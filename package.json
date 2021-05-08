@@ -44,7 +44,6 @@
     "express": "4.17.1",
     "express-unless": "0.5.0",
     "fluent-ffmpeg": "2.1.2",
-    "image-size": "0.9.7",
     "jimp": "0.16.1",
     "locale": "0.1.0",
     "node-geocoder": "3.27.0",
