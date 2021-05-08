@@ -10,14 +10,14 @@
     "model": "Pixel 2",
     "make": "Google",
     "ISO": 116,
-    "focalLength": 4.442,
-    "exposure": 0.008335,
+    "focalLength": 4.4,
+    "exposure": 0.008333333333333333,
     "fStop": 1.8
   },
   "positionData": {
     "GPSData": {
-      "longitude": -73.96425083333334,
-      "latitude": 40.77845111111111,
+      "longitude": -73.9642508333333,
+      "latitude": 40.7784511111111,
       "altitude": 2.2
     }
   }
