@@ -7,11 +7,13 @@
     "make": "NIKON",
     "model": "E880"
   },
-  "creationDate": 0,
   "fileSize": 72850,
   "orientation": 1,
   "size": {
     "height": 768,
     "width": 1024
-  }
+  },
+  "skip": [
+    "creationDate"
+  ]
 }
