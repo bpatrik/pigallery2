@@ -50,7 +50,6 @@
     "reflect-metadata": "0.1.13",
     "sharp": "0.23.4",
     "sqlite3": "5.0.0",
-    "ts-exif-parser": "0.2.1",
     "typeconfig": "2.0.14",
     "typeorm": "0.2.29",
     "winston": "2.4.4"

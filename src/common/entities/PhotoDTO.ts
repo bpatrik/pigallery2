@@ -1,6 +1,16 @@
 import {DirectoryBaseDTO, DirectoryDTO} from './DirectoryDTO';
-import {OrientationTypes} from 'ts-exif-parser';
 import {MediaBaseDTO, MediaDimension, MediaDTO, MediaMetadata} from './MediaDTO';
+
+export enum OrientationTypes {
+  TOP_LEFT = 1, //this is hte normal
+  TOP_RIGHT = 2,
+  BOTTOM_RIGHT = 3,
+  BOTTOM_LEFT = 4,
+  LEFT_TOP = 5,
+  RIGHT_TOP = 6,
+  RIGHT_BOTTOM = 7,
+  LEFT_BOTTOM = 8
+}
 
 export interface PreviewPhotoDTO extends MediaBaseDTO {
   name: string;

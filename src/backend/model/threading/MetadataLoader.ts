@@ -1,11 +1,10 @@
 import {VideoMetadata} from '../../../common/entities/VideoDTO';
-import {CameraMetadata, FaceRegion, PhotoMetadata, PositionMetaData} from '../../../common/entities/PhotoDTO';
+import {CameraMetadata, FaceRegion, PhotoMetadata, PositionMetaData, OrientationTypes} from '../../../common/entities/PhotoDTO';
 import {Config} from '../../../common/config/private/Config';
 import {Logger} from '../../Logger';
 import * as fs from 'fs';
 import * as path from 'path';
 // @ts-ignore
-import {OrientationTypes} from 'ts-exif-parser';
 import {FFmpegFactory} from '../FFmpegFactory';
 import {FfprobeData} from 'fluent-ffmpeg';
 import {exiftool, ExifDateTime, Tags} from 'exiftool-vendored';

@@ -1,7 +1,7 @@
 import {Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, TableInheritance, Unique} from 'typeorm';
 import {DirectoryEntity} from './DirectoryEntity';
 import {MediaDimension, MediaDTO, MediaMetadata} from '../../../../../common/entities/MediaDTO';
-import {OrientationTypes} from 'ts-exif-parser';
+import {OrientationTypes} from '../../../../../common/entities/PhotoDTO';
 import {CameraMetadataEntity, PositionMetaDataEntity} from './PhotoEntity';
 import {FaceRegionEntry} from './FaceRegionEntry';
 import {columnCharsetCS} from './EntityUtils';
