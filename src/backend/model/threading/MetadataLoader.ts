@@ -141,7 +141,7 @@ export class MetadataLoader {
 
   private static async loadPhotoExif(fullPath: string, metadata: PhotoMetadata): Promise<PhotoMetadata> {
     try {
-      const exif = await exiftool.read(fullPath);
+      const exif = await exiftool.read(fullPath, ['--ifd1:all']);
       metadata.cameraData = this.decodeExifCameraData(exif, metadata.cameraData);
       metadata.positionData = this.decodeExifPositionData(exif, metadata.positionData);
       metadata.creationDate = this.decodeExifCreationDate(exif, metadata.creationDate);
