@@ -1,5 +1,6 @@
 import {VideoMetadata} from '../../../common/entities/VideoDTO';
-import {CameraMetadata, FaceRegion, PhotoMetadata, PositionMetaData, OrientationTypes} from '../../../common/entities/PhotoDTO';
+import {CameraMetadata, FaceRegion, PhotoMetadata, PositionMetaData, OrientationTypes, RatingTypes} from '../../../common/entities/PhotoDTO';
+import {MediaDimension} from '../../../common/entities/MediaDTO';
 import {Config} from '../../../common/config/private/Config';
 import {Logger} from '../../Logger';
 import * as fs from 'fs';
@@ -189,7 +190,7 @@ export class MetadataLoader {
     return metadata;
   }
 
-  private static decodeExifCameraData(exif: Tags, cameraData: CameraMetadata): any
+  private static decodeExifCameraData(exif: Tags, cameraData: CameraMetadata): CameraMetadata
   {
     if (exif.ISO || exif.Model ||
       exif.Make || exif.FNumber ||
@@ -233,7 +234,7 @@ export class MetadataLoader {
     return cameraData;
   }
 
-  private static decodeExifPositionData(exif: Tags, positionData: PositionMetaData): any
+  private static decodeExifPositionData(exif: Tags, positionData: PositionMetaData): PositionMetaData
   {
     if (!isNaN(exif.GPSLatitude) || exif.GPSLongitude || exif.GPSAltitude) {
       positionData = positionData || {};
@@ -264,7 +265,7 @@ export class MetadataLoader {
     return positionData;
   }
 
-  private static decodeExifCreationDate(exif: Tags, creationDate: any): any
+  private static decodeExifCreationDate(exif: Tags, creationDate: number): number
   {
     if (exif.CreateDate instanceof ExifDateTime || exif.DateTimeOriginal instanceof ExifDateTime || exif.ModifyDate instanceof ExifDateTime) {
       const myDate = (exif.DateTimeOriginal instanceof ExifDateTime && exif.DateTimeOriginal ||
@@ -276,7 +277,7 @@ export class MetadataLoader {
     return Math.max(creationDate || 0, 0);
   }
 
-  private static decodeExifSize(exif: Tags, size: any, orientation: any = null): any
+  private static decodeExifSize(exif: Tags, size: MediaDimension, orientation: OrientationTypes = null): MediaDimension
   {
     if (exif.ImageWidth) {
       size = {width: exif.ImageWidth, height: exif.ImageHeight};
@@ -295,7 +296,7 @@ export class MetadataLoader {
     return size;
   }
 
-  private static decodeExifCaption(exif: Tags, caption: any): any
+  private static decodeExifCaption(exif: Tags, caption: string): string
   {
     if (exif.Description || exif.UserComment || exif.Comment || exif['Caption-Abstract']) {
       caption = (exif.Description || exif.UserComment || exif.Comment || exif['Caption-Abstract']).replace(/\0/g, '').trim();
@@ -303,12 +304,12 @@ export class MetadataLoader {
     return caption;
   }
 
-  private static decodeExifKeywords(exif: Tags, keywords: any): any
+  private static decodeExifKeywords(exif: Tags, keywords: string[]): string[]
   {
     return exif.Keywords || exif.Subject || keywords;
   }
 
-  private static decodeExifRating(exif: Tags, rating: any): any
+  private static decodeExifRating(exif: Tags, rating: RatingTypes): RatingTypes
   {
     if (exif.Rating) {
       rating = (parseInt('' + exif.Rating, 10) as any);
@@ -316,7 +317,7 @@ export class MetadataLoader {
     return rating;
   }
 
-  private static decodeExifOrientation(exif: Tags, orientation: any): any
+  private static decodeExifOrientation(exif: Tags, orientation: OrientationTypes): OrientationTypes
   {
     if (exif.Orientation !== undefined) {
       orientation = (parseInt(exif.Orientation as any, 10) as any);
@@ -324,7 +325,7 @@ export class MetadataLoader {
     return orientation;
   }
 
-  private static decodeExifFaces(exif: Tags, size: any): FaceRegion[]
+  private static decodeExifFaces(exif: Tags, size: MediaDimension): FaceRegion[]
   {
     const faces: FaceRegion[] = [];
     if (exif.RegionInfo && exif.RegionInfo.RegionList) {

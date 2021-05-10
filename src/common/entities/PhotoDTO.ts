@@ -12,6 +12,8 @@ export enum OrientationTypes {
   LEFT_BOTTOM = 8
 }
 
+export type RatingTypes = 0 | 1 | 2 | 3 | 4 | 5;
+
 export interface PreviewPhotoDTO extends MediaBaseDTO {
   name: string;
   directory: DirectoryBaseDTO;
@@ -41,7 +43,7 @@ export interface FaceRegion {
 }
 
 export interface PhotoMetadata extends MediaMetadata {
-  rating?: 0 | 1 | 2 | 3 | 4 | 5;
+  rating?: RatingTypes;
   caption?: string;
   keywords?: string[];
   cameraData?: CameraMetadata;
