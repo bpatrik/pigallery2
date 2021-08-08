@@ -137,7 +137,16 @@ export class PublicRouter {
       setLocale,
       AuthenticationMWs.normalizePathParam('file'),
       renderFile());
-
+    app.get('/assets/icon.png',
+      setLocale,
+      (req: Request, res: Response, next: NextFunction)=>{
+        if (fs.existsSync('../../data/config/icon.png')) {
+          return res.sendFile('../../data/config/icon.png');//not sure about what the path to /config is
+        }
+        else {
+          return res.sendFile('/assets/icon.png');
+        }
+      },// I don't know if "AuthenticationMWs.normalizePathParam('file')" is needed here
   }
 
 }
