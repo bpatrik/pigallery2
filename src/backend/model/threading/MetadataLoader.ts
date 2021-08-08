@@ -278,7 +278,7 @@ export class MetadataLoader {
                     } else if (regionRoot.Area && regionRoot.Name && regionRoot.Type) {
 
                       const regionBox = regionRoot.Area.value;
-                      name = regionRoot.Name.value;
+                      name = decodeURIComponent(escape(regionRoot.Name.value));
                       type = regionRoot.Type.value;
                       box = createFaceBox(regionBox.w.value,
                         regionBox.h.value,
