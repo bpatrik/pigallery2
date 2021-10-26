@@ -102,12 +102,16 @@ export abstract class FileJob<S extends { indexedOnly: boolean } = { indexedOnly
       this.directoryQueue.push(path.join(item.path, item.name));
     }
     if (this.scanFilter.noPhoto !== true || this.scanFilter.noVideo !== true) {
-      this.fileQueue.push(...(await this.filterMediaFiles(scanned.media))
-        .map(f => path.join(ProjectPath.ImageFolder, f.directory.path, f.directory.name, f.name)));
+      const scannedAndFiltered = await this.filterMediaFiles(scanned.media);
+      for (const item of scannedAndFiltered) {
+        this.fileQueue.push(path.join(ProjectPath.ImageFolder, item.directory.path, item.directory.name, item.name));
+      }
     }
     if (this.scanFilter.noMetaFile !== true) {
-      this.fileQueue.push(...(await this.filterMetaFiles(scanned.metaFile))
-        .map(f => path.join(ProjectPath.ImageFolder, f.directory.path, f.directory.name, f.name)));
+      const scannedAndFiltered = await this.filterMetaFiles(scanned.metaFile);
+      for (const item of scannedAndFiltered) {
+        this.fileQueue.push(path.join(ProjectPath.ImageFolder, item.directory.path, item.directory.name, item.name));
+      }
     }
   }
 
@@ -136,7 +140,8 @@ export abstract class FileJob<S extends { indexedOnly: boolean } = { indexedOnly
       .leftJoinAndSelect('media.directory', 'directory')
       .getMany();
 
-    this.fileQueue.push(...(result
-      .map(f => path.join(ProjectPath.ImageFolder, f.directory.path, f.directory.name, f.name))));
+    for (const item of result) {
+      this.fileQueue.push(path.join(ProjectPath.ImageFolder, item.directory.path, item.directory.name, item.name));
+    }
   }
 }
