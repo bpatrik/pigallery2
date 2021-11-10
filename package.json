@@ -52,7 +52,7 @@
     "sqlite3": "5.0.2",
     "ts-exif-parser": "0.2.2",
     "ts-node-iptc": "1.0.11",
-    "typeconfig": "2.0.18",
+    "typeconfig": "2.0.19",
     "typeorm": "0.2.32"
   },
   "devDependencies": {
@@ -140,7 +140,7 @@
     "ts-node": "9.1.1",
     "tslint": "6.1.3",
     "typescript": "4.1.5",
-    "xlf-google-translate": "1.0.0-beta.21",
+    "xlf-google-translate": "1.0.0-beta.22",
     "web-animations-js": "2.3.2",
     "webpack-bundle-analyzer": "4.4.1",
     "xml2js": "0.4.23",
