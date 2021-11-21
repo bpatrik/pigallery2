@@ -66,8 +66,9 @@ docker-compose up -d
 ```
 `-d` runs it as a daemon. Remove it, so you will see the logs. 
 
-After the containers are up and running, you go to `yourdomain.com` and log in with user: `admin` pass: `admin` and set up the page in the settings. 
-Full list of configuration options are available at the [MANPAGE.md](../MANPAGE.md).
+After the containers are up and running, you go to `yourdomain.com` and log in with user: `admin` pass: `admin` and set up the page in the settings. Full list of configuration options are available at the [MANPAGE.md](../MANPAGE.md).
+
+**Important**: It is strongly recommended to change the default password by defining the `PI_ADMIN_PASSWORD` environment variable. Alternatively, you can use the `PI_ADMIN_PASSWORD_FILE` environment variable in order to read the password from a file. Similarly, you can change the default user with the `PI_ADMIN_USER` and `PI_ADMIN_USER_FILE` environment variables.
 
 **Note:** `docker-compose.yml` contains `restart:always`, so the containers will be automatically started after reboot ([read more here](https://stackoverflow.com/questions/43671482/how-to-run-docker-compose-up-d-at-system-start-up)).
  
@@ -95,6 +96,8 @@ docker run \
 ```
 
 After the container is up and running, you go to `http://localhost` and log in with user: `admin` pass: `admin` and set up the page in the settings. 
+
+**Important**: It is strongly recommended to change the default password by defining the `PI_ADMIN_PASSWORD` environment variable. Alternatively, you can use the `PI_ADMIN_PASSWORD_FILE` environment variable in order to read the password from a file. Similarly, you can change the default user with the `PI_ADMIN_USER` and `PI_ADMIN_USER_FILE` environment variables.
 
 **Note**: even with `memory` db, pigallery2 creates a db file for storing user credentials (if enabled), so mounting (with `-v`) the `/app/data/db` folder is recommended.
 

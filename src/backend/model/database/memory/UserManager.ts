@@ -24,8 +24,11 @@ export class UserManager implements IUserManager {
 
     if (!this.db.users) {
       this.db.users = [];
-      // TODO: remove defaults
-      this.createUser({name: 'admin', password: 'admin', role: UserRoles.Admin} as UserDTO);
+      this.createUser({
+        name: PasswordHelper.getDefaultAdminUser(),
+        password: PasswordHelper.getDefaultAdminPassword(),
+        role: UserRoles.Admin
+      } as UserDTO);
     }
     this.saveDB();
 

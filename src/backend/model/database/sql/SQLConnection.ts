@@ -100,8 +100,8 @@ export class SQLConnection {
     const admins = await userRepository.find({role: UserRoles.Admin});
     if (admins.length === 0) {
       const a = new UserEntity();
-      a.name = 'admin';
-      a.password = PasswordHelper.cryptPassword('admin');
+      a.name = PasswordHelper.getDefaultAdminUser();
+      a.password = PasswordHelper.cryptPassword(PasswordHelper.getDefaultAdminPassword());
       a.role = UserRoles.Admin;
       await userRepository.save(a);
     }
