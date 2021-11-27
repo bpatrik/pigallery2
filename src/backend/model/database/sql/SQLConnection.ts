@@ -192,7 +192,7 @@ export class SQLConnection {
       };
     } else if (config.type === DatabaseType.sqlite) {
       driver = {
-        type: 'sqlite',
+        type: 'better-sqlite3',
         database: path.join(ProjectPath.getAbsolutePath(config.dbFolder), config.sqlite.DBFileName)
       };
     }
