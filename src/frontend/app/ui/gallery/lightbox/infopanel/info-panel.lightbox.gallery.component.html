@@ -28,10 +28,10 @@
     </div>
     <div class="col-10">
       <div class="details-main">
-        {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate')}}
+        {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : 'UTC' }}
       </div>
       <div class="details-sub row">
-        <div class="col-12">{{ media.metadata.creationDate | date :'EEEE'}}, {{getTime()}}</div>
+        <div class="col-12">{{ media.metadata.creationDate | date : 'EEEE, HH:mm:ss' : 'UTC' }}</div>
       </div>
     </div>
   </div>
