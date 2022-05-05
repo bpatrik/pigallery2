@@ -56,6 +56,11 @@ export class FilterService {
       isArrayValue: false,
     },
     {
+      name: $localize`Title`,
+      mapFn: (m: PhotoDTO): string => m.metadata.title,
+      renderType: FilterRenderType.enum,
+    },
+    {
       name: $localize`Caption`,
       mapFn: (m: PhotoDTO): string => m.metadata.caption,
       renderType: FilterRenderType.enum,

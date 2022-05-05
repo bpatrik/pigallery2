@@ -23,6 +23,7 @@ export class SearchQueryParserService {
 
     any_text: 'any-text',
     keyword: 'keyword',
+    title: 'title',
     caption: 'caption',
     directory: 'directory',
     file_name: 'file-name',

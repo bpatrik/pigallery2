@@ -36,6 +36,7 @@
          *ngFor="let item of autoCompleteRenders; let i = index">
       <div>
                     <span [ngSwitch]="item.type">
+                      <span *ngSwitchCase="SearchQueryTypes.title" class="oi oi-image"></span>
                       <span *ngSwitchCase="SearchQueryTypes.caption" class="oi oi-image"></span>
                       <span *ngSwitchCase="SearchQueryTypes.directory" class="oi oi-folder"></span>
                       <span *ngSwitchCase="SearchQueryTypes.file_name" class="oi oi-image"></span>

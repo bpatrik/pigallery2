@@ -101,6 +101,9 @@ export class PositionMetaDataEntity implements PositionMetaData {
 
 export class MediaMetadataEntity implements MediaMetadata {
   @Column('text')
+  title: string;
+
+  @Column('text')
   caption: string;
 
   @Column((type) => MediaDimensionEntity)

@@ -132,7 +132,7 @@
     "ngx-toastr": "14.2.2",
     "nyc": "15.1.0",
     "open-iconic": "1.1.1",
-    "rxjs": "7.5.5",
+    "rxjs": "^7.5.5",
     "ts-helpers": "1.1.2",
     "ts-node": "10.7.0",
     "webpack-bundle-analyzer": "4.5.0",

@@ -151,6 +151,8 @@ export class ClientOtherConfig {
   @ConfigProperty()
   captionFirstNaming: boolean = false; // shows the caption instead of the filename in the photo grid
   @ConfigProperty()
+  titleFirstNaming: boolean = false; // shows the title instead of the filename in the photo grid
+  @ConfigProperty()
   enableDownloadZip: boolean = false;
   @ConfigProperty({
     description:
