@@ -79,7 +79,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     if (!this.activePhoto) {
       return null;
     }
-    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.caption;
+    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.title;
   }
 
   public toggleFullscreen(): void {

@@ -241,6 +241,31 @@ export class SearchManager implements ISQLSearchManager {
 
     if (
       type === SearchQueryTypes.any_text ||
+      type === SearchQueryTypes.title
+    ) {
+      partialResult.push(
+        this.encapsulateAutoComplete(
+          (
+            await photoRepository
+              .createQueryBuilder('media')
+              .select('DISTINCT(media.metadata.title) as title')
+              .where(
+                'media.metadata.title LIKE :text COLLATE ' + SQL_COLLATE,
+                {text: '%' + text + '%'}
+              )
+              .limit(
+                Config.Client.Search.AutoComplete.targetItemsPerCategory * 2
+              )
+              .getRawMany()
+          ).map((r) => r.title),
+          SearchQueryTypes.title
+        )
+      );
+    }
+
+
+    if (
+      type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.directory
     ) {
       partialResult.push(

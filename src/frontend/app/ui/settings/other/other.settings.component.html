@@ -54,6 +54,13 @@
       </app-settings-entry>
 
       <app-settings-entry
+        name="Title first naming"
+        description="Show the title (IPTC 5) tags from the EXIF data instead of the filenames."
+        i18n-description i18n-name
+        [ngModel]="states.Client.titleFirstNaming">
+      </app-settings-entry>
+
+      <app-settings-entry
         name="Caption first naming"
         description="Show the caption (IPTC 120) tags from the EXIF data instead of the filenames."
         i18n-description i18n-name

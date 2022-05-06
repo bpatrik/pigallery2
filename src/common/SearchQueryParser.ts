@@ -37,6 +37,7 @@ export interface QueryKeywords {
   from: string;
   to: string;
   any_text: string;
+  title: string;
   caption: string;
   directory: string;
   file_name: string;
@@ -61,6 +62,7 @@ export const defaultQueryKeywords: QueryKeywords = {
 
   any_text: 'any-text',
   keyword: 'keyword',
+  title: 'title',
   caption: 'caption',
   directory: 'directory',
   file_name: 'file-name',
@@ -521,6 +523,7 @@ export class SearchQueryParser {
       case SearchQueryTypes.person:
       case SearchQueryTypes.position:
       case SearchQueryTypes.keyword:
+      case SearchQueryTypes.title:
       case SearchQueryTypes.caption:
       case SearchQueryTypes.file_name:
       case SearchQueryTypes.directory:

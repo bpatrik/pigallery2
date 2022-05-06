@@ -109,7 +109,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     if (!this.activePhoto) {
       return null;
     }
-    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.caption;
+    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.title;
   }
 
   public containerWidth(): void {

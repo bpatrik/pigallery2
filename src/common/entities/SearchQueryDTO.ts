@@ -20,6 +20,7 @@ export enum SearchQueryTypes {
 
   // TEXT search types
   any_text = 100,
+  title,
   caption,
   directory,
   file_name,
@@ -35,6 +36,7 @@ export const ListSearchQueryTypes = [
 ];
 export const TextSearchQueryTypes = [
   SearchQueryTypes.any_text,
+  SearchQueryTypes.title,
   SearchQueryTypes.caption,
   SearchQueryTypes.directory,
   SearchQueryTypes.file_name,
@@ -117,6 +119,7 @@ export const SearchQueryDTOUtils = {
       case SearchQueryTypes.person:
       case SearchQueryTypes.position:
       case SearchQueryTypes.keyword:
+      case SearchQueryTypes.title:
       case SearchQueryTypes.caption:
       case SearchQueryTypes.file_name:
       case SearchQueryTypes.directory:
@@ -168,6 +171,7 @@ export interface TextSearch extends NegatableSearchQuery {
     | SearchQueryTypes.person
     | SearchQueryTypes.keyword
     | SearchQueryTypes.position
+    | SearchQueryTypes.title
     | SearchQueryTypes.caption
     | SearchQueryTypes.file_name
     | SearchQueryTypes.directory;
