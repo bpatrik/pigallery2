@@ -11,7 +11,9 @@
               title="download" i18n-title></span>
     </a>
 
-    <div class=" highlight control-button" (click)="toggleInfoPanel.emit()"
+    <div class=" highlight control-button"
+	 (click)="toggleInfoPanel.emit()"
+	 (tap)="toggleInfoPanel.emit()"
          title="info key: i" i18n-title>
       <span class="oi oi-info"></span>
     </div>
@@ -19,6 +21,7 @@
     <div *ngIf="fullScreenService.isFullScreenEnabled()"
          class=" highlight control-button"
          (click)="toggleFullScreen.emit()"
+	 (tap)="toggleFullScreen.emit()"
          title="toggle fullscreen, key: f" i18n-title>
         <span class="oi oi-fullscreen-exit">
 
@@ -28,6 +31,7 @@
     <div *ngIf="!fullScreenService.isFullScreenEnabled()"
          class="highlight control-button"
          (click)="toggleFullScreen.emit(true)"
+         (tap)="toggleFullScreen.emit(true)"
          title="toggle fullscreen, key: f" i18n-title>
         <span class="oi oi-fullscreen-enter">
         </span>
@@ -35,6 +39,7 @@
 
     <div class="highlight control-button"
          (click)="closeLightbox()"
+         (tap)="closeLightbox()"
          title="close, key: Escape" i18n-title>
         <span class="oi oi-x">
 
@@ -48,7 +53,8 @@
        (tap)="tap($event)"
        (pan)="pan($any($event))"
        (wheel)="wheel($event)"
-       (click)="mediaElement.playPause()">
+       (click)="mediaElement.playPause()"
+       (tap)="mediaElement.playPause()">
 
     <div class="faces-container"
          [style.top.px]="photoFrameDim.height/2 + drag.y"
@@ -88,23 +94,25 @@
 
   <div class="navigation-arrow highlight"
        *ngIf="navigation.hasPrev && zoom == 1" title="key: left arrow" id="leftArrow" i18n-title
-       (click)="previousPhoto.emit()"><span
+       (click)="previousPhoto.emit()"
+       (tap)="previousPhoto.emit()"><span
     class="oi oi-chevron-left"></span></div>
   <div class="navigation-arrow highlight"
        *ngIf="navigation.hasNext && zoom == 1" title="key: right arrow" id="rightArrow" i18n-title
-       (click)="nextPhoto.emit()"><span
+       (click)="nextPhoto.emit()"
+       (tap)="nextPhoto.emit()"><span
     class="oi oi-chevron-right"></span></div>
 
   <div class="controls controls-zoom row" *ngIf="Zoom > 1">
     <div class="col-1 col-md-4">
-        <span (click)="zoomOut()" i18n-title title="Zoom out, key: '-'"
+        <span (click)="zoomOut()" (tap)="zoomOut()" i18n-title title="Zoom out, key: '-'"
               class="oi oi-zoom-out float-end"></span>
     </div>
     <input type="range"
            [(ngModel)]="Zoom" min="1" [max]="MAX_ZOOM" step="0.1"
            value="1" class="col-10 col-md-4 zoom-progress">
     <div class="col-1 col-md-4">
-        <span (click)="zoomIn()" i18n-title title="Zoom in, key: '+'"
+        <span (click)="zoomIn()" (tap)="zoomOut()" i18n-title title="Zoom in, key: '+'"
               class="oi oi-zoom-in float-left"></span>
     </div>
   </div>
@@ -115,15 +123,18 @@
       <span class="oi oi-media-pause highlight control-button"
             [ngClass]="playBackState == PlayBackStates.Paused ? 'button-disabled':''"
             (click)="pause()"
+	    (tap)="pause()"
             title="pause"></span>
     <span
       class="oi oi-media-play highlight control-button"
       [ngClass]="playBackState == PlayBackStates.Play ? 'button-active':''"
       (click)="play()"
+      (tap)="play()"
       title="auto play"></span>
     <span class="oi oi-media-skip-forward highlight control-button"
           [ngClass]="playBackState == PlayBackStates.FastForward ? 'button-active':''"
           (click)="fastForward()"
+	  (tap)="fastForward()"
           title="fast auto play"></span>
   </div>
 
@@ -135,12 +146,14 @@
   <div class="controls controls-video row" *ngIf="activePhoto && activePhoto.gridMedia.isVideo()">
       <span class="oi  col-1"
             [ngClass]="!mediaElement.Paused ? 'oi-media-pause':'oi-media-play'"
-            (click)="mediaElement.playPause()"></span>
+            (click)="mediaElement.playPause()"
+	    (tap)="mediaElement.playPause()"></span>
     <input type="range" [(ngModel)]="mediaElement.VideoProgress"
            min="0" max="100" step="0.1" class="col video-progress">
     <span class="oi  col-1"
           [ngClass]="mediaElement.Muted ? 'oi-volume-off':'oi-volume-high'"
-          (click)="mediaElement.mute()"></span>
+          (click)="mediaElement.mute()"
+	  (tap)="mediaElement.mute()"></span>
     <input type="range"
            [(ngModel)]="mediaElement.VideoVolume" min="0" max="1" step="0.1"
            value="1" class="col-2 col-md-1 volume">
