@@ -219,12 +219,12 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   onKeyPress(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowLeft':
-        if (this.navigation.hasPrev) {
+        if (this.navigation.hasPrev || Config.Client.Other.enableDirectoryLoop) {
           this.previousPhoto.emit();
         }
         break;
       case 'ArrowRight':
-        if (this.navigation.hasNext) {
+        if (this.navigation.hasNext || Config.Client.Other.enableDirectoryLoop) {
           this.nextPhoto.emit();
         }
         break;

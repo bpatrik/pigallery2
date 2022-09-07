@@ -15,6 +15,7 @@ import {ContentService} from '../content.service';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {ControlsLightboxComponent} from './controls/controls.lightbox.gallery.component';
 import {SupportedFormats} from '../../../../../common/SupportedFormats';
+import { Config } from '../../../../../common/config/public/Config';
 import {GridMedia} from '../grid/GridMedia';
 
 export enum LightboxStates {
@@ -204,6 +205,8 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
     if (this.activePhotoId > 0) {
       this.navigateToPhoto(this.activePhotoId - 1);
+    } else if (Config.Client.Other.enableDirectoryLoop) {
+      this.navigateToPhoto(this.gridPhotoQL.length - 1);
     }
   }
 

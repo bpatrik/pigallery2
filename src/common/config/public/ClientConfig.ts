@@ -164,6 +164,11 @@ export class ClientOtherConfig {
       'Adds a button to flattens the file structure, by listing the content of all subdirectories.',
   })
   enableDirectoryFlattening: boolean = false;
+  @ConfigProperty({
+    description:
+      'Enables using the left/right arrow key at the beginning/end of an album or directory to loop back to the beginning/end.',
+  })
+  enableDirectoryLoop: boolean = false;
 }
 
 @SubConfigClass()

@@ -76,6 +76,13 @@
         [ngModel]="states.Client.enableDirectoryFlattening">
       </app-settings-entry>
 
+      <app-settings-entry
+        name="Directory Looping"
+        description="Enables using the left/right arrow key at the beginning/end of an album or directory to loop back to the beginning/end."
+        i18n-description i18n-name
+        [ngModel]="states.Client.enableDirectoryLoop">
+      </app-settings-entry>
+
 
       <hr/>
       <p class="title" i18n>Navigation bar:</p>
