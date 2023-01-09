@@ -3192,7 +3192,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/gallery-statistic/gallery-statistic.component.html</context>
           <context context-type="linenumber">2,4</context>
         </context-group>
-        <target>Statistiek:</target>
+        <target>Statistieken:</target>
       </trans-unit>
       <trans-unit id="1205037876874222931" datatype="html">
         <source>Folders</source>
