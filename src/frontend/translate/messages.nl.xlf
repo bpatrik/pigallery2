@@ -92,7 +92,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">153</context>
         </context-group>
-        <target>Sqlite database bestandsnaam</target>
+        <target>SQLite database bestandsnaam</target>
       </trans-unit>
       <trans-unit id="6242404539171057139" datatype="html">
         <source>Sqlite will save the db with this filename.</source>
@@ -100,7 +100,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">157</context>
         </context-group>
-        <target>Sqlite zal de database opslaan met deze bestandsnaam.</target>
+        <target>SQLite zal de database opslaan met deze bestandsnaam.</target>
       </trans-unit>
       <trans-unit id="8953033926734869941" datatype="html">
         <source>Name</source>
@@ -184,7 +184,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">247</context>
         </context-group>
-        <target>Alle bestands-gebaseerde data wordt hier opgeslagen (sqlite database, taakgeschiedenis gegevens).</target>
+        <target>Alle bestands-gebaseerde data wordt hier opgeslagen (SQLite database, taakgeschiedenis gegevens).</target>
       </trans-unit>
       <trans-unit id="3636930811048814547" datatype="html">
         <source>SQLite</source>
@@ -940,7 +940,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1069</context>
         </context-group>
-        <target>Meta bestand</target>
+        <target>Metabestanden</target>
       </trans-unit>
       <trans-unit id="1295614462098694869" datatype="html">
         <source>Preview</source>
@@ -1260,7 +1260,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">279</context>
         </context-group>
-        <target>De kaart module zal deze URL's gebruiken om de kaarttegels op te halen.</target>
+        <target>De kaartmodule zal deze URL's gebruiken om de kaarttegels op te halen.</target>
       </trans-unit>
       <trans-unit id="6452617211342461685" datatype="html">
         <source>Custom Layers</source>
@@ -2199,7 +2199,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">28</context>
         </context-group>
-        <target>Aangepast</target>
+        <target>Eigen keuze</target>
       </trans-unit>
       <trans-unit id="113099127945736504" datatype="html">
         <source>OpenStreetMap</source>
@@ -2936,7 +2936,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">73</context>
         </context-group>
-        <target>Zoektekst</target>
+        <target>Zoekopdracht</target>
       </trans-unit>
       <trans-unit id="5203279511751768967" datatype="html">
         <source>From</source>
@@ -3032,7 +3032,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
           <context context-type="linenumber">72,73</context>
         </context-group>
-        <target>Album name</target>
+        <target>Albumnaam</target>
       </trans-unit>
       <trans-unit id="4606777540690493351" datatype="html">
         <source>Save as album</source>
@@ -3297,7 +3297,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">1,5</context>
         </context-group>
-        <target>It seems that you are running the application in a Docker container. This setting should not be changed in docker. Make sure, that you know what you are doing.</target>
+        <target>Het lijkt erop dat de applicatie in een Docker container draait. Deze instelling zou niet moeten worden aangepast in Docker. Zorg ervoor dat je weet wat je doet.</target>
       </trans-unit>
       <trans-unit id="5769292297914455214" datatype="html">
         <source>Disabled</source>
@@ -3325,7 +3325,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">90</context>
         </context-group>
-        <target>Tile Url*</target>
+        <target>Tile URL*</target>
       </trans-unit>
       <trans-unit id="5559929655128993973" datatype="html">
         <source>+ Add Layer </source>
