@@ -924,7 +924,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1050</context>
         </context-group>
-        <target>Als een nieuwe map wordt toegevoegd in de gallery, wordt deze automatisch geïndexeerd. Als handmatig indexeren gewenst is, klik op de index knop. (Opmerking: zoeken werkt alleen in geïndexeerde mappen).</target>
+        <target>Als een nieuwe map wordt toegevoegd in de galerij, wordt deze automatisch geïndexeerd. Als handmatig indexeren gewenst is, klik op de index knop. (Opmerking: zoeken werkt alleen in geïndexeerde mappen).</target>
       </trans-unit>
       <trans-unit id="3250391385569692601" datatype="html">
         <source>Media</source>
@@ -1284,7 +1284,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">295</context>
         </context-group>
-        <target>Maximum aantal markeringen getoond op de kaart voorbeeldweergave op de gallery pagina.</target>
+        <target>Maximum aantal markeringen getoond op de kaart voorbeeldweergave op de galerij pagina.</target>
       </trans-unit>
       <trans-unit id="5208941380118400380" datatype="html">
         <source>Map Icon size</source>
@@ -1536,7 +1536,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">520</context>
         </context-group>
-        <target>Voegt een knop toe voor het platmaken van mappen, waarbij alle inhoud van de submappen wordt weergegeven. (Werkt niet als de gallery meerdere mappen heeft met hetzelfde pad.)</target>
+        <target>Voegt een knop toe voor het platmaken van mappen, waarbij alle inhoud van de submappen wordt weergegeven. (Werkt niet als de galerij meerdere mappen heeft met hetzelfde pad.)</target>
       </trans-unit>
       <trans-unit id="8685965882892653885" datatype="html">
         <source>Default slideshow speed</source>
@@ -1868,7 +1868,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">816</context>
         </context-group>
-        <target>Schakelt gebruikersbeheer met wachtwoordbeveiliging in om de gallery te beschermen.</target>
+        <target>Schakelt gebruikersbeheer met wachtwoordbeveiliging in om de galerij te beschermen.</target>
       </trans-unit>
       <trans-unit id="6609079253925902817" datatype="html">
         <source>Default user right</source>
@@ -1900,7 +1900,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
-        <target>Gallery</target>
+        <target>Galerij</target>
       </trans-unit>
       <trans-unit id="1393837337557373364" datatype="html">
         <source>Album</source>
@@ -1976,7 +1976,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">901</context>
         </context-group>
-        <target>Hiermee kunnen 'willekeurige foto' URLs worden gemaakt. Deze URL geeft een willekeurige foto uit de gallery. Deze URL kan worden gebruikt met andere applicaties zoals willekeurige desktop achtergronden. Opmerking: met de huidige implementatie is het nodig om ingelogd te zijn voor de willekeurige foto.</target>
+        <target>Hiermee kunnen 'willekeurige foto' URLs worden gemaakt. Deze URL geeft een willekeurige foto uit de galerij. Deze URL kan worden gebruikt met andere applicaties zoals willekeurige desktop achtergronden. Opmerking: met de huidige implementatie is het nodig om ingelogd te zijn voor de willekeurige foto.</target>
       </trans-unit>
       <trans-unit id="5732878542640870310" datatype="html">
         <source>Size to generate</source>
@@ -2032,7 +2032,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target>Gallery reset</target>
+        <target>Galerij reset</target>
       </trans-unit>
       <trans-unit id="2046036880411214558" datatype="html">
         <source>Album reset</source>
@@ -2432,7 +2432,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/saved-search-popup/saved-search-popup.component.html</context>
           <context context-type="linenumber">17,18</context>
         </context-group>
-        <target>Voeg deze json toe aan een '.saved_searches.pg2conf' bestand in de gallery</target>
+        <target>Voeg deze json toe aan een '.saved_searches.pg2conf' bestand in de galerij</target>
       </trans-unit>
       <trans-unit id="1692479277642537323" datatype="html">
         <source>This saved search will be loaded from file during gallery indexing and it will survive a database reset.</source>
@@ -2876,7 +2876,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
           <context context-type="linenumber">48</context>
         </context-group>
-        <target>Thuis</target>
+        <target>Home</target>
       </trans-unit>
       <trans-unit id="3445823735428564189" datatype="html">
         <source>Random link</source>
@@ -2936,7 +2936,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">73</context>
         </context-group>
-        <target>Search text</target>
+        <target>Zoektekst</target>
       </trans-unit>
       <trans-unit id="5203279511751768967" datatype="html">
         <source>From</source>
