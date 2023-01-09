@@ -880,7 +880,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">978</context>
         </context-group>
-        <target>Server zal verbindingen vanaf dit IPv6 or IPv4 addres accepteren.</target>
+        <target>Server zal verbindingen vanaf dit IPv6 of IPv4 adres accepteren.</target>
       </trans-unit>
       <trans-unit id="4804785061014590286" datatype="html">
         <source>Logs</source>
@@ -3677,7 +3677,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
           <context context-type="linenumber">117</context>
         </context-group>
-        <target>geëindigd</target>
+        <target>klaar</target>
       </trans-unit>
       <trans-unit id="8293670171001042991" datatype="html">
         <source>every</source>
