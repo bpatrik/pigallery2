@@ -131,8 +131,11 @@ export class ShareService {
       );
       this.sharingSubject.next(sharing);
     } catch (e) {
-      this.sharingSubject.next(this.UnknownSharingKey);
+      if(e == "Not Found") {
+          this.sharingSubject.next(this.UnknownSharingKey);
+      }
       console.error(e);
     }
+
   }
 }
