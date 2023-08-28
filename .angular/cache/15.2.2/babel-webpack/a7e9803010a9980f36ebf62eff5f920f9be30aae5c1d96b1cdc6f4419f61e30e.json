@@ -1,0 +1,1 @@
+{"ast":null,"code":"export const DimensionUtils = {\n  toString: dim => {\n    return {\n      top: dim.top || 0 + 'px',\n      left: dim.left || 0 + 'px',\n      width: dim.width || 0 + 'px',\n      height: dim.height || 0 + 'px'\n    };\n  }\n};","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

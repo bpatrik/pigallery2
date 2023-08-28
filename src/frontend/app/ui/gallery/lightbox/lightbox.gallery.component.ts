@@ -1,22 +1,22 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild,} from '@angular/core';
-import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
-import {Dimension, DimensionUtils} from '../../../model/IRenderable';
-import {FullScreenService} from '../fullscreen.service';
-import {OverlayService} from '../overlay.service';
-import {animate, AnimationBuilder, AnimationPlayer, style,} from '@angular/animations';
-import {GalleryLightboxMediaComponent} from './media/media.lightbox.gallery.component';
-import {Subscription} from 'rxjs';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {PageHelper} from '../../../model/page.helper';
-import {QueryService} from '../../../model/query.service';
-import {MediaDTO} from '../../../../../common/entities/MediaDTO';
-import {QueryParams} from '../../../../../common/QueryParams';
-import {ContentService} from '../content.service';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {ControlsLightboxComponent} from './controls/controls.lightbox.gallery.component';
-import {SupportedFormats} from '../../../../../common/SupportedFormats';
-import {GridMedia} from '../grid/GridMedia';
-import {PiTitleService} from '../../../model/pi-title.service';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, } from '@angular/core';
+import { GalleryPhotoComponent } from '../grid/photo/photo.grid.gallery.component';
+import { Dimension, DimensionUtils } from '../../../model/IRenderable';
+import { FullScreenService } from '../fullscreen.service';
+import { OverlayService } from '../overlay.service';
+import { animate, AnimationBuilder, AnimationPlayer, style, } from '@angular/animations';
+import { GalleryLightboxMediaComponent } from './media/media.lightbox.gallery.component';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { PageHelper } from '../../../model/page.helper';
+import { QueryService } from '../../../model/query.service';
+import { MediaDTO } from '../../../../../common/entities/MediaDTO';
+import { QueryParams } from '../../../../../common/QueryParams';
+import { ContentService } from '../content.service';
+import { PhotoDTO } from '../../../../../common/entities/PhotoDTO';
+import { ControlsLightboxComponent } from './controls/controls.lightbox.gallery.component';
+import { SupportedFormats } from '../../../../../common/SupportedFormats';
+import { GridMedia } from '../grid/GridMedia';
+import { PiTitleService } from '../../../model/pi-title.service';
 
 export enum LightboxStates {
   Open = 1,
@@ -30,20 +30,20 @@ export enum LightboxStates {
   templateUrl: './lightbox.gallery.component.html',
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {
-  @ViewChild('photo', {static: true})
+  @ViewChild('photo', { static: true })
   mediaElement: GalleryLightboxMediaComponent;
-  @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
-  @ViewChild('lightbox', {static: false}) lightboxElement: ElementRef;
-  @ViewChild('root', {static: false}) root: ElementRef;
+  @ViewChild('controls', { static: false }) controls: ControlsLightboxComponent;
+  @ViewChild('lightbox', { static: false }) lightboxElement: ElementRef;
+  @ViewChild('root', { static: false }) root: ElementRef;
 
-  public navigation = {hasPrev: true, hasNext: true};
+  public navigation = { hasPrev: true, hasNext: true };
   public blackCanvasOpacity = 0;
   public activePhoto: GalleryPhotoComponent;
   public status: LightboxStates = LightboxStates.Closed;
   public infoPanelVisible = false;
   public infoPanelWidth = 0;
   public animating = false;
-  public photoFrameDim = {width: 1, height: 1, aspect: 1};
+  public photoFrameDim = { width: 1, height: 1, aspect: 1 };
   public videoSourceError = false;
   public transcodeNeedVideos = SupportedFormats.TranscodeNeed.Videos;
   private startPhotoDimension: Dimension = {
@@ -61,9 +61,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     photosChange: Subscription;
     route: Subscription;
   } = {
-    photosChange: null,
-    route: null,
-  };
+      photosChange: null,
+      route: null,
+    };
 
   constructor(
     public fullScreenService: FullScreenService,
@@ -246,7 +246,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   public hide(): void {
     this.router
-      .navigate([], {queryParams: this.queryService.getParams()})
+      .navigate([], { queryParams: this.queryService.getParams() })
       .then(() => {
         this.piTitleService.setLastNonMedia();
       })
@@ -398,7 +398,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       .navigate([], {
         queryParams: this.queryService.getParams(
           this.gridPhotoQL.get(photoIndex).gridMedia.media
-        ),
+        ), replaceUrl: true
       })
       .then(() => {
         this.piTitleService.setMediaTitle(this.gridPhotoQL.get(photoIndex).gridMedia);
@@ -509,7 +509,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     const top = this.photoFrameDim.height / 2 - height / 2;
     const left = this.photoFrameDim.width / 2 - width / 2;
 
-    return {top, left, width, height} as Dimension;
+    return { top, left, width, height } as Dimension;
   }
 
   get NexGridMedia(): GridMedia {

@@ -11,6 +11,7 @@ import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../..
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {LightboxService} from '../lightbox.service';
 import {GalleryCacheService} from '../../cache.gallery.service';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 
 export enum PlayBackStates {
   Paused = 1,
@@ -64,7 +65,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     public lightboxService: LightboxService,
     public fullScreenService: FullScreenService,
     private authService: AuthenticationService,
-    private cacheService: GalleryCacheService
+    private cacheService: GalleryCacheService,
+    private router: Router,
   ) {
     this.searchEnabled = this.authService.canSearch();
   }
@@ -357,7 +359,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
 
   public closeLightbox(): void {
     this.hideControls();
-    this.closed.emit();
+    // this.closed.emit();
+    this.router.navigate([], { replaceUrl: true });
   }
 
   getPersonSearchQuery(name: string): string {

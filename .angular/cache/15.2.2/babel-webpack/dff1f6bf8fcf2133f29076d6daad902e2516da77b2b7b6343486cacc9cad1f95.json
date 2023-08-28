@@ -1,0 +1,1 @@
+{"ast":null,"code":"export const backendTexts = {\n  indexedFilesOnly: {\n    name: 10,\n    description: 12\n  },\n  sizeToGenerate: {\n    name: 20,\n    description: 22\n  },\n  indexChangesOnly: {\n    name: 30,\n    description: 32\n  }\n};","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

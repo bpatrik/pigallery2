@@ -1,0 +1,1 @@
+{"ast":null,"code":"\"use strict\";\n\nObject.defineProperty(exports, \"__esModule\", {\n  value: true\n});\nexports.ConstraintError = void 0;\nclass ConstraintError extends Error {}\nexports.ConstraintError = ConstraintError;\n//# sourceMappingURL=ConstraintError.js.map","map":null,"metadata":{},"sourceType":"script","externalDependencies":[]}
