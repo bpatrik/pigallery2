@@ -2708,7 +2708,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">45</context>
         </context-group>
-        <target>Download</target>
+        <target>下载</target>
       </trans-unit>
       <trans-unit id="6639312389704540885" datatype="html">
         <source>Slideshow playback speed</source>
@@ -2716,7 +2716,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">53</context>
         </context-group>
-        <target>Slideshow playback speed</target>
+        <target> </target>
       </trans-unit>
       <trans-unit id="6561811782994945096" datatype="html">
         <source>Slideshow speed:</source>

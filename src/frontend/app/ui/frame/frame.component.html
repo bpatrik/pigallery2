@@ -1,17 +1,14 @@
 <ngx-loading-bar [includeSpinner]="false" color="#337ab7" height="3px"></ngx-loading-bar>
-<div #navContainer class="navbar-container auto-hide-navbar"
-     [class.navbar-keep-top]="navbarKeepTop || fixNavbarOnTop"
-     [class.hide-navbar]="!navbarKeepTop && shouldHideNavbar"
-     [class.animate-navbar]="animateNavbar">
+<div #navContainer class="navbar-container auto-hide-navbar" [class.navbar-keep-top]="navbarKeepTop || fixNavbarOnTop"
+  [class.hide-navbar]="!navbarKeepTop && shouldHideNavbar" [class.animate-navbar]="animateNavbar">
   <nav class="navbar navbar-expand bg-body">
     <div class="container-fluid">
-      <a class="navbar-brand d-none d-sm-block" [routerLink]="['/gallery']"
-         [queryParams]="queryService.getParams()">
+      <a class="navbar-brand d-none d-sm-block" [routerLink]="['/gallery']" [queryParams]="queryService.getParams()">
         <img src="assets/icon_inv.png" width="30" height="30" class="d-inline-block align-top" alt="">
         <strong class="d-none d-lg-inline-block">{{title}}</strong>
       </a>
       <div class="collapse navbar-collapse text-center" id="navbarCollapse" [collapse]="collapsed">
-        <ul class="navbar-nav mb-0 me-2 text-lg-start d-none d-md-flex">
+        <ul class="navbar-nav mb-0 me-2 text-lg-start d-none d-md-flex" style="width: 20%;">
           <ng-container *ngFor="let link of navbarLinks">
             <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
               <a class="nav-link" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')" i18n>Albums</a>
@@ -20,16 +17,15 @@
               <a class="nav-link" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')" i18n>Faces</a>
             </li>
             <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.gallery">
-              <a class="nav-link"
-                 [routerLink]="['/gallery']"
-                 [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')" i18n>Gallery</a>
+              <a class="nav-link" [routerLink]="['/gallery']" [queryParams]="queryService.getParams()"
+                [class.active]="isLinkActive('/gallery')" i18n>Gallery</a>
             </li>
             <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.url">
               <a class="nav-link" [href]="link.url" [class.active]="isLinkActive(link.url)">{{link.name}}</a>
             </li>
             <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.search">
               <a class="nav-link" [routerLink]="['/search', link.SearchQuery | json]"
-                 [class.active]="isSearchActive(link.SearchQuery)">{{link.name}}</a>
+                [class.active]="isSearchActive(link.SearchQuery)">{{link.name}}</a>
             </li>
           </ng-container>
         </ul>
@@ -44,37 +40,35 @@
               <app-gallery-share></app-gallery-share>
             </li>
             <li class="nav-item divider-vertical  d-xl-block d-none"
-                *ngIf="authenticationRequired && user.value && showShare">
+              *ngIf="authenticationRequired && user.value && showShare">
             </li>
             <ng-container *ngIf="authenticationRequired && user.value">
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
-             <span style="white-space: nowrap;">
-                <span class="oi oi-person"></span> {{user.value.name}}
-              </span>
+                <span style="white-space: nowrap;">
+                  <span class="oi oi-person"></span> {{user.value.name}}
+                </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
               </li>
             </ng-container>
             <li class="nav-item d-xl-block d-none">
-            <span>
-              <app-language #languageSelector class="navbar-btn" [isDark]="true"></app-language>
-            </span>
+              <span>
+                <app-language #languageSelector class="navbar-btn" [isDark]="true"></app-language>
+              </span>
             </li>
             <li class="nav-item divider-vertical d-xl-block d-none">
             </li>
             <li class="nav-item dropdown">
-              <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom"
-                   [autoClose]="false"  container="body">
-                <button id="button-alignment" dropdownToggle
-                        type="button" class="btn btn-dark dropdown-toggle"
-                        aria-controls="dropdown-alignment">
+              <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom" [autoClose]="false"
+                container="body">
+                <button id="button-alignment" dropdownToggle type="button" class="btn btn-dark dropdown-toggle"
+                  aria-controls="dropdown-alignment">
                   <span class="oi oi-menu"></span>
                   <span *ngIf="isAdmin() && notificationService.numberOfNotifications>0"
-                        class="navbar-badge badge text-bg-warning">{{notificationService.numberOfNotifications}}</span>
+                    class="navbar-badge badge text-bg-warning">{{notificationService.numberOfNotifications}}</span>
                 </button>
-                <ul id="dropdown-alignment" *dropdownMenu
-                    class="dropdown-menu dropdown-menu-right"
-                    role="menu" aria-labelledby="button-alignment">
+                <ul id="dropdown-alignment" *dropdownMenu class="dropdown-menu dropdown-menu-right" role="menu"
+                  aria-labelledby="button-alignment">
 
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">
@@ -108,26 +102,25 @@
                       </button>
                     </div>
                   </li>
-                  <hr/>
+                  <hr />
                   <ng-container *ngFor="let link of navbarLinks">
                     <li class="nav-item d-md-none"
-                        *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
+                      *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
                       <a class="dropdown-item" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')">
                         <span class="oi oi-grid-two-up"></span>
                         <ng-container i18n>Albums</ng-container>
                       </a>
                     </li>
                     <li class="nav-item d-md-none"
-                        *ngIf="link.type === NavigationLinkTypes.faces && isFacesAvailable()">
+                      *ngIf="link.type === NavigationLinkTypes.faces && isFacesAvailable()">
                       <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')">
                         <span class="oi oi-people"></span>
                         <ng-container i18n>Faces</ng-container>
                       </a>
                     </li>
                     <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.gallery">
-                      <a class="dropdown-item"
-                         [routerLink]="['/gallery']"
-                         [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')">
+                      <a class="dropdown-item" [routerLink]="['/gallery']" [queryParams]="queryService.getParams()"
+                        [class.active]="isLinkActive('/gallery')">
                         <span class="oi oi-image"></span>
                         <ng-container i18n>Gallery</ng-container>
                       </a>
@@ -140,16 +133,15 @@
                     </li>
                     <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.search">
                       <a class="dropdown-item" [routerLink]="['/search', link.SearchQuery | json]"
-                         [class.active]="isSearchActive(link.SearchQuery)">
+                        [class.active]="isSearchActive(link.SearchQuery)">
                         <span class="oi oi-link-intact"></span>
                         {{link.name}}
                       </a>
                     </li>
                   </ng-container>
-                  <hr class="d-md-none"/>
+                  <hr class="d-md-none" />
 
-                  <li role="menuitem" dropdown [autoClose]="false"
-                      placement="bottom left" container="body">
+                  <li role="menuitem" dropdown [autoClose]="false" placement="bottom left" container="body">
                     <a dropdownToggle class="dropdown-item">
                       <span class="oi oi-command"></span>
                       <ng-container i18n>Tools</ng-container>
@@ -157,8 +149,7 @@
                     <ul class="dropdown-menu dropdown-menu-start" *dropdownMenu role="menu">
                       <ng-content select="[navbar-menu]"></ng-content>
                       <li role="menuitem" *ngIf="isAdmin()">
-                        <a class="dropdown-item"
-                           [routerLink]="['/duplicates']">
+                        <a class="dropdown-item" [routerLink]="['/duplicates']">
                           <span class="oi oi-layers"></span>
                           <ng-container i18n>Duplicates</ng-container>
                         </a>
@@ -167,12 +158,8 @@
                         <div class="dropdown-item d-flex justify-content-between">
                           <span title="key: c" i18n-title i18n>Fix nabvar</span>
                           <div class="form-check form-switch">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   role="switch"
-                                   name="fix-navbar"
-                                   id="fix-switch"
-                                   [(ngModel)]="fixNavbarOnTop">
+                            <input class="form-check-input" type="checkbox" role="switch" name="fix-navbar"
+                              id="fix-switch" [(ngModel)]="fixNavbarOnTop">
                           </div>
                         </div>
                       </li>
@@ -182,7 +169,7 @@
                     <a class="dropdown-item" [routerLink]="['/admin']">
                       <span class="oi oi-wrench"></span>
                       <span *ngIf="notificationService.numberOfNotifications>0"
-                            class="badge rounded-pill position-absolute p-0 text-bg-warning">{{notificationService.numberOfNotifications}}</span>
+                        class="badge rounded-pill position-absolute p-0 text-bg-warning">{{notificationService.numberOfNotifications}}</span>
                       <ng-container i18n>Settings</ng-container>
                     </a>
                   </li>

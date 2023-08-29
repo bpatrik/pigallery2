@@ -6,6 +6,7 @@
 img {
   width: inherit;
   height: inherit;
+  border-radius: 2px;
 
   -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
   -moz-animation: fadein 2s; /* Firefox < 16 */
@@ -66,7 +67,7 @@ img {
 
   100% {
     transform: translateY(-100%);
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -74,7 +75,7 @@ img {
 
   0% {
     transform: translateY(-100%);
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.3);
   }
   100% {
     transform: translateY(0);
@@ -87,7 +88,7 @@ img {
   transform: translateY(0);
   background-color: transparent;
   color: white;
-  font-size: medium;
+  font-size: small;
   display: table-caption;
   position: absolute;
   padding: 5px;
@@ -136,7 +137,7 @@ a {
   right: 0;
   white-space: nowrap;
   border-bottom-left-radius: 15px !important;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.2);
   color: white;
   transition: background-color .3s ease-out;
   -moz-transition: background-color .3s ease-out;

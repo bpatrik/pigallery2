@@ -1,6 +1,6 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:18-buster AS builder
+FROM node:18.17.1-buster AS builder
 # LABEL maintainer="Patrik J. Braun"
 # copying only package{-lock}.json to make node_modules cachable
 RUN git clone https://github.com/xuthus83/pigallery2.git /build
@@ -16,7 +16,7 @@ RUN npm install --unsafe-perm \
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:18-buster-slim AS main
+FROM node:18.17.1-buster-slim AS main
 WORKDIR /app
 ENV NODE_ENV=production \
     # overrides only the default value of the settings (the actualy value can be overwritten through config.json)

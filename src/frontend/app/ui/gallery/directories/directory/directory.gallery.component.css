@@ -32,9 +32,9 @@ a {
 }
 
 .info {
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0.2);
   color: white;
-  font-size: medium;
+  font-size: small;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -43,7 +43,7 @@ a {
 }
 
 a:hover .info {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 a:hover .photo-container {

@@ -27,3 +27,6 @@ ffmpeg/
 locale.source.xlf
 test.*
 /db/
+.vscode/
+.github/
+.angular/

@@ -29,6 +29,7 @@ bs-dropdown-container {
 
 element.style {
   width: 100px;
+  font-size: small;
 }
 
 [data-bs-theme=dark] .btn:not(.btn-secondary):not(.btn-danger):not(.btn-warning):not(.btn-primary):not(.btn-success) {
