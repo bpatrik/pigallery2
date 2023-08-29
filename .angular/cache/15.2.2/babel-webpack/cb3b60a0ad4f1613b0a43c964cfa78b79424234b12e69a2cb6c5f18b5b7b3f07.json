@@ -1,1 +1,0 @@
-{"ast":null,"code":"export let CookieNames = /*#__PURE__*/(() => {\n  class CookieNames {}\n  CookieNames.lang = 'pigallery2-lang';\n  CookieNames.session = 'pigallery2-session';\n  CookieNames.configPriority = 'config-priority';\n  return CookieNames;\n})();","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}

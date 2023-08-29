@@ -1,1 +1,0 @@
-{"ast":null,"code":"export let CustomHeaders = /*#__PURE__*/(() => {\n  class CustomHeaders {}\n  CustomHeaders.dataVersion = 'PI-GALLERY2-DATA-VERSION';\n  return CustomHeaders;\n})();","map":null,"metadata":{},"sourceType":"module","externalDependencies":[]}
