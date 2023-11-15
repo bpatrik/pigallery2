@@ -1457,6 +1457,7 @@ export class ClientConfig {
         hideProgress: true
       }]
     } as TAGS,
+    description: $localize`An album reset deletes all albums (all saved searches).`
   })
   Album: ClientAlbumConfig = new ClientAlbumConfig();
 
