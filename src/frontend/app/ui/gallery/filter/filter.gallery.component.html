@@ -16,8 +16,8 @@
               <div class="d-none d-lg-block" *ngIf="freq.count < freq.max/2">{{freq.count}}</div>
             </div>
             <div class="text-bg-primary text-center  border border-primary"
-                 [class.text-bg-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
-                 [class.border-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
+                 [class.text-bg-secondary]="freq.endDate.getTime()<FilterState.dateFilter.minFilter || freq.date.getTime()>FilterState.dateFilter.maxFilter "
+                 [class.border-secondary]="freq.endDate.getTime()<FilterState.dateFilter.minFilter || freq.date.getTime()>FilterState.dateFilter.maxFilter "
                  [style.height.%]="(freq.count/freq.max)*100">
               <div class="d-none d-lg-block" *ngIf="freq.count >= freq.max/2">{{freq.count}}</div>
             </div>
@@ -42,10 +42,10 @@
       </div>
       <div class="col-md-1-half col-12  d-table">
         <div
-          *ngIf="ActiveFilters.dateFilter.minFilter !== NUMBER_MIN_VALUE"
-          [title]="ActiveFilters.dateFilter.minFilter | date: 'medium'"
+          *ngIf="FilterState.dateFilter.minFilter !== NUMBER_MIN_VALUE"
+          [title]="FilterState.dateFilter.minFilter | date: 'medium'"
           class="d-table-cell align-middle text-center">
-          {{ActiveFilters.dateFilter.minFilter | date: 'longDate'}}
+          {{FilterState.dateFilter.minFilter | date: 'longDate'}}
         </div>
       </div>
       <div class="date-filter-wrapper col-md-9 col-12">
@@ -64,34 +64,34 @@
 
         </div>
         <input type="range"
-               [max]="ActiveFilters.dateFilter.maxDate"
-               [min]="ActiveFilters.dateFilter.minDate"
-               [(ngModel)]="ActiveFilters.dateFilter.minFilter"
+               [max]="FilterState.dateFilter.maxDate"
+               [min]="FilterState.dateFilter.minDate"
+               [(ngModel)]="FilterState.dateFilter.minFilter"
                step="60"
                (change)="newMinDate($event); filterService.onFilterChange()"/>
         <input type="range"
                step="60"
-               [max]="ActiveFilters.dateFilter.maxDate"
-               [min]="ActiveFilters.dateFilter.minDate"
-               [(ngModel)]="ActiveFilters.dateFilter.maxFilter"
+               [max]="FilterState.dateFilter.maxDate"
+               [min]="FilterState.dateFilter.minDate"
+               [(ngModel)]="FilterState.dateFilter.maxFilter"
                (change)="newMaxDate($event); filterService.onFilterChange()"/>
 
       </div>
       <div class="col-md-1-half col-12  d-table">
         <div class="d-table-cell align-middle text-center"
-             [title]="ActiveFilters.dateFilter.maxFilter | date: 'medium'"
-             *ngIf="ActiveFilters.dateFilter.maxFilter !== NUMBER_MAX_VALUE">
-          {{ActiveFilters.dateFilter.maxFilter | date: 'longDate'}}
+             [title]="FilterState.dateFilter.maxFilter | date: 'medium'"
+             *ngIf="FilterState.dateFilter.maxFilter !== NUMBER_MAX_VALUE">
+          {{FilterState.dateFilter.maxFilter | date: 'longDate'}}
         </div>
       </div>
     </div>
     <div class="row">
       <div class="col-12 col-md-6 col-lg-3 mt-2 mt-lg-1"
-           *ngFor="let filter of ActiveFilters.selectedFilters; let i=index">
-        <select [(ngModel)]="filter.filter"
-                (ngModelChange)="filterService.onFilterChange()"
+           *ngFor="let filter of FilterState.selectedFilters; let i=index">
+        <select [ngModel]="filterService.filtersMap[filter.type]"
+                (ngModelChange)="filterChangedType(i, $event.key)"
                 class="form-select" id="gallery-filter-{{i}}">
-          <option *ngFor="let f of filterService.AVAILABLE_FILTERS"
+          <option *ngFor="let f of filterService.filters"
                   [ngValue]="f">{{f.name}}</option>
         </select>
         <div class="filter-column">
@@ -99,22 +99,22 @@
             <li
               *ngFor="let option of filter.options"
               [class.unselected]="!option.selected"
-              (click)="option.selected = !option.selected; filterService.onFilterChange()"
+              (click)="toggleFilterValue(option)"
               class="filter-option list-group-item list-group-item-action d-flex justify-content-between align-items-center">
 
               <div>
                 <ng-icon name="ionFlagOutline"
                          class="pin"
-                         (click)="toggleSelectOnly(filter, option, $event)"
+                         (click)="toggleSelectOnly(filter, option.name, $event)"
                          title="Select only this"
-                         [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
+                         [ngClass]="isOnlySelected(filter, option.name) ? 'filter-only-selected' : 'filter-pin'"
                          i18n-title></ng-icon>
                 {{option.name === undefined ? unknownText : option.name}}
               </div>
               <span class="badge"
                     [class.bg-primary]="option.selected"
                     [class.bg-secondary]="!option.selected"
-              >{{option.count}}</span>
+              >{{filterService.filterState.value.filterValueCounts[filter.type]?.[option.name]}}</span>
             </li>
           </ul>
           <div class="card-body text-center" *ngIf="filter.options.length === 0" i18n>Nothing to filter</div>

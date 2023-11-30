@@ -45,8 +45,8 @@
             </ng-container>
             <ng-container *ngIf="ItemCount> 0">
                 <a class="btn btn-outline-secondary btn-navigator"
-                   [class.btn-secondary]="filterService.activeFilters.value.areFiltersActive"
-                   [class.btn-outline-secondary]="!filterService.activeFilters.value.areFiltersActive"
+                   [class.btn-secondary]="filterService.filterState.value.areFiltersActive"
+                   [class.btn-outline-secondary]="!filterService.filterState.value.areFiltersActive"
                    (click)="showFilters = ! showFilters">
                     <ng-icon name="ionFunnelOutline"
                              title="Filters" i18n-title></ng-icon>

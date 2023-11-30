@@ -1,9 +1,13 @@
 .idea/
+.angular/
+.nyc_output/
 PiGallery2.iml
 node_modules/
 pigallery2.zip
 src/**/*.js
 src/**/*.js.map
+test/**/*.js
+test/**/*.js.map
 src/frontend/dist
 test/coverage
 test/backend/**/*.js

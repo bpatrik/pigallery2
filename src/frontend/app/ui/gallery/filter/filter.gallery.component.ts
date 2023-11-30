@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {FilterOption, FilterService, SelectedFilter} from './filter.service';
+import { Filter, FilterService, FilterState, FilterType, SelectedFilter} from './filter.service';
 
 @Component({
   selector: 'app-gallery-filter',
@@ -22,38 +22,40 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
 
   get MinDatePrc(): number {
     return (
-        ((this.ActiveFilters.dateFilter.minFilter -
-                this.ActiveFilters.dateFilter.minDate) /
-            (this.ActiveFilters.dateFilter.maxDate -
-                this.ActiveFilters.dateFilter.minDate)) *
+        ((this.FilterState.dateFilter.minFilter -
+                this.FilterState.dateFilter.minDate) /
+            (this.FilterState.dateFilter.maxDate -
+                this.FilterState.dateFilter.minDate)) *
         100
     );
   }
 
   get MaxDatePrc(): number {
     return (
-        ((this.ActiveFilters.dateFilter.maxFilter -
-                this.ActiveFilters.dateFilter.minDate) /
-            (this.ActiveFilters.dateFilter.maxDate -
-                this.ActiveFilters.dateFilter.minDate)) *
+        ((this.FilterState.dateFilter.maxFilter -
+                this.FilterState.dateFilter.minDate) /
+            (this.FilterState.dateFilter.maxDate -
+                this.FilterState.dateFilter.minDate)) *
         100
     );
   }
 
-  get ActiveFilters(): {
-    filtersVisible: boolean;
-    areFiltersActive: boolean;
-    dateFilter: {
-      minDate: number;
-      maxDate: number;
-      minFilter: number;
-      maxFilter: number;
-    };
-    selectedFilters: SelectedFilter[];
-  } {
-    return this.filterService.activeFilters.value;
+  get FilterState(): FilterState {
+    return this.filterService.filterState.value;
   }
 
+  filterChangedType(index: number, type: FilterType) {
+    this.filterService.filterState.value.selectedFilters[index] = {
+      type,
+      options: []
+    }
+    this.filterService.onFilterChange();
+  }
+
+  toggleFilterValue(option: {selected: boolean}) {
+    option.selected = !option.selected
+    this.filterService.onFilterChange();
+  }
 
   ngOnDestroy(): void {
     setTimeout(() => this.filterService.setShowingFilters(false));
@@ -63,30 +65,20 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
     this.filterService.setShowingFilters(true);
   }
 
-  isOnlySelected(filter: SelectedFilter, option: FilterOption): boolean {
-    for (const o of filter.options) {
-      if (o === option) {
-        if (o.selected === false) {
-          return false;
-        }
-      } else {
-        if (o.selected === true) {
-          return false;
-        }
-      }
-    }
-    return true;
+  isOnlySelected(filter: SelectedFilter, option: string): boolean {
+    const selectedEntries = filter.options.filter(({selected}) => selected);
+    return selectedEntries.length === 1 && selectedEntries[0].name === option;
   }
 
   toggleSelectOnly(
       filter: SelectedFilter,
-      option: FilterOption,
+      option: string,
       event: MouseEvent
   ): void {
     if (this.isOnlySelected(filter, option)) {
-      filter.options.forEach((o) => (o.selected = true));
+      filter.options.forEach((o) => o.selected = true);
     } else {
-      filter.options.forEach((o) => (o.selected = o === option));
+      filter.options.forEach((o) => o.selected = o.name === option);
     }
     event.stopPropagation();
     this.filterService.onFilterChange();
@@ -94,16 +86,16 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
 
   newMinDate($event: Event): void {
     const diff =
-        (this.ActiveFilters.dateFilter.maxDate -
-            this.ActiveFilters.dateFilter.minDate) *
+        (this.FilterState.dateFilter.maxDate -
+            this.FilterState.dateFilter.minDate) *
         0.01;
     if (
-        this.ActiveFilters.dateFilter.minFilter >
-        this.ActiveFilters.dateFilter.maxFilter - diff
+        this.FilterState.dateFilter.minFilter >
+        this.FilterState.dateFilter.maxFilter - diff
     ) {
-      this.ActiveFilters.dateFilter.minFilter = Math.max(
-          this.ActiveFilters.dateFilter.maxFilter - diff,
-          this.ActiveFilters.dateFilter.minDate
+      this.FilterState.dateFilter.minFilter = Math.max(
+          this.FilterState.dateFilter.maxFilter - diff,
+          this.FilterState.dateFilter.minDate
       );
     }
     this.filterService.onFilterChange();
@@ -111,16 +103,16 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
 
   newMaxDate($event: Event): void {
     const diff =
-        (this.ActiveFilters.dateFilter.maxDate -
-            this.ActiveFilters.dateFilter.minDate) *
+        (this.FilterState.dateFilter.maxDate -
+            this.FilterState.dateFilter.minDate) *
         0.01;
     if (
-        this.ActiveFilters.dateFilter.maxFilter <
-        this.ActiveFilters.dateFilter.minFilter + diff
+        this.FilterState.dateFilter.maxFilter <
+        this.FilterState.dateFilter.minFilter + diff
     ) {
-      this.ActiveFilters.dateFilter.maxFilter = Math.min(
-          this.ActiveFilters.dateFilter.minFilter + diff,
-          this.ActiveFilters.dateFilter.maxDate
+      this.FilterState.dateFilter.maxFilter = Math.min(
+          this.FilterState.dateFilter.minFilter + diff,
+          this.FilterState.dateFilter.maxDate
       );
     }
     this.filterService.onFilterChange();

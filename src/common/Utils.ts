@@ -287,6 +287,18 @@ export class Utils {
     }
     return ret;
   }
+
+  public static collect<TItem, TRet>(iter: Iterator<TItem, TRet>) {
+    const values: TItem[] = [];
+    let nextValue = iter.next();
+
+    while (!nextValue.done) {
+        values.push(nextValue.value as TItem);
+        nextValue = iter.next();
+    }
+
+    return [values, nextValue.value as TRet] as const;
+}
 }
 
 export class LRU<V> {

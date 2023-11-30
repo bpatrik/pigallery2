@@ -1,98 +1,119 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {DirectoryContent} from '../contentLoader.service';
-import {debounceTime, map, switchMap} from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { PhotoDTO } from '../../../../../common/entities/PhotoDTO';
+import { DirectoryContent } from '../contentLoader.service';
+import { map, switchMap } from 'rxjs/operators';
+import { Utils } from '../../../../../common/Utils';
 
 export enum FilterRenderType {
   enum = 1,
   range = 2,
 }
 
+const filters = {
+  keywords: {
+    key: 'keywords',
+    name: $localize`Keywords`,
+    mapFn: (m: PhotoDTO): string[] | undefined => m.metadata.keywords,
+    renderType: FilterRenderType.enum,
+    isArrayValue: true,
+  },
+  faces: {
+    key: 'faces',
+    name: $localize`Faces`,
+    mapFn: (m: PhotoDTO) => 
+      m.metadata.faces
+        ? m.metadata.faces.map((f) => f.name)
+        : ['<' + $localize`no face` + '>'],
+    renderType: FilterRenderType.enum,
+    isArrayValue: true,
+  },
+  faces_groups: {
+    key: 'faces_groups',
+    name: $localize`Faces groups`,
+    mapFn: (m: PhotoDTO): string[] | undefined => [
+      m.metadata.faces
+        ?.map((f) => f.name)
+        .sort()
+        .join(', '),
+    ],
+    renderType: FilterRenderType.enum,
+    isArrayValue: false,
+  },
+  caption: {
+    key: 'caption',
+    name: $localize`Caption`,
+    mapFn: (m: PhotoDTO) => [m.metadata.caption ?? '<unknown>'],
+    renderType: FilterRenderType.enum,
+  },
+  rating: {
+    key: 'rating',
+    name: $localize`Rating`,
+    mapFn: (m: PhotoDTO) => [String(m.metadata.rating ?? '<unknown>')],
+    renderType: FilterRenderType.enum,
+  },
+  camera: {
+    key: 'camera',
+    name: $localize`Camera`,
+    mapFn: (m: PhotoDTO) => [m.metadata.cameraData?.model ?? '<unknown>'],
+    renderType: FilterRenderType.enum,
+  },
+  lens: {
+    key: 'lens',
+    name: $localize`Lens`,
+    mapFn: (m: PhotoDTO) => [m.metadata.cameraData?.lens ?? '<unknown>'],
+    renderType: FilterRenderType.enum,
+  },
+  city: {
+    key: 'city',
+    name: $localize`City`,
+    mapFn: (m: PhotoDTO) => [m.metadata.positionData?.city ?? '<unknown>'],
+    renderType: FilterRenderType.enum,
+  },
+  state: {
+    key: 'state',
+    name: $localize`State`,
+    mapFn: (m: PhotoDTO) => [m.metadata.positionData?.state ?? '<unknown>'],
+    renderType: FilterRenderType.enum,
+  },
+  country: {
+    key: 'country',
+    name: $localize`Country`,
+    mapFn: (m: PhotoDTO) => [m.metadata.positionData?.country ?? '<unknown>'],
+    renderType: FilterRenderType.enum,
+  },
+} as const;
+
+export type FilterState = {
+  filtersVisible: boolean;
+  areFiltersActive: boolean;
+  dateFilter: {
+    minDate: number;
+    maxDate: number;
+    minFilter: number;
+    maxFilter: number;
+  };
+  selectedFilters: SelectedFilter[];
+  filterValueCounts: { [k in FilterType]?: Record<string, number | undefined> };
+};
+export type FilterType = keyof typeof filters;
+
 export interface Filter {
+  key: FilterType;
   name: string;
   mapFn: (m: PhotoDTO) => (string | number)[] | (string | number);
   renderType: FilterRenderType;
   isArrayValue?: boolean;
 }
 
-export interface FilterOption {
-  name: string;
-  count: number;
-  selected: boolean;
-}
-
 export interface SelectedFilter {
-  filter: Filter;
-  options: FilterOption[];
+  type: FilterType;
+  options: Array<{name: string, selected: boolean}>;
 }
 
 @Injectable()
 export class FilterService {
-  public readonly AVAILABLE_FILTERS: Filter[] = [
-    {
-      name: $localize`Keywords`,
-      mapFn: (m: PhotoDTO): string[] => m.metadata.keywords,
-      renderType: FilterRenderType.enum,
-      isArrayValue: true,
-    },
-    {
-      name: $localize`Faces`,
-      mapFn: (m: PhotoDTO): string[] =>
-        m.metadata.faces
-          ? m.metadata.faces.map((f) => f.name)
-          : ['<' + $localize`no face` + '>'],
-      renderType: FilterRenderType.enum,
-      isArrayValue: true,
-    },
-    {
-      name: $localize`Faces groups`,
-      mapFn: (m: PhotoDTO): string =>
-        m.metadata.faces
-          ?.map((f) => f.name)
-          .sort()
-          .join(', '),
-      renderType: FilterRenderType.enum,
-      isArrayValue: false,
-    },
-    {
-      name: $localize`Caption`,
-      mapFn: (m: PhotoDTO): string => m.metadata.caption,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`Rating`,
-      mapFn: (m: PhotoDTO): number => m.metadata.rating,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`Camera`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.model,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`Lens`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.lens,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`City`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.city,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`State`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.state,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`Country`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.country,
-      renderType: FilterRenderType.enum,
-    },
-  ];
-
-  public readonly activeFilters = new BehaviorSubject({
+  public readonly filterState = new BehaviorSubject<FilterState>({
     filtersVisible: false,
     areFiltersActive: false,
     dateFilter: {
@@ -103,23 +124,28 @@ export class FilterService {
     },
     selectedFilters: [
       {
-        filter: this.AVAILABLE_FILTERS[0],
+        type: 'keywords',
         options: [],
       },
       {
-        filter: this.AVAILABLE_FILTERS[1],
+        type: 'faces',
         options: [],
       },
       {
-        filter: this.AVAILABLE_FILTERS[7],
+        type: 'city',
         options: [],
       },
       {
-        filter: this.AVAILABLE_FILTERS[4],
+        type: 'rating',
         options: [],
       },
     ],
+    filterValueCounts: {},
   });
+
+  public filters = Object.values(filters);
+  public filtersMap = filters;
+
   public statistic: { date: Date; endDate: Date; dateStr: string; count: number; max: number; }[] = [];
 
   private getStatistic(prefiltered: DirectoryContent): { date: Date, endDate: Date, dateStr: string, count: number, max: number }[] {
@@ -226,8 +252,7 @@ export class FilterService {
     return directoryContent.pipe(
       switchMap((dirContent: DirectoryContent) => {
         this.statistic = this.getStatistic(dirContent);
-        this.resetFilters(false);
-        return this.activeFilters.pipe(
+        return this.filterState.pipe(
           map((afilters) => {
             if (!dirContent || !dirContent.media || (!afilters.filtersVisible && !afilters.areFiltersActive)) {
               return dirContent;
@@ -275,66 +300,58 @@ export class FilterService {
               afilters.dateFilter.maxFilter = Number.MAX_VALUE;
             }
 
-            // filters
-            for (const f of afilters.selectedFilters) {
+            function* filterAndBuildCounts() {
+              const filterValueCounts: {
+                [k in FilterType]?: Record<string, number | undefined>;
+              } = {};
 
-              /* Update filter options */
-              const valueMap: { [key: string]: any } = {};
-              f.options.forEach((o) => {
-                valueMap[o.name] = o;
-                o.count = 0; // reset count so unknown option can be removed at the end
-              });
+              for (const item of c.media) {
+                const keep = afilters.selectedFilters.reduce(
+                  (keep, { type, options }) => {
+                    const values = filters[type].mapFn(item as PhotoDTO) ?? [];
+                    const counts = (filterValueCounts[type] =
+                      filterValueCounts[type] ?? {});
 
-              if (f.filter.isArrayValue) {
-                c.media.forEach((m) => {
-                  (f.filter.mapFn(m as PhotoDTO) as string[])?.forEach((v) => {
-                    valueMap[v] = valueMap[v] || {
-                      name: v,
-                      count: 0,
-                      selected: true,
-                    };
-                    valueMap[v].count++;
-                  });
-                });
-              } else {
-                c.media.forEach((m) => {
-                  const key = f.filter.mapFn(m as PhotoDTO) as string;
-                  valueMap[key] = valueMap[key] || {
-                    name: key,
-                    count: 0,
-                    selected: true,
-                  };
-                  valueMap[key].count++;
-                });
-              }
-
-              f.options = Object.values(valueMap)
-                .filter((o) => o.count > 0)
-                .sort((a, b) => b.count - a.count);
-
-              /* Apply filters */
-              f.options.forEach((opt) => {
-                if (opt.selected) {
-                  return;
-                }
-                if (f.filter.isArrayValue) {
-                  c.media = c.media.filter((m) => {
-                    const mapped = f.filter.mapFn(m as PhotoDTO) as string[];
-                    if (!mapped) {
-                      return true;
+                    for (const value of values) {
+                      counts[value] = (counts[value] ?? 0) + 1;
+                      if (options.find((x) => x.name === value) === undefined) {
+                        options.push({ name: value, selected: true }); // Add any unknown values to the filter
+                      }
                     }
-                    return mapped.indexOf(opt.name) === -1;
-                  });
-                } else {
-                  c.media = c.media.filter(
-                    (m) =>
-                      (f.filter.mapFn(m as PhotoDTO) as string) !== opt.name
-                  );
+                    return (
+                      !keep ||
+                      (values.length > 0 &&
+                        !options.some(
+                          ({ name, selected }) =>
+                            selected && values.includes(name)
+                        ))
+                    );
+                  },
+                  true
+                );
+                if (keep) {
+                  yield item;
                 }
-              });
+              }
+              return filterValueCounts;
             }
-            // If the number of photos did not change, the filters are not active
-            afilters.areFiltersActive = c.media.length !== dirContent.media.length;
+
+            const [filteredMedia, filterValueCounts] = Utils.collect(
+              filterAndBuildCounts()
+            );
+
+            afilters.filterValueCounts = filterValueCounts;
+            afilters.areFiltersActive =
+              filteredMedia.length !== dirContent.media.length;
+            for (const filter of afilters.selectedFilters) {
+              filter.options = filter.options.filter(
+                (option) => filterValueCounts[filter.type]?.[option.name]
+              );
+            }
+
+            console.info(afilters.selectedFilters)
+
+            c.media = filteredMedia;
             return c;
           })
         );
@@ -343,28 +360,29 @@ export class FilterService {
   }
 
   public onFilterChange(): void {
-    this.activeFilters.next(this.activeFilters.value);
+    this.filterState.next(this.filterState.value);
   }
 
   setShowingFilters(value: boolean): void {
-    if (this.activeFilters.value.filtersVisible === value) {
+    if (this.filterState.value.filtersVisible === value) {
       return;
     }
-    this.activeFilters.value.filtersVisible = value;
-    if ((!this.activeFilters.value.filtersVisible && !this.activeFilters.value.areFiltersActive)) {
+    this.filterState.value.filtersVisible = value;
+    if (
+      !this.filterState.value.filtersVisible &&
+      !this.filterState.value.areFiltersActive
+    ) {
       this.resetFilters(false);
     }
     this.onFilterChange();
   }
 
   resetFilters(triggerChangeDetection = true): void {
-    this.activeFilters.value.dateFilter.minFilter = Number.MIN_VALUE;
-    this.activeFilters.value.dateFilter.maxFilter = Number.MAX_VALUE;
-    this.activeFilters.value.selectedFilters.forEach((f) => (f.options = []));
+    this.filterState.value.dateFilter.minFilter = Number.MIN_VALUE;
+    this.filterState.value.dateFilter.maxFilter = Number.MAX_VALUE;
+    this.filterState.value.selectedFilters.forEach((f) => (f.options = []));
     if (triggerChangeDetection) {
       this.onFilterChange();
     }
   }
 }
-
-

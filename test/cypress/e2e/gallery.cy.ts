@@ -16,7 +16,8 @@ describe('Gallery', () => {
   it('Gallery should open', () => {
     cy.get('.mb-0 > :nth-child(1) > .nav-link').contains('Gallery');
   });
-  it('Gallery should filter', () => {
+
+  it('Gallery should allow changing filter types, and filter with toggle-only', () => {
     cy.wait('@getContent');
     cy.get('app-gallery-navbar  ng-icon[name="ionFunnelOutline"]').click({scrollBehavior: false});
     cy.get('app-gallery-navbar #gallery-filter-0').select('City', {force: true});
@@ -33,6 +34,19 @@ describe('Gallery', () => {
     // should this photo be visible
     cy.get('.photo-container > img[alt="IMG_5910.jpg"]');
     cy.get('.photo-container > img[alt="IMG_6220.jpg"]').should('not.exist');
+  });
+
+  it('Gallery should cascade filters left-to-right', () => {
+    cy.wait('@getContent');
+    cy.get('app-gallery-navbar  ng-icon[name="ionFunnelOutline"]').click({scrollBehavior: false});
+
+    cy.get('app-gallery-navbar #gallery-filter-1').siblings('.filter-column').contains('<no face>').parent().contains('15');
+    cy.get('.photo-container > img[alt="IMG_8751.jpg"]');
+
+    cy.get('app-gallery-navbar #gallery-filter-0').siblings('.filter-column').contains('USA Road trip').click({scrollBehavior: false, force: true});
+    cy.get('app-gallery-navbar #gallery-filter-1').siblings('.filter-column').contains('<no face>').parent().contains('7')
+
+    cy.get('.photo-container > img[alt="IMG_8751.jpg"]').should('not.exist');
   });
 
 
