@@ -20,13 +20,13 @@
       </thead>
       <tbody>
       <tr *ngFor="let share of shares">
-        <td><a [href]="sharingUrl + share.sharingKey">{{share.sharingKey}}</a></td>
+        <td><a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a></td>
         <td>{{share.path}}</td>
         <td>{{share.creator.name}}</td>
         <td>{{share.expires | date}}</td>
         <td>
           <button (click)="deleteSharing(share)" class="btn btn-danger float-end">
-            <span class="oi oi-trash" aria-hidden="true" aria-label="Delete"></span>
+            <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
           </button>
         </td>
       </tr>

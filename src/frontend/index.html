@@ -4,14 +4,16 @@
   <base href="<%= Config.Server.urlBase %>/"/>
   <meta charset="UTF-8">
   <title>Loading..</title>
-  <link rel="shortcut icon" href="assets/icon.png">
+  <link rel="shortcut icon" href="icon_auto.svg">
+  <link rel="shortcut icon" sizes="256x256"  href="icon.png" type="image/png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <meta name="theme-color" content="#000000" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-  <link rel="apple-touch-icon" href="assets/icon.png">
+  <link rel="apple-touch-icon" href="icon_auto.svg">
+  <link rel="apple-touch-icon" sizes="256x256"  href="icon.png">
 
   <link rel="manifest" crossorigin="use-credentials" href="manifest.json">
 
@@ -33,8 +35,14 @@
     -webkit-transform: translate(-50%, -50%);
     left: 50%;
     text-align: center">
-    <img src="assets/icon.png" style="max-width: 256px"/>
-    <h2>Loading...</h2>
+    <svg xmlns="http://www.w3.org/2000/svg"
+         class="d-inline-block align-top"
+         style="width: 200px;max-width: calc(50vw);max-height: calc(50vh);"
+         fill="currentcolor"
+         viewBox="<%- Config.Server.svgIcon.viewBox || '0 0 512 512' %>">
+     <!-- <%- "-->"+Config.Server.svgIcon.items+"<!--" %> -->
+    </svg>
+    <h2 style="margin-top: 1em">Loading...</h2>
   </div>
 </app-pi-gallery2>
 

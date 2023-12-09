@@ -16,46 +16,46 @@ export class AlbumRouter {
 
   private static addListAlbums(app: Express): void {
     app.get(
-      [Config.Server.apiPath + '/albums'],
-      // common part
-      AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.User),
-      VersionMWs.injectGalleryVersion,
+        [Config.Server.apiPath + '/albums'],
+        // common part
+        AuthenticationMWs.authenticate,
+        AuthenticationMWs.authorise(UserRoles.User),
+        VersionMWs.injectGalleryVersion,
 
-      // specific part
-      AlbumMWs.listAlbums,
-      ServerTimingMWs.addServerTiming,
-      RenderingMWs.renderResult
+        // specific part
+        AlbumMWs.listAlbums,
+        ServerTimingMWs.addServerTiming,
+        RenderingMWs.renderResult
     );
   }
 
   private static addDeleteAlbum(app: Express): void {
     app.delete(
-      [Config.Server.apiPath + '/albums/:id'],
-      // common part
-      AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.Admin),
-      VersionMWs.injectGalleryVersion,
+        [Config.Server.apiPath + '/albums/:id'],
+        // common part
+        AuthenticationMWs.authenticate,
+        AuthenticationMWs.authorise(UserRoles.Admin),
+        VersionMWs.injectGalleryVersion,
 
-      // specific part
-      AlbumMWs.deleteAlbum,
-      ServerTimingMWs.addServerTiming,
-      RenderingMWs.renderResult
+        // specific part
+        AlbumMWs.deleteAlbum,
+        ServerTimingMWs.addServerTiming,
+        RenderingMWs.renderResult
     );
   }
 
   private static addAddSavedSearch(app: Express): void {
     app.put(
-      [Config.Server.apiPath + '/albums/saved-searches'],
-      // common part
-      AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.Admin),
-      VersionMWs.injectGalleryVersion,
+        [Config.Server.apiPath + '/albums/saved-searches'],
+        // common part
+        AuthenticationMWs.authenticate,
+        AuthenticationMWs.authorise(UserRoles.Admin),
+        VersionMWs.injectGalleryVersion,
 
-      // specific part
-      AlbumMWs.createSavedSearch,
-      ServerTimingMWs.addServerTiming,
-      RenderingMWs.renderResult
+        // specific part
+        AlbumMWs.createSavedSearch,
+        ServerTimingMWs.addServerTiming,
+        RenderingMWs.renderResult
     );
   }
 }

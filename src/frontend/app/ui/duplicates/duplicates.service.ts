@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
-import { NetworkService } from '../../model/network/network.service';
-import { DuplicatesDTO } from '../../../../common/entities/DuplicatesDTO';
-import { BehaviorSubject } from 'rxjs';
+import {Injectable} from '@angular/core';
+import {NetworkService} from '../../model/network/network.service';
+import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
+import {BehaviorSubject} from 'rxjs';
 
 @Injectable()
 export class DuplicateService {
@@ -13,7 +13,7 @@ export class DuplicateService {
 
   public async getDuplicates(): Promise<void> {
     this.duplicates.next(
-      await this.networkService.getJson<DuplicatesDTO[]>('/admin/duplicates')
+        await this.networkService.getJson<DuplicatesDTO[]>('/admin/duplicates')
     );
   }
 }

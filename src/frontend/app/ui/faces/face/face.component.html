@@ -2,7 +2,7 @@
    style="display: inline-block;">
 
 
-  <div class="photo-container"
+  <div class="photo-container rounded overflow-hidden"
        [style.width.px]="size"
        [style.height.px]="size">
 
@@ -10,17 +10,19 @@
          *ngIf="thumbnail && thumbnail.Available"
          [style.background-image]="getSanitizedThUrl()"></div>
 
-    <span *ngIf="!thumbnail || !thumbnail.Available" class="oi oi-person no-image"
-          aria-hidden="true">
-    </span>
+    <ng-icon *ngIf="!thumbnail || !thumbnail.Available"
+             class="no-image" name="ionPersonOutline"></ng-icon>
   </div>
 
 
   <!--Info box -->
-  <div class="info">
-      <span (click)="CanUpdate && toggleFavourite($event)"
-            class="star oi oi-star"
-            [ngClass]="{'favourite':person.isFavourite, 'clickable':CanUpdate}"></span>
+  <div class="info rounded-bottom">
+    <ng-icon class="star"
+             name="ionStarOutline"
+             [class.favourite]="person.isFavourite"
+             [class.clickable]="CanUpdate"
+             (click)="CanUpdate && toggleFavourite($event)"
+    ></ng-icon>
     {{person.name}} ({{person.count}})
 
   </div>

@@ -1,14 +1,14 @@
-import { Express } from 'express';
-import { PublicRouter } from './PublicRouter';
-import { UserRouter } from './UserRouter';
-import { GalleryRouter } from './GalleryRouter';
-import { PersonRouter } from './PersonRouter';
-import { SharingRouter } from './SharingRouter';
-import { AdminRouter } from './admin/AdminRouter';
-import { SettingsRouter } from './admin/SettingsRouter';
-import { NotificationRouter } from './NotificationRouter';
-import { ErrorRouter } from './ErrorRouter';
-import { AlbumRouter } from './AlbumRouter';
+import {Express} from 'express';
+import {PublicRouter} from './PublicRouter';
+import {UserRouter} from './UserRouter';
+import {GalleryRouter} from './GalleryRouter';
+import {PersonRouter} from './PersonRouter';
+import {SharingRouter} from './SharingRouter';
+import {AdminRouter} from './admin/AdminRouter';
+import {SettingsRouter} from './admin/SettingsRouter';
+import {NotificationRouter} from './NotificationRouter';
+import {ErrorRouter} from './ErrorRouter';
+import {AlbumRouter} from './AlbumRouter';
 
 export class Router {
   public static route(app: Express): void {

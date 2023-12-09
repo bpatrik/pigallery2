@@ -6,21 +6,20 @@
 .row {
   margin-left: 0;
   margin-right: 0;
-  padding: 10px;
+  padding: 10px 16px 10px 16px;
 }
 
 .details-icon {
-  margin-top: .7rem;
   font-size: x-large;
 }
 
 .details-main {
-  font-size: x-large;
+  font-size: large;
 }
 
 .details-sub {
   padding: 0;
-  font-size: 0.875rem;
+  font-size: small;
 }
 
 .details-sub div {

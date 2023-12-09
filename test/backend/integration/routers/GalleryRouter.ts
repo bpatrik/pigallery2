@@ -30,7 +30,6 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
   const setUp = async () => {
     await sqlHelper.initDB();
     Config.Users.authenticationRequired = false;
-    Config.Server.Threading.enabled = false;
     Config.Media.Video.enabled = true;
     Config.Media.folder = path.join(__dirname, '../../assets');
     Config.Media.tempFolder = tempDir;

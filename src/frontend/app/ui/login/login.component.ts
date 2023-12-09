@@ -17,8 +17,8 @@ export class LoginComponent implements OnInit {
   inProgress = false;
 
   constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService
+      private authService: AuthenticationService,
+      private navigation: NavigationService
   ) {
     this.loginCredential = new LoginCredential();
     this.title = Config.Server.applicationTitle;

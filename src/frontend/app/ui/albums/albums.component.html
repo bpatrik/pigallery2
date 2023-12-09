@@ -11,7 +11,7 @@
          [style.height.px]="size"
          (click)="openModal(modal)">
       <div class="text">
-        <span class="oi oi-plus" aria-hidden="true">  </span><br/>
+        <ng-icon name="ionAddOutline" class="mb-2"></ng-icon>
         <span i18n>Add saved search</span>
       </div>
     </div>
@@ -58,7 +58,7 @@
       </div>
 
 
-      <div class="input-group-btn float-end row" style="display: block">
+      <div class="input-group-btn float-end" style="display: block">
         <app-saved-search-popup-btn
           [disabled]="savedSearch.searchQuery.text == ''"
           class="me-2"
@@ -67,7 +67,7 @@
         <button class="btn btn-primary" type="button"
                 [disabled]="savedSearch.searchQuery.text == ''"
                 (click)="saveSearch()">
-          <span class="oi oi-folder"></span> Save
+          <ng-icon name="ionSaveOutline" class="me-1"></ng-icon><span i18n>Save</span>
         </button>
       </div>
     </form>

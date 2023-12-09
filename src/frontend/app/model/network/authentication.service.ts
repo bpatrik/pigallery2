@@ -16,26 +16,26 @@ declare module ServerInject {
   export let user: UserDTO;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({providedIn: 'root'})
 export class AuthenticationService {
   public readonly user: BehaviorSubject<UserDTO>;
 
   constructor(
-    private userService: UserService,
-    private networkService: NetworkService,
-    private shareService: ShareService,
-    private cookieService: CookieService
+      private userService: UserService,
+      private networkService: NetworkService,
+      private shareService: ShareService,
+      private cookieService: CookieService
   ) {
     this.user = new BehaviorSubject(null);
 
     // picking up session..
     if (
-      this.isAuthenticated() === false &&
-      this.cookieService.get(CookieNames.session) != null
+        this.isAuthenticated() === false &&
+        this.cookieService.get(CookieNames.session) != null
     ) {
       if (
-        typeof ServerInject !== 'undefined' &&
-        typeof ServerInject.user !== 'undefined'
+          typeof ServerInject !== 'undefined' &&
+          typeof ServerInject.user !== 'undefined'
       ) {
         this.user.next(ServerInject.user);
       }

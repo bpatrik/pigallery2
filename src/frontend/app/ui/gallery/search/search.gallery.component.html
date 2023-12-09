@@ -9,12 +9,13 @@
 
     </app-gallery-search-field-base>
 
-    <button class="btn btn-light" type="button"
+    <button class="btn btn-tertiary" type="button"
             [routerLink]="['/search', HTMLSearchQuery]">
-      <span class="oi oi-magnifying-glass"></span>
+      <ng-icon name="ionSearchOutline"></ng-icon>
     </button>
-    <button class="btn btn-light" type="button" (click)="openSearchModal(searchModal)">
-      <span class="oi oi-chevron-bottom"></span>
+    <button class="btn btn-tertiary" type="button" (click)="openSearchModal(searchModal)">
+      <ng-icon size="1.2em" style="margin-left: -0.1em; margin-right: -0.1em;"
+               name="ionChevronDownOutline"></ng-icon>
     </button>
   </div>
 </form>
@@ -33,7 +34,7 @@
       <app-gallery-search-query-builder
         name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
-        (change)="onQueryChange()"
+        (ngModelChange)="onQueryChange()"
         (search)="Search()">
       </app-gallery-search-query-builder>
 
@@ -46,13 +47,13 @@
                 class="btn btn-secondary me-2" type="button"
                 [disabled]="rawSearchText == ''"
                 (click)="openSaveSearchModal(saveSearchModal)">
-          <span class="oi oi-folder me-2"></span>
+          <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
           <ng-container i18n>Save</ng-container>
         </button>
         <button class="btn btn-primary" type="button"
                 [routerLink]="['/search', HTMLSearchQuery]"
                 (click)="hideSearchModal()">
-          <span class="oi oi-magnifying-glass me-2"></span>
+          <ng-icon name="ionSearchOutline" class="me-1"></ng-icon>
           <ng-container i18n>Search</ng-container>
         </button>
       </div>
@@ -93,7 +94,7 @@
           <button class="btn btn-primary" type="button"
                   [disabled]="saveSearchName == ''"
                   (click)="saveSearch()">
-            <span class="oi oi-folder me-2"></span>
+            <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
             <ng-container i18n>Save as album</ng-container>
           </button>
         </div>

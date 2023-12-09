@@ -25,15 +25,15 @@ export interface MediaDimension {
 export const MediaDTOUtils = {
   hasPositionData: (media: MediaDTO): boolean => {
     return (
-      !!(media as PhotoDTO).metadata.positionData &&
-      !!(
-        (media as PhotoDTO).metadata.positionData.city ||
-        (media as PhotoDTO).metadata.positionData.state ||
-        (media as PhotoDTO).metadata.positionData.country ||
-        ((media as PhotoDTO).metadata.positionData.GPSData &&
-          (media as PhotoDTO).metadata.positionData.GPSData.latitude &&
-          (media as PhotoDTO).metadata.positionData.GPSData.longitude)
-      )
+        !!(media as PhotoDTO).metadata.positionData &&
+        !!(
+            (media as PhotoDTO).metadata.positionData.city ||
+            (media as PhotoDTO).metadata.positionData.state ||
+            (media as PhotoDTO).metadata.positionData.country ||
+            ((media as PhotoDTO).metadata.positionData.GPSData &&
+                (media as PhotoDTO).metadata.positionData.GPSData.latitude &&
+                (media as PhotoDTO).metadata.positionData.GPSData.longitude)
+        )
     );
   },
   isPhoto: (media: FileDTO): boolean => {
@@ -73,4 +73,10 @@ export const MediaDTOUtils = {
   calcAspectRatio: (photo: MediaDTO): number => {
     return (photo.metadata.size.width / photo.metadata.size.height) || 1; // NaN should be treated as square photo
   },
+
+  equals: (a: MediaDTO, b: MediaDTO): boolean => {
+    return a.directory.path === b.directory.path &&
+        a.directory.name === b.directory.name &&
+        a.name === b.name;
+  }
 };

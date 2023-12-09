@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
-import { Event } from '../../../../common/event/Event';
+import {Injectable} from '@angular/core';
+import {Event} from '../../../../common/event/Event';
+
 
 declare const document: {
-  fullscreenElement: any;
-  mozFullScreenElement: any;
-  webkitFullscreenElement: any;
+  fullscreenElement: boolean;
+  mozFullScreenElement: boolean;
+  webkitFullscreenElement: boolean;
   exitFullscreen: () => void;
   mozCancelFullScreen: () => void;
   webkitExitFullscreen: () => void;
@@ -16,9 +17,9 @@ export class FullScreenService {
 
   public isFullScreenEnabled(): boolean {
     return !!(
-      document.fullscreenElement ||
-      document.mozFullScreenElement ||
-      document.webkitFullscreenElement
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement
     );
   }
 
@@ -29,12 +30,12 @@ export class FullScreenService {
 
     if (element.requestFullscreen) {
       element.requestFullscreen().catch(console.error);
-    } else if ((element as any).mozRequestFullScreen) {
-      (element as any).mozRequestFullScreen();
-    } else if ((element as any).webkitRequestFullscreen) {
-      (element as any).webkitRequestFullscreen();
-    } else if ((element as any).msRequestFullscreen) {
-      (element as any).msRequestFullscreen();
+    } else if ((element as unknown as Record<string, () => void>).mozRequestFullScreen) {
+      (element as unknown as Record<string, () => void>).mozRequestFullScreen();
+    } else if ((element as unknown as Record<string, () => void>).webkitRequestFullscreen) {
+      (element as unknown as Record<string, () => void>).webkitRequestFullscreen();
+    } else if ((element as unknown as Record<string, () => void>).msRequestFullscreen) {
+      (element as unknown as Record<string, () => void>).msRequestFullscreen();
     }
     this.OnFullScreenChange.trigger(true);
   }

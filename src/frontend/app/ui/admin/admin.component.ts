@@ -5,7 +5,7 @@ import {NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
 import {NavigationService} from '../../model/navigation.service';
 import {ViewportScroller} from '@angular/common';
-import {SettingsService} from '../settings/settings.service';
+import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
 import {ISettingsComponent} from '../settings/template/ISettingsComponent';
@@ -24,21 +24,24 @@ export class AdminComponent implements OnInit, AfterViewInit {
   settingsComponentsElemRef: QueryList<ElementRef>;
   contents: ISettingsComponent[] = [];
   configPriorities: { key: number; value: string; }[];
+  configStyles: { key: number; value: string; }[];
   public readonly ConfigPriority = ConfigPriority;
+  public readonly ConfigStyle = ConfigStyle;
   public readonly configPaths: string[] = [];
 
   constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    public viewportScroller: ViewportScroller,
-    public notificationService: NotificationService,
-    public settingsService: SettingsService,
-    private piTitleService: PiTitleService
+      private authService: AuthenticationService,
+      private navigation: NavigationService,
+      public viewportScroller: ViewportScroller,
+      public notificationService: NotificationService,
+      public settingsService: SettingsService,
+      private piTitleService: PiTitleService
   ) {
     this.configPriorities = enumToTranslatedArray(ConfigPriority);
+    this.configStyles = enumToTranslatedArray(ConfigStyle);
     const wc = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
     this.configPaths = Object.keys(wc.State)
-      .filter(s => !wc.__state[s].volatile);
+        .filter(s => !wc.__state[s].volatile);
   }
 
   ngAfterViewInit(): void {
@@ -47,8 +50,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     if (
-      !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < UserRoles.Admin
+        !this.authService.isAuthenticated() ||
+        this.authService.user.value.role < UserRoles.Admin
     ) {
       this.navigation.toLogin();
       return;

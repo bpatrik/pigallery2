@@ -1,4 +1,4 @@
-import { MediaDTO } from './MediaDTO';
+import {MediaDTO} from './MediaDTO';
 
 export interface DuplicatesDTO {
   media: MediaDTO[];

@@ -1,6 +1,6 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import {Pipe, PipeTransform} from '@angular/core';
 
-@Pipe({ name: 'duration' })
+@Pipe({name: 'duration'})
 export class DurationPipe implements PipeTransform {
 
   transform(time: number, separator: ':' | 'string' = 'string'): string {
@@ -12,7 +12,7 @@ export class DurationPipe implements PipeTransform {
 
     if (separator === ':') {
       const leftPad = (x: any): string =>
-        String(x).length >= 2 ? x : leftPad(`0${x}`);
+          String(x).length >= 2 ? x : leftPad(`0${x}`);
       return [h || 0, m || 0, s || 0].map(leftPad).join(':');
     }
     let str = '';

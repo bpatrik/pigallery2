@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["**/*.ts"],
+  "compilerOptions": {
+    "sourceMap": false,
+    "types": ["cypress"]
+  },
+  // See https://github.com/cypress-io/cypress/issues/7552#issuecomment-763498855
+  "exclude": []
+}

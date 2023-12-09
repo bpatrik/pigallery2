@@ -144,3 +144,15 @@ hr {
 .banner-photo {
   margin-bottom: 30px;
 }
+
+
+.row.feature:nth-child(odd) .feature-image{
+  order: 2;
+}
+
+/*Medium devices (tablets, 768px and up)*/
+@media (max-width: 768px) {
+  .row.feature .feature-image{
+    order: 2;
+  }
+}

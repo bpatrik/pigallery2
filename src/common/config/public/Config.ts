@@ -17,11 +17,11 @@ declare namespace ServerInject {
 }
 
 export const Config: IWebConfigClass & ClientClass =
-  WebConfigClassBuilder.attachInterface(new ClientClass());
+    WebConfigClassBuilder.attachInterface(new ClientClass());
 
 if (
-  typeof ServerInject !== 'undefined' &&
-  typeof ServerInject.ConfigInject !== 'undefined'
+    typeof ServerInject !== 'undefined' &&
+    typeof ServerInject.ConfigInject !== 'undefined'
 ) {
   Config.load(ServerInject.ConfigInject);
 }

@@ -1,13 +1,13 @@
-import { Config } from '../../../../common/config/private/Config';
-import { DefaultsJobs } from '../../../../common/entities/job/JobDTO';
-import { FileJob } from './FileJob';
-import { PhotoProcessing } from '../../fileprocessing/PhotoProcessing';
+import {Config} from '../../../../common/config/private/Config';
+import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
+import {FileJob} from './FileJob';
+import {PhotoProcessing} from '../../fileaccess/fileprocessing/PhotoProcessing';
 
 export class PhotoConvertingJob extends FileJob {
   public readonly Name = DefaultsJobs[DefaultsJobs['Photo Converting']];
 
   constructor() {
-    super({ noVideo: true, noMetaFile: true });
+    super({noVideo: true, noMetaFile: true});
   }
 
   public get Supported(): boolean {

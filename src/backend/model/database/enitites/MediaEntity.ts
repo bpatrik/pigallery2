@@ -1,26 +1,9 @@
-import {
-  Column,
-  Entity,
-  Index,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  TableInheritance,
-  Unique,
-} from 'typeorm';
-import { DirectoryEntity } from './DirectoryEntity';
-import {
-  MediaDimension,
-  MediaDTO,
-  MediaMetadata,
-} from '../../../../common/entities/MediaDTO';
-import { PersonJunctionTable} from './PersonJunctionTable';
-import { columnCharsetCS } from './EntityUtils';
-import {
-  CameraMetadata, FaceRegion,
-  GPSMetadata,
-  PositionMetaData,
-} from '../../../../common/entities/PhotoDTO';
+import {Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, TableInheritance, Unique,} from 'typeorm';
+import {DirectoryEntity} from './DirectoryEntity';
+import {MediaDimension, MediaDTO, MediaMetadata,} from '../../../../common/entities/MediaDTO';
+import {PersonJunctionTable} from './PersonJunctionTable';
+import {columnCharsetCS} from './EntityUtils';
+import {CameraMetadata, FaceRegion, GPSMetadata, PositionMetaData,} from '../../../../common/entities/PhotoDTO';
 
 export class MediaDimensionEntity implements MediaDimension {
   @Column('int')
@@ -31,7 +14,7 @@ export class MediaDimensionEntity implements MediaDimension {
 }
 
 export class CameraMetadataEntity implements CameraMetadata {
-  @Column('int', { nullable: true, unsigned: true })
+  @Column('int', {nullable: true, unsigned: true})
   ISO: number;
 
   @Column({
@@ -50,28 +33,28 @@ export class CameraMetadataEntity implements CameraMetadata {
   })
   make: string;
 
-  @Column('float', { nullable: true })
+  @Column('float', {nullable: true})
   fStop: number;
 
-  @Column('float', { nullable: true })
+  @Column('float', {nullable: true})
   exposure: number;
 
-  @Column('float', { nullable: true })
+  @Column('float', {nullable: true})
   focalLength: number;
 
-  @Column('text', { nullable: true })
+  @Column('text', {nullable: true})
   lens: string;
 }
 
 export class GPSMetadataEntity implements GPSMetadata {
-  @Column('float', { nullable: true })
+  @Column('float', {nullable: true})
   latitude: number;
-  @Column('float', { nullable: true })
+  @Column('float', {nullable: true})
   longitude: number;
 }
 
 export class PositionMetaDataEntity implements PositionMetaData {
-  @Column((type) => GPSMetadataEntity)
+  @Column(() => GPSMetadataEntity)
   GPSData: GPSMetadataEntity;
 
   @Column({
@@ -103,7 +86,7 @@ export class MediaMetadataEntity implements MediaMetadata {
   @Column('text')
   caption: string;
 
-  @Column((type) => MediaDimensionEntity)
+  @Column(() => MediaDimensionEntity)
   size: MediaDimensionEntity;
 
   /**
@@ -120,7 +103,7 @@ export class MediaMetadataEntity implements MediaMetadata {
   @Index()
   creationDate: number;
 
-  @Column('int', { unsigned: true })
+  @Column('int', {unsigned: true})
   fileSize: number;
 
   @Column({
@@ -130,24 +113,25 @@ export class MediaMetadataEntity implements MediaMetadata {
   })
   keywords: string[];
 
-  @Column((type) => CameraMetadataEntity)
+  @Column(() => CameraMetadataEntity)
   cameraData: CameraMetadataEntity;
 
-  @Column((type) => PositionMetaDataEntity)
+  @Column(() => PositionMetaDataEntity)
   positionData: PositionMetaDataEntity;
 
-  @Column('tinyint', { unsigned: true })
+  @Column('tinyint', {unsigned: true})
   @Index()
   rating: 0 | 1 | 2 | 3 | 4 | 5;
 
-  @OneToMany((type) => PersonJunctionTable, (junctionTable) => junctionTable.media)
+  @OneToMany(() => PersonJunctionTable, (junctionTable) => junctionTable.media)
   personJunction: PersonJunctionTable[];
 
   @Column({
-    type:'simple-json',
+    type: 'simple-json',
     nullable: true,
     charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation})
+    collation: columnCharsetCS.collation
+  })
   faces: FaceRegion[];
 
   /**
@@ -162,33 +146,45 @@ export class MediaMetadataEntity implements MediaMetadata {
   })
   persons: string[];
 
-  @Column('int', { unsigned: true })
+  /**
+   * Caches the list of persons' length. Only used for searching
+   */
+  @Column({
+    type: 'tinyint',
+    select: false,
+    nullable: false,
+    default: 0
+  })
+  personsLength: number;
+
+
+  @Column('int', {unsigned: true})
   bitRate: number;
 
-  @Column('int', { unsigned: true })
+  @Column('int', {unsigned: true})
   duration: number;
 }
 
 // TODO: fix inheritance once its working in typeorm
 @Entity()
 @Unique(['name', 'directory'])
-@TableInheritance({ column: { type: 'varchar', name: 'type', length: 16 } })
+@TableInheritance({column: {type: 'varchar', name: 'type', length: 16}})
 export abstract class MediaEntity implements MediaDTO {
   @Index()
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn({unsigned: true})
   id: number;
 
   @Column(columnCharsetCS)
   name: string;
 
   @Index()
-  @ManyToOne((type) => DirectoryEntity, (directory) => directory.media, {
+  @ManyToOne(() => DirectoryEntity, (directory) => directory.media, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   directory: DirectoryEntity;
 
-  @Column((type) => MediaMetadataEntity)
+  @Column(() => MediaMetadataEntity)
   metadata: MediaMetadataEntity;
 
   missingThumbnails: number;

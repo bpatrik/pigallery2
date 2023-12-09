@@ -18,6 +18,7 @@ import {
   ClientPhotoConvertingConfig,
   ClientServiceConfig,
   ClientSharingConfig,
+  ClientSortingConfig,
   ClientThumbnailConfig,
   ClientUserConfig,
   ClientVideoConfig,
@@ -28,8 +29,10 @@ import {SubConfigClass} from 'typeconfig/src/decorators/class/SubConfigClass';
 import {ConfigProperty} from 'typeconfig/src/decorators/property/ConfigPropoerty';
 import {DefaultsJobs} from '../../entities/job/JobDTO';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../entities/SearchQueryDTO';
-import {SortingMethods} from '../../entities/SortingMethods';
+import {SortByTypes} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
+import {MediaPickDTO} from '../../entities/MediaPickDTO';
+import {MessagingConfig} from './MessagingConfig';
 
 declare let $localize: (s: TemplateStringsArray) => string;
 
@@ -61,9 +64,12 @@ export enum SQLLogLevel {
 }
 
 export enum ReIndexingSensitivity {
-  low = 1,
-  medium = 2,
-  high = 3,
+  // Order is important. It also used to do relative comparison.
+  // Keep space between items for future
+  never = 10,
+  low = 20,
+  medium = 30,
+  high = 40,
 }
 
 export enum FFmpegPresets {
@@ -81,14 +87,14 @@ export enum FFmpegPresets {
 
 export type videoCodecType = 'libvpx-vp9' | 'libx264' | 'libvpx' | 'libx265';
 export type videoResolutionType =
-  | 240
-  | 360
-  | 480
-  | 720
-  | 1080
-  | 1440
-  | 2160
-  | 4320;
+    | 240
+    | 360
+    | 480
+    | 720
+    | 1080
+    | 1440
+    | 2160
+    | 4320;
 export type videoFormatType = 'mp4' | 'webm';
 
 @SubConfigClass({softReadonly: true})
@@ -96,51 +102,51 @@ export class MySQLConfig {
   @ConfigProperty({
     envAlias: 'MYSQL_HOST',
     tags:
-      {
-        name: $localize`Host`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.advanced
-      },
+        {
+          name: $localize`Host`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.advanced
+        },
   })
   host: string = 'localhost';
   @ConfigProperty({
     envAlias: 'MYSQL_PORT', min: 0, max: 65535,
     tags:
-      {
-        name: $localize`Port`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.advanced
-      },
+        {
+          name: $localize`Port`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.advanced
+        },
   })
   port: number = 3306;
   @ConfigProperty({
     envAlias: 'MYSQL_DATABASE',
     tags:
-      {
-        name: $localize`Database`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.advanced
-      },
+        {
+          name: $localize`Database`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.advanced
+        },
   })
   database: string = 'pigallery2';
   @ConfigProperty({
     envAlias: 'MYSQL_USERNAME',
     tags:
-      {
-        name: $localize`Username`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.advanced
-      },
+        {
+          name: $localize`Username`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.advanced
+        },
   })
   username: string = '';
   @ConfigProperty({
     envAlias: 'MYSQL_PASSWORD', type: 'password',
     tags:
-      {
-        name: $localize`Password`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.advanced
-      }
+        {
+          name: $localize`Password`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.advanced
+        }
   })
   password: string = '';
 }
@@ -149,11 +155,11 @@ export class MySQLConfig {
 export class SQLiteConfig {
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Sqlite db filename`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Sqlite db filename`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`Sqlite will save the db with this filename.`,
   })
   DBFileName: string = 'sqlite.db';
@@ -163,51 +169,51 @@ export class SQLiteConfig {
 export class UserConfig {
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Name`,
-        priority: ConfigPriority.underTheHood
-      }
+        {
+          name: $localize`Name`,
+          priority: ConfigPriority.underTheHood
+        }
   })
   name: string;
 
   @ConfigProperty({
     type: UserRoles,
     tags:
-      {
-        name: $localize`Role`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Role`,
+          priority: ConfigPriority.underTheHood
+        },
   })
   role: UserRoles = UserRoles.User;
 
   @ConfigProperty<string, ServerConfig, TAGS>({
     type: 'string',
-    constraint: {assert: (val: string, config) => !!val, assertReason: 'Password cant be empty'},
     tags:
-      {
-        name: $localize`Password`,
-        priority: ConfigPriority.underTheHood,
-        relevant: (c: UserConfig) => !c.encrypted
-      },
+        {
+          name: $localize`Password`,
+          priority: ConfigPriority.underTheHood,
+          relevant: (c: UserConfig) => !c.encrypted
+        },
     description: $localize`Unencrypted, temporary password. App will encrypt it and delete this.`
   })
   password: string;
+
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Encrypted password`,
-        priority: ConfigPriority.underTheHood,
-        secret: true
-      },
+        {
+          name: $localize`Encrypted password`,
+          priority: ConfigPriority.underTheHood,
+          secret: true
+        },
   })
   encryptedPassword: string | undefined;
 
   @ConfigProperty({
     tags:
-      {
-        priority: ConfigPriority.underTheHood,
-        relevant: () => false // never render this on UI. Only used to indicate that encryption is done.
-      } as TAGS,
+        {
+          priority: ConfigPriority.underTheHood,
+          relevant: () => false // never render this on UI. Only used to indicate that encryption is done.
+        } as TAGS,
   })
   encrypted: boolean;
 
@@ -229,44 +235,44 @@ export class ServerDataBaseConfig {
   @ConfigProperty<DatabaseType, ServerConfig>({
     type: DatabaseType,
     tags:
-      {
-        name: $localize`Type`,
-        priority: ConfigPriority.advanced,
-        uiResetNeeded: {db: true},
-        githubIssue: 573
-      } as TAGS,
+        {
+          name: $localize`Type`,
+          priority: ConfigPriority.advanced,
+          uiResetNeeded: {db: true},
+          githubIssue: 573
+        } as TAGS,
     description: $localize`SQLite is recommended.`
   })
   type: DatabaseType = DatabaseType.sqlite;
 
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Database folder`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.advanced
-      },
+        {
+          name: $localize`Database folder`,
+          uiResetNeeded: {server: true},
+          priority: ConfigPriority.advanced
+        },
     description: $localize`All file-based data will be stored here (sqlite database, job history data).`,
   })
   dbFolder: string = 'db';
 
   @ConfigProperty({
     tags:
-      {
-        name: $localize`SQLite`,
-        uiResetNeeded: {db: true},
-        relevant: (c: any) => c.type === DatabaseType.sqlite,
-      }
+        {
+          name: $localize`SQLite`,
+          uiResetNeeded: {db: true},
+          relevant: (c: any) => c.type === DatabaseType.sqlite,
+        }
   })
   sqlite?: SQLiteConfig = new SQLiteConfig();
 
   @ConfigProperty({
     tags:
-      {
-        name: $localize`MySQL`,
-        uiResetNeeded: {db: true},
-        relevant: (c: any) => c.type === DatabaseType.mysql,
-      }
+        {
+          name: $localize`MySQL`,
+          uiResetNeeded: {db: true},
+          relevant: (c: any) => c.type === DatabaseType.mysql,
+        }
   })
   mysql?: MySQLConfig = new MySQLConfig();
 
@@ -279,13 +285,13 @@ export class ServerUserConfig extends ClientUserConfig {
   @ConfigProperty({
     arrayType: UserConfig,
     tags:
-      {
-        name: $localize`Enforced users`,
-        priority: ConfigPriority.underTheHood,
-        uiResetNeeded: {server: true},
-        uiOptional: true,
-        githubIssue: 575
-      } as TAGS,
+        {
+          name: $localize`Enforced users`,
+          priority: ConfigPriority.underTheHood,
+          uiResetNeeded: {server: true},
+          uiOptional: true,
+          githubIssue: 575
+        } as TAGS,
     description: $localize`Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.`,
   })
   enforcedUsers: UserConfig[] = [];
@@ -296,90 +302,90 @@ export class ServerUserConfig extends ClientUserConfig {
 export class ServerThumbnailConfig extends ClientThumbnailConfig {
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Enforced users`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`High quality resampling`,
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`if true, 'lanczos3' will used to scale photos, otherwise faster but lower quality 'nearest'.`
   })
   useLanczos3: boolean = true;
   @ConfigProperty({
     max: 100, min: 1, type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Converted photo and thumbnail quality`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Converted photo and thumbnail quality`,
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`Between 0-100.`
   })
   quality = 80;
   @ConfigProperty({
     type: 'boolean',
     tags:
-      {
-        name: $localize`Use chroma subsampling.`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Use chroma subsampling`,
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`Use high quality chroma subsampling in webp. See: https://sharp.pixelplumbing.com/api-output#webp.`
   })
   smartSubsample = true;
   @ConfigProperty({
-    type: 'ratio',
+    type: 'float',
     tags:
-      {
-        name: $localize`Person face margin`,
-        priority: ConfigPriority.underTheHood
-      },
-    description: $localize`Person face size ratio on the face thumbnail.`
+        {
+          name: $localize`Person face margin`,
+          priority: ConfigPriority.underTheHood
+        },
+    description: $localize`This ratio of the face bounding box will be added to the face as a margin. Higher number add more margin.`
   })
-  personFaceMargin: number = 0.6; // in ration [0-1]
+  personFaceMargin: number = 0.7; // in ratio [0-1]
 }
 
 @SubConfigClass({softReadonly: true})
 export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
   @ConfigProperty({
     tags:
-      {
-        name: $localize`OnTheFly *.gpx compression`,
-        priority: ConfigPriority.advanced,
-        uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      },
+        {
+          name: $localize`OnTheFly *.gpx compression`,
+          priority: ConfigPriority.advanced,
+          uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
+        },
     description: $localize`Enables on the fly *.gpx compression.`,
   })
   onTheFly: boolean = true;
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Min distance`,
-        priority: ConfigPriority.underTheHood,
-        unit: 'm',
-        uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      } as TAGS,
+        {
+          name: $localize`Min distance`,
+          priority: ConfigPriority.underTheHood,
+          unit: 'm',
+          uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
+        } as TAGS,
     description: $localize`Filters out entry that are closer than this to each other in meters.`
   })
   minDistance: number = 5;
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Max middle point deviance`,
-        priority: ConfigPriority.underTheHood,
-        unit: 'm',
-        uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      } as TAGS,
+        {
+          name: $localize`Max middle point deviance`,
+          priority: ConfigPriority.underTheHood,
+          unit: 'm',
+          uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
+        } as TAGS,
     description: $localize`Filters out entry that would fall on the line if we would just connect the previous and the next points. This setting sets the sensitivity for that (higher number, more points are filtered).`
   })
   maxMiddleDeviance: number = 5;
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Min time delta`,
-        priority: ConfigPriority.underTheHood,
-        unit: 'ms',
-        uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      } as TAGS,
+        {
+          name: $localize`Min time delta`,
+          priority: ConfigPriority.underTheHood,
+          unit: 'ms',
+          uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
+        } as TAGS,
     description: $localize`Filters out entry that are closer than this in time in milliseconds.`
   })
   minTimeDistance: number = 5000;
@@ -389,14 +395,17 @@ export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
 export class ServerMetaFileConfig extends ClientMetaFileConfig {
   @ConfigProperty({
     tags:
-      {
-        name: $localize`GPX compression`,
-        priority: ConfigPriority.advanced,
-        uiJob: [{
-          job: DefaultsJobs[DefaultsJobs['GPX Compression']],
-          relevant: (c) => c.MetaFile.GPXCompressing.enabled
-        }]
-      } as TAGS
+        {
+          name: $localize`GPX compression`,
+          priority: ConfigPriority.advanced,
+          uiJob: [{
+            job: DefaultsJobs[DefaultsJobs['GPX Compression']],
+            relevant: (c) => c.MetaFile.GPXCompressing.enabled
+          }, {
+            job: DefaultsJobs[DefaultsJobs['Delete Compressed GPX']],
+            relevant: (c) => c.MetaFile.GPXCompressing.enabled
+          }]
+        } as TAGS
   })
   GPXCompressing: ServerGPXCompressingConfig = new ServerGPXCompressingConfig();
 }
@@ -407,11 +416,11 @@ export class ServerSharingConfig extends ClientSharingConfig {
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Update timeout`,
-        priority: ConfigPriority.underTheHood,
-        unit: 'ms'
-      } as TAGS,
+        {
+          name: $localize`Update timeout`,
+          priority: ConfigPriority.underTheHood,
+          unit: 'ms'
+        } as TAGS,
     description: $localize`After creating a sharing link, it can be updated for this long.`
   })
   updateTimeout: number = 1000 * 60 * 5;
@@ -422,74 +431,50 @@ export class ServerIndexingConfig {
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Index cache timeout`,
-        priority: ConfigPriority.underTheHood,
-        unit: 'ms'
-      } as TAGS,
+        {
+          name: $localize`Index cache timeout`,
+          priority: ConfigPriority.underTheHood,
+          unit: 'ms'
+        } as TAGS,
     description: $localize`If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low).`
   })
   cachedFolderTimeout: number = 1000 * 60 * 60; // Do not rescans the folder if seems ok
   @ConfigProperty({
     type: ReIndexingSensitivity,
     tags:
-      {
-        name: $localize`Folder reindexing sensitivity`,
-        priority: ConfigPriority.advanced
-      },
-    description: $localize`Set the reindexing sensitivity. High value check the folders for change more often.`
+        {
+          name: $localize`Folder reindexing sensitivity`,
+          priority: ConfigPriority.advanced
+        },
+    description: $localize`Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job.`
   })
   reIndexingSensitivity: ReIndexingSensitivity = ReIndexingSensitivity.low;
   @ConfigProperty({
     arrayType: 'string',
     tags:
-      {
-        name: $localize`Exclude Folder List`,
-        priority: ConfigPriority.advanced,
-        uiResetNeeded: {server: true, db: true},
-        uiOptional: true,
-        uiAllowSpaces: true
-      } as TAGS,
+        {
+          name: $localize`Exclude Folder List`,
+          priority: ConfigPriority.advanced,
+          uiResetNeeded: {server: true, db: true},
+          uiOptional: true,
+          uiAllowSpaces: true
+        } as TAGS,
     description: $localize`Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded.`,
   })
   excludeFolderList: string[] = ['.Trash-1000', '.dtrash', '$RECYCLE.BIN'];
   @ConfigProperty({
     arrayType: 'string',
     tags:
-      {
-        name: $localize`Exclude File List`,
-        priority: ConfigPriority.advanced,
-        uiResetNeeded: {server: true, db: true},
-        uiOptional: true,
-        hint: $localize`.ignore;.pg2ignore`
-      } as TAGS,
+        {
+          name: $localize`Exclude File List`,
+          priority: ConfigPriority.advanced,
+          uiResetNeeded: {server: true, db: true},
+          uiOptional: true,
+          hint: $localize`.ignore;.pg2ignore`
+        } as TAGS,
     description: $localize`Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing.`,
   })
   excludeFileList: string[] = [];
-}
-
-@SubConfigClass({softReadonly: true})
-export class ServerThreadingConfig {
-  @ConfigProperty({
-    tags:
-      {
-        name: $localize`Threading`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.underTheHood,
-      } as TAGS,
-    description: $localize`[Deprecated, will be removed in the next release] Runs directory scanning and thumbnail generation in a different thread.`
-  })
-  enabled: boolean = false;
-  @ConfigProperty({
-    tags:
-      {
-        name: $localize`Thumbnail threads`,
-        uiResetNeeded: {server: true},
-        priority: ConfigPriority.underTheHood
-      },
-    description: $localize`Number of threads that are used to generate thumbnails. If 0, number of 'CPU cores -1' threads will be used.`,
-  })
-  thumbnailThreads: number = 0; // if zero-> CPU count -1
 }
 
 @SubConfigClass({softReadonly: true})
@@ -497,10 +482,10 @@ export class ServerDuplicatesConfig {
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Max duplicates`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Max duplicates`,
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`Maximum number of duplicates to list.`
   })
   listingLimit: number = 1000;
@@ -580,7 +565,7 @@ export class JobScheduleConfig implements JobScheduleDTO {
   @ConfigProperty()
   jobName: string;
   @ConfigProperty()
-  config: Record<string, string | number | string[] | number[]> = {};
+  config: Record<string, string | number | string[] | number[] | MediaPickDTO[]> = {};
   @ConfigProperty()
   allowParallelRun: boolean = false;
   @ConfigProperty({
@@ -601,21 +586,21 @@ export class JobScheduleConfig implements JobScheduleDTO {
     },
   })
   trigger:
-    | AfterJobTriggerConfig
-    | NeverJobTriggerConfig
-    | PeriodicJobTriggerConfig
-    | ScheduledJobTriggerConfig;
-
-  constructor(
-    name: string,
-    jobName: string,
-    trigger:
       | AfterJobTriggerConfig
       | NeverJobTriggerConfig
       | PeriodicJobTriggerConfig
-      | ScheduledJobTriggerConfig,
-    config: any = {},
-    allowParallelRun: boolean = false
+      | ScheduledJobTriggerConfig;
+
+  constructor(
+      name: string,
+      jobName: string,
+      trigger:
+          | AfterJobTriggerConfig
+          | NeverJobTriggerConfig
+          | PeriodicJobTriggerConfig
+          | ScheduledJobTriggerConfig,
+      config: any = {},
+      allowParallelRun: boolean = false
   ) {
     this.name = name;
     this.jobName = jobName;
@@ -630,20 +615,20 @@ export class ServerJobConfig {
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Max saved progress`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Max saved progress`,
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`Job history size.`
   })
   maxSavedProgress: number = 20;
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Processing batch size`,
-        priority: ConfigPriority.underTheHood
-      },
+        {
+          name: $localize`Processing batch size`,
+          priority: ConfigPriority.underTheHood
+        },
     description: $localize`Jobs load this many photos or videos form the DB for processing at once.`
   })
   mediaProcessingBatchSize: number = 1000;
@@ -656,46 +641,46 @@ export class ServerJobConfig {
   })
   scheduled: JobScheduleConfig[] = [
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs.Indexing],
-      DefaultsJobs[DefaultsJobs.Indexing],
-      new NeverJobTriggerConfig(),
-      {indexChangesOnly: true} // set config explicitly, so it is not undefined on the UI
+        DefaultsJobs[DefaultsJobs.Indexing],
+        DefaultsJobs[DefaultsJobs.Indexing],
+        new NeverJobTriggerConfig(),
+        {indexChangesOnly: true} // set config explicitly, so it is not undefined on the UI
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Preview Filling']],
-      DefaultsJobs[DefaultsJobs['Preview Filling']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Indexing']]),
-      {}
+        DefaultsJobs[DefaultsJobs['Album Cover Filling']],
+        DefaultsJobs[DefaultsJobs['Album Cover Filling']],
+        new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Indexing']]),
+        {}
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Thumbnail Generation']],
-      DefaultsJobs[DefaultsJobs['Thumbnail Generation']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Preview Filling']]),
-      {sizes: [240], indexedOnly: true}
+        DefaultsJobs[DefaultsJobs['Thumbnail Generation']],
+        DefaultsJobs[DefaultsJobs['Thumbnail Generation']],
+        new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Album Cover Filling']]),
+        {sizes: [240], indexedOnly: true}
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Photo Converting']],
-      DefaultsJobs[DefaultsJobs['Photo Converting']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Thumbnail Generation']]),
-      {indexedOnly: true}
+        DefaultsJobs[DefaultsJobs['Photo Converting']],
+        DefaultsJobs[DefaultsJobs['Photo Converting']],
+        new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Thumbnail Generation']]),
+        {indexedOnly: true}
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Video Converting']],
-      DefaultsJobs[DefaultsJobs['Video Converting']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Photo Converting']]),
-      {indexedOnly: true}
+        DefaultsJobs[DefaultsJobs['Video Converting']],
+        DefaultsJobs[DefaultsJobs['Video Converting']],
+        new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Photo Converting']]),
+        {indexedOnly: true}
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['GPX Compression']],
-      DefaultsJobs[DefaultsJobs['GPX Compression']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Video Converting']]),
-      {indexedOnly: true}
+        DefaultsJobs[DefaultsJobs['GPX Compression']],
+        DefaultsJobs[DefaultsJobs['GPX Compression']],
+        new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Video Converting']]),
+        {indexedOnly: true}
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']],
-      DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['GPX Compression']]),
-      {indexedOnly: true}
+        DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']],
+        DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']],
+        new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['GPX Compression']]),
+        {indexedOnly: true}
     ),
   ];
 }
@@ -705,73 +690,73 @@ export class VideoTranscodingConfig {
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Bit rate`,
-        priority: ConfigPriority.advanced,
-        unit: 'bps'
-      },
+        {
+          name: $localize`Bit rate`,
+          priority: ConfigPriority.advanced,
+          unit: 'bps'
+        },
     description: $localize`Target bit rate of the output video will be scaled down this this. This should be less than the upload rate of your home server.`
   })
   bitRate: number = 5 * 1024 * 1024;
   @ConfigProperty({
     type: 'unsignedInt',
     tags:
-      {
-        name: $localize`Resolution`,
-        priority: ConfigPriority.advanced,
-        uiOptions: [720, 1080, 1440, 2160, 4320],
-        unit: 'px'
-      },
+        {
+          name: $localize`Resolution`,
+          priority: ConfigPriority.advanced,
+          uiOptions: [720, 1080, 1440, 2160, 4320],
+          unit: 'px'
+        },
     description: $localize`The height of the output video will be scaled down to this, while keeping the aspect ratio.`
   })
   resolution: videoResolutionType = 720;
   @ConfigProperty({
     type: 'positiveFloat',
     tags:
-      {
-        name: $localize`FPS`,
-        priority: ConfigPriority.underTheHood,
-        uiOptions: [24, 25, 30, 48, 50, 60]
-      },
+        {
+          name: $localize`FPS`,
+          priority: ConfigPriority.underTheHood,
+          uiOptions: [24, 25, 30, 48, 50, 60]
+        },
     description: $localize`Target frame per second (fps) of the output video will be scaled down this this.`
   })
   fps: number = 25;
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Format`,
-        priority: ConfigPriority.advanced,
-        uiOptions: ['mp4', 'webm']
-      }
+        {
+          name: $localize`Format`,
+          priority: ConfigPriority.advanced,
+          uiOptions: ['mp4', 'webm']
+        }
   })
   format: videoFormatType = 'mp4';
   @ConfigProperty({
     tags:
-      {
-        name: $localize`MP4 codec`,
-        priority: ConfigPriority.underTheHood,
-        uiOptions: ['libx264', 'libx265'],
-        relevant: (c: any) => c.format === 'mp4'
-      }
+        {
+          name: $localize`MP4 codec`,
+          priority: ConfigPriority.underTheHood,
+          uiOptions: ['libx264', 'libx265'],
+          relevant: (c: any) => c.format === 'mp4'
+        }
   })
   mp4Codec: videoCodecType = 'libx264';
   @ConfigProperty({
     tags:
-      {
-        name: $localize`Webm Codec`,
-        priority: ConfigPriority.underTheHood,
-        uiOptions: ['libvpx', 'libvpx-vp9'],
-        relevant: (c: any) => c.format === 'webm'
-      }
+        {
+          name: $localize`Webm Codec`,
+          priority: ConfigPriority.underTheHood,
+          uiOptions: ['libvpx', 'libvpx-vp9'],
+          relevant: (c: any) => c.format === 'webm'
+        }
   })
   webmCodec: videoCodecType = 'libvpx';
   @ConfigProperty({
     type: 'unsignedInt', max: 51,
     tags:
-      {
-        name: $localize`CRF`,
-        priority: ConfigPriority.underTheHood,
-      },
+        {
+          name: $localize`CRF`,
+          priority: ConfigPriority.underTheHood,
+        },
     description: $localize`The range of the Constant Rate Factor (CRF) scale is 0–51, where 0 is lossless, 23 is the default, and 51 is worst quality possible.`,
 
   })
@@ -779,10 +764,10 @@ export class VideoTranscodingConfig {
   @ConfigProperty({
     type: FFmpegPresets,
     tags:
-      {
-        name: $localize`Preset`,
-        priority: ConfigPriority.advanced,
-      },
+        {
+          name: $localize`Preset`,
+          priority: ConfigPriority.advanced,
+        },
     description: $localize`A preset is a collection of options that will provide a certain encoding speed to compression ratio. A slower preset will provide better compression (compression is quality per filesize).`,
   })
   preset: FFmpegPresets = FFmpegPresets.medium;
@@ -834,7 +819,7 @@ export class PhotoConvertingConfig extends ClientPhotoConvertingConfig {
       name: $localize`On the fly converting`,
       priority: ConfigPriority.underTheHood,
       uiDisabled: (sc: PhotoConvertingConfig) =>
-        !sc.enabled
+          !sc.enabled
 
     },
     description: $localize`Converts photos on the fly, when they are requested.`,
@@ -848,7 +833,7 @@ export class PhotoConvertingConfig extends ClientPhotoConvertingConfig {
       uiOptions: [720, 1080, 1440, 2160, 4320],
       unit: 'px',
       uiDisabled: (sc: PhotoConvertingConfig) =>
-        !sc.enabled
+          !sc.enabled
     },
     description: $localize`The shorter edge of the converted photo will be scaled down to this, while keeping the aspect ratio.`,
   })
@@ -867,11 +852,11 @@ export class ServerPhotoConfig extends ClientPhotoConfig {
 }
 
 @SubConfigClass({softReadonly: true})
-export class ServerPreviewConfig {
+export class ServerAlbumCoverConfig {
   @ConfigProperty({
     type: 'object',
     tags: {
-      name: $localize`Preview Filter query`,
+      name: $localize`Cover Filter query`,
       uiResetNeeded: {db: true},
       priority: ConfigPriority.advanced,
       uiType: 'SearchQuery'
@@ -883,23 +868,25 @@ export class ServerPreviewConfig {
     text: '',
   } as TextSearch;
   @ConfigProperty({
-    arrayType: SortingMethods,
+    arrayType: ClientSortingConfig,
     tags: {
-      name: $localize`Preview Sorting`,
+      name: $localize`Cover Sorting`,
       uiResetNeeded: {db: true},
       priority: ConfigPriority.advanced
     },
-    description: $localize`If multiple preview is available sorts them by these methods and selects the first one.`,
+    description: $localize`If multiple cover is available sorts them by these methods and selects the first one.`,
   })
-  Sorting: SortingMethods[] = [
-    SortingMethods.descRating,
-    SortingMethods.descDate,
+  Sorting: ClientSortingConfig[] = [
+    new ClientSortingConfig(SortByTypes.Rating, false),
+    new ClientSortingConfig(SortByTypes.Date, false),
+    new ClientSortingConfig(SortByTypes.PersonCount, false)
   ];
 }
 
 @SubConfigClass({softReadonly: true})
 export class ServerMediaConfig extends ClientMediaConfig {
   @ConfigProperty({
+
     tags: {
       name: $localize`Images folder`,
       priority: ConfigPriority.basic,
@@ -937,7 +924,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Video`,
-      uiIcon: 'video',
+      uiIcon: 'ionVideocamOutline',
       priority: ConfigPriority.advanced,
       uiJob: [
         {
@@ -951,7 +938,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Photo`,
-      uiIcon: 'camera-slr',
+      uiIcon: 'ionCameraOutline',
       priority: ConfigPriority.advanced,
       uiJob: [
         {
@@ -964,7 +951,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Thumbnail`,
-      uiIcon: 'grid-three-up',
+      uiIcon: 'ionImageOutline',
       priority: ConfigPriority.advanced,
       uiJob: [{job: DefaultsJobs[DefaultsJobs['Thumbnail Generation']]}]
     } as TAGS
@@ -1019,14 +1006,6 @@ export class ServerServiceConfig extends ClientServiceConfig {
 
   @ConfigProperty({
     tags: {
-      name: $localize`Threading`,
-      priority: ConfigPriority.underTheHood,
-    }
-  })
-  Threading: ServerThreadingConfig = new ServerThreadingConfig();
-
-  @ConfigProperty({
-    tags: {
       name: $localize`Logs`,
       priority: ConfigPriority.advanced,
     }
@@ -1048,6 +1027,7 @@ export class ServerEnvironmentConfig {
   isDocker: boolean | undefined;
 }
 
+
 @SubConfigClass<TAGS>({softReadonly: true})
 export class ServerConfig extends ClientConfig {
 
@@ -1057,7 +1037,7 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Server`,
-      uiIcon: 'cog'
+      uiIcon: 'ionCloudOutline'
     } as TAGS,
   })
   Server: ServerServiceConfig = new ServerServiceConfig();
@@ -1065,7 +1045,7 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Database`,
-      uiIcon: 'list'
+      uiIcon: 'ionServerOutline'
     } as TAGS
   })
   Database: ServerDataBaseConfig = new ServerDataBaseConfig();
@@ -1073,7 +1053,7 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Users`,
-      uiIcon: 'person'
+      uiIcon: 'ionPersonOutline'
     } as TAGS,
   })
   Users: ServerUserConfig = new ServerUserConfig();
@@ -1081,7 +1061,7 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Indexing`,
-      uiIcon: 'pie-chart',
+      uiIcon: 'ionFileTrayFullOutline',
       uiJob: [
         {
           job: DefaultsJobs[DefaultsJobs.Indexing],
@@ -1097,7 +1077,7 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Media`,
-      uiIcon: 'camera-slr'
+      uiIcon: 'ionImagesOutline'
     } as TAGS,
   })
   Media: ServerMediaConfig = new ServerMediaConfig();
@@ -1105,30 +1085,32 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Meta file`,
-      uiIcon: 'file'
+      uiIcon: 'ionDocumentOutline'
     } as TAGS,
   })
   MetaFile: ServerMetaFileConfig = new ServerMetaFileConfig();
 
   @ConfigProperty({
     tags: {
-      name: $localize`Preview`,
-      uiIcon: 'image',
+      name: $localize`Album cover`,
+      uiIcon: 'ionImageOutline',
+      githubIssue: 679,
       uiJob: [
         {
-          job: DefaultsJobs[DefaultsJobs['Preview Filling']],
+          job: DefaultsJobs[DefaultsJobs['Album Cover Filling']],
         }, {
-          job: DefaultsJobs[DefaultsJobs['Preview Reset']],
+          job: DefaultsJobs[DefaultsJobs['Album Cover Reset']],
           hideProgress: true
         }]
-    } as TAGS
+    } as TAGS,
+    description: $localize`Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.`
   })
-  Preview: ServerPreviewConfig = new ServerPreviewConfig();
+  AlbumCover: ServerAlbumCoverConfig = new ServerAlbumCoverConfig();
 
   @ConfigProperty({
     tags: {
       name: $localize`Sharing`,
-      uiIcon: 'share'
+      uiIcon: 'ionShareSocialOutline'
     } as TAGS,
   })
   Sharing: ServerSharingConfig = new ServerSharingConfig();
@@ -1136,15 +1118,25 @@ export class ServerConfig extends ClientConfig {
   @ConfigProperty({
     tags: {
       name: $localize`Duplicates`,
-      uiIcon: 'layers'
+      uiIcon: 'ionCopyOutline'
     } as TAGS
   })
   Duplicates: ServerDuplicatesConfig = new ServerDuplicatesConfig();
 
   @ConfigProperty({
     tags: {
+      name: $localize`Messaging`,
+      uiIcon: 'ionChatboxOutline',
+      githubIssue: 683
+    } as TAGS,
+    description: $localize`The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.`
+  })
+  Messaging: MessagingConfig = new MessagingConfig();
+
+  @ConfigProperty({
+    tags: {
       name: $localize`Jobs`,
-      uiIcon: 'project'
+      uiIcon: 'ionPlayOutline'
     } as TAGS
   })
   Jobs: ServerJobConfig = new ServerJobConfig();

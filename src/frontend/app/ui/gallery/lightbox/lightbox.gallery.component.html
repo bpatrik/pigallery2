@@ -18,7 +18,7 @@
     <div class="container h-100 flex-column" *ngIf="videoSourceError && activePhoto">
       <div class="row justify-content-center align-items-center h-100">
         <div class="col-md-8 text-white text-center">
-          <span class="oi oi-warning h2 me-2"></span><span class="h2" i18n>Error during loading the video.</span>
+          <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom"></ng-icon><span class="h2" i18n>Error during loading the video.</span>
           <br/>
           <ng-container *ngIf="activePhoto.gridMedia.isVideoTranscodingNeeded()" i18n>
             Most likely the video is not transcoded.

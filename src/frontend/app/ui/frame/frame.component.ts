@@ -6,13 +6,14 @@ import {Config} from '../../../../common/config/public/Config';
 import {BehaviorSubject} from 'rxjs';
 import {NotificationService} from '../../model/notification.service';
 import {QueryService} from '../../model/query.service';
-import {NavigationLinkTypes, ThemeModes} from '../../../../common/config/public/ClientConfig';
+import {NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 import {Utils} from '../../../../common/Utils';
 import {PageHelper} from '../../model/page.helper';
 import {BsDropdownDirective} from 'ngx-bootstrap/dropdown';
 import {LanguageComponent} from '../language/language.component';
 import {ThemeService} from '../../model/theme.service';
+import {DeviceDetectorService} from 'ngx-device-detector';
 
 @Component({
   selector: 'app-frame',
@@ -32,6 +33,7 @@ export class FrameComponent {
   public readonly NavigationLinkTypes = NavigationLinkTypes;
   public readonly stringify = JSON.stringify;
   public readonly themesEnabled = Config.Gallery.Themes.enabled;
+  public readonly svgIcon = Config.Server.svgIcon;
 
   /* sticky top navbar */
   private lastScroll = {
@@ -48,14 +50,17 @@ export class FrameComponent {
   @ViewChild('languageSelector', {static: true}) languageSelector: LanguageComponent;
 
   ThemeModes = ThemeModes;
+  public readonly enableScrollUpButton: boolean;
 
   constructor(
-    private authService: AuthenticationService,
-    public notificationService: NotificationService,
-    public queryService: QueryService,
-    private router: Router,
-    public themeService: ThemeService
+      private authService: AuthenticationService,
+      public notificationService: NotificationService,
+      public queryService: QueryService,
+      private router: Router,
+      public themeService: ThemeService,
+      private deviceService: DeviceDetectorService
   ) {
+    this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && !this.deviceService.isDesktop());
     this.user = this.authService.user;
   }
 
@@ -65,9 +70,9 @@ export class FrameComponent {
 
   isFacesAvailable(): boolean {
     return (
-      Config.Faces.enabled &&
-      this.user.value &&
-      this.user.value.role >= Config.Faces.readAccessMinRole
+        Config.Faces.enabled &&
+        this.user.value &&
+        this.user.value.role >= Config.Faces.readAccessMinRole
     );
   }
 
@@ -105,7 +110,7 @@ export class FrameComponent {
     const down = this.lastScroll.any < scrollPosition;
     const upDelay = up && this.lastScroll.down > scrollPosition + window.innerHeight * Config.Gallery.NavBar.NavbarShowDelay;
     const downDelay = down && this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay;
-    //we are the top where the navbar by default lives
+    // We are the top where the navbar by default lives
     if (this.navContainer.nativeElement.offsetHeight > scrollPosition) {
       // do not force move navbar up when we are scrolling up from bottom
       if (this.shouldHideNavbar != false || scrollPosition <= 0) {
@@ -139,6 +144,10 @@ export class FrameComponent {
     }
 
     this.lastScroll.any = scrollPosition;
+  }
+
+  scrollUp(): void {
+    PageHelper.ScrollY = 0;
   }
 }
 

@@ -1,0 +1,27 @@
+<ng-container [ngSwitch]="method">
+    <ng-container *ngSwitchCase="GridSizes.extraSmall">
+        <ng-icon name="ionAppsOutline"></ng-icon>
+    </ng-container>
+    <div class="align-middle" *ngSwitchCase="GridSizes.small">
+        <div class="d-flex" style="margin-bottom: 0.1em">
+            <ng-icon class="line-height-0" strokeWidth="80" size="0.33em" name="ionSquareOutline"></ng-icon>
+            <ng-icon class="line-height-0" strokeWidth="80" size="0.33em" name="ionSquareOutline"></ng-icon>
+            <ng-icon class="line-height-0" strokeWidth="80" size="0.33em" name="ionSquareOutline"></ng-icon>
+        </div>
+        <div class="d-flex">
+            <ng-icon class="line-height-0" strokeWidth="80" size="0.33em" name="ionSquareOutline"></ng-icon>
+            <ng-icon class="line-height-0" strokeWidth="80" size="0.33em" name="ionSquareOutline"></ng-icon>
+            <ng-icon class="line-height-0" strokeWidth="80" size="0.33em" name="ionSquareOutline"></ng-icon>
+        </div>
+    </div>
+    <ng-container *ngSwitchCase="GridSizes.medium">
+        <ng-icon name="ionGridOutline"></ng-icon>
+    </ng-container>
+    <ng-container *ngSwitchCase="GridSizes.large">
+        <ng-icon strokeWidth="70" class="line-height-0 align-middle" size="0.5em" name="ionSquareOutline"></ng-icon>
+        <ng-icon strokeWidth="70" class="line-height-0 align-middle" size="0.5em" name="ionSquareOutline"></ng-icon>
+    </ng-container>
+    <ng-container *ngSwitchCase="GridSizes.extraLarge">
+        <ng-icon name="ionSquareOutline"></ng-icon>
+    </ng-container>
+</ng-container>

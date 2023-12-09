@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import {Connection, createConnection, DataSourceOptions, getConnection,} from 'typeorm';
+import {Connection, createConnection, DataSourceOptions, getConnection, LoggerOptions,} from 'typeorm';
 import {UserEntity} from './enitites/UserEntity';
 import {UserRoles} from '../../../common/entities/UserDTO';
 import {PhotoEntity} from './enitites/PhotoEntity';
@@ -22,8 +22,11 @@ import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
 import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {NotificationManager} from '../NotifocationManager';
 import {PersonJunctionTable} from './enitites/PersonJunctionTable';
+import {MDFileEntity} from './enitites/MDFileEntity';
 
 const LOG_TAG = '[SQLConnection]';
+
+type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export class SQLConnection {
   private static connection: Connection = null;
@@ -31,31 +34,13 @@ export class SQLConnection {
 
   public static async getConnection(): Promise<Connection> {
     if (this.connection == null) {
-      const options: any = this.getDriver(Config.Database);
-      //   options.name = 'main';
-      options.entities = [
-        UserEntity,
-        FileEntity,
-        PersonJunctionTable,
-        PersonEntry,
-        MediaEntity,
-        PhotoEntity,
-        VideoEntity,
-        DirectoryEntity,
-        SharingEntity,
-        AlbumBaseEntity,
-        SavedSearchEntity,
-        VersionEntity,
-      ];
-      options.synchronize = false;
-      if (Config.Server.Log.sqlLevel !== SQLLogLevel.none) {
-        options.logging = SQLLogLevel[Config.Server.Log.sqlLevel];
-      }
+      const options = this.getDriver(Config.Database);
+
       Logger.debug(
-        LOG_TAG,
-        'Creating connection: ' + DatabaseType[Config.Database.type],
-        ', with driver:',
-        options.type
+          LOG_TAG,
+          'Creating connection: ' + DatabaseType[Config.Database.type],
+          ', with driver:',
+          options.type
       );
       this.connection = await this.createConnection(options);
       await SQLConnection.schemeSync(this.connection);
@@ -64,33 +49,15 @@ export class SQLConnection {
   }
 
   public static async tryConnection(
-    config: ServerDataBaseConfig
+      config: ServerDataBaseConfig
   ): Promise<boolean> {
     try {
       await getConnection('test').close();
       // eslint-disable-next-line no-empty
     } catch (err) {
     }
-    const options: any = this.getDriver(config);
+    const options = this.getDriver(config);
     options.name = 'test';
-    options.entities = [
-      UserEntity,
-      FileEntity,
-      PersonJunctionTable,
-      PersonEntry,
-      MediaEntity,
-      PhotoEntity,
-      VideoEntity,
-      DirectoryEntity,
-      SharingEntity,
-      AlbumBaseEntity,
-      SavedSearchEntity,
-      VersionEntity,
-    ];
-    options.synchronize = false;
-    if (Config.Server.Log.sqlLevel !== SQLLogLevel.none) {
-      options.logging = SQLLogLevel[Config.Server.Log.sqlLevel];
-    }
     const conn = await this.createConnection(options);
     await SQLConnection.schemeSync(conn);
     await conn.close();
@@ -106,8 +73,8 @@ export class SQLConnection {
     // Adding enforced users to the db
     const userRepository = connection.getRepository(UserEntity);
     if (
-      Array.isArray(Config.Users.enforcedUsers) &&
-      Config.Users.enforcedUsers.length > 0
+        Array.isArray(Config.Users.enforcedUsers) &&
+        Config.Users.enforcedUsers.length > 0
     ) {
       for (let i = 0; i < Config.Users.enforcedUsers.length; ++i) {
         const uc = Config.Users.enforcedUsers[i];
@@ -139,12 +106,12 @@ export class SQLConnection {
       role: UserRoles.Admin,
     });
     if (
-      defAdmin &&
-      PasswordHelper.comparePassword('admin', defAdmin.password)
+        defAdmin &&
+        PasswordHelper.comparePassword('admin', defAdmin.password)
     ) {
       NotificationManager.error(
-        'Using default admin user!',
-        'You are using the default admin/admin user/password, please change or remove it.'
+          'Using default admin user!',
+          'You are using the default admin/admin user/password, please change or remove it.'
       );
     }
   }
@@ -161,12 +128,12 @@ export class SQLConnection {
     }
   }
 
-  public static getSQLiteDB(config: ServerDataBaseConfig): any {
+  public static getSQLiteDB(config: ServerDataBaseConfig): string {
     return path.join(ProjectPath.getAbsolutePath(config.dbFolder), 'sqlite.db');
   }
 
   private static async createConnection(
-    options: DataSourceOptions
+      options: DataSourceOptions
   ): Promise<Connection> {
     if (options.type === 'sqlite' || options.type === 'better-sqlite3') {
       return await createConnection(options);
@@ -182,7 +149,7 @@ export class SQLConnection {
         delete tmpOption.database;
         const tmpConn = await createConnection(tmpOption);
         await tmpConn.query(
-          'CREATE DATABASE IF NOT EXISTS ' + options.database
+            'CREATE DATABASE IF NOT EXISTS ' + options.database
         );
         await tmpConn.close();
         return await createConnection(options);
@@ -210,9 +177,9 @@ export class SQLConnection {
     let users: UserEntity[] = [];
     try {
       users = await connection
-        .getRepository(UserEntity)
-        .createQueryBuilder('user')
-        .getMany();
+          .getRepository(UserEntity)
+          .createQueryBuilder('user')
+          .getMany();
       // eslint-disable-next-line no-empty
     } catch (ex) {
     }
@@ -226,15 +193,16 @@ export class SQLConnection {
       await connection.synchronize();
       await connection.getRepository(VersionEntity).save(version);
       Logger.warn(
-        LOG_TAG,
-        'Could not move users to the new db scheme, deleting them. Details:' +
-        e.toString()
+          LOG_TAG,
+          'Could not move users to the new db scheme, deleting them. Details:' +
+          e.toString()
       );
     }
   }
 
-  private static getDriver(config: ServerDataBaseConfig): DataSourceOptions {
-    let driver: DataSourceOptions = null;
+
+  private static getDriver(config: ServerDataBaseConfig): Writeable<DataSourceOptions> {
+    let driver: Writeable<DataSourceOptions>;
     if (config.type === DatabaseType.mysql) {
       driver = {
         type: 'mysql',
@@ -249,10 +217,29 @@ export class SQLConnection {
       driver = {
         type: 'better-sqlite3',
         database: path.join(
-          ProjectPath.getAbsolutePath(config.dbFolder),
-          config.sqlite.DBFileName
+            ProjectPath.getAbsolutePath(config.dbFolder),
+            config.sqlite.DBFileName
         ),
       };
+    }
+    driver.entities = [
+      UserEntity,
+      FileEntity,
+      MDFileEntity,
+      PersonJunctionTable,
+      PersonEntry,
+      MediaEntity,
+      PhotoEntity,
+      VideoEntity,
+      DirectoryEntity,
+      SharingEntity,
+      AlbumBaseEntity,
+      SavedSearchEntity,
+      VersionEntity,
+    ];
+    driver.synchronize = false;
+    if (Config.Server.Log.sqlLevel !== SQLLogLevel.none) {
+      driver.logging = SQLLogLevel[Config.Server.Log.sqlLevel] as LoggerOptions;
     }
     return driver;
   }

@@ -57,6 +57,7 @@ jobs:
     - name: test
       run: |
         npm test
+        npm run coverage
       env:
         MYSQL_HOST: localhost
         MYSQL_USERNAME: root
@@ -64,6 +65,21 @@ jobs:
         MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
         PORT: 35000
         CI: true
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2
+    - name: E2E test - Cypress run
+      uses: cypress-io/github-action@v6
+      env:
+        DEBUG: '@cypress/github-action'
+      with:
+        start: npm run start-e2e-server
+      # after the test run completes store screenshots
+    - uses: actions/upload-artifact@v3
+      if: failure() # Store screenshots only on failures
+      with:
+         name: cypress-screenshots
+         path: test/cypress/screenshots
+         if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
 
   create-release:
     runs-on: [ubuntu-latest]
@@ -102,9 +118,6 @@ jobs:
             platforms: linux/amd64,linux/arm64,linux/arm/v7
 
     steps:
-      - name: Set tag
-        id: vars
-        run: echo ::set-output name=tag::$(echo ${GITHUB_REF:10}) && echo ::set-output name=type::$(echo ${GITHUB_REF:5})
       - name: Checkout
         uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -135,17 +148,18 @@ jobs:
           platforms: ${{ matrix.platforms }}
           push: true
           tags: bpatrik/pigallery2:experimental-${{ matrix.container }}
-      - name: Push nightly on new master commit
-        if: ${{ startsWith(steps.vars.outputs.type , 'head') &&  !github.event.issue.pull_request && github.ref == 'refs/heads/master' }}
+      - name: Push edge on new master commit
+        # github.ref:  branches the format is refs/heads/<branch_name>  PRs and Tags are different
+        if: ${{github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@v3
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
           platforms: ${{ matrix.platforms }}
           push: true
-          tags: bpatrik/pigallery2:nightly-${{ matrix.container }}
+          tags: bpatrik/pigallery2:edge-${{ matrix.container }}
       - name: Push release on new Tag
-        if: ${{ startsWith(steps.vars.outputs.type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container != 'debian-bullseye'}}
+        if: ${{ startsWith(github.ref_type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container != 'debian-bullseye'}}
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -153,11 +167,11 @@ jobs:
           platforms: ${{ matrix.platforms }}
           push: true
           tags: |
-            bpatrik/pigallery2:nightly-${{ matrix.container }}
-            bpatrik/pigallery2:${{ steps.vars.outputs.tag }}-${{ matrix.container }}
+            bpatrik/pigallery2:edge-${{ matrix.container }}
+            bpatrik/pigallery2:${{ github.ref_name }}-${{ matrix.container }}
             bpatrik/pigallery2:latest-${{ matrix.container }}
       - name: Push latest on new Tag
-        if: ${{ startsWith(steps.vars.outputs.type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container == 'debian-bullseye'}}
+        if: ${{ startsWith(github.ref_type, 'tag') &&  !github.event.issue.pull_request &&  matrix.container == 'debian-bullseye'}}
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -165,8 +179,8 @@ jobs:
           platforms: ${{ matrix.platforms }}
           push: true
           tags: |
-            bpatrik/pigallery2:nightly-${{ matrix.container }}
-            bpatrik/pigallery2:${{ steps.vars.outputs.tag }}-${{ matrix.container }}
+            bpatrik/pigallery2:edge-${{ matrix.container }}
+            bpatrik/pigallery2:${{ github.ref_name }}-${{ matrix.container }}
             bpatrik/pigallery2:latest-${{ matrix.container }}
-            bpatrik/pigallery2:${{ steps.vars.outputs.tag }}
+            bpatrik/pigallery2:${{ github.ref_name }}
             bpatrik/pigallery2:latest

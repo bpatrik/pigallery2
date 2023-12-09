@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {VideoProcessing} from '../../../../../src/backend/model/fileprocessing/VideoProcessing';
+import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import * as path from 'path';

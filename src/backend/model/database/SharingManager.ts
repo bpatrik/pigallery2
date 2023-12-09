@@ -3,24 +3,25 @@ import {SQLConnection} from './SQLConnection';
 import {SharingEntity} from './enitites/SharingEntity';
 import {Config} from '../../../common/config/private/Config';
 import {PasswordHelper} from '../PasswordHelper';
-import {DeleteResult, FindOptionsWhere} from 'typeorm';
+import {DeleteResult, SelectQueryBuilder} from 'typeorm';
+import {UserDTO} from '../../../common/entities/UserDTO';
 
 export class SharingManager {
   private static async removeExpiredLink(): Promise<DeleteResult> {
     const connection = await SQLConnection.getConnection();
     return await connection
-      .getRepository(SharingEntity)
-      .createQueryBuilder('share')
-      .where('expires < :now', {now: Date.now()})
-      .delete()
-      .execute();
+        .getRepository(SharingEntity)
+        .createQueryBuilder('share')
+        .where('expires < :now', {now: Date.now()})
+        .delete()
+        .execute();
   }
 
   async deleteSharing(sharingKey: string): Promise<void> {
     const connection = await SQLConnection.getConnection();
     const sharing = await connection
-      .getRepository(SharingEntity)
-      .findOneBy({sharingKey});
+        .getRepository(SharingEntity)
+        .findOneBy({sharingKey});
     await connection.getRepository(SharingEntity).remove(sharing);
   }
 
@@ -28,16 +29,35 @@ export class SharingManager {
     await SharingManager.removeExpiredLink();
     const connection = await SQLConnection.getConnection();
     return await connection
-      .getRepository(SharingEntity)
-      .createQueryBuilder('share')
-      .leftJoinAndSelect('share.creator', 'creator')
-      .getMany();
+        .getRepository(SharingEntity)
+        .createQueryBuilder('share')
+        .leftJoinAndSelect('share.creator', 'creator')
+        .getMany();
   }
 
-  async findOne(filter: FindOptionsWhere<SharingDTO>): Promise<SharingDTO> {
+
+  async listAllForDir(dir: string, user?: UserDTO): Promise<SharingDTO[]> {
     await SharingManager.removeExpiredLink();
     const connection = await SQLConnection.getConnection();
-    return await connection.getRepository(SharingEntity).findOneBy(filter);
+    const q: SelectQueryBuilder<SharingEntity> = connection
+        .getRepository(SharingEntity)
+        .createQueryBuilder('share')
+        .leftJoinAndSelect('share.creator', 'creator')
+        .where('path = :dir', {dir});
+    if (user) {
+      q.andWhere('share.creator = :user', {user: user.id});
+    }
+    return await q.getMany();
+  }
+
+  async findOne(sharingKey: string): Promise<SharingDTO> {
+    await SharingManager.removeExpiredLink();
+    const connection = await SQLConnection.getConnection();
+    return await connection.getRepository(SharingEntity)
+        .createQueryBuilder('share')
+        .leftJoinAndSelect('share.creator', 'creator')
+        .where('share.sharingKey = :sharingKey', {sharingKey})
+        .getOne();
   }
 
   async createSharing(sharing: SharingDTO): Promise<SharingDTO> {
@@ -50,20 +70,20 @@ export class SharingManager {
   }
 
   async updateSharing(
-    inSharing: SharingDTO,
-    forceUpdate: boolean
+      inSharing: SharingDTO,
+      forceUpdate: boolean
   ): Promise<SharingDTO> {
     const connection = await SQLConnection.getConnection();
 
     const sharing = await connection.getRepository(SharingEntity).findOneBy({
       id: inSharing.id,
-      creator: inSharing.creator.id as any,
+      creator: inSharing.creator.id as unknown,
       path: inSharing.path,
     });
 
     if (
-      sharing.timeStamp < Date.now() - Config.Sharing.updateTimeout &&
-      forceUpdate !== true
+        sharing.timeStamp < Date.now() - Config.Sharing.updateTimeout &&
+        forceUpdate !== true
     ) {
       throw new Error('Sharing is locked, can\'t update anymore');
     }

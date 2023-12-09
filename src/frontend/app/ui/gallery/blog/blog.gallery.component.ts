@@ -1,7 +1,7 @@
-import { Component, Input } from '@angular/core';
-import { FileDTO } from '../../../../../common/entities/FileDTO';
-import { BlogService } from './blog.service';
-import { OnChanges } from '../../../../../../node_modules/@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {BlogService, GroupedMarkdown} from './blog.service';
+import {OnChanges} from '../../../../../../node_modules/@angular/core';
+import {map, Observable} from 'rxjs';
 
 @Component({
   selector: 'app-gallery-blog',
@@ -9,30 +9,30 @@ import { OnChanges } from '../../../../../../node_modules/@angular/core';
   styleUrls: ['./blog.gallery.component.css'],
 })
 export class GalleryBlogComponent implements OnChanges {
-  @Input() mdFiles: FileDTO[];
-  @Input() collapsed: boolean;
-  markdowns: string[] = [];
+  @Input() open: boolean;
+  @Input() date: Date;
+  @Output() openChange = new EventEmitter<boolean>();
+  public markdowns: string[] = [];
+  mkObservable: Observable<GroupedMarkdown[]>;
 
-  constructor(public blogService: BlogService) {}
-
-  get SampleText(): string {
-    if (!this.markdowns || this.markdowns.length < 1) {
-      return '';
-    }
-    return this.markdowns[0].length < 203
-      ? this.markdowns[0]
-      : this.markdowns[0].substring(0, 200) + '...';
+  constructor(public blogService: BlogService) {
   }
+
 
   ngOnChanges(): void {
-    this.loadMarkdown().catch(console.error);
+    const utcDate = this.date ? this.date.getTime() : undefined;
+    this.mkObservable = this.blogService.groupedMarkdowns.pipe(map(gm => {
+      if (!this.date) {
+        return gm.filter(g => !g.date);
+      }
+      return gm.filter(g => g.date == utcDate);
+    }));
   }
 
-  async loadMarkdown(): Promise<void> {
-    this.markdowns = [];
-    for (const f of this.mdFiles) {
-      this.markdowns.push(await this.blogService.getMarkDown(f));
-    }
+
+  toggleCollapsed(): void {
+    this.open = !this.open;
+    this.openChange.emit(this.open);
   }
 }
 

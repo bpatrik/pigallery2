@@ -1,79 +1,194 @@
 <div #navigator class="container-fluid pt-1 pb-1 pe-0 ps-0 bg-body-secondary">
-  <nav class="d-md-flex row" aria-label="breadcrumb">
-    <div class="col-12 col-md-auto">
-      <ol *ngIf="isDirectory" id="directory-path" class="mb-0 mt-1 breadcrumb">
-        <li *ngFor="let path of routes | async" class="breadcrumb-item">
-          <a *ngIf="path.route" [routerLink]="['/gallery',path.route]"
-             [title]="path.title || ''"
-             [queryParams]="queryService.getParams()">{{path.name}}</a>
-          <ng-container *ngIf="!path.route">{{path.name}}</ng-container>
-        </li>
-      </ol>
+    <nav class="d-md-flex row" aria-label="breadcrumb">
+        <div class="col-auto">
+            <ol *ngIf="isDirectory" id="directory-path" class="mb-0 mt-1 breadcrumb">
+                <li *ngFor="let path of routes | async" class="breadcrumb-item">
+                    <a *ngIf="path.route" [routerLink]="['/gallery',path.route]"
+                       [title]="path.title || ''"
+                       [queryParams]="queryService.getParams()">{{path.name}}</a>
+                    <ng-container *ngIf="!path.route">{{path.name}}</ng-container>
+                </li>
+            </ol>
 
-      <ol *ngIf="isSearch" class="mb-0 mt-1 breadcrumb">
-        <li class="active">
-          <ng-container i18n>Searching for:</ng-container>
-          <strong> {{galleryService.content.value?.searchResult?.searchQuery | searchQuery}}</strong>
-        </li>
-      </ol>
+            <ol *ngIf="isSearch" class="mb-0 mt-1 breadcrumb">
+                <li class="active">
+                    <ng-container i18n>Searching for:</ng-container>
+                    <strong> {{contentLoaderService.content.value?.searchResult?.searchQuery | searchQuery}}</strong>
+                </li>
+            </ol>
 
-    </div>
-    <div class="ms-auto text-end col-12 col-md-auto">
-      <ng-container *ngIf="ItemCount> 0 && config.Gallery.NavBar.showItemCount">
-        <div class="photos-count">
-          {{ItemCount}} <span i18n>items</span>
         </div>
-        <div class="divider">&nbsp;</div>
-      </ng-container>
+        <div class="ms-auto text-end col-auto">
+            <ng-container *ngIf="ItemCount> 0 && config.Gallery.NavBar.showItemCount">
+                <div class="photos-count">
+                    {{ItemCount}} <span i18n>items</span>
+                </div>
+                <div class="divider">&nbsp;</div>
+            </ng-container>
 
-      <ng-container *ngIf="config.Gallery.enableDownloadZip && isDirectory && ItemCount > 0">
-        <a [href]="getDownloadZipLink()"
-           class="btn">
-         <span class="oi oi-data-transfer-download"
-               title="download" i18n-title></span>
-        </a>
-        <div class="divider">&nbsp;</div>
-      </ng-container>
+            <ng-container *ngIf="config.Gallery.NavBar.enableDownloadZip && isDirectory && ItemCount > 0">
+                <a [href]="getDownloadZipLink()"
+                   class="btn  btn-outline-secondary btn-navigator">
+                    <ng-icon name="ionDownloadOutline" title="Download" i18n-title></ng-icon>
+                </a>
+                <div class="divider">&nbsp;</div>
+            </ng-container>
 
-      <ng-container *ngIf="config.Gallery.enableDirectoryFlattening && isDirectory && authService.canSearch()">
-        <a
-          [routerLink]="['/search', getDirectoryFlattenSearchQuery()]"
-          class="btn">
-         <span class="oi oi-fork"
-               title="Flatten directory" i18n-title></span>
-        </a>
-        <div class="divider">&nbsp;</div>
-      </ng-container>
-      <ng-container *ngIf="ItemCount> 0">
-        <a class="btn"
-           [class.btn-secondary]="filterService.activeFilters.value.areFiltersActive"
-           (click)="showFilters = ! showFilters">
-         <span class="oi oi-spreadsheet"
-               title="Filters" i18n-title></span>
-        </a>
-        <div class="divider">&nbsp;</div>
-      </ng-container>
-      <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right">
-        <button id="button-alignment" dropdownToggle type="button"
-                class="btn dropdown-toggle"
-                [class.btn-secondary]="sortingService.sorting.value !== DefaultSorting"
-                aria-controls="sorting-dropdown"
-                [innerHTML]="sortingService.sorting.value | iconizeSorting">
-        </button>
-        <ul id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-            role="menu" aria-labelledby="button-alignment">
-          <li class="row dropdown-item" role="menuitem"
-              *ngFor="let type of sortingMethodsType"
-              (click)="setSorting(type.key)">
-            <div class="col-3">
-              <div [outerHTML]="type.key | iconizeSorting"></div>
+            <ng-container *ngIf="config.Gallery.NavBar.enableDirectoryFlattening && isDirectory && authService.canSearch()">
+                <a
+                        [routerLink]="['/search', getDirectoryFlattenSearchQuery()]"
+                        class="btn btn-outline-secondary btn-navigator">
+                    <ng-icon name="ionGitBranchOutline"
+                             title="Show all subdirectories" i18n-title></ng-icon>
+                </a>
+                <div class="divider">&nbsp;</div>
+            </ng-container>
+            <ng-container *ngIf="ItemCount> 0">
+                <a class="btn btn-outline-secondary btn-navigator"
+                   [class.btn-secondary]="filterService.activeFilters.value.areFiltersActive"
+                   [class.btn-outline-secondary]="!filterService.activeFilters.value.areFiltersActive"
+                   (click)="showFilters = ! showFilters">
+                    <ng-icon name="ionFunnelOutline"
+                             title="Filters" i18n-title></ng-icon>
+                </a>
+                <div class="divider">&nbsp;</div>
+            </ng-container>
+            <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
+                 [insideClick]="true"
+                 title="Sort and group" i18n-title>
+                <button id="button-alignment" dropdownToggle type="button"
+                        class="btn dropdown-toggle  btn-outline-secondary btn-navigator"
+                        [class.btn-secondary]="!isDefaultSortingAndGrouping()"
+                        [class.btn-outline-secondary]="isDefaultSortingAndGrouping()"
+                        aria-controls="sorting-dropdown">
+                    <ng-icon *ngIf="sortingService.sorting.value.ascending !== null"
+                             [name]="!sortingService.sorting.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
+                    <app-sorting-method-icon [method]="sortingService.sorting.value.method"></app-sorting-method-icon>
+                    <div class="grouping-icon" *ngIf="sortingService.grouping.value.method !== GroupByTypes.NoGrouping">
+                        <div>
+                            <ng-icon
+                                    [name]="!sortingService.grouping.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
+                            <app-sorting-method-icon
+                                    [method]="sortingService.grouping.value.method"></app-sorting-method-icon>
+                        </div>
+                        <div class="ps-1" i18n>
+                            group
+                        </div>
+                    </div>
+                </button>
+                <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                     role="menu" aria-labelledby="button-alignment">
+                    <div class="row flex-nowrap">
+                        <div class="col  p-1 border-end">
+                            <h6 class="ps-2"><ng-container i18n>Sorting</ng-container>
+                                <button class="btn btn-outline-primary btn-group-follow btn-sm"
+                                        [class.btn-outline-primary]="groupingFollowSorting"
+                                        [class.btn-outline-secondary]="!groupingFollowSorting"
+                                        (click)="groupingFollowSorting=!groupingFollowSorting"
+                                        title="Grouping follows sorting" i18n-title>
+                                    <ng-icon class="" name="ionLinkOutline"></ng-icon>
+                                </button>
+
+                            </h6>
+
+                            <div class="row">
+                                <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                                     [class.active]="sortingService.sorting.value.method == type.key"
+                                     *ngFor="let type of sortingByTypes"
+                                     (click)="setSortingBy(type.key)">
+                                    <div class="me-2 d-inline-block">
+                                        <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
+                                    </div>
+                                    <div class="d-inline-block">{{type.key | stringifySorting}}</div>
+                                </div>
+
+                                <ng-container *ngIf="isDirectionalSort(sortingService.sorting.value.method)">
+                                    <hr>
+                                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                                         [class.active]="sortingService.sorting.value.ascending == true"
+                                         (click)="setSortingAscending(true)">
+                                        <div class="me-2 d-inline-block">
+                                            <ng-icon name="ionArrowUpOutline"></ng-icon>
+                                        </div>
+                                        <div class="d-inline-block" i18n>ascending</div>
+                                    </div>
+
+                                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                                         [class.active]="sortingService.sorting.value.ascending == false"
+                                         (click)="setSortingAscending(false)">
+                                        <div class="me-2 d-inline-block">
+                                            <ng-icon name="ionArrowDownOutline"></ng-icon>
+                                        </div>
+                                        <div class="d-inline-block" i18n>descending</div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div class="col p-1">
+                            <h6 class="ps-2" i18n>Grouping</h6>
+                            <div class="row">
+                                <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                                     [class.active]="sortingService.grouping.value.method == type.key"
+                                     *ngFor="let type of groupingByTypes"
+                                     (click)="setGroupingBy(type.key)">
+                                    <div class="me-2 d-inline-block">
+                                        <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
+                                    </div>
+                                    <div class="d-inline-block">{{type.key | stringifySorting}}</div>
+                                </div>
+                                <ng-container *ngIf="isDirectionalSort(sortingService.grouping.value.method)">
+                                    <hr>
+
+                                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                                         [class.active]="sortingService.grouping.value.ascending == true"
+                                         (click)="setGroupingAscending(true)">
+                                        <div class="me-2 d-inline-block">
+                                            <ng-icon name="ionArrowUpOutline"></ng-icon>
+                                        </div>
+                                        <div class="d-inline-block" i18n>ascending</div>
+                                    </div>
+                                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                                         [class.active]="sortingService.grouping.value.ascending == false"
+                                         (click)="setGroupingAscending(false)">
+                                        <div class="me-2 d-inline-block">
+                                            <ng-icon name="ionArrowDownOutline"></ng-icon>
+                                        </div>
+                                        <div class="d-inline-block" i18n>descending</div>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-9">{{type.key | stringifySorting}}</div>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+            <div class="divider">&nbsp;</div>
+            <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
+                 title="Grid size" i18n-title>
+                <button id="button-grid-size" dropdownToggle type="button"
+                        class="btn dropdown-toggle  btn-outline-secondary btn-navigator"
+                        [class.btn-secondary]="!navigatorService.isDefaultGridSize()"
+                        [class.btn-outline-secondary]="navigatorService.isDefaultGridSize()"
+                        aria-controls="grid-size-dropdown">
+                    <app-grid-size-icon [method]="navigatorService.girdSize.value"></app-grid-size-icon>
+                </button>
+                <div id="grid-size-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+                     role="menu" aria-labelledby="button-alignment">
+                    <h6 class="ps-2" i18n>Grid size</h6>
+                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                         [class.active]="navigatorService.girdSize.value == type.key"
+                         *ngFor="let type of gridSizes"
+                         (click)="navigatorService.setGridSize(type.key)">
+                        <div class="me-2 d-inline-block">
+                            <app-grid-size-icon [method]="type.key"></app-grid-size-icon>
+                        </div>
+                        <div class="d-inline-block">{{type.key | stringifyGridSize}}</div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </nav>
 
 
 </div>

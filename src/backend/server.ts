@@ -10,18 +10,17 @@ import * as locale from 'locale';
 import {ObjectManagers} from './model/ObjectManagers';
 import {Logger} from './Logger';
 import {LoggerRouter} from './routes/LoggerRouter';
-import {DiskManager} from './model/DiskManger';
 import {ConfigDiagnostics} from './model/diagnostics/ConfigDiagnostics';
 import {Localizations} from './model/Localizations';
 import {CookieNames} from '../common/CookieNames';
 import {Router} from './routes/Router';
-import {PhotoProcessing} from './model/fileprocessing/PhotoProcessing';
+import {PhotoProcessing} from './model/fileaccess/fileprocessing/PhotoProcessing';
 import * as _csrf from 'csurf';
 import {Event} from '../common/event/Event';
 import {QueryParams} from '../common/QueryParams';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {ConfigClassOptions} from 'typeconfig/src/decorators/class/IConfigClass';
-import {DatabaseType, ServerConfig} from '../common/config/private/PrivateConfig';
+import {ServerConfig} from '../common/config/private/PrivateConfig';
 import {unless} from 'express-unless';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -112,7 +111,6 @@ export class Server {
       _csrf({ignoreMethods: ['GET']})
     );
 
-    DiskManager.init();
     PhotoProcessing.init();
     Localizations.init();
 

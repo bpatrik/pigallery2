@@ -4,6 +4,7 @@ export enum JobProgressStates {
   interrupted = 3,
   canceled = 4,
   finished = 5,
+  failed = 6,
 }
 
 export interface JobProgressLogDTO {
@@ -26,4 +27,9 @@ export interface JobProgressDTO {
     start: number;
     end: number;
   };
+}
+
+
+export interface OnTimerJobProgressDTO extends JobProgressDTO {
+  onTimer?: boolean; // indicates if there is an active timer set for the job
 }

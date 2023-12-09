@@ -11,16 +11,24 @@
   padding-bottom: 1px;
 }
 
-#shareButton span {
-  padding-right: 0.3rem;
+ng-icon{
+  vertical-align: text-top;
 }
-
 
 a.dropdown-item, button.dropdown-item, div.dropdown-item {
   padding: 0.3rem 1.0rem 0.3rem 0.8rem;
   cursor: pointer;
 }
 
-a.dropdown-item span, button.dropdown-item span, div.dropdown-item span {
-  padding-right: 0.8rem;
+a.dropdown-item ng-icon, button.dropdown-item ng-icon, div.dropdown-item ng-icon {
+  margin-right: 0.5rem;
+}
+
+a.list-shares-button {
+  cursor: pointer;
+  color: inherit;
+}
+
+a.list-shares-button:hover {
+  text-decoration: underline;
 }

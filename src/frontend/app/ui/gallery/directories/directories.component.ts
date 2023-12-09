@@ -13,8 +13,8 @@ export class DirectoriesComponent implements OnChanges {
   isDesktop: boolean;
 
   constructor(
-    private container: ElementRef,
-    private deviceService: DeviceDetectorService
+      private container: ElementRef,
+      private deviceService: DeviceDetectorService
   ) {
     this.isDesktop = this.deviceService.isDesktop();
   }
@@ -34,7 +34,7 @@ export class DirectoriesComponent implements OnChanges {
     }
     const directoryMargin = 2; // 2px margin on both sides
     const containerWidth =
-      this.container.nativeElement.clientWidth - 1; // the browser sometimes makes some rounding error. Sacrifice 1px to make that error up.
+        this.container.nativeElement.clientWidth - 1; // the browser sometimes makes some rounding error. Sacrifice 1px to make that error up.
 
     if (!this.isDesktop && window.innerWidth < window.innerHeight) {
       // On portrait mode, show 2 directories side by side with some padding

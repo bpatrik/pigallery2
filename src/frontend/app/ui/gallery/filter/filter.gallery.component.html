@@ -31,14 +31,13 @@
 
     </div>
     <div class="row">
-      <div class="position-absolute" *ngIf="filterService.statistic.length>1">
+      <div class="position-absolute w-auto start-50" *ngIf="filterService.statistic.length>1">
         <div class="text-md-center">
-          <span
-            [class.oi-chevron-bottom]="showStatistic"
-            [class.oi-chevron-top]="!showStatistic"
-            (click)="showStatistic = !showStatistic"
+          <ng-icon
+            [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
             style="top: -2px; cursor: pointer"
-            class="oi"></span>
+            class="position-relative"
+            (click)="showStatistic = !showStatistic"></ng-icon>
         </div>
       </div>
       <div class="col-md-1-half col-12  d-table">
@@ -104,10 +103,12 @@
               class="filter-option list-group-item list-group-item-action d-flex justify-content-between align-items-center">
 
               <div>
-              <span (click)="toggleSelectOnly(filter, option, $event)"
-                    class="oi oi-pin" title="Select only this"
-                    [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
-                    i18n-title></span>
+                <ng-icon name="ionFlagOutline"
+                         class="pin"
+                         (click)="toggleSelectOnly(filter, option, $event)"
+                         title="Select only this"
+                         [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
+                         i18n-title></ng-icon>
                 {{option.name === undefined ? unknownText : option.name}}
               </div>
               <span class="badge"

@@ -1,6 +1,6 @@
-import { JobDTO } from '../../../../common/entities/job/JobDTO';
-import { JobProgress } from './JobProgress';
-import { IJobListener } from './IJobListener';
+import {JobDTO} from '../../../../common/entities/job/JobDTO';
+import {JobProgress} from './JobProgress';
+import {IJobListener} from './IJobListener';
 
 export interface IJob<T> extends JobDTO {
   Name: string;

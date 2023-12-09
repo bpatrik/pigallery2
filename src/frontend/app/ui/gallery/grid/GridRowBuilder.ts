@@ -1,4 +1,4 @@
-import { MediaDTO } from '../../../../../common/entities/MediaDTO';
+import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 
 export class GridRowBuilder {
   private photoRow: MediaDTO[] = [];
@@ -6,15 +6,15 @@ export class GridRowBuilder {
   private photoIndex = 0; // index of the last pushed media to the photoRow
 
   constructor(
-    private photos: MediaDTO[],
-    private startIndex: number,
-    private photoMargin: number,
-    private containerWidth: number
+      private photos: MediaDTO[],
+      private startIndex: number,
+      private photoMargin: number,
+      private containerWidth: number
   ) {
     this.photoIndex = startIndex;
     if (this.containerWidth <= 0) {
       throw new Error(
-        'container width cant be <=0, got:' + this.containerWidth
+          'container width cant be <=0, got:' + this.containerWidth
       );
     }
   }
@@ -60,13 +60,14 @@ export class GridRowBuilder {
       width += (size.width / size.height) || 1; // summing up aspect ratios, NaN should be treated as square photo
     }
     const height =
-      (this.containerWidth -
-        this.photoRow.length * (this.photoMargin * 2) -
-        1) /
-      width; // cant be equal -> width-1
+        (this.containerWidth -
+            this.photoRow.length * (this.photoMargin * 2) -
+            1) /
+        width; // cant be equal -> width-1
 
     return height + this.photoMargin * 2;
   }
+
 
   private addPhoto(): boolean {
     if (this.photoIndex + 1 > this.photos.length) {

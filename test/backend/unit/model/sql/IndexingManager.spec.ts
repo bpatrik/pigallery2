@@ -11,14 +11,14 @@ import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {IndexingManager} from '../../../../../src/backend/model/database/IndexingManager';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {DBTestHelper} from '../../../DBTestHelper';
-import {DiskMangerWorker} from '../../../../../src/backend/model/threading/DiskMangerWorker';
 import {ReIndexingSensitivity} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import * as path from 'path';
-import {DiskManager} from '../../../../../src/backend/model/DiskManger';
 import {AlbumManager} from '../../../../../src/backend/model/database/AlbumManager';
-import {SortingMethods} from '../../../../../src/common/entities/SortingMethods';
+import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
+import {ClientSortingConfig} from '../../../../../src/common/config/public/ClientConfig';
+import { DiskManager } from '../../../../../src/backend/model/fileaccess/DiskManager';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
@@ -71,13 +71,13 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
   afterEach(async () => {
     Config.loadSync();
-    Config.Preview.Sorting = [SortingMethods.descRating];
+    Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
     await sqlHelper.clearDB();
   });
 
   const setPartial = (dir: DirectoryBaseDTO) => {
-    if (!dir.preview && dir.media && dir.media.length > 0) {
-      dir.preview = dir.media[0];
+    if (!dir.cover && dir.media && dir.media.length > 0) {
+      dir.cover = dir.media[0];
     }
     dir.isPartial = true;
     delete dir.directories;
@@ -94,11 +94,11 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
   const indexifyReturn = (dir: DirectoryBaseDTO): DirectoryBaseDTO => {
     const d = Utils.clone(dir);
 
-    delete d.preview;
+    delete d.cover;
     if (d.directories) {
       for (const subD of d.directories) {
-        if (subD.preview) {
-          delete subD.preview.metadata;
+        if (subD.cover) {
+          delete subD.cover.metadata;
         }
       }
     }
@@ -111,8 +111,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     dir.media.forEach((media: MediaDTO) => {
       delete media.id;
     });
-    if (dir.preview) {
-      delete dir.preview.id;
+    if (dir.cover) {
+      delete dir.cover.id;
     }
     if (dir.metaFile) {
       if (dir.metaFile.length === 0) {
@@ -161,7 +161,6 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
     ProjectPath.reset();
     ProjectPath.ImageFolder = path.join(__dirname, '/../../../assets');
-    Config.Server.Threading.enabled = false;
 
     await ObjectManagers.getInstance().IndexingManager.indexDirectory('.');
     if (ObjectManagers.getInstance().IndexingManager.IsSavingInProgress) {
@@ -288,7 +287,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
   });
 
 
-  it('should select preview', async () => {
+  it('should select cover', async () => {
     const selectDirectory = async (gmTest: GalleryManagerTest, dir: DirectoryBaseDTO): Promise<ParentDirectoryDTO> => {
       const conn = await SQLConnection.getConnection();
       const selected = await gmTest.getParentDirFromId(conn,
@@ -352,13 +351,13 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1');
 
     const subDir = TestHelper.getRandomizedDirectoryEntry(null, 'subDir');
-    subDir.path = DiskMangerWorker.pathFromParent(parent);
+    subDir.path = DiskManager.pathFromParent(parent);
     const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0);
     sp1.metadata.rating = 5;
     const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0);
     sp2.metadata.rating = 3;
-    subDir.preview = sp1;
-    Config.Preview.Sorting = [SortingMethods.descRating];
+    subDir.cover = sp1;
+    Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
     DirectoryDTOUtils.removeReferences(subDir);
     await im.saveToDB(Utils.clone(subDir) as ParentDirectoryDTO);
@@ -390,13 +389,13 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1');
 
     const subDir = TestHelper.getRandomizedDirectoryEntry(null, 'subDir');
-    subDir.path = DiskMangerWorker.pathFromParent(parent);
+    subDir.path = DiskManager.pathFromParent(parent);
     const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0);
     sp1.metadata.rating = 5;
     const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0);
     sp2.metadata.rating = 3;
-    subDir.preview = sp1;
-    Config.Preview.Sorting = [SortingMethods.descRating];
+    subDir.cover = sp1;
+    Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
 
     DirectoryDTOUtils.removeReferences(subDir);
@@ -432,8 +431,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     sp1.metadata.rating = 5;
     const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0);
     sp2.metadata.rating = 3;
-    subDir.preview = sp1;
-    Config.Preview.Sorting = [SortingMethods.descRating];
+    subDir.cover = sp1;
+    Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
     DirectoryDTOUtils.removeReferences(parent);
     await im.saveToDB(Utils.clone(parent) as ParentDirectoryDTO);
@@ -562,8 +561,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     sp1.metadata.rating = 5;
     const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 1);
     sp2.metadata.rating = 3;
-    subDir.preview = sp1;
-    Config.Preview.Sorting = [SortingMethods.descRating];
+    subDir.cover = sp1;
+    Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
     DirectoryDTOUtils.removeReferences(parent);
     const s1 = im.queueForSave(Utils.clone(parent) as ParentDirectoryDTO);
@@ -578,7 +577,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     DirectoryDTOUtils.removeReferences(selected);
     removeIds(selected);
     setPartial(subDir);
-    parent.directories.forEach(d => delete (d.preview.metadata as any).faces);
+    parent.directories.forEach(d => delete (d.cover.metadata as any).faces);
     delete sp1.metadata.faces;
     delete sp2.metadata.faces;
     expect(Utils.clone(Utils.removeNullOrEmptyObj(selected)))
@@ -633,6 +632,31 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
       (await gm.getDirIdAndTime(conn, subDir.name, subDir.path)).id);
     expect(selected.media.length).to.equal(subDir.media.length);
   }) as any).timeout(40000);
+
+  it('should save .md with date', async () => {
+    Config.Album.enabled = true;
+    Config.Faces.enabled = true;
+
+    Config.Media.folder = path.join(__dirname, '/../../../assets');
+    ProjectPath.ImageFolder = path.join(__dirname, '/../../../assets');
+    const im = new IndexingManagerTest();
+    const gm = new GalleryManagerTest();
+
+    const d = await DiskManager.scanDirectory('/');
+
+    await im.saveToDB(d);
+
+    const dir = await gm.listDirectory('/');
+    expect(dir.metaFile).to.be.an('array');
+
+    expect(dir.metaFile).to.be.deep.equal([
+      {
+        date: 1126455782000,
+        id: 1,
+        name: 'index.md'
+      }
+    ]);
+  });
 
   DBTestHelper.savedDescribe('Test listDirectory', () => {
     const statSync = fs.statSync;
@@ -690,12 +714,10 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     });
   });
 
-
   DBTestHelper.savedDescribe('should index .pg2conf', () => {
 
 
     it('.saved_searches.pg2conf', async () => {
-      Config.Server.Threading.enabled = false;
       Config.Album.enabled = true;
       Config.Faces.enabled = true;
 
@@ -709,9 +731,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
       await im.saveToDB(dir);
 
       const albums = await am.getAlbums();
-      expect(albums[0].preview).to.be.an('object');
-      delete albums[0].preview;
-      console.log(albums);
+      expect(albums[0].cover).to.be.an('object');
+      delete albums[0].cover;
       expect(albums).to.be.deep.equal([
         {
           id: 1,

@@ -9,11 +9,9 @@
 
   </app-gallery-search-field-base>
 
-  <div class="input-group-btn col-auto pe-0" style="display: block">
-    <button class="btn btn-light" type="button" (click)="openSearchModal(searchModal)">
-      <span class="oi oi-chevron-bottom"></span>
-    </button>
-  </div>
+  <button class="btn btn-tertiary" type="button" (click)="openSearchModal(searchModal)">
+    <ng-icon name="ionChevronDownOutline"></ng-icon>
+  </button>
 </div>
 
 
@@ -21,7 +19,7 @@
   <!-- sharing Modal-->
   <div class="modal-header">
     <h5 class="modal-title">{{placeholder}}</h5>
-    <button type="button"  class="btn-close"  (click)="hideSearchModal()" data-dismiss="modal" aria-label="Close">
+    <button type="button" class="btn-close" (click)="hideSearchModal()" data-dismiss="modal" aria-label="Close">
     </button>
   </div>
   <div class="modal-body">
@@ -31,7 +29,7 @@
         name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
         [placeholder]="placeholder"
-        (change)="onQueryChange()"
+        (ngModelChange)="onQueryChange()"
         (search)="search.emit()">
       </app-gallery-search-query-builder>
 

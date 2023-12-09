@@ -5,14 +5,16 @@ const MediaEntity_1 = require("../src/backend/model/database/enitites/MediaEntit
 const PhotoEntity_1 = require("../src/backend/model/database/enitites/PhotoEntity");
 const DirectoryEntity_1 = require("../src/backend/model/database/enitites/DirectoryEntity");
 const VideoEntity_1 = require("../src/backend/model/database/enitites/VideoEntity");
-const DiskMangerWorker_1 = require("../src/backend/model/threading/DiskMangerWorker");
+const DiskManager_1 = require("../src/backend/model/fileaccess/DiskManager");
 class TestHelper {
     static { this.creationCounter = 0; }
     static getDirectoryEntry(parent = null, name = 'wars dir') {
         const dir = new DirectoryEntity_1.DirectoryEntity();
         dir.name = name;
-        dir.path = DiskMangerWorker_1.DiskMangerWorker.pathFromParent({ path: '', name: '.' });
+        dir.path = DiskManager_1.DiskManager.pathFromParent({ path: '', name: '.' });
         dir.mediaCount = 0;
+        dir.youngestMedia = 10;
+        dir.oldestMedia = 1000;
         dir.directories = [];
         dir.metaFile = [];
         dir.media = [];
@@ -20,10 +22,33 @@ class TestHelper {
         dir.lastScanned = 1656069687773;
         // dir.parent = null;
         if (parent !== null) {
-            dir.path = DiskMangerWorker_1.DiskMangerWorker.pathFromParent(parent);
+            dir.path = DiskManager_1.DiskManager.pathFromParent(parent);
             parent.directories.push(dir);
         }
         return dir;
+    }
+    static getBasePhotoEntry(dir, name = 'base media.jpg') {
+        const sd = new MediaEntity_1.MediaDimensionEntity();
+        sd.height = 400;
+        sd.width = 200;
+        const m = new PhotoEntity_1.PhotoMetadataEntity();
+        m.caption = null;
+        m.size = sd;
+        m.creationDate = 1656069387772;
+        m.fileSize = 123456789;
+        // m.rating = 0; no rating by default
+        // TODO: remove when typeorm is fixed
+        m.duration = null;
+        m.bitRate = null;
+        const d = new PhotoEntity_1.PhotoEntity();
+        d.name = name;
+        d.directory = dir;
+        if (dir.media) {
+            dir.media.push(d);
+            dir.mediaCount++;
+        }
+        d.metadata = m;
+        return d;
     }
     static getPhotoEntry(dir) {
         const sd = new MediaEntity_1.MediaDimensionEntity();
@@ -226,20 +251,22 @@ class TestHelper {
     static getRandomizedDirectoryEntry(parent = null, forceStr = null) {
         const dir = {
             id: null,
-            name: DiskMangerWorker_1.DiskMangerWorker.dirName(forceStr || Math.random().toString(36).substring(7)),
-            path: DiskMangerWorker_1.DiskMangerWorker.pathFromParent({ path: '', name: '.' }),
+            name: DiskManager_1.DiskManager.dirName(forceStr || Math.random().toString(36).substring(7)),
+            path: DiskManager_1.DiskManager.pathFromParent({ path: '', name: '.' }),
             mediaCount: 0,
+            youngestMedia: 10,
+            oldestMedia: 1000,
             directories: [],
             metaFile: [],
-            preview: null,
-            validPreview: false,
+            cover: null,
+            validCover: false,
             media: [],
             lastModified: Date.now(),
             lastScanned: null,
             parent
         };
         if (parent !== null) {
-            dir.path = DiskMangerWorker_1.DiskMangerWorker.pathFromParent(parent);
+            dir.path = DiskManager_1.DiskManager.pathFromParent(parent);
             parent.directories.push(dir);
         }
         return dir;
@@ -323,21 +350,21 @@ class TestHelper {
             this.getRandomizedFace(p, 'Person ' + i);
         }
         dir.media.push(p);
-        TestHelper.updatePreview(dir);
+        TestHelper.updateCover(dir);
         return p;
     }
-    static updatePreview(dir) {
+    static updateCover(dir) {
         if (dir.media.length > 0) {
-            dir.preview = dir.media.sort((a, b) => b.metadata.creationDate - a.metadata.creationDate)[0];
+            dir.cover = dir.media.sort((a, b) => b.metadata.creationDate - a.metadata.creationDate)[0];
         }
         else {
-            const filtered = dir.directories.filter((d) => d.preview).map((d) => d.preview);
+            const filtered = dir.directories.filter((d) => d.cover).map((d) => d.cover);
             if (filtered.length > 0) {
-                dir.preview = filtered.sort((a, b) => b.metadata.creationDate - a.metadata.creationDate)[0];
+                dir.cover = filtered.sort((a, b) => b.metadata.creationDate - a.metadata.creationDate)[0];
             }
         }
         if (dir.parent) {
-            TestHelper.updatePreview(dir.parent);
+            TestHelper.updateCover(dir.parent);
         }
     }
 }

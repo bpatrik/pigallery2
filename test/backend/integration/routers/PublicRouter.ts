@@ -34,7 +34,6 @@ describe('PublicRouter', () => {
   const setUp = async () => {
     await fs.promises.rm(tempDir, {recursive: true, force: true});
     Config.Users.authenticationRequired = true;
-    Config.Server.Threading.enabled = false;
     Config.Sharing.enabled = true;
     Config.Database.type = DatabaseType.sqlite;
     Config.Database.dbFolder = tempDir;

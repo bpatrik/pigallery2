@@ -1,18 +1,18 @@
-import { NextFunction, Request, Response } from 'express';
-import { MoreThanOrEqual } from 'typeorm';
-import { ErrorCodes, ErrorDTO } from '../../../common/entities/Error';
-import { UserRoles } from '../../../common/entities/UserDTO';
-import { ObjectManagers } from '../../model/ObjectManagers';
+import {NextFunction, Request, Response} from 'express';
+import {MoreThanOrEqual} from 'typeorm';
+import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
+import {UserRoles} from '../../../common/entities/UserDTO';
+import {ObjectManagers} from '../../model/ObjectManagers';
 
 export class UserRequestConstrainsMWs {
   public static forceSelfRequest(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): void {
     if (
-      typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined'
+        typeof req.params === 'undefined' ||
+        typeof req.params.id === 'undefined'
     ) {
       return next();
     }
@@ -24,13 +24,13 @@ export class UserRequestConstrainsMWs {
   }
 
   public static notSelfRequest(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): void {
     if (
-      typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined'
+        typeof req.params === 'undefined' ||
+        typeof req.params.id === 'undefined'
     ) {
       return next();
     }
@@ -43,13 +43,13 @@ export class UserRequestConstrainsMWs {
   }
 
   public static async notSelfRequestOr2Admins(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (
-      typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined'
+        typeof req.params === 'undefined' ||
+        typeof req.params.id === 'undefined'
     ) {
       return next();
     }

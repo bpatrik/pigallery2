@@ -14,7 +14,7 @@
   cursor: pointer;
 }
 
-.filter-option .oi {
+.filter-option .pin {
   height: 0;
   font-size: 0;
   transition: all 0.1s;
@@ -24,19 +24,18 @@
   color: #aaa;
 }
 
-.filter-option:hover .oi.filter-pin, .filter-option .oi.filter-only-selected {
+.filter-option:hover .pin.filter-pin, .filter-option .pin.filter-only-selected {
   display: inline-block;
   height: auto;
   font-size: 1rem;
-  padding: 0 0.3rem;
   margin-left: -0.6rem;
 }
 
-.filter-option:hover .oi.filter-pin:hover {
+.filter-option:hover .pin.filter-pin:hover {
   color: #212529;
 }
 
-.filter-option .oi.filter-only-selected {
+.filter-option .pin.filter-only-selected {
   color: var(--bs-primary);
 }
 

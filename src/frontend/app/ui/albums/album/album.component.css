@@ -1,3 +1,11 @@
+:host {
+  transition: scale .3s ease-out;
+}
+
+:host:hover {
+  scale: 98%;
+}
+
 .info-button {
   margin: 2px;
   cursor: default;
@@ -20,18 +28,20 @@ a {
 }
 
 .photo-container {
-  border: 2px solid #333;
+  border: 1px solid #333;
   width: 180px;
   height: 180px;
-  background-color: #bbbbbb;
+  background-color: var(--item-background);
 }
 
 .no-image {
-  position: absolute;
-  color: #7f7f7f;
-  font-size: 80px;
-  top: calc(50% - 40px);
-  left: calc(50% - 40px);
+  display: block;
+  color: var(--bs-secondary-color);
+  width: 100px;
+  top: calc(50%);
+  left: calc(50%);
+  transform: translate(-50%, -50%);
+  position: relative;
 }
 
 .photo {
@@ -50,6 +60,7 @@ a {
   left: 0;
   padding: 5px;
   width: 100%;
+  line-height: normal;
 }
 
 a:hover .info {

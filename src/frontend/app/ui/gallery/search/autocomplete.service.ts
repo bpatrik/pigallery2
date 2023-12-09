@@ -15,86 +15,93 @@ export class AutoCompleteService {
   private noACKeywordsMap: { [key: string]: SearchQueryTypes } = {}; // these commands do not have autocompete
 
   constructor(
-    private networkService: NetworkService,
-    private searchQueryParserService: SearchQueryParserService,
-    private galleryCacheService: GalleryCacheService
+      private networkService: NetworkService,
+      private searchQueryParserService: SearchQueryParserService,
+      private galleryCacheService: GalleryCacheService
   ) {
     this.keywords = Object.values(this.searchQueryParserService.keywords)
-      .filter(
-        (k) =>
-          k !== this.searchQueryParserService.keywords.or &&
-          k !== this.searchQueryParserService.keywords.and &&
-          k !== this.searchQueryParserService.keywords.portrait &&
-          k !== this.searchQueryParserService.keywords.kmFrom &&
-          k !== this.searchQueryParserService.keywords.NSomeOf &&
-          k !== this.searchQueryParserService.keywords.minRating &&
-          k !== this.searchQueryParserService.keywords.maxRating &&
-          k !== this.searchQueryParserService.keywords.every_week &&
-          k !== this.searchQueryParserService.keywords.every_month &&
-          k !== this.searchQueryParserService.keywords.every_year &&
-          k !== this.searchQueryParserService.keywords.weeks_ago &&
-          k !== this.searchQueryParserService.keywords.days_ago &&
-          k !== this.searchQueryParserService.keywords.months_ago &&
-          k !== this.searchQueryParserService.keywords.years_ago &&
-          k !== this.searchQueryParserService.keywords.lastNDays
-      )
-      .map((k) => k + ':');
+        .filter(
+            (k) =>
+                k !== this.searchQueryParserService.keywords.or &&
+                k !== this.searchQueryParserService.keywords.and &&
+                k !== this.searchQueryParserService.keywords.portrait &&
+                k !== this.searchQueryParserService.keywords.kmFrom &&
+                k !== this.searchQueryParserService.keywords.NSomeOf &&
+                k !== this.searchQueryParserService.keywords.minRating &&
+                k !== this.searchQueryParserService.keywords.maxRating &&
+                k !== this.searchQueryParserService.keywords.minPersonCount &&
+                k !== this.searchQueryParserService.keywords.maxPersonCount &&
+                k !== this.searchQueryParserService.keywords.every_week &&
+                k !== this.searchQueryParserService.keywords.every_month &&
+                k !== this.searchQueryParserService.keywords.every_year &&
+                k !== this.searchQueryParserService.keywords.weeks_ago &&
+                k !== this.searchQueryParserService.keywords.days_ago &&
+                k !== this.searchQueryParserService.keywords.months_ago &&
+                k !== this.searchQueryParserService.keywords.years_ago &&
+                k !== this.searchQueryParserService.keywords.lastNDays
+        )
+        .map((k) => k + ':');
 
     this.keywords.push(this.searchQueryParserService.keywords.and);
     this.keywords.push(this.searchQueryParserService.keywords.or);
     for (let i = 0; i < 5; i++) {
       this.keywords.push(
-        i + '-' + this.searchQueryParserService.keywords.NSomeOf + ':( )'
+          i + '-' + this.searchQueryParserService.keywords.NSomeOf + ':( )'
       );
     }
 
     for (let i = 1; i < 3; i++) {
       this.keywords.push(
-        this.searchQueryParserService.keywords.lastNDays.replace(/%d/g, i.toString()) + ':'
+          this.searchQueryParserService.keywords.lastNDays.replace(/%d/g, i.toString()) + ':'
       );
     }
 
     this.keywords.push(
-      this.searchQueryParserService.keywords.to +
-      ':' +
-      SearchQueryParser.stringifyText(new Date().getFullYear().toString())
+        this.searchQueryParserService.keywords.to +
+        ':' +
+        SearchQueryParser.stringifyText(new Date().getFullYear().toString())
     );
     this.keywords.push(
-      this.searchQueryParserService.keywords.to +
-      ':' +
-      SearchQueryParser.stringifyText(
-        SearchQueryParser.stringifyDate(Date.now())
-      )
+        this.searchQueryParserService.keywords.to +
+        ':' +
+        SearchQueryParser.stringifyText(
+            SearchQueryParser.stringifyDate(Date.now())
+        )
     );
 
     this.keywords.push(
-      this.searchQueryParserService.keywords.from +
-      ':' +
-      SearchQueryParser.stringifyText(new Date().getFullYear().toString())
+        this.searchQueryParserService.keywords.from +
+        ':' +
+        SearchQueryParser.stringifyText(new Date().getFullYear().toString())
     );
     this.keywords.push(
-      this.searchQueryParserService.keywords.from +
-      ':' +
-      SearchQueryParser.stringifyText(
-        SearchQueryParser.stringifyDate(Date.now())
-      )
+        this.searchQueryParserService.keywords.from +
+        ':' +
+        SearchQueryParser.stringifyText(
+            SearchQueryParser.stringifyDate(Date.now())
+        )
     );
 
     TextSearchQueryTypes.forEach((t) => {
       this.textSearchKeywordsMap[
-        (this.searchQueryParserService.keywords as any)[SearchQueryTypes[t]]
-        ] = t;
+          (this.searchQueryParserService.keywords as any)[SearchQueryTypes[t]]
+          ] = t;
     });
 
     this.noACKeywordsMap[this.searchQueryParserService.keywords.minRating]
-      = SearchQueryTypes.min_rating;
+        = SearchQueryTypes.min_rating;
     this.noACKeywordsMap[this.searchQueryParserService.keywords.maxRating]
-      = SearchQueryTypes.max_rating;
+        = SearchQueryTypes.max_rating;
+
+    this.noACKeywordsMap[this.searchQueryParserService.keywords.minPersonCount]
+        = SearchQueryTypes.min_person_count;
+    this.noACKeywordsMap[this.searchQueryParserService.keywords.maxPersonCount]
+        = SearchQueryTypes.max_person_count;
 
     this.noACKeywordsMap[this.searchQueryParserService.keywords.minResolution]
-      = SearchQueryTypes.min_resolution;
+        = SearchQueryTypes.min_resolution;
     this.noACKeywordsMap[this.searchQueryParserService.keywords.maxResolution]
-      = SearchQueryTypes.max_resolution;
+        = SearchQueryTypes.max_resolution;
   }
 
   public autoComplete(text: {
@@ -102,9 +109,9 @@ export class AutoCompleteService {
     prev: string;
   }): BehaviorSubject<RenderableAutoCompleteItem[]> {
     const items: BehaviorSubject<RenderableAutoCompleteItem[]> =
-      new BehaviorSubject(
-        this.sortResults(text.current, this.getQueryKeywords(text))
-      );
+        new BehaviorSubject(
+            this.sortResults(text.current, this.getQueryKeywords(text))
+        );
 
     const prefixType = this.getTypeFromPrefix(text.current);
     const searchText = this.getPrefixLessSearchText(text.current);
@@ -117,10 +124,10 @@ export class AutoCompleteService {
   }
 
   private typedAutoComplete(
-    text: string,
-    fullText: string,
-    type: SearchQueryTypes,
-    items?: BehaviorSubject<RenderableAutoCompleteItem[]>
+      text: string,
+      fullText: string,
+      type: SearchQueryTypes,
+      items?: BehaviorSubject<RenderableAutoCompleteItem[]>
   ): BehaviorSubject<RenderableAutoCompleteItem[]> {
     items = items || new BehaviorSubject([]);
 
@@ -132,26 +139,26 @@ export class AutoCompleteService {
           acParams[QueryParams.gallery.search.type] = type;
         }
         this.networkService
-          .getJson<IAutoCompleteItem[]>('/autocomplete/' + text, acParams)
-          .then((ret) => {
-            this.galleryCacheService.setAutoComplete(text, type, ret);
-            items.next(
-              this.sortResults(
-                fullText,
-                ret
-                  .map((i) => this.ACItemToRenderable(i, fullText))
-                  .concat(items.value)
-              )
-            );
-          });
+            .getJson<IAutoCompleteItem[]>('/autocomplete/' + text, acParams)
+            .then((ret) => {
+              this.galleryCacheService.setAutoComplete(text, type, ret);
+              items.next(
+                  this.sortResults(
+                      fullText,
+                      ret
+                          .map((i) => this.ACItemToRenderable(i, fullText))
+                          .concat(items.value)
+                  )
+              );
+            });
       } else {
         items.next(
-          this.sortResults(
-            fullText,
-            cached
-              .map((i) => this.ACItemToRenderable(i, fullText))
-              .concat(items.value)
-          )
+            this.sortResults(
+                fullText,
+                cached
+                    .map((i) => this.ACItemToRenderable(i, fullText))
+                    .concat(items.value)
+            )
         );
       }
     } catch (e) {
@@ -183,9 +190,9 @@ export class AutoCompleteService {
       return {type: null};
     }
     if (
-      new RegExp('^\\d*-' + this.searchQueryParserService.keywords.kmFrom).test(
-        tokens[0]
-      )
+        new RegExp('^\\d*-' + this.searchQueryParserService.keywords.kmFrom).test(
+            tokens[0]
+        )
     ) {
       return {type: SearchQueryTypes.distance};
     }
@@ -196,32 +203,32 @@ export class AutoCompleteService {
   }
 
   private ACItemToRenderable(
-    item: IAutoCompleteItem,
-    searchToken: string
+      item: IAutoCompleteItem,
+      searchToken: string
   ): RenderableAutoCompleteItem {
     if (!item.type) {
       return {text: item.text, queryHint: item.text};
     }
     if (
-      (TextSearchQueryTypes.includes(item.type) ||
-        item.type === SearchQueryTypes.distance) &&
-      item.type !== SearchQueryTypes.any_text
+        (TextSearchQueryTypes.includes(item.type) ||
+            item.type === SearchQueryTypes.distance) &&
+        item.type !== SearchQueryTypes.any_text
     ) {
       let queryHint =
-        (this.searchQueryParserService.keywords as any)[
-          SearchQueryTypes[item.type]
-          ] +
-        ':"' +
-        item.text +
-        '"';
+          (this.searchQueryParserService.keywords as any)[
+              SearchQueryTypes[item.type]
+              ] +
+          ':"' +
+          item.text +
+          '"';
 
       // if its a distance search, change hint text
       const tokens = searchToken.split(':');
       if (
-        tokens.length === 2 &&
-        new RegExp(
-          '^\\d*-' + this.searchQueryParserService.keywords.kmFrom
-        ).test(tokens[0])
+          tokens.length === 2 &&
+          new RegExp(
+              '^\\d*-' + this.searchQueryParserService.keywords.kmFrom
+          ).test(tokens[0])
       ) {
         queryHint = tokens[0] + ':"' + item.text + '"';
       }
@@ -240,8 +247,8 @@ export class AutoCompleteService {
   }
 
   private sortResults(
-    text: string,
-    items: RenderableAutoCompleteItem[]
+      text: string,
+      items: RenderableAutoCompleteItem[]
   ): RenderableAutoCompleteItem[] {
     const textLC = text.toLowerCase();
     // Source: https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
@@ -270,7 +277,7 @@ export class AutoCompleteService {
       } else if (!aLC.startsWith(textLC) && !bLC.startsWith(textLC)) {
 
         if ((isStartRgx.test(aLC) && isStartRgx.test(bLC)) ||
-          (!isStartRgx.test(aLC) && !isStartRgx.test(bLC))) {
+            (!isStartRgx.test(aLC) && !isStartRgx.test(bLC))) {
           return basicCompare();
         } else if (isStartRgx.test(aLC)) {
           return -1;
@@ -309,8 +316,8 @@ export class AutoCompleteService {
     });
 
     const ret = this.keywords
-      .filter((key) => key.startsWith(text.current.toLowerCase()))
-      .map(generateMatch);
+        .filter((key) => key.startsWith(text.current.toLowerCase()))
+        .map(generateMatch);
 
     // make KmFrom sensitive to all positive distances
     const starterNum = parseInt(text.current);
@@ -321,32 +328,40 @@ export class AutoCompleteService {
       }
     }
 
-    // only showing rating recommendations of the full query is typed
-    const mrKey = this.searchQueryParserService.keywords.minRating + ':';
-    const mxrKey = this.searchQueryParserService.keywords.maxRating + ':';
-    if (text.current.toLowerCase().startsWith(mrKey)) {
-      for (let i = 1; i <= 5; ++i) {
-        ret.push(generateMatch(mrKey + i));
+
+    const addRangeAutoComp = (minStr: string, maxStr: string, minRange: number, maxRange: number) => {
+      // only showing rating recommendations of the full query is typed
+      const mrKey = minStr + ':';
+      const mxrKey = maxStr + ':';
+      if (text.current.toLowerCase().startsWith(mrKey)) {
+        for (let i = minRange; i <= maxRange; ++i) {
+          ret.push(generateMatch(mrKey + i));
+        }
+      } else if (mrKey.startsWith(text.current.toLowerCase())) {
+        ret.push(generateMatch(mrKey));
       }
-    } else if (mrKey.startsWith(text.current.toLowerCase())) {
-      ret.push(generateMatch(mrKey));
-    }
 
 
-    if (text.current.toLowerCase().startsWith(mxrKey)) {
-      for (let i = 1; i <= 5; ++i) {
-        ret.push(generateMatch(mxrKey + i));
+      if (text.current.toLowerCase().startsWith(mxrKey)) {
+        for (let i = minRange; i <= maxRange; ++i) {
+          ret.push(generateMatch(mxrKey + i));
+        }
+      } else if (mxrKey.startsWith(text.current.toLowerCase())) {
+        ret.push(generateMatch(mxrKey));
       }
-    } else if (mxrKey.startsWith(text.current.toLowerCase())) {
-      ret.push(generateMatch(mxrKey));
-    }
+    };
+    addRangeAutoComp(this.searchQueryParserService.keywords.minRating,
+        this.searchQueryParserService.keywords.maxRating, 1, 5);
+    addRangeAutoComp(this.searchQueryParserService.keywords.minPersonCount,
+        this.searchQueryParserService.keywords.maxPersonCount, 0, 9);
+
 
     // Date patterns
     if (new RegExp('^' +
-        SearchQueryParser.humanToRegexpStr(this.searchQueryParserService.keywords.lastNDays) + '!?:$', 'i')
-        .test(text.current) ||
-      new RegExp('^' + this.searchQueryParserService.keywords.sameDay + '!?:$', 'i')
-        .test(text.current)) {
+            SearchQueryParser.humanToRegexpStr(this.searchQueryParserService.keywords.lastNDays) + '!?:$', 'i')
+            .test(text.current) ||
+        new RegExp('^' + this.searchQueryParserService.keywords.sameDay + '!?:$', 'i')
+            .test(text.current)) {
       ret.push(generateMatch(text.current + this.searchQueryParserService.keywords.every_week));
       ret.push(generateMatch(text.current + this.searchQueryParserService.keywords.every_month));
       ret.push(generateMatch(text.current + this.searchQueryParserService.keywords.every_year));

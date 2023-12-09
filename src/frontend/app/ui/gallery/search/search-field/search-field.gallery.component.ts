@@ -1,10 +1,11 @@
-import {Component, EventEmitter, forwardRef, Input, Output,TemplateRef} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output, TemplateRef} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
-import {ControlValueAccessor, UntypedFormControl, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator,} from '@angular/forms';
+import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator,} from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
 import {BsModalRef, BsModalService,} from '../../../../../../../node_modules/ngx-bootstrap/modal';
+import {Utils} from '../../../../../../common/Utils';
 
 @Component({
   selector: 'app-gallery-search-field',
@@ -26,7 +27,7 @@ import {BsModalRef, BsModalService,} from '../../../../../../../node_modules/ngx
   ],
 })
 export class GallerySearchFieldComponent
-  implements ControlValueAccessor, Validator {
+    implements ControlValueAccessor, Validator {
   @Output() search = new EventEmitter<void>();
   @Input() placeholder: string;
   public rawSearchText = '';
@@ -34,14 +35,14 @@ export class GallerySearchFieldComponent
   private searchModalRef: BsModalRef;
 
   constructor(
-    private autoCompleteService: AutoCompleteService,
-    private searchQueryParserService: SearchQueryParserService,
-    private modalService: BsModalService,
-    public router: Router
+      private autoCompleteService: AutoCompleteService,
+      private searchQueryParserService: SearchQueryParserService,
+      private modalService: BsModalService,
+      public router: Router
   ) {
   }
 
-  public async openSearchModal(template: TemplateRef<any>): Promise<void> {
+  public async openSearchModal(template: TemplateRef<unknown>): Promise<void> {
     this.searchModalRef = this.modalService.show(template, {
       class: 'modal-lg',
     });
@@ -58,9 +59,19 @@ export class GallerySearchFieldComponent
   }
 
   public writeValue(obj: SearchQueryDTO): void {
+    try {
+      if (Utils.equalsFilter(this.searchQueryDTO, obj) &&
+          Utils.equalsFilter(this.searchQueryParserService.parse(
+              this.rawSearchText
+          ), obj)) {
+        return;
+      }
+    } catch (e) {
+      // if cant parse they are not the same
+    }
     this.searchQueryDTO = obj;
     this.rawSearchText = this.searchQueryParserService.stringify(
-      this.searchQueryDTO
+        this.searchQueryDTO
     );
   }
 
@@ -76,21 +87,30 @@ export class GallerySearchFieldComponent
     this.propagateChange(this.searchQueryDTO);
   }
 
-  validate(control: UntypedFormControl): ValidationErrors {
+  validate(): ValidationErrors {
     return {required: true};
   }
 
   onQueryChange(): void {
+    try {
+      if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
+        this.onChange();
+        return;
+      }
+    } catch (e) {
+      // if cant parse they are not the same
+    }
     this.rawSearchText = this.searchQueryParserService.stringify(
-      this.searchQueryDTO
+        this.searchQueryDTO
     );
+
     this.onChange();
   }
 
   validateRawSearchText(): void {
     try {
       this.searchQueryDTO = this.searchQueryParserService.parse(
-        this.rawSearchText
+          this.rawSearchText
       );
       this.onChange();
     } catch (e) {
@@ -98,11 +118,12 @@ export class GallerySearchFieldComponent
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private propagateChange = (_: SearchQueryDTO): void => {
     //ignoring
   };
 
-  private propagateTouch = (_: never): void => {
+  private propagateTouch = (): void => {
     //ignoring
   };
 }

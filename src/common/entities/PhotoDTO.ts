@@ -1,12 +1,12 @@
-import { DirectoryPathDTO } from './DirectoryDTO';
-import { MediaDimension, MediaDTO, MediaMetadata } from './MediaDTO';
+import {DirectoryPathDTO} from './DirectoryDTO';
+import {MediaDimension, MediaDTO, MediaMetadata} from './MediaDTO';
 
-export interface PreviewPhotoDTO extends MediaDTO {
+export interface CoverPhotoDTO extends MediaDTO {
   name: string;
   directory: DirectoryPathDTO;
 }
 
-export interface PhotoDTO extends PreviewPhotoDTO, MediaDTO {
+export interface PhotoDTO extends CoverPhotoDTO, MediaDTO {
   id: number;
   name: string;
   directory: DirectoryPathDTO;

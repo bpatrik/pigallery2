@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?><gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.1" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+  <trk>
+    <name>SF - LA flight</name>
+    <trkseg>
+      <trkpt lat="37.61907358382852" lon="-122.38276951882519">
+        <time>2023-07-16T04:09:32Z</time>
+      </trkpt>
+      <trkpt lat="33.973731424165905" lon="-118.25928533563894">
+        <time>2023-07-16T04:09:33Z</time>
+      </trkpt>
+    </trkseg>
+  </trk>
+</gpx>

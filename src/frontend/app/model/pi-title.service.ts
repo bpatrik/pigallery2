@@ -13,8 +13,8 @@ export class PiTitleService {
   private lastNonMedia: string = null;
 
   constructor(
-    private titleService: Title,
-    private searchQueryParserService: SearchQueryParserService) {
+      private titleService: Title,
+      private searchQueryParserService: SearchQueryParserService) {
   }
 
   setTitle(title: string) {

@@ -1,16 +1,15 @@
 <div class="dropdown" dropdown   #dropdown="bs-dropdown">
   <button dropdownToggle
-          class="btn btn-secondary dropdown-toggle"
+          class="btn btn-tertiary dropdown-toggle"
           type="button"
           id="language"
           data-toggle="dropdown"
           aria-haspopup="true"
-          aria-expanded="true"
-          [ngClass]="isDark?'dark':''">
+          aria-expanded="true">
     <ng-container *ngIf="current != null">
       {{current}}
     </ng-container>
-    <span *ngIf="current == null" class="oi oi-globe"></span>
+    <ng-icon  *ngIf="current == null" name="ionGlobeOutline"></ng-icon>
 
   </button>
   <div *dropdownMenu class="dropdown-menu" aria-labelledby="language">

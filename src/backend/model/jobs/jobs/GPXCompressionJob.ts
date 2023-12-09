@@ -1,9 +1,9 @@
 import {Config} from '../../../../common/config/private/Config';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {FileJob} from './FileJob';
-import {GPXProcessing} from '../../fileprocessing/GPXProcessing';
 import {FileDTO} from '../../../../common/entities/FileDTO';
 import {Logger} from '../../../Logger';
+import {GPXProcessing} from '../../fileaccess/fileprocessing/GPXProcessing';
 
 export class GPXCompressionJob extends FileJob {
   public readonly Name = DefaultsJobs[DefaultsJobs['GPX Compression']];
@@ -22,7 +22,7 @@ export class GPXCompressionJob extends FileJob {
 
   protected async shouldProcess(fPath: string): Promise<boolean> {
     return !(await GPXProcessing.compressedGPXExist(
-      fPath
+        fPath
     ));
   }
 

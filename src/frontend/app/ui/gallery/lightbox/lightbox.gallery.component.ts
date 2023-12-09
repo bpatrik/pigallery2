@@ -1,27 +1,27 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, } from '@angular/core';
-import { GalleryPhotoComponent } from '../grid/photo/photo.grid.gallery.component';
-import { Dimension, DimensionUtils } from '../../../model/IRenderable';
-import { FullScreenService } from '../fullscreen.service';
-import { OverlayService } from '../overlay.service';
-import { animate, AnimationBuilder, AnimationPlayer, style, } from '@angular/animations';
-import { GalleryLightboxMediaComponent } from './media/media.lightbox.gallery.component';
-import { Subscription } from 'rxjs';
-import { ActivatedRoute, Params, Router } from '@angular/router';
-import { PageHelper } from '../../../model/page.helper';
-import { QueryService } from '../../../model/query.service';
-import { MediaDTO } from '../../../../../common/entities/MediaDTO';
-import { QueryParams } from '../../../../../common/QueryParams';
-import { ContentService } from '../content.service';
-import { PhotoDTO } from '../../../../../common/entities/PhotoDTO';
-import { ControlsLightboxComponent } from './controls/controls.lightbox.gallery.component';
-import { SupportedFormats } from '../../../../../common/SupportedFormats';
-import { GridMedia } from '../grid/GridMedia';
-import { PiTitleService } from '../../../model/pi-title.service';
+import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild,} from '@angular/core';
+import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
+import {Dimension, DimensionUtils} from '../../../model/IRenderable';
+import {FullScreenService} from '../fullscreen.service';
+import {OverlayService} from '../overlay.service';
+import {animate, AnimationBuilder, AnimationPlayer, style,} from '@angular/animations';
+import {GalleryLightboxMediaComponent} from './media/media.lightbox.gallery.component';
+import {Subscription} from 'rxjs';
+import {ActivatedRoute, Params, Router} from '@angular/router';
+import {PageHelper} from '../../../model/page.helper';
+import {QueryService} from '../../../model/query.service';
+import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {QueryParams} from '../../../../../common/QueryParams';
+import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {ControlsLightboxComponent} from './controls/controls.lightbox.gallery.component';
+import {SupportedFormats} from '../../../../../common/SupportedFormats';
+import {GridMedia} from '../grid/GridMedia';
+import {PiTitleService} from '../../../model/pi-title.service';
 
 export enum LightboxStates {
   Open = 1,
-  Closing = 2,
-  Closed = 3,
+  Opening = 2,
+  Closing = 3,
+  Closed = 4,
 }
 
 @Component({
@@ -42,6 +42,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   public status: LightboxStates = LightboxStates.Closed;
   public infoPanelVisible = false;
   public infoPanelWidth = 0;
+  private infoPanelMaxWidth = 400;
   public animating = false;
   public photoFrameDim = { width: 1, height: 1, aspect: 1 };
   public videoSourceError = false;
@@ -72,7 +73,6 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     private builder: AnimationBuilder,
     private router: Router,
     private queryService: QueryService,
-    private galleryService: ContentService,
     private route: ActivatedRoute,
     private piTitleService: PiTitleService
   ) {
@@ -93,16 +93,27 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
   }
 
+  private updateInfoPanelWidth() {
+    this.infoPanelMaxWidth = Math.min(400, Math.ceil(window.innerWidth + 1));
+    if ((window.innerWidth - this.infoPanelMaxWidth) < this.infoPanelMaxWidth * 0.3) {
+      this.infoPanelMaxWidth = Math.ceil(window.innerWidth + 1);
+    }
+  }
+
   ngOnInit(): void {
+    this.infoPanelMaxWidth = 1000;
     this.updatePhotoFrameDim();
     this.subscription.route = this.route.queryParams.subscribe(
-      (params: Params): any => {
+      (params: Params) => {
+        this.delayedMediaShow = null;
         if (
           params[QueryParams.gallery.photo] &&
           params[QueryParams.gallery.photo] !== ''
         ) {
+          this.delayedMediaShow = params[QueryParams.gallery.photo];
+          // photos are not yet available to show
           if (!this.gridPhotoQL) {
-            return (this.delayedMediaShow = params[QueryParams.gallery.photo]);
+            return;
           }
           this.onNavigateTo(params[QueryParams.gallery.photo]);
         } else if (this.status === LightboxStates.Open) {
@@ -213,7 +224,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     if (this.controls) {
       this.controls.resetZoom();
     }
-    this.status = LightboxStates.Open;
+    this.status = LightboxStates.Opening;
     const selectedPhoto = this.findPhotoComponent(photo);
     if (selectedPhoto === null) {
       throw new Error('Can\'t find Photo');
@@ -227,6 +238,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       this.calcLightBoxPhotoDimension(selectedPhoto.gridMedia.media)
     ).onDone((): void => {
       this.animating = false;
+      this.status = LightboxStates.Open;
     });
     this.animateLightbox(lightboxDimension, {
       top: 0,
@@ -258,7 +270,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     const elem = this.builder
       .build([
         style(DimensionUtils.toString(from)),
-        animate(300, style(DimensionUtils.toString(to))),
+        animate('0.2s ease-in-out', style(DimensionUtils.toString(to))),
       ])
       .create(this.mediaElement.elementRef.nativeElement);
     elem.play();
@@ -278,7 +290,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     const elem = this.builder
       .build([
         style(DimensionUtils.toString(from)),
-        animate(300, style(DimensionUtils.toString(to))),
+        animate('0.2s ease-in-out', style(DimensionUtils.toString(to))),
       ])
       .create(this.lightboxElement.nativeElement);
     elem.play();
@@ -286,7 +298,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   public toggleInfoPanel(): void {
-    if (this.infoPanelWidth !== 400) {
+    if (this.infoPanelWidth !== this.infoPanelMaxWidth) {
       this.showInfoPanel();
     } else {
       this.hideInfoPanel();
@@ -315,7 +327,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
         {
           top: 0,
           left: 0,
-          width: Math.max(this.photoFrameDim.width - 400, 0),
+          width: Math.max(this.photoFrameDim.width - this.infoPanelMaxWidth, 0),
           height: this.photoFrameDim.height,
         } as Dimension,
         {
@@ -333,12 +345,13 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   showInfoPanel(): void {
+    this.updateInfoPanelWidth();
     this.infoPanelVisible = true;
 
     const starPhotoPos = this.calcLightBoxPhotoDimension(
       this.activePhoto.gridMedia.media
     );
-    this.infoPanelWidth = 400;
+    this.infoPanelWidth = this.infoPanelMaxWidth;
     this.updatePhotoFrameDim();
     const endPhotoPos = this.calcLightBoxPhotoDimension(
       this.activePhoto.gridMedia.media
@@ -348,7 +361,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       {
         top: 0,
         left: 0,
-        width: this.photoFrameDim.width + 400,
+        width: this.photoFrameDim.width + this.infoPanelMaxWidth,
         height: this.photoFrameDim.height,
       } as Dimension,
       {

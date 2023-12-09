@@ -1,5 +1,5 @@
-import { Config } from '../common/config/private/Config';
-import { LogLevel } from '../common/config/private/PrivateConfig';
+import {Config} from '../common/config/private/Config';
+import {LogLevel} from '../common/config/private/PrivateConfig';
 
 export type logFN = (...args: (string | number)[]) => void;
 
@@ -7,7 +7,7 @@ const forcedDebug = process.env['NODE_ENV'] === 'debug';
 
 if (forcedDebug === true) {
   console.log(
-    'NODE_ENV environmental variable is set to debug, forcing all logs to print'
+      'NODE_ENV environmental variable is set to debug, forcing all logs to print'
   );
 }
 
@@ -55,10 +55,10 @@ export class Logger {
     const date = new Date().toLocaleString();
     let LOG_TAG = '';
     if (
-      args.length > 0 &&
-      typeof args[0] === 'string' &&
-      args[0].startsWith('[') &&
-      args[0].endsWith(']')
+        args.length > 0 &&
+        typeof args[0] === 'string' &&
+        args[0].startsWith('[') &&
+        args[0].endsWith(']')
     ) {
       LOG_TAG = args[0];
       args.shift();

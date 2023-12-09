@@ -1,9 +1,9 @@
 export class Utils {
   static GUID(): string {
     const s4 = (): string =>
-      Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
+        Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
 
     return s4() + s4() + '-' + s4() + s4();
   }
@@ -90,6 +90,26 @@ export class Utils {
     return true;
   }
 
+  static toIsoString(d: number | Date) {
+    if (!(d instanceof Date)) {
+      d = new Date(d);
+    }
+    return d.getUTCFullYear() + '-' + d.getUTCMonth() + '-' + d.getUTCDate();
+  }
+
+
+  static makeUTCMidnight(d: number | Date) {
+    if (!(d instanceof Date)) {
+      d = new Date(d);
+    }
+    d.setUTCHours(0);
+    d.setUTCMinutes(0);
+    d.setUTCSeconds(0);
+    d.setUTCMilliseconds(0);
+
+    return d;
+  }
+
   static renderDataSize(size: number): string {
     const postFixes = ['B', 'KB', 'MB', 'GB', 'TB'];
     let index = 0;
@@ -115,8 +135,8 @@ export class Utils {
 
   public static canonizePath(path: string): string {
     return path
-      .replace(new RegExp('\\\\', 'g'), '/')
-      .replace(new RegExp('/+', 'g'), '/');
+        .replace(new RegExp('\\\\', 'g'), '/')
+        .replace(new RegExp('/+', 'g'), '/');
   }
 
   static concatUrls(...args: string[]): string {
@@ -176,6 +196,10 @@ export class Utils {
         targetObject[key] = sourceObject[key];
       }
     });
+  }
+
+  public static isValidEnumInt(EnumType: any, value: number) {
+    return typeof EnumType[value] === 'string';
   }
 
   public static enumToArray(EnumType: any): { key: number; value: string }[] {
@@ -238,9 +262,9 @@ export class Utils {
     const E = Math.pow(10, 38);
     const nE = Math.pow(10, -38);
     return (
-      !isNaN(value) &&
-      ((value >= -3.402823466 * E && value <= -1.175494351 * nE) ||
-        (value <= 3.402823466 * E && value >= 1.175494351 * nE))
+        !isNaN(value) &&
+        ((value >= -3.402823466 * E && value <= -1.175494351 * nE) ||
+            (value <= 3.402823466 * E && value >= 1.175494351 * nE))
     );
   }
 

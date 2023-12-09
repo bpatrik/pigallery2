@@ -1,9 +1,9 @@
-import { GPSMetadata } from '../../../common/entities/PhotoDTO';
+import {GPSMetadata} from '../../../common/entities/PhotoDTO';
 import * as NodeGeocoder from 'node-geocoder';
-import { LocationLookupException } from '../../exceptions/LocationLookupException';
-import { LRU } from '../../../common/Utils';
-import { IObjectManager } from './IObjectManager';
-import { ParentDirectoryDTO } from '../../../common/entities/DirectoryDTO';
+import {LocationLookupException} from '../../exceptions/LocationLookupException';
+import {LRU} from '../../../common/Utils';
+import {IObjectManager} from './IObjectManager';
+import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
 
 export class LocationManager implements IObjectManager {
   // onNewDataVersion only need for TypeScript, otherwise the interface is not implemented.
@@ -12,7 +12,7 @@ export class LocationManager implements IObjectManager {
   cache = new LRU<GPSMetadata>(100);
 
   constructor() {
-    this.geocoder = NodeGeocoder({ provider: 'openstreetmap' });
+    this.geocoder = NodeGeocoder({provider: 'openstreetmap'});
   }
 
   async getGPSData(text: string): Promise<GPSMetadata> {

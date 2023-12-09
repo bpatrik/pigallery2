@@ -7,13 +7,14 @@ export class PasswordHelper {
   }
 
   public static comparePassword(
-    password: string,
-    encryptedPassword: string
+      password: string,
+      encryptedPassword: string
   ): boolean {
     try {
       return bcrypt.compareSync(password, encryptedPassword);
       // eslint-disable-next-line no-empty
-    } catch (e) {}
+    } catch (e) {
+    }
     return false;
   }
 }

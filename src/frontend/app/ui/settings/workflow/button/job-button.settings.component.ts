@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
+import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
 import {NotificationService} from '../../../../model/notification.service';
@@ -47,7 +47,7 @@ export class JobButtonComponent {
     );
   }
 
-  get Progress(): JobProgressDTO {
+  get Progress(): OnTimerJobProgressDTO {
     this.populateConfig();
     return this.jobsService.progress.value[
       JobDTOUtils.getHashName(this.jobName, this.config)

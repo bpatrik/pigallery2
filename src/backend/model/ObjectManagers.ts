@@ -9,7 +9,7 @@ import {UserManager} from './database/UserManager';
 import {IndexingManager} from './database/IndexingManager';
 import {SearchManager} from './database/SearchManager';
 import {VersionManager} from './database/VersionManager';
-import {PreviewManager} from './database/PreviewManager';
+import {CoverManager} from './database/CoverManager';
 import {AlbumManager} from './database/AlbumManager';
 import {PersonManager} from './database/PersonManager';
 import {SharingManager} from './database/SharingManager';
@@ -27,7 +27,7 @@ export class ObjectManagers {
   private sharingManager: SharingManager;
   private indexingManager: IndexingManager;
   private personManager: PersonManager;
-  private previewManager: PreviewManager;
+  private coverManager: CoverManager;
   private versionManager: VersionManager;
   private jobManager: JobManager;
   private locationManager: LocationManager;
@@ -85,16 +85,16 @@ export class ObjectManagers {
     this.managers.push(this.personManager);
   }
 
-  get PreviewManager(): PreviewManager {
-    return this.previewManager;
+  get CoverManager(): CoverManager {
+    return this.coverManager;
   }
 
-  set PreviewManager(value: PreviewManager) {
-    if (this.previewManager) {
-      this.managers.splice(this.managers.indexOf(this.previewManager), 1);
+  set CoverManager(value: CoverManager) {
+    if (this.coverManager) {
+      this.managers.splice(this.managers.indexOf(this.coverManager), 1);
     }
-    this.previewManager = value;
-    this.managers.push(this.previewManager);
+    this.coverManager = value;
+    this.managers.push(this.coverManager);
   }
 
   get IndexingManager(): IndexingManager {
@@ -179,8 +179,8 @@ export class ObjectManagers {
   public static async reset(): Promise<void> {
     Logger.silly(LOG_TAG, 'Object manager reset begin');
     if (
-      ObjectManagers.getInstance().IndexingManager &&
-      ObjectManagers.getInstance().IndexingManager.IsSavingInProgress
+        ObjectManagers.getInstance().IndexingManager &&
+        ObjectManagers.getInstance().IndexingManager.IsSavingInProgress
     ) {
       await ObjectManagers.getInstance().IndexingManager.SavingReady;
     }
@@ -204,7 +204,7 @@ export class ObjectManagers {
     ObjectManagers.getInstance().GalleryManager = new GalleryManager();
     ObjectManagers.getInstance().IndexingManager = new IndexingManager();
     ObjectManagers.getInstance().PersonManager = new PersonManager();
-    ObjectManagers.getInstance().PreviewManager = new PreviewManager();
+    ObjectManagers.getInstance().CoverManager = new CoverManager();
     ObjectManagers.getInstance().SearchManager = new SearchManager();
     ObjectManagers.getInstance().SharingManager = new SharingManager();
     ObjectManagers.getInstance().UserManager = new UserManager();
@@ -214,7 +214,7 @@ export class ObjectManagers {
   }
 
   public async onDataChange(
-    changedDir: ParentDirectoryDTO = null
+      changedDir: ParentDirectoryDTO = null
   ): Promise<void> {
     await this.VersionManager.onNewDataVersion();
 

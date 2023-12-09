@@ -1,14 +1,14 @@
-import { NextFunction, Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import * as fs from 'fs';
-import { PhotoProcessing } from '../../model/fileprocessing/PhotoProcessing';
-import { Config } from '../../../common/config/private/Config';
+import {PhotoProcessing} from '../../model/fileaccess/fileprocessing/PhotoProcessing';
+import {Config} from '../../../common/config/private/Config';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 
 export class PhotoConverterMWs {
   public static async convertPhoto(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (!req.resultPipe) {
       return next();
@@ -20,8 +20,8 @@ export class PhotoConverterMWs {
     const fullMediaPath = req.resultPipe as string;
 
     const convertedVideo = PhotoProcessing.generateConvertedPath(
-      fullMediaPath,
-      Config.Media.Photo.Converting.resolution
+        fullMediaPath,
+        Config.Media.Photo.Converting.resolution
     );
 
     // check if converted photo exist
@@ -33,7 +33,7 @@ export class PhotoConverterMWs {
     if (Config.Media.Photo.Converting.onTheFly === true) {
       try {
         req.resultPipe = await PhotoProcessing.convertPhoto(fullMediaPath);
-      }catch (err){
+      } catch (err) {
         return next(new ErrorDTO(ErrorCodes.PHOTO_GENERATION_ERROR, err.message));
       }
       return next();

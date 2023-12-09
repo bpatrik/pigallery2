@@ -4,19 +4,17 @@
    style="display: inline-block;">
 
 
-  <div class="photo-container"
+  <div class="photo-container rounded overflow-hidden"
        [style.width.px]="size"
        [style.height.px]="size">
     <div class="photo"
          *ngIf="thumbnail && thumbnail.Available"
          [style.background-image]="getSanitizedThUrl()"></div>
 
-    <span *ngIf="!thumbnail || !thumbnail.Available" class="oi oi-folder no-image"
-          aria-hidden="true">
-    </span>
+    <app-icon *ngIf="!thumbnail || !thumbnail.Available"  class="no-image"></app-icon>
   </div>
   <!--Info box -->
-  <div class="info">
+  <div class="info rounded-bottom">
     <div class="directory-name">{{directory.name}}</div>
 
   </div>

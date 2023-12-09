@@ -15,11 +15,12 @@ import {
   Control,
   DivIcon,
   divIcon,
+  featureGroup,
+  FeatureGroup,
   icon,
   latLng,
-  latLngBounds,
-  layerGroup,
-  LayerGroup,
+  LatLngBounds,
+  LatLngLiteral,
   Map,
   MapOptions,
   Marker,
@@ -35,6 +36,7 @@ import {LeafletControlLayersConfig} from '@asymmetrik/ngx-leaflet';
 import {ThemeService} from '../../../../model/theme.service';
 import {Subscription} from 'rxjs';
 import {MarkerFactory} from '../MarkerFactory';
+import {ionImageOutline, ionWarningOutline} from '@ng-icons/ionicons';
 
 
 @Component({
@@ -81,7 +83,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private mapLayersControlOption: LeafletControlLayersConfig & {
     overlays: {
       Photos: MarkerClusterGroup;
-      [name: string]: LayerGroup;
+      [name: string]: FeatureGroup;
     };
   } = {
     baseLayers: {},
@@ -115,7 +117,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   // ordered list
   private pathLayersConfigOrdered: {
     name: string,
-    layer: LayerGroup,
+    layer: FeatureGroup,
     themes?: {
       matchers?: RegExp[],
       theme?: { color: string, dashArray: string },
@@ -127,6 +129,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private startPosition: Dimension = null;
   private leafletMap: Map;
   darkModeSubscription: Subscription;
+  private longPathSEPairs: { [key: string]: number } = {}; // stores how often a long distance path pair comes up
 
   constructor(
     public fullScreenService: FullScreenService,
@@ -166,7 +169,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   setUpPathLayers() {
 
 
-    Config.Map.MapPathGroupConfig.forEach((conf, i) => {
+    Config.Map.MapPathGroupConfig.forEach((conf) => {
       let nameI18n = conf.name;
       switch (conf.name) {
         case 'Sport':
@@ -181,14 +184,14 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       }
       const pl = {
         name: nameI18n,
-        layer: layerGroup([]),
+        layer: featureGroup([]),
         themes: conf.matchers.map(ths => {
           return {
             matchers: ths.matchers.map(s => new RegExp(s, 'i')),
             theme: ths.theme,
             icon: MarkerFactory.getSvgIcon({
               color: ths.theme.color,
-              svgPath: ths.theme.svgIcon?.path,
+              svgItems: ths.theme.svgIcon?.items,
               viewBox: ths.theme.svgIcon?.viewBox
             })
           };
@@ -199,7 +202,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
     });
     if (this.pathLayersConfigOrdered.length === 0) {
-      this.pathLayersConfigOrdered.push({name: $localize`Other paths`, layer: layerGroup([])});
+      this.pathLayersConfigOrdered.push({name: $localize`Other paths`, layer: featureGroup([])});
     }
 
     this.pathLayersConfigOrdered.forEach(pl => {
@@ -369,9 +372,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         } else {
           const noPhotoPopup = `<div class="lightbox-map-gallery-component-preview-loading"
                                  style="width: ${width}px; height: ${height}px">
-                  <span class="oi ${photoTh.Error ? 'oi-warning' : 'oi-image'}"
-                        aria-hidden="true">
-                  </span>
+                  ${photoTh.Error ? ionWarningOutline : ionImageOutline}
                   </div>`;
 
           mkr.bindPopup(noPhotoPopup, {minWidth: width});
@@ -450,6 +451,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         p.layer
       );
     });
+    this.longPathSEPairs = {};
 
   }
 
@@ -507,17 +509,99 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   }
 
   private centerMap(): void {
-    if (this.mapLayersControlOption.overlays.Photos.getLayers().length === 0) {
+    let bounds: LatLngBounds = null;
+    for (const k of Object.keys(this.mapLayersControlOption.overlays)) {
+      const b = this.mapLayersControlOption?.overlays?.[k]?.getBounds();
+      if (!b) {
+        continue;
+      }
+      if (!bounds) {
+        bounds = b;
+        continue;
+      }
+      bounds.extend(b);
+    }
+    if (!bounds) {
       return;
     }
-    this.leafletMap.fitBounds(
-      latLngBounds(
-        (
-          this.mapLayersControlOption.overlays.Photos.getLayers() as Marker[]
-        ).map((m) => m.getLatLng())
-      )
-    );
+    this.leafletMap.fitBounds(bounds);
   }
+
+  private addArchForLongDistancePaths(path: LatLngLiteral[]) {
+
+    for (let i = 0; i < path.length - 1; ++i) {
+      const dst = (a: LatLngLiteral, b: LatLngLiteral) => {
+        return Math.sqrt(Math.pow(a.lat - b.lat, 2) +
+          Math.pow(a.lng - b.lng, 2));
+      };
+
+      /**
+       * Sort points then prints them as string
+       * @param a
+       * @param b
+       */
+      const getKey = (a: LatLngLiteral, b: LatLngLiteral) => {
+        const KEY_PRECISION = 2;
+        if (parseFloat(a.lat.toFixed(KEY_PRECISION)) > parseFloat(b.lat.toFixed(KEY_PRECISION))) {
+          const tmp = b;
+          b = a;
+          a = tmp;
+        } else if (a.lat.toFixed(KEY_PRECISION) == b.lat.toFixed(KEY_PRECISION)) { // let's keep string so no precision issue
+          if (parseFloat(a.lng.toFixed(KEY_PRECISION)) > parseFloat(b.lng.toFixed(KEY_PRECISION))) {
+            const tmp = b;
+            b = a;
+            a = tmp;
+          }
+        }
+        return `${a.lat.toFixed(KEY_PRECISION)},${a.lng.toFixed(KEY_PRECISION)},${b.lat.toFixed(KEY_PRECISION)},${b.lng.toFixed(KEY_PRECISION)}`;
+
+      };
+      if (Math.abs(path[i].lng - path[i + 1].lng) > Config.Map.bendLongPathsTrigger) {
+        const s = path[i];
+        const e = path[i + 1];
+        const k = getKey(s, e);
+        this.longPathSEPairs[k] = (this.longPathSEPairs[k] || 0) + 1;
+        const occurrence = this.longPathSEPairs[k] - 1;
+        // transofrming occurrence to the following
+        // 0, 1, -1, 2, -2, 3, -3;
+        // 0, 1,  2, 3,  4, 6,  7;
+        const multip = (((occurrence) % 2 == 1 ? 1 : -1) * Math.floor((occurrence + 1) / 2));
+        const archScale = 0.3 + multip * 0.1;
+        const d = dst(s, e); //start end distance
+        const newPoints: LatLngLiteral[] = [];
+
+        const N = Math.round(d / Config.Map.bendLongPathsTrigger); // number of new points
+        const m: LatLngLiteral = { //mid point
+          lat: (s.lat + e.lat) / 2,
+          lng: (s.lng + e.lng) / 2,
+        };
+        const md = d / 2; // distance of the ends form mid point
+        for (let j = 1; j < N; ++j) {
+          const p = {
+            lat: s.lat + (j / N) * (e.lat - s.lat),
+            lng: s.lng + (j / N) * (e.lng - s.lng)
+          };
+          // simple pythagorean to have something like an arch.
+          const a = dst(p, m);
+          const c = md;
+          const b = Math.sqrt(Math.pow(c, 2) - Math.pow(a, 2));
+          p.lat += b * archScale;//* d10p;
+
+          newPoints.push(p);
+        }
+        newPoints.forEach(mc => {
+
+          const mkr = marker(mc);
+          mkr.setIcon(MarkerFactory.defIconSmall);
+        });
+
+        path.splice(i + 1, 0, ...newPoints);
+        i += newPoints.length;
+      }
+    }
+
+  }
+
 
   private async loadGPXFiles(): Promise<void> {
     this.clearPath();
@@ -535,16 +619,10 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
-    for (let i = 0; i < this.gpxFiles.length; i++) {
-      const file = this.gpxFiles[i];
+    const loadAFile = async (file: FileDTO) => {
       const parsedGPX = await this.mapService.getMapCoordinates(file);
-      if (file !== this.gpxFiles[i]) {
-        // check race condition
-        return;
-      }
 
-      let pathLayer: { layer: LayerGroup, icon?: DivIcon, theme?: { color?: string, dashArray?: string } };
+      let pathLayer: { layer: FeatureGroup, icon?: DivIcon, theme?: { color?: string, dashArray?: string } };
       for (const pl of this.pathLayersConfigOrdered) {
         pathLayer = {layer: pl.layer, icon: MarkerFactory.defIcon};
         if (!pl.themes || pl.themes.length === 0) {
@@ -565,9 +643,9 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         pathLayer = {layer: this.pathLayersConfigOrdered[0].layer, icon: MarkerFactory.defIcon};
       }
 
-      if (parsedGPX.path.length !== 0) {
+      if (parsedGPX.path.length !== 0 && parsedGPX.path[0].length !== 0) {
         // render the beginning of the path with a marker
-        const mkr = marker(parsedGPX.path[0]);
+        const mkr = marker(parsedGPX.path[0][0]);
         pathLayer.layer.addLayer(mkr);
 
         mkr.setIcon(pathLayer.icon);
@@ -575,14 +653,20 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         // Setting popup info
         mkr.bindPopup(file.name + ': ' + parsedGPX.name);
 
-        pathLayer.layer.addLayer(
-          polyline(parsedGPX.path, {
-            smoothFactor: 3,
-            interactive: false,
-            color: pathLayer?.theme?.color,
-            dashArray: pathLayer?.theme?.dashArray
-          })
-        );
+        //add arch for long paths
+        parsedGPX.path.forEach(p => {
+          this.addArchForLongDistancePaths(p);
+          pathLayer.layer.addLayer(
+            polyline(p, {
+              smoothFactor: 3,
+              interactive: false,
+              color: pathLayer?.theme?.color,
+              dashArray: pathLayer?.theme?.dashArray
+            })
+          );
+        });
+
+
       }
       parsedGPX.markers.forEach((mc) => {
         const mkr = marker(mc);
@@ -590,7 +674,9 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         pathLayer.layer.addLayer(mkr);
         mkr.bindPopup($localize`Latitude` + ': ' + mc.lat + ', ' + $localize`longitude` + ': ' + mc.lng);
       });
-    }
+    };
+
+    await Promise.all(this.gpxFiles.map(f => loadAFile(f)));
 
     // Add layer to the map
     this.pathLayersConfigOrdered.filter(pl => pl.layer.getLayers().length > 0).forEach((pl) => {
@@ -606,7 +692,10 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         this.leafletMap.addLayer(pl.layer);
       }
     });
-
+    // center map on paths if no photos to center map on
+    if (!this.photos?.length) {
+      this.centerMap();
+    }
   }
 }
 

@@ -1,16 +1,14 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
-import {
-  Thumbnail,
-  ThumbnailManagerService,
-} from '../../gallery/thumbnailManager.service';
-import { AuthenticationService } from '../../../model/network/authentication.service';
-import { AlbumsService } from '../albums.service';
-import { AlbumBaseDTO } from '../../../../../common/entities/album/AlbumBaseDTO';
-import { Media } from '../../gallery/Media';
-import { SavedSearchDTO } from '../../../../../common/entities/album/SavedSearchDTO';
-import { UserRoles } from '../../../../../common/entities/UserDTO';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {RouterLink} from '@angular/router';
+import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
+import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
+import {AuthenticationService} from '../../../model/network/authentication.service';
+import {AlbumsService} from '../albums.service';
+import {AlbumBaseDTO} from '../../../../../common/entities/album/AlbumBaseDTO';
+import {Media} from '../../gallery/Media';
+import {SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDTO';
+import {UserRoles} from '../../../../../common/entities/UserDTO';
+import {Config} from '../../../../../common/config/public/Config';
 
 @Component({
   selector: 'app-album',
@@ -21,15 +19,17 @@ import { UserRoles } from '../../../../../common/entities/UserDTO';
 export class AlbumComponent implements OnInit, OnDestroy {
   @Input() album: AlbumBaseDTO;
   @Input() size: number;
+  public readonly svgIcon = Config.Server.svgIcon;
 
   public thumbnail: Thumbnail = null;
 
   constructor(
-    private thumbnailService: ThumbnailManagerService,
-    private sanitizer: DomSanitizer,
-    private albumService: AlbumsService,
-    public authenticationService: AuthenticationService
-  ) {}
+      private thumbnailService: ThumbnailManagerService,
+      private sanitizer: DomSanitizer,
+      private albumService: AlbumsService,
+      public authenticationService: AuthenticationService
+  ) {
+  }
 
   get IsSavedSearch(): boolean {
     return this.album && !!this.AsSavedSearch.searchQuery;
@@ -52,19 +52,19 @@ export class AlbumComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.album.preview) {
+    if (this.album.cover) {
       this.thumbnail = this.thumbnailService.getThumbnail(
-        new Media(this.album.preview, this.size, this.size)
+          new Media(this.album.cover, this.size, this.size)
       );
     }
   }
 
   getSanitizedThUrl(): SafeStyle {
     return this.sanitizer.bypassSecurityTrustStyle(
-      'url(' +
+        'url(' +
         this.thumbnail.Src.replace(/\(/g, '%28')
-          .replace(/'/g, '%27')
-          .replace(/\)/g, '%29') +
+            .replace(/'/g, '%27')
+            .replace(/\)/g, '%29') +
         ')'
     );
   }

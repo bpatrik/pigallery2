@@ -19,7 +19,7 @@ export class EventLimit<T> {
 
   public off(limit: T, handler: (data?: T) => void): void {
     this.handlers = this.handlers.filter(
-      (h) => h.handler !== handler && h.limit !== limit
+        (h) => h.handler !== handler && h.limit !== limit
     );
   }
 
@@ -31,8 +31,8 @@ export class EventLimit<T> {
     if (this.handlers) {
       this.handlers.slice(0).forEach((h) => {
         if (
-          h.limit <= data &&
-          (h.lastTriggerValue < h.limit || h.lastTriggerValue == null)
+            h.limit <= data &&
+            (h.lastTriggerValue < h.limit || h.lastTriggerValue == null)
         ) {
           h.fire(data);
         }
@@ -47,7 +47,8 @@ export class EventLimit<T> {
 class EventLimitHandler<T> {
   public lastTriggerValue: T = null;
 
-  constructor(public limit: T, public handler: (data?: T) => void) {}
+  constructor(public limit: T, public handler: (data?: T) => void) {
+  }
 
   public fire(data?: T): void {
     this.handler(data);

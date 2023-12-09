@@ -1,0 +1,45 @@
+<div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
+     [insideClick]="true"
+     title="Sort and group" i18n-title>
+  <button dropdownToggle type="button"
+          class="btn dropdown-toggle btn-outline-primary btn-navigator"
+          aria-controls="sorting-dropdown">
+    <ng-icon *ngIf="sortingMethod?.ascending !== null"
+             [name]="!sortingMethod?.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
+    <app-sorting-method-icon [method]="sortingMethod?.method"></app-sorting-method-icon>
+
+  </button>
+  <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+       role="menu" aria-labelledby="button-alignment">
+    <div class="dropdown-item " role="menuitem"
+         [class.active]="sortingMethod?.method == type.key"
+         *ngFor="let type of sortingByTypes"
+         (click)="setSortingBy(type.key)">
+      <div class="me-2 d-inline-block">
+        <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
+      </div>
+      <div class="d-inline-block">{{type.key | stringifySorting}}</div>
+    </div>
+
+    <ng-container *ngIf="isBidirectional(sortingMethod?.method)">
+      <hr>
+      <div class="dropdown-item " role="menuitem"
+           [class.active]="sortingMethod?.ascending == true"
+           (click)="setSortingAscending(true)">
+        <div class="me-2 d-inline-block">
+          <ng-icon name="ionArrowUpOutline"></ng-icon>
+        </div>
+        <div class="d-inline-block" i18n>ascending</div>
+      </div>
+
+      <div class="dropdown-item" role="menuitem"
+           [class.active]="sortingMethod?.ascending == false"
+           (click)="setSortingAscending(false)">
+        <div class="me-2 d-inline-block">
+          <ng-icon name="ionArrowDownOutline"></ng-icon>
+        </div>
+        <div class="d-inline-block" i18n>descending</div>
+      </div>
+    </ng-container>
+  </div>
+</div>

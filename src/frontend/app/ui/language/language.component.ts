@@ -1,4 +1,4 @@
-import {Component, Input, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
@@ -10,7 +10,6 @@ import {BsDropdownDirective} from 'ngx-bootstrap/dropdown';
   styleUrls: ['./language.component.css'],
 })
 export class LanguageComponent {
-  @Input() isDark: boolean;
   languages: string[] = [];
   current: string = null;
   urlBase = Config.Server.urlBase;

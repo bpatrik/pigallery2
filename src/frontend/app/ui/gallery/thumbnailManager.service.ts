@@ -1,18 +1,14 @@
-import { Injectable } from '@angular/core';
-import {
-  ThumbnailLoaderService,
-  ThumbnailLoadingListener,
-  ThumbnailLoadingPriority,
-  ThumbnailTaskEntity,
-} from './thumbnailLoader.service';
-import { Media } from './Media';
-import { MediaIcon } from './MediaIcon';
-import { PersonDTO } from '../../../../common/entities/PersonDTO';
-import { Person } from '../faces/Person';
+import {Injectable} from '@angular/core';
+import {ThumbnailLoaderService, ThumbnailLoadingListener, ThumbnailLoadingPriority, ThumbnailTaskEntity,} from './thumbnailLoader.service';
+import {Media} from './Media';
+import {MediaIcon} from './MediaIcon';
+import {PersonDTO} from '../../../../common/entities/PersonDTO';
+import {Person} from '../faces/Person';
 
 @Injectable()
 export class ThumbnailManagerService {
-  constructor(private thumbnailLoader: ThumbnailLoaderService) {}
+  constructor(private thumbnailLoader: ThumbnailLoaderService) {
+  }
 
   public getThumbnail(photo: Media): Thumbnail {
     return new Thumbnail(photo, this.thumbnailLoader);
@@ -39,7 +35,8 @@ export abstract class ThumbnailBase {
   protected onLoad: () => void = null;
   protected thumbnailTask: ThumbnailTaskEntity = null;
 
-  protected constructor(protected thumbnailService: ThumbnailLoaderService) {}
+  protected constructor(protected thumbnailService: ThumbnailLoaderService) {
+  }
 
   abstract set Visible(visible: boolean);
 
@@ -73,8 +70,8 @@ export abstract class ThumbnailBase {
 
 export class PersonThumbnail extends ThumbnailBase {
   constructor(
-    private person: PersonDTO,
-    thumbnailService: ThumbnailLoaderService
+      private person: PersonDTO,
+      thumbnailService: ThumbnailLoaderService
   ) {
     super(thumbnailService);
     this.src = '';
@@ -112,9 +109,9 @@ export class PersonThumbnail extends ThumbnailBase {
         },
       };
       this.thumbnailTask = this.thumbnailService.loadPersonThumbnail(
-        person,
-        ThumbnailLoadingPriority.high,
-        listener
+          person,
+          ThumbnailLoadingPriority.high,
+          listener
       );
     }, 0);
   }
@@ -133,8 +130,8 @@ export class PersonThumbnail extends ThumbnailBase {
 
 export class IconThumbnail extends ThumbnailBase {
   constructor(
-    private media: MediaIcon,
-    thumbnailService: ThumbnailLoaderService
+      private media: MediaIcon,
+      thumbnailService: ThumbnailLoaderService
   ) {
     super(thumbnailService);
     this.src = '';
@@ -172,9 +169,9 @@ export class IconThumbnail extends ThumbnailBase {
           },
         };
         this.thumbnailTask = this.thumbnailService.loadIcon(
-          this.media,
-          ThumbnailLoadingPriority.high,
-          listener
+            this.media,
+            ThumbnailLoadingPriority.high,
+            listener
         );
       }, 0);
     }
@@ -194,9 +191,9 @@ export class IconThumbnail extends ThumbnailBase {
 
 export class Thumbnail extends ThumbnailBase {
   constructor(
-    private media: Media,
-    thumbnailService: ThumbnailLoaderService,
-    autoLoad = true
+      private media: Media,
+      thumbnailService: ThumbnailLoaderService,
+      autoLoad = true
   ) {
     super(thumbnailService);
     if (this.media.isThumbnailAvailable()) {
@@ -279,15 +276,15 @@ export class Thumbnail extends ThumbnailBase {
       };
       if (this.media.isReplacementThumbnailAvailable()) {
         this.thumbnailTask = this.thumbnailService.loadImage(
-          this.media,
-          ThumbnailLoadingPriority.medium,
-          listener
+            this.media,
+            ThumbnailLoadingPriority.medium,
+            listener
         );
       } else {
         this.thumbnailTask = this.thumbnailService.loadImage(
-          this.media,
-          ThumbnailLoadingPriority.high,
-          listener
+            this.media,
+            ThumbnailLoadingPriority.high,
+            listener
         );
       }
       // }, 0);

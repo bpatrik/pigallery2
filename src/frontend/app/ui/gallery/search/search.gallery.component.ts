@@ -1,16 +1,9 @@
 import {Component, OnDestroy, TemplateRef} from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
 import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
-import {ContentService} from '../content.service';
 import {Subscription} from 'rxjs';
-import {NavigationService} from '../../../model/navigation.service';
 import {QueryParams} from '../../../../../common/QueryParams';
-import {
-  MetadataSearchQueryTypes,
-  SearchQueryDTO,
-  SearchQueryTypes,
-  TextSearch,
-} from '../../../../../common/entities/SearchQueryDTO';
+import {MetadataSearchQueryTypes, SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {SearchQueryParserService} from './search-query-parser.service';
@@ -18,6 +11,7 @@ import {AlbumsService} from '../../albums/albums.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
+import {Utils} from '../../../../../common/Utils';
 
 @Component({
   selector: 'app-gallery-search',
@@ -43,15 +37,12 @@ export class GallerySearchComponent implements OnDestroy {
   private saveSearchModalRef: BsModalRef;
 
   constructor(
-    private autoCompleteService: AutoCompleteService,
-    private searchQueryParserService: SearchQueryParserService,
-    private galleryService: ContentService,
-    private albumService: AlbumsService,
-    private navigationService: NavigationService,
-    private route: ActivatedRoute,
-    public router: Router,
-    private modalService: BsModalService,
-    public authenticationService: AuthenticationService
+      private searchQueryParserService: SearchQueryParserService,
+      private albumService: AlbumsService,
+      private route: ActivatedRoute,
+      public router: Router,
+      private modalService: BsModalService,
+      public authenticationService: AuthenticationService
   ) {
     this.SearchQueryTypes = SearchQueryTypes;
     this.MetadataSearchQueryTypes = MetadataSearchQueryTypes.map((v) => ({
@@ -73,8 +64,8 @@ export class GallerySearchComponent implements OnDestroy {
 
   get CanCreateAlbum(): boolean {
     return (
-      Config.Album.enabled &&
-      this.authenticationService.user.getValue().role >= UserRoles.Admin
+        Config.Album.enabled &&
+        this.authenticationService.user.getValue().role >= UserRoles.Admin
     );
   }
 
@@ -112,17 +103,20 @@ export class GallerySearchComponent implements OnDestroy {
     this.saveSearchModalRef = null;
   }
 
-  onQueryChange(): void {
+  public onQueryChange(): void {
+    if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
+      return;
+    }
+
     this.rawSearchText = this.searchQueryParserService.stringify(
-      this.searchQueryDTO
+        this.searchQueryDTO
     );
-    // this.validateRawSearchText();
   }
 
   validateRawSearchText(): void {
     try {
       this.searchQueryDTO = this.searchQueryParserService.parse(
-        this.rawSearchText
+          this.rawSearchText
       );
     } catch (e) {
       console.error(e);
@@ -131,14 +125,14 @@ export class GallerySearchComponent implements OnDestroy {
 
   Search(): void {
     this.router
-      .navigate(['/search', this.HTMLSearchQuery])
-      .catch(console.error);
+        .navigate(['/search', this.HTMLSearchQuery])
+        .catch(console.error);
   }
 
   async saveSearch(): Promise<void> {
     await this.albumService.addSavedSearch(
-      this.saveSearchName,
-      this.searchQueryDTO
+        this.saveSearchName,
+        this.searchQueryDTO
     );
     this.hideSaveSearchModal();
   }

@@ -1,5 +1,5 @@
-import { DirectoryPathDTO } from './DirectoryDTO';
-import { MediaDimension, MediaDTO, MediaMetadata } from './MediaDTO';
+import {DirectoryPathDTO} from './DirectoryDTO';
+import {MediaDimension, MediaDTO, MediaMetadata} from './MediaDTO';
 
 export interface VideoDTO extends MediaDTO {
   id: number;

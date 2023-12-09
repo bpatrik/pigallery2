@@ -1,4 +1,4 @@
-import {JobProgressDTO, JobProgressStates,} from '../../../common/entities/job/JobProgressDTO';
+import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../common/entities/job/JobProgressDTO';
 import {IJob} from './jobs/IJob';
 import {JobRepository} from './JobRepository';
 import {Config} from '../../../common/config/private/Config';
@@ -8,6 +8,8 @@ import {NotificationManager} from '../NotifocationManager';
 import {IJobListener} from './jobs/IJobListener';
 import {JobProgress} from './jobs/JobProgress';
 import {JobProgressManager} from './JobProgressManager';
+import {JobDTOUtils} from '../../../common/entities/job/JobDTO';
+import {Utils} from '../../../common/Utils';
 
 const LOG_TAG = '[JobManager]';
 
@@ -36,11 +38,18 @@ export class JobManager implements IJobListener {
     );
   }
 
-  getProgresses(): { [id: string]: JobProgressDTO } {
-    return this.progressManager.Progresses;
+  public getProgresses(): { [id: string]: OnTimerJobProgressDTO } {
+    const prg = Utils.clone(this.progressManager.Progresses);
+    this.timers.forEach(t => {
+      if (!prg[JobDTOUtils.getHashName(t.schedule.jobName, t.schedule.config)]) {
+        return;
+      }
+      (prg[JobDTOUtils.getHashName(t.schedule.jobName, t.schedule.config)] as OnTimerJobProgressDTO).onTimer = true;
+    });
+    return prg;
   }
 
-  async run<T>(
+  public async run<T>(
     jobName: string,
     config: T,
     soloRun: boolean,
@@ -62,7 +71,7 @@ export class JobManager implements IJobListener {
     }
   }
 
-  stop(jobName: string): void {
+  public stop(jobName: string): void {
     const t = this.findJob(jobName);
     if (t) {
       t.cancel();
@@ -71,12 +80,12 @@ export class JobManager implements IJobListener {
     }
   }
 
-  onProgressUpdate = (progress: JobProgress): void => {
+  public onProgressUpdate = (progress: JobProgress): void => {
     this.progressManager.onJobProgressUpdate(progress.toDTO());
   };
 
   onJobFinished = async (
-    job: IJob<any>,
+    job: IJob<unknown>,
     state: JobProgressStates,
     soloRun: boolean
   ): Promise<void> => {
@@ -111,7 +120,7 @@ export class JobManager implements IJobListener {
     }
   };
 
-  getAvailableJobs(): IJob<any>[] {
+  getAvailableJobs(): IJob<unknown>[] {
     return JobRepository.Instance.getAvailableJobs();
   }
 
@@ -129,7 +138,7 @@ export class JobManager implements IJobListener {
     Config.Jobs.scheduled.forEach((s): void => this.runSchedule(s));
   }
 
-  protected findJob<T = any>(jobName: string): IJob<T> {
+  protected findJob<T = unknown>(jobName: string): IJob<T> {
     return this.getAvailableJobs().find((t): boolean => t.Name === jobName);
   }
 

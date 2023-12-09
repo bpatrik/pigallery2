@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnChanges, TemplateRef} from '@angular/core';
+import {Component, forwardRef, Input, OnChanges, TemplateRef} from '@angular/core';
 import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator,} from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
@@ -12,11 +12,13 @@ import {
   TAGS,
   ThemeConfig
 } from '../../../../../../common/config/public/ClientConfig';
-import {SettingsService} from '../../settings.service';
+import {ConfigStyle, SettingsService} from '../../settings.service';
 import {WebConfig} from '../../../../../../common/config/private/WebConfig';
 import {JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
 import {BsModalService} from '../../../../../../../node_modules/ngx-bootstrap/modal';
+import {CustomSettingsEntries} from '../CustomSettingsEntries';
+import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 
 interface IState {
   shouldHide(): boolean;
@@ -78,6 +80,10 @@ export class SettingsEntryComponent
   public uiType: string;
   newThemeModalRef: any;
   iconModal: { ref?: any, error?: string };
+  @Input() noChangeDetection = false;
+  public readonly ConfigStyle = ConfigStyle;
+  protected readonly SortByTypes = SortByTypes;
+  protected readonly GroupByTypes = GroupByTypes;
 
 
   constructor(private searchQueryParserService: SearchQueryParserService,
@@ -87,7 +93,7 @@ export class SettingsEntryComponent
   }
 
   get changed(): boolean {
-    if (this.Disabled) {
+    if (this.Disabled || this.noChangeDetection) {
       return false;
     }
 
@@ -231,11 +237,14 @@ export class SettingsEntryComponent
       this.state.isEnumType = true;
     }
     this.uiType = this.arrayType;
+    if (CustomSettingsEntries.iS(this.state)) {
+      this.uiType = CustomSettingsEntries.getFullName(this.state);
+    }
     if (!this.state.isEnumType &&
       !this.state.isEnumArrayType &&
       this.type !== 'boolean' &&
       this.type !== 'SearchQuery' &&
-      this.type !== 'SVGIconConfig' &&
+      !CustomSettingsEntries.iS(this.state) &&
       this.arrayType !== 'MapLayers' &&
       this.arrayType !== 'NavigationLinkConfig' &&
       this.arrayType !== 'MapPathGroupConfig' &&
@@ -297,20 +306,21 @@ export class SettingsEntryComponent
     }
   }
 
-  getOptionsView(state: IState) {
-    let optionsView: { key: number | string; value: string | number }[];
-    const eClass = state.isEnumType
-      ? state.type
-      : state.arrayType;
-    if (state.tags?.uiOptions) {
-      optionsView = state.tags?.uiOptions.map(o => ({
-        key: o,
-        value: o + (state.tags?.unit ? state.tags?.unit : '')
-      }));
-    } else {
-      optionsView = enumToTranslatedArray(eClass);
+  getOptionsView(state: IState & { optionsView?: { key: number | string; value: string | number }[] }) {
+    if (!state.optionsView) {
+      const eClass = state.isEnumType
+        ? state.type
+        : state.arrayType;
+      if (state.tags?.uiOptions) {
+        state.optionsView = state.tags?.uiOptions.map(o => ({
+          key: o,
+          value: o + (state.tags?.unit ? state.tags?.unit : '')
+        }));
+      } else {
+        state.optionsView = enumToTranslatedArray(eClass);
+      }
     }
-    return optionsView;
+    return state.optionsView;
   }
 
   validate(): ValidationErrors {
@@ -448,8 +458,8 @@ export class SettingsEntryComponent
       const doc = parser.parseFromString(reader.result as string, 'image/svg+xml');
       try {
         const wb = doc.documentElement.getAttribute('viewBox');
-        const path = doc.documentElement.getElementsByTagName('path')[0].getAttribute('d');
-        this.state.value.path = path;
+        const items = doc.documentElement.innerHTML;
+        this.state.value.items = items;
         this.state.value.viewBox = wb;
       } catch (e) {
         console.error(e);

@@ -1,11 +1,37 @@
-<div #gridContainer>
-  <app-gallery-grid-photo
-    *ngFor="let gridPhoto of photosToRender"
-    (click)="photoClicked(gridPhoto.media)"
-    [gridMedia]="gridPhoto"
-    [style.width.px]="gridPhoto.renderWidth"
-    [style.height.px]="gridPhoto.renderHeight"
-    [style.margin-left.px]="IMAGE_MARGIN"
-    [style.margin-right.px]="IMAGE_MARGIN">
-  </app-gallery-grid-photo>
+<div #gridContainer [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
+  <ng-container *ngIf="mediaToRender?.length > 0">
+    <ng-container *ngFor="let group of mediaToRender">
+      <ng-container *ngIf="group.name">
+        <ng-container [ngSwitch]="sortingService.grouping.value.method">
+          <div *ngSwitchCase="GroupByTypes.Rating" class="mt-4 mb-3">
+            <h6 class="ms-2">
+              <ng-icon *ngFor="let i of [0,1,2,3,4]"
+                       [name]="(i < (group.name | parseInt)) ? 'ionStar' : 'ionStarOutline'"></ng-icon>
+            </h6>
+          </div>
+          <div *ngSwitchCase="GroupByTypes.PersonCount" class="mt-4 mb-3">
+            <h6 class="ms-2">{{group.name}}
+              <ng-icon class="ms-1" name="ionPeopleOutline"></ng-icon>
+            </h6>
+          </div>
+          <div *ngSwitchDefault class="mt-4 mb-3"><h6 class="ms-2">{{group.name}}</h6></div>
+        </ng-container>
+      </ng-container>
+
+      <ng-container *ngIf="group.date">
+        <app-gallery-blog [date]="group.date" [open]="blogOpen"></app-gallery-blog>
+      </ng-container>
+      <div class="media-grid">
+        <app-gallery-grid-photo
+          *ngFor="let gridPhoto of group.media"
+          (click)="photoClicked(gridPhoto.media)"
+          [gridMedia]="gridPhoto"
+          [style.width.px]="gridPhoto.renderWidth"
+          [style.height.px]="gridPhoto.renderHeight"
+          [style.margin.px]="IMAGE_MARGIN">
+        </app-gallery-grid-photo>
+      </div>
+    </ng-container>
+  </ng-container>
+
 </div>

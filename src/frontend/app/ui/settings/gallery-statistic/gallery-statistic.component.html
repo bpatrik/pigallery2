@@ -3,24 +3,24 @@
     Statistic:
   </div>
   <div class="col-md-2 col-6">
-    <span class="oi oi-folder" title="Folders" i18n-title aria-hidden="true">  </span>
+    <ng-icon name="ionFolderOutline" title="Folders" i18n-title></ng-icon>
     {{settingsService.statistic.value ? settingsService.statistic.value.directories : '...'}}
   </div>
   <div class="col-md-2 col-6">
-    <span class="oi oi-camera-slr" title="Photos" i18n-title aria-hidden="true">  </span>
+    <ng-icon name="ionCameraOutline" title="Photos" i18n-title></ng-icon>
     {{settingsService.statistic.value ? settingsService.statistic.value.photos : '...'}}
   </div>
   <div class="col-md-2 col-6">
-    <span class="oi oi-video" title="Videos" i18n-title aria-hidden="true">  </span>
+    <ng-icon name="ionVideocamOutline" title="Videos" i18n-title></ng-icon>
     {{settingsService.statistic.value ? settingsService.statistic.value.videos : '...'}}
 
   </div>
   <div class="col-md-2 col-6">
-    <span class="oi oi-people" title="Persons" i18n-title aria-hidden="true">  </span>
+    <ng-icon name="ionPersonOutline" title="Persons" i18n-title></ng-icon>
     {{settingsService.statistic.value ? settingsService.statistic.value.persons : '...'}}
   </div>
   <div class="col-md-2 col-6">
-    <span class="oi oi-pie-chart" title="Size" i18n-title aria-hidden="true">  </span>
+    <ng-icon name="ionPieChartOutline" title="Size" i18n-title></ng-icon>
     {{settingsService.statistic.value ? (settingsService.statistic.value.diskUsage | fileSize) : '...'}}
   </div>
 </div>

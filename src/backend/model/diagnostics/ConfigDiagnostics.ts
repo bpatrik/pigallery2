@@ -17,9 +17,9 @@ import {
 } from '../../../common/config/public/ClientConfig';
 import {
   DatabaseType,
+  ServerAlbumCoverConfig,
   ServerDataBaseConfig,
   ServerJobConfig,
-  ServerPreviewConfig,
   ServerThumbnailConfig,
   ServerVideoConfig,
 } from '../../../common/config/private/PrivateConfig';
@@ -31,8 +31,10 @@ const LOG_TAG = '[ConfigDiagnostics]';
 
 export class ConfigDiagnostics {
   static testAlbumsConfig(
-    albumConfig: ClientAlbumConfig,
-    original: PrivateConfigClass
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      albumConfig: ClientAlbumConfig,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      original: PrivateConfigClass
   ): void {
     Logger.debug(LOG_TAG, 'Testing album config');
     // nothing to check
@@ -51,33 +53,34 @@ export class ConfigDiagnostics {
   }
 
   static async testDatabase(
-    databaseConfig: ServerDataBaseConfig
+      databaseConfig: ServerDataBaseConfig
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing database config');
     await SQLConnection.tryConnection(databaseConfig);
     if (databaseConfig.type === DatabaseType.sqlite) {
       try {
         await this.checkReadWritePermission(
-          SQLConnection.getSQLiteDB(databaseConfig)
+            SQLConnection.getSQLiteDB(databaseConfig)
         );
       } catch (e) {
         throw new Error(
-          'Cannot read or write sqlite storage file: ' +
-          SQLConnection.getSQLiteDB(databaseConfig)
+            'Cannot read or write sqlite storage file: ' +
+            SQLConnection.getSQLiteDB(databaseConfig)
         );
       }
     }
   }
 
   static async testMetaFileConfig(
-    metaFileConfig: ClientMetaFileConfig,
-    config: PrivateConfigClass
+      metaFileConfig: ClientMetaFileConfig,
+      config: PrivateConfigClass
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing meta file config');
     if (metaFileConfig.gpx === true && config.Map.enabled === false) {
       throw new Error('*.gpx meta files are not supported without MAP');
     }
   }
+
 
   static testVideoConfig(videoConfig: ServerVideoConfig,
                          config: PrivateConfigClass): Promise<void> {
@@ -95,19 +98,19 @@ export class ConfigDiagnostics {
           ffmpeg().getAvailableCodecs((err: Error) => {
             if (err) {
               return reject(
-                new Error(
-                  'Error accessing ffmpeg, cant find executable: ' +
-                  err.toString()
-                )
+                  new Error(
+                      'Error accessing ffmpeg, cant find executable: ' +
+                      err.toString()
+                  )
               );
             }
             ffmpeg(__dirname + '/blank.jpg').ffprobe((err2: Error) => {
               if (err2) {
                 return reject(
-                  new Error(
-                    'Error accessing ffmpeg-probe, cant find executable: ' +
-                    err2.toString()
-                  )
+                    new Error(
+                        'Error accessing ffmpeg-probe, cant find executable: ' +
+                        err2.toString()
+                    )
                 );
               }
               return resolve();
@@ -155,7 +158,7 @@ export class ConfigDiagnostics {
 
 
   static async testThumbnailConfig(
-    thumbnailConfig: ServerThumbnailConfig
+      thumbnailConfig: ServerThumbnailConfig
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing thumbnail config');
 
@@ -166,7 +169,7 @@ export class ConfigDiagnostics {
 
     if (isNaN(thumbnailConfig.iconSize) || thumbnailConfig.iconSize <= 0) {
       throw new Error(
-        'IconSize has to be >= 0 integer, got: ' + thumbnailConfig.iconSize
+          'IconSize has to be >= 0 integer, got: ' + thumbnailConfig.iconSize
       );
     }
 
@@ -181,16 +184,18 @@ export class ConfigDiagnostics {
   }
 
   static async testTasksConfig(
-    task: ServerJobConfig,
-    config: PrivateConfigClass
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      task: ServerJobConfig,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      config: PrivateConfigClass
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing tasks config');
     return;
   }
 
   static async testFacesConfig(
-    faces: ClientFacesConfig,
-    config: PrivateConfigClass
+      faces: ClientFacesConfig,
+      config: PrivateConfigClass
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing faces config');
     if (faces.enabled === true) {
@@ -201,29 +206,33 @@ export class ConfigDiagnostics {
   }
 
   static async testSearchConfig(
-    search: ClientSearchConfig,
-    config: PrivateConfigClass
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      search: ClientSearchConfig,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      config: PrivateConfigClass
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing search config');
     //nothing to check
   }
 
   static async testSharingConfig(
-    sharing: ClientSharingConfig,
-    config: PrivateConfigClass
+      sharing: ClientSharingConfig,
+      config: PrivateConfigClass
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing sharing config');
     if (
-      sharing.enabled === true &&
-      config.Users.authenticationRequired === false
+        sharing.enabled === true &&
+        config.Users.authenticationRequired === false
     ) {
       throw new Error('In case of no authentication, sharing is not supported');
     }
   }
 
   static async testRandomPhotoConfig(
-    sharing: ClientRandomPhotoConfig,
-    config: PrivateConfigClass
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      sharing: ClientRandomPhotoConfig,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      config: PrivateConfigClass
   ): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing random photo config');
     //nothing to check
@@ -235,14 +244,14 @@ export class ConfigDiagnostics {
       return;
     }
     if (
-      map.mapProvider === MapProviders.Mapbox &&
-      (!map.mapboxAccessToken || map.mapboxAccessToken.length === 0)
+        map.mapProvider === MapProviders.Mapbox &&
+        (!map.mapboxAccessToken || map.mapboxAccessToken.length === 0)
     ) {
       throw new Error('Mapbox needs a valid api key.');
     }
     if (
-      map.mapProvider === MapProviders.Custom &&
-      (!map.customLayers || map.customLayers.length === 0)
+        map.mapProvider === MapProviders.Custom &&
+        (!map.customLayers || map.customLayers.length === 0)
     ) {
       throw new Error('Custom maps need at least one valid layer');
     }
@@ -255,14 +264,14 @@ export class ConfigDiagnostics {
     }
   }
 
-  static async testPreviewConfig(settings: ServerPreviewConfig): Promise<void> {
-    Logger.debug(LOG_TAG, 'Testing preview config');
+  static async testAlbumCoverConfig(settings: ServerAlbumCoverConfig): Promise<void> {
+    Logger.debug(LOG_TAG, 'Testing cover config');
     const sp = new SearchQueryParser();
     if (
-      !Utils.equalsFilter(
-        sp.parse(sp.stringify(settings.SearchQuery)),
-        settings.SearchQuery
-      )
+        !Utils.equalsFilter(
+            sp.parse(sp.stringify(settings.SearchQuery)),
+            settings.SearchQuery
+        )
     ) {
       throw new Error('SearchQuery is not valid. Got: ' + JSON.stringify(sp.parse(sp.stringify(settings.SearchQuery))));
     }
@@ -279,7 +288,7 @@ export class ConfigDiagnostics {
     await ConfigDiagnostics.testImageFolder(config.Media.folder);
     await ConfigDiagnostics.testThumbnailConfig(config.Media.Thumbnail);
     await ConfigDiagnostics.testSearchConfig(config.Search, config);
-    await ConfigDiagnostics.testPreviewConfig(config.Preview);
+    await ConfigDiagnostics.testAlbumCoverConfig(config.AlbumCover);
     await ConfigDiagnostics.testFacesConfig(config.Faces, config);
     await ConfigDiagnostics.testTasksConfig(config.Jobs, config);
     await ConfigDiagnostics.testSharingConfig(config.Sharing, config);
@@ -288,11 +297,13 @@ export class ConfigDiagnostics {
 
   }
 
+
   static async runDiagnostics(): Promise<void> {
 
     if (process.env['NODE_ENV'] === 'debug') {
       NotificationManager.warning('You are running the application with NODE_ENV=debug. This exposes a lot of debug information that can be a security vulnerability. Set NODE_ENV=production, when you finished debugging.');
     }
+
 
     try {
       await ConfigDiagnostics.testDatabase(Config.Database);
@@ -300,8 +311,8 @@ export class ConfigDiagnostics {
       const err: Error = ex;
       Logger.warn(LOG_TAG, '[SQL error]', err.toString());
       Logger.error(
-        LOG_TAG,
-        'Error during initializing SQL DB, check DB connection and settings'
+          LOG_TAG,
+          'Error during initializing SQL DB, check DB connection and settings'
       );
       process.exit(1);
     }
@@ -312,15 +323,15 @@ export class ConfigDiagnostics {
       const err: Error = ex;
 
       Logger.warn(
-        LOG_TAG,
-        '[Thumbnail hardware acceleration] module error: ',
-        err.toString()
+          LOG_TAG,
+          '[Thumbnail hardware acceleration] module error: ',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Thumbnail hardware acceleration is not possible.' +
-        ' \'sharp\' node module is not found.' +
-        ' Falling back temporally to JS based thumbnail generation'
+          LOG_TAG,
+          'Thumbnail hardware acceleration is not possible.' +
+          ' \'sharp\' node module is not found.' +
+          ' Falling back temporally to JS based thumbnail generation'
       );
       process.exit(1);
     }
@@ -338,32 +349,32 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Video support error, switching off..',
-        err.toString()
+          'Video support error, switching off..',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Video support error, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Video support error, switching off..',
+          err.toString()
       );
       Config.Media.Video.enabled = false;
     }
 
     try {
       await ConfigDiagnostics.testMetaFileConfig(
-        Config.MetaFile,
-        Config
+          Config.MetaFile,
+          Config
       );
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Meta file support error, switching off gpx..',
-        err.toString()
+          'Meta file support error, switching off gpx..',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Meta file support error, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Meta file support error, switching off..',
+          err.toString()
       );
       Config.MetaFile.gpx = false;
     }
@@ -373,13 +384,13 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Albums support error, switching off..',
-        err.toString()
+          'Albums support error, switching off..',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Meta file support error, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Meta file support error, switching off..',
+          err.toString()
       );
       Config.Album.enabled = false;
     }
@@ -393,7 +404,7 @@ export class ConfigDiagnostics {
     }
     try {
       await ConfigDiagnostics.testThumbnailConfig(
-        Config.Media.Thumbnail
+          Config.Media.Thumbnail
       );
     } catch (ex) {
       const err: Error = ex;
@@ -406,32 +417,32 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Search is not supported with these settings. Disabling temporally. ' +
-        'Please adjust the config properly.',
-        err.toString()
+          'Search is not supported with these settings. Disabling temporally. ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Search is not supported with these settings, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Search is not supported with these settings, switching off..',
+          err.toString()
       );
       Config.Search.enabled = false;
     }
 
     try {
-      await ConfigDiagnostics.testPreviewConfig(Config.Preview);
+      await ConfigDiagnostics.testAlbumCoverConfig(Config.AlbumCover);
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Preview settings are not valid, resetting search query',
-        err.toString()
+          'Cover settings are not valid, resetting search query',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Preview settings are not valid, resetting search query',
-        err.toString()
+          LOG_TAG,
+          'Cover settings are not valid, resetting search query',
+          err.toString()
       );
-      Config.Preview.SearchQuery = {
+      Config.AlbumCover.SearchQuery = {
         type: SearchQueryTypes.any_text,
         text: '',
       } as TextSearch;
@@ -442,14 +453,14 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Faces are not supported with these settings. Disabling temporally. ' +
-        'Please adjust the config properly.',
-        err.toString()
+          'Faces are not supported with these settings. Disabling temporally. ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Faces are not supported with these settings, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Faces are not supported with these settings, switching off..',
+          err.toString()
       );
       Config.Faces.enabled = false;
     }
@@ -459,14 +470,14 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Some Tasks are not supported with these settings. Disabling temporally. ' +
-        'Please adjust the config properly.',
-        err.toString()
+          'Some Tasks are not supported with these settings. Disabling temporally. ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Some Tasks not supported with these settings, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Some Tasks not supported with these settings, switching off..',
+          err.toString()
       );
       Config.Faces.enabled = false;
     }
@@ -476,34 +487,34 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Sharing is not supported with these settings. Disabling temporally. ' +
-        'Please adjust the config properly.',
-        err.toString()
+          'Sharing is not supported with these settings. Disabling temporally. ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Sharing is not supported with these settings, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Sharing is not supported with these settings, switching off..',
+          err.toString()
       );
       Config.Sharing.enabled = false;
     }
 
     try {
       await ConfigDiagnostics.testRandomPhotoConfig(
-        Config.Sharing,
-        Config
+          Config.Sharing,
+          Config
       );
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Random Media is not supported with these settings. Disabling temporally. ' +
-        'Please adjust the config properly.',
-        err.toString()
+          'Random Media is not supported with these settings. Disabling temporally. ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Random Media is not supported with these settings, switching off..',
-        err.toString()
+          LOG_TAG,
+          'Random Media is not supported with these settings, switching off..',
+          err.toString()
       );
       Config.Sharing.enabled = false;
     }
@@ -513,17 +524,20 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
       NotificationManager.warning(
-        'Maps is not supported with these settings. Using open street maps temporally. ' +
-        'Please adjust the config properly.',
-        err.toString()
+          'Maps is not supported with these settings. Using open street maps temporally. ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Logger.warn(
-        LOG_TAG,
-        'Maps is not supported with these settings. Using open street maps temporally ' +
-        'Please adjust the config properly.',
-        err.toString()
+          LOG_TAG,
+          'Maps is not supported with these settings. Using open street maps temporally ' +
+          'Please adjust the config properly.',
+          err.toString()
       );
       Config.Map.mapProvider = MapProviders.OpenStreetMap;
     }
+
+
   }
+
 }

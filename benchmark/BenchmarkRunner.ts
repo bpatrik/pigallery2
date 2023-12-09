@@ -1,6 +1,6 @@
 import {Config} from '../src/common/config/private/Config';
 import {ObjectManagers} from '../src/backend/model/ObjectManagers';
-import {DiskMangerWorker} from '../src/backend/model/threading/DiskMangerWorker';
+import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
 import {IndexingManager} from '../src/backend/model/database/IndexingManager';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -28,7 +28,7 @@ import {
   TextSearchQueryMatchTypes,
   TextSearchQueryTypes
 } from '../src/common/entities/SearchQueryDTO';
-import {QueryKeywords, SearchQueryParser} from '../src/common/SearchQueryParser';
+import {defaultQueryKeywords, QueryKeywords, SearchQueryParser} from '../src/common/SearchQueryParser';
 import {ParentDirectoryDTO} from '../src/common/entities/DirectoryDTO';
 
 
@@ -84,7 +84,7 @@ export class BenchmarkRunner {
   }
 
   async bmSaveDirectory(): Promise<BenchmarkResult[]> {
-    const dir = await DiskMangerWorker.scanDirectory(this.biggestDirPath);
+    const dir = await DiskManager.scanDirectory(this.biggestDirPath);
     const bm = new Benchmark('Saving directory to DB', null,
       (): Promise<void> => this.resetDB(), null,
       async (): Promise<void> => {
@@ -110,7 +110,7 @@ export class BenchmarkRunner {
       });
     bm.addAStep({
       name: 'Scanning directory',
-      fn: async (): Promise<ContentWrapper> => new ContentWrapper(await DiskMangerWorker.scanDirectory(this.biggestDirPath))
+      fn: async (): Promise<ContentWrapper> => new ContentWrapper(await DiskManager.scanDirectory(this.biggestDirPath))
     });
     return await bm.run(this.RUNS);
   }
@@ -148,43 +148,7 @@ export class BenchmarkRunner {
   async bmAllSearch(): Promise<{ result: BenchmarkResult[], searchQuery: SearchQueryDTO }[]> {
     await this.setupDB();
 
-    const queryKeywords: QueryKeywords = {
-      NSomeOf: 'of',
-      and: 'and',
-      or: 'or',
-
-      from: 'after',
-      to: 'before',
-      landscape: 'landscape',
-      maxRating: 'max-rating',
-      maxResolution: 'max-resolution',
-      minRating: 'min-rating',
-      minResolution: 'min-resolution',
-      orientation: 'orientation',
-
-
-      years_ago: '%d-years-ago',
-      months_ago: '%d-months-ago',
-      weeks_ago: '%d-weeks-ago',
-      days_ago: '%d-days-ago',
-      every_year: 'every-year',
-      every_month: 'every-month',
-      every_week: 'every-week',
-      lastNDays: 'last-%d-days',
-      sameDay: 'same-day',
-
-      any_text: 'any-text',
-      keyword: 'keyword',
-      caption: 'caption',
-      directory: 'directory',
-      file_name: 'file-name',
-      person: 'person',
-      portrait: 'portrait',
-      position: 'position',
-      someOf: 'some-of',
-      kmFrom: 'km-from'
-    };
-    const queryParser = new SearchQueryParser(queryKeywords);
+    const queryParser = new SearchQueryParser(defaultQueryKeywords);
     const names = (await ObjectManagers.getInstance().PersonManager.getAll()).sort((a, b) => b.count - a.count);
     const queries: { query: SearchQueryDTO, description: string }[] = TextSearchQueryTypes.map(t => {
       const q = {
@@ -321,7 +285,6 @@ export class BenchmarkRunner {
 
 
   private resetDB = async (): Promise<void> => {
-    Config.Server.Threading.enabled = false;
     await ObjectManagers.reset();
     await fs.promises.rm(ProjectPath.DBFolder, {recursive: true, force: true});
     Config.Database.type = DatabaseType.sqlite;
@@ -330,7 +293,6 @@ export class BenchmarkRunner {
   };
 
   private async setupDB(): Promise<void> {
-    Config.Server.Threading.enabled = false;
     await this.resetDB();
     await new Promise<void>((resolve, reject): void => {
       try {

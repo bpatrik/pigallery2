@@ -1,6 +1,4 @@
-import * as cluster from 'cluster';
 import {Server} from './server';
-import {Worker} from './model/threading/Worker';
 import {ConfigDiagnostics} from './model/diagnostics/ConfigDiagnostics';
 
 
@@ -13,9 +11,5 @@ if ((process.argv || []).includes('--run-diagnostics')) {
     process.exit(0);
   });
 } else {
-  if ((cluster as any).isMaster) {
-    new Server();
-  } else {
-    Worker.process();
-  }
+  new Server();
 }

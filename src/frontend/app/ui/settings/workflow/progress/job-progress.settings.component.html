@@ -3,21 +3,21 @@
     Last run:
   </div>
   <div class="col-md-4 col-12" title="Run between" i18n-title>
-    <span class="oi oi-clock" aria-hidden="true"></span>
+    <ng-icon name="ionTimeOutline"></ng-icon>
     {{progress.time.start | date:'medium'}} -  {{progress.time.end | date:'mediumTime'}}
   </div>
   <div class="col-md-2 col-4"
        [title]="ProgressTitle">
-    <span class="oi oi-check" aria-hidden="true"></span>
+    <ng-icon name="ionCheckmarkOutline"></ng-icon>
     {{progress.steps.processed + progress.steps.skipped}}/{{progress.steps.all}}
   </div>
   <div class="col-md-2 col-4" title="Status" i18n-title>
-    <span class="oi oi-pulse" aria-hidden="true"></span>
+    <ng-icon name="ionPulseOutline"></ng-icon>
     {{State}}
   </div>
   <div class="col-md-2 col-4">
     <button class="btn btn-secondary float-end" (click)="openModal(template)">
-      <span class="oi oi-resize-both"></span>
+      <ng-icon name="ionResizeOutline"></ng-icon>
     </button>
   </div>
 </div>
@@ -34,16 +34,16 @@
       i18n-value name="details">
     <div class="input-group-append">
       <button class="btn btn-secondary" (click)="openModal(template)">
-        <span class="oi oi-resize-both"></span>
+        <ng-icon name="ionResizeOutline"></ng-icon>
       </button>
     </div>
   </div>
 
 
   <div class="mb-1 row progress-row ">
-    <div class="col-6 col-md-2 col-lg-1 text-md-right order-md-0" title="time elapsed"
+    <div class="col-6 col-md-2 col-lg-1 text-md-right order-md-0 text-nowrap" title="time elapsed"
          i18n-title>{{TimeElapsed| duration:':'}}</div>
-    <div class="col-6 col-md-2 col-lg-1 order-md-2 text-end text-md-left" title="duration"
+    <div class="col-6 col-md-2 col-lg-1 order-md-2 text-end text-md-left  text-nowrap" title="duration"
          i18n-title>{{TimeAll| duration:':'}}</div>
     <div class="progress col-md-8 col-lg-10 order-md-1"
          [title]="ProgressTitle">

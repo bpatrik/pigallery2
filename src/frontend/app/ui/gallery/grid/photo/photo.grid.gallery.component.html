@@ -1,7 +1,9 @@
-<div #photoContainer class="photo-container" (mouseover)="mouseOver()" (mouseout)="mouseOut()">
+<div #photoContainer class="photo-container rounded" (mouseover)="mouseOver()" (mouseout)="mouseOut()">
 
 
   <img alt="{{gridMedia.media.name}}" #img [src]="thumbnail.Src"
+       (load)="loaded=true"
+       [class.loading]="!loaded"
        *ngIf="thumbnail.Available">
 
   <app-gallery-grid-photo-loading
@@ -12,21 +14,21 @@
 
 
   <div *ngIf="gridMedia.isVideo()" class="video-indicator">
-    {{gridMedia.Video.metadata.duration  | duration}} <span class="oi oi-video"></span></div>
+    {{gridMedia.Video.metadata.duration  | duration}}
+    <ng-icon name="ionVideocamOutline"></ng-icon>
+  </div>
 
 
   <!--Info box -->
-  <div class="info"
+  <div class="info rounded-bottom"
        *ngIf="infoBarVisible">
     <div class="photo-name">{{Title}}</div>
 
     <div class="photo-position" *ngIf="gridMedia.hasPositionData()">
-      <span class="oi oi-map-marker"></span>
+      <ng-icon name="ionLocationOutline"></ng-icon>
       <ng-template [ngIf]="getPositionText()">
         <a [routerLink]="['/search', getPositionSearchQuery()]"
-           *ngIf="searchEnabled">
-          {{getPositionText()}}
-        </a>
+           *ngIf="searchEnabled">{{getPositionText()}}</a>
         <span *ngIf="!searchEnabled">{{getPositionText()}}</span>
       </ng-template>
     </div>
@@ -37,11 +39,14 @@
            [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]" [ngSwitch]="keyword.type">
           <ng-template [ngSwitchCase]="SearchQueryTypes.keyword">#</ng-template><!--
        -->
-          <ng-template [ngSwitchCase]="SearchQueryTypes.person"><span class="oi oi-person"></span></ng-template><!--
+          <ng-template [ngSwitchCase]="SearchQueryTypes.person">
+            <ng-icon name="ionPersonOutline"></ng-icon>
+          </ng-template><!--
        -->{{keyword.value}}</a>
         <span *ngIf="!searchEnabled" [ngSwitch]="keyword.type">
           <ng-template [ngSwitchCase]="SearchQueryTypes.keyword">#</ng-template><!--
-       --><ng-template [ngSwitchCase]="SearchQueryTypes.person"><span class="oi oi-person"></span></ng-template><!--
+       --><ng-template [ngSwitchCase]="SearchQueryTypes.person"><ng-icon
+          name="ionPersonOutline"></ng-icon></ng-template><!--
        -->{{keyword.value}}</span>
         <ng-template [ngIf]="!last">,&#160;</ng-template>
       </ng-template>

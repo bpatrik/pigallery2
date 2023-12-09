@@ -1,15 +1,7 @@
-import {
-  Column,
-  Entity,
-  Index,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  Unique,
-} from 'typeorm';
+import {Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, Unique,} from 'typeorm';
 import {PersonJunctionTable} from './PersonJunctionTable';
 import {columnCharsetCS} from './EntityUtils';
-import { PersonDTO } from '../../../../common/entities/PersonDTO';
+import {PersonDTO} from '../../../../common/entities/PersonDTO';
 
 @Entity()
 @Unique(['name'])
@@ -27,10 +19,10 @@ export class PersonEntry implements PersonDTO {
   @Column({default: false})
   isFavourite: boolean;
 
-  @OneToMany((type) => PersonJunctionTable, (junctionTable) => junctionTable.person)
+  @OneToMany(() => PersonJunctionTable, (junctionTable) => junctionTable.person)
   public faces: PersonJunctionTable[];
 
-  @ManyToOne((type) => PersonJunctionTable, {
+  @ManyToOne(() => PersonJunctionTable, {
     onDelete: 'SET NULL',
     nullable: true,
   })

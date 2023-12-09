@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import {Request} from 'express';
 
 export enum ErrorCodes {
   NOT_AUTHENTICATED = 1,
@@ -33,16 +33,16 @@ export class ErrorDTO {
   public request: {
     method: string;
     url: string;
-  } = { method: '', url: '' };
+  } = {method: '', url: ''};
 
   constructor(
-    public code: ErrorCodes,
-    public message?: string,
-    public details?: any,
-    req?: Request
+      public code: ErrorCodes,
+      public message?: string,
+      public details?: any,
+      req?: Request
   ) {
     this.detailsStr =
-      (this.details ? this.details.toString() : '') || ErrorCodes[code];
+        (this.details ? this.details.toString() : '') || ErrorCodes[code];
     if (req) {
       this.request = {
         method: req.method,

@@ -1,13 +1,12 @@
-import { ChildEntity, Column } from 'typeorm';
-import { AlbumBaseEntity } from './AlbumBaseEntity';
-import { SavedSearchDTO } from '../../../../../common/entities/album/SavedSearchDTO';
-import { SearchQueryDTO } from '../../../../../common/entities/SearchQueryDTO';
+import {ChildEntity, Column} from 'typeorm';
+import {AlbumBaseEntity} from './AlbumBaseEntity';
+import {SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDTO';
+import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
 
 @ChildEntity()
 export class SavedSearchEntity
-  extends AlbumBaseEntity
-  implements SavedSearchDTO
-{
+    extends AlbumBaseEntity
+    implements SavedSearchDTO {
   @Column({
     type: 'text',
     nullable: false,

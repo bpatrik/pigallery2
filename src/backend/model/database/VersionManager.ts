@@ -23,30 +23,30 @@ export class VersionManager implements IObjectManager {
     }
 
     const versionString =
-      DataStructureVersion +
-      '_' +
-      this.latestDirectoryStatus.name +
-      '_' +
-      this.latestDirectoryStatus.lastModified +
-      '_' +
-      this.latestDirectoryStatus.mediaCount +
-      '_' +
-      this.allMediaCount;
+        DataStructureVersion +
+        '_' +
+        this.latestDirectoryStatus.name +
+        '_' +
+        this.latestDirectoryStatus.lastModified +
+        '_' +
+        this.latestDirectoryStatus.mediaCount +
+        '_' +
+        this.allMediaCount;
     return crypto.createHash('md5').update(versionString).digest('hex');
   }
 
   async onNewDataVersion(): Promise<void> {
     const connection = await SQLConnection.getConnection();
     const dir = await connection
-      .getRepository(DirectoryEntity)
-      .createQueryBuilder('directory')
-      .limit(1)
-      .orderBy('directory.lastModified')
-      .getOne();
+        .getRepository(DirectoryEntity)
+        .createQueryBuilder('directory')
+        .limit(1)
+        .orderBy('directory.lastModified')
+        .getOne();
     this.allMediaCount = await connection
-      .getRepository(MediaEntity)
-      .createQueryBuilder('media')
-      .getCount();
+        .getRepository(MediaEntity)
+        .createQueryBuilder('media')
+        .getCount();
 
     if (!dir) {
       return;

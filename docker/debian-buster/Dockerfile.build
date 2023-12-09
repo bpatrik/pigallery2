@@ -1,13 +1,14 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:18-buster AS builder
-COPY pigallery2-release /app
+FROM node:18-alpine AS builder
 WORKDIR /app
+COPY package.json /app
 RUN npm install --unsafe-perm
 RUN mkdir -p /app/data/config && \
     mkdir -p /app/data/db && \
     mkdir -p /app/data/images && \
     mkdir -p /app/data/tmp
+COPY pigallery2-release /app
 
 
 #-----------------MAIN--------------------

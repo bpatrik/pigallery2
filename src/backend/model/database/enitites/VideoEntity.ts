@@ -1,14 +1,10 @@
-import { ChildEntity, Column } from 'typeorm';
-import { MediaEntity, MediaMetadataEntity } from './MediaEntity';
-import {
-  VideoDTO,
-  VideoMetadata,
-} from '../../../../common/entities/VideoDTO';
+import {ChildEntity, Column} from 'typeorm';
+import {MediaEntity, MediaMetadataEntity} from './MediaEntity';
+import {VideoDTO, VideoMetadata,} from '../../../../common/entities/VideoDTO';
 
 export class VideoMetadataEntity
-  extends MediaMetadataEntity
-  implements VideoMetadata
-{
+    extends MediaMetadataEntity
+    implements VideoMetadata {
   @Column('int')
   bitRate: number;
 
@@ -28,6 +24,6 @@ export class VideoMetadataEntity
 
 @ChildEntity()
 export class VideoEntity extends MediaEntity implements VideoDTO {
-  @Column((type) => VideoMetadataEntity)
+  @Column(() => VideoMetadataEntity)
   metadata: VideoMetadataEntity;
 }

@@ -13,14 +13,14 @@ export class PersonJunctionTable {
   id: number;
 
   @Index()
-  @ManyToOne((type) => MediaEntity, (media) => media.metadata.faces, {
+  @ManyToOne(() => MediaEntity, (media) => media.metadata.faces, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   media: MediaEntity;
 
   @Index()
-  @ManyToOne((type) => PersonEntry, (person) => person.faces, {
+  @ManyToOne(() => PersonEntry, (person) => person.faces, {
     onDelete: 'CASCADE',
     nullable: false,
   })

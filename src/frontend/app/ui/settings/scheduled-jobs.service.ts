@@ -1,6 +1,6 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {JobProgressDTO, JobProgressStates,} from '../../../../common/entities/job/JobProgressDTO';
+import {JobProgressDTO, JobProgressStates, OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
 import {NetworkService} from '../../model/network/network.service';
 import {JobScheduleDTO} from '../../../../common/entities/job/JobScheduleDTO';
 import {ConfigTemplateEntry, JobDTO, JobDTOUtils} from '../../../../common/entities/job/JobDTO';
@@ -9,7 +9,7 @@ import {NotificationService} from '../../model/notification.service';
 
 @Injectable()
 export class ScheduledJobsService {
-  public progress: BehaviorSubject<Record<string, JobProgressDTO>>;
+  public progress: BehaviorSubject<Record<string, OnTimerJobProgressDTO>>;
   public onJobFinish: EventEmitter<string> = new EventEmitter<string>();
   timer: number = null;
   public availableJobs: BehaviorSubject<JobDTO[]>;
@@ -124,11 +124,19 @@ export class ScheduledJobsService {
           ))
       ) {
         this.onJobFinish.emit(prg);
-        this.notification.success(
-          $localize`Job finished` +
-          ': ' +
-          this.backendTextService.getJobName(prevPrg[prg].jobName)
-        );
+        if (this.progress.value[prg].state === JobProgressStates.failed) {
+          this.notification.warning(
+            $localize`Job failed` +
+            ': ' +
+            this.backendTextService.getJobName(prevPrg[prg].jobName)
+          );
+        } else {
+          this.notification.success(
+            $localize`Job finished` +
+            ': ' +
+            this.backendTextService.getJobName(prevPrg[prg].jobName)
+          );
+        }
       }
     }
   }

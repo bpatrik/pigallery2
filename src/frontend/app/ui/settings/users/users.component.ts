@@ -25,28 +25,27 @@ export class UsersComponent implements OnInit {
   Changed = false;
 
 
-
   constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    private userSettings: UsersSettingsService,
-    private settingsService: SettingsService,
-    private notification: NotificationService
+      private authService: AuthenticationService,
+      private navigation: NavigationService,
+      private userSettings: UsersSettingsService,
+      private settingsService: SettingsService,
+      private notification: NotificationService
   ) {
   }
 
   ngOnInit(): void {
     if (
-      !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < UserRoles.Admin
+        !this.authService.isAuthenticated() ||
+        this.authService.user.value.role < UserRoles.Admin
     ) {
       this.navigation.toLogin();
       return;
     }
     this.userRoles = Utils.enumToArray(UserRoles)
-      .filter((r) => r.key !== UserRoles.LimitedGuest)
-      .filter((r) => r.key <= this.authService.user.value.role)
-      .sort((a, b) => a.key - b.key);
+        .filter((r) => r.key !== UserRoles.LimitedGuest)
+        .filter((r) => r.key <= this.authService.user.value.role)
+        .sort((a, b) => a.key - b.key);
 
     this.getUsersList();
   }
@@ -60,7 +59,7 @@ export class UsersComponent implements OnInit {
     return currentUser.name !== user.name && currentUser.role >= user.role;
   }
 
-  get Enabled():boolean{
+  get Enabled(): boolean {
     return this.settingsService.settings.value.Users.authenticationRequired;
   }
 
@@ -78,8 +77,8 @@ export class UsersComponent implements OnInit {
     } catch (e) {
       const err: ErrorDTO = e;
       this.notification.error(
-        err.message + ', ' + err.details,
-        $localize`User creation error!`
+          err.message + ', ' + err.details,
+          $localize`User creation error!`
       );
     }
   }

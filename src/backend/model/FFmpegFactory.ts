@@ -1,6 +1,8 @@
+import {FfmpegCommand} from 'fluent-ffmpeg';
+
 /* eslint-disable @typescript-eslint/no-var-requires */
 export class FFmpegFactory {
-  public static get(): any {
+  public static get(): (path?: string) => FfmpegCommand {
     const ffmpeg = require('fluent-ffmpeg');
     try {
       const ffmpegPath = require('ffmpeg-static');

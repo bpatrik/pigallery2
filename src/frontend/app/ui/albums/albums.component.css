@@ -3,6 +3,11 @@ app-album {
   display: inline-block;
 }
 
+
+.container-fluid {
+  line-height: 0;
+}
+
 .no-item-msg {
   height: 100vh;
   text-align: center;
@@ -20,10 +25,14 @@ app-album {
 
 .add-saved-search .text {
   position: relative;
-  top: calc(50% - 40px);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
   text-align: center;
 }
 
-.add-saved-search .text .oi {
-  font-size: 80px;
+.add-saved-search .text ng-icon {
+  font-size: 120px;
+  display: inline-block;
+  width: 100%;
 }

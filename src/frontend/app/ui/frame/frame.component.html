@@ -3,8 +3,9 @@
   [class.hide-navbar]="!navbarKeepTop && shouldHideNavbar" [class.animate-navbar]="animateNavbar">
   <nav class="navbar navbar-expand bg-body">
     <div class="container-fluid">
-      <a class="navbar-brand d-none d-sm-block" [routerLink]="['/gallery']" [queryParams]="queryService.getParams()">
-        <img src="assets/icon_inv.png" width="30" height="30" class="d-inline-block align-top" alt="">
+      <a class="navbar-brand d-none d-sm-block" [routerLink]="['/gallery']"
+         [queryParams]="queryService.getParams()">
+        <app-icon class="d-inline-block align-top me-1" [width]="30" [height]="30"></app-icon>
         <strong class="d-none d-lg-inline-block">{{title}}</strong>
       </a>
       <div class="collapse navbar-collapse text-center" id="navbarCollapse" [collapse]="collapsed">
@@ -44,26 +45,27 @@
             </li>
             <ng-container *ngIf="authenticationRequired && user.value">
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
-                <span style="white-space: nowrap;">
-                  <span class="oi oi-person"></span> {{user.value.name}}
-                </span>
+             <span style="white-space: nowrap;">
+               <ng-icon name="ionPersonOutline" class="me-1"></ng-icon><span>{{user.value.name}}</span>
+              </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
               </li>
             </ng-container>
             <li class="nav-item d-xl-block d-none">
-              <span>
-                <app-language #languageSelector class="navbar-btn" [isDark]="true"></app-language>
-              </span>
+            <span>
+              <app-language #languageSelector class="navbar-btn"></app-language>
+            </span>
             </li>
             <li class="nav-item divider-vertical d-xl-block d-none">
             </li>
             <li class="nav-item dropdown">
-              <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom" [autoClose]="false"
-                container="body">
-                <button id="button-alignment" dropdownToggle type="button" class="btn btn-dark dropdown-toggle"
-                  aria-controls="dropdown-alignment">
-                  <span class="oi oi-menu"></span>
+              <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom"
+                   [autoClose]="false" container="body">
+                <button id="button-alignment" dropdownToggle
+                        type="button" class="btn btn-tertiary dropdown-toggle"
+                        aria-controls="dropdown-alignment">
+                  <ng-icon class="align-text-top" size="1.2em" name="ionMenuOutline"></ng-icon>
                   <span *ngIf="isAdmin() && notificationService.numberOfNotifications>0"
                     class="navbar-badge badge text-bg-warning">{{notificationService.numberOfNotifications}}</span>
                 </button>
@@ -73,9 +75,10 @@
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">
                       <ng-container *ngIf="authenticationRequired && user.value">
-                        <span class="oi oi-person"></span>{{user.value.name}}
+                        <ng-icon name="ionPersonOutline"></ng-icon>
+                        <span>{{user.value.name}}</span>
                       </ng-container>
-                      <app-language class="navbar-btn d-inline-block" [isDark]="false"></app-language>
+                      <app-language class="navbar-btn d-inline-block float-end"></app-language>
                     </div>
                   </li>
                   <li class="nav-item d-xl-none" *ngIf="showShare">
@@ -86,16 +89,16 @@
                       <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
                         <ng-container [ngSwitch]="themeService.mode">
                           <ng-container *ngSwitchCase="ThemeModes.light">
-                            <span class="oi oi-sun"></span>
+                            <ng-icon name="ionSunnyOutline"></ng-icon>
                             <ng-container i18n>Light</ng-container>
                           </ng-container>
                           <ng-container *ngSwitchCase="ThemeModes.dark">
-                            <span class="oi oi-moon"></span>
+                            <ng-icon name="ionMoonOutline"></ng-icon>
                             <ng-container i18n>Dark</ng-container>
                           </ng-container>
                           <ng-container *ngSwitchCase="ThemeModes.auto">
-                            <span class="oi oi-moon"></span>
-                            <span class="oi oi-sun" style="margin-left: -0.8rem"></span>
+                            <ng-icon name="ionMoonOutline"></ng-icon>
+                            <ng-icon name="ionSunnyOutline" style="margin-left: -0.3rem"></ng-icon>
                             <ng-container i18n>Auto</ng-container>
                           </ng-container>
                         </ng-container>
@@ -107,35 +110,36 @@
                     <li class="nav-item d-md-none"
                       *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
                       <a class="dropdown-item" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')">
-                        <span class="oi oi-grid-two-up"></span>
+                        <ng-icon name="ionAlbumsOutline"></ng-icon>
                         <ng-container i18n>Albums</ng-container>
                       </a>
                     </li>
                     <li class="nav-item d-md-none"
                       *ngIf="link.type === NavigationLinkTypes.faces && isFacesAvailable()">
                       <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')">
-                        <span class="oi oi-people"></span>
+                        <ng-icon name="ionPeopleOutline"></ng-icon>
                         <ng-container i18n>Faces</ng-container>
                       </a>
                     </li>
                     <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.gallery">
-                      <a class="dropdown-item" [routerLink]="['/gallery']" [queryParams]="queryService.getParams()"
-                        [class.active]="isLinkActive('/gallery')">
-                        <span class="oi oi-image"></span>
+                      <a class="dropdown-item"
+                         [routerLink]="['/gallery']"
+                         [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')">
+                        <ng-icon name="ionImagesOutline"></ng-icon>
                         <ng-container i18n>Gallery</ng-container>
                       </a>
                     </li>
                     <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.url">
                       <a class="dropdown-item" [href]="link.url" [class.active]="isLinkActive(link.url)">
-                        <span class="oi oi-external-link"></span>
-                        {{link.name}}
+                        <ng-icon name="ionLinkOutline"></ng-icon>
+                        <span>{{link.name}}</span>
                       </a>
                     </li>
                     <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.search">
                       <a class="dropdown-item" [routerLink]="['/search', link.SearchQuery | json]"
-                        [class.active]="isSearchActive(link.SearchQuery)">
-                        <span class="oi oi-link-intact"></span>
-                        {{link.name}}
+                         [class.active]="isSearchActive(link.SearchQuery)">
+                        <ng-icon name="ionSearchOutline"></ng-icon>
+                        <span>{{link.name}}</span>
                       </a>
                     </li>
                   </ng-container>
@@ -143,20 +147,21 @@
 
                   <li role="menuitem" dropdown [autoClose]="false" placement="bottom left" container="body">
                     <a dropdownToggle class="dropdown-item">
-                      <span class="oi oi-command"></span>
+                      <ng-icon name="ionHammerOutline"></ng-icon>
                       <ng-container i18n>Tools</ng-container>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-start" *dropdownMenu role="menu">
                       <ng-content select="[navbar-menu]"></ng-content>
                       <li role="menuitem" *ngIf="isAdmin()">
-                        <a class="dropdown-item" [routerLink]="['/duplicates']">
-                          <span class="oi oi-layers"></span>
+                        <a class="dropdown-item"
+                           [routerLink]="['/duplicates']">
+                          <ng-icon name="ionCopyOutline"></ng-icon>
                           <ng-container i18n>Duplicates</ng-container>
                         </a>
                       </li>
                       <li role="menuitem">
                         <div class="dropdown-item d-flex justify-content-between">
-                          <span title="key: c" i18n-title i18n>Fix nabvar</span>
+                          <span title="key: c" i18n-title i18n>Fix navbar</span>
                           <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" role="switch" name="fix-navbar"
                               id="fix-switch" [(ngModel)]="fixNavbarOnTop">
@@ -167,7 +172,7 @@
                   </li>
                   <li role="menuitem" *ngIf="isAdmin()">
                     <a class="dropdown-item" [routerLink]="['/admin']">
-                      <span class="oi oi-wrench"></span>
+                      <ng-icon name="ionSettingsOutline"></ng-icon>
                       <span *ngIf="notificationService.numberOfNotifications>0"
                         class="badge rounded-pill position-absolute p-0 text-bg-warning">{{notificationService.numberOfNotifications}}</span>
                       <ng-container i18n>Settings</ng-container>
@@ -175,7 +180,7 @@
                   </li>
                   <li role="menuitem" *ngIf="authenticationRequired">
                     <button class="dropdown-item btn btn-link" (click)="logout()">
-                      <span class="oi oi-account-logout"></span>
+                      <ng-icon name="ionLogOutOutline"></ng-icon>
                       <ng-container i18n>Logout</ng-container>
                     </button>
                   </li>
@@ -191,3 +196,10 @@
   <ng-content select="[navbar-appendix]"></ng-content>
 </div>
 <ng-content select="[body]"></ng-content>
+<button
+  *ngIf="enableScrollUpButton"
+  (click)="scrollUp()"
+  [class.show-btn-scroll-up]="!shouldHideNavbar && !navbarKeepTop"
+  class="btn btn-tertiary rounded-pill btn-scroll-up">
+  <ng-icon name="ionChevronUpOutline"></ng-icon>
+</button>

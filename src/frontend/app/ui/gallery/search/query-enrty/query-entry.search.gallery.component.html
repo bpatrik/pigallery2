@@ -2,8 +2,8 @@
   <ng-container *ngIf="IsListQuery">
     <div class="col-md-3 col-4">
       <select
-        id="listSearchType"
-        name="listSearchType"
+        [id]="'listSearchType'+id"
+        [name]="'listSearchType'+id"
         class="form-select"
         [(ngModel)]="queryEntry.type"
         (ngModelChange)="onChangeType()">
@@ -12,7 +12,7 @@
       </select>
     </div>
     <ng-container *ngIf="queryEntry.type == SearchQueryTypes.SOME_OF">
-      <label class="col-4 col-sm-auto control-label" for="someOfMinValue">
+      <label class="col-4 col-sm-auto control-label" [for]="'someOfMinValue'+id">
         <ng-container i18n>At least this many</ng-container>
         (1-{{AsListQuery.list.length}}):</label>
       <div class="col-md col">
@@ -23,8 +23,8 @@
           i18n-title
           [(ngModel)]="AsSomeOfQuery.min"
           (ngModelChange)="onChange()"
-          name="someOfMinValue"
-          id="someOfMinValue"
+          [name]="'someOfMinValue'+id"
+          [id]="'someOfMinValue'+id"
           required="required">
       </div>
     </ng-container>
@@ -36,17 +36,23 @@
     <button [ngClass]="'btn-danger'"
             class="btn float-end col-1 align-self-center"
             (click)="deleteItem()">
-      <span class="oi oi-trash" aria-hidden="true" aria-label="Delete"></span>
+      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
     </button>
     <div class="container query-list">
       <app-gallery-search-query-entry *ngFor="let sq of AsListQuery.list; index as i"
+                                      [id]="id+'_'+i"
                                       [(ngModel)]="AsListQuery.list[i]"
                                       (delete)="itemDeleted(i)">
       </app-gallery-search-query-entry>
     </div>
     <div class="col query-list d-flex justify-content-start">
       <button class="btn btn-primary" (click)="addQuery()">
-        <span class="oi oi-plus" aria-hidden="true" aria-label="Add"> Add</span>
+        <ng-icon
+          class="me-1"
+          style="margin-left: -0.1em; margin-right: -0.1em"
+          [name]="'ionAddOutline'+id"
+          title="Add" i18n-title></ng-icon>
+        <span i18n>Add</span>
       </button>
     </div>
   </ng-container>
@@ -54,8 +60,8 @@
     <div class="col-lg-4 col-xl-3">
       <div class="input-group">
         <select
-          id="searchType"
-          name="searchType"
+          [id]="'searchType'+id"
+          [name]="'searchType'+id"
           class="form-select"
           [(ngModel)]="queryEntry.type"
           (ngModelChange)="onChangeType()">
@@ -63,11 +69,11 @@
           </option>
         </select>
         <select
-          id="negate"
-          name="negate"
+          [id]="'negate'+id"
+          [name]="'negate'+id"
           class="form-select w-auto flex-grow-0"
           title="Negate"
-          p18n-title
+          i18n-title
           [(ngModel)]="SelectedMatchType"
           (ngModelChange)="onChange()">
           <option *ngFor="let mt of MatchingTypes" [ngValue]="mt">{{mt}}
@@ -77,8 +83,8 @@
     <div class="col-10 col-lg" *ngIf="IsTextQuery">
       <div class="input-group">
         <input
-          id="searchField"
-          name="searchField"
+          [id]="'searchField'+id"
+          [name]="'searchField'+id"
           placeholder="Search text"
           i18n-placeholder
           class="form-control rounded-2"
@@ -99,15 +105,15 @@
                      step="0.1"
                      [(ngModel)]="AsDistanceQuery.distance"
                      (ngModelChange)="onChange()"
-                     name="distance" required>
+                     [name]="'distance'+id" required>
               <span class="input-group-text">km</span>
             </div>
           </div>
           <div class="col-md-8">
             <div class="input-group">
-              <label class="control-label me-2" for="maxResolution">From</label>
-              <input id="from"
-                     name="from"
+              <label class="control-label me-2" [for]="'maxResolution_'+id">From</label>
+              <input [name]="'maxResolution_'+id"
+                     [id]="'maxResolution_'+id"
                      title="From"
                      placeholder="New York"
                      i18n-title
@@ -127,13 +133,14 @@
                i18n-title
                [ngModel]="AsRangeQuery.value | date:'yyyy-MM-dd'"
                (ngModelChange)="AsRangeQuery.value = $event; onChange() "
-               [value]="AsRangeQuery.value | date:'yyyy-MM-dd'" #from_date="ngModel"
+               [value]="AsRangeQuery.value | date:'yyyy-MM-dd'"
+               #from_date="ngModel"
                class="form-control input-md rounded-2"
                type="date">
       </div>
       <div *ngSwitchCase="SearchQueryTypes.to_date" class="col-10 col-lg d-flex">
-        <input id="to_date"
-               name="to_date"
+        <input [id]="'to_date'+id"
+               [name]="'to_date'+id"
                title="To date"
                i18n-title
                [ngModel]="AsRangeQuery.value | date:'yyyy-MM-dd'"
@@ -143,8 +150,8 @@
                type="date">
       </div>
       <div *ngSwitchCase="SearchQueryTypes.min_rating" class="col-10 col-lg d-flex">
-        <input id="minRating"
-               name="minRating"
+        <input [id]="'minRating'+id"
+               [name]="'minRating'+id"
                title="Minimum Rating"
                placeholder="0"
                i18n-title
@@ -156,9 +163,35 @@
                type="number">
       </div>
       <div *ngSwitchCase="SearchQueryTypes.max_rating" class="col-10 col-lg d-flex">
-        <input id="maxRating"
-               name="maxRating"
+        <input [id]="'maxRating'+id"
+               [name]="'maxRating'+id"
                title="Maximum Rating"
+               placeholder="5"
+               i18n-title
+               min="0"
+               max="5"
+               class="form-control input-md rounded-2"
+               [(ngModel)]="AsRangeQuery.value"
+               (ngModelChange)="onChange()"
+               type="number">
+      </div>
+      <div *ngSwitchCase="SearchQueryTypes.min_person_count" class="col-10 col-lg d-flex">
+        <input [id]="'min_person_count'+id"
+               [name]="'min_person_count'+id"
+               title="Minimum Person count"
+               placeholder="0"
+               i18n-title
+               min="0"
+               max="5"
+               class="form-control input-md rounded-2"
+               [(ngModel)]="AsRangeQuery.value"
+               (ngModelChange)="onChange()"
+               type="number">
+      </div>
+      <div *ngSwitchCase="SearchQueryTypes.max_person_count" class="col-10 col-lg d-flex">
+        <input [id]="'max_person_count'+id"
+               [name]="'max_person_count'+id"
+               title="Maximum Person count"
                placeholder="5"
                i18n-title
                min="0"
@@ -170,9 +203,9 @@
       </div>
       <div *ngSwitchCase="SearchQueryTypes.min_resolution" class="col-10 col-lg">
         <div class="input-group">
-          <input id="minResolution"
-                 name="minResolution"
-                 title="Minimum Rating"
+          <input [id]="'minResolution'+id"
+                 [name]="'minResolution'+id"
+                 title="Minimum Resolution"
                  placeholder="0"
                  i18n-title
                  min="0"
@@ -186,9 +219,9 @@
 
       <div *ngSwitchCase="SearchQueryTypes.max_resolution" class="col-10 col-lg">
         <div class="input-group">
-          <input id="maxResolution"
-                 name="maxResolution"
-                 title="Maximum Rating"
+          <input [id]="'maxResolution'+id"
+                 [name]="'maxResolution'+id"
+                 title="Maximum Resolution"
                  placeholder="5"
                  i18n-title
                  [min]="0"
@@ -201,11 +234,11 @@
       </div>
       <div *ngSwitchCase="SearchQueryTypes.orientation" class="col-10 col-lg d-flex">
         <div class="input-group col-md-6">
-          <select class="form-select rounded-2"
+          <select [id]="'orientation-select'+id"
+                  [name]="'orientation-select'+id"
+                  class="form-select rounded-2"
                   [(ngModel)]="AsOrientationQuery.landscape"
                   (ngModelChange)="onChange()"
-                  id="orientation-select"
-                  name="orientation-select"
                   title="Orientation"
                   required>
             <option [ngValue]="true" i18n>Landscape</option>
@@ -218,8 +251,8 @@
         <div class="row">
           <div class="input-group col-md-6">
             <span class="input-group-text" i18n>Last</span>
-            <input id="daysLength"
-                   name="daysLength"
+            <input [id]="'daysLength'+id"
+                   [name]="'daysLength'+id"
                    title="Last N Days"
                    placeholder="1"
                    i18n-title
@@ -234,8 +267,8 @@
           <div class="input-group col-md-6">
             <input
               *ngIf="AsDatePatternQuery.frequency == DatePatternFrequency.days_ago || AsDatePatternQuery.frequency == DatePatternFrequency.weeks_ago || AsDatePatternQuery.frequency == DatePatternFrequency.months_ago || AsDatePatternQuery.frequency == DatePatternFrequency.years_ago"
-              id="agoNumber"
-              name="agoNumber"
+              [id]="'agoNumber'+id"
+              [name]="'agoNumber'+id"
               title="Ago"
               placeholder="1"
               i18n-title
@@ -247,8 +280,8 @@
             <select class="form-select rounded-2"
                     [(ngModel)]="AsDatePatternQuery.frequency"
                     (ngModelChange)="onChange()"
-                    id="date_pattern-select"
-                    name="date_pattern-select"
+                    [id]="'date_pattern-select'+id"
+                    [name]="'date_pattern-select'+id"
                     title="Date Pattern"
                     required>
               <option [ngValue]="DatePatternFrequency.days_ago" i18n>Day(s) ago</option>
@@ -267,7 +300,7 @@
       <button [ngClass]="'btn-danger'"
               class="btn  w-auto float-end"
               (click)="deleteItem()">
-        <span class="oi oi-trash" aria-hidden="true" aria-label="Delete"></span>
+        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
       </button>
     </div>
   </ng-container>

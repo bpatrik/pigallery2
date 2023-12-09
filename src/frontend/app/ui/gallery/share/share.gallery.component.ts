@@ -1,7 +1,6 @@
 import {Component, Input, OnDestroy, OnInit, TemplateRef} from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
-import {ContentService} from '../content.service';
 import {ContentWrapper} from '../../../../../common/entities/ConentWrapper';
 import {SharingDTO} from '../../../../../common/entities/SharingDTO';
 import {Config} from '../../../../../common/config/public/Config';
@@ -9,6 +8,10 @@ import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {Subscription} from 'rxjs';
+import {UserRoles} from '../../../../../common/entities/UserDTO';
+import {AuthenticationService} from '../../../model/network/authentication.service';
+import {ClipboardService} from 'ngx-clipboard';
+import {ContentLoaderService} from '../contentLoader.service';
 
 @Component({
   selector: 'app-gallery-share',
@@ -19,6 +22,8 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   enabled = true;
   @Input() dropDownItem = false;
   url = '';
+  urlValid = false;
+  showSharingList = false;
 
   input = {
     includeSubfolders: true,
@@ -37,39 +42,64 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   modalRef: BsModalRef;
   invalidSettings = $localize`Invalid settings`;
 
+  activeShares: SharingDTO[] = [];
+
   text = {
     Yes: 'Yes',
     No: 'No',
   };
 
   constructor(
-    private sharingService: ShareService,
-    public galleryService: ContentService,
-    private notification: NotificationService,
-    private modalService: BsModalService
+      public sharingService: ShareService,
+      public galleryService: ContentLoaderService,
+      private notification: NotificationService,
+      private modalService: BsModalService,
+      public authService: AuthenticationService,
+      private clipboardService: ClipboardService
   ) {
     this.text.Yes = $localize`Yes`;
     this.text.No = $localize`No`;
   }
 
+  public get IsAdmin() {
+    return this.authService.user.value.role > UserRoles.Admin;
+  }
+
   ngOnInit(): void {
     this.contentSubscription = this.galleryService.content.subscribe(
-      (content: ContentWrapper) => {
-        this.enabled = !!content.directory;
-        if (!this.enabled) {
-          return;
+        async (content: ContentWrapper) => {
+          this.activeShares = [];
+          this.enabled = !!content.directory;
+          if (!this.enabled) {
+            return;
+          }
+          this.currentDir = Utils.concatUrls(
+              content.directory.path,
+              content.directory.name
+          );
+          await this.updateActiveSharesList();
         }
-        this.currentDir = Utils.concatUrls(
-          content.directory.path,
-          content.directory.name
-        );
-      }
     );
   }
 
   ngOnDestroy(): void {
     if (this.contentSubscription !== null) {
       this.contentSubscription.unsubscribe();
+    }
+  }
+
+
+  async deleteSharing(sharing: SharingDTO): Promise<void> {
+    await this.sharingService.deleteSharing(sharing);
+    await this.updateActiveSharesList();
+  }
+
+  private async updateActiveSharesList() {
+    try {
+      this.activeShares = await this.sharingService.getSharingListForDir(this.currentDir);
+    } catch (e) {
+      this.activeShares = [];
+      console.error(e);
     }
   }
 
@@ -93,39 +123,46 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     if (this.sharing == null) {
       return;
     }
+    this.urlValid = false;
     this.url = $localize`loading..`;
     this.sharing = await this.sharingService.updateSharing(
-      this.currentDir,
-      this.sharing.id,
-      this.input.includeSubfolders,
-      this.input.password,
-      this.calcValidity()
+        this.currentDir,
+        this.sharing.id,
+        this.input.includeSubfolders,
+        this.input.password,
+        this.calcValidity()
     );
-    this.url = Utils.concatUrls(Config.Server.publicUrl, '/share/', this.sharing.sharingKey);
+    this.urlValid = true;
+    this.url = this.sharingService.getUrl(this.sharing);
+    await this.updateActiveSharesList();
   }
 
   async get(): Promise<void> {
+    this.urlValid = false;
     this.url = $localize`loading..`;
     this.sharing = await this.sharingService.createSharing(
-      this.currentDir,
-      this.input.includeSubfolders,
-      this.calcValidity()
+        this.currentDir,
+        this.input.includeSubfolders,
+        this.calcValidity()
     );
-    this.url = Utils.concatUrls(Config.Server.publicUrl, '/share/', this.sharing.sharingKey);
+    this.url = this.sharingService.getUrl(this.sharing);
+    this.urlValid = true;
+    await this.updateActiveSharesList();
   }
 
   async openModal(template: TemplateRef<unknown>): Promise<void> {
-    await this.get();
+    this.url = $localize`Click share to get a link.`;
+    this.urlValid = false;
+    this.sharing = null;
     this.input.password = '';
     if (this.modalRef) {
       this.modalRef.hide();
     }
     this.modalRef = this.modalService.show(template);
-    document.body.style.paddingRight = '0px';
   }
 
   onCopy(): void {
-    this.notification.success($localize`Url has been copied to clipboard`);
+    this.notification.success($localize`Sharing link has been copied to clipboard`);
   }
 
   public hideModal(): void {
@@ -133,6 +170,16 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     this.modalRef = null;
     this.sharing = null;
   }
+
+  async share() {
+    await this.get();
+    if (this.clipboardService.isSupported) {
+      this.clipboardService.copy(this.url);
+      this.onCopy();
+    }
+
+  }
+
 }
 
 

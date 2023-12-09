@@ -30,3 +30,4 @@ test.*
 .vscode/
 .github/
 .angular/
+/test/cypress/screenshots/

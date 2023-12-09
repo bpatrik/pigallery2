@@ -11,9 +11,6 @@
   display: inline-block;
 }
 
-#sorting-dropdown .dropdown-item.row {
-  flex-wrap: nowrap;
-}
 
 .dropdown-item {
   padding: 0.25rem 0.25rem;
@@ -22,7 +19,6 @@
 .row {
   margin: 0;
   display: flex;
-  cursor: pointer;
 }
 
 nav {
@@ -38,7 +34,37 @@ nav {
   margin-left: 5px;
 }
 
-app-gallery-filter{
+app-gallery-filter {
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+.btn-navigator {
+  border: none;
+}
+
+.sorting-grouping-item {
+  cursor: pointer;
+  flex-wrap: nowrap;
+}
+
+
+.btn-navigator:not(:hover):not(.btn-secondary) {
+  --bs-text-opacity: 1;
+  color: rgba(var(--bs-body-color-rgb), var(--bs-text-opacity)) !important;
+}
+
+.grouping-icon {
+  display: inline-block;
+  font-size: xx-small;
+  vertical-align: top;
+  line-height: 1;
+}
+
+.btn-group-follow {
+  float: right;
+  margin-right: -0.25em;
+  transform: translateX(50%);
+  padding: 0;
+  border: none;
 }

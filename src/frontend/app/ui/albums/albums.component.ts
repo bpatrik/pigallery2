@@ -22,10 +22,10 @@ export class AlbumsComponent implements OnInit {
   private modalRef: BsModalRef;
 
   constructor(
-    public albumsService: AlbumsService,
-    private modalService: BsModalService,
-    public authenticationService: AuthenticationService,
-    private piTitleService: PiTitleService
+      public albumsService: AlbumsService,
+      private modalService: BsModalService,
+      public authenticationService: AuthenticationService,
+      private piTitleService: PiTitleService
   ) {
     this.albumsService.getAlbums().catch(console.error);
   }
@@ -51,8 +51,8 @@ export class AlbumsComponent implements OnInit {
 
   async saveSearch(): Promise<void> {
     await this.albumsService.addSavedSearch(
-      this.savedSearch.name,
-      this.savedSearch.searchQuery
+        this.savedSearch.name,
+        this.savedSearch.searchQuery
     );
     this.hideModal();
   }

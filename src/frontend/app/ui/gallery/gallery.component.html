@@ -40,23 +40,18 @@
                                [directories]="directoryContent?.directories || []"></app-gallery-directories>
 
       <div class="blog-map-row" *ngIf="ShowMarkDown || ShowMap">
-        <div class="blog-wrapper"
-             [style.width]="blogOpen ?  '100%' : 'calc(100% - 100px)'"
-             *ngIf="ShowMarkDown">
-          <app-gallery-blog [collapsed]="!blogOpen"
-                            [mdFiles]="directoryContent.metaFile | mdFiles"></app-gallery-blog>
-
-
-          <button class="btn btn-blog-details text-body" (click)="blogOpen=!blogOpen"><span
-            class="oi oi-chevron-{{blogOpen ? 'top' : 'bottom'}}"></span>
-          </button>
-        </div>
+        <app-gallery-blog
+          [style.width]="blogOpen ?  '100%' : 'calc(100% - 100px)'"
+          *ngIf="ShowMarkDown"
+          [(open)]="blogOpen"></app-gallery-blog>
         <app-gallery-map
+          class="rounded"
+          [class.rounded-start-0]="ShowMarkDown"
           *ngIf="ShowMap"
-          [photos]="directoryContent?.media | photosOnly"
+          [photos]="directoryContent?.mediaGroups | photosOnly"
           [gpxFiles]="directoryContent?.metaFile | gpxFiles"></app-gallery-map>
       </div>
-      <app-gallery-grid [media]="directoryContent?.media"
+      <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
                         [lightbox]="lightbox"></app-gallery-grid>
 
     </ng-container>
@@ -67,7 +62,7 @@
         ContentWrapper.directory.isPartial == true)
        && !ContentWrapper.searchResult
        && !ContentWrapper.error">
-    <div class="spinner">
+    <div class="spinner rounded">
 
     </div>
   </div>

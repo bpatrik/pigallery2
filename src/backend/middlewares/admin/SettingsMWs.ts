@@ -5,6 +5,7 @@ import {Config} from '../../../common/config/private/Config';
 import {ConfigDiagnostics} from '../../model/diagnostics/ConfigDiagnostics';
 import {ConfigClassBuilder} from '../../../../node_modules/typeconfig/node';
 import {TAGS} from '../../../common/config/public/ClientConfig';
+import {ObjectManagers} from '../../model/ObjectManagers';
 
 const LOG_TAG = '[SettingsMWs]';
 
@@ -19,15 +20,14 @@ export class SettingsMWs {
    */
   public static async updateSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
     if ((typeof req.body === 'undefined')
-      || (typeof req.body.settings === 'undefined')
-      || (typeof req.body.settingsPath !== 'string')) {
+        || (typeof req.body.settings === 'undefined')
+        || (typeof req.body.settingsPath !== 'string')) {
       return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'settings is needed'));
     }
 
     try {
       let settings = req.body.settings; // Top level settings JSON
       const settingsPath: string = req.body.settingsPath; // Name of the top level settings
-
       const transformer = await Config.original();
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
@@ -48,6 +48,8 @@ export class SettingsMWs {
       Config[settingsPath] = settings;
       await original.save();
       await ConfigDiagnostics.runDiagnostics();
+      // restart all schedule timers. In case they have changed
+      ObjectManagers.getInstance().JobManager.runSchedules();
       Logger.info(LOG_TAG, 'new config:');
       Logger.info(LOG_TAG, JSON.stringify(Config.toJSON({attachDescription: false}), null, '\t'));
       return next();

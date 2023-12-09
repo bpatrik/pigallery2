@@ -1,12 +1,12 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {Server} from '../../../../../src/backend/server';
 import {DatabaseType, ServerConfig} from '../../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {TAGS} from '../../../../../src/common/config/public/ClientConfig';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
+import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 
 process.env.NODE_ENV = 'test';
 const chai: any = require('chai');
@@ -19,7 +19,6 @@ describe('SettingsRouter', () => {
   const tempDir = path.join(__dirname, '../../tmp');
   beforeEach(async () => {
     await fs.promises.rm(tempDir, {recursive: true, force: true});
-    Config.Server.Threading.enabled = false;
     Config.Database.type = DatabaseType.sqlite;
     Config.Database.dbFolder = tempDir;
     ProjectPath.reset();
@@ -34,9 +33,8 @@ describe('SettingsRouter', () => {
   describe('/GET settings', () => {
     it('it should GET the settings', async () => {
       Config.Users.authenticationRequired = false;
+      Config.Users.unAuthenticatedUserRole = UserRoles.Admin;
       const originalSettings = await Config.original();
-    //  originalSettings.Server.sessionSecret = null;
-     // originalSettings.Users.enforcedUsers = null;
       const srv = new Server();
       await srv.onStarted.wait();
       const result = await chai.request(srv.App)

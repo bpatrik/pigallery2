@@ -7,7 +7,6 @@ import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {Logger} from '../../Logger';
 import {IObjectManager} from './IObjectManager';
-import {DirectoryEntity} from './enitites/DirectoryEntity';
 
 const LOG_TAG = '[AlbumManager]';
 
@@ -19,28 +18,28 @@ export class AlbumManager implements IObjectManager {
 
   private static async updateAlbum(album: SavedSearchEntity): Promise<void> {
     const connection = await SQLConnection.getConnection();
-    const preview =
-      await ObjectManagers.getInstance().PreviewManager.getAlbumPreview(album);
+    const cover =
+        await ObjectManagers.getInstance().CoverManager.getAlbumCover(album);
     const count = await
-      ObjectManagers.getInstance().SearchManager.getCount((album as SavedSearchDTO).searchQuery);
+        ObjectManagers.getInstance().SearchManager.getCount((album as SavedSearchDTO).searchQuery);
 
     await connection
-      .createQueryBuilder()
-      .update(AlbumBaseEntity)
-      .set({preview, count})
-      .where('id = :id', {id: album.id})
-      .execute();
+        .createQueryBuilder()
+        .update(AlbumBaseEntity)
+        .set({cover: cover, count})
+        .where('id = :id', {id: album.id})
+        .execute();
   }
 
   public async addIfNotExistSavedSearch(
-    name: string,
-    searchQuery: SearchQueryDTO,
-    lockedAlbum: boolean
+      name: string,
+      searchQuery: SearchQueryDTO,
+      lockedAlbum: boolean
   ): Promise<void> {
     const connection = await SQLConnection.getConnection();
     const album = await connection
-      .getRepository(SavedSearchEntity)
-      .findOneBy({name, searchQuery});
+        .getRepository(SavedSearchEntity)
+        .findOneBy({name, searchQuery});
     if (album) {
       return;
     }
@@ -48,14 +47,14 @@ export class AlbumManager implements IObjectManager {
   }
 
   public async addSavedSearch(
-    name: string,
-    searchQuery: SearchQueryDTO,
-    lockedAlbum?: boolean
+      name: string,
+      searchQuery: SearchQueryDTO,
+      lockedAlbum?: boolean
   ): Promise<void> {
     const connection = await SQLConnection.getConnection();
     const a = await connection
-      .getRepository(SavedSearchEntity)
-      .save({name, searchQuery, locked: lockedAlbum});
+        .getRepository(SavedSearchEntity)
+        .save({name, searchQuery, locked: lockedAlbum});
     await AlbumManager.updateAlbum(a);
   }
 
@@ -63,35 +62,35 @@ export class AlbumManager implements IObjectManager {
     const connection = await SQLConnection.getConnection();
 
     if (
-      (await connection
-        .getRepository(AlbumBaseEntity)
-        .countBy({id, locked: false})) !== 1
+        (await connection
+            .getRepository(AlbumBaseEntity)
+            .countBy({id, locked: false})) !== 1
     ) {
       throw new Error('Could not delete album, id:' + id);
     }
 
     await connection
-      .getRepository(AlbumBaseEntity)
-      .delete({id, locked: false});
+        .getRepository(AlbumBaseEntity)
+        .delete({id, locked: false});
   }
 
   public async getAlbums(): Promise<AlbumBaseDTO[]> {
     await this.updateAlbums();
     const connection = await SQLConnection.getConnection();
     return await connection
-      .getRepository(AlbumBaseEntity)
-      .createQueryBuilder('album')
-      .innerJoin('album.preview', 'preview')
-      .innerJoin('preview.directory', 'directory')
-      .select(['album', 'preview.name', 'directory.name', 'directory.path'])
-      .getMany();
+        .getRepository(AlbumBaseEntity)
+        .createQueryBuilder('album')
+        .leftJoin('album.cover', 'cover')
+        .leftJoin('cover.directory', 'directory')
+        .select(['album', 'cover.name', 'directory.name', 'directory.path'])
+        .getMany();
   }
 
   public async onNewDataVersion(): Promise<void> {
-    await this.resetPreviews();
+    await this.resetCovers();
   }
 
-  public async resetPreviews(): Promise<void> {
+  public async resetCovers(): Promise<void> {
     this.isDBValid = false;
   }
 
@@ -115,9 +114,9 @@ export class AlbumManager implements IObjectManager {
   async deleteAll() {
     const connection = await SQLConnection.getConnection();
     await connection
-      .getRepository(AlbumBaseEntity)
-      .createQueryBuilder('album')
-      .delete()
-      .execute();
+        .getRepository(AlbumBaseEntity)
+        .createQueryBuilder('album')
+        .delete()
+        .execute();
   }
 }

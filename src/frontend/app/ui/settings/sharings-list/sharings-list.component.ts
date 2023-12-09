@@ -1,9 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {SharingDTO} from '../../../../../common/entities/SharingDTO';
-import {SharingListService} from './sharing-list.service';
 import {SettingsService} from '../settings.service';
-import {Config} from '../../../../../common/config/public/Config';
-import {Utils} from '../../../../../common/Utils';
+import {ShareService} from '../../gallery/share.service';
 
 @Component({
   selector: 'app-settigns-sharings-list',
@@ -13,10 +11,10 @@ import {Utils} from '../../../../../common/Utils';
 export class SharingsListComponent implements OnInit {
 
   public shares: SharingDTO[] = [];
-  public sharingUrl = Utils.concatUrls(Config.Server.publicUrl, '/share') + '/';
 
-  constructor(public sharingList: SharingListService,
-              private settingsService: SettingsService) {
+
+  constructor(public sharingService: ShareService,
+              public settingsService: SettingsService) {
   }
 
 
@@ -29,13 +27,13 @@ export class SharingsListComponent implements OnInit {
   }
 
   async deleteSharing(sharing: SharingDTO): Promise<void> {
-    await this.sharingList.deleteSharing(sharing);
+    await this.sharingService.deleteSharing(sharing);
     await this.getSharingList();
   }
 
   private async getSharingList(): Promise<void> {
     try {
-      this.shares = await this.sharingList.getSharingList();
+      this.shares = await this.sharingService.getSharingList();
     } catch (err) {
       this.shares = [];
       throw err;

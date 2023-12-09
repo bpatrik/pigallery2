@@ -1,17 +1,17 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild,} from '@angular/core';
-import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
-import {FullScreenService} from '../../fullscreen.service';
-import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
-import {interval, Subscription} from 'rxjs';
-import {filter, skip} from 'rxjs/operators';
-import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
-import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
-import {Config} from '../../../../../../common/config/public/Config';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
-import {AuthenticationService} from '../../../../model/network/authentication.service';
-import {LightboxService} from '../lightbox.service';
-import {GalleryCacheService} from '../../cache.gallery.service';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, } from '@angular/core';
+import { MediaDTOUtils } from '../../../../../../common/entities/MediaDTO';
+import { FullScreenService } from '../../fullscreen.service';
+import { GalleryPhotoComponent } from '../../grid/photo/photo.grid.gallery.component';
+import { interval, Subscription } from 'rxjs';
+import { filter, skip } from 'rxjs/operators';
+import { PhotoDTO } from '../../../../../../common/entities/PhotoDTO';
+import { GalleryLightboxMediaComponent } from '../media/media.lightbox.gallery.component';
+import { Config } from '../../../../../../common/config/public/Config';
+import { SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes, } from '../../../../../../common/entities/SearchQueryDTO';
+import { AuthenticationService } from '../../../../model/network/authentication.service';
+import { LightboxService } from '../lightbox.service';
+import { GalleryCacheService } from '../../cache.gallery.service';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 
 export enum PlayBackStates {
   Paused = 1,
@@ -29,44 +29,43 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   canvas: ElementRef<HTMLCanvasElement>;
   private ctx: CanvasRenderingContext2D;
 
-  @ViewChild('root', {static: false}) root: ElementRef;
+  @ViewChild('root', { static: false }) root: ElementRef;
   @Output() closed = new EventEmitter();
   @Output() toggleInfoPanel = new EventEmitter();
   @Output() toggleFullScreen = new EventEmitter();
   @Output() nextPhoto = new EventEmitter();
   @Output() previousPhoto = new EventEmitter();
 
-  @Input() navigation = {hasPrev: true, hasNext: true};
+  @Input() navigation = { hasPrev: true, hasNext: true };
   @Input() activePhoto: GalleryPhotoComponent;
   @Input() mediaElement: GalleryLightboxMediaComponent;
-  @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
+  @Input() photoFrameDim = { width: 1, height: 1, aspect: 1 };
 
   public readonly facesEnabled = Config.Faces.enabled;
 
   public zoom = 1;
   public playBackState: PlayBackStates = PlayBackStates.Paused;
   public PlayBackStates = PlayBackStates;
-  public playBackDurations = [2, 5, 10, 15, 20, 30, 60];
+  public playBackDurations = [1, 2, 5, 10, 15, 20, 30, 60];
   public selectedSlideshowSpeed: number = null;
   public controllersDimmed = false;
 
   public controllersVisible = true;
-  public drag = {x: 0, y: 0};
+  public drag = { x: 0, y: 0 };
   public SearchQueryTypes = SearchQueryTypes;
-  public faceContainerDim = {width: 0, height: 0};
+  public faceContainerDim = { width: 0, height: 0 };
   public searchEnabled: boolean;
 
   private visibilityTimer: number = null;
   private timerSub: Subscription;
-  private prevDrag = {x: 0, y: 0};
+  private prevDrag = { x: 0, y: 0 };
   private prevZoom = 1;
 
   constructor(
     public lightboxService: LightboxService,
     public fullScreenService: FullScreenService,
     private authService: AuthenticationService,
-    private cacheService: GalleryCacheService,
-    private router: Router,
+    private cacheService: GalleryCacheService, private router: Router
   ) {
     this.searchEnabled = this.authService.canSearch();
   }
@@ -179,11 +178,11 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.prevZoom = this.zoom;
   }
 
-  tap($event: any): void {
+  tap($event: Event): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
-    if ($event.tapCount < 2) {
+    if (($event as unknown as { tapCount: number }).tapCount < 2) {
       return;
     }
 
@@ -306,6 +305,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
 
     this.ctx.lineWidth = 5;
     this.ctx.strokeStyle = 'white';
+    this.ctx.lineCap = 'round';
     this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
     this.ctx.beginPath();
     this.ctx.arc(this.canvas.nativeElement.width / 2, this.canvas.nativeElement.height / 2, this.canvas.nativeElement.width / 2 - this.ctx.lineWidth, 0, p * 2 * Math.PI);
@@ -435,7 +435,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   }
 
   private hideControls = () => {
-    this.controllersDimmed = true;
+    //this.controllersDimmed = true;
   };
 
   private updateFaceContainerDim(): void {

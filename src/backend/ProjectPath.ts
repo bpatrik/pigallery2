@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import { Config } from '../common/config/private/Config';
+import {Config} from '../common/config/private/Config';
 
 class ProjectPathClass {
   public Root: string;

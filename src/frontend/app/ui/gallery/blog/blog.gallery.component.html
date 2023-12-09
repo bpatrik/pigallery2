@@ -1,16 +1,29 @@
-<div class="blog">
-  <div class="card">
-    <div class="card-body" style="min-height: 77px" [style.height]="collapsed ? '77px':''">
-      <ng-container *ngFor="let md of markdowns; let i = index">
-        <markdown
-          *ngIf="!collapsed"
-          [data]="md">
-        </markdown>
-        <span *ngIf="collapsed" class="text-preview">
-        {{md}}
-      </span>
-        <hr *ngIf="i != markdowns.length-1">
-      </ng-container>
+<ng-container *ngIf="mkObservable | async as markdowns">
+  <div class="blog h-100" *ngIf="markdowns.length > 0">
+    <div class="card h-100">
+      <div class="card-body" style="min-height: 77px" [style.height]="!open ? '77px':''">
+        <ng-container *ngFor="let md of markdowns; let last = last; let first = first">
+          <ng-container *ngIf="open">
+            <div *ngIf="markdowns.length > 1" class="row">
+              <hr class="col">
+              <div class="col-auto small fst-italic">{{md.file | toRelativePath}}</div>
+            </div>
+            <markdown
+              [data]="md.text">
+            </markdown>
+          </ng-container>
+          <span *ngIf="!open && first" class="text-preview">
+            <markdown
+              [inline]="true"
+              [data]="md.textShort">
+            </markdown>
+          </span>
+        </ng-container>
+      </div>
     </div>
+
+    <button class="btn btn-blog-details text-body" (click)="toggleCollapsed()">
+      <ng-icon [name]="open ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"></ng-icon>
+    </button>
   </div>
-</div>
+</ng-container>

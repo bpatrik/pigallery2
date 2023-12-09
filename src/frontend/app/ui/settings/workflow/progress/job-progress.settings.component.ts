@@ -1,17 +1,8 @@
-import {
-  Component,
-  Input,
-  OnChanges,
-  OnDestroy,
-  TemplateRef,
-} from '@angular/core';
-import {
-  JobProgressDTO,
-  JobProgressStates,
-} from '../../../../../../common/entities/job/JobProgressDTO';
-import { Subscription, timer } from 'rxjs';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
-import { BackendtextService } from '../../../../model/backendtext.service';
+import {Component, Input, OnChanges, OnDestroy, TemplateRef,} from '@angular/core';
+import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
+import {Subscription, timer} from 'rxjs';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
+import {BackendtextService} from '../../../../model/backendtext.service';
 
 @Component({
   selector: 'app-settings-job-progress',
@@ -26,26 +17,27 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
   private timerSub: Subscription;
 
   constructor(
-    private modalService: BsModalService,
-    public backendTextService: BackendtextService
-  ) {}
+      private modalService: BsModalService,
+      public backendTextService: BackendtextService
+  ) {
+  }
 
   get ProgressTitle(): string {
     if (!this.progress) {
       return '';
     }
     return (
-      $localize`processed` +
-      ':' +
-      this.progress.steps.processed +
-      ' + ' +
-      $localize`skipped` +
-      ':' +
-      this.progress.steps.skipped +
-      ' / ' +
-      $localize`all` +
-      ':' +
-      this.progress.steps.all
+        $localize`processed` +
+        ':' +
+        this.progress.steps.processed +
+        ' + ' +
+        $localize`skipped` +
+        ':' +
+        this.progress.steps.skipped +
+        ' / ' +
+        $localize`all` +
+        ':' +
+        this.progress.steps.all
     );
   }
 
@@ -61,25 +53,25 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
       return 0;
     }
     return (
-      ((this.progress.time.end - this.progress.time.start) /
-        this.progress.steps.processed) *
-      (this.progress.steps.all - this.progress.steps.skipped)
+        ((this.progress.time.end - this.progress.time.start) /
+            this.progress.steps.processed) *
+        (this.progress.steps.all - this.progress.steps.skipped)
     );
   }
 
   get Running(): boolean {
     return (
-      this.progress &&
-      (this.progress.state === JobProgressStates.running ||
-        this.progress.state === JobProgressStates.cancelling)
+        this.progress &&
+        (this.progress.state === JobProgressStates.running ||
+            this.progress.state === JobProgressStates.cancelling)
     );
   }
 
   get Stopped(): boolean {
     return (
-      this.progress &&
-      this.progress.state !== JobProgressStates.running &&
-      this.progress.state !== JobProgressStates.cancelling
+        this.progress &&
+        this.progress.state !== JobProgressStates.running &&
+        this.progress.state !== JobProgressStates.cancelling
     );
   }
 
@@ -88,8 +80,8 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
       return 0;
     }
     return (
-      (this.progress.time.end - this.progress.time.start) /
-      this.progress.steps.all
+        (this.progress.time.end - this.progress.time.start) /
+        this.progress.steps.all
     );
   }
 
@@ -115,13 +107,15 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
         return $localize`interrupted`;
       case JobProgressStates.finished:
         return $localize`finished`;
+      case JobProgressStates.failed:
+        return $localize`failed`;
       default:
         return 'unknown state';
     }
   }
 
   openModal(template: TemplateRef<unknown>): void {
-    this.modalRef = this.modalService.show(template, { class: 'modal-lg' });
+    this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
   }
 
   ngOnChanges(): void {

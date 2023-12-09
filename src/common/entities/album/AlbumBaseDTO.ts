@@ -1,9 +1,9 @@
-import { PreviewPhotoDTO } from '../PhotoDTO';
+import {CoverPhotoDTO} from '../PhotoDTO';
 
 export interface AlbumBaseDTO {
   id: number;
   name: string;
-  preview?: PreviewPhotoDTO;
+  cover?: CoverPhotoDTO;
   count: number;
   locked: boolean;
 }

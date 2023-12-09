@@ -1,13 +1,18 @@
 app-face {
-  margin: 2px;
-  display: inline-block;
+    margin: 2px;
+    display: inline-block;
+}
+
+
+.container-fluid {
+    line-height: 0;
 }
 
 .no-face-msg {
-  height: 100vh;
-  text-align: center;
+    height: 100vh;
+    text-align: center;
 }
 
 .no-face-msg h2 {
-  color: #6c757d;
+    color: #6c757d;
 }

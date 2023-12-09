@@ -1,4 +1,4 @@
-import { ErrorDTO } from './Error';
+import {ErrorDTO} from './Error';
 
 export class Message<T> {
   public error: ErrorDTO = null;

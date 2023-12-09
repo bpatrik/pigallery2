@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "cli": {
     "schematicCollections": [
-      "@angular-eslint/schematics"
+      "@angular-eslint/schematics",
+      "@schematics/angular"
     ]
   },
   "version": 1,
@@ -92,7 +93,6 @@
             "tsConfig": "src/frontend/tsconfig.app.json",
             "polyfills": "src/frontend/polyfills.ts",
             "assets": [
-              "src/frontend/assets",
               "src/frontend/robots.txt",
               {
                 "glob": "**/*",
@@ -103,7 +103,6 @@
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.css",
               "node_modules/ngx-bootstrap/datepicker/bs-datepicker.css",
-              "node_modules/open-iconic/font/css/open-iconic-bootstrap.css",
               "node_modules/ngx-toastr/toastr.css",
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
@@ -191,7 +190,6 @@
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
               "node_modules/ngx-toastr/toastr.css",
               "node_modules/bootstrap/dist/css/bootstrap.css",
-              "node_modules/open-iconic/font/css/open-iconic-bootstrap.css",
               "node_modules/ngx-bootstrap/datepicker/bs-datepicker.css",
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
@@ -199,7 +197,6 @@
               "src/frontend/styles.css"
             ],
             "assets": [
-              "src/frontend/assets",
               {
                 "glob": "**/*",
                 "input": "node_modules/leaflet/dist/images/",

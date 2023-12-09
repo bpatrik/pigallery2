@@ -1,7 +1,5 @@
 <div class="static" *ngIf="animate == false">
-    <span class="oi"
-          [ngClass]="error ? 'oi-warning' :  'oi-image'" aria-hidden="true">
-    </span>
+  <ng-icon [name]="error ? 'ionWarningOutline' : 'ionImageOutline'"></ng-icon>
 </div>
 <div class="sk-cube-grid animate" *ngIf="animate == true">
   <div class="sk-cube sk-cube1"></div>

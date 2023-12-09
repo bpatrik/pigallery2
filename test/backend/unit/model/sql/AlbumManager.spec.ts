@@ -37,16 +37,16 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
   };
 
 
-  const toAlbumPreview = (m: MediaDTO): MediaDTO => {
+  const toAlbumCover = (m: MediaDTO): MediaDTO => {
     // generated dirs for test contain everything, not like return values from the server.
     const tmpDir: ParentDirectoryDTO = m.directory as ParentDirectoryDTO;
     const tmpM = tmpDir.media;
     const tmpD = tmpDir.directories;
-    const tmpP = tmpDir.preview;
+    const tmpP = tmpDir.cover;
     const tmpMT = tmpDir.metaFile;
     delete tmpDir.directories;
     delete tmpDir.media;
-    delete tmpDir.preview;
+    delete tmpDir.cover;
     delete tmpDir.metaFile;
     const ret = Utils.clone(m);
     delete ret.id;
@@ -54,7 +54,7 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
     delete ret.metadata;
     tmpDir.directories = tmpD;
     tmpDir.media = tmpM;
-    tmpDir.preview = tmpP;
+    tmpDir.cover = tmpP;
     tmpDir.metaFile = tmpMT;
     return ret;
   };
@@ -152,7 +152,7 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
       searchQuery: query,
       locked: false,
       count: 1,
-      preview: toAlbumPreview(sqlHelper.testGalleyEntities.p)
+      cover: toAlbumCover(sqlHelper.testGalleyEntities.p)
     } as SavedSearchDTO]));
 
 

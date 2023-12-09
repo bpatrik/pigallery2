@@ -1,9 +1,6 @@
-import { Injectable } from '@angular/core';
-import {
-  QueryKeywords,
-  SearchQueryParser,
-} from '../../../../../common/SearchQueryParser';
-import { SearchQueryDTO } from '../../../../../common/entities/SearchQueryDTO';
+import {Injectable} from '@angular/core';
+import {QueryKeywords, SearchQueryParser,} from '../../../../../common/SearchQueryParser';
+import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
 
 @Injectable()
 export class SearchQueryParserService {
@@ -16,8 +13,10 @@ export class SearchQueryParserService {
     to: 'before',
     landscape: 'landscape',
     maxRating: 'max-rating',
-    maxResolution: 'max-resolution',
     minRating: 'min-rating',
+    minPersonCount: 'min-faces',
+    maxPersonCount: 'max-faces',
+    maxResolution: 'max-resolution',
     minResolution: 'min-resolution',
     orientation: 'orientation',
 

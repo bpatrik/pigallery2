@@ -22,6 +22,6 @@ button.dropdown-item {
   padding: 0.3rem 1.0rem 0.3rem 0.8rem;
 }
 
-button.dropdown-item span {
-  padding-right: 0.8rem;
+button.dropdown-item ng-icon {
+  margin-right: 0.5rem;
 }

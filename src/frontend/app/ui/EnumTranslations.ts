@@ -1,8 +1,10 @@
 import {UserRoles} from '../../../common/entities/UserDTO';
-import {ConfigPriority, MapProviders, NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
+import {ConfigPriority, MapProviders, NavigationLinkTypes, ScrollUpModes} from '../../../common/config/public/ClientConfig';
 import {ReIndexingSensitivity} from '../../../common/config/private/PrivateConfig';
-import {SortingMethods} from '../../../common/entities/SortingMethods';
 import {SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
+import {ConfigStyle} from './settings/settings.service';
+import {GroupByTypes, SortByTypes} from '../../../common/entities/SortingMethods';
+import {GridSizes} from '../../../common/entities/GridSizes';
 
 export const EnumTranslations: Record<string, string> = {};
 export const enumToTranslatedArray = (EnumType: any): { key: number; value: string }[] => {
@@ -26,24 +28,39 @@ EnumTranslations[ConfigPriority[ConfigPriority.basic]] = $localize`Basic`;
 EnumTranslations[ConfigPriority[ConfigPriority.advanced]] = $localize`Advanced`;
 EnumTranslations[ConfigPriority[ConfigPriority.underTheHood]] = $localize`Under the hood`;
 
+EnumTranslations[ScrollUpModes[ScrollUpModes.always]] = $localize`Always`;
+EnumTranslations[ScrollUpModes[ScrollUpModes.mobileOnly]] = $localize`Mobile only`;
+EnumTranslations[ScrollUpModes[ScrollUpModes.never]] = $localize`Never`;
+
+EnumTranslations[ConfigStyle[ConfigStyle.full]] = $localize`Full`;
+EnumTranslations[ConfigStyle[ConfigStyle.compact]] = $localize`Compact`;
+
 EnumTranslations[MapProviders[MapProviders.Custom]] = $localize`Custom`;
 EnumTranslations[MapProviders[MapProviders.OpenStreetMap]] = $localize`OpenStreetMap`;
 EnumTranslations[MapProviders[MapProviders.Mapbox]] = $localize`Mapbox`;
 
 
+EnumTranslations[ReIndexingSensitivity[ReIndexingSensitivity.never]] = $localize`never`;
 EnumTranslations[ReIndexingSensitivity[ReIndexingSensitivity.low]] = $localize`low`;
 EnumTranslations[ReIndexingSensitivity[ReIndexingSensitivity.high]] = $localize`high`;
 EnumTranslations[ReIndexingSensitivity[ReIndexingSensitivity.medium]] = $localize`medium`;
 
 
-EnumTranslations[SortingMethods[SortingMethods.descDate]] = $localize`descending date`;
-EnumTranslations[SortingMethods[SortingMethods.ascDate]] = $localize`ascending date`;
-EnumTranslations[SortingMethods[SortingMethods.descName]] = $localize`descending name`;
-EnumTranslations[SortingMethods[SortingMethods.ascName]] = $localize`ascending name`;
-EnumTranslations[SortingMethods[SortingMethods.descRating]] = $localize`descending rating`;
-EnumTranslations[SortingMethods[SortingMethods.ascRating]] = $localize`ascending rating`;
-EnumTranslations[SortingMethods[SortingMethods.random]] = $localize`random`;
+EnumTranslations[SortByTypes[SortByTypes.Date]] = $localize`date`;
+EnumTranslations[SortByTypes[SortByTypes.Name]] = $localize`name`;
+EnumTranslations[SortByTypes[SortByTypes.Rating]] = $localize`rating`;
+EnumTranslations[SortByTypes[SortByTypes.Random]] = $localize`random`;
+EnumTranslations[SortByTypes[SortByTypes.PersonCount]] = $localize`faces`;
+EnumTranslations[SortByTypes[SortByTypes.FileSize]] = $localize`file size`;
 
+EnumTranslations[GroupByTypes[GroupByTypes.NoGrouping]] = $localize`don't group`;
+
+
+EnumTranslations[GridSizes[GridSizes.extraSmall]] = $localize`extra small`;
+EnumTranslations[GridSizes[GridSizes.small]] = $localize`small`;
+EnumTranslations[GridSizes[GridSizes.medium]] = $localize`medium`;
+EnumTranslations[GridSizes[GridSizes.large]] = $localize`big`;
+EnumTranslations[GridSizes[GridSizes.extraLarge]] = $localize`extra large`;
 
 EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.url]] = $localize`Url`;
 EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.search]] = $localize`Search`;
@@ -61,6 +78,8 @@ EnumTranslations[SearchQueryTypes[SearchQueryTypes.to_date]] = $localize`Until`;
 EnumTranslations[SearchQueryTypes[SearchQueryTypes.distance]] = $localize`Distance`;
 EnumTranslations[SearchQueryTypes[SearchQueryTypes.min_rating]] = $localize`Min rating`;
 EnumTranslations[SearchQueryTypes[SearchQueryTypes.max_rating]] = $localize`Max rating`;
+EnumTranslations[SearchQueryTypes[SearchQueryTypes.min_person_count]] = $localize`Min faces`;
+EnumTranslations[SearchQueryTypes[SearchQueryTypes.max_person_count]] = $localize`Max faces`;
 EnumTranslations[SearchQueryTypes[SearchQueryTypes.min_resolution]] = $localize`Min resolution`;
 EnumTranslations[SearchQueryTypes[SearchQueryTypes.max_resolution]] = $localize`Max resolution`;
 EnumTranslations[SearchQueryTypes[SearchQueryTypes.directory]] = $localize`Directory`;

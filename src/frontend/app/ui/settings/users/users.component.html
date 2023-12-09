@@ -35,7 +35,7 @@
         <button [disabled]="!canModifyUser(user)" (click)="deleteUser(user)"
                 [ngClass]="canModifyUser(user)? 'btn-danger':'btn-secondary'"
                 class="btn float-end">
-          <span class="oi oi-trash" aria-hidden="true" aria-label="Delete"></span>
+          <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
         </button>
       </td>
     </tr>
@@ -43,7 +43,9 @@
   </table>
 
   <button class="btn btn-primary float-end"
-          (click)="initNewUser()" i18n>+ Add user
+          (click)="initNewUser()">
+    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+    <span i18n>Add user</span>
   </button>
 </ng-container>
 

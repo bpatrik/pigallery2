@@ -1,5 +1,5 @@
-import { Express, NextFunction, Request, Response } from 'express';
-import { logFN, Logger } from '../Logger';
+import {Express, NextFunction, Request, Response} from 'express';
+import {logFN, Logger} from '../Logger';
 import {Config} from '../../common/config/private/Config';
 
 declare global {
@@ -26,10 +26,10 @@ export class LoggerRouter {
       res.end = end;
       res.end(a, b, c);
       loggerFn(
-        req.method,
-        req.url,
-        res.statusCode,
-        Date.now() - req._startTime + 'ms'
+          req.method,
+          req.url,
+          res.statusCode,
+          Date.now() - req._startTime + 'ms'
       );
       return res;
     };
@@ -48,11 +48,11 @@ export class LoggerRouter {
     });
 
     app.get(
-      '/node_modules*',
-      (req: Request, res: Response, next: NextFunction): any => {
-        LoggerRouter.log(Logger.silly, req, res);
-        return next();
-      }
+        '/node_modules*',
+        (req: Request, res: Response, next: NextFunction): any => {
+          LoggerRouter.log(Logger.silly, req, res);
+          return next();
+        }
     );
 
     app.use((req: Request, res: Response, next: NextFunction): any => {

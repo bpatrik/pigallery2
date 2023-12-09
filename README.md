@@ -153,73 +153,7 @@ apt-get install build-essential  libkrb5-dev gcc g++
 
 ## 3. Feature list
 
- * supported formats [full list here](https://github.com/bpatrik/pigallery2/blob/master/src/common/SupportedFormats.ts):
-   * images: **jpg, jpeg, jpe, webp, png, gif, svg**
-   * videos: **mp4, ogg, ogv, webm**
-     * with (built-in) transcoding: avi, mkv, mov, wmv, flv, mts, m2ts, mpg, 3gp, m4v, mpeg, vob, divx, xvid, ts
- * **Rendering directories as it is**
-   * Listing subdirectories recursively
-   * Listing photos in a nice grid layout
-     * showing **tag/keywords, locations, GPS coordinates** for photos
-     * rendering photos on demand (on scroll)
- * **On the fly thumbnail generation** in several sizes
-   * prioritizes thumbnail generation (generating thumbnail first for the visible photos)
-   * saving generated thumbnails to TEMP folder for reuse
-   * supporting multi-core CPUs
-   * supporting hardware acceleration ([sharp](https://github.com/lovell/sharp))
- * Custom lightbox for full screen photo and video viewing
-   * keyboard support for navigation  
-   * showing low-res thumbnail while full image loads
-   * Information panel for showing **Exif and IPTC info**  
-   * Automatic playing
-   * gesture support (swipe left, right, up)
-   * shortcut support
- * On the fly photo downscaling for faster load [#50](https://github.com/bpatrik/pigallery2/issues/50)
-   * on zoom, the original photo loads
- * Client side caching (directories and search results)
- * Rendering **photos** with GPS coordinates **on open street maps**
-   * .gpx file support: rendering paths to map
-   * supports [OSM](https://www.openstreetmap.org) and [Mapbox](https://www.mapbox.com) by default, but you can add any provider that has a tile url
- * **Two modes: SQL database and no-database mode**
-   * both modes support
-     * user management
-     * password protection can be disabled/enabled
-   * database mode supports:
-     * faster directory listing
-     * searching
-       * instant search, auto complete
-     * sharing 
-       * setting link expiration time
- * Faces (persons) support
-    * reads Adobe's XMP Face region metadata. (It is defined by the Metadata Working Group (MWG).)
-    * shows face bounding box over images
- * internalization / translation support
-   * currently supported languages: eng, hun, ro, ru, fr, many other
- * Nice design 
-    * responsive design (phone, tablet desktop support)
- * Setup page
- * Random photo url
-   * You can generate an url that returns a random photo from your gallery. You can use this feature to develop 3rd party applications, like: changing desktop background
- * duplicate photo detection  
- * video support
-   * fully supports `*.mp4` files and partially (might have errors with safari and IE) supports `*.ogg`, `*.ogv`, `*.webm` files
-   * uses ffmpeg and ffprobe to generate video thumbnails
-   * can transcode videos to mp4 for better support
- * job scheduling support, with the following supported task: [#92](https://github.com/bpatrik/pigallery2/issues/92)
-   * converting/transcoding videos [#66](https://github.com/bpatrik/pigallery2/issues/66) [#71](https://github.com/bpatrik/pigallery2/issues/71)
-   * generating thumbnails
-   * generating converted photos
-   * cleaning up temp folder
-   * indexing db
- * folder ignoring [#87](https://github.com/bpatrik/pigallery2/issues/87)
- * `.pg2conf` UI modifying files. [#177](https://github.com/bpatrik/pigallery2/issues/177).
-    * List of these files are passed down to the UI modify its behaviour.
-    * Currently, supported custom, per folder sorting.
- * Dockerized 
- * **Markdown based blogging support** 
-   * you can write some note in the *.md files for every directory
- * bug free :) - `In progress`
- 
+See: http://bpatrik.github.io/pigallery2/
  
 ## 4. Suggest/endorse new features
   Unfortunately, lately I only have a limited time for this hobby project of mine. 

@@ -1,13 +1,3 @@
 .dropdown-menu {
   min-width: auto;
 }
-
-.dark {
-  background-color: #000;
-  color: rgba(255, 255, 255, 0.55);
-  border-color: transparent;
-}
-
-.dark:hover {
-  border-color: #adadad;
-}

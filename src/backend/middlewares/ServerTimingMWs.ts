@@ -22,9 +22,9 @@ export class ServerTimeEntry {
 
 export const ServerTime = (id: string, name: string) => {
   return (
-    target: unknown,
-    propertyName: string,
-    descriptor: TypedPropertyDescriptor<(req: unknown, res: unknown, next: () => void) => void>
+      target: unknown,
+      propertyName: string,
+      descriptor: TypedPropertyDescriptor<(req: unknown, res: unknown, next: () => void) => void>
   ): void => {
     if (Config.Server.Log.logServerTiming === false) {
       return;
@@ -40,8 +40,8 @@ export const ServerTime = (id: string, name: string) => {
       });
     };
     descriptor.value = new Function(
-      'action',
-      'return function ' + m.name + '(...args){ action(...args) };'
+        'action',
+        'return function ' + m.name + '(...args){ action(...args) };'
     )(customAction);
   };
 };
@@ -53,19 +53,19 @@ export class ServerTimingMWs {
    * Add server timing
    */
   public static async addServerTiming(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (
-      (Config.Server.Log.logServerTiming === false && !forcedDebug) ||
-      !req.timing
+        (Config.Server.Log.logServerTiming === false && !forcedDebug) ||
+        !req.timing
     ) {
       return next();
     }
     const l = Object.entries(req.timing)
-      .filter((e) => e[1].endTime)
-      .map((e) => `${e[0]};dur=${e[1].endTime};desc="${e[1].name}"`);
+        .filter((e) => e[1].endTime)
+        .map((e) => `${e[0]};dur=${e[1].endTime};desc="${e[1].name}"`);
     res.header('Server-Timing', l.join(', '));
     next();
   }

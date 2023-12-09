@@ -8,7 +8,7 @@ import {IObjectManager} from './IObjectManager';
 
 const LOG_TAG = '[PersonManager]';
 
-export class PersonManager  implements IObjectManager{
+export class PersonManager implements IObjectManager {
   persons: PersonEntry[] = null;
   /**
    * Person table contains denormalized data that needs to update when isDBValid = false
@@ -18,43 +18,44 @@ export class PersonManager  implements IObjectManager{
   private static async updateCounts(): Promise<void> {
     const connection = await SQLConnection.getConnection();
     await connection.query(
-      'UPDATE person_entry SET count = ' +
-      ' (SELECT COUNT(1) FROM person_junction_table WHERE person_junction_table.personId = person_entry.id)'
+        'UPDATE person_entry SET count = ' +
+        ' (SELECT COUNT(1) FROM person_junction_table WHERE person_junction_table.personId = person_entry.id)'
     );
 
     // remove persons without photo
     await connection
-      .createQueryBuilder()
-      .delete()
-      .from(PersonEntry)
-      .where('count = 0')
-      .execute();
+        .createQueryBuilder()
+        .delete()
+        .from(PersonEntry)
+        .where('count = 0')
+        .execute();
   }
 
   private static async updateSamplePhotos(): Promise<void> {
     const connection = await SQLConnection.getConnection();
     await connection.query(
-      'update person_entry set sampleRegionId = ' +
-      '(Select person_junction_table.id from  media_entity ' +
-      'left join person_junction_table on media_entity.id = person_junction_table.mediaId ' +
-      'where person_junction_table.personId=person_entry.id ' +
-      'order by media_entity.metadataCreationdate desc ' +
-      'limit 1)'
+        'update person_entry set sampleRegionId = ' +
+        '(Select person_junction_table.id from  media_entity ' +
+        'left join person_junction_table on media_entity.id = person_junction_table.mediaId ' +
+        'where person_junction_table.personId=person_entry.id ' +
+        'order by media_entity.metadataRating desc, ' +
+        'media_entity.metadataCreationdate desc ' +
+        'limit 1)'
     );
   }
 
   async updatePerson(
-    name: string,
-    partialPerson: PersonDTO
+      name: string,
+      partialPerson: PersonDTO
   ): Promise<PersonEntry> {
     this.isDBValid = false;
     const connection = await SQLConnection.getConnection();
     const repository = connection.getRepository(PersonEntry);
     const person = await repository
-      .createQueryBuilder('person')
-      .limit(1)
-      .where('person.name LIKE :name COLLATE ' + SQL_COLLATE, {name})
-      .getOne();
+        .createQueryBuilder('person')
+        .limit(1)
+        .where('person.name LIKE :name COLLATE ' + SQL_COLLATE, {name})
+        .getOne();
 
     if (typeof partialPerson.name !== 'undefined') {
       person.name = partialPerson.name;
@@ -82,9 +83,9 @@ export class PersonManager  implements IObjectManager{
   public async countFaces(): Promise<number> {
     const connection = await SQLConnection.getConnection();
     return await connection
-      .getRepository(PersonJunctionTable)
-      .createQueryBuilder('personJunction')
-      .getCount();
+        .getRepository(PersonJunctionTable)
+        .createQueryBuilder('personJunction')
+        .getCount();
   }
 
   public async get(name: string): Promise<PersonEntry> {
@@ -95,7 +96,7 @@ export class PersonManager  implements IObjectManager{
   }
 
   public async saveAll(
-    persons: { name: string; mediaId: number }[]
+      persons: { name: string; mediaId: number }[]
   ): Promise<void> {
     const toSave: { name: string; mediaId: number }[] = [];
     const connection = await SQLConnection.getConnection();
@@ -106,7 +107,7 @@ export class PersonManager  implements IObjectManager{
     // filter already existing persons
     for (const personToSave of persons) {
       const person = savedPersons.find(
-        (p): boolean => p.name === personToSave.name
+          (p): boolean => p.name === personToSave.name
       );
       if (!person) {
         toSave.push(personToSave);
@@ -118,7 +119,7 @@ export class PersonManager  implements IObjectManager{
         const saving = toSave.slice(i * 200, (i + 1) * 200);
         // saving person
         const inserted = await personRepository.insert(
-          saving.map((p) => ({name: p.name}))
+            saving.map((p) => ({name: p.name}))
         );
         // saving junction table
         const junctionTable = inserted.identifiers.map((idObj, j) => ({person: idObj, media: {id: saving[j].mediaId}}));

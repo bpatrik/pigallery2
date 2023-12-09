@@ -31,7 +31,8 @@
 </head>
 
 <body class="text-center">
-<a class="github-fork-ribbon" href="https://github.com/bpatrik/pigallery2" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+<a class="github-fork-ribbon" href="https://github.com/bpatrik/pigallery2" data-ribbon="Fork me on GitHub"
+   title="Fork me on GitHub">Fork me on GitHub</a>
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column ">
   <header class="masthead">
     <div class="inner">
@@ -52,7 +53,7 @@
         <h3>
           PiGallery 2 is a self-hosted directory-first photo gallery website.
         </h3>
-        <a href="https://pigallery2.onrender.com/">Try our live demo! <span class="small">(First load may take up 30s, while the server boots up)</span></a>
+        <a href="https://pigallery2.onrender.com/">Try our live demo! <span class="small">(First load may take up 60s, while the server boots up)</span></a>
 
       </div>
 
@@ -66,10 +67,10 @@
          data-icon="octicon-repo-forked"
          data-show-count="true" aria-label="Fork bpatrik/pigallery2 on GitHub">Fork</a>
     </div>
-    <img class="banner-photo" src="assets/main_page.jpg" style="width: 100%">
+    <img class="banner-photo" src="assets/main_page.png" style="width: 100%">
     <div class="row">
       <div class="col">
-        The gallery is a directory first gallery. It renders your directory structure as it is.
+        The gallery is a directory first gallery. It renders your read-only directory structure as it is.
         Supports rich search queries and fully <a href="https://www.docker.com/">dockerized</a>.
       </div>
     </div>
@@ -78,29 +79,34 @@
 
 
     <div class="row feature">
-      <div class="col">
+      <div class="col-12 col-md-8 feature-image">
+        <img src="assets/lightbox.png" style="width: 100%">
+      </div>
+      <div class="col order-md-1">
         <h3>Photo viewer</h3>
         Nice photo viewer with optional information panel that shows all important information about the photo.
-      </div>
-      <div class="col-12 col-md-8">
-        <img class="card-img-right" src="assets/lightbox_info.jpg" style="width: 100%">
       </div>
     </div>
 
     <div class="row feature">
-      <div class="col-12 col-md-8  order-last order-md-first">
-        <img class="card-img-right" src="assets/map.jpg" style="width: 100%">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/map.png" style="width: 100%">
       </div>
       <div class="col">
         <h3>Map</h3>
         PiGallery2 reads the location data of the photos and puts them on a nice map.
-        The gallery also supports *.gps file to show your tracked path on the map too.
         It by default supports <a href="https://www.openstreetmap.org">OpenStreetMap</a> and <a
         href="https://www.mapbox.com">Mapbox</a>, but you can also add you own favourite map provider.
+        The gallery also supports *.gpx file to show your tracked path on the map too.
+        It recognize different type of activities (like: running, flying) from the *.gpx files.
+        The app shows these activities with different color and icon on the map.
       </div>
     </div>
 
     <div class="row feature">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/search.png">
+      </div>
       <div class="col">
         <h3>Advanced searching</h3>
         App supports full <a href="https://en.wikipedia.org/wiki/Boolean_algebra">boolean logic</a> with negation and
@@ -118,9 +124,6 @@
 
 
       </div>
-      <div class="col-12 col-md-8">
-        <img class="card-img-right" src="assets/search.jpg">
-      </div>
     </div>
     <div class="row feature">
       <div class="col">
@@ -131,10 +134,12 @@
           before:2021<br/>
           orientation:portrait<br/>
           orientation:landscape<br/>
-          maxRating:1<br/>
-          maxRating:5<br/>
-          minResolution:1<br/>
-          maxResolution:10<br/>
+          max-rating:1<br/>
+          max-rating:5<br/>
+          min-resolution:1<br/>
+          max-resolution:10<br/>
+          min-faces:1<br/>
+          max-faces:10<br/>
 
           keyword:"house"<br/>
           caption:"caption"<br/>
@@ -143,8 +148,17 @@
           person:"John",<br/>
           position:"USA" # use city, state, country names<br/>
           5-km-from:(New York) # photos 5 km from the center of New York <br/>
-          any_text:"apple", # searches for apple everywhere, "any_text:" can be omitted
+          any_text:"apple", # searches for apple everywhere, "any_text:" can be omitted <br/>
+          last-4-days:every-week <br/>
+          last-4-days:every-month <br/>
+          last-4-days:every-year <br/>
+          last-4-days:2-days-ago <br/>
+          last-4-days:2-weeks-ago <br/>
+          last-4-days:2-months-ago <br/>
+          last-4-days:2-years-ago <br/>
         </code>
+        See all here: <a
+        href="https://github.com/bpatrik/pigallery2/blob/5368b4ed4e1a61097dbc88aa076aaf9c21524a8d/src/frontend/app/ui/gallery/search/search-query-parser.service.ts#L9">search-query-parser.service.ts</a>.
         <p/>
         <h5>Bool expressions</h5>
         <code class="code-block p-2 text-light rounded bg-secondary d-block">
@@ -155,10 +169,12 @@
         </code>
         <p/>
         <h5>Sort order</h5>
-        Add an empty file like <code class="code-block p-1 text-light rounded bg-secondary">.order_[ORDER].pg2conf</code>
+        Add an empty file like <code
+        class="code-block p-1 text-light rounded bg-secondary">.order_[ORDER].pg2conf</code>
         to a folder to override the default sorting for that folder.
         It's not recursively applied to subfolders.<br/>
-        Replace <code class="code-block p-1 text-light rounded bg-secondary">[ORDER]</code> in the above shown filename by one of the following values:<br/>
+        Replace <code class="code-block p-1 text-light rounded bg-secondary">[ORDER]</code> in the above shown filename
+        by one of the following values:<br/>
         <code class="code-block p-2 text-light rounded bg-secondary d-block">
           descending_name<br/>
           ascending_name<br/>
@@ -171,8 +187,8 @@
 
 
     <div class="row feature">
-      <div class="col-12 col-md-8  order-last order-md-first">
-        <img class="card-img-right" src="assets/sharing.jpg" style="width: 100%">
+      <div class="col-12 col-md-8   feature-image">
+        <img src="assets/sharing.png" style="width: 100%">
       </div>
       <div class="col">
         <h3>Sharing</h3>
@@ -184,19 +200,8 @@
 
 
     <div class="row feature">
-      <div class="col">
-        <h3>Easy settings</h3>
-        PiGallery2 has a rich settings page where you can easily set up the gallery.
-        <a href="https://pigallery2.onrender.com/admin">Click here to see all the setting in the live demo.</a>
-      </div>
-      <div class="col-12 col-md-8">
-        <img class="card-img-right" src="assets/settings.jpg" style="width: 100%">
-      </div>
-    </div>
-
-    <div class="row feature">
-      <div class="col-12 col-md-8  order-last order-md-first">
-        <img class="card-img-right" src="assets/video.jpg" style="width: 100%">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/video.png" style="width: 100%">
       </div>
       <div class="col">
         <h3>Video playback</h3>
@@ -206,23 +211,73 @@
 
 
     <div class="row feature">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/filters.png" style="width: 100%">
+      </div>
+      <div class="col">
+        <h3>Local filters</h3>
+        Rich filter panel, where you can further filter your directory or search results.
+      </div>
+    </div>
+
+
+    <div class="row feature">
+      <div class="col-12 col-md-8   feature-image">
+        <img src="assets/blog.png" style="width: 100%">
+      </div>
+      <div class="col">
+        <h3>Blog</h3>
+        You can add *.md files to your directory and app will show them.
+        You can tag section in the *.md files with <code class="code-block">&lt;!-- @pg-date &lt;ISO_DATE> --></code>,
+        like: <code class="code-block">&lt;!-- @pg-date 2015-06-29 --></code> to attach them to a date.
+        Then, if you group by date, they will show up at the assigned day.
+      </div>
+    </div>
+
+    <div class="row feature">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/albums.png" style="width: 100%">
+      </div>
+      <div class="col">
+        <h3>Logical Albums</h3>
+        You can create logical albums (a.k.a.: Saved search) from any search query.
+        Current limitation: It is not possible to create albums from a manually picked photos.
+      </div>
+    </div>
+
+
+    <div class="row feature">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/faces.png" style="width: 100%">
+      </div>
+      <div class="col">
+        <h3>Faces</h3>
+        PiGallery2 can read face reagions from photo metadata.
+        Current limitation: No ML-based, automatic face detection.
+      </div>
+    </div>
+
+
+    <div class="row feature">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/random_link.png" style="width: 100%">
+      </div>
       <div class="col">
         <h3>Random link</h3>
         You can create a link that will serve a random photo from your gallery.
         You can use this link with 3rd party applications, like with an automatic wallpaper changer gadget.
       </div>
-      <div class="col-12 col-md-8">
-        <img class="card-img-right" src="assets/random_link.jpg" style="width: 100%">
-      </div>
     </div>
 
+
     <div class="row feature">
-      <div class="col-12 col-md-8  order-last order-md-first">
-        <img class="card-img-right" src="assets/local_filters.jpg" style="width: 100%">
+      <div class="col-12 col-md-8  feature-image">
+        <img src="assets/settings.png" style="width: 100%">
       </div>
       <div class="col">
-        <h3>Local filters</h3>
-        Rich filter panel, where you can further filter your directory or search results.
+        <h3>Rich settings</h3>
+        PiGallery2 has a rich settings page where you can easily set up the gallery.
+        <a href="https://pigallery2.onrender.com/admin">Click here to see all the setting in the live demo.</a>
       </div>
     </div>
 
@@ -273,23 +328,9 @@
           <li>supports OSM and Mapbox by default, but you can add any provider that has a tile url</li>
         </ul>
       </li>
-      <li><strong>Two modes: SQL database and no-database mode</strong>
+      <li> Indexes Gallery to DB for a snappy user experience
         <ul>
-          <li>both modes supports
-            <ul>
-              <li>user management</li>
-              <li>password protection can be disabled/enabled</li>
-            </ul>
-          </li>
-          <li>database mode supports:
-            <ul>
-              <li>faster directory listing</li>
-              <li>searching</li>
-              <li>instant search, auto complete</li>
-              <li>sharing</li>
-              <li>setting link expiration time</li>
-            </ul>
-          </li>
+          <li>Both MySQL and SQLite support</li>
         </ul>
       </li>
       <li>Faces (persons) support
@@ -320,6 +361,7 @@
             <em>.ogv, </em>.webm files
           </li>
           <li>uses ffmpeg and ffprobe to generate video thumbnails</li>
+          <li>can transcode videos to mp4 for better support</li>
         </ul>
       </li>
       <li>Markdown based blogging support
@@ -327,11 +369,28 @@
           <li>You can write some note in the *.md files for every directory</li>
         </ul>
       </li>
+      <li>job scheduling support, with the following supported task <a
+        href="https://github.com/bpatrik/pigallery2/issues/92">#92</a>
+        <ul>
+          <li>converting/transcoding videos</li>
+          <li>indexing db</li>
+          <li>etc..</li>
+        </ul>
+      </li>
+      <li>.pg2conf UI modifying files. <a
+        href="https://github.com/bpatrik/pigallery2/issues/177">#177</a>
+        <ul>
+          <li>List of these files are passed down to the UI modify its behaviour.</li>
+          <li>Currently, supported custom, per folder sorting.</li>
+        </ul>
+      </li>
+      <li>Dockerized</li>
     </ul>
 
     <hr/>
 
-    <p>Fork me on GitHub ribbon provided by <a href="https://github.com/simonwhitaker/github-fork-ribbon-css">simonwhitaker</a></p>
+    <p>Fork me on GitHub ribbon provided by <a href="https://github.com/simonwhitaker/github-fork-ribbon-css">simonwhitaker</a>
+    </p>
 
   </main>
 

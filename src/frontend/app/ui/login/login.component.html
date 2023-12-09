@@ -3,7 +3,9 @@
     <app-language></app-language>
   </div>
   <div class="row title  align-self-center">
-    <h1><img src="assets/icon.png"/>{{title}}</h1>
+    <h1>
+      <app-icon [width]="80"></app-icon>
+      {{title}}</h1>
   </div>
   <div class="row card align-self-center">
     <div class="card-body">
@@ -14,7 +16,7 @@
         </div>
 
         <div class="input-group mb-3">
-          <div class="input-group-text"><span class="oi oi-person"></span></div>
+          <div class="input-group-text"><ng-icon name="ionPersonOutline"></ng-icon></div>
           <input type="text"
                  i18n-placeholder
                  class="form-control"
@@ -27,7 +29,7 @@
         </div>
 
         <div class="input-group mb-3">
-          <div class="input-group-text"><span class="oi oi-lock-locked"></span></div>
+          <div class="input-group-text"><ng-icon name="ionLockClosedOutline"></ng-icon></div>
           <input type="password"
                  i18n-placeholder
                  class="form-control"

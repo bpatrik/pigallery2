@@ -1,12 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnChanges,
-  Output,
-  ViewChild,
-} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild,} from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -56,17 +48,17 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   get ImageTransform(): SafeStyle {
     return this.sanitizer.bypassSecurityTrustStyle(
-      'scale(' +
-      this.zoom +
-      ') translate(calc(' +
-      -50 / this.zoom +
-      '% + ' +
-      this.drag.x / this.zoom +
-      'px), calc(' +
-      -50 / this.zoom +
-      '% + ' +
-      this.drag.y / this.zoom +
-      'px))'
+        'scale(' +
+        this.zoom +
+        ') translate(calc(' +
+        -50 / this.zoom +
+        '% + ' +
+        this.drag.x / this.zoom +
+        'px), calc(' +
+        -50 / this.zoom +
+        '% + ' +
+        this.drag.y / this.zoom +
+        'px))'
     );
   }
 
@@ -79,7 +71,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       return;
     }
     this.video.nativeElement.currentTime =
-      this.video.nativeElement.duration * (value / 100);
+        this.video.nativeElement.duration * (value / 100);
     if (this.video.nativeElement.paused) {
       this.video.nativeElement.play().catch(console.error);
     }
@@ -142,9 +134,9 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
     this.setImageSize();
     if (
-      this.thumbnailSrc == null &&
-      this.gridMedia &&
-      this.ThumbnailUrl !== null
+        this.thumbnailSrc == null &&
+        this.gridMedia &&
+        this.ThumbnailUrl !== null
     ) {
       this.thumbnailSrc = this.ThumbnailUrl;
     }
@@ -175,8 +167,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     // TODO:handle error
     this.imageLoadFinished.this = true;
     console.error(
-      'Error: cannot load media for lightbox url: ' +
-      this.gridMedia.getBestFitMediaPath()
+        'Error: cannot load media for lightbox url: ' +
+        this.gridMedia.getBestFitMediaPath()
     );
     this.loadNextPhoto();
   }
@@ -189,11 +181,11 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   public showThumbnail(): boolean {
     return (
-      this.gridMedia &&
-      !this.mediaLoaded &&
-      this.thumbnailSrc !== null &&
-      (this.gridMedia.isThumbnailAvailable() ||
-        this.gridMedia.isReplacementThumbnailAvailable())
+        this.gridMedia &&
+        !this.mediaLoaded &&
+        this.thumbnailSrc !== null &&
+        (this.gridMedia.isThumbnailAvailable() ||
+            this.gridMedia.isReplacementThumbnailAvailable())
     );
   }
 
@@ -239,8 +231,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
 
     if (
-      this.zoom === 1 ||
-      Config.Media.Photo.Converting.loadFullImageOnZoom === false
+        this.zoom === 1 ||
+        Config.Media.Photo.Converting.loadFullImageOnZoom === false
     ) {
       if (this.photo.src == null) {
         if (Config.Media.Photo.Converting.enabled === true) {
@@ -260,8 +252,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   public onVideoProgress(): void {
     this.videoProgress =
-      (100 / this.video.nativeElement.duration) *
-      this.video.nativeElement.currentTime;
+        (100 / this.video.nativeElement.duration) *
+        this.video.nativeElement.currentTime;
   }
 
   private setImageSize(): void {

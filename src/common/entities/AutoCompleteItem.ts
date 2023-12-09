@@ -1,4 +1,4 @@
-import { SearchQueryTypes } from './SearchQueryDTO';
+import {SearchQueryTypes} from './SearchQueryDTO';
 
 export interface IAutoCompleteItem {
   text: string;
@@ -6,7 +6,8 @@ export interface IAutoCompleteItem {
 }
 
 export class AutoCompleteItem implements IAutoCompleteItem {
-  constructor(public text: string, public type: SearchQueryTypes = null) {}
+  constructor(public text: string, public type: SearchQueryTypes = null) {
+  }
 
   equals(other: AutoCompleteItem): boolean {
     return this.text === other.text && this.type === other.type;

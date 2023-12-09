@@ -10,16 +10,16 @@ import {VideoEntity, VideoMetadataEntity} from '../src/backend/model/database/en
 import {MediaDimension, MediaDTO} from '../src/common/entities/MediaDTO';
 import {
   CameraMetadata,
+  CoverPhotoDTO,
   FaceRegion,
   GPSMetadata,
   PhotoDTO,
   PhotoMetadata,
-  PositionMetaData,
-  PreviewPhotoDTO
+  PositionMetaData
 } from '../src/common/entities/PhotoDTO';
 import {DirectoryBaseDTO, DirectoryPathDTO} from '../src/common/entities/DirectoryDTO';
 import {FileDTO} from '../src/common/entities/FileDTO';
-import {DiskMangerWorker} from '../src/backend/model/threading/DiskMangerWorker';
+import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
 
 export class TestHelper {
 
@@ -29,8 +29,10 @@ export class TestHelper {
 
     const dir = new DirectoryEntity();
     dir.name = name;
-    dir.path = DiskMangerWorker.pathFromParent({path: '', name: '.'});
+    dir.path = DiskManager.pathFromParent({path: '', name: '.'});
     dir.mediaCount = 0;
+    dir.youngestMedia = 10;
+    dir.oldestMedia = 1000;
     dir.directories = [];
     dir.metaFile = [];
     dir.media = [];
@@ -38,10 +40,38 @@ export class TestHelper {
     dir.lastScanned = 1656069687773;
     // dir.parent = null;
     if (parent !== null) {
-      dir.path = DiskMangerWorker.pathFromParent(parent);
+      dir.path = DiskManager.pathFromParent(parent);
       parent.directories.push(dir);
     }
     return dir;
+  }
+
+
+  public static getBasePhotoEntry(dir: DirectoryPathDTO, name = 'base media.jpg'): PhotoEntity {
+    const sd = new MediaDimensionEntity();
+    sd.height = 400;
+    sd.width = 200;
+    const m = new PhotoMetadataEntity();
+    m.caption = null;
+    m.size = sd;
+    m.creationDate = 1656069387772;
+    m.fileSize = 123456789;
+    // m.rating = 0; no rating by default
+
+    // TODO: remove when typeorm is fixed
+    m.duration = null;
+    m.bitRate = null;
+
+
+    const d = new PhotoEntity();
+    d.name = name;
+    d.directory = (dir as any);
+    if ((dir as DirectoryBaseDTO).media) {
+      (dir as DirectoryBaseDTO).media.push(d);
+      (dir as DirectoryBaseDTO).mediaCount++;
+    }
+    d.metadata = m;
+    return d;
   }
 
   public static getPhotoEntry(dir: DirectoryPathDTO): PhotoEntity {
@@ -269,20 +299,22 @@ export class TestHelper {
 
     const dir: DirectoryBaseDTO = {
       id: null,
-      name: DiskMangerWorker.dirName(forceStr || Math.random().toString(36).substring(7)),
-      path: DiskMangerWorker.pathFromParent({path: '', name: '.'}),
+      name: DiskManager.dirName(forceStr || Math.random().toString(36).substring(7)),
+      path: DiskManager.pathFromParent({path: '', name: '.'}),
       mediaCount: 0,
+      youngestMedia: 10,
+      oldestMedia: 1000,
       directories: [],
       metaFile: [],
-      preview: null,
-      validPreview: false,
+      cover: null,
+      validCover: false,
       media: [],
       lastModified: Date.now(),
       lastScanned: null,
       parent
     };
     if (parent !== null) {
-      dir.path = DiskMangerWorker.pathFromParent(parent);
+      dir.path = DiskManager.pathFromParent(parent);
       parent.directories.push(dir);
     }
     return dir;
@@ -380,21 +412,21 @@ export class TestHelper {
     }
 
     dir.media.push(p);
-    TestHelper.updatePreview(dir);
+    TestHelper.updateCover(dir);
     return p;
   }
 
-  static updatePreview(dir: DirectoryBaseDTO): void {
+  static updateCover(dir: DirectoryBaseDTO): void {
     if (dir.media.length > 0) {
-      dir.preview = dir.media.sort((a, b): number => b.metadata.creationDate - a.metadata.creationDate)[0];
+      dir.cover = dir.media.sort((a, b): number => b.metadata.creationDate - a.metadata.creationDate)[0];
     } else {
-      const filtered = dir.directories.filter((d): PreviewPhotoDTO => d.preview).map((d): PreviewPhotoDTO => d.preview);
+      const filtered = dir.directories.filter((d): CoverPhotoDTO => d.cover).map((d): CoverPhotoDTO => d.cover);
       if (filtered.length > 0) {
-        dir.preview = filtered.sort((a, b): number => b.metadata.creationDate - a.metadata.creationDate)[0];
+        dir.cover = filtered.sort((a, b): number => b.metadata.creationDate - a.metadata.creationDate)[0];
       }
     }
     if (dir.parent) {
-      TestHelper.updatePreview(dir.parent);
+      TestHelper.updateCover(dir.parent);
     }
 
   }

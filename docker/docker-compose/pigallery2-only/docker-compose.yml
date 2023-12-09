@@ -1,4 +1,4 @@
-version: '3'
+version: '3.9'
 services:
   pigallery2:
     image: bpatrik/pigallery2:latest

@@ -2,31 +2,33 @@
    style="display: inline-block;">
 
 
-  <div class="photo-container"
+  <div class="photo-container  rounded overflow-hidden"
        [style.width.px]="size"
        [style.height.px]="size">
 
-    <div class="photo"
+    <div class="photo "
          *ngIf="thumbnail && thumbnail.Available"
          [style.background-image]="getSanitizedThUrl()"></div>
 
-    <span *ngIf="!thumbnail || !thumbnail.Available" class="oi oi-folder no-image"
-          aria-hidden="true">
-    </span>
+    <app-icon *ngIf="!thumbnail || !thumbnail.Available" class="no-image"></app-icon>
   </div>
 
 
   <!--Info box -->
-  <div class="info">
+  <div class="info rounded-bottom">
     {{album.name}} ({{album.count}})
-    <span *ngIf="CanUpdate && !album.locked"
-          (click)="deleteAlbum($event)"
-          class="info-button delete oi oi-trash float-end"></span>
+    <ng-icon *ngIf="CanUpdate && !album.locked"
+             (click)="deleteAlbum($event)"
+             class="info-button delete float-end"
+             name="ionTrashOutline"
+             title="Delete" i18n-title></ng-icon>
 
-    <span *ngIf="album.locked"
-          title="Album is locked, cannot be deleted from the webpage."
-          i18n-title
-          class="info-button oi oi-lock-locked float-end"></span>
+    <ng-icon *ngIf="album.locked"
+             class="info-button float-end"
+             name="ionLockClosedOutline"
+             title="Album is locked, cannot be deleted from the webpage."
+             i18n-title></ng-icon>
+
   </div>
 </a>
 

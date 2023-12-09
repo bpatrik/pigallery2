@@ -1,9 +1,9 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { FacesService } from './faces.service';
-import { QueryService } from '../../model/query.service';
-import { map } from 'rxjs/operators';
-import { PersonDTO } from '../../../../common/entities/PersonDTO';
-import { Observable } from 'rxjs';
+import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {FacesService} from './faces.service';
+import {QueryService} from '../../model/query.service';
+import {map} from 'rxjs/operators';
+import {PersonDTO} from '../../../../common/entities/PersonDTO';
+import {Observable} from 'rxjs';
 import {PiTitleService} from '../../model/pi-title.service';
 
 @Component({
@@ -12,25 +12,25 @@ import {PiTitleService} from '../../model/pi-title.service';
   styleUrls: ['./faces.component.css'],
 })
 export class FacesComponent implements OnInit {
-  @ViewChild('container', { static: true }) container: ElementRef;
+  @ViewChild('container', {static: true}) container: ElementRef;
   public size: number;
   favourites: Observable<PersonDTO[]>;
   nonFavourites: Observable<PersonDTO[]>;
 
   constructor(
-    public facesService: FacesService,
-    public queryService: QueryService,
-    private piTitleService: PiTitleService
+      public facesService: FacesService,
+      public queryService: QueryService,
+      private piTitleService: PiTitleService
   ) {
     this.facesService.getPersons().catch(console.error);
     const personCmp = (p1: PersonDTO, p2: PersonDTO) => {
       return p1.name.localeCompare(p2.name);
     };
     this.favourites = this.facesService.persons.pipe(
-      map((value) => value.filter((p) => p.isFavourite).sort(personCmp))
+        map((value) => value.filter((p) => p.isFavourite).sort(personCmp))
     );
     this.nonFavourites = this.facesService.persons.pipe(
-      map((value) => value.filter((p) => !p.isFavourite).sort(personCmp))
+        map((value) => value.filter((p) => !p.isFavourite).sort(personCmp))
     );
   }
 

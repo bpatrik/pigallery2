@@ -1,4 +1,4 @@
-import { UserDTO } from './UserDTO';
+import {UserDTO} from './UserDTO';
 
 export interface SharingDTO {
   id: number;

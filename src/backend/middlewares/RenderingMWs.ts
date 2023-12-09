@@ -131,7 +131,18 @@ export class RenderingMWs {
       if (err.details) {
         Logger.warn('Handled error:');
         LoggerRouter.log(Logger.warn, req, res);
+        // use separate rendering for detailsStr
+        const d = err.detailsStr;
+        delete err.detailsStr;
         console.log(err);
+        if (err.detailsStr) {
+          try {
+            console.log('details:', JSON.stringify(err.detailsStr));
+          } catch (_) {
+            console.log(err.detailsStr);
+          }
+        }
+        err.detailsStr = d;
         delete err.details; // do not send back error object to the client side
 
         // hide error details for non developers

@@ -17,9 +17,9 @@ export class ShareLoginComponent implements OnInit {
   title: string;
 
   constructor(
-    public shareService: ShareService,
-    private authService: AuthenticationService,
-    private navigation: NavigationService
+      public shareService: ShareService,
+      private authService: AuthenticationService,
+      private navigation: NavigationService
   ) {
     this.title = Config.Server.applicationTitle;
   }
@@ -38,8 +38,8 @@ export class ShareLoginComponent implements OnInit {
       await this.authService.shareLogin(this.password);
     } catch (error) {
       if (
-        (error && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) ||
-        error === 'Unauthorized'
+          (error && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) ||
+          error === 'Unauthorized'
       ) {
         this.loginError = true;
       }

@@ -1,8 +1,8 @@
 import {Config} from '../../../../common/config/private/Config';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {FileJob} from './FileJob';
-import {PhotoProcessing} from '../../fileprocessing/PhotoProcessing';
-import {ThumbnailSourceType} from '../../threading/PhotoWorker';
+import {PhotoProcessing} from '../../fileaccess/fileprocessing/PhotoProcessing';
+import {ThumbnailSourceType} from '../../fileaccess/PhotoWorker';
 import {MediaDTOUtils} from '../../../../common/entities/MediaDTO';
 import {FileDTO} from '../../../../common/entities/FileDTO';
 import {backendTexts} from '../../../../common/BackendTexts';
@@ -29,9 +29,9 @@ export class ThumbnailGenerationJob extends FileJob<{
   }
 
   start(
-    config: { sizes?: number[]; indexedOnly?: boolean },
-    soloRun = false,
-    allowParallelRun = false
+      config: { sizes?: number[]; indexedOnly?: boolean },
+      soloRun = false,
+      allowParallelRun = false
   ): Promise<void> {
     if (!config || !config.sizes || !Array.isArray(config.sizes) || config.sizes.length === 0) {
       config = config || {};
@@ -40,9 +40,9 @@ export class ThumbnailGenerationJob extends FileJob<{
     for (const item of config.sizes) {
       if (Config.Media.Thumbnail.thumbnailSizes.indexOf(item) === -1) {
         throw new Error(
-          'unknown thumbnails size: ' +
-          item +
-          '. Add it to the possible thumbnail sizes.'
+            'unknown thumbnails size: ' +
+            item +
+            '. Add it to the possible thumbnail sizes.'
         );
       }
     }
@@ -54,6 +54,7 @@ export class ThumbnailGenerationJob extends FileJob<{
     return files;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
     return undefined;
   }
@@ -70,12 +71,12 @@ export class ThumbnailGenerationJob extends FileJob<{
   protected async processFile(mPath: string): Promise<void> {
     for (const item of this.config.sizes) {
       await PhotoProcessing.generateThumbnail(
-        mPath,
-        item,
-        MediaDTOUtils.isVideoPath(mPath)
-          ? ThumbnailSourceType.Video
-          : ThumbnailSourceType.Photo,
-        false
+          mPath,
+          item,
+          MediaDTOUtils.isVideoPath(mPath)
+              ? ThumbnailSourceType.Video
+              : ThumbnailSourceType.Photo,
+          false
       );
     }
   }

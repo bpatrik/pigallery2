@@ -1,0 +1,23 @@
+<ng-container [ngSwitch]="method">
+  <ng-container *ngSwitchCase="GroupSortByTypes.Name">
+    <ng-icon name="ionTextOutline"></ng-icon>
+  </ng-container>
+  <ng-container *ngSwitchCase="GroupSortByTypes.Rating">
+    <ng-icon name="ionStarOutline"></ng-icon>
+  </ng-container>
+  <ng-container *ngSwitchCase="GroupSortByTypes.Date">
+    <ng-icon name="ionCalendarOutline"></ng-icon>
+  </ng-container>
+  <ng-container *ngSwitchCase="GroupSortByTypes.PersonCount">
+    <ng-icon name="ionPersonOutline"></ng-icon>
+  </ng-container>
+  <ng-container *ngSwitchCase="GroupSortByTypes.Random">
+    <ng-icon name="ionShuffleOutline"></ng-icon>
+  </ng-container>
+  <ng-container *ngSwitchCase="GroupSortByTypes.FileSize">
+    <ng-icon name="ionDocumentOutline"></ng-icon>
+  </ng-container>
+  <ng-container *ngSwitchCase="GroupSortByTypes.NoGrouping">
+    <ng-icon name="ionCloseOutline"></ng-icon>
+  </ng-container>
+</ng-container>

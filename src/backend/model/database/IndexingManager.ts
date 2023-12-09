@@ -1,11 +1,10 @@
-import {DirectoryDTOUtils, DirectoryPathDTO, ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryBaseDTO, DirectoryDTOUtils, DirectoryPathDTO, ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
 import {DirectoryEntity} from './enitites/DirectoryEntity';
 import {SQLConnection} from './SQLConnection';
-import {DiskManager} from '../DiskManger';
 import {PhotoEntity, PhotoMetadataEntity} from './enitites/PhotoEntity';
 import {Utils} from '../../../common/Utils';
 import {PhotoMetadata,} from '../../../common/entities/PhotoDTO';
-import {Connection, Repository} from 'typeorm';
+import {Connection, ObjectLiteral, Repository} from 'typeorm';
 import {MediaEntity} from './enitites/MediaEntity';
 import {MediaDTO, MediaDTOUtils} from '../../../common/entities/MediaDTO';
 import {VideoEntity} from './enitites/VideoEntity';
@@ -13,7 +12,6 @@ import {FileEntity} from './enitites/FileEntity';
 import {FileDTO} from '../../../common/entities/FileDTO';
 import {NotificationManager} from '../NotifocationManager';
 import {ObjectManagers} from '../ObjectManagers';
-import {DiskMangerWorker} from '../threading/DiskMangerWorker';
 import {Logger} from '../../Logger';
 import {ServerPG2ConfMap, ServerSidePG2ConfAction,} from '../../../common/PG2ConfMap';
 import {ProjectPath} from '../../ProjectPath';
@@ -22,6 +20,9 @@ import * as fs from 'fs';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {PersonEntry} from './enitites/PersonEntry';
 import {PersonJunctionTable} from './enitites/PersonJunctionTable';
+import {MDFileEntity} from './enitites/MDFileEntity';
+import {MDFileDTO} from '../../../common/entities/MDFileDTO';
+import {DiskManager} from '../fileaccess/DiskManager';
 
 const LOG_TAG = '[IndexingManager]';
 
@@ -208,6 +209,8 @@ export class IndexingManager {
       currentDir.lastModified = scannedDirectory.lastModified;
       currentDir.lastScanned = scannedDirectory.lastScanned;
       currentDir.mediaCount = scannedDirectory.mediaCount;
+      currentDir.youngestMedia = scannedDirectory.youngestMedia;
+      currentDir.oldestMedia = scannedDirectory.oldestMedia;
       await directoryRepository.save(currentDir);
       return currentDir.id;
     } else {
@@ -216,6 +219,8 @@ export class IndexingManager {
           mediaCount: scannedDirectory.mediaCount,
           lastModified: scannedDirectory.lastModified,
           lastScanned: scannedDirectory.lastScanned,
+          youngestMedia: scannedDirectory.youngestMedia,
+          oldestMedia: scannedDirectory.oldestMedia,
           name: scannedDirectory.name,
           path: scannedDirectory.path,
         } as DirectoryEntity)
@@ -234,11 +239,11 @@ export class IndexingManager {
     await directoryRepository
       .createQueryBuilder()
       .update(DirectoryEntity)
-      .set({parent: currentDirId as any})
+      .set({parent: currentDirId as unknown})
       .where('path = :path', {
-        path: DiskMangerWorker.pathFromParent(scannedDirectory),
+        path: DiskManager.pathFromParent(scannedDirectory),
       })
-      .andWhere('name NOT LIKE :root', {root: DiskMangerWorker.dirName('.')})
+      .andWhere('name NOT LIKE :root', {root: DiskManager.dirName('.')})
       .andWhere('parent IS NULL')
       .execute();
 
@@ -261,8 +266,8 @@ export class IndexingManager {
         // directory found
         childDirectories.splice(dirIndex, 1);
       } else {
-        // dir does not exists yet
-        directory.parent = {id: currentDirId} as any;
+        // dir does not exist yet
+        directory.parent = {id: currentDirId} as ParentDirectoryDTO;
         (directory as DirectoryEntity).lastScanned = null; // new child dir, not fully scanned yet
         const d = await directoryRepository.insert(
           directory as DirectoryEntity
@@ -288,6 +293,7 @@ export class IndexingManager {
     scannedDirectory: ParentDirectoryDTO
   ): Promise<void> {
     const fileRepository = connection.getRepository(FileEntity);
+    const MDfileRepository = connection.getRepository(MDFileEntity);
     // save files
     const indexedMetaFiles = await fileRepository
       .createQueryBuilder('file')
@@ -296,7 +302,8 @@ export class IndexingManager {
       })
       .getMany();
 
-    const metaFilesToSave = [];
+    const metaFilesToInsert = [];
+    const MDFilesToUpdate = [];
     for (const item of scannedDirectory.metaFile) {
       let metaFile: FileDTO = null;
       for (let j = 0; j < indexedMetaFiles.length; j++) {
@@ -311,12 +318,26 @@ export class IndexingManager {
         item.directory = null;
         metaFile = Utils.clone(item);
         item.directory = scannedDirectory;
-        metaFile.directory = {id: currentDirID} as any;
-        metaFilesToSave.push(metaFile);
+        metaFile.directory = {id: currentDirID} as DirectoryBaseDTO;
+        metaFilesToInsert.push(metaFile);
+      } else if ((item as MDFileDTO).date) {
+        if ((item as MDFileDTO).date != (metaFile as MDFileDTO).date) {
+          (metaFile as MDFileDTO).date = (item as MDFileDTO).date;
+          MDFilesToUpdate.push(metaFile);
+        }
       }
     }
-    await fileRepository.save(metaFilesToSave, {
-      chunk: Math.max(Math.ceil(metaFilesToSave.length / 500), 1),
+
+    const MDFiles = metaFilesToInsert.filter(f => !isNaN((f as MDFileDTO).date));
+    const generalFiles = metaFilesToInsert.filter(f => isNaN((f as MDFileDTO).date));
+    await fileRepository.save(generalFiles, {
+      chunk: Math.max(Math.ceil(generalFiles.length / 500), 1),
+    });
+    await MDfileRepository.save(MDFiles, {
+      chunk: Math.max(Math.ceil(MDFiles.length / 500), 1),
+    });
+    await MDfileRepository.save(MDFilesToUpdate, {
+      chunk: Math.max(Math.ceil(MDFilesToUpdate.length / 500), 1),
     });
     await fileRepository.remove(indexedMetaFiles, {
       chunk: Math.max(Math.ceil(indexedMetaFiles.length / 500), 1),
@@ -367,13 +388,14 @@ export class IndexingManager {
           ),
         ];
       }
+      (media[i].metadata as PhotoMetadataEntity).personsLength = (media[i].metadata as PhotoMetadataEntity)?.persons?.length || 0;
 
 
       if (mediaItem == null) {
         // Media not in DB yet
         media[i].directory = null;
         mediaItem = Utils.clone(media[i]);
-        mediaItem.directory = {id: parentDirId} as any;
+        mediaItem.directory = {id: parentDirId} as DirectoryBaseDTO;
         (MediaDTOUtils.isPhoto(mediaItem)
             ? mediaChange.insertP
             : mediaChange.insertV
@@ -485,8 +507,8 @@ export class IndexingManager {
     });
   }
 
-  private async saveChunk<T>(
-    repository: Repository<any>,
+  private async saveChunk<T extends ObjectLiteral>(
+    repository: Repository<T>,
     entities: T[],
     size: number
   ): Promise<T[]> {
@@ -505,8 +527,8 @@ export class IndexingManager {
     return list;
   }
 
-  private async insertChunk<T>(
-    repository: Repository<any>,
+  private async insertChunk<T extends ObjectLiteral>(
+    repository: Repository<T>,
     entities: T[],
     size: number
   ): Promise<number[]> {
@@ -515,7 +537,7 @@ export class IndexingManager {
     }
     if (entities.length < size) {
       return (await repository.insert(entities)).identifiers.map(
-        (i: any) => i.id
+        (i: { id: number }) => i.id
       );
     }
     let list: number[] = [];

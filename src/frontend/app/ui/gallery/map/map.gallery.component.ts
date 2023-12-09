@@ -86,6 +86,9 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
 
   onMapReady(map: Map): void {
     this.leafletMap = map;
+    if (!this.leafletMap) {
+      return;
+    }
     if (this.markerLayer.length > 0) {
       this.leafletMap.setView(this.markerLayer[0].getLatLng(), 99);
       this.leafletMap.fitBounds(

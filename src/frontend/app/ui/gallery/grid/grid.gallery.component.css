@@ -1,12 +1,14 @@
-div {
-  /*display: block;*/
-  line-height: normal;
-  font-size: 0;
+:host {
+    display: block;
+    width: 100%;
+}
+
+.media-grid {
+    line-height: normal;
+    font-size: 0;
 }
 
 app-gallery-grid-photo {
-  display: inline-block;
-
-  cursor: pointer;
-  margin: 2px;
+    display: inline-block;
+    cursor: pointer;
 }

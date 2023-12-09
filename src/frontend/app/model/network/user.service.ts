@@ -9,8 +9,8 @@ import {QueryParams} from '../../../../common/QueryParams';
 @Injectable()
 export class UserService {
   constructor(
-    private networkService: NetworkService,
-    private shareService: ShareService
+      private networkService: NetworkService,
+      private shareService: ShareService
   ) {
   }
 
@@ -26,11 +26,11 @@ export class UserService {
 
   public async shareLogin(password: string): Promise<UserDTO> {
     return this.networkService.postJson<UserDTO>(
-      '/share/login?' +
-      QueryParams.gallery.sharingKey_query +
-      '=' +
-      this.shareService.getSharingKey(),
-      {password}
+        '/share/login?' +
+        QueryParams.gallery.sharingKey_query +
+        '=' +
+        this.shareService.getSharingKey(),
+        {password}
     );
   }
 
@@ -40,7 +40,7 @@ export class UserService {
       if (this.shareService.isSharing()) {
         const query: any = {};
         query[QueryParams.gallery.sharingKey_query] =
-          this.shareService.getSharingKey();
+            this.shareService.getSharingKey();
         return this.networkService.getJson<UserDTO>('/user/me', query);
       }
     }

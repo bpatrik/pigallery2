@@ -2,12 +2,12 @@
         style="white-space:nowrap"
         *ngIf="!dropDownItem"
         type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
-  <span class="oi oi-share"></span>
+  <ng-icon name="ionShareSocialOutline" class="me-1"></ng-icon>
   <ng-container i18n>Share</ng-container>
 </button>
 
 <a class="dropdown-item" (click)="openModal(shareModal)" *ngIf="dropDownItem">
-  <span class="oi oi-share"></span>
+  <ng-icon name="ionShareSocialOutline"></ng-icon>
   <ng-container i18n>Share</ng-container>
 </a>
 
@@ -28,16 +28,25 @@
                  class="form-control input-md"
                  type="text"
                  readonly
-                 [disabled]="!shareForm.form.valid"
+                 [disabled]="!shareForm.form.valid || !urlValid"
                  [ngModel]="shareForm.form.valid ? url: invalidSettings">
         </div>
         <div class="col-5 col-sm-3">
-          <button id="copyButton" name="copyButton"
-                  ngxClipboard
-                  [cbContent]="url"
-                  (cbOnSuccess)="onCopy()"
-                  [disabled]="!shareForm.form.valid"
-                  class="btn btn-primary btn-block" i18n>Copy
+          <button
+            *ngIf="!sharing"
+            id="getShareButton" name="getShareButton"
+            (click)="share()"
+            [disabled]="!shareForm.form.valid"
+            class="btn btn-primary btn-block float-end" i18n>Share
+          </button>
+          <button
+            *ngIf="sharing"
+            id="copyButton" name="copyButton"
+            ngxClipboard
+            [cbContent]="url"
+            (cbOnSuccess)="onCopy()"
+            [disabled]="!shareForm.form.valid"
+            class="btn btn-primary btn-block float-end" i18n>Copy
           </button>
         </div>
       </div>
@@ -117,5 +126,39 @@
         </div>
       </div>
     </form>
+  </div>
+  <div class="modal-footer" *ngIf="activeShares && activeShares.length>0">
+    <a *ngIf="!showSharingList"
+       (click)="showSharingList = true"
+       class="list-shares-button m-0">
+      <span class="badge text-bg-secondary me-1">{{activeShares.length}}</span>
+      <ng-container i18n>active share(s) for this folder.
+      </ng-container>
+      <ng-icon name="ionChevronForwardOutline" class="ms-1"></ng-icon>
+    </a>
+    <table class="table table-hover table-sm" *ngIf="showSharingList">
+      <thead>
+      <tr>
+        <th i18n>Sharing</th>
+        <th *ngIf="IsAdmin" i18n>Creator</th>
+        <th i18n>Expires</th>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let share of activeShares">
+        <td><a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a></td>
+        <td *ngIf="IsAdmin">{{share.creator.name}}</td>
+        <td>{{share.expires | date}}</td>
+        <td>
+          <button (click)="deleteSharing(share)"
+                  [disabled]="share.sharingKey == sharing?.sharingKey"
+                  class="btn btn-danger float-end">
+            <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
   </div>
 </ng-template>

@@ -15,6 +15,7 @@
 
 .form-switch .form-check-input:checked {
   background-color: var(--bs-success);
+  border-color: var(--bs-success);
 }
 
 .form-switch .form-check-input:focus {

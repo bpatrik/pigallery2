@@ -14,14 +14,18 @@ export class ThemeService {
   public readonly matcher = window.matchMedia('(prefers-color-scheme: dark)');
 
   constructor(private cachingService: GalleryCacheService) {
-    if (cachingService.getThemeMode()) {
-      this.setMode(cachingService.getThemeMode());
+    this.init();
+  }
+
+  public init() {
+    if (this.cachingService.getThemeMode()) {
+      this.setMode(this.cachingService.getThemeMode());
     } else {
       this.setMode(Config.Gallery.Themes.defaultMode);
     }
     this.darkMode.subscribe((darkMode: boolean) => {
-        this.applyMode(darkMode);
-      }
+          this.applyMode(darkMode);
+        }
     );
   }
 

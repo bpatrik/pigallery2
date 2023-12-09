@@ -2,11 +2,12 @@
   <input type="text"
          class="form-control search-text"
          [placeholder]="placeholder"
-         (keyup)="onSearchChange($event)"
+         (keyup)="onSearchChange()"
          (blur)="onFocusLost()"
+         (focus)="onFocus()"
          [(ngModel)]="rawSearchText"
          (ngModelChange)="onChange()"
-         (keydown.enter)="OnEnter($event)"
+         (keydown.enter)="OnEnter()"
          (keydown.arrowRight)="applyHint($event)"
          (keydown.arrowUp)="selectAutocompleteUp()"
          (keydown.arrowDown)="selectAutocompleteDown()"
@@ -34,19 +35,20 @@
          *ngFor="let item of autoCompleteRenders; let i = index">
       <div>
                     <span [ngSwitch]="item.type">
-                      <span *ngSwitchCase="SearchQueryTypes.caption" class="oi oi-image"></span>
-                      <span *ngSwitchCase="SearchQueryTypes.directory" class="oi oi-folder"></span>
-                      <span *ngSwitchCase="SearchQueryTypes.file_name" class="oi oi-image"></span>
-                      <span *ngSwitchCase="SearchQueryTypes.keyword" class="oi oi-tag"></span>
-                      <span *ngSwitchCase="SearchQueryTypes.person" class="oi oi-person"></span>
-                      <span *ngSwitchCase="SearchQueryTypes.position" class="oi oi-map-marker"></span>
-                     <span *ngSwitchCase="SearchQueryTypes.distance" class="oi oi-map-marker"></span>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.caption" name="ionTextOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.directory" name="ionFolderOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.file_name" name="ionImageOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.keyword" name="ionPricetagOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.person" name="ionPersonOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.position" name="ionLocationOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.distance" name="ionLocationOutline"></ng-icon>
                     </span>
         {{item.preText}}<strong>{{item.highLightText}}</strong>{{item.postText}}
-        <span class="oi oi-chevron-right insert-button float-end" (click)="applyAutoComplete(item)"
-              title="Insert"
-              i18n-title>
-        </span>
+        <ng-icon name="ionChevronForwardOutline"
+                 class="insert-button float-end"
+                 (click)="applyAutoComplete(item)"
+                 title="Insert"
+                 i18n-title></ng-icon>
       </div>
     </div>
   </div>

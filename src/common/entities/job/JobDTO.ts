@@ -1,6 +1,6 @@
 import {backendText} from '../../BackendTexts';
 
-export type fieldType = 'string' | 'number' | 'boolean' | 'number-array';
+export type fieldType = 'string' | 'string-array' | 'number' | 'boolean' | 'number-array' | 'MediaPickDTO-array';
 
 export enum DefaultsJobs {
   Indexing = 1,
@@ -9,10 +9,12 @@ export enum DefaultsJobs {
   'Photo Converting' = 4,
   'Thumbnail Generation' = 5,
   'Temp Folder Cleaning' = 6,
-  'Preview Filling' = 7,
-  'Preview Reset' = 8,
+  'Album Cover Filling' = 7,
+  'Album Cover Reset' = 8,
   'GPX Compression' = 9,
   'Album Reset' = 10,
+  'Delete Compressed GPX' = 11,
+  'Top Pick Sending' = 12
 }
 
 export interface ConfigTemplateEntry {

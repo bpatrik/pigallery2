@@ -1,11 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { SharingDTO } from '../../../../common/entities/SharingDTO';
-import { UserEntity } from './UserEntity';
-import { UserDTO } from '../../../../common/entities/UserDTO';
+import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
+import {SharingDTO} from '../../../../common/entities/SharingDTO';
+import {UserEntity} from './UserEntity';
+import {UserDTO} from '../../../../common/entities/UserDTO';
 
 @Entity()
 export class SharingEntity implements SharingDTO {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn({unsigned: true})
   id: number;
 
   @Column()
@@ -14,7 +14,7 @@ export class SharingEntity implements SharingDTO {
   @Column()
   path: string;
 
-  @Column({ type: 'text', nullable: true })
+  @Column({type: 'text', nullable: true})
   password: string;
 
   @Column('bigint', {
@@ -38,6 +38,6 @@ export class SharingEntity implements SharingDTO {
   @Column()
   includeSubfolders: boolean;
 
-  @ManyToOne((type) => UserEntity, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => UserEntity, {onDelete: 'CASCADE', nullable: false})
   creator: UserDTO;
 }

@@ -1,20 +1,31 @@
+:host {
+  transition: scale .3s ease-out;
+}
+
+:host:hover {
+  scale: 98%;
+}
+
 a {
   position: relative;
 }
 
 .photo-container {
-  border: 2px solid #333;
+  border: 1px solid #333;
   width: 180px;
   height: 180px;
-  background-color: #bbbbbb;
+  background-color: var(--item-background);
 }
 
-.no-image {
 
-  color: #7f7f7f;
-  font-size: 80px;
-  top: calc(50% - 40px);
-  left: calc(50% - 40px);
+.no-image {
+  display: block;
+  color: var(--bs-secondary-color);
+  width: 100px;
+  top: calc(50%);
+  left: calc(50%);
+  transform: translate(-50%, -50%);
+  position: relative;
 }
 
 .photo {

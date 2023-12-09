@@ -1,10 +1,7 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { MediaDTO } from '../../../../../common/entities/MediaDTO';
-import {
-  IconThumbnail,
-  ThumbnailManagerService,
-} from '../../gallery/thumbnailManager.service';
-import { MediaIcon } from '../../gallery/MediaIcon';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {IconThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
+import {MediaIcon} from '../../gallery/MediaIcon';
 
 @Component({
   selector: 'app-duplicates-photo',
@@ -16,7 +13,8 @@ export class DuplicatesPhotoComponent implements OnInit, OnDestroy {
 
   thumbnail: IconThumbnail;
 
-  constructor(private thumbnailService: ThumbnailManagerService) {}
+  constructor(private thumbnailService: ThumbnailManagerService) {
+  }
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getIcon(new MediaIcon(this.media));

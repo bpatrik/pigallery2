@@ -1,17 +1,18 @@
 .static {
   width: 100%;
   height: 100%;
-  background-color: #bbbbbb;
+  background-color: var(--item-background);
   color: #7f7f7f;
   font-size: 50px;
 }
 
-.static span {
+.static ng-icon {
   top: 50%;
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
   left: 50%;
   display: table;
+  position: relative;
 }
 
 .sk-cube-grid {
@@ -22,7 +23,7 @@
 .sk-cube-grid .sk-cube {
   width: calc(100% / 3);
   height: calc(100% / 3);
-  background-color: #bbbbbb;
+  background-color: var(--item-background);
   float: left;
 }
 
@@ -34,6 +35,7 @@
 .sk-cube-grid.animate .sk-cube1 {
   -webkit-animation-delay: 0.4s;
   animation-delay: 0.4s;
+  border-top-left-radius: var(--bs-border-radius);
 }
 
 .sk-cube-grid.animate .sk-cube2 {
@@ -44,6 +46,7 @@
 .sk-cube-grid.animate .sk-cube3 {
   -webkit-animation-delay: 0.8s;
   animation-delay: 0.8s;
+  border-top-right-radius: var(--bs-border-radius);
 }
 
 .sk-cube-grid.animate .sk-cube4 {
@@ -59,6 +62,7 @@
 .sk-cube-grid.animate .sk-cube6 {
   -webkit-animation-delay: 0.6s;
   animation-delay: 0.6s;
+  border-bottom-left-radius: var(--bs-border-radius);
 }
 
 .sk-cube-grid.animate .sk-cube7 {
@@ -74,6 +78,7 @@
 .sk-cube-grid.animate .sk-cube9 {
   -webkit-animation-delay: 0.4s;
   animation-delay: 0.4s;
+  border-bottom-right-radius: var(--bs-border-radius);
 }
 
 @-webkit-keyframes sk-cubeGridScaleDelay {

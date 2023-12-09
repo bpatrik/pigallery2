@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
-import { Event } from '../../../../common/event/Event';
-import { PageHelper } from '../../model/page.helper';
+import {Injectable} from '@angular/core';
+import {Event} from '../../../../common/event/Event';
+import {PageHelper} from '../../model/page.helper';
 
 @Injectable()
 export class OverlayService {
@@ -23,7 +23,7 @@ export class OverlayService {
       const outer = document.createElement('div');
       outer.style.visibility = 'hidden';
       outer.style.width = '100px';
-      (outer.style as any).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+      (outer.style as unknown as Record<string, string>).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
 
       document.body.appendChild(outer);
 

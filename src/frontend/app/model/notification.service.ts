@@ -1,12 +1,9 @@
-import { Injectable } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
-import { NetworkService } from './network/network.service';
-import { AuthenticationService } from './network/authentication.service';
-import {
-  NotificationDTO,
-  NotificationType,
-} from '../../../common/entities/NotificationDTO';
-import { UserDTO, UserRoles } from '../../../common/entities/UserDTO';
+import {Injectable} from '@angular/core';
+import {ToastrService} from 'ngx-toastr';
+import {NetworkService} from './network/network.service';
+import {AuthenticationService} from './network/authentication.service';
+import {NotificationDTO, NotificationType,} from '../../../common/entities/NotificationDTO';
+import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 
 export interface CountedNotificationDTO extends NotificationDTO {
   count: number;
@@ -23,16 +20,16 @@ export class NotificationService {
   lastUser: UserDTO = null;
 
   constructor(
-    private toastr: ToastrService,
-    private networkService: NetworkService,
-    private authService: AuthenticationService
+      private toastr: ToastrService,
+      private networkService: NetworkService,
+      private authService: AuthenticationService
   ) {
     this.authService.user.subscribe(() => {
       if (
-        this.authService.isAuthenticated() &&
-        (!this.lastUser ||
-          this.lastUser.id !== this.authService.user.value.id) &&
-        this.authService.user.value.role >= UserRoles.Guest
+          this.authService.isAuthenticated() &&
+          (!this.lastUser ||
+              this.lastUser.id !== this.authService.user.value.id) &&
+          this.authService.user.value.role >= UserRoles.Guest
       ) {
         this.getServerNotifications();
       }
@@ -53,16 +50,16 @@ export class NotificationService {
       if (n.details) {
         key += JSON.stringify(n.details);
       }
-      groups[key] = groups[key] || { notification: n, count: 0 };
+      groups[key] = groups[key] || {notification: n, count: 0};
       groups[key].count++;
     });
     this.numberOfNotifications = notifications.length;
     this.countedNotifications = [];
     for (const key of Object.keys(groups)) {
       (groups[key].notification as CountedNotificationDTO).count =
-        groups[key].count;
+          groups[key].count;
       this.countedNotifications.push(
-        groups[key].notification as CountedNotificationDTO
+          groups[key].notification as CountedNotificationDTO
       );
     }
   }
@@ -70,9 +67,9 @@ export class NotificationService {
   async getServerNotifications(): Promise<void> {
     try {
       this.groupNotifications(
-        (await this.networkService.getJson<NotificationDTO[]>(
-          '/notifications'
-        )) || []
+          (await this.networkService.getJson<NotificationDTO[]>(
+              '/notifications'
+          )) || []
       );
       this.countedNotifications.forEach((noti) => {
         let msg = '(' + noti.count + ') ' + noti.message;

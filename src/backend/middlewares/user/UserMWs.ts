@@ -6,23 +6,23 @@ import {Config} from '../../../common/config/private/Config';
 
 export class UserMWs {
   public static async createUser(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
     }
     if (
-      typeof req.body === 'undefined' ||
-      typeof req.body.newUser === 'undefined'
+        typeof req.body === 'undefined' ||
+        typeof req.body.newUser === 'undefined'
     ) {
       return next();
     }
 
     try {
       await ObjectManagers.getInstance().UserManager.createUser(
-        req.body.newUser
+          req.body.newUser
       );
       return next();
     } catch (err) {
@@ -31,23 +31,23 @@ export class UserMWs {
   }
 
   public static async deleteUser(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
     }
     if (
-      typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined'
+        typeof req.params === 'undefined' ||
+        typeof req.params.id === 'undefined'
     ) {
       return next();
     }
 
     try {
       await ObjectManagers.getInstance().UserManager.deleteUser(
-        parseInt(req.params.id, 10)
+          parseInt(req.params.id, 10)
       );
       return next();
     } catch (err) {
@@ -56,26 +56,26 @@ export class UserMWs {
   }
 
   public static async changeRole(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
     }
     if (
-      typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined' ||
-      typeof req.body === 'undefined' ||
-      typeof req.body.newRole === 'undefined'
+        typeof req.params === 'undefined' ||
+        typeof req.params.id === 'undefined' ||
+        typeof req.body === 'undefined' ||
+        typeof req.body.newRole === 'undefined'
     ) {
       return next();
     }
 
     try {
       await ObjectManagers.getInstance().UserManager.changeRole(
-        parseInt(req.params.id, 10),
-        req.body.newRole
+          parseInt(req.params.id, 10),
+          req.body.newRole
       );
       return next();
     } catch (err) {
@@ -84,9 +84,9 @@ export class UserMWs {
   }
 
   public static async listUsers(
-    req: Request,
-    res: Response,
-    next: NextFunction
+      req: Request,
+      res: Response,
+      next: NextFunction
   ): Promise<void> {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));

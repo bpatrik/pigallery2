@@ -12,10 +12,10 @@ export class NavigationService {
 
   public isLoginPage(): boolean {
     return (
-      this.router.isActive('login',
-        {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
-      this.router.isActive('shareLogin',
-        {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
+        this.router.isActive('login',
+            {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
+        this.router.isActive('shareLogin',
+            {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
     );
   }
 

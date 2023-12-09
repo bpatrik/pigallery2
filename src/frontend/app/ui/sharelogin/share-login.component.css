@@ -4,9 +4,6 @@
   text-align: center;
 }
 
-.title img {
-  height: 80px;
-}
 
 @media screen and ( max-width: 500px ) {
   .title h1 {
@@ -27,11 +24,12 @@
 
 .card {
   min-width: 400px;
-  background-color: #F7F7F7;
-  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.3);
-
 }
 
 .error-message {
   color: #d9534f;
+}
+
+ng-icon ::ng-deep svg {
+  vertical-align: text-top;
 }

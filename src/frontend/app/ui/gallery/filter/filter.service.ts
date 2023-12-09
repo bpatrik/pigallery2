@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {DirectoryContent} from '../content.service';
-import {map, switchMap} from 'rxjs/operators';
+import {DirectoryContent} from '../contentLoader.service';
+import {debounceTime, map, switchMap} from 'rxjs/operators';
 
 export enum FilterRenderType {
   enum = 1,
@@ -333,7 +333,7 @@ export class FilterService {
                 }
               });
             }
-            // If th e number of photos did not change, the filters are not active
+            // If the number of photos did not change, the filters are not active
             afilters.areFiltersActive = c.media.length !== dirContent.media.length;
             return c;
           })

@@ -23,9 +23,9 @@ export class ThumbnailLoaderService {
 
   run = (): void => {
     if (
-      this.que.length === 0 ||
-      this.runningRequests >=
-      Config.Media.Thumbnail.concurrentThumbnailGenerations
+        this.que.length === 0 ||
+        this.runningRequests >=
+        Config.Media.Thumbnail.concurrentThumbnailGenerations
     ) {
       return;
     }
@@ -43,7 +43,7 @@ export class ThumbnailLoaderService {
     curImg.onload = (): void => {
       task.onLoaded();
       task.taskEntities.forEach((te: ThumbnailTaskEntity): void =>
-        te.listener.onLoad()
+          te.listener.onLoad()
       );
 
       this.taskReady(task);
@@ -53,7 +53,7 @@ export class ThumbnailLoaderService {
 
     curImg.onerror = (error): void => {
       task.taskEntities.forEach((te: ThumbnailTaskEntity): void =>
-        te.listener.onError(error)
+          te.listener.onError(error)
       );
 
       this.taskReady(task);
@@ -72,8 +72,8 @@ export class ThumbnailLoaderService {
     taskEntry.parentTask.taskEntities.splice(index, 1);
 
     if (
-      taskEntry.parentTask.taskEntities.length === 0 &&
-      taskEntry.parentTask.inProgress === false
+        taskEntry.parentTask.taskEntities.length === 0 &&
+        taskEntry.parentTask.inProgress === false
     ) {
       const i = this.que.indexOf(taskEntry.parentTask);
       if (i === -1) {
@@ -84,57 +84,57 @@ export class ThumbnailLoaderService {
   }
 
   loadIcon(
-    media: MediaIcon,
-    priority: ThumbnailLoadingPriority,
-    listener: ThumbnailLoadingListener
+      media: MediaIcon,
+      priority: ThumbnailLoadingPriority,
+      listener: ThumbnailLoadingListener
   ): ThumbnailTaskEntity {
     return this.load(
-      media.getIconPath(),
-      (): void => {
-        media.iconLoaded();
-        this.galleryCacheService.mediaUpdated(media.media);
-      },
-      priority,
-      listener
+        media.getIconPath(),
+        (): void => {
+          media.iconLoaded();
+          this.galleryCacheService.mediaUpdated(media.media);
+        },
+        priority,
+        listener
     );
   }
 
   loadImage(
-    media: Media,
-    priority: ThumbnailLoadingPriority,
-    listener: ThumbnailLoadingListener
+      media: Media,
+      priority: ThumbnailLoadingPriority,
+      listener: ThumbnailLoadingListener
   ): ThumbnailTaskEntity {
     return this.load(
-      media.getThumbnailPath(),
-      (): void => {
-        media.thumbnailLoaded();
-        this.galleryCacheService.mediaUpdated(media.media);
-      },
-      priority,
-      listener
+        media.getThumbnailPath(),
+        (): void => {
+          media.thumbnailLoaded();
+          this.galleryCacheService.mediaUpdated(media.media);
+        },
+        priority,
+        listener
     );
   }
 
   loadPersonThumbnail(
-    person: PersonDTO,
-    priority: ThumbnailLoadingPriority,
-    listener: ThumbnailLoadingListener
+      person: PersonDTO,
+      priority: ThumbnailLoadingPriority,
+      listener: ThumbnailLoadingListener
   ): ThumbnailTaskEntity {
     return this.load(
-      Person.getThumbnailUrl(person),
-      (): void => {
-        // no callback
-      },
-      priority,
-      listener
+        Person.getThumbnailUrl(person),
+        (): void => {
+          // no callback
+        },
+        priority,
+        listener
     );
   }
 
   private load(
-    path: string,
-    onLoaded: () => void,
-    priority: ThumbnailLoadingPriority,
-    listener: ThumbnailLoadingListener
+      path: string,
+      onLoaded: () => void,
+      priority: ThumbnailLoadingPriority,
+      listener: ThumbnailLoadingListener
   ): ThumbnailTaskEntity {
     let thTask: ThumbnailTask = null;
     // is image already queued?

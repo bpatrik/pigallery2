@@ -1,17 +1,14 @@
-import { Media } from '../Media';
-import {
-  MediaDTO,
-  MediaDTOUtils,
-} from '../../../../../common/entities/MediaDTO';
-import { PhotoDTO } from '../../../../../common/entities/PhotoDTO';
-import { VideoDTO } from '../../../../../common/entities/VideoDTO';
+import {Media} from '../Media';
+import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
+import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {VideoDTO} from '../../../../../common/entities/VideoDTO';
 
 export class GridMedia extends Media {
   constructor(
-    media: MediaDTO,
-    renderWidth: number,
-    renderHeight: number,
-    public rowId: number
+      media: MediaDTO,
+      renderWidth: number,
+      renderHeight: number,
+      public rowId: number
   ) {
     super(media, renderWidth, renderHeight);
   }

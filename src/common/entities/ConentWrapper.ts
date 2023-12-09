@@ -9,14 +9,14 @@ import {PhotoDTO} from './PhotoDTO';
 
 
 export class ContentWrapper {
-  private map: {
+  private map?: {
     faces: string[],
     keywords: string[],
     lens: string[],
     camera: string[],
     directories: DirectoryPathDTO[]
   };
-  private reverseMap: {
+  private reverseMap?: {
     faces: Map<string, number>,
     keywords: Map<string, number>,
     lens: Map<string, number>,
@@ -25,12 +25,12 @@ export class ContentWrapper {
   };
   public directory: ParentDirectoryDTO;
   public searchResult: SearchResultDTO;
-  public notModified: boolean;
+  public notModified?: boolean;
 
   constructor(
-    directory: ParentDirectoryDTO = null,
-    searchResult: SearchResultDTO = null,
-    notModified?: boolean
+      directory: ParentDirectoryDTO = null,
+      searchResult: SearchResultDTO = null,
+      notModified?: boolean
   ) {
     if (directory) {
       this.directory = directory;
@@ -138,15 +138,15 @@ export class ContentWrapper {
       if ((media as PhotoDTO).metadata.cameraData) {
         if ((media as PhotoDTO).metadata.cameraData.lens) {
           mapifyOne(cw.map.lens, cw.reverseMap.lens,
-            (media as PhotoDTO).metadata.cameraData, 'lens', 'l');
+              (media as PhotoDTO).metadata.cameraData, 'lens', 'l');
         }
         if ((media as PhotoDTO).metadata.cameraData.make) {
           mapifyOne(cw.map.camera, cw.reverseMap.camera,
-            (media as PhotoDTO).metadata.cameraData, 'make', 'm');
+              (media as PhotoDTO).metadata.cameraData, 'make', 'm');
         }
         if ((media as PhotoDTO).metadata.cameraData.model) {
           mapifyOne(cw.map.camera, cw.reverseMap.camera,
-            (media as PhotoDTO).metadata.cameraData, 'model', 'o');
+              (media as PhotoDTO).metadata.cameraData, 'model', 'o');
         }
 
         if ((media as PhotoDTO).metadata.cameraData.ISO) {
@@ -177,15 +177,15 @@ export class ContentWrapper {
       if ((media as PhotoDTO).metadata.positionData) {
         if ((media as PhotoDTO).metadata.positionData.country) {
           mapifyOne(cw.map.keywords, cw.reverseMap.keywords,
-            (media as PhotoDTO).metadata.positionData, 'country', 'c');
+              (media as PhotoDTO).metadata.positionData, 'country', 'c');
         }
         if ((media as PhotoDTO).metadata.positionData.city) {
           mapifyOne(cw.map.keywords, cw.reverseMap.keywords,
-            (media as PhotoDTO).metadata.positionData, 'city', 'cy');
+              (media as PhotoDTO).metadata.positionData, 'city', 'cy');
         }
         if ((media as PhotoDTO).metadata.positionData.state) {
           mapifyOne(cw.map.keywords, cw.reverseMap.keywords,
-            (media as PhotoDTO).metadata.positionData, 'state', 's');
+              (media as PhotoDTO).metadata.positionData, 'state', 's');
         }
 
         if ((media as PhotoDTO).metadata.positionData.GPSData) {
@@ -251,15 +251,15 @@ export class ContentWrapper {
   }
 
   private static packDirectory(cw: ContentWrapper, dir: DirectoryBaseDTO | SearchResultDTO, isSearchResult = false): void {
-    if ((dir as DirectoryBaseDTO).preview) {
-      (dir as DirectoryBaseDTO).preview.directory = {
-        path: (dir as DirectoryBaseDTO).preview.directory.path,
-        name: (dir as DirectoryBaseDTO).preview.directory.name,
+    if ((dir as DirectoryBaseDTO).cover) {
+      (dir as DirectoryBaseDTO).cover.directory = {
+        path: (dir as DirectoryBaseDTO).cover.directory.path,
+        name: (dir as DirectoryBaseDTO).cover.directory.name,
       } as DirectoryPathDTO;
 
       // make sure that it is not a same object as one of the photo in the media[]
       // as the next foreach would remove the directory
-      (dir as DirectoryBaseDTO).preview = Utils.clone((dir as DirectoryBaseDTO).preview);
+      (dir as DirectoryBaseDTO).cover = Utils.clone((dir as DirectoryBaseDTO).cover);
     }
 
     if (dir.media) {
@@ -284,7 +284,7 @@ export class ContentWrapper {
       }
     }
 
-    delete (dir as DirectoryBaseDTO).validPreview; // should not go to the client side;
+    delete (dir as DirectoryBaseDTO).validCover; // should not go to the client side;
   }
 
   private static deMapify(cw: ContentWrapper, media: FileDTO, isSearchResult: boolean): void {
@@ -412,17 +412,17 @@ export class ContentWrapper {
         // @ts-ignore
         if (typeof (media as PhotoDTO).metadata.cameraData.l !== 'undefined') {
           deMapifyOne(cw.map.lens,
-            (media as PhotoDTO).metadata.cameraData, 'lens', 'l');
+              (media as PhotoDTO).metadata.cameraData, 'lens', 'l');
         }
         // @ts-ignore
         if (typeof (media as PhotoDTO).metadata.cameraData.m !== 'undefined') {
           deMapifyOne(cw.map.camera,
-            (media as PhotoDTO).metadata.cameraData, 'make', 'm');
+              (media as PhotoDTO).metadata.cameraData, 'make', 'm');
         }
         // @ts-ignore
         if (typeof (media as PhotoDTO).metadata.cameraData['o'] !== 'undefined') {
           deMapifyOne(cw.map.camera,
-            (media as PhotoDTO).metadata.cameraData, 'model', 'o');
+              (media as PhotoDTO).metadata.cameraData, 'model', 'o');
         }
 
         // @ts-ignore
@@ -464,28 +464,28 @@ export class ContentWrapper {
         // @ts-ignore
         if (typeof (media as PhotoDTO).metadata.positionData.c !== 'undefined') {
           deMapifyOne(cw.map.keywords,
-            (media as PhotoDTO).metadata.positionData, 'country', 'c');
+              (media as PhotoDTO).metadata.positionData, 'country', 'c');
         }
         // @ts-ignore
         if (typeof (media as PhotoDTO).metadata.positionData.cy !== 'undefined') {
           deMapifyOne(cw.map.keywords,
-            (media as PhotoDTO).metadata.positionData, 'city', 'cy');
+              (media as PhotoDTO).metadata.positionData, 'city', 'cy');
         }
         // @ts-ignore
         if (typeof (media as PhotoDTO).metadata.positionData.s !== 'undefined') {
           deMapifyOne(cw.map.keywords,
-            (media as PhotoDTO).metadata.positionData, 'state', 's');
+              (media as PhotoDTO).metadata.positionData, 'state', 's');
         }
 
         // @ts-ignore
         if ((media as PhotoDTO).metadata.positionData['g']) {
           (media as PhotoDTO).metadata.positionData.GPSData =
-            {
-              // @ts-ignore
-              latitude: (media as PhotoDTO).metadata.positionData['g'][0],
-              // @ts-ignore
-              longitude: (media as PhotoDTO).metadata.positionData['g'][1]
-            };
+              {
+                // @ts-ignore
+                latitude: (media as PhotoDTO).metadata.positionData['g'][0],
+                // @ts-ignore
+                longitude: (media as PhotoDTO).metadata.positionData['g'][1]
+              };
           // @ts-ignore
           delete (media as PhotoDTO).metadata.positionData['g'];
         }
