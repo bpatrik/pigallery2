@@ -84,6 +84,7 @@ export class GalleryMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    var contentDisposition = require('content-disposition')
     if (Config.Gallery.NavBar.enableDownloadZip === false) {
       return next();
     }
@@ -102,7 +103,16 @@ export class GalleryMWs {
 
     try {
       res.set('Content-Type', 'application/zip');
-      res.set('Content-Disposition', 'attachment; filename=Gallery.zip');
+      var zipName = directoryName;
+      if (zipName.endsWith('/')) {
+        zipName=zipName.substring(0,zipName.length-1);
+      }
+      zipName = zipName.substring(zipName.lastIndexOf('/')+1);
+      if (zipName=='') {
+        zipName='gallery';
+      }
+      zipName=zipName+'.zip';
+      res.set('Content-Disposition', contentDisposition(zipName));
 
       const archive = archiver('zip', {
         store: true, // disable compression
