@@ -10,6 +10,7 @@ export class AdminRouter {
     this.addGetStatistic(app);
     this.addGetDuplicates(app);
     this.addJobs(app);
+    this.addMessengers(app);
   }
 
   private static addGetStatistic(app: Express): void {
@@ -32,6 +33,15 @@ export class AdminRouter {
     );
   }
 
+  private static addMessengers(app: Express): void {
+    app.get(
+      Config.Server.apiPath + '/admin/messengers/available',
+      AuthenticationMWs.authenticate,
+      AuthenticationMWs.authorise(UserRoles.Admin),
+      AdminMWs.getAvailableMessengers,
+      RenderingMWs.renderResult
+    );
+  }
   private static addJobs(app: Express): void {
     app.get(
         Config.Server.apiPath + '/admin/jobs/available',

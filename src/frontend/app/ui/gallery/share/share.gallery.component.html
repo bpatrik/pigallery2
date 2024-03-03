@@ -82,11 +82,11 @@
         </div>
       </div>
 
-      <div class="row" *ngIf="passwordProtection">
+      <div class="row">
         <div class="col-4">
           <label class="control-label" for="share-password">
-            <ng-container i18n>Password</ng-container><!--
-            -->*:
+            <ng-container i18n>Password</ng-container>
+            <ng-container  *ngIf="passwordRequired">*</ng-container>
           </label>
         </div>
         <div class="col-8">
@@ -98,7 +98,7 @@
                  [(ngModel)]="input.password"
                  i18n-placeholder
                  placeholder="Password"
-                 required>
+                 [required]="passwordRequired">
         </div>
       </div>
 

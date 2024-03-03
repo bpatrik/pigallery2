@@ -10,7 +10,7 @@ import {CookieService} from 'ngx-cookie-service';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {StatisticDTO} from '../../../../common/entities/settings/StatisticDTO';
 import {ScheduledJobsService} from './scheduled-jobs.service';
-import {IWebConfigClassPrivate} from '../../../../../node_modules/typeconfig/src/decorators/class/IWebConfigClass';
+import {IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
 
 
 export enum ConfigStyle {

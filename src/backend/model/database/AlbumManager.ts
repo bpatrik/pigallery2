@@ -19,7 +19,7 @@ export class AlbumManager implements IObjectManager {
   private static async updateAlbum(album: SavedSearchEntity): Promise<void> {
     const connection = await SQLConnection.getConnection();
     const cover =
-        await ObjectManagers.getInstance().CoverManager.getAlbumCover(album);
+        await ObjectManagers.getInstance().CoverManager.getCoverForAlbum(album);
     const count = await
         ObjectManagers.getInstance().SearchManager.getCount((album as SavedSearchDTO).searchQuery);
 

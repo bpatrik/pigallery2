@@ -3,9 +3,10 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {Logger} from '../../Logger';
 import {Config} from '../../../common/config/private/Config';
 import {ConfigDiagnostics} from '../../model/diagnostics/ConfigDiagnostics';
-import {ConfigClassBuilder} from '../../../../node_modules/typeconfig/node';
+import {ConfigClassBuilder} from 'typeconfig/node';
 import {TAGS} from '../../../common/config/public/ClientConfig';
 import {ObjectManagers} from '../../model/ObjectManagers';
+import {ExtensionConfigWrapper} from '../../model/extension/ExtensionConfigWrapper';
 
 const LOG_TAG = '[SettingsMWs]';
 
@@ -28,7 +29,7 @@ export class SettingsMWs {
     try {
       let settings = req.body.settings; // Top level settings JSON
       const settingsPath: string = req.body.settingsPath; // Name of the top level settings
-      const transformer = await Config.original();
+      const transformer = await ExtensionConfigWrapper.original();
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       transformer[settingsPath] = settings;
@@ -37,7 +38,7 @@ export class SettingsMWs {
       settings = ConfigClassBuilder.attachPrivateInterface(transformer[settingsPath]).toJSON({
         skipTags: {secret: true} as TAGS
       });
-      const original = await Config.original();
+      const original = await ExtensionConfigWrapper.original();
       // only updating explicitly set config (not saving config set by the diagnostics)
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore

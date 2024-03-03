@@ -12,6 +12,7 @@ import {ServerTimeEntry} from '../middlewares/ServerTimingMWs';
 import {ClientConfig, TAGS} from '../../common/config/public/ClientConfig';
 import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
+import {Utils} from '../../common/Utils';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -35,7 +36,7 @@ export class PublicRouter {
       let selectedLocale = req.locale;
       if (req.cookies && req.cookies[CookieNames.lang]) {
         if (
-            Config.Server.languages.indexOf(req.cookies[CookieNames.lang]) !== -1
+          Config.Server.languages.indexOf(req.cookies[CookieNames.lang]) !== -1
         ) {
           selectedLocale = req.cookies[CookieNames.lang];
         }
@@ -48,14 +49,14 @@ export class PublicRouter {
     // index.html should not be cached as it contains template that can change
     const renderIndex = (req: Request, res: Response, next: NextFunction) => {
       ejs.renderFile(
-          path.join(ProjectPath.FrontendFolder, req.localePath, 'index.html'),
-          res.tpl,
-          (err, str) => {
-            if (err) {
-              return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, err.message));
-            }
-            res.send(str);
+        path.join(ProjectPath.FrontendFolder, req.localePath, 'index.html'),
+        res.tpl,
+        (err, str) => {
+          if (err) {
+            return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, err.message));
           }
+          res.send(str);
+        }
       );
     };
 
@@ -64,7 +65,7 @@ export class PublicRouter {
         if (Config.Server.languages.indexOf(locale) !== -1) {
           res.cookie(CookieNames.lang, locale);
         }
-        res.redirect('/?ln=' + locale);
+        res.redirect(Utils.concatUrls('/' + Config.Server.urlBase) + '/?ln=' + locale);
       };
     };
 
@@ -94,12 +95,12 @@ export class PublicRouter {
       }) as unknown as ClientConfig;
       // Escaping html tags, like <script></script>
       confCopy.Server.customHTMLHead =
-          confCopy.Server.customHTMLHead
-              .replace(/&/g, '&amp;')
-              .replace(/</g, '&lt;')
-              .replace(/>/g, '&gt;')
-              .replace(/"/g, '&quot;')
-              .replace(/'/g, '&#039;');
+        confCopy.Server.customHTMLHead
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#039;');
       res.tpl.Config = confCopy;
       res.tpl.customHTMLHead = Config.Server.customHTMLHead;
       const selectedTheme = Config.Gallery.Themes.availableThemes.find(th => th.name === Config.Gallery.Themes.selectedTheme)?.theme || '';
@@ -140,7 +141,7 @@ export class PublicRouter {
           'photo'
         ],
         start_url:
-            Config.Server.publicUrl === '' ? '.' : Config.Server.publicUrl,
+          Config.Server.publicUrl === '' ? '.' : Config.Server.publicUrl,
         background_color: '#000000',
         theme_color: '#000000',
       });
@@ -185,40 +186,40 @@ export class PublicRouter {
         y: vBs[1]
       };
       return '<svg ' +
-          ' xmlns="http://www.w3.org/2000/svg"' +
-          ' viewBox="' + vBs.join(' ') + '">' +
-          (theme === 'auto' ? ('<style>' +
-                  '    path, circle {' +
-                  '      fill: black;' +
-                  '    }' +
-                  '   circle.bg,rect.bg {' +
-                  '    fill: white;' +
-                  '   }' +
-                  '    @media (prefers-color-scheme: dark) {' +
-                  '      path, circle {' +
-                  '        fill: white;' +
-                  '      }' +
-                  '   circle.bg,rect.bg {' +
-                  '    fill: black;' +
-                  '   }' +
-                  '    }' +
-                  '  </style>') :
-              (theme != null ?
-                  ('<style>' +
-                      '    path, circle {' +
-                      '      fill: ' + theme + ';' +
-                      '    }' +
-                      '   circle.bg {' +
-                      '    fill: black;' +
-                      '   }' +
-                      '  </style>')
-                  : '<style>' +
-                  '   circle.bg,rect.bg {' +
-                  '    fill: white;' +
-                  '   }' +
-                  '  </style>')) +
-          `<rect class="bg" x="${canvasStart.x}" y="${canvasStart.y}" width="${canvasSize}" height="${canvasSize}" rx="15" />` +
-          Config.Server.svgIcon.items + '</svg>';
+        ' xmlns="http://www.w3.org/2000/svg"' +
+        ' viewBox="' + vBs.join(' ') + '">' +
+        (theme === 'auto' ? ('<style>' +
+            '    path, circle {' +
+            '      fill: black;' +
+            '    }' +
+            '   circle.bg,rect.bg {' +
+            '    fill: white;' +
+            '   }' +
+            '    @media (prefers-color-scheme: dark) {' +
+            '      path, circle {' +
+            '        fill: white;' +
+            '      }' +
+            '   circle.bg,rect.bg {' +
+            '    fill: black;' +
+            '   }' +
+            '    }' +
+            '  </style>') :
+          (theme != null ?
+            ('<style>' +
+              '    path, circle {' +
+              '      fill: ' + theme + ';' +
+              '    }' +
+              '   circle.bg {' +
+              '    fill: black;' +
+              '   }' +
+              '  </style>')
+            : '<style>' +
+            '   circle.bg,rect.bg {' +
+            '    fill: white;' +
+            '   }' +
+            '  </style>')) +
+        `<rect class="bg" x="${canvasStart.x}" y="${canvasStart.y}" width="${canvasSize}" height="${canvasSize}" rx="15" />` +
+        Config.Server.svgIcon.items + '</svg>';
     };
 
     app.get('/icon.svg', (req: Request, res: Response) => {
@@ -276,44 +277,44 @@ export class PublicRouter {
     });
 
     app.get(
-        [
-          '/',
-          '/login',
-          '/gallery*',
-          '/share/:' + QueryParams.gallery.sharingKey_params,
-          '/shareLogin',
-          '/admin',
-          '/duplicates',
-          '/faces',
-          '/albums',
-          '/search*',
-        ],
-        AuthenticationMWs.tryAuthenticate,
-        addTPl, // add template after authentication was successful
-        setLocale,
-        renderIndex
+      [
+        '/',
+        '/login',
+        '/gallery*',
+        '/share/:' + QueryParams.gallery.sharingKey_params,
+        '/shareLogin',
+        '/admin',
+        '/duplicates',
+        '/faces',
+        '/albums',
+        '/search*',
+      ],
+      AuthenticationMWs.tryAuthenticate,
+      addTPl, // add template after authentication was successful
+      setLocale,
+      renderIndex
     );
     Config.Server.languages.forEach((l) => {
       app.get(
-          [
-            '/' + l + '/',
-            '/' + l + '/login',
-            '/' + l + '/gallery*',
-            '/' + l + '/share*',
-            '/' + l + '/admin',
-            '/' + l + '/search*',
-          ],
-          redirectToBase(l)
+        [
+          '/' + l + '/',
+          '/' + l + '/login',
+          '/' + l + '/gallery*',
+          '/' + l + '/share*',
+          '/' + l + '/admin',
+          '/' + l + '/search*',
+        ],
+        redirectToBase(l)
       );
     });
 
     const renderFile = (subDir = '') => {
       return (req: Request, res: Response) => {
         const file = path.join(
-            ProjectPath.FrontendFolder,
-            req.localePath,
-            subDir,
-            req.params.file
+          ProjectPath.FrontendFolder,
+          req.localePath,
+          subDir,
+          req.params.file
         );
         if (!fs.existsSync(file)) {
           return res.sendStatus(404);
@@ -326,16 +327,16 @@ export class PublicRouter {
     };
 
     app.get(
-        '/assets/:file(*)',
-        setLocale,
-        AuthenticationMWs.normalizePathParam('file'),
-        renderFile('assets')
+      '/assets/:file(*)',
+      setLocale,
+      AuthenticationMWs.normalizePathParam('file'),
+      renderFile('assets')
     );
     app.get(
-        '/:file',
-        setLocale,
-        AuthenticationMWs.normalizePathParam('file'),
-        renderFile()
+      '/:file',
+      setLocale,
+      AuthenticationMWs.normalizePathParam('file'),
+      renderFile()
     );
   }
 }

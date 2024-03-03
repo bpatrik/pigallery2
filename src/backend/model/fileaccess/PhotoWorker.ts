@@ -5,6 +5,7 @@ import {Logger} from '../../Logger';
 import {FfmpegCommand, FfprobeData} from 'fluent-ffmpeg';
 import {FFmpegFactory} from '../FFmpegFactory';
 import * as path from 'path';
+import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 
 
 sharp.cache(false);
@@ -46,6 +47,7 @@ interface RendererInput {
   outPath: string;
   quality: number;
   useLanczos3: boolean;
+  animate: boolean; // animates the output. Used for Gifs
   cut?: {
     left: number;
     top: number;
@@ -92,21 +94,21 @@ export class VideoRendererFactory {
           const folder = path.dirname(input.outPath);
           let executedCmd = '';
           command
-              .on('start', (cmd): void => {
-                executedCmd = cmd;
-              })
-              .on('end', (): void => {
-                resolve();
-              })
-              .on('error', (e): void => {
-                reject('[FFmpeg] ' + e.toString() + ' executed: ' + executedCmd);
-              })
-              .outputOptions(['-qscale:v 4']);
+            .on('start', (cmd): void => {
+              executedCmd = cmd;
+            })
+            .on('end', (): void => {
+              resolve();
+            })
+            .on('error', (e): void => {
+              reject('[FFmpeg] ' + e.toString() + ' executed: ' + executedCmd);
+            })
+            .outputOptions(['-qscale:v 4']);
           if (input.makeSquare === false) {
             const newSize =
-                width < height
-                    ? Math.min(input.size, width) + 'x?'
-                    : '?x' + Math.min(input.size, height);
+              width < height
+                ? Math.min(input.size, width) + 'x?'
+                : '?x' + Math.min(input.size, height);
             command.takeScreenshots({
               timemarks: ['10%'],
               size: newSize,
@@ -129,17 +131,18 @@ export class VideoRendererFactory {
 
 export class ImageRendererFactory {
 
+  @ExtensionDecorator(e => e.gallery.ImageRenderer.render)
   public static async render(input: MediaRendererInput | SvgRendererInput): Promise<void> {
 
     let image: Sharp;
     if ((input as MediaRendererInput).mediaPath) {
       Logger.silly(
-          '[SharpRenderer] rendering photo:' +
-          (input as MediaRendererInput).mediaPath +
-          ', size:' +
-          input.size
+        '[SharpRenderer] rendering photo:' +
+        (input as MediaRendererInput).mediaPath +
+        ', size:' +
+        input.size
       );
-      image = sharp((input as MediaRendererInput).mediaPath, {failOnError: false});
+      image = sharp((input as MediaRendererInput).mediaPath, {failOnError: false, animated: input.animate});
     } else {
       const svg_buffer = Buffer.from((input as SvgRendererInput).svgString);
       image = sharp(svg_buffer, {density: 450});
@@ -147,9 +150,9 @@ export class ImageRendererFactory {
     image.rotate();
     const metadata: Metadata = await image.metadata();
     const kernel =
-        input.useLanczos3 === true
-            ? sharp.kernel.lanczos3
-            : sharp.kernel.nearest;
+      input.useLanczos3 === true
+        ? sharp.kernel.lanczos3
+        : sharp.kernel.nearest;
 
     if (input.cut) {
       image.extract(input.cut);

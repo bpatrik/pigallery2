@@ -146,7 +146,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   const setUpSqlDB = async () => {
     await sqlHelper.initDB();
     await setUpTestGallery();
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
   };
 
 

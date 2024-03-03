@@ -9,7 +9,7 @@ import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
 import {ISettingsComponent} from '../settings/template/ISettingsComponent';
-import {WebConfigClassBuilder} from '../../../../../node_modules/typeconfig/src/decorators/builders/WebConfigClassBuilder';
+import {WebConfigClassBuilder} from 'typeconfig/src/decorators/builders/WebConfigClassBuilder';
 import {enumToTranslatedArray} from '../EnumTranslations';
 import {PiTitleService} from '../../model/pi-title.service';
 

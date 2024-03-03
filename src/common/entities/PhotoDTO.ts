@@ -27,9 +27,7 @@ export interface FaceRegion {
 }
 
 export interface PhotoMetadata extends MediaMetadata {
-  rating?: 0 | 1 | 2 | 3 | 4 | 5;
   caption?: string;
-  keywords?: string[];
   cameraData?: CameraMetadata;
   positionData?: PositionMetaData;
   size: MediaDimension;

@@ -11,5 +11,5 @@ if ((process.argv || []).includes('--run-diagnostics')) {
     process.exit(0);
   });
 } else {
-  new Server();
+  Server.getInstance();
 }

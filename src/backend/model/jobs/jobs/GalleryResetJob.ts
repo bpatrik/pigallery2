@@ -1,10 +1,11 @@
 import {ObjectManagers} from '../../ObjectManagers';
-import {ConfigTemplateEntry, DefaultsJobs,} from '../../../../common/entities/job/JobDTO';
+import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {Job} from './Job';
+import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 export class GalleryRestJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Gallery Reset']];
-  public readonly ConfigTemplate: ConfigTemplateEntry[] = null;
+  public readonly ConfigTemplate: DynamicConfig[] = null;
   protected readonly IsInstant = true;
 
   public get Supported(): boolean {

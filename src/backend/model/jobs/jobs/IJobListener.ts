@@ -4,7 +4,7 @@ import {JobProgressStates} from '../../../../common/entities/job/JobProgressDTO'
 
 export interface IJobListener {
   onJobFinished(
-      job: IJob<unknown>,
+      job: IJob,
       state: JobProgressStates,
       soloRun: boolean
   ): void;

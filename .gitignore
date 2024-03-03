@@ -31,3 +31,5 @@ test.*
 .github/
 .angular/
 /test/cypress/screenshots/
+/extensions/
+/extension/lib/

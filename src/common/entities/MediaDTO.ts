@@ -11,10 +11,14 @@ export interface MediaDTO extends FileDTO {
   missingThumbnails?: number;
 }
 
+export type RatingTypes = 0 | 1 | 2 | 3 | 4 | 5;
+
 export interface MediaMetadata {
   size: MediaDimension;
   creationDate: number;
   fileSize: number;
+  keywords?: string[];
+  rating?: RatingTypes;
 }
 
 export interface MediaDimension {

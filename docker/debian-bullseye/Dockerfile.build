@@ -19,6 +19,7 @@ ENV NODE_ENV=production \
     default-Database-dbFolder=/app/data/db \
     default-Media-folder=/app/data/images \
     default-Media-tempFolder=/app/data/tmp \
+    default-Extensions-folder=/app/data/config/extensions \
     # flagging dockerized environemnt
     PI_DOCKER=true
 

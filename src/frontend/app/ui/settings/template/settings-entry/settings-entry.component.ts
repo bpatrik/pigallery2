@@ -16,7 +16,7 @@ import {ConfigStyle, SettingsService} from '../../settings.service';
 import {WebConfig} from '../../../../../../common/config/private/WebConfig';
 import {JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
-import {BsModalService} from '../../../../../../../node_modules/ngx-bootstrap/modal';
+import {BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 
@@ -59,7 +59,7 @@ interface IState {
   ],
 })
 export class SettingsEntryComponent
-  implements ControlValueAccessor, Validator, OnChanges {
+    implements ControlValueAccessor, Validator, OnChanges {
   name: string;
   required: boolean;
   dockerWarning: boolean;
@@ -79,7 +79,10 @@ export class SettingsEntryComponent
   public arrayType: string;
   public uiType: string;
   newThemeModalRef: any;
-  iconModal: { ref?: any, error?: string };
+  iconModal: {
+    ref?: any,
+    error?: string
+  };
   @Input() noChangeDetection = false;
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
@@ -101,9 +104,9 @@ export class SettingsEntryComponent
       for (let i = 0; i < this.state.value?.length; ++i) {
         for (const k of Object.keys(this.state.value[i].__state)) {
           if (!Utils.equalsFilter(
-            this.state.value[i]?.__state[k]?.value,
-            this.state.default[i] ? this.state.default[i][k] : undefined,
-            ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
+              this.state.value[i]?.__state[k]?.value,
+              this.state.default[i] ? this.state.default[i][k] : undefined,
+              ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
 
             return true;
           }
@@ -129,7 +132,7 @@ export class SettingsEntryComponent
   get defaultStr(): string {
     if (this.type === 'SearchQuery') {
       return (
-        '\'' + this.searchQueryParserService.stringify(this.state.default) + '\''
+          '\'' + this.searchQueryParserService.stringify(this.state.default) + '\''
       );
     }
 
@@ -143,8 +146,8 @@ export class SettingsEntryComponent
 
   get StringValue(): string {
     if (
-      this.state.type === 'array' &&
-      (this.state.arrayType === 'string' || this.isNumberArray)
+        this.state.type === 'array' &&
+        (this.state.arrayType === 'string' || this.isNumberArray)
     ) {
       return (this.state.value || []).join(';');
     }
@@ -162,8 +165,8 @@ export class SettingsEntryComponent
 
   set StringValue(value: string) {
     if (
-      this.state.type === 'array' &&
-      (this.state.arrayType === 'string' || this.isNumberArray)
+        this.state.type === 'array' &&
+        (this.state.arrayType === 'string' || this.isNumberArray)
     ) {
       value = value.replace(new RegExp(',', 'g'), ';');
       if (!this.allowSpaces) {
@@ -172,14 +175,14 @@ export class SettingsEntryComponent
       this.state.value = value.split(';').filter((v: string) => v !== '');
       if (this.isNumberArray) {
         this.state.value = this.state.value
-          .map((v: string) => parseFloat(v))
-          .filter((v: number) => !isNaN(v));
+            .map((v: string) => parseFloat(v))
+            .filter((v: number) => !isNaN(v));
       }
       return;
     }
-
     if (typeof this.state.value === 'object') {
       this.state.value = JSON.parse(value);
+      return;
     }
 
     this.state.value = value;
@@ -194,11 +197,13 @@ export class SettingsEntryComponent
       key: 'default',
       value: $localize`default`
     }, ...(this.state.rootConfig as any).__state.availableThemes.value
-      .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
+        .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
   }
 
 
-  get SelectedThemeSettings(): { theme: string } {
+  get SelectedThemeSettings(): {
+    theme: string
+  } {
     return (this.state.value as ThemeConfig[]).find(th => th.name === (this.state.rootConfig as any).__state.selectedTheme.value) || {theme: 'N/A'};
   }
 
@@ -241,16 +246,16 @@ export class SettingsEntryComponent
       this.uiType = CustomSettingsEntries.getFullName(this.state);
     }
     if (!this.state.isEnumType &&
-      !this.state.isEnumArrayType &&
-      this.type !== 'boolean' &&
-      this.type !== 'SearchQuery' &&
-      !CustomSettingsEntries.iS(this.state) &&
-      this.arrayType !== 'MapLayers' &&
-      this.arrayType !== 'NavigationLinkConfig' &&
-      this.arrayType !== 'MapPathGroupConfig' &&
-      this.arrayType !== 'MapPathGroupThemeConfig' &&
-      this.arrayType !== 'JobScheduleConfig' &&
-      this.arrayType !== 'UserConfig') {
+        !this.state.isEnumArrayType &&
+        this.type !== 'boolean' &&
+        this.type !== 'SearchQuery' &&
+        !CustomSettingsEntries.iS(this.state) &&
+        this.arrayType !== 'MapLayers' &&
+        this.arrayType !== 'NavigationLinkConfig' &&
+        this.arrayType !== 'MapPathGroupConfig' &&
+        this.arrayType !== 'MapPathGroupThemeConfig' &&
+        this.arrayType !== 'JobScheduleConfig' &&
+        this.arrayType !== 'UserConfig') {
       this.uiType = 'StringInput';
     }
     if (this.type === this.state.tags?.uiType) {
@@ -273,18 +278,18 @@ export class SettingsEntryComponent
     this.name = this.state?.tags?.name;
     if (this.name) {
       this.idName =
-        this.GUID + this.name.toLowerCase().replace(new RegExp(' ', 'gm'), '-');
+          this.GUID + this.name.toLowerCase().replace(new RegExp(' ', 'gm'), '-');
     }
     this.isNumberArray =
-      this.state.arrayType === 'unsignedInt' ||
-      this.state.arrayType === 'integer' ||
-      this.state.arrayType === 'float' ||
-      this.state.arrayType === 'positiveFloat';
+        this.state.arrayType === 'unsignedInt' ||
+        this.state.arrayType === 'integer' ||
+        this.state.arrayType === 'float' ||
+        this.state.arrayType === 'positiveFloat';
     this.isNumber =
-      this.state.type === 'unsignedInt' ||
-      this.state.type === 'integer' ||
-      this.state.type === 'float' ||
-      this.state.type === 'positiveFloat';
+        this.state.type === 'unsignedInt' ||
+        this.state.type === 'integer' ||
+        this.state.type === 'float' ||
+        this.state.type === 'positiveFloat';
 
 
     if (this.isNumber) {
@@ -306,11 +311,16 @@ export class SettingsEntryComponent
     }
   }
 
-  getOptionsView(state: IState & { optionsView?: { key: number | string; value: string | number }[] }) {
+  getOptionsView(state: IState & {
+    optionsView?: {
+      key: number | string;
+      value: string | number
+    }[]
+  }) {
     if (!state.optionsView) {
       const eClass = state.isEnumType
-        ? state.type
-        : state.arrayType;
+          ? state.type
+          : state.arrayType;
       if (state.tags?.uiOptions) {
         state.optionsView = state.tags?.uiOptions.map(o => ({
           key: o,
@@ -325,11 +335,11 @@ export class SettingsEntryComponent
 
   validate(): ValidationErrors {
     if (
-      !this.required ||
-      (this.state &&
-        typeof this.state.value !== 'undefined' &&
-        this.state.value !== null &&
-        this.state.value !== '')
+        !this.required ||
+        (this.state &&
+            typeof this.state.value !== 'undefined' &&
+            this.state.value !== null &&
+            this.state.value !== '')
     ) {
       return null;
     }
@@ -386,8 +396,8 @@ export class SettingsEntryComponent
 
   removeLayer(layer: MapLayers): void {
     this.state.value.splice(
-      this.state.value.indexOf(layer),
-      1
+        this.state.value.indexOf(layer),
+        1
     );
   }
 
@@ -395,7 +405,7 @@ export class SettingsEntryComponent
   addNewTheme(): void {
     const availableThemes = (this.state.rootConfig as any).__state.availableThemes;
     if (!this.newThemeName ||
-      (availableThemes.value as ThemeConfig[]).find(th => th.name === this.newThemeName)) {
+        (availableThemes.value as ThemeConfig[]).find(th => th.name === this.newThemeName)) {
       return;
     }
     this.state.value = this.newThemeName;

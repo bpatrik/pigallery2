@@ -10,14 +10,15 @@ import {JobProgress} from './jobs/JobProgress';
 import {JobProgressManager} from './JobProgressManager';
 import {JobDTOUtils} from '../../../common/entities/job/JobDTO';
 import {Utils} from '../../../common/Utils';
+import {IObjectManager} from '../database/IObjectManager';
 
 const LOG_TAG = '[JobManager]';
 
-export class JobManager implements IJobListener {
+export class JobManager implements IJobListener, IObjectManager {
   protected timers: { schedule: JobScheduleDTO; timer: NodeJS.Timeout }[] = [];
   protected progressManager: JobProgressManager = null;
 
-  constructor() {
+  async init(){
     this.progressManager = new JobProgressManager();
     this.runSchedules();
   }
@@ -49,7 +50,7 @@ export class JobManager implements IJobListener {
     return prg;
   }
 
-  public async run<T>(
+  public async run<T extends Record<string, unknown>>(
     jobName: string,
     config: T,
     soloRun: boolean,
@@ -85,7 +86,7 @@ export class JobManager implements IJobListener {
   };
 
   onJobFinished = async (
-    job: IJob<unknown>,
+    job: IJob,
     state: JobProgressStates,
     soloRun: boolean
   ): Promise<void> => {
@@ -120,11 +121,16 @@ export class JobManager implements IJobListener {
     }
   };
 
-  getAvailableJobs(): IJob<unknown>[] {
+  getAvailableJobs(): IJob[] {
     return JobRepository.Instance.getAvailableJobs();
   }
 
+  public async cleanUp() {
+    this.stopSchedules();
+  }
+
   public stopSchedules(): void {
+    Logger.silly(LOG_TAG, 'Stopping all schedules');
     this.timers.forEach((t): void => clearTimeout(t.timer));
     this.timers = [];
   }
@@ -138,7 +144,7 @@ export class JobManager implements IJobListener {
     Config.Jobs.scheduled.forEach((s): void => this.runSchedule(s));
   }
 
-  protected findJob<T = unknown>(jobName: string): IJob<T> {
+  protected findJob(jobName: string): IJob {
     return this.getAvailableJobs().find((t): boolean => t.Name === jobName);
   }
 

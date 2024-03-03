@@ -1,6 +1,10 @@
 import {UserDTO} from './UserDTO';
 
-export interface SharingDTO {
+export interface SharingDTOKey {
+  sharingKey: string;
+}
+
+export interface SharingDTO extends SharingDTOKey {
   id: number;
   path: string;
   sharingKey: string;

@@ -72,7 +72,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">47</context>
         </context-group>
-        <target>TLS required</target>
+        <target>TLS erforderlich</target>
       </trans-unit>
       <trans-unit id="4629987485563394658" datatype="html">
         <source>if this is true and secure is false then Nodemailer (used library in the background) tries to use STARTTLS. See https://nodemailer.com/smtp/#tls-options for more details</source>
@@ -80,7 +80,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">50</context>
         </context-group>
-        <target>if this is true and secure is false then Nodemailer (used library in the background) tries to use STARTTLS. See https://nodemailer.com/smtp/#tls-options for more details</target>
+        <target>Falls dies 'wahr' ist und 'secure' ist 'falsch', dann wird Nodemailer (wird im Hintergrund verwendet) versuchen, STARTTLS zu verwenden. Siehe https://nodemailer.com/smtp/#tls-options für mehr Optionen</target>
       </trans-unit>
       <trans-unit id="2392488717875840729" datatype="html">
         <source>User</source>
@@ -92,7 +92,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
-        <target>User</target>
+        <target>Benutzer</target>
       </trans-unit>
       <trans-unit id="5128106301085777888" datatype="html">
         <source>User to connect to the SMTP server.</source>
@@ -152,7 +152,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>Sender email</target>
+        <target>Absender</target>
       </trans-unit>
       <trans-unit id="5308313168080901236" datatype="html">
         <source>Some services do not allow sending from random e-mail addresses. Set this accordingly.</source>
@@ -160,7 +160,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">86</context>
         </context-group>
-        <target>Some services do not allow sending from random e-mail addresses. Set this accordingly.</target>
+        <target>Beachten Sie, dass einige Dienste keinen Versand von zufälligen Absenderadressen erlauben, und setzen Sie die Einstellungen entsprechend.</target>
       </trans-unit>
       <trans-unit id="4452860738128824775" datatype="html">
         <source>SMTP</source>
@@ -184,7 +184,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">107</context>
         </context-group>
-        <target>The app uses Nodemailer in the background for sending e-mails. Refer to https://nodemailer.com/usage/ if some options are not clear.</target>
+        <target>Die Anwendung verwendet im Hintergrund Nodemailer zum Versand von Emails. Konsultieren Sie https://nodemailer.com/usage/ falls einige Einstellungen unklar sind.</target>
       </trans-unit>
       <trans-unit id="4198035112366277884" datatype="html">
         <source>Database</source>
@@ -312,7 +312,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">251</context>
         </context-group>
-        <target>Ordner Datenbank</target>
+        <target>Datenbankordner</target>
       </trans-unit>
       <trans-unit id="631272345671042051" datatype="html">
         <source>All file-based data will be stored here (sqlite database, job history data).</source>
@@ -552,7 +552,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">456</context>
         </context-group>
-        <target>Ordnerliste ausschließen</target>
+        <target>Liste ausgeschlossener Verzeichnisse</target>
       </trans-unit>
       <trans-unit id="1610825524284664220" datatype="html">
         <source>Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded.</source>
@@ -884,7 +884,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">859</context>
         </context-group>
-        <target>Cover Filter query</target>
+        <target>Cover-Foto Suchabfrage</target>
       </trans-unit>
       <trans-unit id="3934792735027900470" datatype="html">
         <source>Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter.</source>
@@ -892,7 +892,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">864</context>
         </context-group>
-        <target>Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter.</target>
+        <target>Filtert die Unterordner mit dieser Abfrage. Falls der Filter keine Foto liefern, sucht die Anwendung noch einmal ohne den Filter.</target>
       </trans-unit>
       <trans-unit id="6038145233304913703" datatype="html">
         <source>Cover Sorting</source>
@@ -900,7 +900,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">873</context>
         </context-group>
-        <target>Cover Sorting</target>
+        <target>Cover Sortierung</target>
       </trans-unit>
       <trans-unit id="7281714126487619000" datatype="html">
         <source>If multiple cover is available sorts them by these methods and selects the first one.</source>
@@ -908,7 +908,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">877</context>
         </context-group>
-        <target>If multiple cover is available sorts them by these methods and selects the first one.</target>
+        <target>Falls mehrere Cover Bilder zur Verfügung stehen, dann werden sie mithilfe dieser Merkmale sortiert und das erste gewählt.</target>
       </trans-unit>
       <trans-unit id="4487775872787805732" datatype="html">
         <source>Images folder</source>
@@ -1056,7 +1056,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1055</context>
         </context-group>
-        <target>Users</target>
+        <target>Nutzer</target>
       </trans-unit>
       <trans-unit id="4973087105311508591" datatype="html">
         <source>Indexing</source>
@@ -1108,7 +1108,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1106</context>
         </context-group>
-        <target>Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.</target>
+        <target>Spezifizieren Sie eine Abfrage, die die Anwendung verwenden soll, um das beste Foto als Cover eines Albums und eines Ordners auszuwählen. Es gibt keine Möglichkeit, um manuell ein Album-/Ordner-Cover auszuwählen. Sie können Ihre Fotos mit 'cover' taggen und diese in der Abfrage verwenden oder mit 5 bewerten und in der Abfrage absteigend nach Bewertung sortieren.</target>
       </trans-unit>
       <trans-unit id="8422875188929347819" datatype="html">
         <source>Sharing</source>
@@ -1120,7 +1120,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">142</context>
         </context-group>
-        <target>Sharing</target>
+        <target>Teilen</target>
       </trans-unit>
       <trans-unit id="3587873128318078848" datatype="html">
         <source>Duplicates</source>
@@ -1136,7 +1136,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">164</context>
         </context-group>
-        <target>Duplicates</target>
+        <target>Duplicate</target>
       </trans-unit>
       <trans-unit id="2609637210173724919" datatype="html">
         <source>Messaging</source>
@@ -1144,7 +1144,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1128</context>
         </context-group>
-        <target>Messaging</target>
+        <target>Benachrichtigungen</target>
       </trans-unit>
       <trans-unit id="8227174550244698887" datatype="html">
         <source>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</source>
@@ -1152,7 +1152,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1132</context>
         </context-group>
-        <target>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</target>
+        <target>Die Anwendung kann Nachrichten verschicken, wie bspw. Fotos vom selben Tag vor einem Jahr, sog. "Top Picks". Hier wird der Versandmechanismus konfiguriert.</target>
       </trans-unit>
       <trans-unit id="3229595422546554334" datatype="html">
         <source>Jobs</source>
@@ -1280,7 +1280,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">151</context>
         </context-group>
-        <target>Enable Autocomplete</target>
+        <target>Autovervollständigung aktivieren</target>
       </trans-unit>
       <trans-unit id="7703111577289302879" datatype="html">
         <source>Show hints while typing search query.</source>
@@ -1360,7 +1360,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1158</context>
         </context-group>
-        <target>Enable</target>
+        <target>Aktivieren</target>
       </trans-unit>
       <trans-unit id="8338545895574711090" datatype="html">
         <source>Enables searching.</source>
@@ -1368,7 +1368,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">189</context>
         </context-group>
-        <target>Enables searching.</target>
+        <target>Aktiviere Suche.</target>
       </trans-unit>
       <trans-unit id="8206089520407978340" datatype="html">
         <source>Search cache timeout.</source>
@@ -1376,7 +1376,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">200</context>
         </context-group>
-        <target>Search cache timeout.</target>
+        <target>Such-Cache-Timeout.</target>
       </trans-unit>
       <trans-unit id="6507738516307254402" datatype="html">
         <source>Autocomplete</source>
@@ -1392,7 +1392,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">215</context>
         </context-group>
-        <target>Maximales Medienergebnis</target>
+        <target>Maximale Medienergebnis-Anzahl</target>
       </trans-unit>
       <trans-unit id="1471447046544934544" datatype="html">
         <source>Maximum number of photos and videos that are listed in one search result.</source>
@@ -1408,7 +1408,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">224</context>
         </context-group>
-        <target>Maximum directory result</target>
+        <target>Maximale Verzeichnisergebnis-Anzahl</target>
       </trans-unit>
       <trans-unit id="8397283408986431970" datatype="html">
         <source>Maximum number of directories that are listed in one search result.</source>
@@ -1668,7 +1668,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">481</context>
         </context-group>
-        <target>Map Provider</target>
+        <target>Kartendienst</target>
       </trans-unit>
       <trans-unit id="5860141610052555892" datatype="html">
         <source>Mapbox access token</source>
@@ -1840,7 +1840,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">747</context>
         </context-group>
-        <target>Ascending</target>
+        <target>Aufsteigend</target>
       </trans-unit>
       <trans-unit id="177392694971808911" datatype="html">
         <source>Default sorting</source>
@@ -1848,7 +1848,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">760</context>
         </context-group>
-        <target>Default sorting</target>
+        <target>Standard-Sortierung</target>
       </trans-unit>
       <trans-unit id="8993065143187639036" datatype="html">
         <source>Default sorting method for photo and video in a directory results.</source>
@@ -1864,7 +1864,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">770</context>
         </context-group>
-        <target>Default search sorting</target>
+        <target>Standard-Sortierung von Suchergebnissen</target>
       </trans-unit>
       <trans-unit id="7941581315950625881" datatype="html">
         <source>Default sorting method for photo and video in a search results.</source>
@@ -1880,7 +1880,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">780</context>
         </context-group>
-        <target>Default grouping</target>
+        <target>Standard-Gruppierung</target>
       </trans-unit>
       <trans-unit id="5640283237212785034" datatype="html">
         <source>Default grouping method for photo and video in a directory results.</source>
@@ -1896,7 +1896,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">791</context>
         </context-group>
-        <target>Default search grouping</target>
+        <target>Standard-Gruppierung von Suchergebnissen</target>
       </trans-unit>
       <trans-unit id="4276017218108240034" datatype="html">
         <source>Default grouping method for photo and video in a search results.</source>
@@ -1912,7 +1912,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">805</context>
         </context-group>
-        <target>Download Zip</target>
+        <target>ZIP-Download</target>
       </trans-unit>
       <trans-unit id="3946771566659086037" datatype="html">
         <source>Enable download zip of a directory contents Directory flattening. (Does not work for searches.)</source>
@@ -1928,7 +1928,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">816</context>
         </context-group>
-        <target>Directory flattening</target>
+        <target>Verzeichnisse "glätten" (flattening)</target>
       </trans-unit>
       <trans-unit id="705617377096083016" datatype="html">
         <source>Adds a button to flattens the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</source>
@@ -1936,7 +1936,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">821</context>
         </context-group>
-        <target>Adds a button to flattens the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</target>
+        <target>Fügt einen Knopf hinzu, um die Dateistruktur zu "glätten", indem der Inhalt aller Unterverzeichnisse aufgelistet wird. (Funktioniert nicht, falls die Galerie mehrere Verzeichnisse mit demselben Pfad hat.)</target>
       </trans-unit>
       <trans-unit id="2057017984457052518" datatype="html">
         <source>Default grid size</source>
@@ -1944,7 +1944,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">828</context>
         </context-group>
-        <target>Default grid size</target>
+        <target>Standard-Rastergröße</target>
       </trans-unit>
       <trans-unit id="783998631226539613" datatype="html">
         <source>Default grid size that is used to render photos and videos.</source>
@@ -1960,7 +1960,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">839</context>
         </context-group>
-        <target>Artikelanzahl anzeigen</target>
+        <target>Elementanzahl anzeigen</target>
       </trans-unit>
       <trans-unit id="3624970360822137346" datatype="html">
         <source>Shows the number photos and videos on the navigation bar.</source>
@@ -2040,7 +2040,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">893</context>
         </context-group>
-        <target>Sorting and grouping</target>
+        <target>Sortieren und gruppieren</target>
       </trans-unit>
       <trans-unit id="8685965882892653885" datatype="html">
         <source>Default slideshow speed</source>
@@ -2048,7 +2048,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">906</context>
         </context-group>
-        <target>Default slideshow speed</target>
+        <target>Standard-Geschwindigkeit der Slideshow</target>
       </trans-unit>
       <trans-unit id="8391296346935301055" datatype="html">
         <source>Default time interval for displaying a photo in the slide show.</source>
@@ -2068,7 +2068,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">66</context>
         </context-group>
-        <target>Always show captions</target>
+        <target>Beschreibung immer anzeigen</target>
       </trans-unit>
       <trans-unit id="1541637444630104645" datatype="html">
         <source>If enabled, lightbox will always show caption by default, not only on hover.</source>
@@ -2088,7 +2088,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">79</context>
         </context-group>
-        <target>Always show faces</target>
+        <target>Gesichter immer anzeigen</target>
       </trans-unit>
       <trans-unit id="9050621730692215024" datatype="html">
         <source>If enabled, lightbox will always show faces by default, not only on hover.</source>
@@ -2104,7 +2104,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">933</context>
         </context-group>
-        <target>Loop Videos</target>
+        <target>Endloswiedergabe von Videos</target>
       </trans-unit>
       <trans-unit id="3583632647770258043" datatype="html">
         <source>If enabled, lightbox will loop videos by default.</source>
@@ -2260,7 +2260,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1063</context>
         </context-group>
-        <target>Navigation bar</target>
+        <target>Navigationsleiste</target>
       </trans-unit>
       <trans-unit id="138256296895235303" datatype="html">
         <source>Caption first naming</source>
@@ -2568,7 +2568,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1338</context>
         </context-group>
-        <target>If you access the page form local network its good to know the public url for creating sharing link.</target>
+        <target>Das Erstellen von Links zum Teilen von Inhalten für einen Zugriff von außerhalb eines lokalen Netzwerks erfordern meist eine öffentliche Adresse.</target>
       </trans-unit>
       <trans-unit id="5093650417970469070" datatype="html">
         <source>Page public url</source>
@@ -2640,7 +2640,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1411</context>
         </context-group>
-        <target>Enables user management with login to password protect the gallery.</target>
+        <target>Aktiviert die Nutzerverwaltung incl. Anmeldung zum Passwort-Schutz von Galerien.</target>
       </trans-unit>
       <trans-unit id="6609079253925902817" datatype="html">
         <source>Default user right</source>
@@ -2756,7 +2756,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1492</context>
         </context-group>
-        <target>Random photo</target>
+        <target>Zufallsbild</target>
       </trans-unit>
       <trans-unit id="6931351711601311753" datatype="html">
         <source>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</source>
@@ -2764,7 +2764,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1496</context>
         </context-group>
-        <target>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</target>
+        <target>Hiermit werden Adresse für 'Zufallsbilder' erstellt. Diese Adresse liefern ein zufüllig ausgewähltes Bild Ihrer Galerie. Die Adresse kann Drittanwendungen wie bspw. für zufällig veränderndem Bildschirmhintergrund verwendet werden. Hinweis: In der aktuellen Implentierung erfordern Zufallsbilder auch eine Anmeldung.</target>
       </trans-unit>
       <trans-unit id="5732878542640870310" datatype="html">
         <source>Size to generate</source>
@@ -3151,7 +3151,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>Under the hood</target>
+        <target>Unter der Haube</target>
       </trans-unit>
       <trans-unit id="9212449559226155586" datatype="html">
         <source>Always</source>
@@ -3183,7 +3183,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target>Full</target>
+        <target>Voll</target>
       </trans-unit>
       <trans-unit id="4046649033157042513" datatype="html">
         <source>Compact</source>
@@ -3191,7 +3191,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target>Compact</target>
+        <target>Kompakt</target>
       </trans-unit>
       <trans-unit id="7590013429208346303" datatype="html">
         <source>Custom</source>
@@ -3199,7 +3199,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">38</context>
         </context-group>
-        <target>Custom</target>
+        <target>Benutzerdefiniert</target>
       </trans-unit>
       <trans-unit id="113099127945736504" datatype="html">
         <source>OpenStreetMap</source>
@@ -3279,7 +3279,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">108</context>
         </context-group>
-        <target>name</target>
+        <target>Name</target>
       </trans-unit>
       <trans-unit id="8415080222848862490" datatype="html">
         <source>rating</source>
@@ -3287,7 +3287,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">51</context>
         </context-group>
-        <target>rating</target>
+        <target>Bewertung</target>
       </trans-unit>
       <trans-unit id="8893285757291009420" datatype="html">
         <source>random</source>
@@ -3303,7 +3303,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">53</context>
         </context-group>
-        <target>faces</target>
+        <target>Gesichter</target>
       </trans-unit>
       <trans-unit id="2999337676190296805" datatype="html">
         <source>file size</source>
@@ -3311,7 +3311,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">54</context>
         </context-group>
-        <target>file size</target>
+        <target>Dateigröße</target>
       </trans-unit>
       <trans-unit id="2838693330548032903" datatype="html">
         <source>don't group</source>
@@ -3319,7 +3319,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">56</context>
         </context-group>
-        <target>don't group</target>
+        <target>nicht gruppieren</target>
       </trans-unit>
       <trans-unit id="4044854304763114941" datatype="html">
         <source>extra small</source>
@@ -3327,7 +3327,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>extra small</target>
+        <target>sehr klein</target>
       </trans-unit>
       <trans-unit id="704865667518683453" datatype="html">
         <source>small</source>
@@ -3335,7 +3335,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">60</context>
         </context-group>
-        <target>small</target>
+        <target>klein</target>
       </trans-unit>
       <trans-unit id="2765721507544664929" datatype="html">
         <source>big</source>
@@ -3343,7 +3343,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">62</context>
         </context-group>
-        <target>big</target>
+        <target>groß</target>
       </trans-unit>
       <trans-unit id="782745584760781543" datatype="html">
         <source>extra large</source>
@@ -3351,7 +3351,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">63</context>
         </context-group>
-        <target>extra large</target>
+        <target>sehr groß</target>
       </trans-unit>
       <trans-unit id="5043933900720743682" datatype="html">
         <source>Albums</source>
@@ -3371,7 +3371,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">118</context>
         </context-group>
-        <target>Albums</target>
+        <target>Alben</target>
       </trans-unit>
       <trans-unit id="188313477943387511" datatype="html">
         <source>And</source>
@@ -3579,7 +3579,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
           <context context-type="linenumber">39</context>
         </context-group>
-        <target>Mode:</target>
+        <target>Modus:</target>
       </trans-unit>
       <trans-unit id="271318073764837543" datatype="html">
         <source> Menu</source>
@@ -3712,7 +3712,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
-        <target>Add saved search</target>
+        <target>Gespeicherte Suche hinzufügen</target>
       </trans-unit>
       <trans-unit id="3231059240281443547" datatype="html">
         <source>No albums to show.</source>
@@ -3720,7 +3720,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>No albums to show.</target>
+        <target>Keine Alben vorhanden.</target>
       </trans-unit>
       <trans-unit id="3768927257183755959" datatype="html">
         <source>Save</source>
@@ -3928,7 +3928,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <target>Rating</target>
+        <target>Bewertung</target>
       </trans-unit>
       <trans-unit id="5087678602655068553" datatype="html">
         <source>Camera</source>
@@ -4060,7 +4060,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">55</context>
         </context-group>
-        <target>Slideshow speed:</target>
+        <target>Slideshow-Geschwindigkeit:</target>
       </trans-unit>
       <trans-unit id="3118381885529786097" datatype="html">
         <source>key: a</source>
@@ -4184,7 +4184,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <target>Home</target>
+        <target>Start</target>
       </trans-unit>
       <trans-unit id="5294987439623514854" datatype="html">
         <source>Error during loading the video.</source>
@@ -4292,7 +4292,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">24</context>
         </context-group>
-        <target>Artikel</target>
+        <target>Elemente</target>
       </trans-unit>
       <trans-unit id="5686806460713319354" datatype="html">
         <source>Show all subdirectories</source>
@@ -4308,7 +4308,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">52</context>
         </context-group>
-        <target>Filters</target>
+        <target>Filter</target>
       </trans-unit>
       <trans-unit id="4124492018839258838" datatype="html">
         <source>Sort and group</source>
@@ -4320,7 +4320,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
           <context context-type="linenumber">3</context>
         </context-group>
-        <target>Sort and group</target>
+        <target>Sortieren und gruppieren</target>
       </trans-unit>
       <trans-unit id="2317496634288800773" datatype="html">
         <source> group </source>
@@ -4360,7 +4360,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
           <context context-type="linenumber">32</context>
         </context-group>
-        <target>ascending</target>
+        <target>aufsteigend</target>
       </trans-unit>
       <trans-unit id="8583825692753174768" datatype="html">
         <source>descending</source>
@@ -4376,7 +4376,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
           <context context-type="linenumber">41</context>
         </context-group>
-        <target>descending</target>
+        <target>absteigend</target>
       </trans-unit>
       <trans-unit id="877780134171662191" datatype="html">
         <source>Grouping</source>
@@ -4396,7 +4396,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">176</context>
         </context-group>
-        <target>Grid size</target>
+        <target>Rastergröße</target>
       </trans-unit>
       <trans-unit id="7241451058585494578" datatype="html">
         <source>key: alt + up</source>
@@ -4676,7 +4676,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>Save search to album</target>
+        <target>Suche zum Album speichern</target>
       </trans-unit>
       <trans-unit id="8002146750272130034" datatype="html">
         <source>Album name</source>
@@ -4688,7 +4688,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
           <context context-type="linenumber">80</context>
         </context-group>
-        <target>Album name</target>
+        <target>Name des Albums</target>
       </trans-unit>
       <trans-unit id="4606777540690493351" datatype="html">
         <source>Save as album</source>
@@ -4696,7 +4696,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
           <context context-type="linenumber">98</context>
         </context-group>
-        <target>Save as album</target>
+        <target>Als Album speichern</target>
       </trans-unit>
       <trans-unit id="7419704019640008953" datatype="html">
         <source>Share</source>
@@ -4824,7 +4824,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">43</context>
         </context-group>
-        <target>Invalid settings</target>
+        <target>Ungültige Einstellungen (fehlendes Passwort?)</target>
       </trans-unit>
       <trans-unit id="2807800733729323332" datatype="html">
         <source>Yes</source>
@@ -4860,7 +4860,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">154</context>
         </context-group>
-        <target>Click share to get a link.</target>
+        <target>Klicke "teilen" um Link zu erhalten.</target>
       </trans-unit>
       <trans-unit id="5217966104824748038" datatype="html">
         <source>Sharing link has been copied to clipboard</source>
@@ -4868,7 +4868,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">165</context>
         </context-group>
-        <target>Sharing link has been copied to clipboard</target>
+        <target>Link zum Teilen wurde in die Zwischenablage kopiert</target>
       </trans-unit>
       <trans-unit id="1692815930495952260" datatype="html">
         <source>Please log in</source>
@@ -4972,7 +4972,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">4</context>
         </context-group>
-        <target>Active shares</target>
+        <target>Aktive Freigaben</target>
       </trans-unit>
       <trans-unit id="2176659033176029418" datatype="html">
         <source>Key</source>
@@ -4980,7 +4980,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">14</context>
         </context-group>
-        <target>Key</target>
+        <target>Schlüssel</target>
       </trans-unit>
       <trans-unit id="7046259383943324039" datatype="html">
         <source>Folder</source>
@@ -4988,7 +4988,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">15</context>
         </context-group>
-        <target>Folder</target>
+        <target>Ordner</target>
       </trans-unit>
       <trans-unit id="4938468904180779002" datatype="html">
         <source> No sharing was created. </source>
@@ -4996,7 +4996,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">39,40</context>
         </context-group>
-        <target>No sharing was created.</target>
+        <target>Keine Inhalte wurden geteilt.</target>
       </trans-unit>
       <trans-unit id="5253186130625984783" datatype="html">
         <source> It seems that you are running the application in a Docker container. This setting should not be changed in docker. Make sure, that you know what you are doing.
@@ -5225,7 +5225,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">4</context>
         </context-group>
-        <target>User list</target>
+        <target>Benutzerliste</target>
       </trans-unit>
       <trans-unit id="5918723526444903137" datatype="html">
         <source>Add user</source>
@@ -5233,7 +5233,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">48</context>
         </context-group>
-        <target>Add user</target>
+        <target>Benutzer hinzufügen</target>
       </trans-unit>
       <trans-unit id="1996265061837601864" datatype="html">
         <source>Add new User</source>

@@ -7,9 +7,41 @@ const forcedDebug = process.env['NODE_ENV'] === 'debug';
 
 if (forcedDebug === true) {
   console.log(
-      'NODE_ENV environmental variable is set to debug, forcing all logs to print'
+    'NODE_ENV environmental variable is set to debug, forcing all logs to print'
   );
 }
+
+export type LoggerFunction = (...args: (string | number)[]) => void;
+
+export interface ILogger {
+  silly: LoggerFunction;
+  debug: LoggerFunction;
+  verbose: LoggerFunction;
+  info: LoggerFunction;
+  warn: LoggerFunction;
+  error: LoggerFunction;
+}
+
+export const createLoggerWrapper = (TAG: string): ILogger => ({
+  silly: (...args: (string | number)[]) => {
+    Logger.silly(TAG, ...args);
+  },
+  debug: (...args: (string | number)[]) => {
+    Logger.debug(TAG, ...args);
+  },
+  verbose: (...args: (string | number)[]) => {
+    Logger.verbose(TAG, ...args);
+  },
+  info: (...args: (string | number)[]) => {
+    Logger.info(TAG, ...args);
+  },
+  warn: (...args: (string | number)[]) => {
+    Logger.warn(TAG, ...args);
+  },
+  error: (...args: (string | number)[]) => {
+    Logger.error(TAG, ...args);
+  }
+});
 
 export class Logger {
   public static silly(...args: (string | number)[]): void {
@@ -55,10 +87,10 @@ export class Logger {
     const date = new Date().toLocaleString();
     let LOG_TAG = '';
     if (
-        args.length > 0 &&
-        typeof args[0] === 'string' &&
-        args[0].startsWith('[') &&
-        args[0].endsWith(']')
+      args.length > 0 &&
+      typeof args[0] === 'string' &&
+      args[0].startsWith('[') &&
+      args[0].endsWith(']')
     ) {
       LOG_TAG = args[0];
       args.shift();

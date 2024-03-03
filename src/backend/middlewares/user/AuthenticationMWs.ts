@@ -156,8 +156,8 @@ export class AuthenticationMWs {
       if (
           !sharing ||
           sharing.expires < Date.now() ||
-          (Config.Sharing.passwordProtected === true &&
-              sharing.password &&
+          ((Config.Sharing.passwordRequired === true ||
+              sharing.password) &&
               !PasswordHelper.comparePassword(password, sharing.password))
       ) {
         Logger.warn(LOG_TAG, 'Failed login with sharing:' + sharing.sharingKey + ', bad password');
@@ -265,8 +265,9 @@ export class AuthenticationMWs {
         return null;
       }
 
+      // no 'free login' if passwords are required, or it is set
       if (
-          Config.Sharing.passwordProtected === true &&
+          Config.Sharing.passwordRequired === true ||
           sharing.password
       ) {
         return null;

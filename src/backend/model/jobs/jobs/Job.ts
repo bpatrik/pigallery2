@@ -1,9 +1,10 @@
 import {Logger} from '../../../Logger';
 import {IJob} from './IJob';
-import {ConfigTemplateEntry, JobDTO, JobDTOUtils,} from '../../../../common/entities/job/JobDTO';
+import {JobDTO, JobDTOUtils} from '../../../../common/entities/job/JobDTO';
 import {JobProgress} from './JobProgress';
 import {IJobListener} from './IJobListener';
 import {JobProgressStates} from '../../../../common/entities/job/JobProgressDTO';
+import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 declare const process: { nextTick: (_: unknown) => void };
 declare const global: { gc: () => void };
@@ -27,7 +28,7 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
 
   public abstract get Name(): string;
 
-  public abstract get ConfigTemplate(): ConfigTemplateEntry[];
+  public abstract get ConfigTemplate(): DynamicConfig[];
 
   public get Progress(): JobProgress {
     return this.progress;

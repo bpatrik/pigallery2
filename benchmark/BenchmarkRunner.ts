@@ -121,7 +121,7 @@ export class BenchmarkRunner {
     const bm = new Benchmark('List directory', req,
       async (): Promise<void> => {
         await ObjectManagers.reset();
-        await ObjectManagers.InitSQLManagers();
+        await ObjectManagers.getInstance().init();
       }, null,
       async (): Promise<void> => {
         Config.Indexing.reIndexingSensitivity = ReIndexingSensitivity.low;
@@ -135,7 +135,7 @@ export class BenchmarkRunner {
   async bmListPersons(): Promise<BenchmarkResult[]> {
     const bm = new Benchmark('Listing Faces', Utils.clone(this.requestTemplate), async (): Promise<void> => {
         await ObjectManagers.reset();
-        await ObjectManagers.InitSQLManagers();
+        await ObjectManagers.getInstance().init();
       }, null,
       async (): Promise<void> => {
         Config.Indexing.reIndexingSensitivity = ReIndexingSensitivity.low;
@@ -289,7 +289,7 @@ export class BenchmarkRunner {
     await fs.promises.rm(ProjectPath.DBFolder, {recursive: true, force: true});
     Config.Database.type = DatabaseType.sqlite;
     Config.Jobs.scheduled = [];
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
   };
 
   private async setupDB(): Promise<void> {

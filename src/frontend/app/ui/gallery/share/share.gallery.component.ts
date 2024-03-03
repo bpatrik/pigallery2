@@ -36,7 +36,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   currentDir = '';
   sharing: SharingDTO = null;
   contentSubscription: Subscription = null;
-  readonly passwordProtection = Config.Sharing.passwordProtected;
+  readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
 
   modalRef: BsModalRef;
@@ -138,11 +138,16 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   }
 
   async get(): Promise<void> {
+    if(Config.Sharing.passwordRequired && !this.input.password){
+      this.url = $localize`Set password.`;
+      return;
+    }
     this.urlValid = false;
     this.url = $localize`loading..`;
     this.sharing = await this.sharingService.createSharing(
         this.currentDir,
         this.input.includeSubfolders,
+        this.input.password,
         this.calcValidity()
     );
     this.url = this.sharingService.getUrl(this.sharing);

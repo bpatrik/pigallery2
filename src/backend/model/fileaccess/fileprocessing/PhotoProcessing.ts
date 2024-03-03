@@ -110,10 +110,14 @@ export class PhotoProcessing {
 
   public static generateConvertedPath(mediaPath: string, size: number): string {
     const file = path.basename(mediaPath);
+    const animated = Config.Media.Thumbnail.animateGif && path.extname(mediaPath).toLowerCase() == '.gif';
     return path.join(
       ProjectPath.TranscodedFolder,
       ProjectPath.getRelativePathToImages(path.dirname(mediaPath)),
-      file + '_' + size + 'q' + Config.Media.Thumbnail.quality + (Config.Media.Thumbnail.smartSubsample ? 'cs' : '') + PhotoProcessing.CONVERTED_EXTENSION
+      file + '_' + size + 'q' + Config.Media.Thumbnail.quality +
+      (animated ? 'anim' : '') +
+      (Config.Media.Thumbnail.smartSubsample ? 'cs' : '') +
+      PhotoProcessing.CONVERTED_EXTENSION
     );
   }
 
@@ -161,11 +165,13 @@ export class PhotoProcessing {
     if (path.extname(convertedPath) !== PhotoProcessing.CONVERTED_EXTENSION) {
       return false;
     }
+    let nextIndex = convertedPath.lastIndexOf('_') + 1;
 
     const sizeStr = convertedPath.substring(
-      convertedPath.lastIndexOf('_') + 1,
+      nextIndex,
       convertedPath.lastIndexOf('q')
     );
+    nextIndex = convertedPath.lastIndexOf('q') + 1;
 
     const size = parseInt(sizeStr, 10);
 
@@ -177,19 +183,8 @@ export class PhotoProcessing {
       return false;
     }
 
-
-    let qualityStr = convertedPath.substring(
-      convertedPath.lastIndexOf('q') + 1,
-      convertedPath.length - path.extname(convertedPath).length
-    );
-
-
-    if (Config.Media.Thumbnail.smartSubsample) {
-      if (!qualityStr.endsWith('cs')) { // remove chromatic subsampling flag if exists
-        return false;
-      }
-      qualityStr = qualityStr.slice(0, -2);
-    }
+    const qualityStr =convertedPath.substring(nextIndex,
+      nextIndex+convertedPath.substring(nextIndex).search(/[A-Za-z]/)); // end of quality string
 
     const quality = parseInt(qualityStr, 10);
 
@@ -197,6 +192,40 @@ export class PhotoProcessing {
       quality !== Config.Media.Thumbnail.quality) {
       return false;
     }
+
+
+    nextIndex += qualityStr.length;
+
+
+    const lowerExt = path.extname(origFilePath).toLowerCase();
+    const shouldBeAnimated = Config.Media.Thumbnail.animateGif && lowerExt == '.gif';
+    if (shouldBeAnimated) {
+      if (convertedPath.substring(
+        nextIndex,
+        nextIndex + 'anim'.length
+      ) != 'anim') {
+        return false;
+      }
+      nextIndex += 'anim'.length;
+    }
+
+
+    if (Config.Media.Thumbnail.smartSubsample) {
+      if (convertedPath.substring(
+        nextIndex,
+        nextIndex + 2
+      ) != 'cs') {
+        return false;
+      }
+      nextIndex+=2;
+    }
+
+    if(convertedPath.substring(
+      nextIndex
+    ).toLowerCase() !== path.extname(convertedPath)){
+      return false;
+    }
+
 
     try {
       await fsp.access(origFilePath, fsConstants.R_OK);
@@ -298,6 +327,7 @@ viewBox="${svgIcon.viewBox || '0 0 512 512'}">d="${svgIcon.items}</svg>`,
       size: size,
       outPath,
       makeSquare: false,
+      animate: false,
       useLanczos3: Config.Media.Thumbnail.useLanczos3,
       quality: Config.Media.Thumbnail.quality,
       smartSubsample: Config.Media.Thumbnail.smartSubsample,

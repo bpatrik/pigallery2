@@ -6,9 +6,10 @@ import {SettingsMWs} from '../../../../../src/backend/middlewares/admin/Settings
 import {ServerUserConfig} from '../../../../../src/common/config/private/PrivateConfig';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
-import {ConfigClassBuilder} from '../../../../../node_modules/typeconfig/node';
 import * as fs from 'fs';
 import * as path from 'path';
+import {ExtensionConfigWrapper} from '../../../../../src/backend/model/extension/ExtensionConfigWrapper';
+import {ConfigClassBuilder} from 'typeconfig/node';
 
 
 declare const describe: any;
@@ -21,7 +22,7 @@ describe('Settings middleware', () => {
   beforeEach(async () => {
     await ObjectManagers.reset();
     await fs.promises.rm(tempDir, {recursive: true, force: true});
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
   });
 
   it('should save empty enforced users settings', (done: (err?: any) => void) => {
@@ -74,7 +75,7 @@ describe('Settings middleware', () => {
         expect(Config.Users.enforcedUsers.length).to.be.equal(1);
         expect(Config.Users.enforcedUsers[0].name).to.be.equal('Apple');
         expect(Config.Users.enforcedUsers.length).to.be.equal(1);
-        Config.original().then((cfg) => {
+        ExtensionConfigWrapper.original().then((cfg) => {
           try {
             expect(cfg.Users.enforcedUsers.length).to.be.equal(1);
             expect(cfg.Users.enforcedUsers[0].name).to.be.equal('Apple');

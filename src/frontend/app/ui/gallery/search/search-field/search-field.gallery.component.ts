@@ -4,7 +4,7 @@ import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator,} from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
-import {BsModalRef, BsModalService,} from '../../../../../../../node_modules/ngx-bootstrap/modal';
+import {BsModalRef, BsModalService,} from 'ngx-bootstrap/modal';
 import {Utils} from '../../../../../../common/Utils';
 
 @Component({

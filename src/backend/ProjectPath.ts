@@ -2,28 +2,29 @@ import * as path from 'path';
 import * as fs from 'fs';
 import {Config} from '../common/config/private/Config';
 
-class ProjectPathClass {
+export class ProjectPathClass {
   public Root: string;
   public ImageFolder: string;
   public TempFolder: string;
   public TranscodedFolder: string;
   public FacesFolder: string;
   public FrontendFolder: string;
+  public ExtensionFolder: string;
   public DBFolder: string;
 
   constructor() {
     this.reset();
   }
 
-  normalizeRelative(pathStr: string): string {
+  public normalizeRelative(pathStr: string): string {
     return path.join(pathStr, path.sep);
   }
 
-  getAbsolutePath(pathStr: string): string {
+  public getAbsolutePath(pathStr: string): string {
     return path.isAbsolute(pathStr) ? pathStr : path.join(this.Root, pathStr);
   }
 
-  getRelativePathToImages(pathStr: string): string {
+  public getRelativePathToImages(pathStr: string): string {
     return path.relative(this.ImageFolder, pathStr);
   }
 
@@ -35,6 +36,7 @@ class ProjectPathClass {
     this.TranscodedFolder = path.join(this.TempFolder, 'tc');
     this.FacesFolder = path.join(this.TempFolder, 'f');
     this.DBFolder = this.getAbsolutePath(Config.Database.dbFolder);
+    this.ExtensionFolder = this.getAbsolutePath(Config.Extensions.folder);
 
     // create thumbnail folder if not exist
     if (!fs.existsSync(this.TempFolder)) {

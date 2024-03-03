@@ -14,6 +14,7 @@ import {GPXProcessing} from './fileprocessing/GPXProcessing';
 import {MDFileDTO} from '../../../common/entities/MDFileDTO';
 import {MetadataLoader} from './MetadataLoader';
 import {NotificationManager} from '../NotifocationManager';
+import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 
 
 const LOG_TAG = '[DiskManager]';
@@ -101,6 +102,7 @@ export class DiskManager {
     )) as ParentDirectoryDTO<FileDTO>;
   }
 
+  @ExtensionDecorator(e => e.gallery.DiskManager.scanDirectory)
   public static async scanDirectory(
     relativeDirectoryName: string,
     settings: DirectoryScanSettings = {}

@@ -32,8 +32,17 @@ const LOG_TAG = '[server]';
 
 export class Server {
   public onStarted = new Event<void>();
-  private app: express.Express;
+  public app: express.Express;
   private server: HttpServer;
+
+  static instance: Server = null;
+
+  public static getInstance(): Server {
+    if (!this.instance) {
+      this.instance = new Server();
+    }
+    return this.instance;
+  }
 
   constructor() {
     if (!(process.env.NODE_ENV === 'production')) {
@@ -45,11 +54,15 @@ export class Server {
     this.init().catch(console.error);
   }
 
-  get App(): any {
+  get Server(): HttpServer {
     return this.server;
   }
 
   async init(): Promise<void> {
+    this.app = express();
+    LoggerRouter.route(this.app);
+    this.app.set('view engine', 'ejs');
+
     Logger.info(LOG_TAG, 'running diagnostics...');
     await ConfigDiagnostics.runDiagnostics();
     Logger.verbose(
@@ -61,13 +74,14 @@ export class Server {
       ).configPath +
       ':'
     );
-    Logger.verbose(LOG_TAG, JSON.stringify(Config.toJSON({attachDescription: false}), null, '\t'));
+    Logger.verbose(LOG_TAG, JSON.stringify(Config.toJSON({attachDescription: false}), (k, v) => {
+      const MAX_LENGTH = 80;
+      if (typeof v === 'string' && v.length > MAX_LENGTH) {
+        v = v.slice(0, MAX_LENGTH - 3) + '...';
+      }
+      return v;
+    }, 2));
 
-    this.app = express();
-
-    LoggerRouter.route(this.app);
-
-    this.app.set('view engine', 'ejs');
 
     /**
      * Session above all
@@ -115,7 +129,7 @@ export class Server {
     Localizations.init();
 
     this.app.use(locale(Config.Server.languages, 'en'));
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
 
     Router.route(this.app);
 

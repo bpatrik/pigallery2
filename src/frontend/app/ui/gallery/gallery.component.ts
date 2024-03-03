@@ -52,18 +52,18 @@ export class GalleryComponent implements OnInit, OnDestroy {
   };
 
   constructor(
-      public contentLoader: ContentLoaderService,
-      public galleryService: ContentService,
-      private authService: AuthenticationService,
-      private router: Router,
-      private shareService: ShareService,
-      private route: ActivatedRoute,
-      private navigation: NavigationService,
-      private filterService: FilterService,
-      private sortingService: GallerySortingService,
-      private piTitleService: PiTitleService,
-      private gpxFilesFilterPipe: GPXFilesFilterPipe,
-      private mdFilesFilterPipe: MDFilesFilterPipe,
+    public contentLoader: ContentLoaderService,
+    public galleryService: ContentService,
+    private authService: AuthenticationService,
+    private router: Router,
+    private shareService: ShareService,
+    private route: ActivatedRoute,
+    private navigation: NavigationService,
+    private filterService: FilterService,
+    private sortingService: GallerySortingService,
+    private piTitleService: PiTitleService,
+    private gpxFilesFilterPipe: GPXFilesFilterPipe,
+    private mdFilesFilterPipe: MDFilesFilterPipe,
   ) {
     this.mapEnabled = Config.Map.enabled;
     PageHelper.showScrollY();
@@ -79,17 +79,17 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
     // if the timer is longer than 10 years, just do not show it
     if (
-        (this.shareService.sharingSubject.value.expires - Date.now()) /
-        1000 /
-        86400 /
-        365 >
-        10
+      (this.shareService.sharingSubject.value.expires - Date.now()) /
+      1000 /
+      86400 /
+      365 >
+      10
     ) {
       return;
     }
 
     t = Math.floor(
-        (this.shareService.sharingSubject.value.expires - Date.now()) / 1000
+      (this.shareService.sharingSubject.value.expires - Date.now()) / 1000
     );
     this.countDown = {} as any;
     this.countDown.day = Math.floor(t / 86400);
@@ -118,31 +118,26 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<boolean> {
     await this.shareService.wait();
-    if (
-        !this.authService.isAuthenticated() &&
-        (!this.shareService.isSharing() ||
-            (this.shareService.isSharing() &&
-                Config.Sharing.passwordProtected === true))
-    ) {
+    if (!this.authService.isAuthenticated()) {
       return this.navigation.toLogin();
     }
     this.showSearchBar = this.authService.canSearch();
     this.showShare =
-        Config.Sharing.enabled &&
-        this.authService.isAuthorized(UserRoles.User);
+      Config.Sharing.enabled &&
+      this.authService.isAuthorized(UserRoles.User);
     this.showRandomPhotoBuilder =
-        Config.RandomPhoto.enabled &&
-        this.authService.isAuthorized(UserRoles.User);
+      Config.RandomPhoto.enabled &&
+      this.authService.isAuthorized(UserRoles.User);
     this.subscription.content = this.galleryService.sortedFilteredContent
-        .subscribe((dc: GroupedDirectoryContent) => {
-          this.onContentChange(dc);
-        });
+      .subscribe((dc: GroupedDirectoryContent) => {
+        this.onContentChange(dc);
+      });
     this.subscription.route = this.route.params.subscribe(this.onRoute);
 
     if (this.shareService.isSharing()) {
       this.$counter = interval(1000);
       this.subscription.timer = this.$counter.subscribe((x): void =>
-          this.updateTimer(x)
+        this.updateTimer(x)
       );
     }
   }
@@ -156,18 +151,18 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
 
     if (
-        params[QueryParams.gallery.sharingKey_params] &&
-        params[QueryParams.gallery.sharingKey_params] !== ''
+      params[QueryParams.gallery.sharingKey_params] &&
+      params[QueryParams.gallery.sharingKey_params] !== ''
     ) {
       const sharing = await this.shareService.currentSharing
-          .pipe(take(1))
-          .toPromise();
+        .pipe(take(1))
+        .toPromise();
       const qParams: { [key: string]: any } = {};
       qParams[QueryParams.gallery.sharingKey_query] =
-          this.shareService.getSharingKey();
+        this.shareService.getSharingKey();
       this.router
-          .navigate(['/gallery', sharing.path], {queryParams: qParams})
-          .catch(console.error);
+        .navigate(['/gallery', sharing.path], {queryParams: qParams})
+        .catch(console.error);
       return;
     }
 
@@ -191,8 +186,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
     for (const mediaGroup of content.mediaGroups) {
 
       if (
-          mediaGroup.media
-              .findIndex((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude) !== -1
+        mediaGroup.media
+          .findIndex((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude) !== -1
       ) {
         this.isPhotoWithLocation = true;
         break;

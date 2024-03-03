@@ -41,7 +41,7 @@ describe('PublicRouter', () => {
     server = new Server();
     await server.onStarted.wait();
 
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));
     await SQLConnection.close();
   };
@@ -71,12 +71,19 @@ describe('PublicRouter', () => {
     afterEach(tearDown);
 
     const fistLoad = async (srv: Server, sharingKey: string): Promise<any> => {
-      return (chai.request(srv.App) as SuperAgentStatic)
+      return (chai.request(srv.Server) as SuperAgentStatic)
         .get('/share/' + sharingKey);
     };
 
-    it('should not get default user with passworded share share without password', async () => {
-      Config.Sharing.passwordProtected = true;
+    it('should not get default user with passworded share  without required password', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
+      const res = await fistLoad(server, sharing.sharingKey);
+      shouldHaveInjectedUser(res, null);
+    });
+
+    it('should not get default user with passworded share share with required password', async () => {
+      Config.Sharing.passwordRequired = true;
       const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
       const res = await fistLoad(server, sharing.sharingKey);
       shouldHaveInjectedUser(res, null);
@@ -84,25 +91,13 @@ describe('PublicRouter', () => {
 
 
     it('should get default user with no-password share', async () => {
-      Config.Sharing.passwordProtected = true;
+      Config.Sharing.passwordRequired = false;
       const sharing = await RouteTestingHelper.createSharing(testUser);
       const res = await fistLoad(server, sharing.sharingKey);
       shouldHaveInjectedUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
     });
 
-    it('should get default user for no-password share when password protection disabled', async () => {
-      Config.Sharing.passwordProtected = false;
-      const sharing = await RouteTestingHelper.createSharing(testUser);
-      const res = await fistLoad(server, sharing.sharingKey);
-      shouldHaveInjectedUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
-    });
 
-    it('should get default user for passworded share when password protection disabled', async () => {
-      Config.Sharing.passwordProtected = false;
-      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
-      const res = await fistLoad(server, sharing.sharingKey);
-      shouldHaveInjectedUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
-    });
 
 
   });

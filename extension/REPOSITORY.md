@@ -1,0 +1,12 @@
+# Pigallery2 extension repository
+
+The app loads this file to discover available extensions for download.
+Note: pigallery2 is not responsible for the extensions that are available here.
+In case of any issue, contact the extension developer.
+
+|     **Name**     |                                                    **Url**                                                    |                                            **Readme**                                             |                                          **Download**                                          |   |
+|:----------------:|:-------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------:|---|
+| Sample extension |             [pigallery2-sample-extension](https://github.com/bpatrik/pigallery2-sample-extension)             | [REAMDE.md](https://raw.githubusercontent.com/bpatrik/pigallery2-sample-extension/main/README.md) | [main.zip](https://github.com/bpatrik/pigallery2-sample-extension/archive/refs/heads/main.zip) |   |
+| DigiKam Connector for Pigallery2                 | [pigallery2-extension-digikam-connector](https://github.com/mblythe86/pigallery2-extension-digikam-connector) |                                           [README.md](https://raw.githubusercontent.com/mblythe86/pigallery2-extension-digikam-connector/main/README.md)                                           |                                          [main.zip](https://github.com/mblythe86/pigallery2-extension-digikam-connector/archive/refs/heads/main.zip)                                          |   |
+|                  |                                                                                                               |                                                                                                   |                                                                                                |   |
+|                  |                                                                                                               |                                                                                                   |                                                                                                |   |

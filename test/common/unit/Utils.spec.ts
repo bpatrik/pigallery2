@@ -10,7 +10,9 @@ describe('Utils', () => {
     expect(Utils.concatUrls('abc\\', 'cde')).to.be.equal('abc/cde');
     expect(Utils.concatUrls('abc/', 'cde/')).to.be.equal('abc/cde');
     expect(Utils.concatUrls('./abc\\', 'cde/')).to.be.equal('./abc/cde');
+    expect(Utils.concatUrls('/abc\\', 'cde/')).to.be.equal('/abc/cde');
     expect(Utils.concatUrls('abc/', '\\cde/')).to.be.equal('abc/cde');
+    expect(Utils.concatUrls('/abc/', '\\cde/')).to.be.equal('/abc/cde');
     expect(Utils.concatUrls('abc\\', '\\cde/')).to.be.equal('abc/cde');
     expect(Utils.concatUrls('abc\\', '/cde/')).to.be.equal('abc/cde');
     expect(Utils.concatUrls('abc/', '/cde/')).to.be.equal('abc/cde');

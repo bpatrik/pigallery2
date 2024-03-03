@@ -1,4 +1,4 @@
-import {ConfigTemplateEntry, DefaultsJobs,} from '../../../../common/entities/job/JobDTO';
+import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import * as path from 'path';
 import * as fs from 'fs';
 import {Job} from './Job';
@@ -6,10 +6,11 @@ import {ProjectPath} from '../../../ProjectPath';
 import {GPXProcessing} from '../../fileaccess/fileprocessing/GPXProcessing';
 import {PhotoProcessing} from '../../fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../fileaccess/fileprocessing/VideoProcessing';
+import { DynamicConfig } from '../../../../common/entities/DynamicConfig';
 
 export class TempFolderCleaningJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']];
-  public readonly ConfigTemplate: ConfigTemplateEntry[] = null;
+  public readonly ConfigTemplate: DynamicConfig[] = null;
   public readonly Supported: boolean = true;
   directoryQueue: string[] = [];
   private tempRootCleaned = false;

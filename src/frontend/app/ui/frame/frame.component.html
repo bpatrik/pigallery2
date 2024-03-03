@@ -62,15 +62,16 @@
             <li class="nav-item dropdown">
               <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom"
                    [autoClose]="false" container="body">
-                <button id="button-alignment" dropdownToggle
+                <button id="button-frame-menu" dropdownToggle
                         type="button" class="btn btn-tertiary dropdown-toggle"
-                        aria-controls="dropdown-alignment">
+                        aria-controls="dropdown-frame-menu">
                   <ng-icon class="align-text-top" size="1.2em" name="ionMenuOutline"></ng-icon>
                   <span *ngIf="isAdmin() && notificationService.numberOfNotifications>0"
                     class="navbar-badge badge text-bg-warning">{{notificationService.numberOfNotifications}}</span>
                 </button>
-                <ul id="dropdown-alignment" *dropdownMenu class="dropdown-menu dropdown-menu-right" role="menu"
-                  aria-labelledby="button-alignment">
+                <ul id="dropdown-frame-menu" *dropdownMenu
+                    class="dropdown-menu dropdown-menu-right"
+                    role="menu" aria-labelledby="button-frame-menu">
 
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">

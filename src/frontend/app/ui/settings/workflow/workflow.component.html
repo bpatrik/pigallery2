@@ -170,6 +170,7 @@
         <div *ngFor="let configEntry of  jobsService.getConfigTemplate(schedule.jobName)">
 
           <div class="mb-1 row"
+               *ngIf="!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue"
                [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
             <label class="col-md-2 control-label"
                    [for]="configEntry.id+'_'+i">{{backendTextService.get(configEntry.name)}}</label>
@@ -226,6 +227,18 @@
                     (change)="onChange($event)"
                     placeholder="Search Query">
                   </app-gallery-search-field>
+
+                  <select
+                    *ngSwitchCase="'messenger'"
+                    [id]="configEntry.id+'_'+i"
+                    [name]="configEntry.id+'_'+i"
+                    (ngModelChange)="onChange($event)"
+                    [(ngModel)]="schedule.config[configEntry.id]"
+                    class="form-select">
+                    <option *ngFor="let msg of jobsService.availableMessengers | async" [ngValue]="msg">{{msg}}
+                    </option>
+                  </select>
+
 
                   <ng-container *ngSwitchCase="'MediaPickDTO-array'">
                     <ng-container *ngFor="let mp of AsMediaPickDTOArray(schedule.config[configEntry.id]); let j=index">

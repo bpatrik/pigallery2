@@ -1,18 +1,40 @@
 import {createTransport, Transporter} from 'nodemailer';
-import {MediaDTO, MediaDTOUtils} from '../../../common/entities/MediaDTO';
 import {Config} from '../../../common/config/private/Config';
-import {PhotoProcessing} from '../fileaccess/fileprocessing/PhotoProcessing';
-import {ThumbnailSourceType} from '../fileaccess/PhotoWorker';
-import {ProjectPath} from '../../ProjectPath';
-import * as path from 'path';
 import {PhotoMetadata} from '../../../common/entities/PhotoDTO';
-import {Utils} from '../../../common/Utils';
-import {QueryParams} from '../../../common/QueryParams';
+import {MediaDTOWithThPath, Messenger} from './Messenger';
+import {backendTexts} from '../../../common/BackendTexts';
+import {DynamicConfig} from '../../../common/entities/DynamicConfig';
+import {DefaultMessengers} from '../../../common/entities/job/JobDTO';
 
-export class EmailMediaMessenger {
+export class EmailMessenger extends Messenger<{
+  emailTo: string,
+  emailSubject: string,
+  emailText: string,
+}> {
+  public readonly Name = DefaultMessengers[DefaultMessengers.Email];
+  public readonly ConfigTemplate: DynamicConfig[]  = [{
+    id: 'emailTo',
+    type: 'string-array',
+    name: backendTexts.emailTo.name,
+    description: backendTexts.emailTo.description,
+    defaultValue: [],
+  }, {
+    id: 'emailSubject',
+    type: 'string',
+    name: backendTexts.emailSubject.name,
+    description: backendTexts.emailSubject.description,
+    defaultValue: 'Latest photos for you',
+  }, {
+    id: 'emailText',
+    type: 'string',
+    name: backendTexts.emailText.name,
+    description: backendTexts.emailText.description,
+    defaultValue: 'I hand picked these photos just for you:',
+  }];
   transporter: Transporter;
 
   constructor() {
+    super();
     this.transporter = createTransport({
       host: Config.Messaging.Email.smtp.host,
       port: Config.Messaging.Email.smtp.port,
@@ -25,24 +47,16 @@ export class EmailMediaMessenger {
     });
   }
 
-  private async getThumbnail(m: MediaDTO) {
-    return await PhotoProcessing.generateThumbnail(
-      path.join(ProjectPath.ImageFolder, m.directory.path, m.directory.name, m.name),
-      Config.Media.Thumbnail.thumbnailSizes[0],
-      MediaDTOUtils.isPhoto(m) ? ThumbnailSourceType.Photo : ThumbnailSourceType.Video,
-      false
-    );
-  }
 
-  public async sendMedia(mailSettings: {
-    to: string,
-    subject: string,
-    text: string
-  }, media: MediaDTO[]) {
+  protected async sendMedia(mailSettings: {
+    emailTo: string,
+    emailSubject: string,
+    emailText: string
+  }, media: MediaDTOWithThPath[]) {
 
     const attachments = [];
     const htmlStart = '<h1 style="text-align: center; margin-bottom: 2em">' + Config.Server.applicationTitle + '</h1>\n' +
-      '<h3>' + mailSettings.text + '</h3>\n' +
+      '<h3>' + mailSettings.emailText + '</h3>\n' +
       '<table style="margin-left: auto;  margin-right: auto;">\n' +
       '  <tbody>\n';
     const htmlEnd = '  </tr>\n' +
@@ -51,9 +65,6 @@ export class EmailMediaMessenger {
     let htmlMiddle = '';
     const numberOfColumns = media.length >= 6 ? 3 : 2;
     for (let i = 0; i < media.length; ++i) {
-      const thPath = await this.getThumbnail(media[i]);
-      const linkUrl = Utils.concatUrls(Config.Server.publicUrl, '/gallery/', encodeURIComponent(path.join(media[i].directory.path, media[i].directory.name))) +
-        '?' + QueryParams.gallery.photo + '=' + encodeURIComponent(media[i].name);
       const location = (media[i].metadata as PhotoMetadata).positionData?.country ?
         (media[i].metadata as PhotoMetadata).positionData?.country :
         ((media[i].metadata as PhotoMetadata).positionData?.city ?
@@ -61,14 +72,14 @@ export class EmailMediaMessenger {
       const caption = (new Date(media[i].metadata.creationDate)).getFullYear() + (location ? ', ' + location : '');
       attachments.push({
         filename: media[i].name,
-        path: thPath,
+        path: media[i].thumbnailPath,
         cid: 'img' + i
       });
       if (i % numberOfColumns == 0) {
         htmlMiddle += '<tr>';
       }
       htmlMiddle += '<td>\n' +
-        '      <a style="display: block;text-align: center;" href="' + linkUrl + '"><img alt="' + media[i].name + '" style="max-width: 200px; max-height: 150px;  height:auto; width:auto;" src="cid:img' + i + '"/></a>\n' +
+        '      <a style="display: block;text-align: center;" href="' + media[i].thumbnailUrl + '"><img alt="' + media[i].name + '" style="max-width: 200px; max-height: 150px;  height:auto; width:auto;" src="cid:img' + i + '"/></a>\n' +
         caption +
         '    </td>\n';
 
@@ -79,8 +90,8 @@ export class EmailMediaMessenger {
 
     return await this.transporter.sendMail({
       from: Config.Messaging.Email.emailFrom,
-      to: mailSettings.to,
-      subject: mailSettings.subject,
+      to: mailSettings.emailTo,
+      subject: mailSettings.emailSubject,
       html: htmlStart + htmlMiddle + htmlEnd,
       attachments: attachments
     });

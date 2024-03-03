@@ -238,10 +238,8 @@ export class ContentWrapper {
         }
         ContentWrapper.mapify(cw, m, isSearchResult);
       } else if (MediaDTOUtils.isVideo(m)) {
-        delete (m as PhotoDTO).metadata.rating;
         delete (m as PhotoDTO).metadata.caption;
         delete (m as PhotoDTO).metadata.cameraData;
-        delete (m as PhotoDTO).metadata.keywords;
         delete (m as PhotoDTO).metadata.faces;
         delete (m as PhotoDTO).metadata.positionData;
         ContentWrapper.mapify(cw, m, isSearchResult);

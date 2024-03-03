@@ -4,7 +4,8 @@
     "schematicCollections": [
       "@angular-eslint/schematics",
       "@schematics/angular"
-    ]
+    ],
+    "analytics": "dd1ed1d7-9618-4345-8694-0471149ade5d"
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -83,6 +84,22 @@
         "build": {
           "builder": "@angular-builders/custom-webpack:browser",
           "options": {
+            "allowedCommonJsDependencies": [
+              "@angularclass/hmr",
+              "moment",
+              "moment/locale/zh-cn",
+              "jquery",
+              "handsontable",
+              "@feathersjs/socketio-client",
+              "@feathersjs/rest-client",
+              "@feathersjs/feathers",
+              "@feathersjs/authentication-client",
+              "socket.io-client",
+              "xlsx",
+              "rxjs",
+              "pikaday",
+              "ng2-flatpickr"
+            ],
             "localize": true,
             "aot": true,
             "crossOrigin": "anonymous",

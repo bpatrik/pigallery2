@@ -3,9 +3,10 @@ import {BehaviorSubject} from 'rxjs';
 import {JobProgressDTO, JobProgressStates, OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
 import {NetworkService} from '../../model/network/network.service';
 import {JobScheduleDTO} from '../../../../common/entities/job/JobScheduleDTO';
-import {ConfigTemplateEntry, JobDTO, JobDTOUtils} from '../../../../common/entities/job/JobDTO';
+import {JobDTO, JobDTOUtils} from '../../../../common/entities/job/JobDTO';
 import {BackendtextService} from '../../model/backendtext.service';
 import {NotificationService} from '../../model/notification.service';
+import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 @Injectable()
 export class ScheduledJobsService {
@@ -13,6 +14,7 @@ export class ScheduledJobsService {
   public onJobFinish: EventEmitter<string> = new EventEmitter<string>();
   timer: number = null;
   public availableJobs: BehaviorSubject<JobDTO[]>;
+  public availableMessengers: BehaviorSubject<string[]>;
   public jobStartingStopping: { [key: string]: boolean } = {};
   private subscribers = 0;
 
@@ -23,6 +25,7 @@ export class ScheduledJobsService {
   ) {
     this.progress = new BehaviorSubject({});
     this.availableJobs = new BehaviorSubject([]);
+    this.availableMessengers = new BehaviorSubject([]);
   }
 
 
@@ -32,7 +35,13 @@ export class ScheduledJobsService {
     );
   }
 
-  public getConfigTemplate(JobName: string): ConfigTemplateEntry[] {
+  public async getAvailableMessengers(): Promise<void> {
+    this.availableMessengers.next(
+      await this.networkService.getJson<string[]>('/admin/messengers/available')
+    );
+  }
+
+  public getConfigTemplate(JobName: string): DynamicConfig[] {
     const job = this.availableJobs.value.find(
       (t) => t.Name === JobName
     );

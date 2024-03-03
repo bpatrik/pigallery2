@@ -2,7 +2,7 @@ import {Config} from '../../src/common/config/private/Config';
 import * as path from 'path';
 import * as fs from 'fs';
 import {SQLConnection} from '../../src/backend/model/database/SQLConnection';
-import {DatabaseType, LogLevel} from '../../src/common/config/private/PrivateConfig';
+import {DatabaseType} from '../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../src/backend/ProjectPath';
 import {DirectoryBaseDTO, ParentDirectoryDTO, SubDirectoryDTO} from '../../src/common/entities/DirectoryDTO';
 import {ObjectManagers} from '../../src/backend/model/ObjectManagers';
@@ -111,7 +111,7 @@ export class DBTestHelper {
   }
 
   public static async persistTestDir(directory: DirectoryBaseDTO): Promise<ParentDirectoryDTO> {
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
     const connection = await SQLConnection.getConnection();
     ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null);
 
@@ -122,20 +122,20 @@ export class DBTestHelper {
     // await im.saveToDB(subDir2);
 
     if (ObjectManagers.getInstance().IndexingManager &&
-      ObjectManagers.getInstance().IndexingManager.IsSavingInProgress) {
+        ObjectManagers.getInstance().IndexingManager.IsSavingInProgress) {
       await ObjectManagers.getInstance().IndexingManager.SavingReady;
     }
 
     const gm = new GalleryManagerTest();
 
     const dir = await gm.getParentDirFromId(connection,
-      (await gm.getDirIdAndTime(connection, directory.name, path.join(directory.path, path.sep))).id);
+        (await gm.getDirIdAndTime(connection, directory.name, path.join(directory.path, path.sep))).id);
 
     const populateDir = async (d: DirectoryBaseDTO) => {
       for (let i = 0; i < d.directories.length; i++) {
         d.directories[i] = await gm.getParentDirFromId(connection,
-          (await gm.getDirIdAndTime(connection, d.directories[i].name,
-            path.join(DiskManager.pathFromParent(d), path.sep))).id);
+            (await gm.getDirIdAndTime(connection, d.directories[i].name,
+                path.join(DiskManager.pathFromParent(d), path.sep))).id);
         await populateDir(d.directories[i]);
       }
     };
@@ -147,6 +147,7 @@ export class DBTestHelper {
 
   public async initDB(): Promise<void> {
     await Config.load();
+    Config.Extensions.enabled = false; // make all tests clean
     if (this.dbType === DatabaseType.sqlite) {
       await this.initSQLite();
     } else if (this.dbType === DatabaseType.mysql) {
@@ -197,7 +198,7 @@ export class DBTestHelper {
     const conn = await SQLConnection.getConnection();
     await conn.query('CREATE DATABASE IF NOT EXISTS ' + conn.options.database);
     await SQLConnection.close();
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
   }
 
   private async clearUpMysql(): Promise<void> {
@@ -218,7 +219,7 @@ export class DBTestHelper {
   private async resetSQLite(): Promise<void> {
     Logger.debug(LOG_TAG, 'resetting sqlite');
     await this.clearUpSQLite();
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
   }
 
   private async clearUpSQLite(): Promise<void> {

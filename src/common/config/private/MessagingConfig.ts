@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {SubConfigClass} from '../../../../node_modules/typeconfig/src/decorators/class/SubConfigClass';
+import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {ConfigPriority, TAGS} from '../public/ClientConfig';
-import {ConfigProperty} from '../../../../node_modules/typeconfig/src/decorators/property/ConfigPropoerty';
 
 declare let $localize: (s: TemplateStringsArray) => string;
 

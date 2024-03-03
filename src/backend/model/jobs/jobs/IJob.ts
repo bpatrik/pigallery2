@@ -2,7 +2,7 @@ import {JobDTO} from '../../../../common/entities/job/JobDTO';
 import {JobProgress} from './JobProgress';
 import {IJobListener} from './IJobListener';
 
-export interface IJob<T> extends JobDTO {
+export interface IJob<T extends Record<string, unknown> = Record<string, unknown>> extends JobDTO {
   Name: string;
   Supported: boolean;
   Progress: JobProgress;

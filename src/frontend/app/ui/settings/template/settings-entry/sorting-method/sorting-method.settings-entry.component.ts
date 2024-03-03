@@ -5,12 +5,12 @@ import {
   NG_VALUE_ACCESSOR,
   ValidationErrors,
   Validator
-} from '../../../../../../../../node_modules/@angular/forms';
+} from '@angular/forms';
 import {SortByDirectionalTypes, SortingMethod} from '../../../../../../../common/entities/SortingMethods';
 import {enumToTranslatedArray} from '../../../../EnumTranslations';
 import {AutoCompleteService} from '../../../../gallery/search/autocomplete.service';
-import {RouterLink} from '../../../../../../../../node_modules/@angular/router';
-import {forwardRef} from '../../../../../../../../node_modules/@angular/core';
+import {RouterLink} from '@angular/router';
+import {forwardRef} from '@angular/core';
 import {Utils} from '../../../../../../../common/Utils';
 
 @Component({

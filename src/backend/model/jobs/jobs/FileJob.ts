@@ -1,4 +1,3 @@
-import {ConfigTemplateEntry} from '../../../../common/entities/job/JobDTO';
 import {Job} from './Job';
 import * as path from 'path';
 import {Logger} from '../../../Logger';
@@ -13,6 +12,7 @@ import {ProjectPath} from '../../../ProjectPath';
 import {FileEntity} from '../../database/enitites/FileEntity';
 import {DirectoryBaseDTO, DirectoryDTOUtils} from '../../../../common/entities/DirectoryDTO';
 import {DirectoryScanSettings, DiskManager} from '../../fileaccess/DiskManager';
+import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 const LOG_TAG = '[FileJob]';
 
@@ -20,7 +20,7 @@ const LOG_TAG = '[FileJob]';
  * Abstract class for thumbnail creation, file deleting etc.
  */
 export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnly?: boolean }> extends Job<S> {
-  public readonly ConfigTemplate: ConfigTemplateEntry[] = [];
+  public readonly ConfigTemplate: DynamicConfig[] = [];
   directoryQueue: string[] = [];
   fileQueue: string[] = [];
   DBProcessing = {

@@ -108,6 +108,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   ngOnInit(): void {
     this.jobsService.subscribeToProgress();
     this.jobsService.getAvailableJobs().catch(console.error);
+    this.jobsService.getAvailableMessengers().catch(console.error);
   }
 
   ngOnDestroy(): void {
@@ -128,7 +129,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     schedule.config = schedule.config || {};
     if (job.ConfigTemplate) {
       job.ConfigTemplate.forEach(
-        (ct) => (schedule.config[ct.id] = ct.defaultValue)
+        (ct) => (schedule.config[ct.id] = ct.defaultValue as never)
       );
     }
   }
@@ -216,7 +217,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     this.newSchedule.config = this.newSchedule.config || {};
     if (job.ConfigTemplate) {
       job.ConfigTemplate.forEach(
-        (ct) => (this.newSchedule.config[ct.id] = ct.defaultValue)
+        (ct) => (this.newSchedule.config[ct.id] = ct.defaultValue as never)
       );
     }
     this.jobModalQL.first.show();

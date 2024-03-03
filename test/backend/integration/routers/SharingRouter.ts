@@ -42,7 +42,7 @@ describe('SharingRouter', () => {
     server = new Server();
     await server.onStarted.wait();
 
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));
     await SQLConnection.close();
   };
@@ -62,7 +62,7 @@ describe('SharingRouter', () => {
   };
 
   const shareLogin = async (srv: Server, sharingKey: string, password?: string): Promise<any> => {
-    return (chai.request(srv.App) as SuperAgentStatic)
+    return (chai.request(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharingKey)
       .send({password});
 
@@ -74,15 +74,32 @@ describe('SharingRouter', () => {
     beforeEach(setUp);
     afterEach(tearDown);
 
-    it('should login with passworded share', async () => {
-      Config.Sharing.passwordProtected = true;
+    it('should login with passworded share when password required', async () => {
+      Config.Sharing.passwordRequired = true;
       const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
       const res = await shareLogin(server, sharing.sharingKey, sharing.password);
       shouldBeValidUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
     });
 
+    it('should login with passworded share when password not required', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
+      const res = await shareLogin(server, sharing.sharingKey, sharing.password);
+      shouldBeValidUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
+    });
+
+
+    it('should login without passworded share when password not required', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser );
+      const res = await shareLogin(server, sharing.sharingKey, sharing.password);
+      shouldBeValidUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
+    });
+
+
+
     it('should not login with passworded share without password', async () => {
-      Config.Sharing.passwordProtected = true;
+      Config.Sharing.passwordRequired = true;
       const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
       const result = await shareLogin(server, sharing.sharingKey);
 
@@ -92,20 +109,20 @@ describe('SharingRouter', () => {
       should.equal(result.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
     });
 
-    it('should not login with passworded share but password protection disabled', async () => {
-      Config.Sharing.passwordProtected = false;
-      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
-      const res = await shareLogin(server, sharing.sharingKey);
 
-      shouldBeValidUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
-    });
-
-    it('should login with no-password share', async () => {
-      Config.Sharing.passwordProtected = true;
+    it('should not login to share without password  when password required', async () => {
+      Config.Sharing.passwordRequired = false;
       const sharing = await RouteTestingHelper.createSharing(testUser);
-      const res = await shareLogin(server, sharing.sharingKey, sharing.password);
-      shouldBeValidUser(res, RouteTestingHelper.getExpectedSharingUser(sharing));
+      Config.Sharing.passwordRequired = true;
+      const result = await shareLogin(server, sharing.sharingKey);
+
+      result.should.have.status(401);
+      result.body.should.be.a('object');
+      result.body.error.should.be.a('object');
+      should.equal(result.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
     });
+
+
 
 
   });

@@ -7,6 +7,7 @@ import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {TAGS} from '../../../../../src/common/config/public/ClientConfig';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
+import {ExtensionConfigWrapper} from '../../../../../src/backend/model/extension/ExtensionConfigWrapper';
 
 process.env.NODE_ENV = 'test';
 const chai: any = require('chai');
@@ -34,10 +35,10 @@ describe('SettingsRouter', () => {
     it('it should GET the settings', async () => {
       Config.Users.authenticationRequired = false;
       Config.Users.unAuthenticatedUserRole = UserRoles.Admin;
-      const originalSettings = await Config.original();
+      const originalSettings = await ExtensionConfigWrapper.original();
       const srv = new Server();
       await srv.onStarted.wait();
-      const result = await chai.request(srv.App)
+      const result = await chai.request(srv.Server)
         .get(Config.Server.apiPath + '/settings');
 
       result.res.should.have.status(200);

@@ -18,6 +18,7 @@ describe('MetadataLoader', () => {
     Config.Database.type = DatabaseType.sqlite;
     Config.Faces.enabled = true;
     Config.Faces.keywordsToPersons = true;
+    Config.Extensions.enabled = false;
   });
 
 
@@ -66,7 +67,7 @@ describe('MetadataLoader', () => {
     });
     it('jpg 2', async () => {
       const data = await MetadataLoader.loadPhotoMetadata(
-        path.join(__dirname, '/../../../assets/orientation/broken_orientation_exif2.jpg'));
+          path.join(__dirname, '/../../../assets/orientation/broken_orientation_exif2.jpg'));
       const expected = require(path.join(__dirname, '/../../../assets/orientation/broken_orientation_exif2.json'));
       expect(Utils.clone(data)).to.be.deep.equal(expected);
     });

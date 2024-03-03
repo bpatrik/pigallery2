@@ -122,7 +122,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
   const setUpSqlDB = async () => {
     await sqlHelper.initDB();
     await setUpTestGallery();
-    await ObjectManagers.InitSQLManagers();
+    await ObjectManagers.getInstance().init();
   };
 
 
@@ -212,21 +212,21 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
   it('should get cover for saved search', async () => {
     const pm = new CoverManager();
     Config.AlbumCover.SearchQuery = null;
-    expect(Utils.clone(await pm.getAlbumCover({
+    expect(Utils.clone(await pm.getCoverForAlbum({
       searchQuery: {
         type: SearchQueryTypes.any_text,
         text: 'sw'
       } as TextSearch
     }))).to.deep.equalInAnyOrder(previewifyMedia(p4));
     Config.AlbumCover.SearchQuery = {type: SearchQueryTypes.any_text, text: 'Boba'} as TextSearch;
-    expect(Utils.clone(await pm.getAlbumCover({
+    expect(Utils.clone(await pm.getCoverForAlbum({
       searchQuery: {
         type: SearchQueryTypes.any_text,
         text: 'sw'
       } as TextSearch
     }))).to.deep.equalInAnyOrder(previewifyMedia(p));
     Config.AlbumCover.SearchQuery = {type: SearchQueryTypes.any_text, text: 'Derem'} as TextSearch;
-    expect(Utils.clone(await pm.getAlbumCover({
+    expect(Utils.clone(await pm.getCoverForAlbum({
       searchQuery: {
         type: SearchQueryTypes.any_text,
         text: 'sw'
@@ -234,7 +234,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
     }))).to.deep.equalInAnyOrder(previewifyMedia(p2));
     // Having a preview search query that does not return valid result
     Config.AlbumCover.SearchQuery = {type: SearchQueryTypes.any_text, text: 'wont find it'} as TextSearch;
-    expect(Utils.clone(await pm.getAlbumCover({
+    expect(Utils.clone(await pm.getCoverForAlbum({
       searchQuery: {
         type: SearchQueryTypes.any_text,
         text: 'Derem'
@@ -242,7 +242,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
     }))).to.deep.equalInAnyOrder(previewifyMedia(p2));
     // having a saved search that does not have any image
     Config.AlbumCover.SearchQuery = {type: SearchQueryTypes.any_text, text: 'Derem'} as TextSearch;
-    expect(Utils.clone(await pm.getAlbumCover({
+    expect(Utils.clone(await pm.getCoverForAlbum({
       searchQuery: {
         type: SearchQueryTypes.any_text,
         text: 'wont find it'

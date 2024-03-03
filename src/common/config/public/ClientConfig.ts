@@ -273,12 +273,12 @@ export class ClientSharingConfig {
   @ConfigProperty({
     tags:
         {
-          name: $localize`Password protected`,
+          name: $localize`Require password`,
           priority: ConfigPriority.advanced
         },
-    description: $localize`Enables password protected sharing links.`,
+    description: $localize`Requires password protected sharing links.`,
   })
-  passwordProtected: boolean = true;
+  passwordRequired: boolean = false;
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
@@ -1335,7 +1335,7 @@ export class ClientServiceConfig {
   applicationTitle: string = 'PiGallery 2';
 
   @ConfigProperty({
-    description: $localize`If you access the page form local network its good to know the public url for creating sharing link.`,
+    description: $localize`If you access the page from local network its good to know the public url for creating sharing link.`,
     tags: {
       name: $localize`Page public url`,
       hint: typeof window !== 'undefined' ? window?.origin : '',
@@ -1424,6 +1424,16 @@ export class ClientUserConfig {
   unAuthenticatedUserRole: UserRoles = UserRoles.Admin;
 }
 
+@SubConfigClass({tags: {client: true}, softReadonly: true})
+export class ClientExtensionsConfig {
+  @ConfigProperty({
+    tags: {
+      name: $localize`Enabled`,
+      priority: ConfigPriority.advanced,
+    }
+  })
+  enabled: boolean = true;
+}
 
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class ClientConfig {
@@ -1496,4 +1506,13 @@ export class ClientConfig {
     description: $localize`This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.`
   })
   RandomPhoto: ClientRandomPhotoConfig = new ClientRandomPhotoConfig();
+
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Extensions`,
+      uiIcon: 'ionCloudOutline'
+    } as TAGS,
+  })
+  Extensions: ClientExtensionsConfig = new ClientExtensionsConfig();
 }

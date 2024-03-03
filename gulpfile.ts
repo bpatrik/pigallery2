@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as util from 'util';
 import * as zip from 'gulp-zip';
 import * as ts from 'gulp-typescript';
+import * as sourcemaps from 'gulp-sourcemaps';
 import * as xml2js from 'xml2js';
 import * as child_process from 'child_process';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -39,10 +40,12 @@ const getSwitch = (name: string, def: string = null): string => {
 gulp.task('build-backend', (): any =>
   gulp
     .src(['src/common/**/*.ts', 'src/backend/**/*.ts', 'benchmark/**/*.ts'], {
-      base: '.',
+      base: '.'
     })
+    .pipe(sourcemaps.init())
     .pipe(tsBackendProject())
-    .js.pipe(gulp.dest('./release'))
+    .pipe(sourcemaps.write('.', {includeContent: false}))
+    .pipe(gulp.dest('./release'))
 );
 
 const createDynamicTranslationFile = async (
@@ -56,7 +59,7 @@ const createDynamicTranslationFile = async (
   );
   const translationXml: XLIFF.Root = await xml2js.parseStringPromise(data);
 
-  // clean translations, keep only .ts transaltions
+  // clean translations, keep only .ts translations
   const hasTsTranslation = (cg: XLIFF.ContextGroup): boolean =>
     cg.context.findIndex(
       (c: any): boolean =>

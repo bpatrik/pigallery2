@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {DirectoryContent} from '../contentLoader.service';
-import {debounceTime, map, switchMap} from 'rxjs/operators';
+import {map, switchMap} from 'rxjs/operators';
 
 export enum FilterRenderType {
   enum = 1,
@@ -66,16 +66,6 @@ export class FilterService {
       renderType: FilterRenderType.enum,
     },
     {
-      name: $localize`Camera`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.model,
-      renderType: FilterRenderType.enum,
-    },
-    {
-      name: $localize`Lens`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.lens,
-      renderType: FilterRenderType.enum,
-    },
-    {
       name: $localize`City`,
       mapFn: (m: PhotoDTO): string => m.metadata.positionData?.city,
       renderType: FilterRenderType.enum,
@@ -88,6 +78,45 @@ export class FilterService {
     {
       name: $localize`Country`,
       mapFn: (m: PhotoDTO): string => m.metadata.positionData?.country,
+      renderType: FilterRenderType.enum,
+    },
+    {
+      name: $localize`Camera`,
+      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.model,
+      renderType: FilterRenderType.enum,
+    },
+    {
+      name: $localize`Lens`,
+      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.lens,
+      renderType: FilterRenderType.enum,
+    },
+    {
+      name: $localize`ISO`,
+      mapFn: (m: PhotoDTO): number => m.metadata.cameraData?.ISO,
+      renderType: FilterRenderType.enum,
+    },
+    {
+      name: $localize`Aperture`,
+      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.fStop ? `f/${m.metadata.cameraData?.fStop}` : undefined,
+      renderType: FilterRenderType.enum,
+    },
+    {
+      name: $localize`Shutter speed`,
+      mapFn: (m: PhotoDTO): string => {
+        const f = m.metadata.cameraData?.exposure;
+        if (typeof f === 'undefined') {
+          return undefined;
+        }
+        if (f > 1) {
+          return `${f} s`;
+        }
+        return `1/${Math.round(1 / f)} s`;
+      },
+      renderType: FilterRenderType.enum,
+    },
+    {
+      name: $localize`Focal length`,
+      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.focalLength ? `${m.metadata.cameraData?.focalLength} mm` : undefined,
       renderType: FilterRenderType.enum,
     },
   ];
@@ -279,7 +308,7 @@ export class FilterService {
             for (const f of afilters.selectedFilters) {
 
               /* Update filter options */
-              const valueMap: { [key: string]: any } = {};
+              const valueMap: { [key: string]: { name: string | number, count: number, selected: boolean } } = {};
               f.options.forEach((o) => {
                 valueMap[o.name] = o;
                 o.count = 0; // reset count so unknown option can be removed at the end
@@ -307,10 +336,13 @@ export class FilterService {
                   valueMap[key].count++;
                 });
               }
-
               f.options = Object.values(valueMap)
                 .filter((o) => o.count > 0)
-                .sort((a, b) => b.count - a.count);
+                // sort by count and alpha. if counts are the same
+                .sort((a, b) =>
+                  a.count == b.count && (a.name !== undefined && b.name !== undefined) ?
+                    Number.isFinite(a.name) && Number.isFinite(b.name) ? (a.name as number) - (b.name as number) : a.name.toString().localeCompare(b.name.toString()) :
+                    b.count - a.count);
 
               /* Apply filters */
               f.options.forEach((opt) => {

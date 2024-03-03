@@ -1,0 +1,8 @@
+{
+  "name": "pigallery2-extension-kit",
+  "version": "2.0.3-edge4",
+  "description": "Interfaces for developing extensions for pigallery2",
+  "author": "Patrik J. Braun",
+  "homepage": "https://github.com/bpatrik/pigallery2",
+  "license": "MIT"
+}

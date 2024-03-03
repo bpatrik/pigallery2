@@ -2,7 +2,7 @@ import {ObjectManagers} from '../../ObjectManagers';
 import * as path from 'path';
 import * as fs from 'fs';
 import {Job} from './Job';
-import {ConfigTemplateEntry, DefaultsJobs,} from '../../../../common/entities/job/JobDTO';
+import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {JobProgressStates} from '../../../../common/entities/job/JobProgressDTO';
 import {ProjectPath} from '../../../ProjectPath';
 import {backendTexts} from '../../../../common/BackendTexts';
@@ -10,6 +10,7 @@ import {ParentDirectoryDTO} from '../../../../common/entities/DirectoryDTO';
 import {Logger} from '../../../Logger';
 import {FileDTO} from '../../../../common/entities/FileDTO';
 import {DiskManager} from '../../fileaccess/DiskManager';
+import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 const LOG_TAG = '[IndexingJob]';
 
@@ -18,7 +19,7 @@ export class IndexingJob<
 > extends Job<S> {
   public readonly Name = DefaultsJobs[DefaultsJobs.Indexing];
   directoriesToIndex: string[] = [];
-  public readonly ConfigTemplate: ConfigTemplateEntry[] = [
+  public readonly ConfigTemplate: DynamicConfig[] = [
     {
       id: 'indexChangesOnly',
       type: 'boolean',

@@ -35,7 +35,7 @@ export class ThumbnailGenerationJob extends FileJob<{
   ): Promise<void> {
     if (!config || !config.sizes || !Array.isArray(config.sizes) || config.sizes.length === 0) {
       config = config || {};
-      config.sizes = this.ConfigTemplate.find(ct => ct.id == 'sizes').defaultValue;
+      config.sizes = this.ConfigTemplate.find(ct => ct.id == 'sizes').defaultValue as number[];
     }
     for (const item of config.sizes) {
       if (Config.Media.Thumbnail.thumbnailSizes.indexOf(item) === -1) {
