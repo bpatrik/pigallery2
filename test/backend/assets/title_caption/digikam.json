@@ -1,0 +1,43 @@
+{
+  "cameraData": {
+    "ISO": 200,
+    "exposure": 0.008,
+    "fStop": 2.8,
+    "focalLength": 9.4,
+    "make": "FUJIFILM",
+    "model": "FinePix F601 ZOOM"
+  },
+  "creationDate": 1126423382000,
+  "creationDateOffset": "+09:00",
+  "fileSize": 14134,
+  "size": {
+    "height": 5,
+    "width": 7
+  },
+  "title": "Digikam Title field",
+  "caption": "Digikam Caption field",
+  "faces": [
+    {
+      "box": {
+        "height": 2,
+        "left": 3,
+        "top": 2,
+        "width": 2
+      },
+      "name": "Æske Øllegård"
+    }
+  ],
+  "keywords": [
+    "æÆøØåÅéÉüÜäÄöÖïÏñÑ"
+  ],
+  "positionData": {
+    "GPSData": {
+      "latitude": 35.9524,
+      "longitude": 139.863355
+    },
+    "city": "Shimizu",
+    "country": "Japan",
+    "state": "Chiba Ken"
+  },
+  "rating": 4
+}

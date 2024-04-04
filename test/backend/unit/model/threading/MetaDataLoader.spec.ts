@@ -35,6 +35,19 @@ describe('MetadataLoader', () => {
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
 
+
+  it('should load png with description', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/title_caption/description.png'));
+    const expected = require(path.join(__dirname, '/../../../assets/title_caption/description.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+
+  it('should load image with metadata saved by digikam', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/title_caption/digikam.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/title_caption/digikam.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+
   it('should load jpg', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test image öüóőúéáű-.,.jpg'));
     const expected = require(path.join(__dirname, '/../../../assets/test image öüóőúéáű-.,.json'));

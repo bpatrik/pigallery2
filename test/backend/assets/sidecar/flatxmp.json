@@ -1,0 +1,38 @@
+{
+  "size": {
+    "width": 10,
+    "height": 5
+  },
+  "caption": "Description of image",
+  "creationDate": 328817998000,
+  "creationDateOffset": "-06:00",
+  "faces": [
+    {
+      "box": {
+        "height": 1,
+        "left": 6,
+        "top": 2,
+        "width": 2
+      },
+      "name": "Person1"
+    },
+    {
+      "box": {
+        "height": 2,
+        "left": 2,
+        "top": 1,
+        "width": 2
+      },
+      "name": "Person2"
+    }
+  ],
+  "fileSize": 1430,
+  "keywords": [
+    "Thing3"
+  ],
+  "title": "The title",
+  "cameraData": {
+    "make": "Cam Make",
+    "model": "Cam Model"
+  }
+}
