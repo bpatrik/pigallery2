@@ -83,14 +83,14 @@ export class SharingMWs {
       );
     }
 
-    let sharingKey = SharingMWs.generateKey();
+    let sharingKey = SharingMWs.generateKey(Config.Sharing.sharingKeyLength);
 
     // create one not yet used
     // eslint-disable-next-line no-constant-condition
     while (true) {
       try {
         await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
-        sharingKey = this.generateKey();
+        sharingKey = this.generateKey(Config.Sharing.sharingKeyLength);
       } catch (err) {
         break;
       }
@@ -279,13 +279,14 @@ export class SharingMWs {
     }
   }
 
-  private static generateKey(): string {
-    function s4(): string {
-      return Math.floor((1 + Math.random()) * 0x10000)
-        .toString(16)
-        .substring(1);
+  private static generateKey(length:number): string {
+    function randomInt(max:number): number {
+      return Math.floor(Math.random() * max);
     }
-
-    return s4() + s4();
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return [...Array(length).keys()].reduce(
+      (result) => result + characters.charAt(randomInt(characters.length)),
+      ""
+    );
   }
 }
