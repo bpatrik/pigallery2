@@ -205,6 +205,13 @@ export class MetadataLoader {
       } catch (e) {
         //in case of failure, set dimensions to 0 so they may be read via tags
         metadata.size = { width: 0, height: 0 };
+      } finally {
+        if (isNaN(metadata.size.width) || metadata.size.width == null) {
+          metadata.size.width = 0;
+        }
+        if (isNaN(metadata.size.height) || metadata.size.height == null) {
+          metadata.size.height = 0;
+        }
       }
 
 
@@ -297,10 +304,10 @@ export class MetadataLoader {
 
   private static mapImageDimensions(metadata: PhotoMetadata, exif: any, orientation: number) {
     if (metadata.size.width <= 0) {
-      metadata.size.width = exif.ifd0?.ImageWidth || exif.exif?.ExifImageWidth;
+      metadata.size.width = exif.ifd0?.ImageWidth || exif.exif?.ExifImageWidth || metadata.size.width;
     }
     if (metadata.size.height <= 0) {
-      metadata.size.height = exif.ifd0?.ImageHeight || exif.exif?.ExifImageHeight;
+      metadata.size.height = exif.ifd0?.ImageHeight || exif.exif?.ExifImageHeight || metadata.size.height;
     }
     metadata.size.height = Math.max(metadata.size.height, 1); //ensure height dimension is positive
     metadata.size.width = Math.max(metadata.size.width, 1); //ensure width  dimension is positive

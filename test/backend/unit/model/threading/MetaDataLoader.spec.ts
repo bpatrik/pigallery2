@@ -23,6 +23,12 @@ describe('MetadataLoader', () => {
   });
 
 
+  it('should load heic', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/parsingfromheic.heic'));
+    const expected = require(path.join(__dirname, '/../../../assets/parsingfromheic.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+
   it('should load png', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test_png.png'));
     const expected = require(path.join(__dirname, '/../../../assets/test_png.json'));
