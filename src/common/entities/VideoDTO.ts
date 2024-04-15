@@ -11,6 +11,7 @@ export interface VideoDTO extends MediaDTO {
 export interface VideoMetadata extends MediaMetadata {
   size: MediaDimension;
   creationDate: number;
+  creationDateOffset?: string;
   bitRate: number;
   duration: number; // in milliseconds
   fileSize: number;

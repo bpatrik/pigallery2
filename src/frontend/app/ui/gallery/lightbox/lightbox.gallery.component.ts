@@ -62,9 +62,10 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     photosChange: Subscription;
     route: Subscription;
   } = {
-      photosChange: null,
-      route: null,
-    };
+    photosChange: null,
+    route: null,
+  };
+  slideShowRunning: boolean;
 
   constructor(
     public fullScreenService: FullScreenService,
@@ -105,10 +106,18 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.updatePhotoFrameDim();
     this.subscription.route = this.route.queryParams.subscribe(
       (params: Params) => {
+        const validPhoto = params[QueryParams.gallery.photo] &&
+          params[QueryParams.gallery.photo] !== '';
+
+
+        if (params[QueryParams.gallery.playback]) {
+          this.runSlideShow();
+        } else {
+          this.stopSlideShow();
+        }
+
         this.delayedMediaShow = null;
-        if (
-          params[QueryParams.gallery.photo] &&
-          params[QueryParams.gallery.photo] !== ''
+        if (validPhoto
         ) {
           this.delayedMediaShow = params[QueryParams.gallery.photo];
           // photos are not yet available to show
@@ -120,13 +129,28 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
           this.delayedMediaShow = null;
           this.hideLightbox();
         }
+
+
       }
     );
   }
 
+  private runSlideShow() {
+    if (!this.activePhoto && this.gridPhotoQL?.length > 0) {
+      this.navigateToPhoto(0);
+    }
+    this.slideShowRunning = true;
+    this.controls?.runSlideShow();
+  }
+
+  private stopSlideShow() {
+    this.slideShowRunning = false;
+    this.controls?.stopSlideShow();
+  }
+
   ngOnDestroy(): void {
     if (this.controls) {
-      this.controls.pause();
+      this.controls.stopSlideShow();
     }
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
@@ -186,11 +210,17 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
         if (this.delayedMediaShow) {
           this.onNavigateTo(this.delayedMediaShow);
         }
+        if (this.slideShowRunning) {
+          this.runSlideShow();
+        }
       }
     );
 
     if (this.delayedMediaShow) {
       this.onNavigateTo(this.delayedMediaShow);
+    }
+    if (this.slideShowRunning) {
+      this.runSlideShow();
     }
   }
 
@@ -213,7 +243,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   public prevImage(): void {
     if (this.controls) {
-      this.controls.pause();
+      this.controls.stopSlideShow();
     }
     if (this.activePhotoId > 0) {
       this.navigateToPhoto(this.activePhotoId - 1);
@@ -410,14 +440,13 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.router
       .navigate([], {
         queryParams: this.queryService.getParams(
-          this.gridPhotoQL.get(photoIndex).gridMedia.media
+          {media: this.gridPhotoQL.get(photoIndex).gridMedia.media, playing: this.slideShowRunning}
         ), replaceUrl: true
       })
       .then(() => {
         this.piTitleService.setMediaTitle(this.gridPhotoQL.get(photoIndex).gridMedia);
       })
       .catch(console.error);
-
   }
 
   private showPhoto(photoIndex: number, resize = true): void {
@@ -434,7 +463,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.fullScreenService.exitFullScreen();
 
     if (this.controls) {
-      this.controls.pause();
+      this.controls.stopSlideShow();
     }
 
     this.animating = true;
@@ -530,6 +559,15 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       return this.gridPhotoQL.get(this.activePhotoId + 1)?.gridMedia;
     }
     return null;
+  }
+
+  togglePlayback(value: boolean): void {
+    if (this.slideShowRunning === value) {
+      return;
+    }
+    this.slideShowRunning = value;
+    // resets query. This side effect is to assign playback = true to the url
+    this.navigateToPhoto(this.activePhotoId);
   }
 }
 

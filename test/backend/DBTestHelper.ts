@@ -47,7 +47,6 @@ export class DBTestHelper {
     mysql: process.env.TEST_MYSQL !== 'false'
   };
   public static readonly savedDescribe = savedDescribe;
-  public tempDir: string;
   public readonly testGalleyEntities: {
     dir: ParentDirectoryDTO,
     subDir: SubDirectoryDTO,
@@ -80,7 +79,6 @@ export class DBTestHelper {
   };
 
   constructor(public dbType: DatabaseType) {
-    this.tempDir = path.join(__dirname, './tmp');
   }
 
   static describe(settingsOverride: {
@@ -206,7 +204,7 @@ export class DBTestHelper {
     await ObjectManagers.reset();
     Config.Database.type = DatabaseType.mysql;
     Config.Database.mysql.database = 'pigallery2_test';
-    await fs.promises.rm(this.tempDir, {recursive: true, force: true});
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
     const conn = await SQLConnection.getConnection();
     await conn.query('DROP DATABASE IF EXISTS ' + conn.options.database);
     await SQLConnection.close();
@@ -225,10 +223,10 @@ export class DBTestHelper {
   private async clearUpSQLite(): Promise<void> {
     Logger.debug(LOG_TAG, 'clearing up sqlite');
     Config.Database.type = DatabaseType.sqlite;
-    Config.Database.dbFolder = this.tempDir;
+    Config.Database.dbFolder = TestHelper.TMP_DIR;
     ProjectPath.reset();
     await ObjectManagers.reset();
-    await fs.promises.rm(this.tempDir, {recursive: true, force: true});
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
   }
 
 }

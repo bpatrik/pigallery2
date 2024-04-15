@@ -1,12 +1,12 @@
 import {IExtensionEvents, IExtensionObject} from './IExtension';
 import {ExtensionApp} from './ExtensionApp';
-import {ExtensionConfig} from './ExtensionConfigWrapper';
 import {ExtensionDB} from './ExtensionDB';
 import {ProjectPath} from '../../ProjectPath';
 import {ExpressRouterWrapper} from './ExpressRouterWrapper';
 import {createLoggerWrapper} from '../../Logger';
 import * as express from 'express';
 import {ExtensionMessengerHandler} from './ExtensionMessengerHandler';
+import {ExtensionConfig} from './ExtensionConfig';
 
 export class ExtensionObject<C> implements IExtensionObject<C> {
 
@@ -26,7 +26,7 @@ export class ExtensionObject<C> implements IExtensionObject<C> {
               events: IExtensionEvents) {
     const logger = createLoggerWrapper(`[Extension][${extensionId}]`);
     this._app = new ExtensionApp();
-    this.config = new ExtensionConfig<C>(extensionId);
+    this.config = new ExtensionConfig<C>(folder);
     this.db = new ExtensionDB(logger);
     this.paths = ProjectPath;
     this.Logger = logger;

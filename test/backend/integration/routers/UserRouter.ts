@@ -39,8 +39,7 @@ describe('UserRouter', () => {
     Config.Database.dbFolder = tempDir;
     ProjectPath.reset();
 
-
-    server = new Server();
+    server = new Server(false);
     await server.onStarted.wait();
     await ObjectManagers.getInstance().init();
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));

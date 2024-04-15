@@ -17,7 +17,12 @@ export class ExtensionMessengerHandler implements IExtensionMessengers {
   addMessenger<C extends Record<string, unknown>>(name: string, config: DynamicConfig[], callbacks: {
     sendMedia: (config: C, media: MediaDTOWithThPath[]) => Promise<void>
   }): void {
-    this.extLogger.silly('Adding new Messenger:', name);
+    if (MessengerRepository.Instance.get(name)) {
+      this.extLogger.silly('Messenger already exist. Overriding it:', name);
+      MessengerRepository.Instance.remove({Name: name});
+    } else {
+      this.extLogger.silly('Adding new Messenger:', name);
+    }
     const em = new ExtensionMessenger(name, config, callbacks);
     this.messengers.push(em);
     MessengerRepository.Instance.register(em);

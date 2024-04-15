@@ -1,22 +1,21 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, } from '@angular/core';
-import { MediaDTOUtils } from '../../../../../../common/entities/MediaDTO';
-import { FullScreenService } from '../../fullscreen.service';
-import { GalleryPhotoComponent } from '../../grid/photo/photo.grid.gallery.component';
-import { interval, Subscription } from 'rxjs';
-import { filter, skip } from 'rxjs/operators';
-import { PhotoDTO } from '../../../../../../common/entities/PhotoDTO';
-import { GalleryLightboxMediaComponent } from '../media/media.lightbox.gallery.component';
-import { Config } from '../../../../../../common/config/public/Config';
-import { SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes, } from '../../../../../../common/entities/SearchQueryDTO';
-import { AuthenticationService } from '../../../../model/network/authentication.service';
-import { LightboxService } from '../lightbox.service';
-import { GalleryCacheService } from '../../cache.gallery.service';
-import { ActivatedRoute, Params, Router } from '@angular/router';
+import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild,} from '@angular/core';
+import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
+import {FullScreenService} from '../../fullscreen.service';
+import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
+import {interval, Subscription} from 'rxjs';
+import {filter, skip} from 'rxjs/operators';
+import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
+import {Config} from '../../../../../../common/config/public/Config';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
+import {AuthenticationService} from '../../../../model/network/authentication.service';
+import {LightboxService} from '../lightbox.service';
+import {GalleryCacheService} from '../../cache.gallery.service';
+import {Utils} from '../../../../../../common/Utils';
+import {FileSizePipe} from '../../../../pipes/FileSizePipe';
+import {DatePipe} from '@angular/common';
+import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 
-export enum PlayBackStates {
-  Paused = 1,
-  Play = 2,
-}
 
 @Component({
   selector: 'app-lightbox-controls',
@@ -35,17 +34,17 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   @Output() toggleFullScreen = new EventEmitter();
   @Output() nextPhoto = new EventEmitter();
   @Output() previousPhoto = new EventEmitter();
+  @Output() togglePlayback = new EventEmitter<boolean>();
 
   @Input() navigation = { hasPrev: true, hasNext: true };
   @Input() activePhoto: GalleryPhotoComponent;
   @Input() mediaElement: GalleryLightboxMediaComponent;
-  @Input() photoFrameDim = { width: 1, height: 1, aspect: 1 };
+  @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
+  @Input() slideShowRunning: boolean;
 
   public readonly facesEnabled = Config.Faces.enabled;
 
   public zoom = 1;
-  public playBackState: PlayBackStates = PlayBackStates.Paused;
-  public PlayBackStates = PlayBackStates;
   public playBackDurations = [1, 2, 5, 10, 15, 20, 30, 60];
   public selectedSlideshowSpeed: number = null;
   public controllersDimmed = false;
@@ -65,7 +64,9 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     public lightboxService: LightboxService,
     public fullScreenService: FullScreenService,
     private authService: AuthenticationService,
-    private cacheService: GalleryCacheService, private router: Router
+    private cacheService: GalleryCacheService,
+    private fileSizePipe: FileSizePipe,
+    private datePipe: DatePipe
   ) {
     this.searchEnabled = this.authService.canSearch();
   }
@@ -88,7 +89,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     if (this.zoom === zoom) {
       return;
     }
-    this.pause();
+    this.stopSlideShow();
     this.drag.x = (this.drag.x / this.zoom) * zoom;
     this.drag.y = (this.drag.y / this.zoom) * zoom;
     this.prevDrag.x = this.drag.x;
@@ -96,13 +97,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.zoom = zoom;
     this.showControls();
     this.checkZoomAndDrag();
-  }
-
-  get Title(): string {
-    if (!this.activePhoto) {
-      return null;
-    }
-    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.caption;
   }
 
   public containerWidth(): void {
@@ -118,15 +112,19 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   }
 
   ngOnDestroy(): void {
-    this.pause();
+    this.stopSlideShow();
 
     if (this.visibilityTimer != null) {
       clearTimeout(this.visibilityTimer);
+      this.visibilityTimer = null;
     }
   }
 
   ngOnChanges(): void {
     this.updateFaceContainerDim();
+    if (this.slideShowRunning) {
+      this.runSlideShow();
+    }
   }
 
   pan($event: { deltaY: number; deltaX: number; isFinal: boolean }): void {
@@ -148,13 +146,25 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     }
   }
 
-  wheel($event: { deltaY: number }): void {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+  wheel($event: { deltaX: number, deltaY: number }): void {
+    if (!this.activePhoto) {
+      return;
+    }
+    if ($event.deltaX < 0) {
+      if (this.navigation.hasPrev) {
+        this.previousPhoto.emit();
+      }
+    } else if ($event.deltaX > 0) {
+      if (this.navigation.hasNext) {
+        this.nextMediaManuallyTriggered();
+      }
+    }
+    if (this.activePhoto.gridMedia.isVideo()) {
       return;
     }
     if ($event.deltaY < 0) {
       this.zoomIn();
-    } else {
+    } else if ($event.deltaY > 0) {
       this.zoomOut();
     }
   }
@@ -252,7 +262,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
         if (event.shiftKey) {
           const link = document.createElement('a');
           link.setAttribute('type', 'hidden');
-          link.href = this.activePhoto.gridMedia.getMediaPath();
+          link.href = this.activePhoto.gridMedia.getOriginalMediaPath();
           link.download = this.activePhoto.gridMedia.media.name;
           document.body.appendChild(link);
           link.click();
@@ -313,14 +323,19 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.ctx.stroke();
   }
 
-  resetSlideshowTimer(): void {
-    if (this.playBackState == PlayBackStates.Play) {
-      this.play();
+  private resetSlideshowTimer(): void {
+    if (this.slideShowRunning === true) {
+      this.stopSlideShow();
+      this.runSlideShow();
     }
   }
 
-  public play(): void {
-    this.pause();
+  public runSlideShow(): void {
+    //timer already running, do not reset it.
+    if (this.timerSub) {
+      return;
+    }
+    this.stopSlideShow();
     this.drawSliderProgress(0);
     this.timerSub = interval(100)
       .pipe(filter((t) => {
@@ -329,7 +344,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       }))
       .pipe(skip(1)) // do not skip to next photo right away
       .subscribe(this.showNextMedia);
-    this.playBackState = PlayBackStates.Play;
   }
 
   public slideshowSpeedChanged() {
@@ -341,12 +355,20 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.showControls();
   }
 
-  public pause(): void {
+  public stopSlideShow(): void {
     if (this.timerSub != null) {
       this.timerSub.unsubscribe();
+      this.timerSub = null;
     }
     this.ctx = null;
-    this.playBackState = PlayBackStates.Paused;
+  }
+
+  playClicked() {
+    this.togglePlayback.emit(true);
+  }
+
+  pauseClicked() {
+    this.togglePlayback.emit(false);
   }
 
   resetZoom(): void {
@@ -461,5 +483,73 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     this.nextPhoto.emit();
   }
 
-}
 
+  getText(type: LightBoxTitleTexts): string {
+    if (!this.activePhoto?.gridMedia?.media) {
+      return null;
+    }
+    const m = this.activePhoto.gridMedia.media as PhotoDTO;
+    switch (type) {
+      case LightBoxTitleTexts.file:
+        return Utils.concatUrls(
+          m.directory.path,
+          m.directory.name,
+          m.name
+        );
+      case LightBoxTitleTexts.resolution:
+        return `${m.metadata.size.width}x${m.metadata.size.height}`;
+      case LightBoxTitleTexts.size:
+        return this.fileSizePipe.transform(m.metadata.fileSize);
+      case LightBoxTitleTexts.title:
+        return m.metadata.title;
+      case LightBoxTitleTexts.caption:
+        return m.metadata.caption;
+      case LightBoxTitleTexts.keywords:
+        return m.metadata.keywords.join(', ');
+      case LightBoxTitleTexts.persons:
+        return m.metadata.faces?.map(f => f.name)?.join(', ');
+      case LightBoxTitleTexts.date:
+        return this.datePipe.transform(m.metadata.creationDate, 'longDate', m.metadata.creationDateOffset);
+      case LightBoxTitleTexts.location:
+        if (!m.metadata.positionData) {
+          return '';
+        }
+        return [
+          m.metadata.positionData.city,
+          m.metadata.positionData.state,
+          m.metadata.positionData.country
+        ].filter(elm => elm).join(', ').trim(); //Filter removes empty elements, join concats the values separated by ', '
+      case LightBoxTitleTexts.camera:
+        return m.metadata.cameraData?.model;
+      case LightBoxTitleTexts.lens:
+        return m.metadata.cameraData?.lens;
+      case LightBoxTitleTexts.iso:
+        return m.metadata.cameraData?.ISO.toString();
+      case LightBoxTitleTexts.fstop:
+        if (m.metadata.cameraData?.fStop > 1) {
+          return m.metadata.cameraData?.fStop.toString();
+        }
+        return '1/' + Math.round(1 / m.metadata.cameraData?.fStop);
+      case LightBoxTitleTexts.focal_length:
+        return m.metadata.cameraData?.focalLength.toString();
+    }
+    return null;
+  }
+
+  get TopLeftTitle(): string {
+    return this.getText(Config.Gallery.Lightbox.Titles.topLeftTitle);
+  }
+
+  get TopLeftSubtitle(): string {
+    return this.getText(Config.Gallery.Lightbox.Titles.topLeftSubtitle);
+  }
+
+  get BottomLeftTitle(): string {
+    return this.getText(Config.Gallery.Lightbox.Titles.bottomLeftTitle);
+  }
+
+  get BottomLeftSubtitle(): string {
+    return this.getText(Config.Gallery.Lightbox.Titles.bottomLeftSubtitle);
+  }
+
+}

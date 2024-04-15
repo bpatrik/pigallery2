@@ -1,14 +1,19 @@
 <div id="controllers-container" #root>
-  <div [class.dim-controls]="controllersDimmed" class="controls-caption"
+  <div [class.dim-controls]="controllersDimmed" class="controls-title controls-top-left-title"
        [class.controls-nodim]="lightboxService.captionAlwaysOn"
-       *ngIf="Title">{{Title}}</div>
+       *ngIf="TopLeftTitle || TopLeftSubtitle">
+    <div class="controls-title-text" *ngIf="TopLeftTitle">{{ TopLeftTitle }}</div>
+
+    <div class="controls-subtitle-text" *ngIf="TopLeftSubtitle">{{ TopLeftSubtitle }}</div>
+  </div>
+
 
   <div [class.dim-controls]="controllersDimmed"
        class="controls controls-top">
     <div class="controls-background rounded-start-bottom">
       <div class="highlight control-button" (click)="toggleInfoPanel.emit()"
            title="info key: i" i18n-title>
-        <ng-icon  name="ionInformationOutline"></ng-icon>
+        <ng-icon name="ionInformationOutline"></ng-icon>
       </div>
 
       <div *ngIf="fullScreenService.isFullScreenEnabled()"
@@ -23,7 +28,7 @@
            class="highlight control-button"
            (click)="toggleFullScreen.emit(true)"
            title="toggle fullscreen, key: f" i18n-title>
-        <ng-icon   size="0.85em"
+        <ng-icon size="0.85em"
                  name="ionExpandOutline"></ng-icon>
       </div>
 
@@ -32,13 +37,13 @@
                 class="border-0 highlight control-button"
                 data-bs-auto-close="outside"
                 aria-controls="dropdown-basic">
-          <ng-icon size="1.2em"  name="ionMenuOutline"></ng-icon>
+          <ng-icon size="1.2em" name="ionMenuOutline"></ng-icon>
         </button>
         <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu dropdown-menu-right"
             role="menu" aria-labelledby="button-basic">
           <li role="menuitem">
             <a *ngIf="activePhoto"
-               [href]="activePhoto.gridMedia.getMediaPath()"
+               [href]="activePhoto.gridMedia.getOriginalMediaPath()"
                [download]="activePhoto.gridMedia.media.name"
                class="dropdown-item">
               <ng-icon class="me-2"
@@ -141,7 +146,7 @@
           <div class="face-box"
                [class.controls-nodim]="lightboxService.facesAlwaysOn"></div>
           <span class="face-name"
-                [class.controls-nodim]="lightboxService.facesAlwaysOn">{{face.name}}</span>
+                [class.controls-nodim]="lightboxService.facesAlwaysOn">{{ face.name }}</span>
         </a>
       </ng-container>
       <ng-container *ngIf="!searchEnabled">
@@ -157,7 +162,7 @@
           </div>
           <span class="face-name"
                 [class.controls-nodim]="lightboxService.facesAlwaysOn"
-          >{{face.name}}</span>
+          >{{ face.name }}</span>
         </div>
       </ng-container>
     </div>
@@ -175,10 +180,18 @@
        (click)="nextMediaManuallyTriggered()">
     <ng-icon name="ionChevronForwardOutline"></ng-icon>
     <canvas
-      *ngIf="playBackState == PlayBackStates.Play"
+      *ngIf="slideShowRunning"
       #canvas width="55px" height="55px"></canvas>
 
   </div>
+  <div [class.dim-controls]="controllersDimmed" class="controls-title controls-bottom-left-title"
+       [class.controls-nodim]="lightboxService.captionAlwaysOn"
+       *ngIf="BottomLeftTitle || BottomLeftSubtitle">
+    <div class="controls-title-text" *ngIf="BottomLeftTitle">{{ BottomLeftTitle }}</div>
+
+    <div class="controls-subtitle-text " *ngIf="BottomLeftSubtitle">{{ BottomLeftSubtitle }}</div>
+  </div>
+
 
   <div [class.dim-controls]="controllersDimmed" class="controls controls-zoom row mb-3" *ngIf="Zoom > 1">
     <div class="col-1 col-md-4">
@@ -194,22 +207,21 @@
     </div>
   </div>
 
-
   <div [class.dim-controls]="controllersDimmed" class="controls controls-playback"
        *ngIf="zoom == 1 && activePhoto && activePhoto.gridMedia.isPhoto()">
     <div class="controls-background rounded-start-top pe-1 pb-1">
       <ng-icon
-        *ngIf="playBackState == PlayBackStates.Play"
+        *ngIf="slideShowRunning"
         name="ionPauseOutline"
         class=" highlight control-button button-active me-2 mb-2"
-        (click)="pause()"
+        (click)="pauseClicked()"
         title="Pause" i18n-title></ng-icon>
 
       <ng-icon
-        *ngIf="playBackState == PlayBackStates.Paused"
+        *ngIf="!slideShowRunning"
         name="ionPlayOutline"
         class="highlight control-button me-2 mb-2"
-        (click)="play()"
+        (click)="playClicked()"
         title="Auto play" i18n-title></ng-icon>
     </div>
   </div>

@@ -7,7 +7,8 @@
     "make": "samsung",
     "model": "SM-G975F"
   },
-  "creationDate": 1614703656000,
+  "creationDate": 1614700056000,
+  "creationDateOffset": "+01:00",
   "fileSize": 4709,
   "keywords": [
     "Max",

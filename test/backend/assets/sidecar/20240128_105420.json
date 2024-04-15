@@ -1,0 +1,21 @@
+{
+  "bitRate": 184871,
+  "creationDate": 1706435660000,
+  "duration": 1000,
+  "fileSize": 23132,
+  "size": {
+    "height": 46,
+    "width": 80
+  },
+  "fps": 60000,
+  "keywords": [
+    "Travel"
+  ],
+  "rating": 3,
+  "positionData": {
+    "GPSData": {
+      "latitude": 50.089587,
+      "longitude": 14.39741
+    }
+  }
+}

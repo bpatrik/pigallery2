@@ -1,5 +1,5 @@
 import {Express, NextFunction, Request, Response} from 'express';
-import {logFN, Logger} from '../Logger';
+import {LoggerFunction, Logger} from '../Logger';
 import {Config} from '../../common/config/private/Config';
 
 declare global {
@@ -16,7 +16,7 @@ declare global {
  * Adds logging to express
  */
 export class LoggerRouter {
-  public static log(loggerFn: logFN, req: Request, res: Response): void {
+  public static log(loggerFn: LoggerFunction, req: Request, res: Response): void {
     if (req.logged === true) {
       return;
     }

@@ -192,7 +192,7 @@ export class GalleryGridComponent
 
   photoClicked(media: MediaDTO): void {
     this.router.navigate([], {
-      queryParams: this.queryService.getParams(media),
+      queryParams: this.queryService.getParams({media}),
     });
   }
 

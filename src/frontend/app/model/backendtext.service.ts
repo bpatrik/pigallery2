@@ -14,6 +14,10 @@ export class BackendtextService {
         return $localize`Size to generate`;
       case backendTexts.sizeToGenerate.description:
         return $localize`These thumbnails will be generated. The list should be a subset of the enabled thumbnail sizes`;
+      case backendTexts.maxVideoSize.name:
+        return $localize`Max video size`;
+      case backendTexts.maxVideoSize.description:
+        return $localize`Sizes bigger than this value won't be generated for videos. Videos does not use photo based previews, so it is not needed to generate big previews for them.`;
       case backendTexts.indexedFilesOnly.name:
         return $localize`Indexed only`;
       case backendTexts.indexedFilesOnly.description:
@@ -58,8 +62,6 @@ export class BackendtextService {
         return $localize`Gallery reset`;
       case DefaultsJobs['Album Reset']:
         return $localize`Album reset`;
-      case DefaultsJobs['Thumbnail Generation']:
-        return $localize`Thumbnail generation`;
       case DefaultsJobs['Photo Converting']:
         return $localize`Photo converting`;
       case DefaultsJobs['Video Converting']:
@@ -92,10 +94,8 @@ export class BackendtextService {
         return $localize`Deletes all directories, photos and videos from the DB.`;
       case DefaultsJobs['Album Reset']:
         return $localize`Removes all albums from the DB`;
-      case DefaultsJobs['Thumbnail Generation']:
-        return $localize`Generates thumbnails from all media files and stores them in the tmp folder.`;
-      case DefaultsJobs['Photo Converting']:
-        return $localize`Generates high res photos from all media files and stores them in the tmp folder.`;
+       case DefaultsJobs['Photo Converting']:
+        return $localize`Generates thumbnails and high-res photos from all media files and stores them in the tmp folder. Smaller sizes will be used for thumbnail (in the grid view), bigger sizes for previews (in the lightbox). Videos does not use photo previews (the app loads the video file instead).`;
       case DefaultsJobs['Video Converting']:
         return $localize`Transcodes all videos and stores them in the tmp folder.`;
       case DefaultsJobs['Temp Folder Cleaning']:

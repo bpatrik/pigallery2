@@ -14,6 +14,7 @@ export const QueryParams = {
       query: 'qs',
     },
     photo: 'p',
+    playback: 'play',
     sharingKey_query: 'sk',
     sharingKey_params: 'sharingKey',
     directory: 'directory',

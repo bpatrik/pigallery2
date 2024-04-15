@@ -1,0 +1,173 @@
+<?xpacket begin='﻿' id='W5M0MpCehiHzreSzNTczkc9d'?>
+<x:xmpmeta xmlns:x='adobe:ns:meta/' x:xmptk='Image::ExifTool 12.69'>
+<rdf:RDF xmlns:rdf='http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+
+ <rdf:Description rdf:about=''
+  xmlns:Iptc4xmpCore='http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/'>
+  <Iptc4xmpCore:CountryCode>SWE</Iptc4xmpCore:CountryCode>
+  <Iptc4xmpCore:Location>Jönköping</Iptc4xmpCore:Location>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:Iptc4xmpExt='http://iptc.org/std/Iptc4xmpExt/2008-02-29/'>
+  <Iptc4xmpExt:PersonInImage>
+   <rdf:Bag>
+    <rdf:li>æÆøØåÅéÉüÜäÄöÖïÏñÑ</rdf:li>
+    <rdf:li>abcdefghijklmnopqrstuvwxyz</rdf:li>
+    <rdf:li>abcdefghijklmnopqrstuvwxyz</rdf:li>
+   </rdf:Bag>
+  </Iptc4xmpExt:PersonInImage>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:MP='http://ns.microsoft.com/photo/1.2/'
+  xmlns:MPRI='http://ns.microsoft.com/photo/1.2/t/RegionInfo#'
+  xmlns:MPReg='http://ns.microsoft.com/photo/1.2/t/Region#'>
+  <MP:RegionInfo rdf:parseType='Resource'>
+   <MPRI:Regions>
+    <rdf:Bag>
+     <rdf:li rdf:parseType='Resource'>
+      <MPReg:PersonDisplayName>æÆøØåÅéÉüÜäÄöÖïÏñÑ</MPReg:PersonDisplayName>
+      <MPReg:Rectangle>0.294791666666667, 0.13287037037037, 0.107291666666667, 0.237962962962963</MPReg:Rectangle>
+     </rdf:li>
+     <rdf:li rdf:parseType='Resource'>
+      <MPReg:PersonDisplayName>abcdefghijklmnopqrstuvwxyz</MPReg:PersonDisplayName>
+      <MPReg:Rectangle>0.451041666666667, 0.13287037037037, 0.110416666666667, 0.24537037037037</MPReg:Rectangle>
+     </rdf:li>
+     <rdf:li rdf:parseType='Resource'>
+      <MPReg:PersonDisplayName>abcdefghijklmnopqrstuvwxyz</MPReg:PersonDisplayName>
+      <MPReg:Rectangle>0.605208333333333, 0.138425925925926, 0.110416666666667, 0.24537037037037</MPReg:Rectangle>
+     </rdf:li>
+    </rdf:Bag>
+   </MPRI:Regions>
+  </MP:RegionInfo>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:dc='http://purl.org/dc/elements/1.1/'>
+  <dc:subject>
+   <rdf:Bag>
+    <rdf:li>æÆøØåÅéÉüÜäÄöÖïÏñÑ</rdf:li>
+    <rdf:li>abcdefghijklmnopqrstuvwxyz</rdf:li>
+   </rdf:Bag>
+  </dc:subject>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:exif='http://ns.adobe.com/exif/1.0/'>
+  <exif:ColorSpace>65535</exif:ColorSpace>
+  <exif:ComponentsConfiguration>
+   <rdf:Seq>
+    <rdf:li>1</rdf:li>
+    <rdf:li>2</rdf:li>
+    <rdf:li>3</rdf:li>
+    <rdf:li>0</rdf:li>
+   </rdf:Seq>
+  </exif:ComponentsConfiguration>
+  <exif:DateTimeOriginal>2024-01-30T12:00:00+01:00</exif:DateTimeOriginal>
+  <exif:ExifVersion>0232</exif:ExifVersion>
+  <exif:FlashpixVersion>0100</exif:FlashpixVersion>
+  <exif:GPSAltitude>102/1</exif:GPSAltitude>
+  <exif:GPSAltitudeRef>0</exif:GPSAltitudeRef>
+  <exif:GPSLatitude>57,46.8417528N</exif:GPSLatitude>
+  <exif:GPSLongitude>14,9.7753146E</exif:GPSLongitude>
+  <exif:GPSMapDatum>WGS-84</exif:GPSMapDatum>
+  <exif:GPSTimeStamp>1899-12-30T01:00:14Z</exif:GPSTimeStamp>
+  <exif:GPSVersionID>2.2.0.0</exif:GPSVersionID>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:mwg-rs='http://www.metadataworkinggroup.com/schemas/regions/'
+  xmlns:stArea='http://ns.adobe.com/xmp/sType/Area#'
+  xmlns:stDim='http://ns.adobe.com/xap/1.0/sType/Dimensions#'>
+  <mwg-rs:Regions rdf:parseType='Resource'>
+   <mwg-rs:AppliedToDimensions rdf:parseType='Resource'>
+    <stDim:h>1080</stDim:h>
+    <stDim:unit>pixel</stDim:unit>
+    <stDim:w>1920</stDim:w>
+   </mwg-rs:AppliedToDimensions>
+   <mwg-rs:RegionList>
+    <rdf:Bag>
+     <rdf:li rdf:parseType='Resource'>
+      <mwg-rs:Area rdf:parseType='Resource'>
+       <stArea:h>0.237962962962963</stArea:h>
+       <stArea:unit>normalized</stArea:unit>
+       <stArea:w>0.107291666666667</stArea:w>
+       <stArea:x>0.3484375</stArea:x>
+       <stArea:y>0.251851851851852</stArea:y>
+      </mwg-rs:Area>
+      <mwg-rs:Name>æÆøØåÅéÉüÜäÄöÖïÏñÑ</mwg-rs:Name>
+      <mwg-rs:Type>Face</mwg-rs:Type>
+     </rdf:li>
+     <rdf:li rdf:parseType='Resource'>
+      <mwg-rs:Area rdf:parseType='Resource'>
+       <stArea:h>0.24537037037037</stArea:h>
+       <stArea:unit>normalized</stArea:unit>
+       <stArea:w>0.110416666666667</stArea:w>
+       <stArea:x>0.50625</stArea:x>
+       <stArea:y>0.255555555555556</stArea:y>
+      </mwg-rs:Area>
+      <mwg-rs:Name>abcdefghijklmnopqrstuvwxyz</mwg-rs:Name>
+      <mwg-rs:Type>Face</mwg-rs:Type>
+     </rdf:li>
+     <rdf:li rdf:parseType='Resource'>
+      <mwg-rs:Area rdf:parseType='Resource'>
+       <stArea:h>0.24537037037037</stArea:h>
+       <stArea:unit>normalized</stArea:unit>
+       <stArea:w>0.110416666666667</stArea:w>
+       <stArea:x>0.660416666666667</stArea:x>
+       <stArea:y>0.261111111111111</stArea:y>
+      </mwg-rs:Area>
+      <mwg-rs:Name>abcdefghijklmnopqrstuvwxyz</mwg-rs:Name>
+      <mwg-rs:Type>Face</mwg-rs:Type>
+     </rdf:li>
+    </rdf:Bag>
+   </mwg-rs:RegionList>
+  </mwg-rs:Regions>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:pdf='http://ns.adobe.com/pdf/1.3/'>
+  <pdf:Keywords>æÆøØåÅéÉüÜäÄöÖïÏñÑ, abcdefghijklmnopqrstuvwxyz</pdf:Keywords>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:photoshop='http://ns.adobe.com/photoshop/1.0/'>
+  <photoshop:City>Jönköping</photoshop:City>
+  <photoshop:Country>Sverige</photoshop:Country>
+  <photoshop:State>Jönköping</photoshop:State>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:tiff='http://ns.adobe.com/tiff/1.0/'>
+  <tiff:BitsPerSample>
+   <rdf:Seq>
+    <rdf:li>8</rdf:li>
+   </rdf:Seq>
+  </tiff:BitsPerSample>
+  <tiff:ImageLength>1080</tiff:ImageLength>
+  <tiff:ImageWidth>1920</tiff:ImageWidth>
+  <tiff:Orientation>1</tiff:Orientation>
+  <tiff:ResolutionUnit>2</tiff:ResolutionUnit>
+  <tiff:XResolution>300/1</tiff:XResolution>
+  <tiff:YCbCrPositioning>1</tiff:YCbCrPositioning>
+  <tiff:YCbCrSubSampling>
+   <rdf:Seq>
+    <rdf:li>1</rdf:li>
+    <rdf:li>1</rdf:li>
+   </rdf:Seq>
+  </tiff:YCbCrSubSampling>
+  <tiff:YResolution>300/1</tiff:YResolution>
+ </rdf:Description>
+
+ <rdf:Description rdf:about=''
+  xmlns:xmp='http://ns.adobe.com/xap/1.0/'>
+  <xmp:CreateDate>2024-01-30T12:00:00+01:00</xmp:CreateDate>
+  <xmp:CreatorTool>Tag That Photo</xmp:CreatorTool>
+  <xmp:MetadataDate>2024-01-30T23:02:06Z</xmp:MetadataDate>
+  <xmp:ModifyDate>2024-01-30T12:00:00+01:00</xmp:ModifyDate>
+  <xmp:Rating>-1</xmp:Rating>
+ </rdf:Description>
+</rdf:RDF>
+</x:xmpmeta>
+<?xpacket end='w'?>

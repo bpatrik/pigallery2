@@ -4,9 +4,9 @@
         i18n-title
         *ngIf="!Running"
         [disabled]="disabled || jobsService.jobStartingStopping[jobName]"
-        (click)="start();">
+        (click)="openModal(jobRunModal);">
   <span class="me-2" *ngIf="!shortName"><ng-container
-    i18n>Run now</ng-container>: {{backendTextService.getJobName(jobName)}}</span>
+    i18n>Run now</ng-container>: {{ backendTextService.getJobName(jobName) }}</span>
   <ng-icon name="ionPlayOutline"></ng-icon>
 </button>
 <button class="btn btn-secondary"
@@ -15,5 +15,36 @@
         (click)="stop();">
   <ng-icon name="ionStopOutline"></ng-icon>
   <span class="ms-2" *ngIf="!shortName"><ng-container
-    i18n>Cancel</ng-container>: {{backendTextService.getJobName(jobName)}}</span>
+    i18n>Cancel</ng-container>: {{ backendTextService.getJobName(jobName) }}</span>
 </button>
+
+
+<ng-template #jobRunModal>
+  <!-- job running Modal-->
+  <div class="modal-header">
+    <h5 class="modal-title" i18n>Do you want to run {{ backendTextService.getJobName(jobName) }}?</h5>
+    <button type="button" class="btn-close" (click)="hideModal()" data-dismiss="modal" aria-label="Close">
+    </button>
+  </div>
+  <div class="modal-body">
+    <span i18n>Are you sue you want to run this job? This will have the following effect:</span>
+    <div class="alert alert-secondary" role="alert">
+      {{ backendTextService.getJobDescription(jobName) }}
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="btn-group float-end row" style="display: block">
+      <div class="pe-0">
+        <button class="btn btn-secondary me-2" type="button"
+                (click)="hideModal()">
+          <ng-container i18n>Cancel</ng-container>
+        </button>
+        <button class="btn {{danger ? 'btn-danger': 'btn-success'}}" type="button"
+                (click)="start(); hideModal();">
+          <ng-container i18n>Run now</ng-container>
+          <ng-icon name="ionPlayOutline" class="ms-1"></ng-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>

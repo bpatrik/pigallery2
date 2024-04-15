@@ -177,10 +177,10 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
     expect(selected?.media?.length)
       .to.be.greaterThan(0);
-    if (!fs.existsSync(sqlHelper.tempDir)) {
-      fs.mkdirSync(sqlHelper.tempDir);
+    if (!fs.existsSync(TestHelper.TMP_DIR)) {
+      fs.mkdirSync(TestHelper.TMP_DIR);
     }
-    const tmpDir = path.join(sqlHelper.tempDir, '/rnd5sdf_emptyDir');
+    const tmpDir = path.join(TestHelper.TMP_DIR, '/rnd5sdf_emptyDir');
     fs.mkdirSync(tmpDir);
     ProjectPath.ImageFolder = tmpDir;
     let notFailed = false;

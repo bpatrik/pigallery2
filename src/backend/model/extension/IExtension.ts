@@ -1,6 +1,6 @@
 import * as express from 'express';
 import {NextFunction, Request, Response} from 'express';
-import {PrivateConfigClass} from '../../../common/config/private/Config';
+import {PrivateConfigClass} from '../../../common/config/private/PrivateConfigClass';
 import {ObjectManagers} from '../ObjectManagers';
 import {ProjectPathClass} from '../../ProjectPath';
 import {ILogger} from '../../Logger';
@@ -73,6 +73,11 @@ export interface IExtensionEvents {
      * photos, videos and metafiles
      */
     DiskManager: {
+      excludeDir: IExtensionEvent<[{
+        name: string,
+        parentDirRelativeName: string,
+        parentDirAbsoluteName: string
+      }], boolean>,
       scanDirectory: IExtensionEvent<[
         string,
         DirectoryScanSettings], ParentDirectoryDTO>
@@ -136,8 +141,6 @@ export interface IExtensionDB {
 }
 
 export interface IExtensionConfig<C> {
-  setTemplate(template: new() => C): void;
-
   getConfig(): C;
 }
 
@@ -205,11 +208,25 @@ export interface IExtensionObject<C = void> {
   messengers: IExtensionMessengers;
 }
 
+export interface IExtensionConfigInit<C> {
+  /**
+   * Sets the config tempalte class
+   * @param template
+   */
+  setConfigTemplate(template: new() => C): void;
+}
 
 /**
  * Extension interface. All extension is expected to implement and export these methods
  */
 export interface IServerExtension<C> {
+
+  /**
+   * This function can be called any time. It should only set the config template class
+   * @param extension
+   */
+  initConfig(extension: IExtensionConfigInit<C>): void;
+
   /**
    * Extension init function. Extension should at minimum expose this function.
    * @param extension

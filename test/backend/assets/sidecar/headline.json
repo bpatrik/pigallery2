@@ -1,0 +1,16 @@
+{
+  "size": {
+    "width": 10,
+    "height": 5
+  },
+  "creationDate": 1185683698000,
+  "creationDateOffset": "+13:45",
+  "fileSize": 1430,
+  "keywords": ["Person 1", "Person 2"],
+  "caption": "XMP description",
+  "title": "Photoshop Headline",
+  "cameraData": {
+    "make": "CamMake",
+    "model": "CamModel"
+  }
+}

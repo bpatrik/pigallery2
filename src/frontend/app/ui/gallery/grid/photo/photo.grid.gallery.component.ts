@@ -134,10 +134,10 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   }
 
   getPositionText(): string {
-    if (!this.gridMedia || !this.gridMedia.isPhoto()) {
+    if (!this.gridMedia || !this.gridMedia.isPhoto() || !(this.gridMedia.media as PhotoDTO).metadata.positionData) {
       return '';
     }
-    return (
+    return ( //not much space in the gridview, so we only deliver city, or state or country
         (this.gridMedia.media as PhotoDTO).metadata.positionData.city ||
         (this.gridMedia.media as PhotoDTO).metadata.positionData.state ||
         (this.gridMedia.media as PhotoDTO).metadata.positionData.country || ''

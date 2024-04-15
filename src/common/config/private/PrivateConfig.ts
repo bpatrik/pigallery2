@@ -11,16 +11,13 @@ import {
 } from '../../entities/job/JobScheduleDTO';
 import {
   ClientConfig,
-  ClientExtensionsConfig,
   ClientGPXCompressingConfig,
   ClientMediaConfig,
   ClientMetaFileConfig,
   ClientPhotoConfig,
-  ClientPhotoConvertingConfig,
   ClientServiceConfig,
   ClientSharingConfig,
   ClientSortingConfig,
-  ClientThumbnailConfig,
   ClientUserConfig,
   ClientVideoConfig,
   ConfigPriority,
@@ -32,7 +29,8 @@ import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../entities/Sear
 import {SortByTypes} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
 import {MediaPickDTO} from '../../entities/MediaPickDTO';
-import {MessagingConfig} from './MessagingConfig';
+import {ServerExtensionsConfig} from './subconfigs/ServerExtensionsConfig';
+import {MessagingConfig} from './subconfigs/MessagingConfig';
 
 declare let $localize: (s: TemplateStringsArray) => string;
 
@@ -299,7 +297,7 @@ export class ServerUserConfig extends ClientUserConfig {
 
 
 @SubConfigClass({softReadonly: true})
-export class ServerThumbnailConfig extends ClientThumbnailConfig {
+export class ServerPhotoConfig extends ClientPhotoConfig {
   @ConfigProperty({
     tags:
       {
@@ -664,16 +662,10 @@ export class ServerJobConfig {
       {}
     ),
     new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Thumbnail Generation']],
-      DefaultsJobs[DefaultsJobs['Thumbnail Generation']],
+      DefaultsJobs[DefaultsJobs['Photo Converting']],
+      DefaultsJobs[DefaultsJobs['Photo Converting']],
       new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Album Cover Filling']]),
-      {sizes: [240], indexedOnly: true}
-    ),
-    new JobScheduleConfig(
-      DefaultsJobs[DefaultsJobs['Photo Converting']],
-      DefaultsJobs[DefaultsJobs['Photo Converting']],
-      new AfterJobTriggerConfig(DefaultsJobs[DefaultsJobs['Thumbnail Generation']]),
-      {indexedOnly: true}
+      {sizes: [320], maxVideoSize: 800, indexedOnly: true}
     ),
     new JobScheduleConfig(
       DefaultsJobs[DefaultsJobs['Video Converting']],
@@ -823,44 +815,6 @@ export class ServerVideoConfig extends ClientVideoConfig {
   transcoding: VideoTranscodingConfig = new VideoTranscodingConfig();
 }
 
-@SubConfigClass({softReadonly: true})
-export class PhotoConvertingConfig extends ClientPhotoConvertingConfig {
-  @ConfigProperty({
-    tags: {
-      name: $localize`On the fly converting`,
-      priority: ConfigPriority.underTheHood,
-      uiDisabled: (sc: PhotoConvertingConfig) =>
-        !sc.enabled
-
-    },
-    description: $localize`Converts photos on the fly, when they are requested.`,
-  })
-  onTheFly: boolean = true;
-  @ConfigProperty({
-    type: 'unsignedInt',
-    tags: {
-      name: $localize`Resolution`,
-      priority: ConfigPriority.advanced,
-      uiOptions: [720, 1080, 1440, 2160, 4320],
-      unit: 'px',
-      uiDisabled: (sc: PhotoConvertingConfig) =>
-        !sc.enabled
-    },
-    description: $localize`The shorter edge of the converted photo will be scaled down to this, while keeping the aspect ratio.`,
-  })
-  resolution: videoResolutionType = 1080;
-}
-
-@SubConfigClass({softReadonly: true})
-export class ServerPhotoConfig extends ClientPhotoConfig {
-  @ConfigProperty({
-    tags: {
-      name: $localize`Photo resizing`,
-      priority: ConfigPriority.advanced,
-    }
-  })
-  Converting: PhotoConvertingConfig = new PhotoConvertingConfig();
-}
 
 @SubConfigClass({softReadonly: true})
 export class ServerAlbumCoverConfig {
@@ -951,23 +905,10 @@ export class ServerMediaConfig extends ClientMediaConfig {
       name: $localize`Photo`,
       uiIcon: 'ionCameraOutline',
       priority: ConfigPriority.advanced,
-      uiJob: [
-        {
-          job: DefaultsJobs[DefaultsJobs['Photo Converting']],
-          relevant: (c) => c.Media.Photo.Converting.enabled
-        }]
+      uiJob: [{job: DefaultsJobs[DefaultsJobs['Photo Converting']]}]
     } as TAGS
   })
   Photo: ServerPhotoConfig = new ServerPhotoConfig();
-  @ConfigProperty({
-    tags: {
-      name: $localize`Thumbnail`,
-      uiIcon: 'ionImageOutline',
-      priority: ConfigPriority.advanced,
-      uiJob: [{job: DefaultsJobs[DefaultsJobs['Thumbnail Generation']]}]
-    } as TAGS
-  })
-  Thumbnail: ServerThumbnailConfig = new ServerThumbnailConfig();
 }
 
 @SubConfigClass({softReadonly: true})
@@ -1024,35 +965,6 @@ export class ServerServiceConfig extends ClientServiceConfig {
   Log: ServerLogConfig = new ServerLogConfig();
 }
 
-
-@SubConfigClass<TAGS>({softReadonly: true})
-export class ServerExtensionsConfig extends ClientExtensionsConfig {
-
-  @ConfigProperty({
-    tags: {
-      name: $localize`Extension folder`,
-      priority: ConfigPriority.underTheHood,
-      dockerSensitive: true
-    },
-    description: $localize`Folder where the app stores the extensions. Extensions live in their sub-folders.`,
-  })
-  folder: string = 'extensions';
-
-  @ConfigProperty({volatile: true})
-  list: string[] = [];
-
-  @ConfigProperty({type: 'object'})
-  configs: Record<string, unknown> = {};
-
-  @ConfigProperty({
-    tags: {
-      name: $localize`Clean up unused tables`,
-      priority: ConfigPriority.underTheHood,
-    },
-    description: $localize`Automatically removes all tables from the DB that are not used anymore.`,
-  })
-  cleanUpUnusedTables: boolean = true;
-}
 
 @SubConfigClass({softReadonly: true})
 export class ServerEnvironmentConfig {

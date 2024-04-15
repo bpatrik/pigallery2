@@ -12,6 +12,7 @@ import {RouteTestingHelper} from './RouteTestingHelper';
 import {QueryParams} from '../../../../src/common/QueryParams';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
+import {ProjectPath} from '../../../../src/backend/ProjectPath';
 
 
 process.env.NODE_ENV = 'test';
@@ -38,8 +39,9 @@ describe('SharingRouter', () => {
     Config.Sharing.enabled = true;
     Config.Database.type = DatabaseType.sqlite;
     Config.Database.dbFolder = tempDir;
+    ProjectPath.reset();
 
-    server = new Server();
+    server = new Server(false);
     await server.onStarted.wait();
 
     await ObjectManagers.getInstance().init();

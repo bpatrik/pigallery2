@@ -2,8 +2,8 @@
 #-----------------------------------------
 FROM node:18-alpine3.17 AS builder
 RUN apk add --update-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.17/community/ \
-  python3 build-base sqlite-dev sqlite-libs vips-dev fftw-dev gcc g++ make libc6-compat && ln -snf /usr/bin/python3 /usr/bin/python
-COPY release /app
+  python3 build-base sqlite-dev sqlite-libs vips-dev vips-heif fftw-dev gcc g++ make libc6-compat && ln -snf /usr/bin/python3 /usr/bin/python
+COPY pigallery2-release /app
 WORKDIR /app
 RUN npm install --unsafe-perm
 RUN mkdir -p /app/data/config && \
@@ -27,7 +27,7 @@ ENV NODE_ENV=production \
 
 EXPOSE 80
 RUN apk add --update-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.17/community/ \
-    vips vips-cpp ffmpeg
+    vips vips-cpp vips-heif ffmpeg
 COPY --from=builder /app /app
 VOLUME ["/app/data/config", "/app/data/db", "/app/data/images", "/app/data/tmp"]
 

@@ -27,11 +27,13 @@ export interface FaceRegion {
 }
 
 export interface PhotoMetadata extends MediaMetadata {
+  title?: string;
   caption?: string;
   cameraData?: CameraMetadata;
   positionData?: PositionMetaData;
   size: MediaDimension;
   creationDate: number;
+  creationDateOffset?: string;
   fileSize: number;
   faces?: FaceRegion[];
 }

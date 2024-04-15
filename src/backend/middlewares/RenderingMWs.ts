@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {Message} from '../../common/entities/Message';
-import {Config, PrivateConfigClass} from '../../common/config/private/Config';
+import {PrivateConfigClass} from '../../common/config/private/PrivateConfigClass';
 import {UserDTO, UserRoles} from '../../common/entities/UserDTO';
 import {NotificationManager} from '../model/NotifocationManager';
 import {Logger} from '../Logger';
@@ -111,13 +111,15 @@ export class RenderingMWs {
     const originalConf = await ExtensionConfigWrapper.original();
     // These are sensitive information, do not send to the client side
     originalConf.Server.sessionSecret = null;
+    const originalConfJSON = JSON.parse(JSON.stringify(originalConf.toJSON({
+      attachState: true,
+      attachVolatile: true,
+      skipTags: {secret: true} as TAGS
+    }) as PrivateConfigClass));
+
     const message = new Message<PrivateConfigClass>(
       null,
-      originalConf.toJSON({
-        attachState: true,
-        attachVolatile: true,
-        skipTags: {secret: true} as TAGS
-      }) as PrivateConfigClass
+      originalConfJSON
     );
     res.json(message);
   }
@@ -130,19 +132,12 @@ export class RenderingMWs {
   ): void {
     if (err instanceof ErrorDTO) {
       if (err.details) {
-        Logger.warn('Handled error:');
-        LoggerRouter.log(Logger.warn, req, res);
+        const logFn = Logger.logLevelForError(err.code)
+        LoggerRouter.log(logFn, req, res);
         // use separate rendering for detailsStr
         const d = err.detailsStr;
         delete err.detailsStr;
-        console.log(err);
-        if (err.detailsStr) {
-          try {
-            console.log('details:', JSON.stringify(err.detailsStr));
-          } catch (_) {
-            console.log(err.detailsStr);
-          }
-        }
+        logFn(err);
         err.detailsStr = d;
         delete err.details; // do not send back error object to the client side
 

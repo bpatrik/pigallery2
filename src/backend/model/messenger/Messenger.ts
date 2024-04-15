@@ -22,7 +22,7 @@ export abstract class Messenger<C extends Record<string, unknown> = Record<strin
   private async getThumbnail(m: MediaDTO) {
     return await PhotoProcessing.generateThumbnail(
       path.join(ProjectPath.ImageFolder, m.directory.path, m.directory.name, m.name),
-      Config.Media.Thumbnail.thumbnailSizes[0],
+      Config.Media.Photo.thumbnailSizes[0],
       MediaDTOUtils.isPhoto(m) ? ThumbnailSourceType.Photo : ThumbnailSourceType.Video,
       false
     );

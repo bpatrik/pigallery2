@@ -12,7 +12,6 @@
        [hidden]="shouldHide">
     <label class="col-sm-3 col-md-2 control-label" [for]="idName">{{name}}</label>
     <div class="col-12 col-sm">
-
       <div class="input-group" [ngSwitch]="uiType">
         <app-gallery-search-field
           *ngSwitchCase="'SearchQuery'"
@@ -29,7 +28,9 @@
              style="flex: 1"
              *ngSwitchCase="'StringInput'">
           <input
-            [type]="HTMLInputType" [min]="state.min" [max]="state.max" class="form-control"
+            [type]="HTMLInputType"
+            [min]="state.min"
+            [max]="state.max" class="form-control"
             [placeholder]="placeholder"
             [title]="title"
             [(ngModel)]="StringValue"
@@ -131,7 +132,7 @@
 
         <textarea
           rows="5"
-          *ngSwitchCase="'SelectedThemeSettings'"
+          *ngSwitchCase="'ThemeConfig-Array'"
           type="text"
           class="form-control"
           [title]="title"
@@ -168,7 +169,7 @@
 
         <app-settings-workflow
           class="w-100"
-          *ngSwitchCase="'JobScheduleConfig'"
+          *ngSwitchCase="'JobScheduleConfig-Array'"
           [(ngModel)]="state.value"
           [id]="idName"
           [name]="idName"
@@ -252,7 +253,7 @@
           </ng-template>
         </ng-container>
 
-        <ng-container *ngSwitchCase="'MapLayers'">
+        <ng-container *ngSwitchCase="'MapLayers-Array'">
           <div class="container">
             <table class="table">
               <thead>
@@ -295,7 +296,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngSwitchCase="'MapPathGroupThemeConfig'">
+        <ng-container *ngSwitchCase="'MapPathGroupThemeConfig-Array'">
           <div class="container">
             <div class="row  mt-1 mb-1 bg-body-tertiary" *ngFor="let val of state.value; index as i; last as isLast">
               <div class="row  mt-1 mb-1 bg-body-tertiary">
@@ -357,7 +358,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngSwitchCase="'MapPathGroupConfig'">
+        <ng-container *ngSwitchCase="'MapPathGroupConfig-Array'">
           <div class="container">
             <div class="bg-body-tertiary row mt-1 mb-1" *ngFor="let arr of state.value; let i = index">
               <div class="row  mt-1 mb-1 me-0 ms-0 pe-0 ps-0">
@@ -403,7 +404,7 @@
           </div>
         </ng-container>
 
-        <ng-container *ngSwitchCase="'NavigationLinkConfig'">
+        <ng-container *ngSwitchCase="'NavigationLinkConfig-Array'">
           <div class="container">
             <div class="row  mt-1 mb-1 bg-body-tertiary" *ngFor="let link of state.value; let i = index">
               <div class="col ps-0">
@@ -468,7 +469,8 @@
           </div>
         </ng-container>
 
-        <ng-container *ngSwitchCase="'UserConfig'">
+
+        <ng-container *ngSwitchCase="'UserConfig-Array'">
           <div class="container ps-0 pe-0">
             <div class="row ms-0 me-0 mt-1 mb-1 bg-body-tertiary" *ngFor="let item of state.value; let i = index">
 

@@ -115,16 +115,27 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     subDir2 = TestHelper.getDirectoryEntry(directory, 'Return of the Jedi');
     p = TestHelper.getPhotoEntry1(directory);
     p.metadata.creationDate = Date.now();
+    p.metadata.creationDateOffset = "+02:00";
     p2 = TestHelper.getPhotoEntry2(directory);
     p2.metadata.creationDate = Date.now() - 60 * 60 * 24 * 1000;
+    p2.metadata.creationDateOffset = "+02:00";
     v = TestHelper.getVideoEntry1(directory);
     v.metadata.creationDate = Date.now() - 60 * 60 * 24 * 7 * 1000;
+    v.metadata.creationDateOffset = "+02:00";
     gpx = TestHelper.getRandomizedGPXEntry(directory);
     p4 = TestHelper.getPhotoEntry4(subDir2);
-    p4.metadata.creationDate = Date.now() - 60 * 60 * 24 * 366 * 1000;
+    let d = new Date();
+    //set creation date to one year and one day earlier
+    p4.metadata.creationDate = d.getTime() - 60 * 60 * 24 * (Utils.isDateFromLeapYear(d) ? 367 : 366) * 1000;
+    p4.metadata.creationDateOffset = "+02:00";
     const pFaceLessTmp = TestHelper.getPhotoEntry3(subDir);
     delete pFaceLessTmp.metadata.faces;
-    pFaceLessTmp.metadata.creationDate = Date.now() - 60 * 60 * 24 * 32 * 1000;
+    d = new Date();
+    //we create a date 1 month and 1 day before now
+    d = Utils.addMonthToDate(d, -1); //subtract 1 month in the "human way"
+    d.setDate(d.getDate()-1); //subtract 1 day
+    pFaceLessTmp.metadata.creationDate = d.getTime();
+    pFaceLessTmp.metadata.creationDateOffset = "+02:00";
 
     dir = await DBTestHelper.persistTestDir(directory);
     subDir = dir.directories[0];
@@ -937,13 +948,16 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         await setUpSqlDB();
         p5 = TestHelper.getBasePhotoEntry(subDir2, 'p5-23h-ago.jpg');
         p5.metadata.creationDate = Date.now() - 60 * 60 * 24 * 1000 - 1000;
+        //p5.metadata.creationDateOffset = "+02:00";
         p6 = TestHelper.getBasePhotoEntry(subDir2, 'p6-300d-ago.jpg');
         p6.metadata.creationDate = Date.now() - 60 * 60 * 24 * 300 * 1000;
+        //p6.metadata.creationDateOffset = "+02:00";
         p7 = TestHelper.getBasePhotoEntry(subDir2, 'p7-1y-1min-ago.jpg');
         const d = new Date();
         d.setUTCFullYear(d.getUTCFullYear() - 1);
         d.setUTCMinutes(d.getUTCMinutes() - 1);
         p7.metadata.creationDate = d.getTime();
+        //p7.metadata.creationDateOffset = "+02:00";
 
         subDir2 = await DBTestHelper.persistTestDir(subDir2) as any;
         p4 = subDir2.media[0];

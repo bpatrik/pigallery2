@@ -18,7 +18,7 @@ export class MessengerRepository {
     return Object.values(this.messengers);
   }
 
-  remove(m: Messenger<Record<string, unknown>>): void {
+  remove(m: { Name: string }): void {
     if (!this.messengers[m.Name]) {
       throw new Error('Messenger does not exist:' + m.Name);
     }

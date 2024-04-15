@@ -20,10 +20,13 @@ import {
 import {DirectoryBaseDTO, DirectoryPathDTO} from '../src/common/entities/DirectoryDTO';
 import {FileDTO} from '../src/common/entities/FileDTO';
 import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
+import * as path from 'path';
 
 export class TestHelper {
 
   static creationCounter = 0;
+
+  public static readonly TMP_DIR= path.join(__dirname, './tmp');
 
   public static getDirectoryEntry(parent: DirectoryBaseDTO = null, name = 'wars dir'): DirectoryEntity {
 
@@ -55,6 +58,7 @@ export class TestHelper {
     m.caption = null;
     m.size = sd;
     m.creationDate = 1656069387772;
+    m.creationDateOffset = "+02:00"
     m.fileSize = 123456789;
     // m.rating = 0; no rating by default
 
@@ -101,6 +105,7 @@ export class TestHelper {
     m.positionData = pd;
     m.size = sd;
     m.creationDate = 1656069387772;
+    m.creationDateOffset = "-05:00";
     m.fileSize = 123456789;
     // m.rating = 0; no rating by default
 
@@ -177,6 +182,7 @@ export class TestHelper {
     p.metadata.positionData.GPSData.latitude = 10;
     p.metadata.positionData.GPSData.longitude = 10;
     p.metadata.creationDate = 1656069387772 - 1000;
+    p.metadata.creationDateOffset = "+00:00";
     p.metadata.rating = 1;
     p.metadata.size.height = 1000;
     p.metadata.size.width = 1000;
@@ -215,6 +221,7 @@ export class TestHelper {
     p.metadata.positionData.GPSData.latitude = -10;
     p.metadata.positionData.GPSData.longitude = -10;
     p.metadata.creationDate = 1656069387772 - 2000;
+    p.metadata.creationDateOffset = "+11:00";
     p.metadata.rating = 2;
     p.metadata.size.height = 2000;
     p.metadata.size.width = 1000;
@@ -247,6 +254,7 @@ export class TestHelper {
     p.metadata.positionData.GPSData.latitude = 10;
     p.metadata.positionData.GPSData.longitude = 15;
     p.metadata.creationDate = 1656069387772 - 3000;
+    p.metadata.creationDateOffset = "-03:45";
     p.metadata.rating = 3;
     p.metadata.size.height = 1000;
     p.metadata.size.width = 2000;
@@ -275,6 +283,7 @@ export class TestHelper {
     p.metadata.positionData.GPSData.latitude = 15;
     p.metadata.positionData.GPSData.longitude = 10;
     p.metadata.creationDate = 1656069387772 - 4000;
+    p.metadata.creationDateOffset = "+04:30";
     p.metadata.size.height = 3000;
     p.metadata.size.width = 2000;
 
@@ -394,6 +403,7 @@ export class TestHelper {
       positionData: pd,
       size: sd,
       creationDate: Date.now() + ++TestHelper.creationCounter,
+      creationDateOffset: "+01:00",
       fileSize: rndInt(10000),
       caption: rndStr(),
       rating: rndInt(5) as any,

@@ -171,7 +171,6 @@ export class SharingMWs {
           sharing,
           forceUpdate
         );
-      console.log(req.resultPipe);
       return next();
     } catch (err) {
       return next(

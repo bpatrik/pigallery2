@@ -4,6 +4,7 @@ import {MediaDimension, MediaDTO, MediaMetadata,} from '../../../../common/entit
 import {PersonJunctionTable} from './PersonJunctionTable';
 import {columnCharsetCS} from './EntityUtils';
 import {CameraMetadata, FaceRegion, GPSMetadata, PositionMetaData,} from '../../../../common/entities/PhotoDTO';
+import { Utils } from '../../../../common/Utils';
 
 export class MediaDimensionEntity implements MediaDimension {
   @Column('int')
@@ -86,6 +87,9 @@ export class MediaMetadataEntity implements MediaMetadata {
   @Column('text')
   caption: string;
 
+  @Column('text')
+  title?: string;
+
   @Column(() => MediaDimensionEntity)
   size: MediaDimensionEntity;
 
@@ -102,6 +106,15 @@ export class MediaMetadataEntity implements MediaMetadata {
   })
   @Index()
   creationDate: number;
+  
+  @Column('smallint', {
+    transformer: {
+      from: (v) => Utils.getOffsetString(v), //from database repr. as smallint (minutes) to string (+/-HH:MM)
+      to: (v) => Utils.getOffsetMinutes(v), //from entiry repr. as string (+/-HH:MM) to smallint (minutes)
+    },
+  })
+  creationDateOffset?: string;
+
 
   @Column('int', {unsigned: true})
   fileSize: number;

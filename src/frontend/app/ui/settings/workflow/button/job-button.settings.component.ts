@@ -1,10 +1,13 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
 import {NotificationService} from '../../../../model/notification.service';
 import {JobDTOUtils} from '../../../../../../common/entities/job/JobDTO';
 import {BackendtextService} from '../../../../model/backendtext.service';
+import {BsModalRef} from 'ngx-bootstrap/modal';
+import {BsModalService} from '../../../../../../../node_modules/ngx-bootstrap/modal';
+import {ConfigStyle} from '../../settings.service';
 
 @Component({
   selector: 'app-settings-job-button',
@@ -21,10 +24,12 @@ export class JobButtonComponent {
   @Input() danger = false;
   JobProgressStates = JobProgressStates;
   @Output() jobError = new EventEmitter<string>();
+  private modalRef: BsModalRef;
 
   constructor(
     private notification: NotificationService,
     public jobsService: ScheduledJobsService,
+    private modalService: BsModalService,
     public backendTextService: BackendtextService
   ) {
   }
@@ -53,6 +58,28 @@ export class JobButtonComponent {
       JobDTOUtils.getHashName(this.jobName, this.config)
       ];
   }
+
+
+  public hideModal(): void {
+    this.modalRef.hide();
+    this.modalRef = null;
+  }
+
+  public async openModal(template: TemplateRef<unknown>): Promise<void> {
+    // if we show the button in short form (at the jobs settings),
+    // we assume users know what they are doing,
+    // so we do not show a confirm window.
+    if(this.shortName){
+      await this.start();
+      return;
+    }
+    this.modalRef = this.modalService.show(template, {
+      class: 'modal-lg',
+    });
+    document.body.style.paddingRight = '0px';
+  }
+
+
 
   public async start(): Promise<boolean> {
     this.jobError.emit('');
@@ -98,6 +125,8 @@ export class JobButtonComponent {
     }
     return false;
   }
+
+  protected readonly ConfigStyle = ConfigStyle;
 }
 
 

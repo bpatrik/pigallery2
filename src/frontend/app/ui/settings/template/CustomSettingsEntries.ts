@@ -1,5 +1,15 @@
 import {propertyTypes} from 'typeconfig/common';
-import {ClientGroupingConfig, ClientSortingConfig, SVGIconConfig} from '../../../../../common/config/public/ClientConfig';
+import {
+  ClientGroupingConfig,
+  ClientSortingConfig,
+  MapLayers,
+  MapPathGroupConfig,
+  MapPathGroupThemeConfig,
+  NavigationLinkConfig,
+  SVGIconConfig,
+  ThemeConfig
+} from '../../../../../common/config/public/ClientConfig';
+import {JobScheduleConfig, UserConfig} from '../../../../../common/config/private/PrivateConfig';
 
 /**
  * Configuration in these class have a custom UI
@@ -8,6 +18,13 @@ export class CustomSettingsEntries {
   public static readonly entries = [
     {c: ClientSortingConfig, name: 'ClientSortingConfig'},
     {c: ClientGroupingConfig, name: 'ClientGroupingConfig'},
+    {c: MapLayers, name: 'MapLayers'},
+    {c: JobScheduleConfig, name: 'JobScheduleConfig'},
+    {c: UserConfig, name: 'UserConfig'},
+    {c: NavigationLinkConfig, name: 'NavigationLinkConfig'},
+    {c: MapPathGroupThemeConfig, name: 'MapPathGroupThemeConfig'},
+    {c: MapPathGroupConfig, name: 'MapPathGroupConfig'},
+    {c: ThemeConfig, name: 'ThemeConfig'},
     {c: SVGIconConfig, name: 'SVGIconConfig'},
   ];
 
@@ -46,7 +63,7 @@ export class CustomSettingsEntries {
     return cN;
   }
 
-  public static iS(s: { tags?: { uiType?: string }, type?: propertyTypes }) {
+  public static iS(s: { tags?: { uiType?: string }, type?: propertyTypes, arrayType?: propertyTypes }) {
     const c = this.getConfigName(s);
     return this.entries.findIndex(e => e.name == c) !== -1;
   }

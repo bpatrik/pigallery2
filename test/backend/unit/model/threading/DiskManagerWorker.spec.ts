@@ -24,12 +24,11 @@ describe('DiskMangerWorker', () => {
     ProjectPath.ImageFolder = path.join(__dirname, '/../../../assets');
     const dir = await DiskManager.scanDirectory('/');
     // should match the number of media (photo/video) files in the assets folder
-    expect(dir.media.length).to.be.equals(11);
+    expect(dir.media.length).to.be.equals(16);
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const expected = require(path.join(__dirname, '/../../../assets/test image öüóőúéáű-.,.json'));
     const i = dir.media.findIndex(m => m.name === 'test image öüóőúéáű-.,.jpg');
     expect(Utils.clone(dir.media[i].name)).to.be.deep.equal('test image öüóőúéáű-.,.jpg');
     expect(Utils.clone(dir.media[i].metadata)).to.be.deep.equal(expected);
   });
-
 });

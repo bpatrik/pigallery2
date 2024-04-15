@@ -10,6 +10,9 @@ import {SuperAgentStatic} from 'superagent';
 import {RouteTestingHelper} from './RouteTestingHelper';
 import {QueryParams} from '../../../../src/common/QueryParams';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
+import {TestHelper} from '../../../TestHelper';
+import {createLoggerWrapper} from '../../../../src/backend/Logger';
+import {ProjectPath} from '../../../../src/backend/ProjectPath';
 
 
 process.env.NODE_ENV = 'test';
@@ -29,16 +32,17 @@ describe('PublicRouter', () => {
     permissions: null
   };
   const {password: pass, ...expectedUser} = testUser;
-  const tempDir = path.join(__dirname, '../../tmp');
+
   let server: Server;
   const setUp = async () => {
-    await fs.promises.rm(tempDir, {recursive: true, force: true});
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
     Config.Users.authenticationRequired = true;
     Config.Sharing.enabled = true;
     Config.Database.type = DatabaseType.sqlite;
-    Config.Database.dbFolder = tempDir;
+    Config.Database.dbFolder = TestHelper.TMP_DIR;
+    ProjectPath.reset();
 
-    server = new Server();
+    server = new Server(false);
     await server.onStarted.wait();
 
     await ObjectManagers.getInstance().init();
@@ -47,7 +51,7 @@ describe('PublicRouter', () => {
   };
   const tearDown = async () => {
     await ObjectManagers.reset();
-    await fs.promises.rm(tempDir, {recursive: true, force: true});
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
   };
 
   const shouldHaveInjectedUser = (result: any, user: any) => {

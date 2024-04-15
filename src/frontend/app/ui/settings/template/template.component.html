@@ -3,7 +3,7 @@
     <div class="card-header">
       <h5 class="d-inline-block mb-0">
         <ng-icon [name]="icon"></ng-icon>
-        {{Name}}
+        {{ Name }}
       </h5>
       <div *ngIf="states.value.enabled !== undefined" class="float-end p-0">
 
@@ -22,7 +22,7 @@
       </div>
     </div>
     <div class="card-body">
-      <div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{error}}</div>
+      <div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error }}</div>
       <ng-container *ngIf="states.value.enabled !== false">
         <ng-container
           *ngTemplateOutlet="Recursion; context:{ rStates: states,topLevel:true,confPath:ConfigPath,skipJobs:true }"
@@ -31,7 +31,7 @@
 
       <div class="panel-info"
            *ngIf="states.value.enabled === false">
-        {{Name}} <span i18n>config is not supported with these settings.</span>
+        {{ Name }} <span i18n>config is not supported with these settings.</span>
       </div>
       <div class="row mt-2">
         <div class="col-auto" *ngIf="states.tags?.uiJob && !states.tags?.uiJob[0].description">
@@ -72,46 +72,71 @@
                let-confPath="confPath">
     <div class="alert alert-secondary" role="alert"
          *ngIf="rStates.description && settingsService.configStyle == ConfigStyle.full">
-      <ng-icon size="1.3em"  name="ionInformationCircleOutline"></ng-icon>  {{rStates.description}}
+      <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+      {{ rStates.description }}
       <a *ngIf="rStates.tags?.githubIssue"
          [href]="'https://github.com/bpatrik/pigallery2/issues/'+rStates.tags?.githubIssue">
         <ng-container i18n>See</ng-container>
-        #{{rStates.tags?.githubIssue}}.</a>
+        #{{ rStates.tags?.githubIssue }}.</a>
     </div>
     <ng-container *ngFor="let ck of getKeys(rStates)">
       <ng-container *ngIf="!(rStates.value.__state[ck].shouldHide && rStates.value.__state[ck].shouldHide())">
-        <app-settings-entry
-          *ngIf="(ck!=='enabled' || !topLevel) && !isExpandableConfig(rStates.value.__state[ck])"
-          [name]="confPath+'_'+ck"
-          [ngModel]="rStates?.value.__state[ck]">
-        </app-settings-entry>
-        <ng-container *ngIf="isExpandableConfig(rStates.value.__state[ck])">
-          <div class="card mt-2 mb-2" *ngIf="topLevel && rStates?.value.__state[ck].tags?.uiIcon"
-               [id]="ConfigPath+'.'+ck">
-            <div class="card-body">
-              <h5 class="card-title">
-                <ng-icon [name]="rStates?.value.__state[ck].tags?.uiIcon"></ng-icon>
-                {{rStates?.value.__state[ck].tags?.name || ck}}
-              </h5>
-              <ng-container
-                *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
-              ></ng-container>
+        <!-- is array -->
+        <ng-container *ngIf="rStates.value.__state[ck].isConfigArrayType && isExpandableArrayConfig(rStates.value.__state[ck])">
+          <div class="row">
+            <div class="col-auto">
+              <h5>{{ rStates?.value.__state[ck].tags?.name || ck }}</h5>
+            </div>
+            <div class="col mt-2">
+              <div class="row mt-2" *ngFor="let entry of rStates.value.__state[ck].value; let i = index">
+                <hr/>
+                <ng-container
+                  *ngTemplateOutlet="Recursion; context:{ rStates: {value: rStates.value.__state[ck].value[i]}, confPath:confPath+'.'+ck+'.'+i }"
+                ></ng-container>
+              </div>
             </div>
           </div>
-          <ng-container *ngIf="!topLevel || !rStates?.value.__state[ck].tags?.uiIcon">
-            <div class="row mt-2">
-              <div class="col-auto">
-                <h5>{{rStates?.value.__state[ck].tags?.name || ck}}</h5>
-              </div>
-              <div class="col">
-                <hr/>
+        </ng-container>
+
+        <ng-container *ngIf="!rStates.value.__state[ck].isConfigArrayType || !isExpandableArrayConfig(rStates.value.__state[ck])">
+
+          <!-- simple entries or complex once's but with custom UI--->
+          <app-settings-entry
+            *ngIf="(ck!=='enabled' || !topLevel) && !isExpandableConfig(rStates.value.__state[ck])"
+            [name]="confPath+'_'+ck"
+            [ngModel]="rStates?.value.__state[ck]">
+          </app-settings-entry>
+          <!-- Config entries --->
+          <ng-container *ngIf="isExpandableConfig(rStates.value.__state[ck]) && rStates.value.__state[ck].value">
+            <!-- Sub category with header and menu item -->
+            <div class="card mt-2 mb-2" *ngIf="topLevel && rStates?.value.__state[ck].tags?.uiIcon"
+                 [id]="ConfigPath+'.'+ck">
+              <div class="card-body">
+                <h5 class="card-title">
+                  <ng-icon [name]="rStates?.value.__state[ck].tags?.uiIcon"></ng-icon>
+                  {{ rStates?.value.__state[ck].tags?.name || ck }}
+                </h5>
+                <ng-container
+                  *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
+                ></ng-container>
               </div>
             </div>
-            <div class="mt-2">
-              <ng-container
-                *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
-              ></ng-container>
-            </div>
+            <!-- Sub category without header and menu item -->
+            <ng-container *ngIf="!topLevel || !rStates?.value.__state[ck].tags?.uiIcon">
+              <div class="row mt-2">
+                <div class="col-auto">
+                  <h5>{{ rStates?.value.__state[ck].tags?.name || ck }}</h5>
+                </div>
+                <div class="col">
+                  <hr/>
+                </div>
+              </div>
+              <div class="mt-2">
+                <ng-container
+                  *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
+                ></ng-container>
+              </div>
+            </ng-container>
           </ng-container>
         </ng-container>
       </ng-container>
@@ -125,12 +150,14 @@
       ></ng-container>
     </div>
   </ng-template>
+
   <ng-template #JobTemplate let-uiJob="uiJob">
     <div class="mb-2">
       <ng-container *ngFor="let job of uiJob; let i = index">
         <div class="alert alert-secondary" role="alert"
              *ngIf="job.description  && settingsService.configStyle == ConfigStyle.full">
-          <ng-icon size="1.3em"  name="ionInformationCircleOutline"></ng-icon>  {{job.description}}
+          <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+          {{ job.description }}
         </div>
         <app-settings-job-button
           *ngIf="!job.relevant || job.relevant(settingsService.settings | async)"
@@ -144,6 +171,7 @@
 
     </div>
   </ng-template>
+
   <ng-template #JobProcessTemplate let-uiJob="uiJob">
     <div>
       <ng-container *ngFor="let job of uiJob">

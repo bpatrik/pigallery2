@@ -1,0 +1,25 @@
+{
+  "size": {
+    "width": 300,
+    "height": 200
+  },
+  "creationDate": 1600512957000,
+  "creationDateOffset": "+10:00",
+  "fileSize": 22755,
+  "cameraData": {
+    "model": "ILCE-7RM3",
+    "make": "Sony"
+  },
+  "positionData": {
+    "GPSData": {
+      "longitude": 151.210381,
+      "latitude": -33.855698
+    },
+    "country": "Australien",
+    "state": "New South Wales",
+    "city": "Dawes Point"
+  },
+  "keywords": [
+    "Sydney Opera House"
+  ]
+}

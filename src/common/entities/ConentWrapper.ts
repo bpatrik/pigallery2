@@ -79,6 +79,11 @@ export class ContentWrapper {
       (media as MediaDTO).metadata['t'] = (media as MediaDTO).metadata.creationDate / 1000; // skip millies
       delete (media as MediaDTO).metadata.creationDate;
 
+      if ((media as MediaDTO).metadata.creationDateOffset) {
+        // @ts-ignore
+        (media as MediaDTO).metadata['o'] = Utils.getOffsetMinutes((media as MediaDTO).metadata.creationDateOffset); // offset in minutes
+        delete (media as MediaDTO).metadata.creationDateOffset;
+      }
 
       if ((media as PhotoDTO).metadata.rating) {
         // @ts-ignore
@@ -336,6 +341,14 @@ export class ContentWrapper {
         (media as PhotoDTO).metadata.creationDate = (media as PhotoDTO).metadata['t'] * 1000;
         // @ts-ignore
         delete (media as PhotoDTO).metadata['t'];
+      }
+
+      // @ts-ignore
+      if (typeof (media as PhotoDTO).metadata['o'] !== 'undefined') {
+        // @ts-ignore
+        (media as PhotoDTO).metadata.creationDateOffset = Utils.getOffsetString((media as PhotoDTO).metadata['o']) ;//convert offset from minutes to String
+        // @ts-ignore
+        delete (media as PhotoDTO).metadata['o'];
       }
 
       // @ts-ignore

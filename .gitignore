@@ -1,3 +1,4 @@
+.angular/
 .idea/
 PiGallery2.iml
 node_modules/
@@ -8,10 +9,15 @@ src/frontend/dist
 test/coverage
 test/backend/**/*.js
 test/backend/**/*.js.map
+test/frontend/**/*.js
+test/frontend/**/*.js.map
 test/common/**/*.js
 test/common/**/*.js.map
 test/e2e/**/*.js
 test/e2e/**/*.js.map
+test/*.js
+test/*.js.map
+test/tmp/*
 benchmark/**/*.js
 benchmark/**/*.js.map
 gulpfile.js
@@ -33,3 +39,9 @@ test.*
 /test/cypress/screenshots/
 /extensions/
 /extension/lib/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+/coverage/
+.nyc_output/
+.vscode*

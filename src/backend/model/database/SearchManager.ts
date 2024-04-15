@@ -364,7 +364,7 @@ export class SearchManager {
     for (const sort of sortings) {
       switch (sort.method) {
         case SortByTypes.Date:
-          query.addOrderBy('media.metadata.creationDate', sort.ascending ? 'ASC' : 'DESC');
+          query.addOrderBy('media.metadata.creationDate', sort.ascending ? 'ASC' : 'DESC'); //If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). If taken into account, it will alter the sort order. Probably should not be done.
           break;
         case SortByTypes.Rating:
           query.addOrderBy('media.metadata.rating', sort.ascending ? 'ASC' : 'DESC');
@@ -563,7 +563,12 @@ export class SearchManager {
           const textParam: { [key: string]: unknown } = {};
           textParam['from' + queryId] = (query as FromDateSearch).value;
           q.where(
-            `media.metadata.creationDate ${relation} :from${queryId}`,
+            `media.metadata.creationDate ${relation} :from${queryId}`, //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). 
+                                                                       //Example: -600 means in the database UTC-10:00. The time 20:00 in the evening in the UTC-10 timezone, is actually 06:00 the next morning 
+                                                                       //in UTC+00:00. To make search take that into account, one can subtract the offset from the creationDate to "pretend" the photo is taken
+                                                                       //in UTC time. Subtracting -600 minutes (because it's the -10:00 timezone), corresponds to adding 10 hours to the photo's timestamp, thus
+                                                                       //bringing it into the next day as if it was taken at UTC+00:00. Similarly subtracting a positive timezone from a timestamp will "pretend"
+                                                                       //the photo is taken earlier in time (e.g. subtracting 300 from the UTC+05:00 timezone).
             textParam
           );
 
@@ -585,8 +590,8 @@ export class SearchManager {
           const textParam: { [key: string]: unknown } = {};
           textParam['to' + queryId] = (query as ToDateSearch).value;
           q.where(
-            `media.metadata.creationDate ${relation} :to${queryId}`,
-            textParam
+            `media.metadata.creationDate ${relation} :to${queryId}`, //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
+            textParam 
           );
 
           return q;
@@ -759,7 +764,7 @@ export class SearchManager {
             tq.frequency === DatePatternFrequency.days_ago)) {
 
             if (isNaN(tq.agoNumber)) {
-              throw new Error('ago number is missing on date patter search query with frequency: ' + DatePatternFrequency[tq.frequency] + ', ago number: ' + tq.agoNumber);
+              throw new Error('ago number is missing on date pattern search query with frequency: ' + DatePatternFrequency[tq.frequency] + ', ago number: ' + tq.agoNumber);
             }
             const to = new Date();
             to.setHours(0, 0, 0, 0);
@@ -774,7 +779,7 @@ export class SearchManager {
                 break;
 
               case DatePatternFrequency.months_ago:
-                to.setUTCMonth(to.getUTCMonth() - tq.agoNumber);
+                to.setTime(Utils.addMonthToDate(to, -1 * tq.agoNumber).getTime());
                 break;
 
               case DatePatternFrequency.years_ago:
@@ -790,15 +795,15 @@ export class SearchManager {
             if (tq.negate) {
 
               q.where(
-                `media.metadata.creationDate >= :to${queryId}`,
+                `media.metadata.creationDate >= :to${queryId}`,            //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                 textParam
-              ).orWhere(`media.metadata.creationDate < :from${queryId}`,
+              ).orWhere(`media.metadata.creationDate < :from${queryId}`,   //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                 textParam);
             } else {
               q.where(
-                `media.metadata.creationDate < :to${queryId}`,
+                `media.metadata.creationDate < :to${queryId}`,             //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                 textParam
-              ).andWhere(`media.metadata.creationDate >= :from${queryId}`,
+              ).andWhere(`media.metadata.creationDate >= :from${queryId}`, //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                 textParam);
             }
 
@@ -821,10 +826,12 @@ export class SearchManager {
               if (Config.Database.type === DatabaseType.sqlite) {
                 if (tq.daysLength == 0) {
                   q.where(
+                    //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                     `CAST(strftime('${duration}',media.metadataCreationDate/1000, 'unixepoch') AS INTEGER) ${relationEql} CAST(strftime('${duration}','now') AS INTEGER)`
                   );
                 } else {
                   q.where(
+                    //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                     `CAST(strftime('${duration}',media.metadataCreationDate/1000, 'unixepoch') AS INTEGER) ${relationTop} CAST(strftime('${duration}','now') AS INTEGER)`
                   )[whereFN](`CAST(strftime('${duration}',media.metadataCreationDate/1000, 'unixepoch') AS INTEGER) ${relationBottom} CAST(strftime('${duration}','now','-:diff${queryId} day') AS INTEGER)`,
                     textParam);
@@ -832,10 +839,12 @@ export class SearchManager {
               } else {
                 if (tq.daysLength == 0) {
                   q.where(
+                    //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                     `CAST(FROM_UNIXTIME(media.metadataCreationDate/1000, '${duration}') AS SIGNED) ${relationEql} CAST(DATE_FORMAT(CURDATE(),'${duration}') AS SIGNED)`
                   );
                 } else {
                   q.where(
+                    //TODO: If media.metadata.creationDateOffset is defined, it is an offset of minutes (+/-). See explanation above.
                     `CAST(FROM_UNIXTIME(media.metadataCreationDate/1000, '${duration}') AS SIGNED) ${relationTop} CAST(DATE_FORMAT(CURDATE(),'${duration}') AS SIGNED)`
                   )[whereFN](`CAST(FROM_UNIXTIME(media.metadataCreationDate/1000, '${duration}') AS SIGNED) ${relationBottom} CAST(DATE_FORMAT((DATE_ADD(curdate(), INTERVAL -:diff${queryId} DAY)),'${duration}') AS SIGNED)`,
                     textParam);
@@ -844,15 +853,16 @@ export class SearchManager {
             };
             switch (tq.frequency) {
               case DatePatternFrequency.every_year:
-                if (tq.daysLength >= 365) { // trivial result includes all photos
+                const d = new Date();
+                if (tq.daysLength >= (Utils.isDateFromLeapYear(d) ? 366: 365)) { // trivial result includes all photos
                   if (tq.negate) {
                     q.andWhere('FALSE');
                   }
                   return q;
                 }
-                const d = new Date();
-                const dayOfYear = Math.floor((d.getTime() - new Date(d.getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
-                addWhere('%j', dayOfYear - tq.daysLength < 0);
+                
+                const dayOfYear = Utils.getDayOfYear(d);
+                addWhere('%m%d', dayOfYear - tq.daysLength < 0);
                 break;
               case DatePatternFrequency.every_month:
                 if (tq.daysLength >= 31) { // trivial result includes all photos

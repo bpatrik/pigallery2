@@ -1,0 +1,48 @@
+{
+  "size": {
+    "width": 1920,
+    "height": 1080
+  },
+  "creationDate": 1706616000000,
+  "fileSize": 111050,
+  "positionData": {
+    "GPSData": {
+      "longitude": 14.162922,
+      "latitude": 57.780696
+    },
+    "country": "Sverige",
+    "state": "Jönköping",
+    "city": "Jönköping"
+  },
+  "keywords": [
+  ],
+  "faces": [
+    {
+      "box": {
+        "width": 206,
+        "height": 257,
+        "left": 566,
+        "top": 144
+      },
+      "name": "æÆøØåÅéÉüÜäÄöÖïÏñÑ"
+    },
+    {
+      "name": "abcdefghijklmnopqrstuvwxyz",
+      "box": {
+        "width": 212,
+        "height": 265,
+        "left": 866,
+        "top": 144
+      }
+    },
+    {
+      "name": "abcdefghijklmnopqrstuvwxyz",
+      "box": {
+        "width": 212,
+        "height": 265,
+        "left": 1162,
+        "top": 150
+      }
+    }
+  ]
+}

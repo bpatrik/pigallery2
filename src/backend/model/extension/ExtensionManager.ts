@@ -36,7 +36,7 @@ export class ExtensionManager implements IObjectManager {
       return;
     }
     this.router = express.Router();
-    Server.getInstance().app.use(ExtensionManager.EXTENSION_API_PATH, this.router);
+    Server.instance?.app.use(ExtensionManager.EXTENSION_API_PATH, this.router);
     this.loadExtensionsList();
     await this.initExtensions();
   }
@@ -54,6 +54,7 @@ export class ExtensionManager implements IObjectManager {
           invalidateDirectoryCovers: new ExtensionEvent(),
         },
         DiskManager: {
+          excludeDir: new ExtensionEvent(),
           scanDirectory: new ExtensionEvent()
         },
         ImageRenderer: {
@@ -70,13 +71,16 @@ export class ExtensionManager implements IObjectManager {
       return;
     }
 
-    Config.Extensions.list = fs
+
+    const extList = fs
       .readdirSync(ProjectPath.ExtensionFolder)
       .filter((f): boolean =>
         fs.statSync(path.join(ProjectPath.ExtensionFolder, f)).isDirectory()
       );
-    Config.Extensions.list.sort();
-    Logger.debug(LOG_TAG, 'Extensions found ', JSON.stringify(Config.Extensions.list));
+    extList.sort();
+
+
+    Logger.debug(LOG_TAG, 'Extensions found: ', JSON.stringify(Config.Extensions.extensions.map(ec => ec.path)));
   }
 
   private createUniqueExtensionObject(name: string, folder: string): IExtensionObject<unknown> {
@@ -95,9 +99,13 @@ export class ExtensionManager implements IObjectManager {
 
   private async initExtensions() {
 
-    for (let i = 0; i < Config.Extensions.list.length; ++i) {
-      const extFolder = Config.Extensions.list[i];
+    for (let i = 0; i < Config.Extensions.extensions.length; ++i) {
+      const extFolder = Config.Extensions.extensions[i].path;
       let extName = extFolder;
+
+      if (Config.Extensions.extensions[i].enabled === false) {
+        Logger.silly(LOG_TAG, `Skipping ${extFolder} initiation. Extension is disabled.`);
+      }
       const extPath = path.join(ProjectPath.ExtensionFolder, extFolder);
       const serverExtPath = path.join(extPath, 'server.js');
       const packageJsonPath = path.join(extPath, 'package.json');
@@ -107,10 +115,14 @@ export class ExtensionManager implements IObjectManager {
       }
 
       if (fs.existsSync(packageJsonPath)) {
-        Logger.silly(LOG_TAG, `Running: "npm install --prefer-offline --no-audit --progress=false --omit=dev" in ${extPath}`);
-        await exec('npm install  --no-audit --progress=false --omit=dev', {
-          cwd: extPath
-        });
+        if (fs.existsSync(path.join(extPath, 'node_modules'))) {
+          Logger.debug(LOG_TAG, `node_modules folder exists. Skipping "npm install".`);
+        } else {
+          Logger.silly(LOG_TAG, `Running: "npm install --prefer-offline --no-audit --progress=false --omit=dev" in ${extPath}`);
+          await exec('npm install  --no-audit --progress=false --omit=dev', {
+            cwd: extPath
+          });
+        }
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const pkg = require(packageJsonPath);
         if (pkg.name) {
@@ -122,7 +134,7 @@ export class ExtensionManager implements IObjectManager {
       const ext = require(serverExtPath);
       if (typeof ext?.init === 'function') {
         Logger.debug(LOG_TAG, 'Running init on extension: ' + extFolder);
-        await ext?.init(this.createUniqueExtensionObject(extName, extPath));
+        await ext?.init(this.createUniqueExtensionObject(extName, extFolder));
       }
     }
     if (Config.Extensions.cleanUpUnusedTables) {
@@ -151,7 +163,7 @@ export class ExtensionManager implements IObjectManager {
     }
     this.initEvents(); // reset events
     await this.cleanUpExtensions();
-    Server.getInstance().app.use(ExtensionManager.EXTENSION_API_PATH, express.Router());
+    Server.instance?.app.use(ExtensionManager.EXTENSION_API_PATH, this.router);
     this.extObjects = {};
   }
 }

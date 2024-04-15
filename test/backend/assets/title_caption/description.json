@@ -1,0 +1,35 @@
+{
+  "size": {
+    "width": 3144,
+    "height": 2288
+  },
+  "creationDate": -2195790002000,
+  "fileSize": 8909621,
+  "keywords": [],
+  "faces": [
+    {
+      "name": "Hulda Stein",
+      "box": {
+        "width": 645,
+        "height": 645,
+        "left": 1919,
+        "top": 547
+      }
+    },
+    {
+      "name": "John Amschler",
+      "box": {
+        "width": 709,
+        "height": 709,
+        "left": 544,
+        "top": 394
+      }
+    }
+  ],
+  "cameraData": {
+    "make": "NIKON CORPORATION",
+    "model": "NIKON D200"
+  },
+  "caption": "Hulda and John's Wedding",
+  "title": "The Wedding"
+}

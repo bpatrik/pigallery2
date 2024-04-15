@@ -37,12 +37,14 @@
       *ngIf="isOpen()"
       #controls
       [activePhoto]="activePhoto"
+      [slideShowRunning]="slideShowRunning"
       (closed)="hide()"
       [navigation]="navigation"
       (nextPhoto)="nextImage()"
       (previousPhoto)="prevImage()"
       (toggleInfoPanel)="toggleInfoPanel()"
       (toggleFullScreen)="toggleFullscreen()"
+      (togglePlayback)="togglePlayback($event)"
       [photoFrameDim]="photoFrameDim"
       [mediaElement]="mediaElement">
     </app-lightbox-controls>

@@ -1,12 +1,12 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
-import {Logger} from '../../Logger';
 import {Config} from '../../../common/config/private/Config';
 import {ConfigDiagnostics} from '../../model/diagnostics/ConfigDiagnostics';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {TAGS} from '../../../common/config/public/ClientConfig';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {ExtensionConfigWrapper} from '../../model/extension/ExtensionConfigWrapper';
+import {Logger} from '../../Logger';
 
 const LOG_TAG = '[SettingsMWs]';
 
@@ -21,8 +21,8 @@ export class SettingsMWs {
    */
   public static async updateSettings(req: Request, res: Response, next: NextFunction): Promise<void> {
     if ((typeof req.body === 'undefined')
-        || (typeof req.body.settings === 'undefined')
-        || (typeof req.body.settingsPath !== 'string')) {
+      || (typeof req.body.settings === 'undefined')
+      || (typeof req.body.settingsPath !== 'string')) {
       return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'settings is needed'));
     }
 
@@ -51,8 +51,8 @@ export class SettingsMWs {
       await ConfigDiagnostics.runDiagnostics();
       // restart all schedule timers. In case they have changed
       ObjectManagers.getInstance().JobManager.runSchedules();
-      Logger.info(LOG_TAG, 'new config:');
-      Logger.info(LOG_TAG, JSON.stringify(Config.toJSON({attachDescription: false}), null, '\t'));
+    //  Logger.info(LOG_TAG, 'new config:');
+    //  Logger.info(LOG_TAG, JSON.stringify(Config.toJSON({attachDescription: false}), null, '\t'));
       return next();
     } catch (err) {
       if (err instanceof Error) {

@@ -72,12 +72,12 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   defLayer: TileLayer;
   darkLayer: TileLayer;
   private smallIconSize = new Point(
-    Config.Media.Thumbnail.iconSize * 0.75,
-    Config.Media.Thumbnail.iconSize * 0.75
+    Config.Media.Photo.iconSize * 0.75,
+    Config.Media.Photo.iconSize * 0.75
   );
   private iconSize = new Point(
-    Config.Media.Thumbnail.iconSize,
-    Config.Media.Thumbnail.iconSize
+    Config.Media.Photo.iconSize,
+    Config.Media.Photo.iconSize
   );
   private usedIconSize = this.iconSize;
   private mapLayersControlOption: LeafletControlLayersConfig & {

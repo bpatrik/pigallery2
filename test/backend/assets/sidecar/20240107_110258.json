@@ -1,0 +1,28 @@
+{
+  "cameraData": {
+    "ISO": 40,
+    "exposure": 0.009524,
+    "fStop": 2.2,
+    "focalLength": 3.75,
+    "make": "samsung",
+    "model": "SM-A715F"
+  },
+  "creationDate": 1704625379177,
+  "creationDateOffset": "+01:00",
+  "fileSize": 15126,
+  "size": {
+    "height": 13,
+    "width": 10
+  },
+  "keywords": [
+    "Výlet",
+    "Travel"
+  ],
+  "positionData": {
+    "GPSData": {
+      "latitude": 50.089587,
+      "longitude": 14.39741
+    }
+  },
+  "rating": 3
+}

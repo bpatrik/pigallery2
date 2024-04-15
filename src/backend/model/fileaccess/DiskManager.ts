@@ -49,19 +49,20 @@ export class DiskManager {
     return path.basename(dirPath);
   }
 
-  public static async excludeDir(
+  @ExtensionDecorator(e => e.gallery.DiskManager.excludeDir)
+  public static async excludeDir(dir: {
     name: string,
-    relativeDirectoryName: string,
-    absoluteDirectoryName: string
-  ): Promise<boolean> {
+    parentDirRelativeName: string,
+    parentDirAbsoluteName: string
+  }): Promise<boolean> {
     if (
       Config.Indexing.excludeFolderList.length === 0 &&
       Config.Indexing.excludeFileList.length === 0
     ) {
       return false;
     }
-    const absoluteName = path.normalize(path.join(absoluteDirectoryName, name));
-    const relativeName = path.normalize(path.join(relativeDirectoryName, name));
+    const absoluteName = path.normalize(path.join(dir.parentDirAbsoluteName, dir.name));
+    const relativeName = path.normalize(path.join(dir.parentDirRelativeName, dir.name));
 
     for (const exclude of Config.Indexing.excludeFolderList) {
       if (exclude.startsWith('/')) {
@@ -73,7 +74,7 @@ export class DiskManager {
           return true;
         }
       } else {
-        if (exclude === name) {
+        if (exclude === dir.name) {
           return true;
         }
       }
@@ -155,11 +156,11 @@ export class DiskManager {
           if (
             settings.noDirectory === true ||
             settings.coverOnly === true ||
-            (await DiskManager.excludeDir(
-              file,
-              relativeDirectoryName,
-              absoluteDirectoryName
-            ))
+            (await DiskManager.excludeDir({
+              name: file,
+              parentDirRelativeName: relativeDirectoryName,
+              parentDirAbsoluteName: absoluteDirectoryName
+            }))
           ) {
             continue;
           }

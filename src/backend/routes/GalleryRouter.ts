@@ -7,7 +7,6 @@ import {UserRoles} from '../../common/entities/UserDTO';
 import {ThumbnailSourceType} from '../model/fileaccess/PhotoWorker';
 import {VersionMWs} from '../middlewares/VersionMWs';
 import {SupportedFormats} from '../../common/SupportedFormats';
-import {PhotoConverterMWs} from '../middlewares/thumbnail/PhotoConverterMWs';
 import {ServerTimingMWs} from '../middlewares/ServerTimingMWs';
 import {MetaFileMWs} from '../middlewares/MetaFileMWs';
 import {Config} from '../../common/config/private/Config';
@@ -16,11 +15,10 @@ export class GalleryRouter {
   public static route(app: Express): void {
     this.addGetImageIcon(app);
     this.addGetVideoIcon(app);
-    this.addGetPhotoThumbnail(app);
-    this.addGetVideoThumbnail(app);
-    this.addGetBestFitImage(app);
-    this.addGetImage(app);
+    this.addGetResizedPhoto(app);
     this.addGetBestFitVideo(app);
+    this.addGetVideoThumbnail(app);
+    this.addGetImage(app);
     this.addGetVideo(app);
     this.addGetMetaFile(app);
     this.addGetBestFitMetaFile(app);
@@ -78,26 +76,6 @@ export class GalleryRouter {
 
         // specific part
         GalleryMWs.loadFile,
-        ServerTimingMWs.addServerTiming,
-        RenderingMWs.renderFile
-    );
-  }
-
-  protected static addGetBestFitImage(app: Express): void {
-    app.get(
-        [
-          Config.Server.apiPath + '/gallery/content/:mediaPath(*.(' +
-          SupportedFormats.Photos.join('|') +
-          '))/bestFit',
-        ],
-        // common part
-        AuthenticationMWs.authenticate,
-        AuthenticationMWs.normalizePathParam('mediaPath'),
-        AuthenticationMWs.authorisePath('mediaPath', false),
-
-        // specific part
-        GalleryMWs.loadFile,
-        PhotoConverterMWs.convertPhoto,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderFile
     );
@@ -197,11 +175,16 @@ export class GalleryRouter {
     );
   }
 
-  protected static addGetPhotoThumbnail(app: Express): void {
+  /**
+   * Used for serving photo thumbnails and previews
+   * @param app
+   * @protected
+   */
+  protected static addGetResizedPhoto(app: Express): void {
     app.get(
         Config.Server.apiPath + '/gallery/content/:mediaPath(*.(' +
         SupportedFormats.Photos.join('|') +
-        '))/thumbnail/:size?',
+        '))/:size',
         // common part
         AuthenticationMWs.authenticate,
         AuthenticationMWs.normalizePathParam('mediaPath'),
@@ -219,7 +202,7 @@ export class GalleryRouter {
     app.get(
         Config.Server.apiPath + '/gallery/content/:mediaPath(*.(' +
         SupportedFormats.Videos.join('|') +
-        '))/thumbnail/:size?',
+        '))/:size?',
         // common part
         AuthenticationMWs.authenticate,
         AuthenticationMWs.normalizePathParam('mediaPath'),

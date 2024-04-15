@@ -4,8 +4,6 @@ import {Config} from '../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils} from '../../../../common/entities/MediaDTO';
 
 export class Media extends MediaIcon {
-  static readonly sortedThumbnailSizes =
-      Config.Media.Thumbnail.thumbnailSizes.sort((a, b): number => a - b);
 
   constructor(
       media: MediaDTO,
@@ -27,8 +25,7 @@ export class Media extends MediaIcon {
   }
 
   getThumbnailSize(): number {
-    const longerEdge = Math.max(this.renderWidth, this.renderHeight);
-    return Utils.findClosestinSorted(longerEdge, Media.sortedThumbnailSizes);
+    return this.getMediaSize(this.renderWidth,this.renderHeight);
   }
 
   getReplacementThumbnailSize(): number {
@@ -37,7 +34,7 @@ export class Media extends MediaIcon {
 
       const size = this.getThumbnailSize();
       if (this.media.missingThumbnails) {
-        for (const thSize of Config.Media.Thumbnail.thumbnailSizes) {
+        for (const thSize of Config.Media.Photo.thumbnailSizes) {
           // eslint-disable-next-line no-bitwise
           if (
               (this.media.missingThumbnails & MediaIcon.ThumbnailMap[thSize]) ===
@@ -73,7 +70,6 @@ export class Media extends MediaIcon {
         Config.Server.apiPath,
         '/gallery/content/',
         this.getRelativePath(),
-        'thumbnail',
         size.toString()
     );
   }
@@ -83,14 +79,6 @@ export class Media extends MediaIcon {
   }
 
   getThumbnailPath(): string {
-    const size = this.getThumbnailSize();
-    return Utils.concatUrls(
-        Config.Server.urlBase,
-        Config.Server.apiPath,
-        '/gallery/content/',
-        this.getRelativePath(),
-        'thumbnail',
-        size.toString()
-    );
+    return this.getBestSizedMediaPath(this.renderWidth,this.renderHeight);
   }
 }

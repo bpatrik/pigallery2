@@ -3,6 +3,7 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {StatisticDTO} from '../../../common/entities/settings/StatisticDTO';
 import {MessengerRepository} from '../../model/messenger/MessengerRepository';
+import {JobStartDTO} from '../../../common/entities/job/JobDTO';
 
 export class AdminMWs {
   public static async loadStatistic(
@@ -81,9 +82,10 @@ export class AdminMWs {
   ): Promise<void> {
     try {
       const id = req.params['id'];
-      const JobConfig: Record<string, unknown> = req.body.config;
-      const soloRun: boolean = req.body.soloRun;
-      const allowParallelRun: boolean = req.body.allowParallelRun;
+      const jobStart: JobStartDTO = req.body;
+      const JobConfig: Record<string, unknown> = jobStart.config;
+      const soloRun: boolean = jobStart.soloRun;
+      const allowParallelRun: boolean = jobStart.allowParallelRun;
       await ObjectManagers.getInstance().JobManager.run(
         id,
         JobConfig,

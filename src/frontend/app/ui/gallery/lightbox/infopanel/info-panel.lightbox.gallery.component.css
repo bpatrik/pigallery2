@@ -27,6 +27,10 @@
   padding-right: 5px;
 }
 
+.caption-body {
+  white-space: pre-wrap;
+}
+
 .yaga-map {
   width: 100%;
   height: 100%;

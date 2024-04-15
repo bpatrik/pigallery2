@@ -58,4 +58,22 @@ describe('Utils', () => {
     expect(Utils.equalsFilter({a: 0}, {b: 0})).to.be.equal(false);
     expect(Utils.equalsFilter({a: 0}, {a: 0})).to.be.equal(true);
   });
+
+  describe('sortableFilename', () => {
+    it('should trim extensions', () => {
+      expect(Utils.sortableFilename("10.jpg")).to.be.equal("10")
+    })
+
+    it('should not trim dotfiles to empty strings', () => {
+      expect(Utils.sortableFilename(".file")).to.be.equal(".file")
+    })
+
+    it('should trim dotfiles with extensions', () => {
+      expect(Utils.sortableFilename(".favourite.jpg")).to.be.equal(".favourite")
+    })
+
+    it('should not trim without dots', () => {
+      expect(Utils.sortableFilename("hello_world")).to.be.equal("hello_world")
+    })
+  })
 });

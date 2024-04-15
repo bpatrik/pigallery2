@@ -67,7 +67,7 @@ describe('Gallery', () => {
     }
 
     cy.get('.photo-container > img[alt="IMG_5910.jpg"]').click({scrollBehavior: 'center'});
-    cy.get('app-lightbox-controls > #controllers-container > .controls-caption').contains('Squirrel at berkely');
+    cy.get('app-lightbox-controls > #controllers-container > .controls-title').contains('Squirrel at berkely');
     cy.get('app-lightbox-controls  .faces-container > .face > .face-name').contains('Alvin the Squirrel');
 
   });
@@ -105,7 +105,7 @@ describe('Gallery', () => {
     cy.get('app-gallery-grid-photo', {timeout: 10000});
     cy.get('.photo-container > img[alt="IMG_5910.jpg"]', {timeout: 10000}); //the main photo should be visible
 
-    cy.get('app-lightbox-controls > #controllers-container > .controls-caption').contains('Squirrel at berkely');
+    cy.get('app-lightbox-controls > #controllers-container > .controls-title').contains('Squirrel at berkely');
     cy.get('app-lightbox-controls  .faces-container > .face > .face-name').contains('Alvin the Squirrel');
 
   });
@@ -120,7 +120,7 @@ describe('Gallery', () => {
     cy.get('app-gallery-grid-photo', {timeout: 10000});
     cy.get('.photo-container > img[alt="IMG_1252.jpg"]', {timeout: 10000}); //the main photo should be visible
 
-    cy.get('app-lightbox-controls > #controllers-container > .controls-caption').contains('This is a super long title with special characters -.,űáéúőpóüö');
+    cy.get('app-lightbox-controls > #controllers-container > .controls-title').contains('This is a super long title with special characters -.,űáéúőpóüö');
     cy.get('app-lightbox-controls  .faces-container > .face > .face-name').should('not.exist');
 
   });
@@ -149,7 +149,7 @@ describe('Gallery - dont wait for content load', () => {
     cy.get('app-gallery-grid-photo', {timeout: 10000});
     cy.get('.photo-container > img[alt="IMG_5910.jpg"]', {timeout: 10000}); //the main photo should be visible
 
-    cy.get('app-lightbox-controls > #controllers-container > .controls-caption').contains('Squirrel at berkely');
+    cy.get('app-lightbox-controls > #controllers-container > .controls-title').contains('Squirrel at berkely');
     cy.get('app-lightbox-controls  .faces-container > .face > .face-name').contains('Alvin the Squirrel');
 
   });
@@ -175,7 +175,7 @@ describe('Gallery - dont wait for content load', () => {
     cy.get('app-gallery-grid-photo', {timeout: 10000});
     cy.get('.photo-container > img[alt="IMG_1252.jpg"]', {timeout: 10000}); //the main photo should be visible
 
-    cy.get('app-lightbox-controls > #controllers-container > .controls-caption').contains('This is a super long title with special characters -.,űáéúőpóüö');
+    cy.get('app-lightbox-controls > #controllers-container > .controls-title').contains('This is a super long title with special characters -.,űáéúőpóüö');
     cy.get('app-lightbox-controls  .faces-container > .face').should('not.exist');
 
   });

@@ -1,6 +1,7 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
 FROM node:18-bullseye AS builder
+RUN apt update && apt install -y --no-install-recommends libvips-dev python3
 COPY pigallery2-release /app
 WORKDIR /app
 RUN npm install --unsafe-perm
@@ -25,7 +26,7 @@ ENV NODE_ENV=production \
 
 EXPOSE 80
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates wget ffmpeg \
+    && apt-get install -y --no-install-recommends ca-certificates wget ffmpeg libvips42 \
     && apt-get clean -q -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /app /app

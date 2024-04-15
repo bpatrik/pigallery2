@@ -13,7 +13,8 @@ In general, I'm happy to merge PRs, but I recommend filling a ticket and ask fir
 1. Download the source files
 2. install dependencies `npm install`
 3. Build client  `npm run run-dev`
-   * This will build the client with english localization and will keep building if you change the source files
+   * This will build the client with english localization and will keep building if you change the source files. 
+   * Note: This process does not exit, so you need another terminal to run the next step.
 4. Build the backend `npm run build-backend`
    * This runs `tsc` that transpiles `.ts` files to `.js` so node can run them. 
      * To rebuild on change run `tsc -w`

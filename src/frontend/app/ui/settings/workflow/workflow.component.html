@@ -1,24 +1,34 @@
-<div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{error}}</div>
+<div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error }}</div>
 <div *ngFor="let schedule of sortedSchedules() as sortedSchedules; let i= index">
   <div
     class="card bg-body-tertiary mt-2 mb-2  no-changed-settings {{shouldIdent(schedule,sortedSchedules[i-1])? 'ms-4' : ''}}">
     <div class="card-header">
       <div class="d-flex justify-content-between">
         <div (click)="showDetails[schedule.name]=!showDetails[schedule.name]">
+          <span
+            *ngIf="!jobsService.isValidJob(schedule.jobName)"
+            triggers="mouseenter:mouseleave"
+            placement="bottom"
+            container="body"
+            [popover]="'Unknown job type: ' + schedule.jobName"
+            class="text-danger me-2">
+          <ng-icon name="ionWarningOutline"></ng-icon>
+          </span>
           <ng-icon style="font-size: 1.3em; margin-left: -4px"
                    [name]="showDetails[schedule.name] ? 'ionChevronDownOutline' : 'ionChevronForwardOutline'"></ng-icon>
-          {{schedule.name}}
+          {{ schedule.name }}
           <ng-container [ngSwitch]="schedule.trigger.type">
             <ng-container *ngSwitchCase="JobTriggerType.periodic">
               <span class="badge bg-primary" i18n>every</span>
-              {{periods[$any(schedule.trigger).periodicity]}} {{atTimeLocal($any(schedule.trigger).atTime) | date:"HH:mm (z)"}}
+              {{ periods[$any(schedule.trigger).periodicity] }} {{ atTimeLocal($any(schedule.trigger).atTime) | date:"HH:mm (z)" }}
             </ng-container>
             <ng-container
-              *ngSwitchCase="JobTriggerType.scheduled">@{{$any(schedule.trigger).time | date:"medium"}}</ng-container>
+              *ngSwitchCase="JobTriggerType.scheduled">@{{ $any(schedule.trigger).time | date:"medium" }}
+            </ng-container>
             <span class="badge bg-secondary" *ngSwitchCase="JobTriggerType.never" i18n>never</span>
             <ng-container *ngSwitchCase="JobTriggerType.after">
               <span class="badge bg-primary" i18n>after</span>
-              {{$any(schedule.trigger).afterScheduleName}}
+              {{ $any(schedule.trigger).afterScheduleName }}
             </ng-container>
           </ng-container>
         </div>
@@ -27,6 +37,7 @@
             <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
           </button>
           <app-settings-job-button class="ms-md-2 mt-2 mt-md-0"
+                                   *ngIf="jobsService.isValidJob(schedule.jobName)"
                                    (jobError)="error=$event"
                                    [allowParallelRun]="schedule.allowParallelRun"
                                    [jobName]="schedule.jobName" [config]="schedule.config"
@@ -42,12 +53,13 @@
         <div class="col-md-12">
           <div class="alert alert-secondary" role="alert"
                *ngIf="settingsService.configStyle == ConfigStyle.full">
-            <ng-icon size="1.3em"  name="ionInformationCircleOutline"></ng-icon> {{getJobDescription(schedule.jobName)}}
+            <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+            {{ getJobDescription(schedule.jobName) }}
           </div>
           <div class="mb-1 row">
             <label class="col-md-2 control-label" i18n>Job:</label>
             <div class="col-md-4">
-              {{backendTextService.getJobName(schedule.jobName)}}
+              {{ backendTextService.getJobName(schedule.jobName) }}
             </div>
             <div class="col-md-6">
               <app-settings-job-button class="float-end"
@@ -68,7 +80,7 @@
                       [id]="'repeatType'+i"
                       required>
                 <option *ngFor="let jobTrigger of JobTriggerTypeMap"
-                        [ngValue]="jobTrigger.key">{{jobTrigger.value}}
+                        [ngValue]="jobTrigger.key">{{ jobTrigger.value }}
                 </option>
               </select>
               <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
@@ -89,7 +101,7 @@
                       [id]="'triggerAfter'+i" required>
                 <ng-container *ngFor="let sch of sortedSchedules">
                   <option *ngIf="sch.name !== schedule.name"
-                          [ngValue]="sch.name">{{sch.name}}
+                          [ngValue]="sch.name">{{ sch.name }}
                   </option>
                 </ng-container>
               </select>
@@ -128,7 +140,7 @@
                 <option *ngFor="let period of periods; let i = index"
                         [ngValue]="i">
                   <ng-container i18n>every</ng-container>
-                  {{period}}
+                  {{ period }}
                 </option>
               </select>
               <app-timestamp-timepicker
@@ -173,7 +185,7 @@
                *ngIf="!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue"
                [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
             <label class="col-md-2 control-label"
-                   [for]="configEntry.id+'_'+i">{{backendTextService.get(configEntry.name)}}</label>
+                   [for]="configEntry.id+'_'+i">{{ backendTextService.get(configEntry.name) }}</label>
             <div class="col-md-10">
               <div [class.input-group]="'MediaPickDTO-array'!=configEntry.type">
                 <ng-container [ngSwitch]="configEntry.type">
@@ -235,7 +247,7 @@
                     (ngModelChange)="onChange($event)"
                     [(ngModel)]="schedule.config[configEntry.id]"
                     class="form-select">
-                    <option *ngFor="let msg of jobsService.availableMessengers | async" [ngValue]="msg">{{msg}}
+                    <option *ngFor="let msg of jobsService.availableMessengers | async" [ngValue]="msg">{{ msg }}
                     </option>
                   </select>
 
@@ -246,7 +258,9 @@
                       <div class="mb-1 row"
                            [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
                         <label class="col-md-2 control-label"
-                               [for]="configEntry.id+'_'+i"><ng-container>Search Query</ng-container> - {{(j + 1)}}</label>
+                               [for]="configEntry.id+'_'+i">
+                          <ng-container>Search Query</ng-container>
+                          - {{ (j + 1) }}</label>
                         <div class="col-md-10">
                           <div class="input-group">
                             <app-gallery-search-field
@@ -363,7 +377,7 @@
               <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full">
                 <ng-container *ngIf="configEntry.type == 'number-array'" i18n>';' separated integers.
                 </ng-container>
-                {{backendTextService.get(configEntry.description)}}
+                {{ backendTextService.get(configEntry.description) }}
               </small>
             </div>
           </div>
@@ -405,7 +419,7 @@
                   [(ngModel)]="newSchedule.jobName"
                   name="newJobName" required>
             <option *ngFor="let availableJob of jobsService.availableJobs | async"
-                    [ngValue]="availableJob.Name">{{backendTextService.getJobName(availableJob.Name)}}
+                    [ngValue]="availableJob.Name">{{ backendTextService.getJobName(availableJob.Name) }}
             </option>
           </select>
           <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"

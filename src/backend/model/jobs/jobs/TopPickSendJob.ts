@@ -100,7 +100,6 @@ export class TopPickSendJob extends Job<{
         arr.findIndex(m => MediaDTOUtils.equals(m, value)) === index);
 
     this.Progress.Processed++;
-    // console.log(this.mediaList);
     return false;
   }
 

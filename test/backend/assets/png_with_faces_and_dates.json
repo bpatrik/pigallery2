@@ -1,0 +1,32 @@
+
+{
+  "size": {
+    "width": 26,
+    "height": 26
+  },
+  "creationDate": 1599990007000,
+  "creationDateOffset": "+05:00",
+  "fileSize": 5758,
+  "keywords": [
+  ],
+  "faces": [
+    {
+      "name": "raspberry",
+      "box": {
+        "width": 21,
+        "height": 18,
+        "left": 3,
+        "top": 8
+      }
+    },
+    {
+      "name": "leaf",
+      "box": {
+        "width": 9,
+        "height": 7,
+        "left": 14,
+        "top": 1
+      }
+    }
+  ]
+}

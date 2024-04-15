@@ -167,7 +167,6 @@ export class GallerySearchFieldBaseComponent
             0,
             this.rawSearchText.length - token.current.length
         ) + item.queryHint;
-    console.log('aa');
     this.onChange();
     this.emptyAutoComplete();
   }

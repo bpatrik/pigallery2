@@ -4,6 +4,21 @@
     <button type="button"  class="btn-close"  (click)="close()" aria-label="Close">
     </button>
   </div>
+
+  <div class="row" *ngIf="media.metadata.caption || media.metadata.title">
+    <div class="col-1 ps-0">
+      <ng-icon class="details-icon" name="ionDocumentTextOutline"></ng-icon>
+    </div>
+    <div class="col-11">
+      <h4 *ngIf="media.metadata.title">
+        {{media.metadata.title}}
+      </h4>
+      <div class="details-main" *ngIf="media.metadata.caption">
+        <div class="caption-body">{{media.metadata.caption}}</div>
+      </div>
+    </div>
+  </div>
+
   <div class="row" *ngIf="contentLoaderService.isSearchResult()">
     <div class="col-1 ps-0">
       <ng-icon class="details-icon" name="ionFolderOutline"></ng-icon>
@@ -39,10 +54,10 @@
     </div>
     <div class="col-11">
       <div class="details-main">
-        {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : 'UTC' }}
+        {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
       </div>
       <div class="details-sub  text-secondary row">
-        <div class="col-12">{{ media.metadata.creationDate | date : 'EEEE, HH:mm:ss' : 'UTC' }}</div>
+        <div class="col-12">{{ media.metadata.creationDate | date : (media.metadata.creationDateOffset ? 'EEEE, HH:mm:ss ZZZZZ' : 'EEEE, HH:mm:ss') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}</div>
       </div>
     </div>
   </div>

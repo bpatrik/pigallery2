@@ -4,8 +4,7 @@ export enum DefaultsJobs {
   Indexing = 1,
   'Gallery Reset' = 2,
   'Video Converting' = 3,
-  'Photo Converting' = 4,
-  'Thumbnail Generation' = 5,
+  'Photo Converting' = 5,
   'Temp Folder Cleaning' = 6,
   'Album Cover Filling' = 7,
   'Album Cover Reset' = 8,
@@ -25,6 +24,13 @@ export enum DefaultMessengers {
 export interface JobDTO {
   Name: string;
   ConfigTemplate: DynamicConfig[];
+}
+
+
+export interface JobStartDTO {
+  soloRun: boolean;
+  config?: Record<string, unknown>;
+  allowParallelRun: boolean;
 }
 
 export const JobDTOUtils = {

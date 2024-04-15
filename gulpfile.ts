@@ -12,7 +12,7 @@ import * as child_process from 'child_process';
 // @ts-ignore
 import * as jeditor from 'gulp-json-editor';
 import {XLIFF} from 'xlf-google-translate';
-import {PrivateConfigClass} from './src/common/config/private/Config';
+import {PrivateConfigClass} from './src/common/config/private/PrivateConfigClass';
 import {ConfigClassBuilder} from 'typeconfig/src/decorators/builders/ConfigClassBuilder';
 
 const execPr = util.promisify(child_process.exec);

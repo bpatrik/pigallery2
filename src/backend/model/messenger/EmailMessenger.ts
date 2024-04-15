@@ -5,6 +5,7 @@ import {MediaDTOWithThPath, Messenger} from './Messenger';
 import {backendTexts} from '../../../common/BackendTexts';
 import {DynamicConfig} from '../../../common/entities/DynamicConfig';
 import {DefaultMessengers} from '../../../common/entities/job/JobDTO';
+import {Utils} from '../../../common/Utils';
 
 export class EmailMessenger extends Messenger<{
   emailTo: string,
@@ -69,7 +70,7 @@ export class EmailMessenger extends Messenger<{
         (media[i].metadata as PhotoMetadata).positionData?.country :
         ((media[i].metadata as PhotoMetadata).positionData?.city ?
           (media[i].metadata as PhotoMetadata).positionData?.city : '');
-      const caption = (new Date(media[i].metadata.creationDate)).getFullYear() + (location ? ', ' + location : '');
+      const caption = Utils.getFullYear(media[i].metadata.creationDate, media[i].metadata.creationDateOffset) + (location ? ', ' + location : '');
       attachments.push({
         filename: media[i].name,
         path: media[i].thumbnailPath,

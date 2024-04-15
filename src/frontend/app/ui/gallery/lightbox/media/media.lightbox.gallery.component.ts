@@ -48,17 +48,17 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   get ImageTransform(): SafeStyle {
     return this.sanitizer.bypassSecurityTrustStyle(
-        'scale(' +
-        this.zoom +
-        ') translate(calc(' +
-        -50 / this.zoom +
-        '% + ' +
-        this.drag.x / this.zoom +
-        'px), calc(' +
-        -50 / this.zoom +
-        '% + ' +
-        this.drag.y / this.zoom +
-        'px))'
+      'scale(' +
+      this.zoom +
+      ') translate(calc(' +
+      -50 / this.zoom +
+      '% + ' +
+      this.drag.x / this.zoom +
+      'px), calc(' +
+      -50 / this.zoom +
+      '% + ' +
+      this.drag.y / this.zoom +
+      'px))'
     );
   }
 
@@ -71,7 +71,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       return;
     }
     this.video.nativeElement.currentTime =
-        this.video.nativeElement.duration * (value / 100);
+      this.video.nativeElement.duration * (value / 100);
     if (this.video.nativeElement.paused) {
       this.video.nativeElement.play().catch(console.error);
     }
@@ -134,9 +134,9 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
     this.setImageSize();
     if (
-        this.thumbnailSrc == null &&
-        this.gridMedia &&
-        this.ThumbnailUrl !== null
+      this.thumbnailSrc == null &&
+      this.gridMedia &&
+      this.ThumbnailUrl !== null
     ) {
       this.thumbnailSrc = this.ThumbnailUrl;
     }
@@ -167,8 +167,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     // TODO:handle error
     this.imageLoadFinished.this = true;
     console.error(
-        'Error: cannot load media for lightbox url: ' +
-        this.gridMedia.getBestFitMediaPath()
+      'Error: cannot load media for lightbox url: ' +
+      this.gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight)
     );
     this.loadNextPhoto();
   }
@@ -181,11 +181,11 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   public showThumbnail(): boolean {
     return (
-        this.gridMedia &&
-        !this.mediaLoaded &&
-        this.thumbnailSrc !== null &&
-        (this.gridMedia.isThumbnailAvailable() ||
-            this.gridMedia.isReplacementThumbnailAvailable())
+      this.gridMedia &&
+      !this.mediaLoaded &&
+      this.thumbnailSrc !== null &&
+      (this.gridMedia.isThumbnailAvailable() ||
+        this.gridMedia.isReplacementThumbnailAvailable())
     );
   }
 
@@ -208,11 +208,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       this.imageLoadFinished.next = true;
       return;
     }
-    if (Config.Media.Photo.Converting.enabled === true) {
-      this.nextImage.src = this.nextGridMedia.getBestFitMediaPath();
-    } else {
-      this.nextImage.src = this.nextGridMedia.getMediaPath();
-    }
+    this.nextImage.src = this.nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
 
     this.nextImage.onload = () => this.imageLoadFinished.next = true;
     this.nextImage.onerror = () => {
@@ -231,29 +227,24 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
 
     if (
-        this.zoom === 1 ||
-        Config.Media.Photo.Converting.loadFullImageOnZoom === false
+      this.zoom === 1 ||
+      Config.Gallery.Lightbox.loadFullImageOnZoom === false
     ) {
       if (this.photo.src == null) {
-        if (Config.Media.Photo.Converting.enabled === true) {
-          this.photo.src = this.gridMedia.getBestFitMediaPath();
-          this.photo.isBestFit = true;
-        } else {
-          this.photo.src = this.gridMedia.getMediaPath();
-          this.photo.isBestFit = false;
-        }
+        this.photo.src = this.gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
+        this.photo.isBestFit = true;
       }
       // on zoom load high res photo
     } else if (this.photo.isBestFit === true || this.photo.src == null) {
-      this.photo.src = this.gridMedia.getMediaPath();
+      this.photo.src = this.gridMedia.getOriginalMediaPath();
       this.photo.isBestFit = false;
     }
   }
 
   public onVideoProgress(): void {
     this.videoProgress =
-        (100 / this.video.nativeElement.duration) *
-        this.video.nativeElement.currentTime;
+      (100 / this.video.nativeElement.duration) *
+      this.video.nativeElement.currentTime;
   }
 
   private setImageSize(): void {

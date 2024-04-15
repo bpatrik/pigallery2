@@ -17,24 +17,24 @@ import {
 import {VersionEntity} from '../../../../../src/backend/model/database/enitites/VersionEntity';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
+import {TestHelper} from '../../../../TestHelper';
 
 
 describe('Typeorm integration', () => {
 
 
-  const tempDir = path.join(__dirname, '../../tmp');
   const setUpSqlDB = async () => {
-    await fs.promises.rm(tempDir, {recursive: true, force: true});
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
 
     Config.Database.type = DatabaseType.sqlite;
-    Config.Database.dbFolder = tempDir;
+    Config.Database.dbFolder = TestHelper.TMP_DIR;
     ProjectPath.reset();
 
   };
 
   const teardownUpSqlDB = async () => {
     await SQLConnection.close();
-    await fs.promises.rm(tempDir, {recursive: true});
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true});
   };
 
   beforeEach(async () => {

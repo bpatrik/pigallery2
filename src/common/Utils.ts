@@ -1,9 +1,9 @@
 export class Utils {
   static GUID(): string {
     const s4 = (): string =>
-        Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
+      Math.floor((1 + Math.random()) * 0x10000)
+        .toString(16)
+        .substring(1);
 
     return s4() + s4() + '-' + s4() + s4();
   }
@@ -35,7 +35,7 @@ export class Utils {
             delete obj[key];
           }
         }
-      } else if (obj[key] === null) {
+      } else if (obj[key] === null || obj[key] === undefined) {
         delete obj[key];
       }
     }
@@ -110,6 +110,129 @@ export class Utils {
     return d;
   }
 
+  static getUTCFullYear(d: number | Date, offset: string) {
+    if (!(d instanceof Date)) {
+      d = new Date(d);
+    }
+    return new Date(new Date(d).toISOString().substring(0,19) + (offset ? offset : '')).getUTCFullYear();
+  }
+
+  static getFullYear(d: number | Date, offset: string) {
+    if (!(d instanceof Date)) {
+      d = new Date(d);
+    }
+    return new Date(new Date(d).toISOString().substring(0,19) + (offset ? offset : '')).getFullYear();
+  }
+
+  //function to convert timestamp into milliseconds taking offset into account
+  static timestampToMS(timestamp: string, offset: string) {
+    if (!timestamp) {
+      return undefined;
+    }
+    //replace : with - in the yyyy-mm-dd part of the timestamp.
+    let formattedTimestamp = timestamp.substring(0,9).replaceAll(':', '-') + timestamp.substring(9,timestamp.length);
+    if (formattedTimestamp.indexOf("Z") > 0) { //replace Z (and what comes after the Z) with offset
+      formattedTimestamp = formattedTimestamp.substring(0, formattedTimestamp.indexOf("Z")) + (offset ? offset : '+00:00');
+    } else if (formattedTimestamp.indexOf("+") > 0 || timestamp.substring(9,timestamp.length).indexOf("-") > 0) { //don't do anything
+    } else { //add offset
+      formattedTimestamp = formattedTimestamp + (offset ? offset : '+00:00');
+    }
+    //parse into MS and return
+    return Date.parse(formattedTimestamp);
+  }
+
+  //function to extract offset string from timestamp string, returns undefined if timestamp does not contain offset
+  static timestampToOffsetString(timestamp: string) {
+    try {
+      const offsetRegex = /[+-]\d{2}:\d{2}$/;
+      const match = timestamp.match(offsetRegex);
+      if (match) {
+        return match[0];
+      } else if (timestamp.indexOf("Z") > 0) {
+        return '+00:00';
+      }
+      return undefined;
+    } catch (err) {
+      return undefined;
+    }
+  }
+
+  //function to calculate offset from exif.exif.gpsTimeStamp or exif.gps.GPSDateStamp + exif.gps.GPSTimestamp
+  static getTimeOffsetByGPSStamp(timestamp: string, gpsTimeStamp: string, gps: any) {
+    let UTCTimestamp = gpsTimeStamp;
+    if (!UTCTimestamp &&
+      gps &&
+      gps.GPSDateStamp &&
+      gps.GPSTimeStamp) { //else use exif.gps.GPS*Stamp if available
+      //GPS timestamp is always UTC (+00:00)
+      UTCTimestamp = gps.GPSDateStamp.replaceAll(':', '-') + gps.GPSTimeStamp.join(':');
+    }
+    if (UTCTimestamp && timestamp) {
+      //offset in minutes is the difference between gps timestamp and given timestamp
+      //to calculate this correctly, we have to work with the same offset
+      const offsetMinutes = (Utils.timestampToMS(timestamp, '+00:00')- Utils.timestampToMS(UTCTimestamp, '+00:00')) / 1000 / 60;
+      return Utils.getOffsetString(offsetMinutes);
+    } else {
+      return undefined;
+    }
+  }
+
+  static getOffsetString(offsetMinutes: number) {
+    if (-720 <= offsetMinutes && offsetMinutes <= 840) {
+      //valid offset is within -12 and +14 hrs (https://en.wikipedia.org/wiki/List_of_UTC_offsets)
+      return (offsetMinutes < 0 ? "-" : "+") +                              //leading +/-
+        ("0" + Math.trunc(Math.abs(offsetMinutes) / 60)).slice(-2) + ":" +  //zeropadded hours and ':'
+        ("0" + Math.abs(offsetMinutes) % 60).slice(-2);                     //zeropadded minutes
+    } else {
+      return undefined;
+    }
+  }
+
+  static getOffsetMinutes(offsetString: string) { //Convert offset string (+HH:MM or -HH:MM) into a minute value
+    const regex = /^([+-](0[0-9]|1[0-4]):[0-5][0-9])$/;  //checks if offset is between -14:00 and +14:00.
+                                                         //-12:00 is the lowest valid UTC-offset, but we allow down to -14 for efficiency
+    if (regex.test(offsetString)) {
+      const hhmm = offsetString.split(":");
+      const hours = parseInt(hhmm[0]);
+      return hours < 0 ? ((hours*60) - parseInt(hhmm[1])) : ((hours*60) + parseInt(hhmm[1]));
+    } else {
+      return undefined;
+    }
+  }
+
+  static isLeapYear(year: number) {
+    return (0 == year % 4) && (0 != year % 100) || (0 == year % 400)
+  }
+
+  static isDateFromLeapYear(date: Date) {
+    return Utils.isLeapYear(date.getFullYear());
+  }
+
+  // Get Day of Year
+  static getDayOfYear(date: Date) {
+    //Day-number at the start of Jan to Dec. A month baseline
+    const dayCount = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+    const mn = date.getMonth();
+    let dayOfYear = dayCount[mn] + date.getDate(); //add the date to the month baseline
+    if (mn > 1 && Utils.isLeapYear((date.getFullYear()))) {
+      dayOfYear++; //Add an extra day for march to december (mn>1) on leap years
+    }
+    return dayOfYear;
+  }
+
+  //Adding months to a date differently from standard JS
+  //this function makes sure that if date is the 31st and you add a month, you will get the last day of the next month
+  //so adding or subtracting a month from 31st of march will give 30th of april or 28th of february respectively (29th on leap years).
+  static addMonthToDate(date: Date, numMonths: number) {
+    const result = new Date(date)
+    const expectedMonth = ((date.getMonth() + numMonths) % 12 + 12) % 12; //inner %12 + 12 makes correct handling of negative months
+    result.setMonth(result.getMonth() + numMonths);
+    if (result.getMonth() !== expectedMonth) {
+      result.setDate(0);
+    }
+    return result;
+  }
+
   static renderDataSize(size: number): string {
     const postFixes = ['B', 'KB', 'MB', 'GB', 'TB'];
     let index = 0;
@@ -135,8 +258,8 @@ export class Utils {
 
   public static canonizePath(path: string): string {
     return path
-        .replace(new RegExp('\\\\', 'g'), '/')
-        .replace(new RegExp('/+', 'g'), '/');
+      .replace(new RegExp('\\\\', 'g'), '/')
+      .replace(new RegExp('/+', 'g'), '/');
   }
 
   static concatUrls(...args: string[]): string {
@@ -262,9 +385,9 @@ export class Utils {
     const E = Math.pow(10, 38);
     const nE = Math.pow(10, -38);
     return (
-        !isNaN(value) &&
-        ((value >= -3.402823466 * E && value <= -1.175494351 * nE) ||
-            (value <= 3.402823466 * E && value >= 1.175494351 * nE))
+      !isNaN(value) &&
+      ((value >= -3.402823466 * E && value <= -1.175494351 * nE) ||
+        (value <= 3.402823466 * E && value >= 1.175494351 * nE))
     );
   }
 
@@ -286,6 +409,30 @@ export class Utils {
       });
     }
     return ret;
+  }
+
+  public static xmpExifGpsCoordinateToDecimalDegrees(text: string): number {
+    if (!text) {
+      return undefined;
+    }
+    const parts = text.match(/^([0-9]+),([0-9.]+)([EWNS])$/);
+    const degrees: number = parseInt(parts[1], 10);
+    const minutes: number = parseFloat(parts[2]);
+    const sign = (parts[3] === "N" || parts[3] === "E") ? 1 : -1;
+    return (sign * (degrees + (minutes / 60.0)))
+  }
+
+
+  public static sortableFilename(filename: string): string {
+    const lastDot = filename.lastIndexOf(".");
+
+    // Avoid 0 as well as -1 to prevent empty names for extensionless dot-files
+    if (lastDot > 0) {
+      return filename.substring(0, lastDot);
+    }
+
+    // Fallback to the full name
+    return filename;
   }
 }
 

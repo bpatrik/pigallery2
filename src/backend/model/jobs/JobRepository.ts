@@ -3,7 +3,6 @@ import {IndexingJob} from './jobs/IndexingJob';
 import {GalleryRestJob} from './jobs/GalleryResetJob';
 import {VideoConvertingJob} from './jobs/VideoConvertingJob';
 import {PhotoConvertingJob} from './jobs/PhotoConvertingJob';
-import {ThumbnailGenerationJob} from './jobs/ThumbnailGenerationJob';
 import {TempFolderCleaningJob} from './jobs/TempFolderCleaningJob';
 import {AlbumCoverFillingJob} from './jobs/AlbumCoverFillingJob';
 import {GPXCompressionJob} from './jobs/GPXCompressionJob';
@@ -33,6 +32,10 @@ export class JobRepository {
     }
     this.availableJobs[job.Name] = job;
   }
+
+  exists(name: string) {
+    return !!this.availableJobs[name];
+  }
 }
 
 JobRepository.Instance.register(new IndexingJob());
@@ -41,7 +44,6 @@ JobRepository.Instance.register(new AlbumCoverFillingJob());
 JobRepository.Instance.register(new AlbumCoverRestJob());
 JobRepository.Instance.register(new VideoConvertingJob());
 JobRepository.Instance.register(new PhotoConvertingJob());
-JobRepository.Instance.register(new ThumbnailGenerationJob());
 JobRepository.Instance.register(new GPXCompressionJob());
 JobRepository.Instance.register(new TempFolderCleaningJob());
 JobRepository.Instance.register(new AlbumRestJob());

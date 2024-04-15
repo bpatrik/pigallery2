@@ -25,7 +25,7 @@ export class ThumbnailLoaderService {
     if (
         this.que.length === 0 ||
         this.runningRequests >=
-        Config.Media.Thumbnail.concurrentThumbnailGenerations
+        Config.Media.Photo.concurrentThumbnailGenerations
     ) {
       return;
     }

@@ -205,7 +205,7 @@ export class FilterService {
     const startMediaDate = new Date(floorDate(minDate));
 
     prefiltered.media.forEach(m => {
-      const key = Math.floor((floorDate(m.metadata.creationDate) - startMediaDate.getTime()) / 1000 / usedDiv);
+      const key = Math.floor((floorDate(m.metadata.creationDate) - startMediaDate.getTime()) / 1000 / usedDiv); //TODO
 
       const getDate = (index: number) => {
         let d: Date;

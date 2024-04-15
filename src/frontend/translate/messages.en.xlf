@@ -415,10 +415,26 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">339</context>
-        </context-group>
+        </context-group>			
         <target>This ratio of the face bounding box will be added to the face as a margin. Higher number add more margin.</target>
       </trans-unit>
-      <trans-unit id="2608032520920350167" datatype="html">
+      <trans-unit id="4036712477982466480" datatype="html">
+        <source>Keep Gif animation</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">347</context>
+        </context-group>
+        <target>Keep Gif animation</target>
+      </trans-unit>
+      <trans-unit id="247227166316013669" datatype="html">
+        <source>Converts Gif to animated webp.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">350</context>
+        </context-group>
+        <target>Converts Gif to animated webp.</target>
+      </trans-unit>
+	  <trans-unit id="2608032520920350167" datatype="html">
         <source>OnTheFly *.gpx compression</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
@@ -1042,6 +1058,38 @@
         </context-group>
         <target>Logs</target>
       </trans-unit>
+	  <trans-unit id="4053091316351372803" datatype="html">
+        <source>Extension folder</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1033</context>
+        </context-group>
+        <target>Extension folder</target>
+      </trans-unit>
+      <trans-unit id="1841639442626174301" datatype="html">
+        <source>Folder where the app stores the extensions. Extensions live in their sub-folders.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1037</context>
+        </context-group>
+        <target>Folder where the app stores the extensions. Extensions live in their sub-folders.</target>
+      </trans-unit>
+      <trans-unit id="5208383456628250463" datatype="html">
+        <source>Clean up unused tables</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1049</context>
+        </context-group>
+        <target>Clean up unused tables</target>
+      </trans-unit>
+      <trans-unit id="3108766488810802595" datatype="html">
+        <source>Automatically removes all tables from the DB that are not used anymore.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1052</context>
+        </context-group>
+        <target>Automatically removes all tables from the DB that are not used anymore.</target>
+      </trans-unit>
       <trans-unit id="2188854519574316630" datatype="html">
         <source>Server</source>
         <context-group purpose="location">
@@ -1153,6 +1201,18 @@
           <context context-type="linenumber">1132</context>
         </context-group>
         <target>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</target>
+      </trans-unit>
+      <trans-unit id="3139147897029202869" datatype="html">
+        <source>Extensions</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1180</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">1513</context>
+        </context-group>
+        <target>Extensions</target>
       </trans-unit>
       <trans-unit id="3229595422546554334" datatype="html">
         <source>Jobs</source>
@@ -1468,6 +1528,22 @@
       </trans-unit>
       <trans-unit id="4655262361738444589" datatype="html">
         <source>Enables password protected sharing links.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">279</context>
+        </context-group>
+        <target>Enables password protected sharing links.</target>
+      </trans-unit>
+      <trans-unit id="4662433240151787590" datatype="html">
+        <source>Require password</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">276</context>
+        </context-group>
+        <target>Require password</target>
+      </trans-unit>
+      <trans-unit id="3273207891065512378" datatype="html">
+        <source>Requires password protected sharing links.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">279</context>
@@ -2561,6 +2637,21 @@
           <context context-type="linenumber">1332</context>
         </context-group>
         <target>Page title</target>
+      <trans-unit id="7902904914951669015" datatype="html">
+        <source>If you access the page from local network its good to know the public url for creating sharing link.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">1338</context>
+        </context-group>
+        <target>If you access the page from local network its good to know the public url for creating sharing link.</target>
+      </trans-unit>      <trans-unit id="7902904914951669015" datatype="html">
+        <source>If you access the page from local network its good to know the public url for creating sharing link.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">1338</context>
+        </context-group>
+        <target>If you access the page from local network its good to know the public url for creating sharing link.</target>
+      </trans-unit>
       </trans-unit>
       <trans-unit id="176222620393429790" datatype="html">
         <source>If you access the page form local network its good to know the public url for creating sharing link.</source>
@@ -2877,6 +2968,22 @@
           <context context-type="linenumber">37</context>
         </context-group>
         <target>E-mail text.</target>
+      </trans-unit>
+      <trans-unit id="5226226395879600777" datatype="html">
+        <source>Messenger</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
+          <context context-type="linenumber">42</context>
+        </context-group>
+        <target>Messenger</target>
+      </trans-unit>
+      <trans-unit id="3241098657716082433" datatype="html">
+        <source>Messenger to send this message with.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
+          <context context-type="linenumber">44</context>
+        </context-group>
+        <target>Messenger to send this message with.</target>
       </trans-unit>
       <trans-unit id="9153059468211122141" datatype="html">
         <source>Gallery reset</source>
@@ -3970,6 +4077,38 @@
         </context-group>
         <target>Country</target>
       </trans-unit>
+      <trans-unit id="5392482057506331601" datatype="html">
+        <source>ISO</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
+          <context context-type="linenumber">94</context>
+        </context-group>
+        <target>ISO</target>
+      </trans-unit>
+      <trans-unit id="7871095434511949009" datatype="html">
+        <source>Aperture</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
+          <context context-type="linenumber">99</context>
+        </context-group>
+        <target>Aperture</target>
+      </trans-unit>
+      <trans-unit id="2897568737433404674" datatype="html">
+        <source>Shutter speed</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
+          <context context-type="linenumber">104</context>
+        </context-group>
+        <target>Shutter speed</target>
+      </trans-unit>
+      <trans-unit id="6542951666153347128" datatype="html">
+        <source>Focal length</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
+          <context context-type="linenumber">118</context>
+        </context-group>
+		<target>Focal length</target>
+      </trans-unit>
       <trans-unit id="2817799343282769458" datatype="html">
         <source>Link availability</source>
         <context-group purpose="location">
@@ -4853,6 +4992,14 @@
           <context context-type="linenumber">142</context>
         </context-group>
         <target>loading..</target>
+      </trans-unit>
+      <trans-unit id="1350237526124518037" datatype="html">
+        <source>Set password.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+        <target>Set password.</target>
       </trans-unit>
       <trans-unit id="4229383470843970064" datatype="html">
         <source>Click share to get a link.</source>

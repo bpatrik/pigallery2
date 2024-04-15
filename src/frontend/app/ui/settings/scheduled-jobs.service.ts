@@ -3,7 +3,7 @@ import {BehaviorSubject} from 'rxjs';
 import {JobProgressDTO, JobProgressStates, OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
 import {NetworkService} from '../../model/network/network.service';
 import {JobScheduleDTO} from '../../../../common/entities/job/JobScheduleDTO';
-import {JobDTO, JobDTOUtils} from '../../../../common/entities/job/JobDTO';
+import {JobDTO, JobDTOUtils, JobStartDTO} from '../../../../common/entities/job/JobDTO';
 import {BackendtextService} from '../../model/backendtext.service';
 import {NotificationService} from '../../model/notification.service';
 import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
@@ -28,6 +28,9 @@ export class ScheduledJobsService {
     this.availableMessengers = new BehaviorSubject([]);
   }
 
+  public  isValidJob(name: string): boolean {
+    return !!this.availableJobs.value.find(j => j.Name === name);
+  }
 
   public async getAvailableJobs(): Promise<void> {
     this.availableJobs.next(
@@ -82,8 +85,8 @@ export class ScheduledJobsService {
 
   public async start(
     jobName: string,
-    config?: any,
-    soloStart = false,
+    config?: Record<string, unknown>,
+    soloRun = false,
     allowParallelRun = false
   ): Promise<void> {
     try {
@@ -93,8 +96,8 @@ export class ScheduledJobsService {
         {
           config,
           allowParallelRun,
-          soloStart,
-        }
+          soloRun,
+        } as JobStartDTO
       );
       // placeholder to force showing running job
       this.addDummyProgress(jobName, config);

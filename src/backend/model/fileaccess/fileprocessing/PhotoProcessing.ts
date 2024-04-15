@@ -21,13 +21,13 @@ export class PhotoProcessing {
       return;
     }
 
-    Config.Media.Thumbnail.concurrentThumbnailGenerations = Math.max(
+    Config.Media.Photo.concurrentThumbnailGenerations = Math.max(
       1,
       os.cpus().length - 1
     );
 
     this.taskQue = new TaskExecuter(
-      Config.Media.Thumbnail.concurrentThumbnailGenerations,
+      Config.Media.Photo.concurrentThumbnailGenerations,
       (input): Promise<void> => PhotoWorker.render(input)
     );
 
@@ -45,7 +45,7 @@ export class PhotoProcessing {
       photo.directory.name,
       photo.name
     );
-    const size: number = Config.Media.Thumbnail.personThumbnailSize;
+    const size: number = Config.Media.Photo.personThumbnailSize;
     const faceRegion = person.sampleRegion.media.metadata.faces.find(f => f.name === person.name);
     // generate thumbnail path
     const thPath = PhotoProcessing.generatePersonThumbnailPath(
@@ -65,11 +65,11 @@ export class PhotoProcessing {
     const margin = {
       x: Math.round(
         faceRegion.box.width *
-        Config.Media.Thumbnail.personFaceMargin
+        Config.Media.Photo.personFaceMargin
       ),
       y: Math.round(
         faceRegion.box.height *
-        Config.Media.Thumbnail.personFaceMargin
+        Config.Media.Photo.personFaceMargin
       ),
     };
 
@@ -90,9 +90,9 @@ export class PhotoProcessing {
         width: faceRegion.box.width + margin.x,
         height: faceRegion.box.height + margin.y,
       },
-      useLanczos3: Config.Media.Thumbnail.useLanczos3,
-      quality: Config.Media.Thumbnail.quality,
-      smartSubsample: Config.Media.Thumbnail.smartSubsample,
+      useLanczos3: Config.Media.Photo.useLanczos3,
+      quality: Config.Media.Photo.quality,
+      smartSubsample: Config.Media.Photo.smartSubsample,
     } as MediaRendererInput;
     input.cut.width = Math.min(
       input.cut.width,
@@ -110,13 +110,13 @@ export class PhotoProcessing {
 
   public static generateConvertedPath(mediaPath: string, size: number): string {
     const file = path.basename(mediaPath);
-    const animated = Config.Media.Thumbnail.animateGif && path.extname(mediaPath).toLowerCase() == '.gif';
+    const animated = Config.Media.Photo.animateGif && path.extname(mediaPath).toLowerCase() == '.gif';
     return path.join(
       ProjectPath.TranscodedFolder,
       ProjectPath.getRelativePathToImages(path.dirname(mediaPath)),
-      file + '_' + size + 'q' + Config.Media.Thumbnail.quality +
+      file + '_' + size + 'q' + Config.Media.Photo.quality +
       (animated ? 'anim' : '') +
-      (Config.Media.Thumbnail.smartSubsample ? 'cs' : '') +
+      (Config.Media.Photo.smartSubsample ? 'cs' : '') +
       PhotoProcessing.CONVERTED_EXTENSION
     );
   }
@@ -142,7 +142,7 @@ export class PhotoProcessing {
         .digest('hex') +
       '_' +
       size +
-      '_' + Config.Media.Thumbnail.personFaceMargin +
+      '_' + Config.Media.Photo.personFaceMargin +
       PhotoProcessing.CONVERTED_EXTENSION
     );
   }
@@ -177,8 +177,7 @@ export class PhotoProcessing {
 
     if (
       (size + '').length !== sizeStr.length ||
-      (Config.Media.Thumbnail.thumbnailSizes.indexOf(size) === -1 &&
-        Config.Media.Photo.Converting.resolution !== size)
+      (Config.Media.Photo.thumbnailSizes.indexOf(size) === -1)
     ) {
       return false;
     }
@@ -189,7 +188,7 @@ export class PhotoProcessing {
     const quality = parseInt(qualityStr, 10);
 
     if ((quality + '').length !== qualityStr.length ||
-      quality !== Config.Media.Thumbnail.quality) {
+      quality !== Config.Media.Photo.quality) {
       return false;
     }
 
@@ -198,7 +197,7 @@ export class PhotoProcessing {
 
 
     const lowerExt = path.extname(origFilePath).toLowerCase();
-    const shouldBeAnimated = Config.Media.Thumbnail.animateGif && lowerExt == '.gif';
+    const shouldBeAnimated = Config.Media.Photo.animateGif && lowerExt == '.gif';
     if (shouldBeAnimated) {
       if (convertedPath.substring(
         nextIndex,
@@ -210,7 +209,7 @@ export class PhotoProcessing {
     }
 
 
-    if (Config.Media.Thumbnail.smartSubsample) {
+    if (Config.Media.Photo.smartSubsample) {
       if (convertedPath.substring(
         nextIndex,
         nextIndex + 2
@@ -236,14 +235,6 @@ export class PhotoProcessing {
     return true;
   }
 
-  public static async convertPhoto(mediaPath: string): Promise<string> {
-    return this.generateThumbnail(
-      mediaPath,
-      Config.Media.Photo.Converting.resolution,
-      ThumbnailSourceType.Photo,
-      false
-    );
-  }
 
   static async convertedPhotoExist(
     mediaPath: string,
@@ -287,9 +278,9 @@ export class PhotoProcessing {
       size,
       outPath,
       makeSquare,
-      useLanczos3: Config.Media.Thumbnail.useLanczos3,
-      quality: Config.Media.Thumbnail.quality,
-      smartSubsample: Config.Media.Thumbnail.smartSubsample,
+      useLanczos3: Config.Media.Photo.useLanczos3,
+      quality: Config.Media.Photo.quality,
+      smartSubsample: Config.Media.Photo.smartSubsample,
     } as MediaRendererInput;
 
     const outDir = path.dirname(input.outPath);
@@ -328,9 +319,9 @@ viewBox="${svgIcon.viewBox || '0 0 512 512'}">d="${svgIcon.items}</svg>`,
       outPath,
       makeSquare: false,
       animate: false,
-      useLanczos3: Config.Media.Thumbnail.useLanczos3,
-      quality: Config.Media.Thumbnail.quality,
-      smartSubsample: Config.Media.Thumbnail.smartSubsample,
+      useLanczos3: Config.Media.Photo.useLanczos3,
+      quality: Config.Media.Photo.quality,
+      smartSubsample: Config.Media.Photo.smartSubsample,
     } as SvgRendererInput;
 
     const outDir = path.dirname(input.outPath);

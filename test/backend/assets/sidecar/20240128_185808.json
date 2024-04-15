@@ -1,0 +1,29 @@
+{
+  "cameraData": {
+    "ISO": 25600,
+    "exposure": 0.04,
+    "fStop": 4.2,
+    "focalLength": 25,
+    "lens": "NIKKOR Z DX 16-50mm f/3.5-6.3 VR",
+    "make": "NIKON CORPORATION",
+    "model": "NIKON Z 30"
+  },
+  "creationDate": 1706468288660,
+  "creationDateOffset": "+01:00",
+  "fileSize": 47059,
+  "size": {
+    "height": 10,
+    "width": 15
+  },
+  "keywords": [
+    "Výlet",
+    "Travel"
+  ],
+  "positionData": {
+    "GPSData": {
+      "latitude": 50.089587,
+      "longitude": 14.39741
+    }
+  },
+  "rating": 3
+}

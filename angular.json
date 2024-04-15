@@ -5,7 +5,7 @@
       "@angular-eslint/schematics",
       "@schematics/angular"
     ],
-    "analytics": "dd1ed1d7-9618-4345-8694-0471149ade5d"
+    "analytics": false
   },
   "version": 1,
   "newProjectRoot": "projects",
@@ -77,6 +77,10 @@
           "pt-br": {
             "baseHref": "",
             "translation": "src/frontend/translate/messages.pt-br.xlf"
+          },
+          "da": {
+            "baseHref": "",
+            "translation": "src/frontend/translate/messages.da.xlf"
           }
         }
       },

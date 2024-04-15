@@ -156,11 +156,12 @@ apt-get install build-essential  libkrb5-dev gcc g++
 See: http://bpatrik.github.io/pigallery2/
  
 ## 4. Suggest/endorse new features
-  Unfortunately, lately I only have a limited time for this hobby project of mine. 
-  So, I mostly focus on those features that are align with my needs. Sorry :(.
+  Unfortunately, I only have a limited time for this hobby project of mine. 
+  And I mostly focus on those features that are align with my needs. Sorry :(.
   Although, I try to fix bugs ASAP (that can still take from a few days to months).
-  I also try to implement some feature requests that have a lots of 'likes' (i.e.: `+1`-s or thumbs ups) on it.
-  If you have a feature that you really would like to happen, I welcome contributions to the app. See [CONTRIBUTING.md](https://github.com/bpatrik/pigallery2/blob/master/CONTRIBUTING.md) for more details.
+  **The recommended way of extending the projects is to implement the feature as an extension.** See [#743](https://github.com/bpatrik/pigallery2/issues/743).
+  If the extension framweork is not powerfull enough, so you can't implement your feature, you are welcome to open a FR bug and I will consider adding that.
+  If you really want to contribute and think that your feature has a place in the mainapp, look at [CONTRIBUTING.md](https://github.com/bpatrik/pigallery2/blob/master/CONTRIBUTING.md) for some guidance.
 
 ## 5. Known errors
 * IOS map issue
