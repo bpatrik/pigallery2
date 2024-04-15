@@ -4,22 +4,20 @@ on: [push]
 
 # 工作流程，可包含多个作业
 jobs:
-
   # 作业1名称
   pigallery2-Gitea-Actions:
     # 指定的运行器环境
     runs-on: ubuntu-latest
-    
+
     # 作业包含一系列任务，称为 steps
     steps:
       - uses: actions/checkout@v4
       - name: Set up node 20
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-        run: 
-          npm install
+          node-version: '20'
+          cache: "npm"
+        run: npm install
           npm run build
       - name: Set up Docker Buildx
         id: buildx
@@ -32,7 +30,7 @@ jobs:
           context: ./
           file: ./Dockerfile.build
           push: true
-          tags: k2.xuthus83.cn:6001/pigallery2:latest    
+          tags: k2.xuthus83.cn:6001/pigallery2:latest
       # - name: Build the  Docker image
       #   run:
       #     | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/MrGaoGang?tab=packages 查看
