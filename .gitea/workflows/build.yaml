@@ -16,7 +16,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: "npm"
         run: npm install
           npm run build
       - name: Set up Docker Buildx
