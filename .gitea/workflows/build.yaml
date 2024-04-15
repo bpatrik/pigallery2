@@ -13,7 +13,7 @@ jobs:
     # 作业包含一系列任务，称为 steps
     steps:
       - uses: actions/checkout@v4
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!"
+      - name: Set up node 20
       - uses: actions/setup-node@v4
         with:
           node-version: 20
