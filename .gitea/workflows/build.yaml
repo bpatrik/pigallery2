@@ -1,0 +1,24 @@
+name: pigallery2
+run-name: ${{ gitea.actor }} is testing out Gitea Actions 🚀
+on: [push]
+
+# 工作流程，可包含多个作业
+jobs:
+
+  # 作业1名称
+  pigallery2-Gitea-Actions:
+    # 指定的运行器环境
+    runs-on: ubuntu-latest
+    
+    # 作业包含一系列任务，称为 steps
+    steps:
+      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by Gitea!"
+      - name: Build the release
+        run: 
+          npm install
+          npm run build
+      - name: Build the  Docker image
+        run:
+          | # 使用 上一步写的 Dockerfile 构建镜像并发布到私有仓库； 发布完成可以去 https://github.com/MrGaoGang?tab=packages 查看
+          docker build . --file Dockerfile.build --tag k2.xuthus83.cn:6001/pigallery2:latest .
+          docker push k2.xuthus83.cn:6001/pigallery2:latest
