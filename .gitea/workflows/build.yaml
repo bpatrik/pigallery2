@@ -15,11 +15,14 @@ jobs:
       - name: Set up node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-      - name: Build with Npm
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Build with Npm build
         run: |
-          npm install
           npm run build
+      - name: Build with Npm create-release
+        run: |
           npm run create-release
       - name: Set up Docker Buildx
         id: buildx
