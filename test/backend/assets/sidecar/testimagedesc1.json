@@ -41,9 +41,9 @@
       "latitude": 37.871093,
       "longitude": -122.25678
     },
-    "city": "test city őúéáűóöí-.,)(=",
+    "city": "test city őúéáűóöí-.,)(=/%!+\"'",
     "country": "test country őúéáűóöí-.,)(=/%!+\"'",
-    "state": "test state őúéáűóöí-.,)("
+    "state": "test state őúéáűóöí-.,)(=/%!+\"'"
   },
   "rating": 3,
   "size": {

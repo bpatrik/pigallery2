@@ -48,9 +48,7 @@ describe('SettingsRouter', () => {
         attachVolatile: true,
         skipTags: {secret: true} as TAGS
       })));
-      //TODO: fix broken test.
-      // It breaks if config. sets value through constructor
-/*
+
       const result = await chai.request(server.Server)
         .get(Config.Server.apiPath + '/settings');
 
@@ -58,7 +56,7 @@ describe('SettingsRouter', () => {
       result.body.should.be.a('object');
       should.equal(result.body.error, null);
       (result.body.result as ServerConfig).Environment.upTime = null;
-      result.body.result.should.deep.equal(originalJSON);*/
+      result.body.result.should.deep.equal(originalJSON);
     });
   });
 });

@@ -11,6 +11,18 @@ import {DatabaseType} from '../../../../../src/common/config/private/PrivateConf
 
 declare const before: any;
 
+function getFileModificationTime(filename: string): Promise<Date | null> {
+  return new Promise((resolve, reject) => {
+      fs.stat(filename, (err, stats) => {
+          if (err) {
+              reject(err);
+          } else {
+              resolve(stats.mtime);
+          }
+      });
+  });
+}
+
 describe('MetadataLoader', () => {
   // loading default settings (this might have been changed by other tests)
 
@@ -22,6 +34,12 @@ describe('MetadataLoader', () => {
     Config.Extensions.enabled = false;
   });
 
+
+  it('should load heic', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/parsingfromheic.heic'));
+    const expected = require(path.join(__dirname, '/../../../assets/parsingfromheic.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
 
   it('should load png', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test_png.png'));
@@ -106,6 +124,16 @@ describe('MetadataLoader', () => {
   it('should load jpg with timestamps and gps (UTC) and calculate offset +1', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.jpg'));
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+  it('should load jpg with timestamps and gps (UTC) and calculate offset +1, but GPS is off by 1 min', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+  it('should load jpg with timestamps and gps (UTC) and calculate offset +1, but GPS is off by 1 min - no XMP GPS', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min_no_xmpgps.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min_no_xmpgps.json'));
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
   it('should load jpg with timestamps but no offset and no GPS to calculate it from', async () => {
@@ -207,6 +235,16 @@ describe('MetadataLoader', () => {
         it(item, async () => {
           const data = await MetadataLoader.loadPhotoMetadata(fullFilePath);
           const expected = require(fullFilePath.split('.').slice(0, -1).join('.') + '.json');
+          
+          if (expected.creationDate == "fileModificationTime") {
+            await getFileModificationTime(fullFilePath).then((modificationTime: any) => {
+              if (modificationTime) {
+                expected.creationDate = new Date(modificationTime).getTime();
+              } else {
+                expected.creationDate = 0;
+              }
+            })
+          }
           if (expected.skip) {
             expected.skip.forEach((s: string) => {
               delete (data as any)[s];

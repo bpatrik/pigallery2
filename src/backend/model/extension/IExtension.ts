@@ -217,15 +217,10 @@ export interface IExtensionConfigInit<C> {
 }
 
 /**
- * Extension interface. All extension is expected to implement and export these methods
+ * Extension interface. All extension is expected to implement and export these methods.
+ * This is the content of the server.js file
  */
 export interface IServerExtension<C> {
-
-  /**
-   * This function can be called any time. It should only set the config template class
-   * @param extension
-   */
-  initConfig(extension: IExtensionConfigInit<C>): void;
 
   /**
    * Extension init function. Extension should at minimum expose this function.
@@ -234,4 +229,19 @@ export interface IServerExtension<C> {
   init(extension: IExtensionObject<C>): Promise<void>;
 
   cleanUp?: (extension: IExtensionObject<C>) => Promise<void>;
+}
+
+
+/**
+ * Extension config interface. All extension can implement and export these methods.
+ * This is the content of the config.js file.
+ */
+export interface IServerExtensionConfig<C> {
+
+  /**
+   * This function can be called any time. It should only set the config template class
+   * @param extension
+   */
+  initConfig(extension: IExtensionConfigInit<C>): void;
+
 }

@@ -12,7 +12,6 @@ import { FfprobeData } from 'fluent-ffmpeg';
 import { FileHandle } from 'fs/promises';
 import * as util from 'node:util';
 import * as path from 'path';
-import { IptcParser } from 'ts-node-iptc';
 import { Utils } from '../../../common/Utils';
 import { FFmpegFactory } from '../FFmpegFactory';
 import { ExtensionDecorator } from '../extension/ExtensionDecorator';
@@ -181,7 +180,7 @@ export class MetadataLoader {
       icc: false,
       jfif: false, //not needed and not supported for png
       ihdr: true,
-      iptc: false, //exifr reads UTF8-encoded data wrongly, using IptcParser instead
+      iptc: true, 
       exif: true,
       gps: true,
       reviveValues: false, //don't convert timestamps
@@ -206,6 +205,13 @@ export class MetadataLoader {
       } catch (e) {
         //in case of failure, set dimensions to 0 so they may be read via tags
         metadata.size = { width: 0, height: 0 };
+      } finally {
+        if (isNaN(metadata.size.width) || metadata.size.width == null) {
+          metadata.size.width = 0;
+        }
+        if (isNaN(metadata.size.height) || metadata.size.height == null) {
+          metadata.size.height = 0;
+        }
       }
 
 
@@ -221,46 +227,6 @@ export class MetadataLoader {
         await fileHandle.close();
       }
       try {
-
-
-        try { //Parse iptc data using the IptcParser, which works correctly for both UTF-8 and ASCII
-          const iptcData = IptcParser.parse(data);
-          if (iptcData.country_or_primary_location_name) {
-            metadata.positionData = metadata.positionData || {};
-            metadata.positionData.country =
-              iptcData.country_or_primary_location_name
-                .replace(/\0/g, '')
-                .trim();
-          }
-          if (iptcData.province_or_state) {
-            metadata.positionData = metadata.positionData || {};
-            metadata.positionData.state = iptcData.province_or_state
-              .replace(/\0/g, '')
-              .trim();
-          }
-          if (iptcData.city) {
-            metadata.positionData = metadata.positionData || {};
-            metadata.positionData.city = iptcData.city
-              .replace(/\0/g, '')
-              .trim();
-          }
-          if (iptcData.object_name) {
-            metadata.title = iptcData.object_name.replace(/\0/g, '').trim();
-          }
-          if (iptcData.caption) {
-            metadata.caption = iptcData.caption.replace(/\0/g, '').trim();
-          }
-          if (Array.isArray(iptcData.keywords)) {
-            metadata.keywords = iptcData.keywords;
-          }
-
-          if (iptcData.date_time) {
-            metadata.creationDate = iptcData.date_time.getTime();
-          }
-        } catch (err) {
-          // Logger.debug(LOG_TAG, 'Error parsing iptc data', fullPath, err);
-        }
-
         try {
           const exif = await exifr.parse(data, exifrOptions);
           MetadataLoader.mapMetadata(metadata, exif);
@@ -338,10 +304,10 @@ export class MetadataLoader {
 
   private static mapImageDimensions(metadata: PhotoMetadata, exif: any, orientation: number) {
     if (metadata.size.width <= 0) {
-      metadata.size.width = exif.ifd0?.ImageWidth || exif.exif?.ExifImageWidth;
+      metadata.size.width = exif.ifd0?.ImageWidth || exif.exif?.ExifImageWidth || metadata.size.width;
     }
     if (metadata.size.height <= 0) {
-      metadata.size.height = exif.ifd0?.ImageHeight || exif.exif?.ExifImageHeight;
+      metadata.size.height = exif.ifd0?.ImageHeight || exif.exif?.ExifImageHeight || metadata.size.height;
     }
     metadata.size.height = Math.max(metadata.size.height, 1); //ensure height dimension is positive
     metadata.size.width = Math.max(metadata.size.width, 1); //ensure width  dimension is positive
@@ -370,20 +336,35 @@ export class MetadataLoader {
         }
       }
     }
+    if (exif.iptc &&
+      exif.iptc.Keywords &&
+      exif.iptc.Keywords.length > 0) {
+      const subj = Array.isArray(exif.iptc.Keywords) ? exif.iptc.Keywords : [exif.iptc.Keywords];
+      if (metadata.keywords === undefined) {
+        metadata.keywords = [];
+      }
+      for (let kw of subj) {
+        kw = Utils.asciiToUTF8(kw);
+        if (metadata.keywords.indexOf(kw) === -1) {
+          metadata.keywords.push(kw);
+        }
+      }
+    }
   }
 
   private static mapTitle(metadata: PhotoMetadata, exif: any) {
-    metadata.title = exif.dc?.title?.value || metadata.title || exif.photoshop?.Headline || exif.acdsee?.caption; //acdsee caption holds the title when data is saved by digikam. Used as last resort if iptc and dc do not contain the data
+    metadata.title = exif.dc?.title?.value || Utils.asciiToUTF8(exif.iptc?.ObjectName) || metadata.title || exif.photoshop?.Headline || exif.acdsee?.caption; //acdsee caption holds the title when data is saved by digikam. Used as last resort if iptc and dc do not contain the data
   }
 
   private static mapCaption(metadata: PhotoMetadata, exif: any) {
-    metadata.caption = exif.dc?.description?.value || metadata.caption || exif.ifd0?.ImageDescription || exif.exif?.UserComment?.value || exif.Iptc4xmpCore?.ExtDescrAccessibility?.value ||exif.acdsee?.notes;
+    metadata.caption = exif.dc?.description?.value || Utils.asciiToUTF8(exif.iptc?.Caption) || metadata.caption || exif.ifd0?.ImageDescription || exif.exif?.UserComment?.value || exif.Iptc4xmpCore?.ExtDescrAccessibility?.value ||exif.acdsee?.notes;
   }
 
   private static mapTimestampAndOffset(metadata: PhotoMetadata, exif: any) {
     metadata.creationDate = Utils.timestampToMS(exif?.photoshop?.DateCreated, null) ||
     Utils.timestampToMS(exif?.xmp?.CreateDate, null) ||
     Utils.timestampToMS(exif?.xmp?.ModifyDate, null) ||
+    Utils.timestampToMS(Utils.toIsoTimestampString(exif?.iptc?.DateCreated, exif?.iptc?.TimeCreated), null) ||
     metadata.creationDate;
 
     metadata.creationDateOffset = Utils.timestampToOffsetString(exif?.photoshop?.DateCreated) ||
@@ -399,27 +380,27 @@ export class MetadataLoader {
         if (!offset) { //Find offset among other options if possible
           offset = exif.exif.OffsetTimeDigitized || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.exif.DateTimeOriginal, exif.exif.GPSTimeStamp, exif.gps);
         }
-        metadata.creationDate = Utils.timestampToMS(exif.exif.DateTimeOriginal, offset);
+        metadata.creationDate = Utils.timestampToMS(exif.exif.DateTimeOriginal, offset) || metadata.creationDate;
       } else if (exif.exif.CreateDate) { //using else if here, because DateTimeOriginal has preceedence
         //Create is when the camera wrote the file (typically within the same ms as shutter close)
         offset = exif.exif.OffsetTimeDigitized; //OffsetTimeDigitized is the corresponding offset
         if (!offset) { //Find offset among other options if possible
           offset = exif.exif.OffsetTimeOriginal || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.exif.DateTimeOriginal, exif.exif.GPSTimeStamp, exif.gps);
         }
-        metadata.creationDate = Utils.timestampToMS(exif.exif.CreateDate, offset);
+        metadata.creationDate = Utils.timestampToMS(exif.exif.CreateDate, offset) || metadata.creationDate;
       } else if (exif.ifd0?.ModifyDate) { //using else if here, because DateTimeOriginal and CreatDate have preceedence
         offset = exif.exif.OffsetTime; //exif.Offsettime is the offset corresponding to ifd0.ModifyDate
         if (!offset) { //Find offset among other options if possible
           offset = exif.exif.DateTimeOriginal || exif.exif.OffsetTimeDigitized || Utils.getTimeOffsetByGPSStamp(exif.ifd0.ModifyDate, exif.exif.GPSTimeStamp, exif.gps);
         }
-        metadata.creationDate = Utils.timestampToMS(exif.ifd0.ModifyDate, offset);
+        metadata.creationDate = Utils.timestampToMS(exif.ifd0.ModifyDate, offset) || metadata.creationDate;
       } else if (exif.ihdr && exif.ihdr["Creation Time"]) {// again else if (another fallback date if the good ones aren't there) {
         const any_offset = exif.exif.DateTimeOriginal || exif.exif.OffsetTimeDigitized || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.ifd0.ModifyDate, exif.exif.GPSTimeStamp, exif.gps);
         metadata.creationDate = Utils.timestampToMS(exif.ihdr["Creation Time"], any_offset);
         offset = any_offset;
       } else if (exif.xmp?.MetadataDate) {// again else if (another fallback date if the good ones aren't there - metadata date is probably later than actual creation date, but much better than file time) {
         const any_offset = exif.exif.DateTimeOriginal || exif.exif.OffsetTimeDigitized || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.ifd0.ModifyDate, exif.exif.GPSTimeStamp, exif.gps);
-        metadata.creationDate = Utils.timestampToMS(exif.xmp.MetadataDate, any_offset);
+        metadata.creationDate = Utils.timestampToMS(exif.xmp.MetadataDate, any_offset) || metadata.creationDate;
         offset = any_offset;
       }
       metadata.creationDateOffset = offset || metadata.creationDateOffset;
@@ -490,24 +471,15 @@ export class MetadataLoader {
 
   private static mapToponyms(metadata: PhotoMetadata, exif: any) {
     //Function to convert html code for special characters into their corresponding character (used in exif.photoshop-section)
-    const unescape = (tag: string) => {
-      return tag.replace(/&#([0-9]{1,3});/gi, function (match, numStr) {
-        return String.fromCharCode(parseInt(numStr, 10));
-      });
-    }
-    //photoshop section sometimes has City, Country and State
-    if (exif.photoshop) {
-      if (!metadata.positionData?.country && exif.photoshop.Country) {
-        metadata.positionData = metadata.positionData || {};
-        metadata.positionData.country = unescape(exif.photoshop.Country);
-      }
-      if (!metadata.positionData?.state && exif.photoshop.State) {
-        metadata.positionData = metadata.positionData || {};
-        metadata.positionData.state = unescape(exif.photoshop.State);
-      }
-      if (!metadata.positionData?.city && exif.photoshop.City) {
-        metadata.positionData = metadata.positionData || {};
-        metadata.positionData.city = unescape(exif.photoshop.City);
+
+    metadata.positionData = metadata.positionData || {};
+    metadata.positionData.country = Utils.asciiToUTF8(exif.iptc?.Country) || Utils.decodeHTMLChars(exif.photoshop?.Country);
+    metadata.positionData.state = Utils.asciiToUTF8(exif.iptc?.State) || Utils.decodeHTMLChars(exif.photoshop?.State);
+    metadata.positionData.city = Utils.asciiToUTF8(exif.iptc?.City) || Utils.decodeHTMLChars(exif.photoshop?.City);
+    if (metadata.positionData) {
+      Utils.removeNullOrEmptyObj(metadata.positionData);
+      if (Object.keys(metadata.positionData).length === 0) {
+        delete metadata.positionData;
       }
     }
   }

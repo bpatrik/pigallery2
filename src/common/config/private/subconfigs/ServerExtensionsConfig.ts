@@ -59,7 +59,8 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
   })
   folder: string = 'extensions';
 
-
+  // TODO: this does not hold if the order of the extensions mixes up.
+  // TODO: experiment with a map instead of an array
   @ConfigProperty({
     arrayType: ServerExtensionsEntryConfig,
     tags: {
