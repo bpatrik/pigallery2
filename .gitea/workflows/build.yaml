@@ -7,7 +7,7 @@ jobs:
   # 作业1名称
   pigallery2-Gitea-Actions:
     # 指定的运行器环境
-    runs-on: ubuntu-latest
+    runs-on: node-lts
 
     # 作业包含一系列任务，称为 steps
     steps:
