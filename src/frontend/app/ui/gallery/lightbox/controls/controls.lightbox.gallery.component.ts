@@ -1,20 +1,21 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild,} from '@angular/core';
-import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
-import {FullScreenService} from '../../fullscreen.service';
-import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
-import {interval, Subscription} from 'rxjs';
-import {filter, skip} from 'rxjs/operators';
-import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
-import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
-import {Config} from '../../../../../../common/config/public/Config';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
-import {AuthenticationService} from '../../../../model/network/authentication.service';
-import {LightboxService} from '../lightbox.service';
-import {GalleryCacheService} from '../../cache.gallery.service';
-import {Utils} from '../../../../../../common/Utils';
-import {FileSizePipe} from '../../../../pipes/FileSizePipe';
-import {DatePipe} from '@angular/common';
-import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
+import { Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, } from '@angular/core';
+import { MediaDTOUtils } from '../../../../../../common/entities/MediaDTO';
+import { FullScreenService } from '../../fullscreen.service';
+import { GalleryPhotoComponent } from '../../grid/photo/photo.grid.gallery.component';
+import { interval, Subscription } from 'rxjs';
+import { filter, skip } from 'rxjs/operators';
+import { PhotoDTO } from '../../../../../../common/entities/PhotoDTO';
+import { GalleryLightboxMediaComponent } from '../media/media.lightbox.gallery.component';
+import { Config } from '../../../../../../common/config/public/Config';
+import { SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes, } from '../../../../../../common/entities/SearchQueryDTO';
+import { AuthenticationService } from '../../../../model/network/authentication.service';
+import { LightboxService } from '../lightbox.service';
+import { GalleryCacheService } from '../../cache.gallery.service';
+import { Utils } from '../../../../../../common/Utils';
+import { FileSizePipe } from '../../../../pipes/FileSizePipe';
+import { DatePipe } from '@angular/common';
+import { LightBoxTitleTexts } from '../../../../../../common/config/public/ClientConfig';
+import { Router } from '@angular/router';
 
 
 @Component({
@@ -39,7 +40,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
   @Input() navigation = { hasPrev: true, hasNext: true };
   @Input() activePhoto: GalleryPhotoComponent;
   @Input() mediaElement: GalleryLightboxMediaComponent;
-  @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
+  @Input() photoFrameDim = { width: 1, height: 1, aspect: 1 };
   @Input() slideShowRunning: boolean;
 
   public readonly facesEnabled = Config.Faces.enabled;
@@ -66,7 +67,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
     private authService: AuthenticationService,
     private cacheService: GalleryCacheService,
     private fileSizePipe: FileSizePipe,
-    private datePipe: DatePipe
+    private datePipe: DatePipe, 
+    private router: Router
   ) {
     this.searchEnabled = this.authService.canSearch();
   }

@@ -12,22 +12,22 @@ import {
   ViewChild,
   ViewChildren,
 } from '@angular/core';
-import {GridRowBuilder} from './GridRowBuilder';
-import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
-import {GridMedia} from './GridMedia';
-import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
-import {OverlayService} from '../overlay.service';
-import {Config} from '../../../../../common/config/public/Config';
-import {PageHelper} from '../../../model/page.helper';
-import {Subscription} from 'rxjs';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {QueryService} from '../../../model/query.service';
-import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
-import {QueryParams} from '../../../../../common/QueryParams';
-import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
-import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
-import {GalleryNavigatorService} from '../navigator/navigator.service';
-import {GridSizes} from '../../../../../common/entities/GridSizes';
+import { GridRowBuilder } from './GridRowBuilder';
+import { GalleryLightboxComponent } from '../lightbox/lightbox.gallery.component';
+import { GridMedia } from './GridMedia';
+import { GalleryPhotoComponent } from './photo/photo.grid.gallery.component';
+import { OverlayService } from '../overlay.service';
+import { Config } from '../../../../../common/config/public/Config';
+import { PageHelper } from '../../../model/page.helper';
+import { Subscription } from 'rxjs';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { QueryService } from '../../../model/query.service';
+import { MediaDTO, MediaDTOUtils, } from '../../../../../common/entities/MediaDTO';
+import { QueryParams } from '../../../../../common/QueryParams';
+import { GallerySortingService, MediaGroup } from '../navigator/sorting.service';
+import { GroupByTypes } from '../../../../../common/entities/SortingMethods';
+import { GalleryNavigatorService } from '../navigator/navigator.service';
+import { GridSizes } from '../../../../../common/entities/GridSizes';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -36,7 +36,7 @@ import {GridSizes} from '../../../../../common/entities/GridSizes';
 })
 export class GalleryGridComponent
   implements OnInit, OnChanges, AfterViewInit, OnDestroy {
-  @ViewChild('gridContainer', {static: false}) gridContainer: ElementRef;
+  @ViewChild('gridContainer', { static: false }) gridContainer: ElementRef;
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
   @Input() lightbox: GalleryLightboxComponent;
@@ -49,9 +49,9 @@ export class GalleryGridComponent
     girdSize: Subscription;
     route: Subscription;
   } = {
-    route: null,
-    girdSize: null
-  };
+      route: null,
+      girdSize: null
+    };
   delayedRenderUpToPhoto: string = null;
   private scrollListenerPhotos: GalleryPhotoComponent[] = [];
   private TARGET_COL_COUNT = 5;
@@ -192,7 +192,7 @@ export class GalleryGridComponent
 
   photoClicked(media: MediaDTO): void {
     this.router.navigate([], {
-      queryParams: this.queryService.getParams({media}),
+      queryParams: this.queryService.getParams({ media }),
     });
   }
 
@@ -400,7 +400,7 @@ export class GalleryGridComponent
       }
     }
     if (groupIndex === -1) {
-      this.router.navigate([], {queryParams: this.queryService.getParams()});
+      this.router.navigate([], { queryParams: this.queryService.getParams() });
       return;
     }
     // Make sure that at leas one more row is rendered
@@ -412,7 +412,7 @@ export class GalleryGridComponent
         this.mediaToRender[this.mediaToRender.length - 1]?.media?.length < mediaIndex) &&
       this.renderARow() !== null
       // eslint-disable-next-line no-empty
-      ) {
+    ) {
     }
   }
 
@@ -458,7 +458,7 @@ export class GalleryGridComponent
       this.isMoreToRender() &&
       (this.shouldRenderMore(renderedContentHeight) === true ||
         this.getNumberOfRenderedMedia() < numberOfPhotos)
-      ) {
+    ) {
       const ret = this.renderARow();
       if (ret === null) {
         throw new Error('Grid media rendering failed');

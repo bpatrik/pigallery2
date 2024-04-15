@@ -288,7 +288,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   public hide(): void {
     this.router
-      .navigate([], { queryParams: this.queryService.getParams() })
+      .navigate([], { queryParams: this.queryService.getParams(),replaceUrl: true })
       .then(() => {
         this.piTitleService.setLastNonMedia();
       })
