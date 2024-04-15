@@ -12,7 +12,7 @@ jobs:
     # 作业包含一系列任务，称为 steps
     steps:
       - uses: actions/checkout@v4
-      - name: Set up node 20
+      - name: Set up node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
