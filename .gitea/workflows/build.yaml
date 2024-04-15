@@ -27,6 +27,7 @@ jobs:
         run: |
           npm install
           npm run build
+          npm run create-release
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
