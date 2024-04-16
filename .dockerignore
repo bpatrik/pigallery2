@@ -1,8 +1,7 @@
 .github/
 .idea/
 .git/
-node_modules/
-release/
+*/node_modules/
 demo/
 dist/
 PiGallery2.iml
