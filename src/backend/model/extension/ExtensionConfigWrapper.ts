@@ -22,9 +22,8 @@ export class ExtensionConfigWrapper {
       // make sure the config file exists by the time we load it.
       // TODO: remove this once typeconfig is fixed and can properly load defaults in arrays
       if (!fs.existsSync((pc.__options as ConfigClassOptions<ServerConfig>).configPath)) {
-        await pc.save();
+        await pc.load();
       }
-
       await pc.load(); // loading the basic configs, but we do not know the extension config hierarchy yet
 
       // TODO make sure that all extensions are present even after loading them from file
@@ -47,7 +46,7 @@ export class ExtensionConfigWrapper {
       // make sure the config file exists by the time we load it.
       // TODO: remove this once typeconfig is fixed and can properly load defaults in arrays
       if (!fs.existsSync((pc.__options as ConfigClassOptions<ServerConfig>).configPath)) {
-        pc.saveSync();
+        pc.loadSync();
       }
       pc.loadSync(); // loading the basic configs, but we do not know the extension config hierarchy yet
       // TODO make sure that all extensions are present even after loading them from file
