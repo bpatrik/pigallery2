@@ -10,6 +10,6 @@ try {
   pre.loadSync({preventSaving: true});
 } catch (e) { /* empty */
 }
-ExtensionConfigTemplateLoader.Instance.init(path.join(__dirname, '/../../../../', pre.Extensions.folder));
+ExtensionConfigTemplateLoader.Instance.init(pre.Extensions.folder);
 
 export const Config = ExtensionConfigWrapper.originalSync(true);
