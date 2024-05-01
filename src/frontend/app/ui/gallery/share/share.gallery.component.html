@@ -147,7 +147,7 @@
       </thead>
       <tbody>
       <tr *ngFor="let share of activeShares">
-        <td><a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a></td>
+        <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
         <td *ngIf="IsAdmin">{{share.creator.name}}</td>
         <td>{{share.expires | date}}</td>
         <td>
