@@ -1,0 +1,17 @@
+{
+  "creationDate": 1713040531000,
+  "creationDateOffset": "+05:45",
+  "fileSize": 62443,
+  "positionData": {
+    "GPSData": {
+      "latitude": 27.693999,
+      "longitude": 85.285262
+    },
+    "country": "Nepal",
+    "state": "Bagmati Province"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}

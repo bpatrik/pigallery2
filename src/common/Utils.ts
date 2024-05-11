@@ -56,10 +56,15 @@ export class Utils {
     return c;
   }
 
-  static zeroPrefix(value: string | number, length: number): string {
-    const ret = '00000' + value;
-    return ret.substr(ret.length - length);
+  static zeroPrefix(number: any, length: number): string {
+    if (!isNaN(number)) {
+      const zerosToAdd = Math.max(length - String(number).length, 0);
+      return '0'.repeat(zerosToAdd) + number;
+    } else {
+      return '0'.repeat(number);
+    }
   }
+
 
   /**
    * Checks if the two input (let them be objects or arrays or just primitives) are equal
@@ -118,7 +123,6 @@ export class Utils {
     }
   }
 
-
   static makeUTCMidnight(d: number | Date) {
     if (!(d instanceof Date)) {
       d = new Date(d);
@@ -162,21 +166,21 @@ export class Utils {
     return Date.parse(formattedTimestamp);
   }
 
-  //function to extract offset string from timestamp string, returns undefined if timestamp does not contain offset
-  static timestampToOffsetString(timestamp: string) {
-    try {
-      const offsetRegex = /[+-]\d{2}:\d{2}$/;
-      const match = timestamp.match(offsetRegex);
-      if (match) {
-        return match[0];
-      } else if (timestamp.indexOf("Z") > 0) {
-        return '+00:00';
-      }
-      return undefined;
-    } catch (err) {
-      return undefined;
+  static splitTimestampAndOffset(timestamp: string): [string|undefined, string|undefined] {
+    if (!timestamp) {
+      return [undefined, undefined];
+    }
+    //                                 |---------------------TIMESTAMP WITH OPTIONAL MILLISECONDS--------------------||-OPTIONAL TZONE--|
+    //                                 |YYYY           MM           DD            HH         MM         SS (MS optio)||(timezone offset)|
+    const timestampWithOffsetRegex = /^(\d{4}[-.: ]\d{2}[-.: ]\d{2}[-.: T]\d{2}[-.: ]\d{2}[-.: ]\d{2}(?:\.\d+)?)([+-]\d{2}:\d{2})?$/;
+    const match = timestamp.match(timestampWithOffsetRegex);
+    if (match) {
+      return [match[1], match[2]]; //match[0] is the full string, not interested in that.
+    } else {
+      return [undefined, undefined];
     }
   }
+
 
   //function to calculate offset from exif.exif.gpsTimeStamp or exif.gps.GPSDateStamp + exif.gps.GPSTimestamp
   static getTimeOffsetByGPSStamp(timestamp: string, gpsTimeStamp: string, gps: any) {
@@ -186,12 +190,12 @@ export class Utils {
       gps.GPSDateStamp &&
       gps.GPSTimeStamp) { //else use exif.gps.GPS*Stamp if available
       //GPS timestamp is always UTC (+00:00)
-      UTCTimestamp = gps.GPSDateStamp.replaceAll(':', '-') + gps.GPSTimeStamp.join(':');
+      UTCTimestamp = gps.GPSDateStamp.replaceAll(':', '-') + " " + gps.GPSTimeStamp.map((num: any) => Utils.zeroPrefix(num ,2)).join(':');
     }
     if (UTCTimestamp && timestamp) {
       //offset in minutes is the difference between gps timestamp and given timestamp
       //to calculate this correctly, we have to work with the same offset
-      const offsetMinutes = (Utils.timestampToMS(timestamp, '+00:00')- Utils.timestampToMS(UTCTimestamp, '+00:00')) / 1000 / 60;
+      const offsetMinutes: number = Math.round((Utils.timestampToMS(timestamp, '+00:00')- Utils.timestampToMS(UTCTimestamp, '+00:00')) / 1000 / 60);
       return Utils.getOffsetString(offsetMinutes);
     } else {
       return undefined;
@@ -202,8 +206,8 @@ export class Utils {
     if (-720 <= offsetMinutes && offsetMinutes <= 840) {
       //valid offset is within -12 and +14 hrs (https://en.wikipedia.org/wiki/List_of_UTC_offsets)
       return (offsetMinutes < 0 ? "-" : "+") +                              //leading +/-
-        ("0" + Math.trunc(Math.abs(offsetMinutes) / 60)).slice(-2) + ":" +  //zeropadded hours and ':'
-        ("0" + Math.abs(offsetMinutes) % 60).slice(-2);                     //zeropadded minutes
+        Utils.zeroPrefix(Math.trunc(Math.abs(offsetMinutes) / 60), 2) + ":" +        //zeropadded hours and ':'
+        Utils.zeroPrefix((Math.abs(offsetMinutes) % 60), 2);                         //zeropadded minutes
     } else {
       return undefined;
     }
@@ -221,6 +225,11 @@ export class Utils {
     }
   }
 
+    static getLocalTimeMS(creationDate: number, creationDateOffset: string) {
+    const offsetMinutes = Utils.getOffsetMinutes(creationDateOffset);
+    return creationDate + (offsetMinutes ? (offsetMinutes * 60000) : 0);
+  }
+  
   static isLeapYear(year: number) {
     return (0 == year % 4) && (0 != year % 100) || (0 == year % 400)
   }

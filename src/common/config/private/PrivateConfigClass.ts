@@ -15,7 +15,7 @@ const isTesting = process.env['NODE_ENV'] == true || ['afterEach', 'after', 'bef
   .every((fn) => (global as any)[fn] instanceof Function);
 
 @ConfigClass<IConfigClass<TAGS> & ServerConfig>({
-  configPath: path.join(__dirname, !isTesting ? './../../../../config.json' : './../../../../test/backend/tmp/config.json'),
+  configPath: path.join(__dirname, !isTesting ? './../../../../config.json' : './../../../../test/tmp/config.json'),
   crateConfigPathIfNotExists: isTesting,
   saveIfNotExist: true,
   attachDescription: true,

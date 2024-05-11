@@ -1,0 +1,25 @@
+{
+  "size": {
+    "width": 200,
+    "height": 300
+  },
+  "creationDate": 1686141955000,
+  "creationDateOffset": "+01:00",
+  "fileSize": 18601,
+  "cameraData": {
+    "model": "Canon EOS R5",
+    "make": "Canon"
+  },
+  "positionData": {
+    "GPSData": {
+      "longitude": -0.124575,
+      "latitude": 51.500694
+    },
+    "country": "Storbritannien",
+    "state": "England",
+    "city": "St James's"
+  },
+  "keywords": [
+    "Big Ben"
+  ]
+}

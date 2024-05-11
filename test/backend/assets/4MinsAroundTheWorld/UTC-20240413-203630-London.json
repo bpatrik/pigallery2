@@ -1,0 +1,18 @@
+{
+  "creationDate": 1713040590000,
+  "creationDateOffset": "+01:00",
+  "fileSize": 60679,
+  "positionData": {
+    "GPSData": {
+      "latitude": 51.515618,
+      "longitude": -0.091998
+    },
+    "city": "Bassishaw",
+    "country": "Storbritannien",
+    "state": "England"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}

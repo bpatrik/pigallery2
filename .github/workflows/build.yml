@@ -32,9 +32,9 @@ jobs:
 
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -87,10 +87,10 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       -
         name: Setup Node.js for use with actions
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
       -
@@ -99,7 +99,7 @@ jobs:
       -
         name: Create Release
         run: npm run create-release -- --skip-opt-packages=ffmpeg-static,ffprobe-static --force-opt-packages
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: pigallery2-release
           path: release
@@ -108,7 +108,7 @@ jobs:
     needs: [ create-release ]
     strategy:
       matrix:
-        container: [alpine, debian-buster, debian-bullseye ]
+        container: [alpine, debian-buster, debian-bullseye, debian-bookworm ]
         include:
           - container: alpine
             platforms: linux/amd64,linux/arm64,linux/arm/v7
@@ -116,32 +116,34 @@ jobs:
             platforms: linux/amd64,linux/arm64,linux/arm/v7
           - container: debian-bullseye
             platforms: linux/amd64,linux/arm64,linux/arm/v7
+          - container: debian-bookworm
+            platforms: linux/amd64,linux/arm64,linux/arm/v7
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+        uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
           name: pigallery2-release
           path: pigallery2-release
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
       - name: Login to DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
       - name: Build docker
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
           platforms: ${{ matrix.platforms }}
       - name: Push experimental
         if: ${{ github.ref == 'refs/heads/experimental' }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
@@ -151,7 +153,7 @@ jobs:
       - name: Push edge on new master commit
         # github.ref:  branches the format is refs/heads/<branch_name>  PRs and Tags are different
         if: ${{github.ref == 'refs/heads/master' }}
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
@@ -159,8 +161,8 @@ jobs:
           push: true
           tags: bpatrik/pigallery2:edge-${{ matrix.container }}
       - name: Push release on new Tag
-        if: ${{ startsWith(github.ref_type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container != 'debian-bullseye'}}
-        uses: docker/build-push-action@v3
+        if: ${{ startsWith(github.ref_type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container != 'debian-bookworm'}}
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
@@ -171,8 +173,8 @@ jobs:
             bpatrik/pigallery2:${{ github.ref_name }}-${{ matrix.container }}
             bpatrik/pigallery2:latest-${{ matrix.container }}
       - name: Push latest on new Tag
-        if: ${{ startsWith(github.ref_type, 'tag') &&  !github.event.issue.pull_request &&  matrix.container == 'debian-bullseye'}}
-        uses: docker/build-push-action@v3
+        if: ${{ startsWith(github.ref_type, 'tag') &&  !github.event.issue.pull_request &&  matrix.container == 'debian-bookworm'}}
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build

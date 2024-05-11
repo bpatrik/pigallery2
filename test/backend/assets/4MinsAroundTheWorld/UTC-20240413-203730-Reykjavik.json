@@ -1,0 +1,17 @@
+{
+  "creationDate": 1713040650000,
+  "creationDateOffset": "+00:00",
+  "fileSize": 59743,
+  "positionData": {
+    "GPSData": {
+      "latitude": 64.141166,
+      "longitude": -21.94313
+    },
+    "city": "Reykjavík - 1",
+    "country": "Island"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}

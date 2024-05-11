@@ -1,6 +1,7 @@
 {
   "skip": [
-    "creationDate"
+    "creationDate",
+    "creationDateOffset"
   ],
   "fileSize": 5860,
   "size": {

@@ -12,6 +12,7 @@ import {SQLConnection} from '../database/SQLConnection';
 import {ExtensionObject} from './ExtensionObject';
 import {ExtensionDecoratorObject} from './ExtensionDecorator';
 import * as util from 'util';
+import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const exec = util.promisify(require('child_process').exec);
 
@@ -80,7 +81,7 @@ export class ExtensionManager implements IObjectManager {
     extList.sort();
 
 
-    Logger.debug(LOG_TAG, 'Extensions found: ', JSON.stringify(Config.Extensions.extensions.map(ec => ec.path)));
+    Logger.debug(LOG_TAG, 'Extensions found: ', JSON.stringify(Config.Extensions.extensions.keys()));
   }
 
   private createUniqueExtensionObject(name: string, folder: string): IExtensionObject<unknown> {
@@ -99,11 +100,12 @@ export class ExtensionManager implements IObjectManager {
 
   private async initExtensions() {
 
-    for (let i = 0; i < Config.Extensions.extensions.length; ++i) {
-      const extFolder = Config.Extensions.extensions[i].path;
+    for (const prop of Config.Extensions.extensions.keys()) {
+      const extConf: ServerExtensionsEntryConfig = Config.Extensions.extensions[prop] as ServerExtensionsEntryConfig;
+      const extFolder = extConf.path;
       let extName = extFolder;
 
-      if (Config.Extensions.extensions[i].enabled === false) {
+      if (extConf.enabled === false) {
         Logger.silly(LOG_TAG, `Skipping ${extFolder} initiation. Extension is disabled.`);
       }
       const extPath = path.join(ProjectPath.ExtensionFolder, extFolder);

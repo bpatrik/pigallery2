@@ -15,6 +15,7 @@ import * as path from 'path';
 import { Utils } from '../../../common/Utils';
 import { FFmpegFactory } from '../FFmpegFactory';
 import { ExtensionDecorator } from '../extension/ExtensionDecorator';
+import { DateTags } from './MetadataCreationDate';
 
 const LOG_TAG = '[MetadataLoader]';
 const ffmpeg = FFmpegFactory.get();
@@ -248,7 +249,9 @@ export class MetadataLoader {
             if (fs.existsSync(sidecarPath)) {
               const sidecarData: any = await exifr.sidecar(sidecarPath, exifrOptions);
               if (sidecarData !== undefined) {
+                //note that since side cars are loaded last, data loaded here overwrites embedded metadata (in Pigallery2, not in the actual files)
                 MetadataLoader.mapMetadata(metadata, sidecarData);
+                break;
               }
             }
           }
@@ -361,50 +364,69 @@ export class MetadataLoader {
   }
 
   private static mapTimestampAndOffset(metadata: PhotoMetadata, exif: any) {
-    metadata.creationDate = Utils.timestampToMS(exif?.photoshop?.DateCreated, null) ||
-    Utils.timestampToMS(exif?.xmp?.CreateDate, null) ||
-    Utils.timestampToMS(exif?.xmp?.ModifyDate, null) ||
-    Utils.timestampToMS(Utils.toIsoTimestampString(exif?.iptc?.DateCreated, exif?.iptc?.TimeCreated), null) ||
-    metadata.creationDate;
-
-    metadata.creationDateOffset = Utils.timestampToOffsetString(exif?.photoshop?.DateCreated) ||
-    Utils.timestampToOffsetString(exif?.xmp?.CreateDate) ||
-    metadata.creationDateOffset;
-    if (exif.exif) {
-      let offset = undefined;
-      //Preceedence of dates: exif.DateTimeOriginal, exif.CreateDate, ifd0.ModifyDate, ihdr["Creation Time"], xmp.MetadataDate, file system date
-      //Filesystem is the absolute last resort, and it's hard to write tests for, since file system dates are changed on e.g. git clone.
-      if (exif.exif.DateTimeOriginal) {
-        //DateTimeOriginal is when the camera shutter closed
-        offset = exif.exif.OffsetTimeOriginal; //OffsetTimeOriginal is the corresponding offset
-        if (!offset) { //Find offset among other options if possible
-          offset = exif.exif.OffsetTimeDigitized || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.exif.DateTimeOriginal, exif.exif.GPSTimeStamp, exif.gps);
+    //This method looks for date tags matching the priorized list 'DateTags' of 'MetadataCreationDate'
+    let ts: string, offset: string;
+    for (let i = 0; i < DateTags.length; i++) {
+      const [mainpath, extrapath, extratype] = DateTags[i];
+      [ts, offset] = extractTSAndOffset(mainpath, extrapath, extratype);
+      if (ts) {
+        if (!offset) { //We don't have the offset from the timestamp or from extra tag, let's see if we can find it in another way
+          //Check the explicit offset tags. Otherwise calculate from GPS
+          offset = exif.exif?.OffsetTimeOriginal || exif.exif?.OffsetTimeDigitized || exif.exif?.OffsetTime || Utils.getTimeOffsetByGPSStamp(ts, exif.exif?.GPSTimeStamp, exif.gps);
         }
-        metadata.creationDate = Utils.timestampToMS(exif.exif.DateTimeOriginal, offset);
-      } else if (exif.exif.CreateDate) { //using else if here, because DateTimeOriginal has preceedence
-        //Create is when the camera wrote the file (typically within the same ms as shutter close)
-        offset = exif.exif.OffsetTimeDigitized; //OffsetTimeDigitized is the corresponding offset
-        if (!offset) { //Find offset among other options if possible
-          offset = exif.exif.OffsetTimeOriginal || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.exif.DateTimeOriginal, exif.exif.GPSTimeStamp, exif.gps);
+        if (!offset) { //still no offset? let's look for a timestamp with offset in the rest of the DateTags list
+          const [tsonly, tsoffset] = Utils.splitTimestampAndOffset(ts);
+          for (let j = i+1; j < DateTags.length; j++) {
+            const [exts, exOffset] = extractTSAndOffset(DateTags[j][0], DateTags[j][1], DateTags[j][2]);
+            if (exts && exOffset && Math.abs(Utils.timestampToMS(tsonly, null) - Utils.timestampToMS(exts, null)) < 30000) {
+              //if there is an offset and the found timestamp is within 30 seconds of the extra timestamp, we will use the offset from the found timestamp
+              offset = exOffset;
+              break;
+            }
+          }
         }
-        metadata.creationDate = Utils.timestampToMS(exif.exif.CreateDate, offset);
-      } else if (exif.ifd0?.ModifyDate) { //using else if here, because DateTimeOriginal and CreatDate have preceedence
-        offset = exif.exif.OffsetTime; //exif.Offsettime is the offset corresponding to ifd0.ModifyDate
-        if (!offset) { //Find offset among other options if possible
-          offset = exif.exif.DateTimeOriginal || exif.exif.OffsetTimeDigitized || Utils.getTimeOffsetByGPSStamp(exif.ifd0.ModifyDate, exif.exif.GPSTimeStamp, exif.gps);
-        }
-        metadata.creationDate = Utils.timestampToMS(exif.ifd0.ModifyDate, offset);
-      } else if (exif.ihdr && exif.ihdr["Creation Time"]) {// again else if (another fallback date if the good ones aren't there) {
-        const any_offset = exif.exif.DateTimeOriginal || exif.exif.OffsetTimeDigitized || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.ifd0.ModifyDate, exif.exif.GPSTimeStamp, exif.gps);
-        metadata.creationDate = Utils.timestampToMS(exif.ihdr["Creation Time"], any_offset);
-        offset = any_offset;
-      } else if (exif.xmp?.MetadataDate) {// again else if (another fallback date if the good ones aren't there - metadata date is probably later than actual creation date, but much better than file time) {
-        const any_offset = exif.exif.DateTimeOriginal || exif.exif.OffsetTimeDigitized || exif.exif.OffsetTime || Utils.getTimeOffsetByGPSStamp(exif.ifd0.ModifyDate, exif.exif.GPSTimeStamp, exif.gps);
-        metadata.creationDate = Utils.timestampToMS(exif.xmp.MetadataDate, any_offset);
-        offset = any_offset;
+        break; //timestamp is found, look no further
       }
-      metadata.creationDateOffset = offset || metadata.creationDateOffset;
     }
+    metadata.creationDate = Utils.timestampToMS(ts, offset) || metadata.creationDate;
+    metadata.creationDateOffset = offset || metadata.creationDateOffset;
+    //---- End of mapTimestampAndOffset logic ----
+
+    //---- Helper functions for mapTimestampAndOffset ----
+    function getValue(exif: any, path: string): any {
+      const pathElements = path.split('.');
+      let currentObject: any = exif;
+      for (const pathElm of pathElements) {
+          const tmp = currentObject[pathElm];
+          if (tmp === undefined) {
+              return undefined;
+          }
+          currentObject = tmp;
+      }
+      return currentObject;
+    }
+  
+    function extractTSAndOffset(mainpath: string, extrapath: string, extratype: string) {
+      let ts: string | undefined = undefined;
+      let offset: string | undefined = undefined;
+      //line below is programmatic way of finding a timestamp in the exif object. For example "xmp.CreateDate", from the DateTags list
+      //ts = exif.xmp?.CreateDate
+      ts = getValue(exif, mainpath);
+      if (ts) {
+        if (!extratype || extratype == 'O') { //offset can be in the timestamp itself
+          [ts, offset] = Utils.splitTimestampAndOffset(ts);
+          if (extratype == 'O' && !offset) { //offset in the extra tag and not already extracted from main tag
+              offset = getValue(exif, extrapath);
+          }
+        } else if (extratype == 'T') { //date only in main tag, time in the extra tag
+          ts = Utils.toIsoTimestampString(ts, getValue(exif, extrapath));
+          [ts, offset] = Utils.splitTimestampAndOffset(ts);
+        }
+      }
+      return [ts, offset];
+    }
+    
+
   }
 
   private static mapCameraData(metadata: PhotoMetadata, exif: any) {

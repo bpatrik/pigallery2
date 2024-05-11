@@ -1,5 +1,6 @@
 import {IExtensionConfig} from './IExtension';
 import {Config} from '../../../common/config/private/Config';
+import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 
 export class ExtensionConfig<C> implements IExtensionConfig<C> {
 
@@ -8,8 +9,7 @@ export class ExtensionConfig<C> implements IExtensionConfig<C> {
 
 
   public getConfig(): C {
-    const c = (Config.Extensions.extensions || [])
-      .find(e => e.path === this.extensionFolder);
+    const c = Config.Extensions.extensions[this.extensionFolder] as ServerExtensionsEntryConfig;
 
     return c?.configs as C;
   }

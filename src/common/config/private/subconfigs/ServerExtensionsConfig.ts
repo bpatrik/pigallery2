@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
+import {ConfigMap, ConfigProperty, IConfigMap, SubConfigClass} from 'typeconfig/common';
 import {ClientExtensionsConfig, ConfigPriority, TAGS} from '../../public/ClientConfig';
 import {GenericConfigType} from 'typeconfig/src/GenericConfigType';
 
@@ -59,15 +59,14 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
   })
   folder: string = 'extensions';
 
-
   @ConfigProperty({
-    arrayType: ServerExtensionsEntryConfig,
+    type: ConfigMap,
     tags: {
       name: $localize`Installed extensions`,
       priority: ConfigPriority.advanced
     }
   })
-  extensions: ServerExtensionsEntryConfig[] = [];
+  extensions: IConfigMap<ServerExtensionsEntryConfig> = new ConfigMap();
 
 
   @ConfigProperty({

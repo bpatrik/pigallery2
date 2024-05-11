@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs';
-import {Config} from '../common/config/private/Config';
+import {PrivateConfigClass} from '../common/config/private/PrivateConfigClass';
 
 export class ProjectPathClass {
   public Root: string;
@@ -11,8 +11,10 @@ export class ProjectPathClass {
   public FrontendFolder: string;
   public ExtensionFolder: string;
   public DBFolder: string;
+  private cfg: PrivateConfigClass;
 
-  constructor() {
+  init(cfg: PrivateConfigClass) {
+    this.cfg = cfg;
     this.reset();
   }
 
@@ -31,12 +33,12 @@ export class ProjectPathClass {
   reset(): void {
     this.Root = path.join(__dirname, '/../../');
     this.FrontendFolder = path.join(this.Root, 'dist');
-    this.ImageFolder = this.getAbsolutePath(Config.Media.folder);
-    this.TempFolder = this.getAbsolutePath(Config.Media.tempFolder);
+    this.ImageFolder = this.getAbsolutePath(this.cfg.Media.folder);
+    this.TempFolder = this.getAbsolutePath(this.cfg.Media.tempFolder);
     this.TranscodedFolder = path.join(this.TempFolder, 'tc');
     this.FacesFolder = path.join(this.TempFolder, 'f');
-    this.DBFolder = this.getAbsolutePath(Config.Database.dbFolder);
-    this.ExtensionFolder = this.getAbsolutePath(Config.Extensions.folder);
+    this.DBFolder = this.getAbsolutePath(this.cfg.Database.dbFolder);
+    this.ExtensionFolder = this.getAbsolutePath(this.cfg.Extensions.folder);
 
     // create thumbnail folder if not exist
     if (!fs.existsSync(this.TempFolder)) {

@@ -1,0 +1,18 @@
+{
+  "creationDate": 1713040530000,
+  "creationDateOffset": "-03:00",
+  "fileSize": 64033,
+  "positionData": {
+    "GPSData": {
+      "latitude": -34.862412,
+      "longitude": -56.154556
+    },
+    "city": "Jacinto Vera",
+    "country": "Uruguay",
+    "state": "Montevideo"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}

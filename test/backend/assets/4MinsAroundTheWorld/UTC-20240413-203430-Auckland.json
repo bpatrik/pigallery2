@@ -1,0 +1,18 @@
+{
+  "creationDate": 1713040470000,
+  "creationDateOffset": "+12:00",
+  "fileSize": 62150,
+  "positionData": {
+    "GPSData": {
+      "latitude": -36.854351,
+      "longitude": 174.755402
+    },
+    "city": "Arch Hill",
+    "country": "New Zealand",
+    "state": "Auckland"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}

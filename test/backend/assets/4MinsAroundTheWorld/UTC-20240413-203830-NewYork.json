@@ -1,0 +1,18 @@
+{
+  "creationDate": 1713040710000,
+  "creationDateOffset": "-04:00",
+  "fileSize": 62918,
+  "positionData": {
+    "GPSData": {
+      "latitude": 40.712728,
+      "longitude": -74.006015
+    },
+    "city": "New York",
+    "country": "USA",
+    "state": "New York"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}

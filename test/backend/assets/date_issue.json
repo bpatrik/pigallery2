@@ -7,7 +7,8 @@
     "make": "HUAWEI",
     "model": "HUAWEI G6-L11"
   },
-  "creationDate": 1460826466000,
+  "creationDate": 1460819266000,
+  "creationDateOffset": "+02:00",
   "fileSize": 1980,
   "size": {
     "height": 1,

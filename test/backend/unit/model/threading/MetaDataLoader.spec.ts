@@ -11,6 +11,18 @@ import {DatabaseType} from '../../../../../src/common/config/private/PrivateConf
 
 declare const before: any;
 
+function getFileModificationTime(filename: string): Promise<Date | null> {
+  return new Promise((resolve, reject) => {
+      fs.stat(filename, (err, stats) => {
+          if (err) {
+              reject(err);
+          } else {
+              resolve(stats.mtime);
+          }
+      });
+  });
+}
+
 describe('MetadataLoader', () => {
   // loading default settings (this might have been changed by other tests)
 
@@ -114,6 +126,16 @@ describe('MetadataLoader', () => {
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.json'));
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
+  it('should load jpg with timestamps and gps (UTC) and calculate offset +1, but GPS is off by 1 min', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+  it('should load jpg with timestamps and gps (UTC) and calculate offset +1, but GPS is off by 1 min - no XMP GPS', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min_no_xmpgps.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc_off_by_1min_no_xmpgps.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
   it('should load jpg with timestamps but no offset and no GPS to calculate it from', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_only_time.jpg'));
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_only_time.json'));
@@ -213,6 +235,16 @@ describe('MetadataLoader', () => {
         it(item, async () => {
           const data = await MetadataLoader.loadPhotoMetadata(fullFilePath);
           const expected = require(fullFilePath.split('.').slice(0, -1).join('.') + '.json');
+          
+          if (expected.creationDate == "fileModificationTime") {
+            await getFileModificationTime(fullFilePath).then((modificationTime: any) => {
+              if (modificationTime) {
+                expected.creationDate = new Date(modificationTime).getTime();
+              } else {
+                expected.creationDate = 0;
+              }
+            })
+          }
           if (expected.skip) {
             expected.skip.forEach((s: string) => {
               delete (data as any)[s];
@@ -236,6 +268,7 @@ describe('MetadataLoader', () => {
         const expected = require(path.join(__dirname, '/../../../assets/orientation/Landscape.json'));
         delete data.fileSize;
         delete data.creationDate;
+        delete data.creationDateOffset;
         expect(Utils.clone(data)).to.be.deep.equal(expected);
       });
       it('Portrait ' + i, async () => {
@@ -243,6 +276,7 @@ describe('MetadataLoader', () => {
         const expected = require(path.join(__dirname, '/../../../assets/orientation/Portrait.json'));
         delete data.fileSize;
         delete data.creationDate;
+        delete data.creationDateOffset;
         expect(Utils.clone(data)).to.be.deep.equal(expected);
       });
     }
@@ -284,6 +318,27 @@ describe('MetadataLoader', () => {
 
   describe('should load metadata from sidecar files', () => {
     const root = path.join(__dirname, '/../../../assets/sidecar');
+    const files = fs.readdirSync(root);
+    for (const item of files) {
+      const fullFilePath = path.join(root, item);
+      if (PhotoProcessing.isPhoto(fullFilePath)) {
+        it(item, async () => {
+          const data = await MetadataLoader.loadPhotoMetadata(fullFilePath);
+          const expected = require(fullFilePath.split('.').slice(0, -1).join('.') + '.json');
+          expect(Utils.clone(data)).to.be.deep.equal(expected);
+        });
+      } else if (VideoProcessing.isVideo(fullFilePath)) {
+        it(item, async () => {
+          const data = await MetadataLoader.loadVideoMetadata(fullFilePath);
+          const expected = require(fullFilePath.split('.').slice(0, -1).join('.') + '.json');
+          expect(Utils.clone(data)).to.be.deep.equal(expected);
+        });
+      }
+    }
+  });
+
+  describe('should load metadata from files with times and coordinates in different parts of the world', () => {
+    const root = path.join(__dirname, '/../../../assets/4MinsAroundTheWorld');
     const files = fs.readdirSync(root);
     for (const item of files) {
       const fullFilePath = path.join(root, item);

@@ -5,7 +5,7 @@ RUN apk add --update-cache --repository https://alpine.global.ssl.fastly.net/alp
   python3 build-base sqlite-dev sqlite-libs vips-dev vips-heif fftw-dev gcc g++ make libc6-compat && ln -snf /usr/bin/python3 /usr/bin/python
 COPY pigallery2-release /app
 WORKDIR /app
-RUN npm install --unsafe-perm
+RUN npm install --unsafe-perm  --fetch-timeout=90000
 RUN mkdir -p /app/data/config && \
     mkdir -p /app/data/db && \
     mkdir -p /app/data/images && \

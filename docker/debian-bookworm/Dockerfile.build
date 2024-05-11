@@ -1,10 +1,10 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:18.19-buster AS builder
+FROM node:18.19-bookworm AS builder
 RUN apt update && apt install -y --no-install-recommends libvips-dev python3
 COPY pigallery2-release /app
 WORKDIR /app
-RUN npm install --unsafe-perm  --fetch-timeout=90000
+RUN npm install --unsafe-perm --fetch-timeout=90000
 RUN mkdir -p /app/data/config && \
     mkdir -p /app/data/db && \
     mkdir -p /app/data/images && \
@@ -13,7 +13,7 @@ RUN mkdir -p /app/data/config && \
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:18-buster-slim AS main
+FROM node:18-bookworm-slim AS main
 WORKDIR /app
 ENV NODE_ENV=production \
     # overrides only the default value of the settings (the actualy value can be overwritten through config.json)

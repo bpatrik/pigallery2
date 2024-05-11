@@ -1,0 +1,18 @@
+{
+  "creationDate": 1713040640000,
+  "creationDateOffset": "+09:00",
+  "fileSize": 60451,
+  "positionData": {
+    "GPSData": {
+      "latitude": 35.682194,
+      "longitude": 139.762221
+    },
+    "city": "Kokyogaien",
+    "country": "Japan",
+    "state": "Tokyo To"
+  },
+  "size": {
+    "height": 1080,
+    "width": 1920
+  }
+}
