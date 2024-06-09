@@ -1094,6 +1094,18 @@ export class ClientGalleryConfig {
 
   @ConfigProperty({
     tags: {
+      name: $localize`Ignore timestamp offsets`,
+      priority: ConfigPriority.advanced,
+    },
+    description: $localize`If enabled, timestamp offsets are ignored, meaning that the local times of pictures are used for searching, sorting and grouping. If disabled, global time is used and pictures with no timestamp are assumed to be in UTC (offset +00:00).`
+  })
+  //DEVELOPER NOTE: The Database model stores the timestamp (creationDate) as milliseconds since 1970-01-01 UTC (global time). And stores and offset (creationDateOffset) as minutes.
+  //Ignoring timestamp for the user is the opposite for the database. If the user wants to ignore the offset, we have to add the offset to the creationDate to give the user the right experience.
+  ignoreTimestampOffset: boolean = true; 
+  
+
+  @ConfigProperty({
+    tags: {
       name: $localize`On scroll thumbnail prioritising`,
       priority: ConfigPriority.underTheHood,
     },

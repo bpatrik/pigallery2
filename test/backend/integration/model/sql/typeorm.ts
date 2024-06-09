@@ -173,7 +173,7 @@ describe('Typeorm integration', () => {
 
     const photos = await pr
       .createQueryBuilder('media')
-      .orderBy('media.metadata.creationDate', 'ASC')
+      .orderBy('media.metadata.creationDate', 'ASC') //TODO: Offset: Create a test where it is ".orderBy('media.metadata.creationDate + (media.metadata.creationDateOffset * 60000)', 'ASC')" instead
       .where('media.metadata.positionData.city LIKE :text COLLATE utf8_general_ci', {text: '%' + photo.metadata.positionData.city + '%'})
       .innerJoinAndSelect('media.directory', 'directory')
       .limit(10)
@@ -195,7 +195,7 @@ describe('Typeorm integration', () => {
     await pr.save(photo);
     const photos = await pr
       .createQueryBuilder('media')
-      .orderBy('media.metadata.creationDate', 'ASC')
+      .orderBy('media.metadata.creationDate', 'ASC') //TODO: Offset: Create a test where it is ".orderBy('media.metadata.creationDate + (media.metadata.creationDateOffset * 60000)', 'ASC')" instead
       .where('media.metadata.positionData.city LIKE :text COLLATE utf8_general_ci', {text: '%' + city + '%'})
       .innerJoinAndSelect('media.directory', 'directory')
       .limit(10)

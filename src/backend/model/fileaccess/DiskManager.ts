@@ -277,8 +277,8 @@ export class DiskManager {
       directory.oldestMedia = Number.MIN_SAFE_INTEGER;
 
       directory.media.forEach((m) => {
-          directory.youngestMedia = Math.min(m.metadata.creationDate, directory.youngestMedia);
-          directory.oldestMedia = Math.max(m.metadata.creationDate, directory.oldestMedia);
+          directory.youngestMedia = Math.min(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), directory.youngestMedia);
+          directory.oldestMedia = Math.max(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), directory.oldestMedia);
         }
       );
 

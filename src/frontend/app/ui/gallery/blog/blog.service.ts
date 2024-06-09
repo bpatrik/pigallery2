@@ -6,6 +6,7 @@ import {ContentService} from '../content.service';
 import {mergeMap, Observable, shareReplay} from 'rxjs';
 import {MDFilesFilterPipe} from '../../../pipes/MDFilesFilterPipe';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
+import {Config} from '../../../../../common/config/public/Config';
 
 @Injectable()
 export class BlogService {
@@ -28,7 +29,7 @@ export class BlogService {
         let firstMedia = Number.MAX_SAFE_INTEGER;
         if (content.mediaGroups.length > 0) {
           firstMedia = content.mediaGroups[0].media.reduce((p, m) =>
-            Math.min(m.metadata.creationDate, p), Number.MAX_SAFE_INTEGER);
+            Math.min(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), p), Number.MAX_SAFE_INTEGER);
         }
 
         const files = this.mdFilesFilterPipe.transform(content.metaFile)
@@ -65,7 +66,7 @@ export class BlogService {
 
     const getDateGroup = (date: Date) => {
       // get UTC midnight date
-      const dateNum = Utils.makeUTCMidnight(date).getTime();
+      const dateNum = Utils.makeUTCMidnight(date, undefined).getTime();
       let groupDate = dates.find((d, i) => i > dates.length - 1 ? false : dates[i + 1] > dateNum);   //dates are sorted
 
       // cant find the date. put to the last group (as it was later)

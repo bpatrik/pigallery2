@@ -508,7 +508,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnInit, OnChanges {
       case LightBoxTitleTexts.persons:
         return m.metadata.faces?.map(f => f.name)?.join(', ');
       case LightBoxTitleTexts.date:
-        return this.datePipe.transform(m.metadata.creationDate, 'longDate', m.metadata.creationDateOffset);
+        return this.datePipe.transform(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) , 'longDate', 'UTC');
       case LightBoxTitleTexts.location:
         if (!m.metadata.positionData) {
           return '';

@@ -148,7 +148,7 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   isThisYear(): boolean {
     return (
         new Date().getFullYear() ===
-        Utils.getUTCFullYear(this.media.metadata.creationDate, this.media.metadata.creationDateOffset)
+        Utils.getUTCFullYear(this.media.metadata.creationDate, this.media.metadata.creationDateOffset)   
     );
   }
 
@@ -202,4 +202,3 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
     } as TextSearch);
   }
 }
-

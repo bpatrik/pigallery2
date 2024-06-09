@@ -3,6 +3,8 @@ import {BehaviorSubject, Observable} from 'rxjs';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {DirectoryContent} from '../contentLoader.service';
 import {map, switchMap} from 'rxjs/operators';
+import {Config} from '../../../../../common/config/public/Config';
+import {Utils} from '../../../../../common/Utils';
 
 export enum FilterRenderType {
   enum = 1,
@@ -159,11 +161,11 @@ export class FilterService {
     }
     const ret: { date: Date, endDate: Date, dateStr: string, count: number, max: number }[] = [];
     const minDate = prefiltered.media.reduce(
-      (p, curr) => Math.min(p, curr.metadata.creationDate),
+      (p, curr) => Math.min(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
       Number.MAX_VALUE - 1
     );
     const maxDate = prefiltered.media.reduce(
-      (p, curr) => Math.max(p, curr.metadata.creationDate),
+      (p, curr) => Math.max(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
       Number.MIN_VALUE + 1
     );
     const diff = (maxDate - minDate) / 1000;
@@ -205,7 +207,7 @@ export class FilterService {
     const startMediaDate = new Date(floorDate(minDate));
 
     prefiltered.media.forEach(m => {
-      const key = Math.floor((floorDate(m.metadata.creationDate) - startMediaDate.getTime()) / 1000 / usedDiv); //TODO
+      const key = Math.floor((floorDate(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)) - startMediaDate.getTime()) / 1000 / usedDiv);
 
       const getDate = (index: number) => {
         let d: Date;
@@ -273,16 +275,16 @@ export class FilterService {
             if (c.media.length > 0) {
               // Update date filter range
               afilters.dateFilter.minDate = c.media.reduce(
-                (p, curr) => Math.min(p, curr.metadata.creationDate),
+                (p, curr) => Math.min(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
                 Number.MAX_VALUE - 1
               );
               afilters.dateFilter.maxDate = c.media.reduce(
-                (p, curr) => Math.max(p, curr.metadata.creationDate),
+                (p, curr) => Math.max(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
                 Number.MIN_VALUE + 1
               );
               // Add a few sec padding
-              afilters.dateFilter.minDate -= (afilters.dateFilter.minDate % 1000) + 1000;
-              afilters.dateFilter.maxDate += (afilters.dateFilter.maxDate % 1000) + 1000;
+              afilters.dateFilter.minDate -= ((afilters.dateFilter.minDate % 1000) + 1000);
+              afilters.dateFilter.maxDate += ((1000 - (afilters.dateFilter.maxDate % 1000)) + 1000);
 
               if (afilters.dateFilter.minFilter === Number.MIN_VALUE) {
                 afilters.dateFilter.minFilter = afilters.dateFilter.minDate;
@@ -294,8 +296,8 @@ export class FilterService {
               // Apply Date filter
               c.media = c.media.filter(
                 (m) =>
-                  m.metadata.creationDate >= afilters.dateFilter.minFilter &&
-                  m.metadata.creationDate <= afilters.dateFilter.maxFilter
+                  Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) >= afilters.dateFilter.minFilter &&
+                  Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) <= afilters.dateFilter.maxFilter
               );
             } else {
               afilters.dateFilter.minDate = Number.MIN_VALUE;
@@ -398,5 +400,3 @@ export class FilterService {
     }
   }
 }
-
-

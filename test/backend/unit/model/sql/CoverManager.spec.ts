@@ -128,6 +128,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
 
   before(async () => {
     await setUpSqlDB();
+    Config.Gallery.ignoreTimestampOffset = false;
   });
 
 
