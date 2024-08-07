@@ -839,12 +839,12 @@
         <target>Video transcoding</target>
       </trans-unit>
       <trans-unit id="440637971406706761" datatype="html">
-        <source>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate.   The transcoded videos will be save to the thumbnail folder.  You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</source>
+        <source>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate.   The transcoded videos will be saved to the thumbnail folder.  You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">810</context>
         </context-group>
-        <target>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate. The transcoded videos will be save to the thumbnail folder. You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</target>
+        <target>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate. The transcoded videos will be saved to the thumbnail folder. You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</target>
       </trans-unit>
       <trans-unit id="4328921999658902771" datatype="html">
         <source>On the fly converting</source>
@@ -1931,12 +1931,12 @@
         <target>Perataan direktori</target>
       </trans-unit>
       <trans-unit id="705617377096083016" datatype="html">
-        <source>Adds a button to flattens the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</source>
+        <source>Adds a button to flatten the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">821</context>
         </context-group>
-        <target>Adds a button to flattens the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</target>
+        <target>Adds a button to flatten the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</target>
       </trans-unit>
       <trans-unit id="2057017984457052518" datatype="html">
         <source>Default grid size</source>
@@ -2311,7 +2311,7 @@
         <target>Inline blog starts open</target>
       </trans-unit>
       <trans-unit id="237163013641208057" datatype="html">
-        <source>Makes inline blog (*.md files content) to be auto open.</source>
+        <source>Makes inline blog (*.md files content) auto-open.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1102</context>
@@ -2320,7 +2320,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1112</context>
         </context-group>
-        <target>Makes inline blog (*.md files content) to be auto open.</target>
+        <target>Makes inline blog (*.md files content) auto-open.</target>
       </trans-unit>
       <trans-unit id="8496975322830640739" datatype="html">
         <source>Top blog starts open</source>
@@ -2603,12 +2603,12 @@
         <target>Api path</target>
       </trans-unit>
       <trans-unit id="2663968068169291107" datatype="html">
-        <source>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it add analytics or custom code to the app).</source>
+        <source>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it to add analytics or custom code to the app).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1373</context>
         </context-group>
-        <target>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it add analytics or custom code to the app).</target>
+        <target>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it to add analytics or custom code to the app).</target>
       </trans-unit>
       <trans-unit id="6764366823411649793" datatype="html">
         <source>Custom HTML Head</source>

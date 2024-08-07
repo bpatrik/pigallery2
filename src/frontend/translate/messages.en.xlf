@@ -659,12 +659,12 @@
         <target>Server timing</target>
       </trans-unit>
       <trans-unit id="7410385593985151245" datatype="html">
-        <source>If enabled, the app ads "Server-Timing" http header to the response.</source>
+        <source>If enabled, the app adds "Server-Timing" http header to the response.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">519</context>
         </context-group>
-        <target>If enabled, the app ads "Server-Timing" http header to the response.</target>
+        <target>If enabled, the app adds "Server-Timing" http header to the response.</target>
       </trans-unit>
       <trans-unit id="6011589038643567137" datatype="html">
         <source>Max saved progress</source>
@@ -691,12 +691,12 @@
         <target>Processing batch size</target>
       </trans-unit>
       <trans-unit id="4763786307361733917" datatype="html">
-        <source>Jobs load this many photos or videos form the DB for processing at once.</source>
+        <source>Jobs load this many photos or videos from the DB for processing at once.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">632</context>
         </context-group>
-        <target>Jobs load this many photos or videos form the DB for processing at once.</target>
+        <target>Jobs load this many photos or videos from the DB for processing at once.</target>
       </trans-unit>
       <trans-unit id="547146152434765833" datatype="html">
         <source>Scheduled jobs</source>
@@ -1231,12 +1231,12 @@
         <target>Maximum items</target>
       </trans-unit>
       <trans-unit id="9059384159901338400" datatype="html">
-        <source>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes upto double of the individual items.</source>
+        <source>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes up to double of the individual items.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">75</context>
         </context-group>
-        <target>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes upto double of the individual items.</target>
+        <target>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes up to double of the individual items.</target>
       </trans-unit>
       <trans-unit id="1975560396569090938" datatype="html">
         <source>Max photo items</source>
@@ -1548,7 +1548,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">279</context>
         </context-group>
-        <target>Enables password protected sharing links.</target>
+        <target>Requires password protected sharing links.</target>
       </trans-unit>
       <trans-unit id="700572637665748593" datatype="html">
         <source>Enables random link generation.</source>
@@ -2415,12 +2415,12 @@
         <target>Supported formats with transcoding</target>
       </trans-unit>
       <trans-unit id="4322859338400777784" datatype="html">
-        <source>Video formats that are supported after transcoding (with the build-in ffmpeg support).</source>
+        <source>Video formats that are supported after transcoding (with the built-in ffmpeg support).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1135</context>
         </context-group>
-        <target>Video formats that are supported after transcoding (with the build-in ffmpeg support).</target>
+        <target>Video formats that are supported after transcoding (with the built-in ffmpeg support).</target>
       </trans-unit>
       <trans-unit id="2099861843042326383" datatype="html">
         <source>Supported formats without transcoding</source>
@@ -2638,28 +2638,28 @@
         </context-group>
         <target>Page title</target>
       <trans-unit id="7902904914951669015" datatype="html">
-        <source>If you access the page from local network its good to know the public url for creating sharing link.</source>
+        <source>If you access the page from local network it's good to know the public url for creating sharing link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1338</context>
         </context-group>
-        <target>If you access the page from local network its good to know the public url for creating sharing link.</target>
+        <target>If you access the page from local network it's good to know the public url for creating sharing link.</target>
       </trans-unit>      <trans-unit id="7902904914951669015" datatype="html">
-        <source>If you access the page from local network its good to know the public url for creating sharing link.</source>
+        <source>If you access the page from local network it's good to know the public url for creating sharing link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1338</context>
         </context-group>
-        <target>If you access the page from local network its good to know the public url for creating sharing link.</target>
+        <target>If you access the page from local network it's good to know the public url for creating sharing link.</target>
       </trans-unit>
       </trans-unit>
       <trans-unit id="176222620393429790" datatype="html">
-        <source>If you access the page form local network its good to know the public url for creating sharing link.</source>
+        <source>If you access the page from local network it's good to know the public url for creating sharing link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1338</context>
         </context-group>
-        <target>If you access the page form local network its good to know the public url for creating sharing link.</target>
+        <target>If you access the page from local network it's good to know the public url for creating sharing link.</target>
       </trans-unit>
       <trans-unit id="5093650417970469070" datatype="html">
         <source>Page public url</source>
