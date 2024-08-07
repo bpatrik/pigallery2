@@ -62,6 +62,10 @@
             "baseHref": "",
             "translation": "src/frontend/translate/messages.ru.xlf"
           },
+          "sk": {
+            "baseHref": "",
+            "translation": "src/frontend/translate/messages.sk.xlf"
+          },
           "sv": {
             "baseHref": "",
             "translation": "src/frontend/translate/messages.sv.xlf"
