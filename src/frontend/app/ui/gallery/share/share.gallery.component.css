@@ -32,3 +32,16 @@ a.list-shares-button {
 a.list-shares-button:hover {
   text-decoration: underline;
 }
+
+.ellipsisContainer {
+  position: relative;
+}
+
+.ellipsisText {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
