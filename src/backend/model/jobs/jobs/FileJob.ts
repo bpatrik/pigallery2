@@ -67,6 +67,9 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
   protected abstract processFile(filePath: string): Promise<void>;
 
   protected async step(): Promise<boolean> {
+    // 获取批处理大小
+    const BATCH_PROCESSING_SIZE = Config.Jobs.batchProcessingSize || 10;
+    
     if (
       this.fileQueue.length === 0 &&
       ((this.directoryQueue.length === 0 && !this.config.indexedOnly) ||
@@ -75,7 +78,7 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
       return false;
     }
 
-
+    // 加载文件到队列
     if (!this.config.indexedOnly) {
       if (this.directoryQueue.length > 0) {
         await this.loadADirectoryFromDisk();
@@ -99,27 +102,37 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
       }
     }
 
-    const filePath = this.fileQueue.shift();
-    try {
-      if ((await this.shouldProcess(filePath)) === true) {
-        this.Progress.Processed++;
-        this.Progress.log('processing: ' + filePath);
-        await this.processFile(filePath);
-      } else {
-        this.Progress.log('skipping: ' + filePath);
-        this.Progress.Skipped++;
-      }
-    } catch (e) {
-      console.error(e);
-      Logger.error(
-        LOG_TAG,
-        'Error during processing file:' + filePath + ', ' + e.toString()
-      );
-      this.Progress.log(
-        'Error during processing file:' + filePath + ', ' + e.toString()
-      );
+    // 批量处理文件
+    const batchSize = Math.min(BATCH_PROCESSING_SIZE, this.fileQueue.length);
+    const filesToProcess = this.fileQueue.splice(0, batchSize);
+    const processingPromises = [];
+
+    for (const filePath of filesToProcess) {
+      processingPromises.push((async () => {
+        try {
+          if (await this.shouldProcess(filePath)) {
+            this.Progress.Processed++;
+            this.Progress.log('processing: ' + filePath);
+            await this.processFile(filePath);
+          } else {
+            this.Progress.log('skipping: ' + filePath);
+            this.Progress.Skipped++;
+          }
+        } catch (e) {
+          console.error(e);
+          Logger.error(
+            LOG_TAG,
+            'Error during processing file:' + filePath + ', ' + e.toString()
+          );
+          this.Progress.log(
+            'Error during processing file:' + filePath + ', ' + e.toString()
+          );
+        }
+      })());
     }
 
+    // 等待所有文件处理完成
+    await Promise.all(processingPromises);
     return true;
   }
 

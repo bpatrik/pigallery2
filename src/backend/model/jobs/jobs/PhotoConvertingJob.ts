@@ -77,19 +77,24 @@ export class PhotoConvertingJob extends FileJob<{
 
   protected async processFile(mPath: string): Promise<void> {
     const isVideo = MediaDTOUtils.isVideoPath(mPath);
+    const promises = [];
+    
     for (const item of this.config.sizes) {
-      // skip hig- res photo creation for video files. App does not use photo preview fore videos in the lightbox
+      // 跳过视频的高分辨率缩略图
       if (this.config.maxVideoSize < item && isVideo) {
         continue;
       }
-      await PhotoProcessing.generateThumbnail(
+      
+      // 不使用 await，而是收集 Promise
+      promises.push(PhotoProcessing.generateThumbnail(
         mPath,
         item,
-        isVideo
-          ? ThumbnailSourceType.Video
-          : ThumbnailSourceType.Photo,
+        isVideo ? ThumbnailSourceType.Video : ThumbnailSourceType.Photo,
         false
-      );
+      ));
     }
+    
+    // 等待所有尺寸处理完成
+    await Promise.all(promises);
   }
 }

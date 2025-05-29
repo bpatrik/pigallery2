@@ -21,9 +21,10 @@ export class PhotoProcessing {
       return;
     }
 
+    // 增加并发度，使用全部 CPU 核心数
     Config.Media.Photo.concurrentThumbnailGenerations = Math.max(
-      1,
-      os.cpus().length - 1
+      2,  // 最小值改为 2
+      os.cpus().length  // 使用全部 CPU 核心数
     );
 
     this.taskQue = new TaskExecuter(
@@ -330,6 +331,4 @@ viewBox="${svgIcon.viewBox || '0 0 512 512'}">d="${svgIcon.items}</svg>`,
     await this.taskQue.execute(input);
     return outPath;
   }
-
 }
-
