@@ -122,7 +122,13 @@ export class MetadataLoader {
             Date.parse(data.format.tags.creation_time) ||
             metadata.creationDate;
         }
-
+        // For Apple
+        if (data.format.tags !== undefined &&                                                             
+        typeof data.format.tags["com.apple.quicktime.creationdate"] === 'string') {                                         
+          metadata.creationDate =                                                                       
+            Date.parse(data.format.tags["com.apple.quicktime.creationdate"]) ||                                             
+            metadata.creationDate;                                   
+        }
         // eslint-disable-next-line no-empty
       } catch (err) {
         Logger.silly(LOG_TAG, 'Error loading metadata for : ' + fullPath);
