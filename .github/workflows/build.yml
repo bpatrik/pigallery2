@@ -66,7 +66,7 @@ jobs:
       with:
         start: npm run start-e2e-server
       # after the test run completes store screenshots
-    - uses: actions/upload-artifact@v3
+    - uses: actions/upload-artifact@v4
       if: failure() # Store screenshots only on failures
       with:
          name: cypress-screenshots
