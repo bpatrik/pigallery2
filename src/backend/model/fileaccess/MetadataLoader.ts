@@ -201,7 +201,7 @@ export class MetadataLoader {
       }
       try {
         //read the actual image size, don't rely on tags for this
-        const info = imageSize(fullPath);
+        const info = imageSize(fullPath as any);
         metadata.size = { width: info.width, height: info.height };
       } catch (e) {
         //in case of failure, set dimensions to 0 so they may be read via tags
@@ -229,7 +229,7 @@ export class MetadataLoader {
       }
       try {
         try {
-          const exif = await exifr.parse(data, exifrOptions);
+          const exif = await exifr.parse(new Uint8Array(data), exifrOptions);
           MetadataLoader.mapMetadata(metadata, exif);
         } catch (err) {
           // ignoring errors
