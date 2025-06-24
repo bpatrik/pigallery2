@@ -57,6 +57,7 @@
     "xml2js": "0.6.2"
   },
   "devDependencies": {
+    "@angular-devkit/build-angular": "15.2.2",
     "@angular-builders/custom-webpack": "15.0.0",
     "@angular-eslint/builder": "15.2.1",
     "@angular-eslint/eslint-plugin": "15.2.1",
