@@ -3,9 +3,9 @@
  */
 // eslint-disable-next-line @typescript-eslint/no-var-requires,no-undef
 module.exports = (config, options) => {
-  // Use webpack from Angular's bundled version
+  // Use webpack directly
   // eslint-disable-next-line @typescript-eslint/no-var-requires,no-undef
-  const webpack = require('@angular-devkit/build-angular/node_modules/webpack');
+  const webpack = require('webpack');
   
   config.plugins = [
     ...config.plugins,

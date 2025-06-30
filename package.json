@@ -57,8 +57,8 @@
     "xml2js": "0.6.2"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "15.2.2",
     "@angular-builders/custom-webpack": "15.0.0",
+    "@angular-devkit/build-angular": "15.2.11",
     "@angular-eslint/builder": "15.2.1",
     "@angular-eslint/eslint-plugin": "15.2.1",
     "@angular-eslint/eslint-plugin-template": "15.2.1",
@@ -143,16 +143,17 @@
     "ts-helpers": "1.1.2",
     "ts-node": "10.9.1",
     "typescript": "4.9.5",
+    "webpack": "5.76.1",
     "webpack-bundle-analyzer": "4.8.0",
     "xlf-google-translate": "1.0.0-beta.23",
     "zone.js": "0.12.0"
   },
   "optionalDependencies": {
-    "better-sqlite3": "8.2.0",
-    "sharp": "0.31.3",
+    "better-sqlite3": "^8.2.0",
     "ffmpeg-static": "5.1.0",
     "ffprobe-static": "3.1.0",
-    "mysql": "2.18.1"
+    "mysql": "2.18.1",
+    "sharp": "0.31.3"
   },
   "engines": {
     "node": ">=18"
