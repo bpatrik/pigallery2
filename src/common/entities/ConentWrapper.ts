@@ -292,8 +292,7 @@ export class ContentWrapper {
 
   private static deMapify(cw: ContentWrapper, media: FileDTO, isSearchResult: boolean): void {
 
-    const deMapifyOne = <T>(map: any[],
-                            obj: T, key: keyof T, mappedKey: string) => {
+    const deMapifyOne = <T>(map: unknown[], obj: T, key: keyof T, mappedKey: string) => {
       // @ts-ignore
       obj[key] = map[obj[mappedKey]];
       // @ts-ignore
