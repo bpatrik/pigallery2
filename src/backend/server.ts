@@ -118,11 +118,11 @@ export class Server {
     // enable token generation but do not check it
     this.app.post(
       [Config.Server.apiPath + '/user/login', Config.Server.apiPath + '/share/login'],
-      _csrf({ignoreMethods: ['POST']})
+      _csrf({ignoreMethods: ['POST']}) as any
     );
     this.app.get(
       [Config.Server.apiPath + '/user/me', Config.Server.apiPath + '/share/:' + QueryParams.gallery.sharingKey_params],
-      _csrf({ignoreMethods: ['GET']})
+      _csrf({ignoreMethods: ['GET']}) as any
     );
 
     PhotoProcessing.init();

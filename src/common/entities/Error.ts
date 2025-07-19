@@ -38,7 +38,7 @@ export class ErrorDTO {
   constructor(
       public code: ErrorCodes,
       public message?: string,
-      public details?: any,
+      public details?: unknown,
       req?: Request
   ) {
     this.detailsStr =

@@ -206,6 +206,7 @@ describe('Authentication middleware', () => {
 
     describe('should call input ErrorDTO next on missing...', () => {
       it('body', (done: (err?: any) => void) => {
+        Config.Users.authenticationRequired = true;
         const req: any = {
           query: {},
           params: {}
@@ -220,6 +221,7 @@ describe('Authentication middleware', () => {
       });
 
       it('loginCredential', (done: (err?: any) => void) => {
+        Config.Users.authenticationRequired = true;
         const req: any = {
           body: {},
           query: {},
@@ -241,6 +243,7 @@ describe('Authentication middleware', () => {
 
 
       it('loginCredential content', (done: (err?: any) => void) => {
+        Config.Users.authenticationRequired = true;
         const req: any = {
           body: {loginCredential: {}},
           query: {},
@@ -262,6 +265,7 @@ describe('Authentication middleware', () => {
 
     });
     it('should call next with error on not finding user', (done: (err?: any) => void) => {
+      Config.Users.authenticationRequired = true;
       const req: any = {
         body: {
           loginCredential: {
@@ -292,6 +296,7 @@ describe('Authentication middleware', () => {
     });
 
     it('should call next with user on the session on  finding user', (done: (err?: any) => void) => {
+      Config.Users.authenticationRequired = true;
       const req: any = {
         session: {},
         body: {

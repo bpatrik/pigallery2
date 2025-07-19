@@ -9,9 +9,9 @@ export class CSRFInterceptor implements HttpInterceptor {
   }
 
   intercept(
-      request: HttpRequest<any>,
+      request: HttpRequest<unknown>,
       next: HttpHandler
-  ): Observable<HttpEvent<any>> {
+  ): Observable<HttpEvent<unknown>> {
     // add authorization header with jwt token if available
     const currentUser = this.authenticationService.user.value;
     if (currentUser && currentUser.csrfToken) {
