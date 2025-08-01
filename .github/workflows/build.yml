@@ -104,7 +104,7 @@ jobs:
         container: [alpine,  debian-bullseye, debian-bookworm ]
         include:
           - container: alpine
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64,linux/arm64,linux/arm/v7
           - container: debian-bullseye
             platforms: linux/amd64,linux/arm64,linux/arm/v7
           - container: debian-bookworm
