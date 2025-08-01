@@ -1,8 +1,7 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
 FROM node:22-alpine3.22 AS builder
-RUN apk add --no-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.22/community/ \
-  python3 build-base sqlite-dev sqlite-libs imagemagick-dev libraw-dev vips-dev vips-heif vips-magick fftw-dev gcc g++ make libc6-compat && \
+RUN apk add --no-cache python3 build-base sqlite-dev sqlite-libs imagemagick-dev libraw-dev vips-dev vips-heif vips-magick fftw-dev gcc g++ make libc6-compat && \
   ln -snf /usr/bin/python3 /usr/bin/python
 
 COPY pigallery2-release /app
@@ -34,8 +33,7 @@ ENV NODE_ENV=production \
     PI_DOCKER=true
 
 EXPOSE 80
-RUN apk add --no-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.22/community/ \
-    vips vips-cpp vips-heif vips-magick ffmpeg
+RUN apk add --no-cache vips vips-cpp vips-heif vips-magick ffmpeg
 COPY --from=builder /app /app
 
 # Run build time diagnostics to make sure the app would work after build is finished
