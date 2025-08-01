@@ -2,11 +2,17 @@
 #-----------------------------------------
 FROM node:22-alpine3.22 AS builder
 RUN apk add --no-cache --repository https://alpine.global.ssl.fastly.net/alpine/v3.22/community/ \
-  python3 py3-pip build-base sqlite-dev sqlite-libs imagemagick-dev libraw-dev vips-dev vips-heif vips-magick fftw-dev gcc g++ make py-setuptools libc6-compat && \
+  python3 build-base sqlite-dev sqlite-libs imagemagick-dev libraw-dev vips-dev vips-heif vips-magick fftw-dev gcc g++ make libc6-compat && \
   ln -snf /usr/bin/python3 /usr/bin/python
 
 COPY pigallery2-release /app
 WORKDIR /app
+
+# Force sharp to use system libvips (Sharp v33 doesn’t ship musl ARMv7 binary)
+ENV SHARP_IGNORE_GLOBAL_LIBVIPS=0
+RUN npm install --unsafe-perm  --fetch-timeout=90000 --build-from-source sharp
+
+
 RUN npm install --unsafe-perm  --fetch-timeout=90000
 RUN mkdir -p /app/data/config && \
     mkdir -p /app/data/db && \
