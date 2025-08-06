@@ -2764,7 +2764,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1496</context>
         </context-group>
-        <target>Ez a modul a 'véletlenszerű fotó' utl generálását engedelyezi. Az url egy véletlen fotót ad vissza a galériából. Harmadik fél által készített alkalmazásokhoz használhatód. Pl véletlenszerűen változó háttérkép.</target>
+        <target>Ez a modul a 'véletlenszerű fotó' url generálását engedelyezi. Az url egy véletlen fotót ad vissza a galériából. Harmadik fél által készített alkalmazásokhoz használhatód. Pl véletlenszerűen változó háttérkép.</target>
       </trans-unit>
       <trans-unit id="5732878542640870310" datatype="html">
         <source>Size to generate</source>
