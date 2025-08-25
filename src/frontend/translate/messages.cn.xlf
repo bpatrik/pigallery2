@@ -24,7 +24,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>SMTP host server</target>
+        <target>SMTP 主机服务器</target>
       </trans-unit>
       <trans-unit id="6117946241126833991" datatype="html">
         <source>Port</source>
@@ -48,7 +48,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">32</context>
         </context-group>
-        <target>SMTP server's port</target>
+        <target>SMTP 服务器端口</target>
       </trans-unit>
       <trans-unit id="7417306416104386782" datatype="html">
         <source>isSecure</source>
@@ -56,7 +56,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">38</context>
         </context-group>
-        <target>isSecure</target>
+        <target>安全</target>
       </trans-unit>
       <trans-unit id="3595369311836927260" datatype="html">
         <source>Is the connection secure. See https://nodemailer.com/smtp/#tls-options for more details</source>
@@ -64,7 +64,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">41</context>
         </context-group>
-        <target>Is the connection secure. See https://nodemailer.com/smtp/#tls-options for more details</target>
+        <target>连接是否安全. 查看 https://nodemailer.com/smtp/#tls-options 获取详细信息</target>
       </trans-unit>
       <trans-unit id="4974172930949190178" datatype="html">
         <source>TLS required</source>
@@ -72,7 +72,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">47</context>
         </context-group>
-        <target>TLS required</target>
+        <target>需要 TLS</target>
       </trans-unit>
       <trans-unit id="4629987485563394658" datatype="html">
         <source>if this is true and secure is false then Nodemailer (used library in the background) tries to use STARTTLS. See https://nodemailer.com/smtp/#tls-options for more details</source>
@@ -80,7 +80,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">50</context>
         </context-group>
-        <target>if this is true and secure is false then Nodemailer (used library in the background) tries to use STARTTLS. See https://nodemailer.com/smtp/#tls-options for more details</target>
+        <target>如果此参数为是,且安全为否,则 Nodemailer（后台使用的库）会尝试使用机会性加密. 查看 https://nodemailer.com/smtp/#tls-options 获取详细信息</target>
       </trans-unit>
       <trans-unit id="2392488717875840729" datatype="html">
         <source>User</source>
@@ -92,7 +92,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">22</context>
         </context-group>
-        <target>User</target>
+        <target>用户</target>
       </trans-unit>
       <trans-unit id="5128106301085777888" datatype="html">
         <source>User to connect to the SMTP server.</source>
@@ -100,7 +100,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">60</context>
         </context-group>
-        <target>User to connect to the SMTP server.</target>
+        <target>连接到 SMTP 服务器的用户.</target>
       </trans-unit>
       <trans-unit id="1431416938026210429" datatype="html">
         <source>Password</source>
@@ -144,7 +144,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>Password to connect to the SMTP server.</target>
+        <target>连接 SMTP 服务器的密码.</target>
       </trans-unit>
       <trans-unit id="2704982721159979632" datatype="html">
         <source>Sender email</source>
@@ -152,7 +152,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>Sender email</target>
+        <target>发件人邮箱</target>
       </trans-unit>
       <trans-unit id="5308313168080901236" datatype="html">
         <source>Some services do not allow sending from random e-mail addresses. Set this accordingly.</source>
@@ -160,7 +160,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">86</context>
         </context-group>
-        <target>Some services do not allow sending from random e-mail addresses. Set this accordingly.</target>
+        <target>有些服务不允许从随机电子邮件地址发送邮件.请据此进行设置.</target>
       </trans-unit>
       <trans-unit id="4452860738128824775" datatype="html">
         <source>SMTP</source>
@@ -176,7 +176,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">105</context>
         </context-group>
-        <target>Email</target>
+        <target>邮件</target>
       </trans-unit>
       <trans-unit id="5088570468989623310" datatype="html">
         <source>The app uses Nodemailer in the background for sending e-mails. Refer to https://nodemailer.com/usage/ if some options are not clear.</source>
@@ -184,7 +184,7 @@
           <context context-type="sourcefile">src/common/config/private/MessagingConfig.ts</context>
           <context context-type="linenumber">107</context>
         </context-group>
-        <target>The app uses Nodemailer in the background for sending e-mails. Refer to https://nodemailer.com/usage/ if some options are not clear.</target>
+        <target>该应用程序在后台使用 Nodemailer 发送电子邮件. 如果某些选项不清楚,请参考 https://nodemailer.com/usage/.</target>
       </trans-unit>
       <trans-unit id="4198035112366277884" datatype="html">
         <source>Database</source>
@@ -220,7 +220,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">159</context>
         </context-group>
-        <target>Sqlite db filename</target>
+        <target>Sqlite 数据库名称</target>
       </trans-unit>
       <trans-unit id="6242404539171057139" datatype="html">
         <source>Sqlite will save the db with this filename.</source>
@@ -228,7 +228,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">163</context>
         </context-group>
-        <target>Sqlite will save the db with this filename.</target>
+        <target>Sqlite 将使用此文件名保存数据库.</target>
       </trans-unit>
       <trans-unit id="8953033926734869941" datatype="html">
         <source>Name</source>
@@ -276,7 +276,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">197</context>
         </context-group>
-        <target>Unencrypted, temporary password. App will encrypt it and delete this.</target>
+        <target>未加密的临时密码.应用程序将加密并删除此密码.</target>
       </trans-unit>
       <trans-unit id="4590004310985064600" datatype="html">
         <source>Encrypted password</source>
@@ -284,7 +284,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">204</context>
         </context-group>
-        <target>Encrypted password</target>
+        <target>加密密码</target>
       </trans-unit>
       <trans-unit id="8650499415827640724" datatype="html">
         <source>Type</source>
@@ -304,7 +304,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">244</context>
         </context-group>
-        <target>SQLite is recommended.</target>
+        <target>推荐使用 SQLite.</target>
       </trans-unit>
       <trans-unit id="9183561046697462335" datatype="html">
         <source>Database folder</source>
@@ -320,7 +320,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">255</context>
         </context-group>
-        <target>All file-based data will be stored here (sqlite database, job history data).</target>
+        <target>所有基于文件的数据都将存储在这里（sqlite数据库、失败任务历史数据）.</target>
       </trans-unit>
       <trans-unit id="3636930811048814547" datatype="html">
         <source>SQLite</source>
@@ -344,7 +344,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">289</context>
         </context-group>
-        <target>Enforced users</target>
+        <target>强制的用户</target>
       </trans-unit>
       <trans-unit id="5248918329958232371" datatype="html">
         <source>Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.</source>
@@ -352,7 +352,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">295</context>
         </context-group>
-        <target>Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.</target>
+        <target>如果这些用户不存在,则在启动时在数据库中创建它们.如果存在同名用户,则即使角色不同,也不会覆盖该用户.</target>
       </trans-unit>
       <trans-unit id="5469820923661123729" datatype="html">
         <source>High quality resampling</source>
@@ -360,7 +360,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">306</context>
         </context-group>
-        <target>High quality resampling</target>
+        <target>高质量重采样</target>
       </trans-unit>
       <trans-unit id="5826490037337254388" datatype="html">
         <source>if true, 'lanczos3' will used to scale photos, otherwise faster but lower quality 'nearest'.</source>
@@ -368,7 +368,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">309</context>
         </context-group>
-        <target>if true, 'lanczos3' will used to scale photos, otherwise faster but lower quality 'nearest'.</target>
+        <target>如果为真,则使用“lanczos3”缩放照片,否则使用速度更快但质量更低的“nearest”.</target>
       </trans-unit>
       <trans-unit id="7563121839842898948" datatype="html">
         <source>Converted photo and thumbnail quality</source>
@@ -376,7 +376,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">316</context>
         </context-group>
-        <target>Converted photo and thumbnail quality</target>
+        <target>转换后的照片和缩略图质量</target>
       </trans-unit>
       <trans-unit id="2244219270224531739" datatype="html">
         <source>Between 0-100.</source>
@@ -384,7 +384,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">319</context>
         </context-group>
-        <target>Between 0-100.</target>
+        <target>介于 0-100 之间.</target>
       </trans-unit>
       <trans-unit id="1917409152137411884" datatype="html">
         <source>Use chroma subsampling</source>
@@ -392,7 +392,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">326</context>
         </context-group>
-        <target>Use chroma subsampling</target>
+        <target>使用色度二次采样</target>
       </trans-unit>
       <trans-unit id="1836296647835828593" datatype="html">
         <source>Use high quality chroma subsampling in webp. See: https://sharp.pixelplumbing.com/api-output#webp.</source>
@@ -400,7 +400,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">329</context>
         </context-group>
-        <target>Use high quality chroma subsampling in webp. See: https://sharp.pixelplumbing.com/api-output#webp.</target>
+        <target>在 webp 中使用高质量色度二次采样. 参阅: https://sharp.pixelplumbing.com/api-output#webp.</target>
       </trans-unit>
       <trans-unit id="5353755005542296188" datatype="html">
         <source>Person face margin</source>
@@ -408,7 +408,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">336</context>
         </context-group>
-        <target>Person face margin</target>
+        <target>人脸边距</target>
       </trans-unit>
       <trans-unit id="5475581732854937898" datatype="html">
         <source>This ratio of the face bounding box will be added to the face as a margin. Higher number add more margin.</source>
@@ -416,7 +416,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">339</context>
         </context-group>
-        <target>This ratio of the face bounding box will be added to the face as a margin. Higher number add more margin.</target>
+        <target>此比例的面部边界框将作为边距添加到面部.数字越大,边距越大.</target>
       </trans-unit>
       <trans-unit id="2608032520920350167" datatype="html">
         <source>OnTheFly *.gpx compression</source>
@@ -424,7 +424,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">349</context>
         </context-group>
-        <target>OnTheFly *.gpx compression</target>
+        <target>即时 *.gpx 压缩</target>
       </trans-unit>
       <trans-unit id="5010771687614184937" datatype="html">
         <source>Enables on the fly *.gpx compression.</source>
@@ -432,7 +432,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">353</context>
         </context-group>
-        <target>Enables on the fly *.gpx compression.</target>
+        <target>启用即时 *.gpx 压缩.</target>
       </trans-unit>
       <trans-unit id="2459653061010411129" datatype="html">
         <source>Min distance</source>
@@ -440,7 +440,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">360</context>
         </context-group>
-        <target>Min distance</target>
+        <target>最小距离</target>
       </trans-unit>
       <trans-unit id="3661874866354505207" datatype="html">
         <source>Filters out entry that are closer than this to each other in meters.</source>
@@ -448,7 +448,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">365</context>
         </context-group>
-        <target>Filters out entry that are closer than this to each other in meters.</target>
+        <target>过滤掉以米为单位且比这更近的条目.</target>
       </trans-unit>
       <trans-unit id="3542117266563491040" datatype="html">
         <source>Max middle point deviance</source>
@@ -456,7 +456,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">372</context>
         </context-group>
-        <target>Max middle point deviance</target>
+        <target>最大中点偏差</target>
       </trans-unit>
       <trans-unit id="1754404097862874766" datatype="html">
         <source>Filters out entry that would fall on the line if we would just connect the previous and the next points. This setting sets the sensitivity for that (higher number, more points are filtered).</source>
@@ -464,7 +464,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">377</context>
         </context-group>
-        <target>Filters out entry that would fall on the line if we would just connect the previous and the next points. This setting sets the sensitivity for that (higher number, more points are filtered).</target>
+        <target>如果我们只连接前一个点和下一个点,则会过滤掉落在线上的条目.此设置用于设置敏感度（数字越大,过滤的点越多）..</target>
       </trans-unit>
       <trans-unit id="7868435806239546428" datatype="html">
         <source>Min time delta</source>
@@ -472,7 +472,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">384</context>
         </context-group>
-        <target>Min time delta</target>
+        <target>最小时间增量</target>
       </trans-unit>
       <trans-unit id="8357288317395152108" datatype="html">
         <source>Filters out entry that are closer than this in time in milliseconds.</source>
@@ -480,7 +480,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">389</context>
         </context-group>
-        <target>Filters out entry that are closer than this in time in milliseconds.</target>
+        <target>过滤掉比此时间更近的条目（以毫秒为单位）.</target>
       </trans-unit>
       <trans-unit id="1496463932969476539" datatype="html">
         <source>GPX compression</source>
@@ -496,7 +496,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>GPX compression</target>
+        <target>GPX 压缩</target>
       </trans-unit>
       <trans-unit id="6317771699376768085" datatype="html">
         <source>Update timeout</source>
@@ -504,7 +504,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">420</context>
         </context-group>
-        <target>Update timeout</target>
+        <target>更新超时</target>
       </trans-unit>
       <trans-unit id="8736166630756120293" datatype="html">
         <source>After creating a sharing link, it can be updated for this long.</source>
@@ -512,7 +512,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">424</context>
         </context-group>
-        <target>After creating a sharing link, it can be updated for this long.</target>
+        <target>创建共享链接后,可以更新该时间长度.</target>
       </trans-unit>
       <trans-unit id="5936920037659087069" datatype="html">
         <source>Index cache timeout</source>
@@ -520,7 +520,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">435</context>
         </context-group>
-        <target>Index cache timeout</target>
+        <target>索引缓存超时</target>
       </trans-unit>
       <trans-unit id="4751279777806037015" datatype="html">
         <source>If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low).</source>
@@ -528,7 +528,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">439</context>
         </context-group>
-        <target>If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low).</target>
+        <target>如果此时没有索引,则重新索引.（如果索引在数据库中并且敏感度较低,则跳过）.</target>
       </trans-unit>
       <trans-unit id="1334817424484159222" datatype="html">
         <source>Folder reindexing sensitivity</source>
@@ -544,7 +544,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">449</context>
         </context-group>
-        <target>Set the reindexing sensitivity. High value check the folders for change more often. Setting to never only indexes if never indexed or explicit running the Indexing Job.</target>
+        <target>设置重新索引的敏感度.高值表示更频繁地检查文件夹是否有更改.设置为“从不”时,仅在从未索引过或明确运行索引失败任务时才进行索引.</target>
       </trans-unit>
       <trans-unit id="3568851002082270949" datatype="html">
         <source>Exclude Folder List</source>
@@ -560,7 +560,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">462</context>
         </context-group>
-        <target>Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded.</target>
+        <target>要从索引中排除的文件夹.如果条目以“/”开头,则将其视为绝对路径.如果它不以“/”开头但包含“/”,则该路径是相对于图片目录的路径.如果它不包含“/”,则任何具有此名称的文件夹都将被排除.</target>
       </trans-unit>
       <trans-unit id="1086546411028005438" datatype="html">
         <source>Exclude File List</source>
@@ -584,7 +584,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">475</context>
         </context-group>
-        <target>Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing.</target>
+        <target>标记文件夹不被索引的文件.任何包含此名称文件的文件夹都将被排除在索引之外.</target>
       </trans-unit>
       <trans-unit id="3089345247204108252" datatype="html">
         <source>Max duplicates</source>
@@ -592,7 +592,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">486</context>
         </context-group>
-        <target>Max duplicates</target>
+        <target>最大重复数</target>
       </trans-unit>
       <trans-unit id="2857981877504842327" datatype="html">
         <source>Maximum number of duplicates to list.</source>
@@ -600,7 +600,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">489</context>
         </context-group>
-        <target>Maximum number of duplicates to list.</target>
+        <target>列出的重复项的最大数量.</target>
       </trans-unit>
       <trans-unit id="3733215288982610673" datatype="html">
         <source>Level</source>
@@ -608,7 +608,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">499</context>
         </context-group>
-        <target>Level</target>
+        <target>级别</target>
       </trans-unit>
       <trans-unit id="6041867609103875269" datatype="html">
         <source>Logging level.</source>
@@ -616,7 +616,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">502</context>
         </context-group>
-        <target>Logging level.</target>
+        <target>日志级别.</target>
       </trans-unit>
       <trans-unit id="676216864464481272" datatype="html">
         <source>Sql Level</source>
@@ -624,7 +624,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">508</context>
         </context-group>
-        <target>Sql Level</target>
+        <target>SQL级别</target>
       </trans-unit>
       <trans-unit id="8812113673684921175" datatype="html">
         <source>Logging level for SQL queries.</source>
@@ -632,7 +632,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">511</context>
         </context-group>
-        <target>Logging level for SQL queries.</target>
+        <target>SQL 查询的日志记录级别.</target>
       </trans-unit>
       <trans-unit id="6212535853329157478" datatype="html">
         <source>Server timing</source>
@@ -640,7 +640,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">516</context>
         </context-group>
-        <target>Server timing</target>
+        <target>服务器计时</target>
       </trans-unit>
       <trans-unit id="7410385593985151245" datatype="html">
         <source>If enabled, the app ads "Server-Timing" http header to the response.</source>
@@ -648,7 +648,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">519</context>
         </context-group>
-        <target>If enabled, the app ads "Server-Timing" http header to the response.</target>
+        <target>如果启用,应用程序会将“Server-Timing”http 标头添加到响应中.</target>
       </trans-unit>
       <trans-unit id="6011589038643567137" datatype="html">
         <source>Max saved progress</source>
@@ -656,7 +656,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">619</context>
         </context-group>
-        <target>Max saved progress</target>
+        <target>最大保存进度</target>
       </trans-unit>
       <trans-unit id="1628705458537085502" datatype="html">
         <source>Job history size.</source>
@@ -664,7 +664,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">622</context>
         </context-group>
-        <target>Job history size.</target>
+        <target>失败任务历史记录大小.</target>
       </trans-unit>
       <trans-unit id="8021865850981477352" datatype="html">
         <source>Processing batch size</source>
@@ -672,7 +672,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">629</context>
         </context-group>
-        <target>Processing batch size</target>
+        <target>处理批次大小</target>
       </trans-unit>
       <trans-unit id="4763786307361733917" datatype="html">
         <source>Jobs load this many photos or videos form the DB for processing at once.</source>
@@ -680,7 +680,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">632</context>
         </context-group>
-        <target>Jobs load this many photos or videos form the DB for processing at once.</target>
+        <target>失败任务处理会从数据库加载该数量的照片或视频以供一次性处理.</target>
       </trans-unit>
       <trans-unit id="547146152434765833" datatype="html">
         <source>Scheduled jobs</source>
@@ -688,7 +688,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">638</context>
         </context-group>
-        <target>Scheduled jobs</target>
+        <target>计划失败任务</target>
       </trans-unit>
       <trans-unit id="306805200938050070" datatype="html">
         <source>Bit rate</source>
@@ -732,7 +732,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">717</context>
         </context-group>
-        <target>FPS</target>
+        <target>帧数</target>
       </trans-unit>
       <trans-unit id="1755420511646795750" datatype="html">
         <source>Target frame per second (fps) of the output video will be scaled down this this.</source>
@@ -756,7 +756,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">736</context>
         </context-group>
-        <target>MP4 codec</target>
+        <target>MP4 编解码器</target>
       </trans-unit>
       <trans-unit id="6048942710723898007" datatype="html">
         <source>Webm Codec</source>
@@ -764,7 +764,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">746</context>
         </context-group>
-        <target>Webm Codec</target>
+        <target>Webm 编解码器</target>
       </trans-unit>
       <trans-unit id="8500867820372719149" datatype="html">
         <source>CRF</source>
@@ -804,7 +804,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">778</context>
         </context-group>
-        <target>Custom Output Options</target>
+        <target>自定义输出选项</target>
       </trans-unit>
       <trans-unit id="4633198251733160919" datatype="html">
         <source>It will be sent to ffmpeg as it is, as custom output options.</source>
@@ -812,7 +812,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">783</context>
         </context-group>
-        <target>It will be sent to ffmpeg as it is, as custom output options.</target>
+        <target>它将作为自定义输出选项按原样发送到 ffmpeg.</target>
       </trans-unit>
       <trans-unit id="2012036823425449881" datatype="html">
         <source>Custom Input Options</source>
@@ -820,7 +820,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">790</context>
         </context-group>
-        <target>Custom Input Options</target>
+        <target>自定义输入选项</target>
       </trans-unit>
       <trans-unit id="4952811342387778937" datatype="html">
         <source>It will be sent to ffmpeg as it is, as custom input options.</source>
@@ -828,7 +828,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">796</context>
         </context-group>
-        <target>It will be sent to ffmpeg as it is, as custom input options.</target>
+        <target>它将作为自定义输入选项按原样发送到 ffmpeg.</target>
       </trans-unit>
       <trans-unit id="3617023035573084133" datatype="html">
         <source>Video transcoding</source>
@@ -836,7 +836,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">806</context>
         </context-group>
-        <target>Video transcoding</target>
+        <target>视频转码</target>
       </trans-unit>
       <trans-unit id="440637971406706761" datatype="html">
         <source>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate.   The transcoded videos will be save to the thumbnail folder.  You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</source>
@@ -844,7 +844,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">810</context>
         </context-group>
-        <target>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate. The transcoded videos will be save to the thumbnail folder. You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</target>
+        <target>为确保视频播放流畅,建议将视频转码至低于服务器上传速率的比特率.转码后的视频将保存到缩略图文件夹中.您可以手动触发转码,也可以在高级设置模式下创建自动编码任务.</target>
       </trans-unit>
       <trans-unit id="4328921999658902771" datatype="html">
         <source>On the fly converting</source>
@@ -876,7 +876,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">847</context>
         </context-group>
-        <target>Photo resizing</target>
+        <target>图片调整</target>
       </trans-unit>
       <trans-unit id="3200155866272065974" datatype="html">
         <source>Cover Filter query</source>
@@ -884,7 +884,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">859</context>
         </context-group>
-        <target>Cover Filter query</target>
+        <target>封面过滤器查询</target>
       </trans-unit>
       <trans-unit id="3934792735027900470" datatype="html">
         <source>Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter.</source>
@@ -892,7 +892,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">864</context>
         </context-group>
-        <target>Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter.</target>
+        <target>使用此搜索查询过滤子文件夹.如果过滤结果中没有照片,应用将再次搜索,无需过滤器.</target>
       </trans-unit>
       <trans-unit id="6038145233304913703" datatype="html">
         <source>Cover Sorting</source>
@@ -900,7 +900,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">873</context>
         </context-group>
-        <target>Cover Sorting</target>
+        <target>封面排序</target>
       </trans-unit>
       <trans-unit id="7281714126487619000" datatype="html">
         <source>If multiple cover is available sorts them by these methods and selects the first one.</source>
@@ -908,7 +908,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">877</context>
         </context-group>
-        <target>If multiple cover is available sorts them by these methods and selects the first one.</target>
+        <target>如果有多个封面可用,则按这些方法对它们进行排序并选择第一个.</target>
       </trans-unit>
       <trans-unit id="4487775872787805732" datatype="html">
         <source>Images folder</source>
@@ -948,7 +948,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">914</context>
         </context-group>
-        <target>Metadata read buffer</target>
+        <target>元数据读取缓冲区</target>
       </trans-unit>
       <trans-unit id="4644756487867291334" datatype="html">
         <source>Only this many bites will be loaded when scanning photo/video for metadata. Increase this number if your photos shows up as square.</source>
@@ -956,7 +956,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">920</context>
         </context-group>
-        <target>Only this many bites will be loaded when scanning photo/video for metadata. Increase this number if your photos shows up as square.</target>
+        <target>扫描照片/视频元数据时,仅加载此数量的字节.如果您的照片显示为一个正方形,请增加该大小.</target>
       </trans-unit>
       <trans-unit id="6549265851868599441" datatype="html">
         <source>Video</source>
@@ -976,7 +976,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">935</context>
         </context-group>
-        <target>Video support uses ffmpeg. ffmpeg and ffprobe binaries need to be available in the PATH or the @ffmpeg-installer/ffmpeg and @ffprobe-installer/ffprobe optional node packages need to be installed.</target>
+        <target>使用ffmpeg来提供视频支持.ffmpeg 和 ffprobe 二进制文件需要在 PATH 中可用,或者需要安装 @ffmpeg-installer/ffmpeg 和 @ffprobe-installer/ffprobe 可选包.</target>
       </trans-unit>
       <trans-unit id="5750485945694679561" datatype="html">
         <source>Photo</source>
@@ -1008,7 +1008,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">976</context>
         </context-group>
-        <target>Session Timeout</target>
+        <target>会话超时</target>
       </trans-unit>
       <trans-unit id="7127520017089378528" datatype="html">
         <source>Users kept logged in for this long time.</source>
@@ -1016,7 +1016,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">980</context>
         </context-group>
-        <target>Users kept logged in for this long time.</target>
+        <target>用户保持登录状态的时间.</target>
       </trans-unit>
       <trans-unit id="2521241309786115337" datatype="html">
         <source>Port number. Port 80 is usually what you need.</source>
@@ -1024,7 +1024,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">991</context>
         </context-group>
-        <target>端口号.</target>
+        <target>端口号.通常您需要的是80端口.</target>
       </trans-unit>
       <trans-unit id="5922774431911312513" datatype="html">
         <source>Server will accept connections from this IPv6 or IPv4 address.</source>
@@ -1048,7 +1048,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1039</context>
         </context-group>
-        <target>Server</target>
+        <target>服务器</target>
       </trans-unit>
       <trans-unit id="4555457172864212828" datatype="html">
         <source>Users</source>
@@ -1056,7 +1056,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1055</context>
         </context-group>
-        <target>Users</target>
+        <target>用户</target>
       </trans-unit>
       <trans-unit id="4973087105311508591" datatype="html">
         <source>Indexing</source>
@@ -1076,7 +1076,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1068</context>
         </context-group>
-        <target>If you add a new folder to your gallery, the site indexes it automatically. If you would like to trigger indexing manually, click index button. (Note: search only works among the indexed directories.)</target>
+        <target>如果您向图库添加新文件夹,网站会自动为其编制索引.如果您想手动触发索引,请点击索引按钮.（注意：搜索功能仅在已编制索引的目录中有效.）</target>
       </trans-unit>
       <trans-unit id="3250391385569692601" datatype="html">
         <source>Media</source>
@@ -1084,7 +1084,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1079</context>
         </context-group>
-        <target>Media</target>
+        <target>媒体</target>
       </trans-unit>
       <trans-unit id="5007962937899031099" datatype="html">
         <source>Meta file</source>
@@ -1100,7 +1100,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1095</context>
         </context-group>
-        <target>Album cover</target>
+        <target>专辑封面</target>
       </trans-unit>
       <trans-unit id="494109936445845592" datatype="html">
         <source>Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.</source>
@@ -1108,7 +1108,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1106</context>
         </context-group>
-        <target>Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.</target>
+        <target>指定搜索查询和排序方式,以便应用选择最佳照片作为相册和文件夹封面.应用无法手动选择文件夹和相册封面.您可以将部分照片标记为“封面”,并将其设置为搜索查询,或者将其评分为 5 分,并将排序设置为按评分降序排列.</target>
       </trans-unit>
       <trans-unit id="8422875188929347819" datatype="html">
         <source>Sharing</source>
@@ -1120,7 +1120,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">142</context>
         </context-group>
-        <target>Sharing</target>
+        <target>共享中</target>
       </trans-unit>
       <trans-unit id="3587873128318078848" datatype="html">
         <source>Duplicates</source>
@@ -1144,7 +1144,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1128</context>
         </context-group>
-        <target>Messaging</target>
+        <target>信息</target>
       </trans-unit>
       <trans-unit id="8227174550244698887" datatype="html">
         <source>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</source>
@@ -1152,7 +1152,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1132</context>
         </context-group>
-        <target>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</target>
+        <target>该应用程序可以发送消息（例如一年前同一天的照片,又称“精选”）.您可以在这里配置发送方式.</target>
       </trans-unit>
       <trans-unit id="3229595422546554334" datatype="html">
         <source>Jobs</source>
@@ -1168,7 +1168,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">72</context>
         </context-group>
-        <target>Maximum items</target>
+        <target>最大条目数</target>
       </trans-unit>
       <trans-unit id="9059384159901338400" datatype="html">
         <source>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes upto double of the individual items.</source>
@@ -1176,7 +1176,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">75</context>
         </context-group>
-        <target>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes upto double of the individual items.</target>
+        <target>一次显示的最大自动完成项目数量.如果项目数量不足以达到此值,则最多需要两倍的单个项目.</target>
       </trans-unit>
       <trans-unit id="1975560396569090938" datatype="html">
         <source>Max photo items</source>
@@ -1184,7 +1184,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>Max photo items</target>
+        <target>最大照片数量</target>
       </trans-unit>
       <trans-unit id="5932836121108496211" datatype="html">
         <source>Maximum number autocomplete items shown per photo category.</source>
@@ -1192,7 +1192,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">86</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per photo category.</target>
+        <target>每个照片类别显示的最大自动完成项目数.</target>
       </trans-unit>
       <trans-unit id="2869925600895621802" datatype="html">
         <source>Max directory items</source>
@@ -1200,7 +1200,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">94</context>
         </context-group>
-        <target>Max directory items</target>
+        <target>最大目录数量</target>
       </trans-unit>
       <trans-unit id="5934414841725017618" datatype="html">
         <source>Maximum number autocomplete items shown per directory category.</source>
@@ -1208,7 +1208,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">97</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per directory category.</target>
+        <target>每个目录类别显示的最大自动完成项目数.</target>
       </trans-unit>
       <trans-unit id="6171775104559161283" datatype="html">
         <source>Max caption items</source>
@@ -1216,7 +1216,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">105</context>
         </context-group>
-        <target>Max caption items</target>
+        <target>最大标题数量</target>
       </trans-unit>
       <trans-unit id="8577207045867351291" datatype="html">
         <source>Maximum number autocomplete items shown per caption category.</source>
@@ -1224,7 +1224,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">108</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per caption category.</target>
+        <target>每个标题类别显示的最大自动完成项目数.</target>
       </trans-unit>
       <trans-unit id="4432248344294022579" datatype="html">
         <source>Max position items</source>
@@ -1232,7 +1232,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">116</context>
         </context-group>
-        <target>Max position items</target>
+        <target>最大位置项</target>
       </trans-unit>
       <trans-unit id="3086088882031149981" datatype="html">
         <source>Maximum number autocomplete items shown per position category.</source>
@@ -1240,7 +1240,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">119</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per position category.</target>
+        <target>每个位置类别显示的自动完成项目的最大数量.</target>
       </trans-unit>
       <trans-unit id="4670515012963382372" datatype="html">
         <source>Max faces items</source>
@@ -1248,7 +1248,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">127</context>
         </context-group>
-        <target>Max faces items</target>
+        <target>最多人脸条目</target>
       </trans-unit>
       <trans-unit id="6404557966185698497" datatype="html">
         <source>Maximum number autocomplete items shown per faces category.</source>
@@ -1256,7 +1256,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">130</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per faces category.</target>
+        <target>每个面孔类别显示的最大自动完成项目数.</target>
       </trans-unit>
       <trans-unit id="8855317879487307752" datatype="html">
         <source>Max keyword items</source>
@@ -1264,7 +1264,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">138</context>
         </context-group>
-        <target>Max keyword items</target>
+        <target>最多关键词条目</target>
       </trans-unit>
       <trans-unit id="6509178736104380145" datatype="html">
         <source>Maximum number autocomplete items shown per keyword category.</source>
@@ -1272,7 +1272,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">141</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per keyword category.</target>
+        <target>每个关键词条目显示的最大自动完成项目数.</target>
       </trans-unit>
       <trans-unit id="4354453441748274999" datatype="html">
         <source>Enable Autocomplete</source>
@@ -1280,7 +1280,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">151</context>
         </context-group>
-        <target>Enable Autocomplete</target>
+        <target>启用自动完成功能</target>
       </trans-unit>
       <trans-unit id="7703111577289302879" datatype="html">
         <source>Show hints while typing search query.</source>
@@ -1296,7 +1296,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">161</context>
         </context-group>
-        <target>Max items per category</target>
+        <target>每个类别的最大条目数</target>
       </trans-unit>
       <trans-unit id="8268742369352149269" datatype="html">
         <source>Maximum number autocomplete items shown per category.</source>
@@ -1304,7 +1304,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">164</context>
         </context-group>
-        <target>Maximum number autocomplete items shown per category.</target>
+        <target>每个类别显示的最大自动完成条目数.</target>
       </trans-unit>
       <trans-unit id="7037803898839863679" datatype="html">
         <source>Cache timeout</source>
@@ -1316,7 +1316,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">196</context>
         </context-group>
-        <target>Cache timeout</target>
+        <target>缓存超时</target>
       </trans-unit>
       <trans-unit id="7460330515350740380" datatype="html">
         <source>Autocomplete cache timeout. </source>
@@ -1324,7 +1324,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">176</context>
         </context-group>
-        <target>Autocomplete cache timeout.</target>
+        <target>自动完成缓存超时.</target>
       </trans-unit>
       <trans-unit id="2180291763949669799" datatype="html">
         <source>Enable</source>
@@ -1360,7 +1360,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1158</context>
         </context-group>
-        <target>Enable</target>
+        <target>启用</target>
       </trans-unit>
       <trans-unit id="8338545895574711090" datatype="html">
         <source>Enables searching.</source>
@@ -1368,7 +1368,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">189</context>
         </context-group>
-        <target>Enables searching.</target>
+        <target>启用搜索.</target>
       </trans-unit>
       <trans-unit id="8206089520407978340" datatype="html">
         <source>Search cache timeout.</source>
@@ -1376,7 +1376,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">200</context>
         </context-group>
-        <target>Search cache timeout.</target>
+        <target>搜索缓存超时.</target>
       </trans-unit>
       <trans-unit id="6507738516307254402" datatype="html">
         <source>Autocomplete</source>
@@ -1400,7 +1400,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">218</context>
         </context-group>
-        <target>Maximum number of photos and videos that are listed in one search result.</target>
+        <target>一个搜索结果中列出的照片和视频的最大数量.</target>
       </trans-unit>
       <trans-unit id="2809377676909040375" datatype="html">
         <source>Maximum directory result</source>
@@ -1408,7 +1408,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">224</context>
         </context-group>
-        <target>Maximum directory result</target>
+        <target>最多结果目录</target>
       </trans-unit>
       <trans-unit id="8397283408986431970" datatype="html">
         <source>Maximum number of directories that are listed in one search result.</source>
@@ -1416,7 +1416,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">227</context>
         </context-group>
-        <target>Maximum number of directories that are listed in one search result.</target>
+        <target>一个搜索结果中列出的目录的最大数量.</target>
       </trans-unit>
       <trans-unit id="5788628366491057479" datatype="html">
         <source>List directories</source>
@@ -1432,7 +1432,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">236</context>
         </context-group>
-        <target>Search returns also with directories, not just media.</target>
+        <target>搜索结果不仅返回媒体,还返回目录.</target>
       </trans-unit>
       <trans-unit id="709142926386769059" datatype="html">
         <source>List metafiles</source>
@@ -1448,7 +1448,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">245</context>
         </context-group>
-        <target>Search also returns with metafiles from directories that contain a media file of the matched search result.</target>
+        <target>搜索还会从包含匹配搜索结果的媒体文件的目录中返回元文件.</target>
       </trans-unit>
       <trans-unit id="6475889191924902342" datatype="html">
         <source>Enables sharing.</source>
@@ -1456,7 +1456,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">270</context>
         </context-group>
-        <target>Enables sharing.</target>
+        <target>启用共享.</target>
       </trans-unit>
       <trans-unit id="166448092104563965" datatype="html">
         <source>Password protected</source>
@@ -1480,7 +1480,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">292</context>
         </context-group>
-        <target>Enables random link generation.</target>
+        <target>启用随机链接生成.</target>
       </trans-unit>
       <trans-unit id="1318992731180201330" datatype="html">
         <source>Name of a map layer.</source>
@@ -1488,7 +1488,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">304</context>
         </context-group>
-        <target>Name of a map layer.</target>
+        <target>地图图层名称.</target>
       </trans-unit>
       <trans-unit id="412557495167115018" datatype="html">
         <source>Url of a map layer.</source>
@@ -1496,7 +1496,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">313</context>
         </context-group>
-        <target>Url of a map layer.</target>
+        <target>地图图层的链接.</target>
       </trans-unit>
       <trans-unit id="1143133976589063640" datatype="html">
         <source>Sets if the layer is dark (used as default in the dark mode).</source>
@@ -1504,7 +1504,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">321</context>
         </context-group>
-        <target>Sets if the layer is dark (used as default in the dark mode).</target>
+        <target>设置图层是否为暗色（在暗色模式下用作默认）.</target>
       </trans-unit>
       <trans-unit id="4946508934141722594" datatype="html">
         <source>SVG icon viewBox</source>
@@ -1512,7 +1512,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">337</context>
         </context-group>
-        <target>SVG icon viewBox</target>
+        <target>SVG 图标查看框</target>
       </trans-unit>
       <trans-unit id="1828745019899593980" datatype="html">
         <source>SVG path viewBox. See: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox</source>
@@ -1520,7 +1520,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">340</context>
         </context-group>
-        <target>SVG path viewBox. See: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox</target>
+        <target>SVG 路径查看框. 参阅: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox</target>
       </trans-unit>
       <trans-unit id="5506858590097128875" datatype="html">
         <source>SVG Items</source>
@@ -1528,7 +1528,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">346</context>
         </context-group>
-        <target>SVG Items</target>
+        <target>SVG 条目</target>
       </trans-unit>
       <trans-unit id="4389372102342374611" datatype="html">
         <source>Content elements (paths, circles, rects) of the SVG icon. Icons used on the map: fontawesome.com/icons.</source>
@@ -1536,7 +1536,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">349</context>
         </context-group>
-        <target>Content elements (paths, circles, rects) of the SVG icon. Icons used on the map: fontawesome.com/icons.</target>
+        <target>SVG 图标的内容元素（路径、圆圈、矩形）. 图标地图: fontawesome.com/icons.</target>
       </trans-unit>
       <trans-unit id="9011959596901584887" datatype="html">
         <source>Color</source>
@@ -1544,7 +1544,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">366</context>
         </context-group>
-        <target>Color</target>
+        <target>颜色</target>
       </trans-unit>
       <trans-unit id="986022036062271497" datatype="html">
         <source>Color of the path. Use any valid css colors.</source>
@@ -1552,7 +1552,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">369</context>
         </context-group>
-        <target>Color of the path. Use any valid css colors.</target>
+        <target>路径颜色.使用任何有效的 CSS 颜色.</target>
       </trans-unit>
       <trans-unit id="8634167331842982441" datatype="html">
         <source>Dash pattern</source>
@@ -1560,7 +1560,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">375</context>
         </context-group>
-        <target>Dash pattern</target>
+        <target>虚线图案</target>
       </trans-unit>
       <trans-unit id="2438737359865289528" datatype="html">
         <source>Dash pattern of the path. Represents the spacing and length of the dash. Read more about dash array at: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray.</source>
@@ -1568,7 +1568,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">379</context>
         </context-group>
-        <target>Dash pattern of the path. Represents the spacing and length of the dash. Read more about dash array at: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray.</target>
+        <target>路径的虚线图案.表示虚线的间距和长度.了解更多关于虚线数组的信息,请访问: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/stroke-dasharray.</target>
       </trans-unit>
       <trans-unit id="1057726871811234595" datatype="html">
         <source>Svg Icon</source>
@@ -1580,7 +1580,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1388</context>
         </context-group>
-        <target>Svg Icon</target>
+        <target>Svg 图标</target>
       </trans-unit>
       <trans-unit id="189392445108403363" datatype="html">
         <source>Set the icon of the map marker pin.</source>
@@ -1588,7 +1588,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">391</context>
         </context-group>
-        <target>Set the icon of the map marker pin.</target>
+        <target>设置地图标记图钉的图标.</target>
       </trans-unit>
       <trans-unit id="133947232251217266" datatype="html">
         <source>Matchers</source>
@@ -1596,7 +1596,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">409</context>
         </context-group>
-        <target>Matchers</target>
+        <target>匹配器</target>
       </trans-unit>
       <trans-unit id="1761476223758787118" datatype="html">
         <source>List of regex string to match the name of the path. Case insensitive. Empty list matches everything.</source>
@@ -1604,7 +1604,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">412</context>
         </context-group>
-        <target>List of regex string to match the name of the path. Case insensitive. Empty list matches everything.</target>
+        <target>用于匹配路径名称的正则表达式字符串列表.不区分大小写.空列表则匹配所有内容.</target>
       </trans-unit>
       <trans-unit id="1041265241960537761" datatype="html">
         <source>Path and icon theme</source>
@@ -1612,7 +1612,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">419</context>
         </context-group>
-        <target>Path and icon theme</target>
+        <target>路径和图标主题</target>
       </trans-unit>
       <trans-unit id="8088686757026932221" datatype="html">
         <source>List of regex string to match the name of the path.</source>
@@ -1620,7 +1620,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">422</context>
         </context-group>
-        <target>List of regex string to match the name of the path.</target>
+        <target>与路径名称匹配的正则表达式字符串列表.</target>
       </trans-unit>
       <trans-unit id="6445741902419302713" datatype="html">
         <source>Name of the marker and path group on the map.</source>
@@ -1628,7 +1628,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">441</context>
         </context-group>
-        <target>Name of the marker and path group on the map.</target>
+        <target>地图上的标记和路径组的名称.</target>
       </trans-unit>
       <trans-unit id="4837108640322397601" datatype="html">
         <source>Path themes</source>
@@ -1636,7 +1636,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">448</context>
         </context-group>
-        <target>Path themes</target>
+        <target>路径主题</target>
       </trans-unit>
       <trans-unit id="6908693151615823516" datatype="html">
         <source>Matchers for a given map and path theme.</source>
@@ -1644,7 +1644,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">451</context>
         </context-group>
-        <target>Matchers for a given map and path theme.</target>
+        <target>给定地图和路径主题的匹配器.</target>
       </trans-unit>
       <trans-unit id="4552446388068845156" datatype="html">
         <source>Image Markers</source>
@@ -1652,7 +1652,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">472</context>
         </context-group>
-        <target>Image Markers</target>
+        <target>图像标记</target>
       </trans-unit>
       <trans-unit id="7016588915008667535" datatype="html">
         <source>Map will use thumbnail images as markers instead of the default pin.</source>
@@ -1668,7 +1668,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">481</context>
         </context-group>
-        <target>Map Provider</target>
+        <target>地图提供商</target>
       </trans-unit>
       <trans-unit id="5860141610052555892" datatype="html">
         <source>Mapbox access token</source>
@@ -1684,7 +1684,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">493</context>
         </context-group>
-        <target>MapBox needs an access token to work, create one at https://www.mapbox.com.</target>
+        <target>MapBox 需要访问令牌才能工作,请创建一个 https://www.mapbox.com.</target>
       </trans-unit>
       <trans-unit id="2386684148261896485" datatype="html">
         <source>The map module will use these urls to fetch the map tiles.</source>
@@ -1692,7 +1692,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">498</context>
         </context-group>
-        <target>The map module will use these urls to fetch the map tiles.</target>
+        <target>地图模块将使用这些链接来获取地图图块.</target>
       </trans-unit>
       <trans-unit id="6452617211342461685" datatype="html">
         <source>Custom Layers</source>
@@ -1700,7 +1700,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">501</context>
         </context-group>
-        <target>Custom Layers</target>
+        <target>自定义图层</target>
       </trans-unit>
       <trans-unit id="1382580573983259242" datatype="html">
         <source>Max Preview Markers</source>
@@ -1708,7 +1708,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">511</context>
         </context-group>
-        <target>Max Preview Markers</target>
+        <target>最多预览标记</target>
       </trans-unit>
       <trans-unit id="4090171517655540902" datatype="html">
         <source>Maximum number of markers to be shown on the map preview on the gallery page.</source>
@@ -1716,7 +1716,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">514</context>
         </context-group>
-        <target>Maximum number of markers to be shown on the map preview on the gallery page.</target>
+        <target>图库页面地图预览中显示的最大标记数.</target>
       </trans-unit>
       <trans-unit id="4556849443711086202" datatype="html">
         <source>Path theme groups</source>
@@ -1724,7 +1724,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">522</context>
         </context-group>
-        <target>Path theme groups</target>
+        <target>路径主题组</target>
       </trans-unit>
       <trans-unit id="7429215598366742079" datatype="html">
         <source>Markers are grouped and themed by these settings</source>
@@ -1732,7 +1732,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">526</context>
         </context-group>
-        <target>Markers are grouped and themed by these settings</target>
+        <target>标记按这些设置分组和主题的项</target>
       </trans-unit>
       <trans-unit id="2826067096229698347" datatype="html">
         <source>Bend long path trigger</source>
@@ -1740,7 +1740,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">590</context>
         </context-group>
-        <target>Bend long path trigger</target>
+        <target>弯曲长路径触发器</target>
       </trans-unit>
       <trans-unit id="4801778710475188270" datatype="html">
         <source>Map will bend the path if two points are this far apart on latititude axes. This intended to bend flight if only the end and the start points are given.</source>
@@ -1748,7 +1748,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">593</context>
         </context-group>
-        <target>Map will bend the path if two points are this far apart on latititude axes. This intended to bend flight if only the end and the start points are given.</target>
+        <target>如果纬度轴上的两个点相距如此远,地图路径就会弯曲.这旨在在仅指定终点和起点的情况下弯曲路径.</target>
       </trans-unit>
       <trans-unit id="5208941380118400380" datatype="html">
         <source>Map Icon size</source>
@@ -1756,7 +1756,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">603</context>
         </context-group>
-        <target>Map Icon size</target>
+        <target>地图图标大小</target>
       </trans-unit>
       <trans-unit id="5685971437887935419" datatype="html">
         <source>Icon size (used on maps).</source>
@@ -1772,7 +1772,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">612</context>
         </context-group>
-        <target>Person thumbnail size</target>
+        <target>人物缩略图大小</target>
       </trans-unit>
       <trans-unit id="6270003837253502273" datatype="html">
         <source>Person (face) thumbnail size.</source>
@@ -1780,7 +1780,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">616</context>
         </context-group>
-        <target>Person (face) thumbnail size.</target>
+        <target>人物(脸部)缩略图大小.</target>
       </trans-unit>
       <trans-unit id="1164574322837752416" datatype="html">
         <source>Thumbnail sizes</source>
@@ -1796,7 +1796,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">624</context>
         </context-group>
-        <target>Size of the thumbnails. The best matching size will be generated. More sizes give better quality, but use more storage and CPU to render. If size is 240, that shorter side of the thumbnail will have 160 pixels.</target>
+        <target>缩略图的尺寸.系统将生成最匹配的尺寸.尺寸越大,质量越好,但渲染时会占用更多存储空间和 CPU 资源.如果尺寸为 240,则缩略图较短的一侧将为 160 像素.</target>
       </trans-unit>
       <trans-unit id="7466923289878135364" datatype="html">
         <source>SearchQuery</source>
@@ -1804,7 +1804,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">677</context>
         </context-group>
-        <target>SearchQuery</target>
+        <target>搜索查询</target>
       </trans-unit>
       <trans-unit id="8308045076391224954" datatype="html">
         <source>Url</source>
@@ -1816,7 +1816,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">65</context>
         </context-group>
-        <target>Url</target>
+        <target>链接</target>
       </trans-unit>
       <trans-unit id="8864288285279476751" datatype="html">
         <source>Method</source>
@@ -1828,7 +1828,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">740</context>
         </context-group>
-        <target>Method</target>
+        <target>方式</target>
       </trans-unit>
       <trans-unit id="6093210751404423786" datatype="html">
         <source>Ascending</source>
@@ -1840,7 +1840,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">747</context>
         </context-group>
-        <target>Ascending</target>
+        <target>升序</target>
       </trans-unit>
       <trans-unit id="177392694971808911" datatype="html">
         <source>Default sorting</source>
@@ -1848,7 +1848,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">760</context>
         </context-group>
-        <target>Default sorting</target>
+        <target>默认排序</target>
       </trans-unit>
       <trans-unit id="8993065143187639036" datatype="html">
         <source>Default sorting method for photo and video in a directory results.</source>
@@ -1856,7 +1856,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">763</context>
         </context-group>
-        <target>Default sorting method for photo and video in a directory results.</target>
+        <target>目录搜索结果中照片和视频的默认排序方法.</target>
       </trans-unit>
       <trans-unit id="6155309121839598217" datatype="html">
         <source>Default search sorting</source>
@@ -1864,7 +1864,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">770</context>
         </context-group>
-        <target>Default search sorting</target>
+        <target>默认搜索排序</target>
       </trans-unit>
       <trans-unit id="7941581315950625881" datatype="html">
         <source>Default sorting method for photo and video in a search results.</source>
@@ -1872,7 +1872,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">773</context>
         </context-group>
-        <target>Default sorting method for photo and video in a search results.</target>
+        <target>搜索结果中照片和视频的默认排序方法.</target>
       </trans-unit>
       <trans-unit id="2219985387769419367" datatype="html">
         <source>Default grouping</source>
@@ -1880,7 +1880,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">780</context>
         </context-group>
-        <target>Default grouping</target>
+        <target>默认分组</target>
       </trans-unit>
       <trans-unit id="5640283237212785034" datatype="html">
         <source>Default grouping method for photo and video in a directory results.</source>
@@ -1888,7 +1888,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">784</context>
         </context-group>
-        <target>Default grouping method for photo and video in a directory results.</target>
+        <target>目录搜索结果中照片和视频的默认分组方法.</target>
       </trans-unit>
       <trans-unit id="6222361365815783209" datatype="html">
         <source>Default search grouping</source>
@@ -1896,7 +1896,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">791</context>
         </context-group>
-        <target>Default search grouping</target>
+        <target>默认搜索分组</target>
       </trans-unit>
       <trans-unit id="4276017218108240034" datatype="html">
         <source>Default grouping method for photo and video in a search results.</source>
@@ -1904,7 +1904,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">795</context>
         </context-group>
-        <target>Default grouping method for photo and video in a search results.</target>
+        <target>搜索结果中照片和视频的默认分组方法.</target>
       </trans-unit>
       <trans-unit id="1524055079900109760" datatype="html">
         <source>Download Zip</source>
@@ -1912,7 +1912,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">805</context>
         </context-group>
-        <target>下载压缩包</target>
+        <target>下载zip压缩包</target>
       </trans-unit>
       <trans-unit id="3946771566659086037" datatype="html">
         <source>Enable download zip of a directory contents Directory flattening. (Does not work for searches.)</source>
@@ -1920,7 +1920,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">810</context>
         </context-group>
-        <target>Enable download zip of a directory contents Directory flattening. (Does not work for searches.)</target>
+        <target>启用目录扁平化下载目录内容的 zip 文件.（不适用于搜索.）</target>
       </trans-unit>
       <trans-unit id="6121078413919868273" datatype="html">
         <source>Directory flattening</source>
@@ -1936,7 +1936,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">821</context>
         </context-group>
-        <target>Adds a button to flattens the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</target>
+        <target>添加一个按钮,通过列出所有子目录的内容来扁平化文件结构.（如果图库中有多个路径相同的文件夹,则此按钮无效.）</target>
       </trans-unit>
       <trans-unit id="2057017984457052518" datatype="html">
         <source>Default grid size</source>
@@ -1944,7 +1944,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">828</context>
         </context-group>
-        <target>Default grid size</target>
+        <target>默认网格大小</target>
       </trans-unit>
       <trans-unit id="783998631226539613" datatype="html">
         <source>Default grid size that is used to render photos and videos.</source>
@@ -1952,7 +1952,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">832</context>
         </context-group>
-        <target>Default grid size that is used to render photos and videos.</target>
+        <target>用于渲染照片和视频的默认网格大小.</target>
       </trans-unit>
       <trans-unit id="221212791975935245" datatype="html">
         <source>Show item count</source>
@@ -1968,7 +1968,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">842</context>
         </context-group>
-        <target>Shows the number photos and videos on the navigation bar.</target>
+        <target>在导航栏上显示照片和视频的数量.</target>
       </trans-unit>
       <trans-unit id="7565716024468232322" datatype="html">
         <source>Links</source>
@@ -1976,7 +1976,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">849</context>
         </context-group>
-        <target>Links</target>
+        <target>链接</target>
       </trans-unit>
       <trans-unit id="4807202367596301715" datatype="html">
         <source>Visible links in the top menu.</source>
@@ -1984,7 +1984,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">853</context>
         </context-group>
-        <target>Visible links in the top menu.</target>
+        <target>顶部菜单中的可见链接.</target>
       </trans-unit>
       <trans-unit id="9123353964549107895" datatype="html">
         <source>Navbar show delay</source>
@@ -1992,7 +1992,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">862</context>
         </context-group>
-        <target>Navbar show delay</target>
+        <target>导航栏显示延迟</target>
       </trans-unit>
       <trans-unit id="6740139625083216976" datatype="html">
         <source>Ratio of the page height, you need to scroll to show the navigation bar.</source>
@@ -2000,7 +2000,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">866</context>
         </context-group>
-        <target>Ratio of the page height, you need to scroll to show the navigation bar.</target>
+        <target>页面高度比例,需要滚动才能显示导航栏.</target>
       </trans-unit>
       <trans-unit id="4038528744338038654" datatype="html">
         <source>Navbar hide delay</source>
@@ -2008,7 +2008,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">871</context>
         </context-group>
-        <target>Navbar hide delay</target>
+        <target>导航栏隐藏延迟</target>
       </trans-unit>
       <trans-unit id="5390013750224429307" datatype="html">
         <source>Ratio of the page height, you need to scroll to hide the navigation bar.</source>
@@ -2016,7 +2016,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">875</context>
         </context-group>
-        <target>Ratio of the page height, you need to scroll to hide the navigation bar.</target>
+        <target>页面高度比例,需要滚动才能隐藏导航栏.</target>
       </trans-unit>
       <trans-unit id="8991316344176796079" datatype="html">
         <source>Show scroll up button</source>
@@ -2024,7 +2024,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">881</context>
         </context-group>
-        <target>Show scroll up button</target>
+        <target>显示向上滚动按钮</target>
       </trans-unit>
       <trans-unit id="425470521667717513" datatype="html">
         <source>Set when the floating scroll-up button should be visible.</source>
@@ -2032,7 +2032,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">885</context>
         </context-group>
-        <target>Set when the floating scroll-up button should be visible.</target>
+        <target>设置浮动向上滚动按钮何时可见.</target>
       </trans-unit>
       <trans-unit id="7921800793872747437" datatype="html">
         <source>Sorting and grouping</source>
@@ -2040,7 +2040,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">893</context>
         </context-group>
-        <target>Sorting and grouping</target>
+        <target>排序和分组</target>
       </trans-unit>
       <trans-unit id="8685965882892653885" datatype="html">
         <source>Default slideshow speed</source>
@@ -2048,7 +2048,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">906</context>
         </context-group>
-        <target>Default slideshow speed</target>
+        <target>默认幻灯片放映速度</target>
       </trans-unit>
       <trans-unit id="8391296346935301055" datatype="html">
         <source>Default time interval for displaying a photo in the slide show.</source>
@@ -2056,7 +2056,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">911</context>
         </context-group>
-        <target>Default time interval for displaying a photo in the slide show.</target>
+        <target>幻灯片中显示照片的默认时间间隔.</target>
       </trans-unit>
       <trans-unit id="1443139905845643218" datatype="html">
         <source>Always show captions</source>
@@ -2068,7 +2068,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">66</context>
         </context-group>
-        <target>Always show captions</target>
+        <target>始终显示字幕</target>
       </trans-unit>
       <trans-unit id="1541637444630104645" datatype="html">
         <source>If enabled, lightbox will always show caption by default, not only on hover.</source>
@@ -2076,7 +2076,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">920</context>
         </context-group>
-        <target>If enabled, lightbox will always show caption by default, not only on hover.</target>
+        <target>如果启用,灯箱将始终默认显示标题,而不仅仅是悬停时.</target>
       </trans-unit>
       <trans-unit id="6677770225614932975" datatype="html">
         <source>Always show faces</source>
@@ -2088,7 +2088,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">79</context>
         </context-group>
-        <target>Always show faces</target>
+        <target>始终显示面孔</target>
       </trans-unit>
       <trans-unit id="9050621730692215024" datatype="html">
         <source>If enabled, lightbox will always show faces by default, not only on hover.</source>
@@ -2096,7 +2096,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">928</context>
         </context-group>
-        <target>If enabled, lightbox will always show faces by default, not only on hover.</target>
+        <target>如果启用,灯箱将始终默认显示面孔,而不仅仅是悬停时.</target>
       </trans-unit>
       <trans-unit id="5516106982912474900" datatype="html">
         <source>Loop Videos</source>
@@ -2104,7 +2104,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">933</context>
         </context-group>
-        <target>Loop Videos</target>
+        <target>循环播放视频</target>
       </trans-unit>
       <trans-unit id="3583632647770258043" datatype="html">
         <source>If enabled, lightbox will loop videos by default.</source>
@@ -2112,7 +2112,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">936</context>
         </context-group>
-        <target>If enabled, lightbox will loop videos by default.</target>
+        <target>如果启用,灯箱将默认循环播放视频.</target>
       </trans-unit>
       <trans-unit id="3660810634447085698" datatype="html">
         <source>Name of the theme</source>
@@ -2120,7 +2120,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">953</context>
         </context-group>
-        <target>Name of the theme</target>
+        <target>主题名称</target>
       </trans-unit>
       <trans-unit id="7103588127254721505" datatype="html">
         <source>Theme</source>
@@ -2128,7 +2128,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">958</context>
         </context-group>
-        <target>Theme</target>
+        <target>主题</target>
       </trans-unit>
       <trans-unit id="3213844127441603131" datatype="html">
         <source>Adds these css settings as it is to the end of the body tag of the page.</source>
@@ -2140,7 +2140,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1006</context>
         </context-group>
-        <target>Adds these css settings as it is to the end of the body tag of the page.</target>
+        <target>将这些 css 设置按原样添加到页面 body 标签的末尾.</target>
       </trans-unit>
       <trans-unit id="6375921149948953257" datatype="html">
         <source>Enable themes and color modes.</source>
@@ -2148,7 +2148,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">973</context>
         </context-group>
-        <target>Enable themes and color modes.</target>
+        <target>启用主题和颜色模式.</target>
       </trans-unit>
       <trans-unit id="667242951578974423" datatype="html">
         <source>Default theme mode</source>
@@ -2156,7 +2156,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">980</context>
         </context-group>
-        <target>Default theme mode</target>
+        <target>默认主题模式</target>
       </trans-unit>
       <trans-unit id="1744907786345958713" datatype="html">
         <source>Sets the default theme mode that is used for the application.</source>
@@ -2164,7 +2164,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">983</context>
         </context-group>
-        <target>Sets the default theme mode that is used for the application.</target>
+        <target>设置应用程序使用的默认主题模式.</target>
       </trans-unit>
       <trans-unit id="2756376392555555363" datatype="html">
         <source>Selected theme</source>
@@ -2172,7 +2172,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">990</context>
         </context-group>
-        <target>Selected theme</target>
+        <target>选定主题</target>
       </trans-unit>
       <trans-unit id="4758803789125339433" datatype="html">
         <source>Selected theme to use on the site.</source>
@@ -2180,7 +2180,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">994</context>
         </context-group>
-        <target>Selected theme to use on the site.</target>
+        <target>选择网站使用的主题.</target>
       </trans-unit>
       <trans-unit id="8968641302600675865" datatype="html">
         <source>Selected theme css</source>
@@ -2188,7 +2188,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1001</context>
         </context-group>
-        <target>Selected theme css</target>
+        <target>选定的主题 css</target>
       </trans-unit>
       <trans-unit id="6385104003676355545" datatype="html">
         <source>Cache</source>
@@ -2244,7 +2244,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1055</context>
         </context-group>
-        <target>On scroll thumbnail prioritising</target>
+        <target>滚动缩略图优先</target>
       </trans-unit>
       <trans-unit id="2449365823353179479" datatype="html">
         <source>Those thumbnails will be rendered first that are in view.</source>
@@ -2252,7 +2252,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1058</context>
         </context-group>
-        <target>Those thumbnails will be rendered first that are in view.</target>
+        <target>视图中的缩略图将首先渲染.</target>
       </trans-unit>
       <trans-unit id="4204029540853675536" datatype="html">
         <source>Navigation bar</source>
@@ -2260,7 +2260,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1063</context>
         </context-group>
-        <target>Navigation bar</target>
+        <target>导航栏</target>
       </trans-unit>
       <trans-unit id="138256296895235303" datatype="html">
         <source>Caption first naming</source>
@@ -2284,7 +2284,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1081</context>
         </context-group>
-        <target>Lightbox</target>
+        <target>灯箱</target>
       </trans-unit>
       <trans-unit id="2798270190074840767" datatype="html">
         <source>Themes</source>
@@ -2292,7 +2292,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1089</context>
         </context-group>
-        <target>Themes</target>
+        <target>主题</target>
       </trans-unit>
       <trans-unit id="2482105354766980770" datatype="html">
         <source>Pigallery2 uses Bootstrap 5.3 (https://getbootstrap.com/docs/5.3) for design (css, layout). In dark mode it sets 'data-bs-theme="dark"' to the &lt;html&gt; to take advantage bootstrap's color modes. For theming, read more at: https://getbootstrap.com/docs/5.3/customize/color-modes/</source>
@@ -2300,7 +2300,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1093</context>
         </context-group>
-        <target>Pigallery2 uses Bootstrap 5.3 (https://getbootstrap.com/docs/5.3) for design (css, layout). In dark mode it sets 'data-bs-theme="dark"' to the &lt;html&gt; to take advantage bootstrap's color modes. For theming, read more at: https://getbootstrap.com/docs/5.3/customize/color-modes/</target>
+        <target>Pigallery2 使用 Bootstrap 5.3 (https://getbootstrap.com/docs/5.3) 设计 (css, 布局). 在黑暗模式下它设置 'data-bs-theme="dark"' 到 &lt;html&gt; 充分利用 Bootstrap 的颜色模式.有关主题的更多信息,请参阅: https://getbootstrap.com/docs/5.3/customize/color-modes/</target>
       </trans-unit>
       <trans-unit id="5004767305340835166" datatype="html">
         <source>Inline blog starts open</source>
@@ -2308,7 +2308,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1098</context>
         </context-group>
-        <target>Inline blog starts open</target>
+        <target>内联博客开始开放</target>
       </trans-unit>
       <trans-unit id="237163013641208057" datatype="html">
         <source>Makes inline blog (*.md files content) to be auto open.</source>
@@ -2320,7 +2320,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1112</context>
         </context-group>
-        <target>Makes inline blog (*.md files content) to be auto open.</target>
+        <target>使内联博客（*.md 文件内容）自动打开.</target>
       </trans-unit>
       <trans-unit id="8496975322830640739" datatype="html">
         <source>Top blog starts open</source>
@@ -2328,7 +2328,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1108</context>
         </context-group>
-        <target>Top blog starts open</target>
+        <target>顶级博客开始开放</target>
       </trans-unit>
       <trans-unit id="9185454837312696816" datatype="html">
         <source>Supported formats with transcoding</source>
@@ -2336,7 +2336,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1130</context>
         </context-group>
-        <target>Supported formats with transcoding</target>
+        <target>转码支持的格式</target>
       </trans-unit>
       <trans-unit id="4322859338400777784" datatype="html">
         <source>Video formats that are supported after transcoding (with the build-in ffmpeg support).</source>
@@ -2344,7 +2344,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1135</context>
         </context-group>
-        <target>Video formats that are supported after transcoding (with the build-in ffmpeg support).</target>
+        <target>转码后支持的视频格式（内置ffmpeg支持）.</target>
       </trans-unit>
       <trans-unit id="2099861843042326383" datatype="html">
         <source>Supported formats without transcoding</source>
@@ -2352,7 +2352,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1143</context>
         </context-group>
-        <target>Supported formats without transcoding</target>
+        <target>无需转码即可支持的格式</target>
       </trans-unit>
       <trans-unit id="2918342650701087250" datatype="html">
         <source>Video formats that are supported also without transcoding. Browser supported formats: https://www.w3schools.com/html/html5_video.asp</source>
@@ -2360,7 +2360,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1148</context>
         </context-group>
-        <target>Video formats that are supported also without transcoding. Browser supported formats: https://www.w3schools.com/html/html5_video.asp</target>
+        <target>无需转码即可支持的视频格式.浏览器支持的格式: https://www.w3schools.com/html/html5_video.asp</target>
       </trans-unit>
       <trans-unit id="6335601943118526384" datatype="html">
         <source>Enable photo converting.</source>
@@ -2368,7 +2368,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1160</context>
         </context-group>
-        <target>Enable photo converting.</target>
+        <target>启用图片转换.</target>
       </trans-unit>
       <trans-unit id="8044411854765524879" datatype="html">
         <source>Load full resolution image on zoom.</source>
@@ -2376,7 +2376,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1166</context>
         </context-group>
-        <target>Load full resolution image on zoom.</target>
+        <target>放大后加载全分辨率图像.</target>
       </trans-unit>
       <trans-unit id="6870206109332559881" datatype="html">
         <source>Enables loading the full resolution image on zoom in the ligthbox (preview).</source>
@@ -2396,7 +2396,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">57</context>
         </context-group>
-        <target>Photo converting</target>
+        <target>图片转换</target>
       </trans-unit>
       <trans-unit id="1269143586062804510" datatype="html">
         <source>Supported photo formats</source>
@@ -2404,7 +2404,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1189</context>
         </context-group>
-        <target>Supported photo formats</target>
+        <target>支持的照片格式</target>
       </trans-unit>
       <trans-unit id="1931666821506012028" datatype="html">
         <source>Photo formats that are supported. Browser needs to support these formats natively. Also sharp (libvips) package should be able to convert these formats.</source>
@@ -2412,7 +2412,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1193</context>
         </context-group>
-        <target>Photo formats that are supported. Browser needs to support these formats natively. Also sharp (libvips) package should be able to convert these formats.</target>
+        <target>支持的照片格式.浏览器需要原生支持这些格式.sharp (libvips) 软件包也应该能够转换这些格式..</target>
       </trans-unit>
       <trans-unit id="2270178033581723629" datatype="html">
         <source>Enable GPX compressing</source>
@@ -2420,7 +2420,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1202</context>
         </context-group>
-        <target>Enable GPX compressing</target>
+        <target>启用 GPX 压缩</target>
       </trans-unit>
       <trans-unit id="1033703021916717714" datatype="html">
         <source>Enables lossy (based on delta time and distance. Too frequent points are removed) GPX compression.</source>
@@ -2428,7 +2428,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1207</context>
         </context-group>
-        <target>Enables lossy (based on delta time and distance. Too frequent points are removed) GPX compression.</target>
+        <target>启用有损（基于增量时间和距离.过于频繁的点将被删除）GPX 压缩.</target>
       </trans-unit>
       <trans-unit id="1159790075331375705" datatype="html">
         <source>*.gpx files</source>
@@ -2476,7 +2476,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1275</context>
         </context-group>
-        <target>Reads *.pg2conf files (You can use it for custom sorting and saved search (albums)).</target>
+        <target>读取 *.pg2conf 文件（您可以使用它进行自定义排序和保存的搜索（相册））.</target>
       </trans-unit>
       <trans-unit id="6014979081471317568" datatype="html">
         <source>Supported formats</source>
@@ -2484,7 +2484,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1281</context>
         </context-group>
-        <target>Supported formats</target>
+        <target>支持的格式</target>
       </trans-unit>
       <trans-unit id="5349838636229861629" datatype="html">
         <source>The app will read and process these files.</source>
@@ -2492,7 +2492,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1285</context>
         </context-group>
-        <target>The app will read and process these files.</target>
+        <target>该应用程序将读取并处理这些文件.</target>
       </trans-unit>
       <trans-unit id="4816216590591222133" datatype="html">
         <source>Enabled</source>
@@ -2544,7 +2544,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1319</context>
         </context-group>
-        <target>Face listing right</target>
+        <target>面孔列表朝右</target>
       </trans-unit>
       <trans-unit id="7717019961331408650" datatype="html">
         <source>Required minimum right to show the faces tab.</source>
@@ -2552,7 +2552,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1322</context>
         </context-group>
-        <target>Required minimum right to show the faces tab.</target>
+        <target>显示“面孔”选项卡所需的最低权限.</target>
       </trans-unit>
       <trans-unit id="933361080941409912" datatype="html">
         <source>Page title</source>
@@ -2568,7 +2568,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1338</context>
         </context-group>
-        <target>If you access the page form local network its good to know the public url for creating sharing link.</target>
+        <target>如果您从本地网络访问该页面,最好了解用于创建共享链接的公共链接.</target>
       </trans-unit>
       <trans-unit id="5093650417970469070" datatype="html">
         <source>Page public url</source>
@@ -2584,7 +2584,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1348</context>
         </context-group>
-        <target>如果您在子URL下访问画廊(例如: http://mydomain.com/myGallery), 请在此处进行设置. 如果不生效，可能是你漏掉了开头的'/'.</target>
+        <target>如果您在子URL下访问画廊(例如: http://mydomain.com/myGallery), 请在此处进行设置. 如果不生效,可能是你漏掉了开头的'/'.</target>
       </trans-unit>
       <trans-unit id="4312373114061005708" datatype="html">
         <source>Url Base</source>
@@ -2600,7 +2600,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1362</context>
         </context-group>
-        <target>Api path</target>
+        <target>Api 路径</target>
       </trans-unit>
       <trans-unit id="2663968068169291107" datatype="html">
         <source>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it add analytics or custom code to the app).</source>
@@ -2608,7 +2608,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1373</context>
         </context-group>
-        <target>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it add analytics or custom code to the app).</target>
+        <target>将此内容注入到 &lt;head&gt;&lt;/head&gt; 应用程序的 HTML 标签. （您可以使用它向应用程序添加分析或自定义代码）.</target>
       </trans-unit>
       <trans-unit id="6764366823411649793" datatype="html">
         <source>Custom HTML Head</source>
@@ -2624,7 +2624,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1392</context>
         </context-group>
-        <target>Sets the icon of the app</target>
+        <target>设置应用程序的图标</target>
       </trans-unit>
       <trans-unit id="7321299026311900359" datatype="html">
         <source>Password protection</source>
@@ -2640,7 +2640,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1411</context>
         </context-group>
-        <target>Enables user management with login to password protect the gallery.</target>
+        <target>启用用户管理,通过登录密码保护图库.</target>
       </trans-unit>
       <trans-unit id="6609079253925902817" datatype="html">
         <source>Default user right</source>
@@ -2648,7 +2648,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1417</context>
         </context-group>
-        <target>Default user right</target>
+        <target>默认用户权限</target>
       </trans-unit>
       <trans-unit id="8265334008597043132" datatype="html">
         <source>Default user right when password protection is disabled.</source>
@@ -2656,7 +2656,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1422</context>
         </context-group>
-        <target>Default user right when password protection is disabled.</target>
+        <target>密码保护禁用时的默认用户权限.</target>
       </trans-unit>
       <trans-unit id="2181154762165715522" datatype="html">
         <source>Gallery</source>
@@ -2684,7 +2684,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1453</context>
         </context-group>
-        <target>Album</target>
+        <target>相册</target>
       </trans-unit>
       <trans-unit id="4580988005648117665" datatype="html">
         <source>Search</source>
@@ -2756,7 +2756,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1492</context>
         </context-group>
-        <target>Random photo</target>
+        <target>随机图片</target>
       </trans-unit>
       <trans-unit id="6931351711601311753" datatype="html">
         <source>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</source>
@@ -2764,7 +2764,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1496</context>
         </context-group>
-        <target>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</target>
+        <target>此功能允许您生成“随机照片”网址.该网址会返回从您的图库中随机选择的照片.您可以将该网址与第三方应用程序（例如随机更改桌面背景）一起使用.注意：在当前实现中,随机链接也需要登录.</target>
       </trans-unit>
       <trans-unit id="5732878542640870310" datatype="html">
         <source>Size to generate</source>
@@ -2820,7 +2820,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>Media selectors</target>
+        <target>媒体选择器</target>
       </trans-unit>
       <trans-unit id="7534784716124739630" datatype="html">
         <source>Set these search queries to find photos and videos to email.</source>
@@ -2828,7 +2828,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">25</context>
         </context-group>
-        <target>Set these search queries to find photos and videos to email.</target>
+        <target>设置这些搜索查询来查找要通过电子邮件发送的照片和视频.</target>
       </trans-unit>
       <trans-unit id="5298689875582975932" datatype="html">
         <source>E-mail to</source>
@@ -2836,7 +2836,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">27</context>
         </context-group>
-        <target>E-mail to</target>
+        <target>发送电子邮件到</target>
       </trans-unit>
       <trans-unit id="969387355003550756" datatype="html">
         <source>E-mail address of the recipient.</source>
@@ -2844,7 +2844,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>E-mail address of the recipient.</target>
+        <target>收件人的电子邮件地址.</target>
       </trans-unit>
       <trans-unit id="9127604588498960753" datatype="html">
         <source>Subject</source>
@@ -2852,7 +2852,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">31</context>
         </context-group>
-        <target>Subject</target>
+        <target>主题</target>
       </trans-unit>
       <trans-unit id="8166565126925776930" datatype="html">
         <source>E-mail subject.</source>
@@ -2860,7 +2860,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">33</context>
         </context-group>
-        <target>E-mail subject.</target>
+        <target>电子邮件主题.</target>
       </trans-unit>
       <trans-unit id="8066608938393600549" datatype="html">
         <source>Message</source>
@@ -2868,7 +2868,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target>Message</target>
+        <target>信息</target>
       </trans-unit>
       <trans-unit id="2752906962332824457" datatype="html">
         <source>E-mail text.</source>
@@ -2876,7 +2876,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>E-mail text.</target>
+        <target>电子邮件文本.</target>
       </trans-unit>
       <trans-unit id="9153059468211122141" datatype="html">
         <source>Gallery reset</source>
@@ -2884,7 +2884,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">51</context>
         </context-group>
-        <target>Gallery reset</target>
+        <target>重置图库</target>
       </trans-unit>
       <trans-unit id="2046036880411214558" datatype="html">
         <source>Album reset</source>
@@ -2892,7 +2892,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">53</context>
         </context-group>
-        <target>Album reset</target>
+        <target>重置相册</target>
       </trans-unit>
       <trans-unit id="1623883110045208603" datatype="html">
         <source>Thumbnail generation</source>
@@ -2900,7 +2900,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">55</context>
         </context-group>
-        <target>Thumbnail generation</target>
+        <target>缩略图生成</target>
       </trans-unit>
       <trans-unit id="2212725374840438395" datatype="html">
         <source>Video converting</source>
@@ -2908,7 +2908,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>Video converting</target>
+        <target>视频转换</target>
       </trans-unit>
       <trans-unit id="2035605189158678284" datatype="html">
         <source>Temp folder cleaning</source>
@@ -2916,7 +2916,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">61</context>
         </context-group>
-        <target>Temp folder cleaning</target>
+        <target>临时文件夹清理</target>
       </trans-unit>
       <trans-unit id="3088840048840308975" datatype="html">
         <source>Cover filling</source>
@@ -2924,7 +2924,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">63</context>
         </context-group>
-        <target>Cover filling</target>
+        <target>封面填充</target>
       </trans-unit>
       <trans-unit id="6795645469514395103" datatype="html">
         <source>Cover reset</source>
@@ -2932,7 +2932,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">65</context>
         </context-group>
-        <target>Cover reset</target>
+        <target>重置封面</target>
       </trans-unit>
       <trans-unit id="1170030142768130074" datatype="html">
         <source>Delete Compressed GPX</source>
@@ -2940,7 +2940,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">69</context>
         </context-group>
-        <target>Delete Compressed GPX</target>
+        <target>删除压缩的 GPX</target>
       </trans-unit>
       <trans-unit id="6422562246025271457" datatype="html">
         <source>Top Pick Sending</source>
@@ -2948,7 +2948,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>Top Pick Sending</target>
+        <target>首选发送</target>
       </trans-unit>
       <trans-unit id="4793522720209559817" datatype="html">
         <source>Scans the whole gallery from disk and indexes it to the DB.</source>
@@ -2956,7 +2956,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>Scans the whole gallery from disk and indexes it to the DB.</target>
+        <target>从磁盘扫描整个图库并将其索引到数据库.</target>
       </trans-unit>
       <trans-unit id="4691070723688024701" datatype="html">
         <source>Deletes all directories, photos and videos from the DB.</source>
@@ -2964,7 +2964,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">85</context>
         </context-group>
-        <target>Deletes all directories, photos and videos from the DB.</target>
+        <target>从数据库中删除所有目录、照片和视频.</target>
       </trans-unit>
       <trans-unit id="6504202610617727748" datatype="html">
         <source>Removes all albums from the DB</source>
@@ -2972,7 +2972,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">87</context>
         </context-group>
-        <target>Removes all albums from the DB</target>
+        <target>从数据库中删除所有专辑</target>
       </trans-unit>
       <trans-unit id="2844399786106605327" datatype="html">
         <source>Generates thumbnails from all media files and stores them in the tmp folder.</source>
@@ -2980,7 +2980,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">89</context>
         </context-group>
-        <target>Generates thumbnails from all media files and stores them in the tmp folder.</target>
+        <target>从所有媒体文件生成缩略图并将其存储在 tmp 文件夹中.</target>
       </trans-unit>
       <trans-unit id="6374721327915016061" datatype="html">
         <source>Generates high res photos from all media files and stores them in the tmp folder.</source>
@@ -2988,7 +2988,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">91</context>
         </context-group>
-        <target>Generates high res photos from all media files and stores them in the tmp folder.</target>
+        <target>从所有媒体文件生成高分辨率照片并将其存储在 tmp 文件夹中.</target>
       </trans-unit>
       <trans-unit id="681839472013852986" datatype="html">
         <source>Transcodes all videos and stores them in the tmp folder.</source>
@@ -2996,7 +2996,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">93</context>
         </context-group>
-        <target>Transcodes all videos and stores them in the tmp folder.</target>
+        <target>对所有视频进行转码并将其存储在 tmp 文件夹中.</target>
       </trans-unit>
       <trans-unit id="2403828565802891849" datatype="html">
         <source>Removes unnecessary files from the tmp folder.</source>
@@ -3004,7 +3004,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">95</context>
         </context-group>
-        <target>Removes unnecessary files from the tmp folder.</target>
+        <target>从 tmp 文件夹中删除不需要的文件.</target>
       </trans-unit>
       <trans-unit id="1886565118515809311" datatype="html">
         <source>Updates the cover photo of all albums (both directories and saved searches) and faces.</source>
@@ -3012,7 +3012,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">97</context>
         </context-group>
-        <target>Updates the cover photo of all albums (both directories and saved searches) and faces.</target>
+        <target>更新所有相册（目录和已保存的搜索）的封面照片和面孔.</target>
       </trans-unit>
       <trans-unit id="4106034977348030939" datatype="html">
         <source>Deletes the cover photo of all albums and faces</source>
@@ -3020,7 +3020,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">99</context>
         </context-group>
-        <target>Deletes the cover photo of all albums and faces</target>
+        <target>删除所有相册的封面照片和面孔</target>
       </trans-unit>
       <trans-unit id="32946664903270658" datatype="html">
         <source>Compresses all gpx files</source>
@@ -3028,7 +3028,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">101</context>
         </context-group>
-        <target>Compresses all gpx files</target>
+        <target>压缩所有 gpx 文件</target>
       </trans-unit>
       <trans-unit id="4490323950044057611" datatype="html">
         <source>Deletes all compressed GPX files</source>
@@ -3036,7 +3036,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">103</context>
         </context-group>
-        <target>Deletes all compressed GPX files</target>
+        <target>删除所有压缩的 GPX 文件</target>
       </trans-unit>
       <trans-unit id="4246926023108353911" datatype="html">
         <source>Gets the top photos of the selected search queries and sends them over email. You need to set up the SMTP server connection to send e-mails.</source>
@@ -3044,7 +3044,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">105</context>
         </context-group>
-        <target>Gets the top photos of the selected search queries and sends them over email. You need to set up the SMTP server connection to send e-mails.</target>
+        <target>获取所选搜索查询的热门照片并通过电子邮件发送.您需要设置 SMTP 服务器连接才能发送电子邮件.</target>
       </trans-unit>
       <trans-unit id="1677142486230902467" datatype="html">
         <source>Server error</source>
@@ -3099,7 +3099,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">20</context>
         </context-group>
-        <target>Developer</target>
+        <target>开发人员</target>
       </trans-unit>
       <trans-unit id="5041354590769758251" datatype="html">
         <source>Admin</source>
@@ -3111,7 +3111,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>Admin</target>
+        <target>管理员</target>
       </trans-unit>
       <trans-unit id="268369328039605234" datatype="html">
         <source>Guest</source>
@@ -3119,7 +3119,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>Guest</target>
+        <target>游客</target>
       </trans-unit>
       <trans-unit id="805152477619072259" datatype="html">
         <source>LimitedGuest</source>
@@ -3127,7 +3127,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">24</context>
         </context-group>
-        <target>LimitedGuest</target>
+        <target>受限游客</target>
       </trans-unit>
       <trans-unit id="8643289769990675407" datatype="html">
         <source>Basic</source>
@@ -3151,7 +3151,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>Under the hood</target>
+        <target>幕后</target>
       </trans-unit>
       <trans-unit id="9212449559226155586" datatype="html">
         <source>Always</source>
@@ -3159,7 +3159,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">31</context>
         </context-group>
-        <target>Always</target>
+        <target>经常</target>
       </trans-unit>
       <trans-unit id="221578388510207648" datatype="html">
         <source>Mobile only</source>
@@ -3167,7 +3167,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">32</context>
         </context-group>
-        <target>Mobile only</target>
+        <target>仅限移动设备</target>
       </trans-unit>
       <trans-unit id="8372007266188249803" datatype="html">
         <source>Never</source>
@@ -3175,7 +3175,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">33</context>
         </context-group>
-        <target>Never</target>
+        <target>永不</target>
       </trans-unit>
       <trans-unit id="1920513678812261969" datatype="html">
         <source>Full</source>
@@ -3183,7 +3183,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target>Full</target>
+        <target>全屏</target>
       </trans-unit>
       <trans-unit id="4046649033157042513" datatype="html">
         <source>Compact</source>
@@ -3191,7 +3191,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target>Compact</target>
+        <target>紧凑</target>
       </trans-unit>
       <trans-unit id="7590013429208346303" datatype="html">
         <source>Custom</source>
@@ -3199,7 +3199,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">38</context>
         </context-group>
-        <target>Custom</target>
+        <target>自定义</target>
       </trans-unit>
       <trans-unit id="113099127945736504" datatype="html">
         <source>OpenStreetMap</source>
@@ -3207,7 +3207,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">39</context>
         </context-group>
-        <target>OpenStreetMap</target>
+        <target>开放街道地图</target>
       </trans-unit>
       <trans-unit id="441839877284474887" datatype="html">
         <source>Mapbox</source>
@@ -3215,7 +3215,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">40</context>
         </context-group>
-        <target>Mapbox</target>
+        <target>地图框</target>
       </trans-unit>
       <trans-unit id="4101442988100757762" datatype="html">
         <source>never</source>
@@ -3267,7 +3267,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">49</context>
         </context-group>
-        <target>date</target>
+        <target>日期</target>
       </trans-unit>
       <trans-unit id="3325180562659478330" datatype="html">
         <source>name</source>
@@ -3279,7 +3279,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">108</context>
         </context-group>
-        <target>name</target>
+        <target>名称</target>
       </trans-unit>
       <trans-unit id="8415080222848862490" datatype="html">
         <source>rating</source>
@@ -3287,7 +3287,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">51</context>
         </context-group>
-        <target>rating</target>
+        <target>评级</target>
       </trans-unit>
       <trans-unit id="8893285757291009420" datatype="html">
         <source>random</source>
@@ -3303,7 +3303,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">53</context>
         </context-group>
-        <target>faces</target>
+        <target>面孔</target>
       </trans-unit>
       <trans-unit id="2999337676190296805" datatype="html">
         <source>file size</source>
@@ -3311,7 +3311,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">54</context>
         </context-group>
-        <target>file size</target>
+        <target>文件大小</target>
       </trans-unit>
       <trans-unit id="2838693330548032903" datatype="html">
         <source>don't group</source>
@@ -3319,7 +3319,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">56</context>
         </context-group>
-        <target>don't group</target>
+        <target>不分组</target>
       </trans-unit>
       <trans-unit id="4044854304763114941" datatype="html">
         <source>extra small</source>
@@ -3327,7 +3327,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>extra small</target>
+        <target>特小</target>
       </trans-unit>
       <trans-unit id="704865667518683453" datatype="html">
         <source>small</source>
@@ -3335,7 +3335,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">60</context>
         </context-group>
-        <target>small</target>
+        <target>小</target>
       </trans-unit>
       <trans-unit id="2765721507544664929" datatype="html">
         <source>big</source>
@@ -3343,7 +3343,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">62</context>
         </context-group>
-        <target>big</target>
+        <target>大</target>
       </trans-unit>
       <trans-unit id="782745584760781543" datatype="html">
         <source>extra large</source>
@@ -3351,7 +3351,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">63</context>
         </context-group>
-        <target>extra large</target>
+        <target>特大</target>
       </trans-unit>
       <trans-unit id="5043933900720743682" datatype="html">
         <source>Albums</source>
@@ -3379,7 +3379,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">72</context>
         </context-group>
-        <target>And</target>
+        <target>和</target>
       </trans-unit>
       <trans-unit id="5504129468136884250" datatype="html">
         <source>Or</source>
@@ -3387,7 +3387,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">73</context>
         </context-group>
-        <target>Or</target>
+        <target>或</target>
       </trans-unit>
       <trans-unit id="3114268147592827952" datatype="html">
         <source>Some of</source>
@@ -3395,7 +3395,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">74</context>
         </context-group>
-        <target>Some of</target>
+        <target>一些</target>
       </trans-unit>
       <trans-unit id="7166568209965309766" datatype="html">
         <source>Any text</source>
@@ -3403,7 +3403,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">75</context>
         </context-group>
-        <target>Any text</target>
+        <target>任何文本</target>
       </trans-unit>
       <trans-unit id="5203279511751768967" datatype="html">
         <source>From</source>
@@ -3423,7 +3423,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">77</context>
         </context-group>
-        <target>Until</target>
+        <target>直到</target>
       </trans-unit>
       <trans-unit id="1779552786277618671" datatype="html">
         <source>Distance</source>
@@ -3431,7 +3431,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">78</context>
         </context-group>
-        <target>Distance</target>
+        <target>距离</target>
       </trans-unit>
       <trans-unit id="157463387541377837" datatype="html">
         <source>Min rating</source>
@@ -3439,7 +3439,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">79</context>
         </context-group>
-        <target>Min rating</target>
+        <target>最低评级</target>
       </trans-unit>
       <trans-unit id="8686048867619829717" datatype="html">
         <source>Max rating</source>
@@ -3447,7 +3447,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">80</context>
         </context-group>
-        <target>Max rating</target>
+        <target>最高评级</target>
       </trans-unit>
       <trans-unit id="4492817943545541734" datatype="html">
         <source>Min faces</source>
@@ -3455,7 +3455,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">81</context>
         </context-group>
-        <target>Min faces</target>
+        <target>最少面孔</target>
       </trans-unit>
       <trans-unit id="142295387545931274" datatype="html">
         <source>Max faces</source>
@@ -3463,7 +3463,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">82</context>
         </context-group>
-        <target>Max faces</target>
+        <target>最多面孔</target>
       </trans-unit>
       <trans-unit id="2618179203175887603" datatype="html">
         <source>Min resolution</source>
@@ -3471,7 +3471,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>Min resolution</target>
+        <target>最小分辨率</target>
       </trans-unit>
       <trans-unit id="8281989101801179201" datatype="html">
         <source>Max resolution</source>
@@ -3479,7 +3479,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">84</context>
         </context-group>
-        <target>Max resolution</target>
+        <target>最大分辨率</target>
       </trans-unit>
       <trans-unit id="5256256049865563765" datatype="html">
         <source>Directory</source>
@@ -3487,7 +3487,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">85</context>
         </context-group>
-        <target>Directory</target>
+        <target>目录</target>
       </trans-unit>
       <trans-unit id="2300247576851644080" datatype="html">
         <source>File name</source>
@@ -3495,7 +3495,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">86</context>
         </context-group>
-        <target>File name</target>
+        <target>文件名</target>
       </trans-unit>
       <trans-unit id="6838559377527923778" datatype="html">
         <source>Caption</source>
@@ -3515,7 +3515,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">88</context>
         </context-group>
-        <target>Orientation</target>
+        <target>方向</target>
       </trans-unit>
       <trans-unit id="3177862278657494562" datatype="html">
         <source>Date pattern</source>
@@ -3523,7 +3523,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">89</context>
         </context-group>
-        <target>Date pattern</target>
+        <target>日期模式</target>
       </trans-unit>
       <trans-unit id="1172866303261737245" datatype="html">
         <source>Position</source>
@@ -3531,7 +3531,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">90</context>
         </context-group>
-        <target>Position</target>
+        <target>位置</target>
       </trans-unit>
       <trans-unit id="4259420107141838090" datatype="html">
         <source>Person</source>
@@ -3539,7 +3539,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">91</context>
         </context-group>
-        <target>Person</target>
+        <target>人物</target>
       </trans-unit>
       <trans-unit id="5206272431542421762" datatype="html">
         <source>Keyword</source>
@@ -3547,7 +3547,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">92</context>
         </context-group>
-        <target>Keyword</target>
+        <target>关键词</target>
       </trans-unit>
       <trans-unit id="3443810994372262728" datatype="html">
         <source>Server notifications</source>
@@ -3579,7 +3579,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
           <context context-type="linenumber">39</context>
         </context-group>
-        <target>Mode:</target>
+        <target>模式:</target>
       </trans-unit>
       <trans-unit id="271318073764837543" datatype="html">
         <source> Menu</source>
@@ -3692,7 +3692,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">328</context>
         </context-group>
-        <target>Delete</target>
+        <target>删除</target>
       </trans-unit>
       <trans-unit id="3017479276216613525" datatype="html">
         <source>Album is locked, cannot be deleted from the webpage.</source>
@@ -3788,7 +3788,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">97</context>
         </context-group>
-        <target>Light</target>
+        <target>亮</target>
       </trans-unit>
       <trans-unit id="3892161059518616136" datatype="html">
         <source>Dark</source>
@@ -3796,7 +3796,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">101</context>
         </context-group>
-        <target>Dark</target>
+        <target>暗</target>
       </trans-unit>
       <trans-unit id="616064537937996961" datatype="html">
         <source>Auto</source>
@@ -3804,7 +3804,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">106</context>
         </context-group>
-        <target>Auto</target>
+        <target>自动</target>
       </trans-unit>
       <trans-unit id="1684734235599362204" datatype="html">
         <source>Tools</source>
@@ -3812,7 +3812,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">156</context>
         </context-group>
-        <target>Tools</target>
+        <target>工具</target>
       </trans-unit>
       <trans-unit id="7990544842257386570" datatype="html">
         <source>key: c</source>
@@ -3824,7 +3824,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">66</context>
         </context-group>
-        <target>key: c</target>
+        <target>快捷键: c</target>
       </trans-unit>
       <trans-unit id="2897959497810772660" datatype="html">
         <source>Fix navbar</source>
@@ -3832,7 +3832,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">169</context>
         </context-group>
-        <target>Fix navbar</target>
+        <target>修复导航栏</target>
       </trans-unit>
       <trans-unit id="4930506384627295710" datatype="html">
         <source>Settings</source>
@@ -3856,7 +3856,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
           <context context-type="linenumber">119</context>
         </context-group>
-        <target>Cannot find location</target>
+        <target>找不到位置</target>
       </trans-unit>
       <trans-unit id="7436975022198908854" datatype="html">
         <source>Unknown server error</source>
@@ -3864,7 +3864,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
           <context context-type="linenumber">121</context>
         </context-group>
-        <target>Unknown server error</target>
+        <target>未知服务器错误</target>
       </trans-unit>
       <trans-unit id="1146494050504614738" datatype="html">
         <source>Select only this</source>
@@ -4044,7 +4044,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">32</context>
         </context-group>
-        <target>Download</target>
+        <target>下载</target>
       </trans-unit>
       <trans-unit id="6639312389704540885" datatype="html">
         <source>Slideshow playback speed</source>
@@ -4052,7 +4052,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">55</context>
         </context-group>
-        <target>Slideshow playback speed</target>
+        <target>幻灯片播放速度</target>
       </trans-unit>
       <trans-unit id="6561811782994945096" datatype="html">
         <source>Slideshow speed:</source>
@@ -4060,7 +4060,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">55</context>
         </context-group>
-        <target>Slideshow speed:</target>
+        <target>幻灯片放映速度:</target>
       </trans-unit>
       <trans-unit id="3118381885529786097" datatype="html">
         <source>key: a</source>
@@ -4068,7 +4068,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">79</context>
         </context-group>
-        <target>key: a</target>
+        <target>快捷键: a</target>
       </trans-unit>
       <trans-unit id="3853005186637856594" datatype="html">
         <source>key: l</source>
@@ -4076,7 +4076,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">94</context>
         </context-group>
-        <target>key: l</target>
+        <target>快捷键: l</target>
       </trans-unit>
       <trans-unit id="1289596067609871549" datatype="html">
         <source>Loop videos</source>
@@ -4084,7 +4084,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">94</context>
         </context-group>
-        <target>Loop videos</target>
+        <target>循环播放视频</target>
       </trans-unit>
       <trans-unit id="6587606691006859224" datatype="html">
         <source>close, key: Escape</source>
@@ -4136,7 +4136,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">206</context>
         </context-group>
-        <target>Pause</target>
+        <target>暂停</target>
       </trans-unit>
       <trans-unit id="8597427582603336662" datatype="html">
         <source>Auto play</source>
@@ -4144,7 +4144,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">213</context>
         </context-group>
-        <target>Auto play</target>
+        <target>自动播放</target>
       </trans-unit>
       <trans-unit id="314315645942131479" datatype="html">
         <source>Info</source>
@@ -4184,7 +4184,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <target>Home</target>
+        <target>主页</target>
       </trans-unit>
       <trans-unit id="5294987439623514854" datatype="html">
         <source>Error during loading the video.</source>
@@ -4208,7 +4208,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
           <context context-type="linenumber">176</context>
         </context-group>
-        <target>Sport</target>
+        <target>运动</target>
       </trans-unit>
       <trans-unit id="1415537753700024352" datatype="html">
         <source>Transportation</source>
@@ -4216,7 +4216,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
           <context context-type="linenumber">179</context>
         </context-group>
-        <target>Transportation</target>
+        <target>运输</target>
       </trans-unit>
       <trans-unit id="7953475258022164347" datatype="html">
         <source>Other paths</source>
@@ -4228,7 +4228,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
           <context context-type="linenumber">205</context>
         </context-group>
-        <target>Other paths</target>
+        <target>其他路径</target>
       </trans-unit>
       <trans-unit id="8314090883669143391" datatype="html">
         <source>Latitude</source>
@@ -4236,7 +4236,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
           <context context-type="linenumber">675</context>
         </context-group>
-        <target>Latitude</target>
+        <target>纬度</target>
       </trans-unit>
       <trans-unit id="2703718513716530782" datatype="html">
         <source>longitude</source>
@@ -4244,7 +4244,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
           <context context-type="linenumber">675</context>
         </context-group>
-        <target>longitude</target>
+        <target>经度</target>
       </trans-unit>
       <trans-unit id="6560708001470959956" datatype="html">
         <source>street</source>
@@ -4252,7 +4252,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.service.ts</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>street</target>
+        <target>街道</target>
       </trans-unit>
       <trans-unit id="5616490555226013552" datatype="html">
         <source>satellite</source>
@@ -4260,7 +4260,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.service.ts</context>
           <context context-type="linenumber">30</context>
         </context-group>
-        <target>satellite</target>
+        <target>卫星</target>
       </trans-unit>
       <trans-unit id="3574756324609227822" datatype="html">
         <source>hybrid</source>
@@ -4268,7 +4268,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.service.ts</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>hybrid</target>
+        <target>混合</target>
       </trans-unit>
       <trans-unit id="8262108640078645269" datatype="html">
         <source>dark</source>
@@ -4276,7 +4276,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.service.ts</context>
           <context context-type="linenumber">44</context>
         </context-group>
-        <target>dark</target>
+        <target>暗</target>
       </trans-unit>
       <trans-unit id="7909798112576642157" datatype="html">
         <source>Searching for:</source>
@@ -4300,7 +4300,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">42</context>
         </context-group>
-        <target>Show all subdirectories</target>
+        <target>显示所有子目录</target>
       </trans-unit>
       <trans-unit id="4163272119298020373" datatype="html">
         <source>Filters</source>
@@ -4320,7 +4320,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
           <context context-type="linenumber">3</context>
         </context-group>
-        <target>Sort and group</target>
+        <target>排序和分组</target>
       </trans-unit>
       <trans-unit id="2317496634288800773" datatype="html">
         <source> group </source>
@@ -4328,7 +4328,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">75,76</context>
         </context-group>
-        <target>group</target>
+        <target>分组</target>
       </trans-unit>
       <trans-unit id="2774613742044941352" datatype="html">
         <source>Sorting</source>
@@ -4336,7 +4336,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>Sorting</target>
+        <target>排序</target>
       </trans-unit>
       <trans-unit id="7266946560591201477" datatype="html">
         <source>Grouping follows sorting</source>
@@ -4344,7 +4344,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">88</context>
         </context-group>
-        <target>Grouping follows sorting</target>
+        <target>排序后分组</target>
       </trans-unit>
       <trans-unit id="8007904845243402148" datatype="html">
         <source>ascending</source>
@@ -4360,7 +4360,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
           <context context-type="linenumber">32</context>
         </context-group>
-        <target>ascending</target>
+        <target>升序</target>
       </trans-unit>
       <trans-unit id="8583825692753174768" datatype="html">
         <source>descending</source>
@@ -4376,7 +4376,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
           <context context-type="linenumber">41</context>
         </context-group>
-        <target>descending</target>
+        <target>降序</target>
       </trans-unit>
       <trans-unit id="877780134171662191" datatype="html">
         <source>Grouping</source>
@@ -4384,7 +4384,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">128</context>
         </context-group>
-        <target>Grouping</target>
+        <target>分组</target>
       </trans-unit>
       <trans-unit id="53284904959011055" datatype="html">
         <source>Grid size</source>
@@ -4396,7 +4396,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">176</context>
         </context-group>
-        <target>Grid size</target>
+        <target>网格大小</target>
       </trans-unit>
       <trans-unit id="7241451058585494578" datatype="html">
         <source>key: alt + up</source>
@@ -4404,7 +4404,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
           <context context-type="linenumber">123</context>
         </context-group>
-        <target>key: alt + up</target>
+        <target>快捷键: alt + up</target>
       </trans-unit>
       <trans-unit id="3445823735428564189" datatype="html">
         <source>Random link</source>
@@ -4484,7 +4484,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">341</context>
         </context-group>
-        <target>Add</target>
+        <target>添加</target>
       </trans-unit>
       <trans-unit id="7051066787135970070" datatype="html">
         <source>Negate</source>
@@ -4492,7 +4492,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">75</context>
         </context-group>
-        <target>Negate</target>
+        <target>否定</target>
       </trans-unit>
       <trans-unit id="3548274206254483489" datatype="html">
         <source>Search text</source>
@@ -4500,7 +4500,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">88</context>
         </context-group>
-        <target>Search text</target>
+        <target>搜索文本</target>
       </trans-unit>
       <trans-unit id="5027564160787173789" datatype="html">
         <source>From date</source>
@@ -4540,7 +4540,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">181</context>
         </context-group>
-        <target>Minimum Person count</target>
+        <target>最少人物计数</target>
       </trans-unit>
       <trans-unit id="5965220081582142268" datatype="html">
         <source>Maximum Person count</source>
@@ -4548,7 +4548,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">194</context>
         </context-group>
-        <target>Maximum Person count</target>
+        <target>最多人物计数</target>
       </trans-unit>
       <trans-unit id="1362128514258619168" datatype="html">
         <source>Minimum Resolution</source>
@@ -4556,7 +4556,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">208</context>
         </context-group>
-        <target>Minimum Resolution</target>
+        <target>最小分辨率</target>
       </trans-unit>
       <trans-unit id="6524138748702944953" datatype="html">
         <source>Maximum Resolution</source>
@@ -4564,7 +4564,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">224</context>
         </context-group>
-        <target>Maximum Resolution</target>
+        <target>最大分辨率</target>
       </trans-unit>
       <trans-unit id="1403507799985368460" datatype="html">
         <source>Landscape</source>
@@ -4588,7 +4588,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">253</context>
         </context-group>
-        <target>Last</target>
+        <target>过去</target>
       </trans-unit>
       <trans-unit id="2317694455251704278" datatype="html">
         <source>Last N Days</source>
@@ -4596,7 +4596,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">256</context>
         </context-group>
-        <target>Last N Days</target>
+        <target>过去 N 天</target>
       </trans-unit>
       <trans-unit id="1841001414805444530" datatype="html">
         <source>Ago</source>
@@ -4604,7 +4604,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">272</context>
         </context-group>
-        <target>Ago</target>
+        <target>先前</target>
       </trans-unit>
       <trans-unit id="7267191671332895261" datatype="html">
         <source>Day(s) ago</source>
@@ -4612,7 +4612,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">287</context>
         </context-group>
-        <target>Day(s) ago</target>
+        <target>天前</target>
       </trans-unit>
       <trans-unit id="6246978557266811210" datatype="html">
         <source>Week(s) ago</source>
@@ -4620,7 +4620,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">288</context>
         </context-group>
-        <target>Week(s) ago</target>
+        <target>周前</target>
       </trans-unit>
       <trans-unit id="5214793274172992989" datatype="html">
         <source>Month(s) ago</source>
@@ -4628,7 +4628,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">289</context>
         </context-group>
-        <target>Month(s) ago</target>
+        <target>月前</target>
       </trans-unit>
       <trans-unit id="8760070733234838765" datatype="html">
         <source>Year(s) ago</source>
@@ -4636,7 +4636,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">290</context>
         </context-group>
-        <target>Year(s) ago</target>
+        <target>年前</target>
       </trans-unit>
       <trans-unit id="548935897521348324" datatype="html">
         <source>Every week</source>
@@ -4644,7 +4644,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">291</context>
         </context-group>
-        <target>Every week</target>
+        <target>每周</target>
       </trans-unit>
       <trans-unit id="123874585581109714" datatype="html">
         <source>Every Month</source>
@@ -4652,7 +4652,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">292</context>
         </context-group>
-        <target>Every Month</target>
+        <target>每月</target>
       </trans-unit>
       <trans-unit id="1723692577259921020" datatype="html">
         <source>Every year</source>
@@ -4660,7 +4660,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">293</context>
         </context-group>
-        <target>Every year</target>
+        <target>每年</target>
       </trans-unit>
       <trans-unit id="3200342440195656274" datatype="html">
         <source>Insert</source>
@@ -4688,7 +4688,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
           <context context-type="linenumber">80</context>
         </context-group>
-        <target>Album name</target>
+        <target>相册名称</target>
       </trans-unit>
       <trans-unit id="4606777540690493351" datatype="html">
         <source>Save as album</source>
@@ -4696,7 +4696,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
           <context context-type="linenumber">98</context>
         </context-group>
-        <target>Save as album</target>
+        <target>保存为相册</target>
       </trans-unit>
       <trans-unit id="7419704019640008953" datatype="html">
         <source>Share</source>
@@ -4792,7 +4792,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">135,136</context>
         </context-group>
-        <target>active share(s) for this folder.</target>
+        <target>此文件夹的活动共享.</target>
       </trans-unit>
       <trans-unit id="1043390381565182083" datatype="html">
         <source>Creator</source>
@@ -4804,7 +4804,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">16</context>
         </context-group>
-        <target>Creator</target>
+        <target>创造者</target>
       </trans-unit>
       <trans-unit id="8037476586059399916" datatype="html">
         <source>Expires</source>
@@ -4816,7 +4816,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">17</context>
         </context-group>
-        <target>Expires</target>
+        <target>过期</target>
       </trans-unit>
       <trans-unit id="1625809888219597132" datatype="html">
         <source>Invalid settings</source>
@@ -4824,7 +4824,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">43</context>
         </context-group>
-        <target>Invalid settings</target>
+        <target>无效设置</target>
       </trans-unit>
       <trans-unit id="2807800733729323332" datatype="html">
         <source>Yes</source>
@@ -4860,7 +4860,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">154</context>
         </context-group>
-        <target>Click share to get a link.</target>
+        <target>点击分享即可获取链接.</target>
       </trans-unit>
       <trans-unit id="5217966104824748038" datatype="html">
         <source>Sharing link has been copied to clipboard</source>
@@ -4868,7 +4868,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">165</context>
         </context-group>
-        <target>Sharing link has been copied to clipboard</target>
+        <target>共享链接已复制到剪贴板</target>
       </trans-unit>
       <trans-unit id="1692815930495952260" datatype="html">
         <source>Please log in</source>
@@ -4956,7 +4956,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/scheduled-jobs.service.ts</context>
           <context context-type="linenumber">129</context>
         </context-group>
-        <target>Job failed</target>
+        <target>失败任务</target>
       </trans-unit>
       <trans-unit id="7393380261620707212" datatype="html">
         <source>Job finished</source>
@@ -4972,7 +4972,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">4</context>
         </context-group>
-        <target>Active shares</target>
+        <target>激活的分享</target>
       </trans-unit>
       <trans-unit id="2176659033176029418" datatype="html">
         <source>Key</source>
@@ -4980,7 +4980,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">14</context>
         </context-group>
-        <target>Key</target>
+        <target>快捷键</target>
       </trans-unit>
       <trans-unit id="7046259383943324039" datatype="html">
         <source>Folder</source>
@@ -4988,7 +4988,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">15</context>
         </context-group>
-        <target>Folder</target>
+        <target>文件夹</target>
       </trans-unit>
       <trans-unit id="4938468904180779002" datatype="html">
         <source> No sharing was created. </source>
@@ -4996,7 +4996,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">39,40</context>
         </context-group>
-        <target>No sharing was created.</target>
+        <target>未创建共享.</target>
       </trans-unit>
       <trans-unit id="5253186130625984783" datatype="html">
         <source> It seems that you are running the application in a Docker container. This setting should not be changed in docker. Make sure, that you know what you are doing.
@@ -5005,7 +5005,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">1,5</context>
         </context-group>
-        <target>您似乎是在 Docker 容器中运行该应用程序. Docker内的这个配置不应该被修改，除非您知道你在做什么.</target>
+        <target>您似乎是在 Docker 容器中运行该应用程序. Docker内的这个配置不应该被修改,除非您知道你在做什么.</target>
       </trans-unit>
       <trans-unit id="4948407374074297419" datatype="html">
         <source>Add new</source>
@@ -5013,7 +5013,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">87</context>
         </context-group>
-        <target>Add new</target>
+        <target>添加</target>
       </trans-unit>
       <trans-unit id="5014150909482122080" datatype="html">
         <source>Add new theme</source>
@@ -5021,7 +5021,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">97</context>
         </context-group>
-        <target>Add new theme</target>
+        <target>添加新主题</target>
       </trans-unit>
       <trans-unit id="4131271480390950600" datatype="html">
         <source>Theme name</source>
@@ -5029,7 +5029,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">104</context>
         </context-group>
-        <target>Theme name</target>
+        <target>主题名称</target>
       </trans-unit>
       <trans-unit id="8589439542246737000" datatype="html">
         <source>Add new Theme</source>
@@ -5037,7 +5037,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">124</context>
         </context-group>
-        <target>Add new Theme</target>
+        <target>添加新主题</target>
       </trans-unit>
       <trans-unit id="3074987902485823708" datatype="html">
         <source>Icon</source>
@@ -5045,7 +5045,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">192</context>
         </context-group>
-        <target>Icon</target>
+        <target>图标</target>
       </trans-unit>
       <trans-unit id="7382005450112017816" datatype="html">
         <source>Load from SVG file</source>
@@ -5053,7 +5053,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">212</context>
         </context-group>
-        <target>Load from SVG file</target>
+        <target>从 SVG 文件加载</target>
       </trans-unit>
       <trans-unit id="2995318609110293026" datatype="html">
         <source>To auto load these values from file: pick an SVG file with a single 'path'. You can use e.g: http://fontawesome.com/icons. </source>
@@ -5061,7 +5061,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">218,220</context>
         </context-group>
-        <target>To auto load these values from file: pick an SVG file with a single 'path'. You can use e.g: http://fontawesome.com/icons.</target>
+        <target>要从文件自动加载这些值：选择一个具有单个“路径”的 SVG 文件.例如,您可以使用这些: http://fontawesome.com/icons.</target>
       </trans-unit>
       <trans-unit id="2448998566468414760" datatype="html">
         <source>Save &amp; Close</source>
@@ -5069,7 +5069,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">247</context>
         </context-group>
-        <target>Save &amp; Close</target>
+        <target>保存 &amp; 关闭</target>
       </trans-unit>
       <trans-unit id="3853557835274460749" datatype="html">
         <source>Tile Url*</source>
@@ -5085,7 +5085,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">292</context>
         </context-group>
-        <target>Add Layer</target>
+        <target>添加图层</target>
       </trans-unit>
       <trans-unit id="7045831295346420833" datatype="html">
         <source>Add matcher</source>
@@ -5093,7 +5093,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">353</context>
         </context-group>
-        <target>Add matcher</target>
+        <target>添加匹配器</target>
       </trans-unit>
       <trans-unit id="8941069064218228603" datatype="html">
         <source>Add path theme group</source>
@@ -5101,7 +5101,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">399</context>
         </context-group>
-        <target>Add path theme group</target>
+        <target>添加路径主题组</target>
       </trans-unit>
       <trans-unit id="3138682220834083018" datatype="html">
         <source>Add Link</source>
@@ -5109,7 +5109,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">464</context>
         </context-group>
-        <target>Add Link</target>
+        <target>添加链接</target>
       </trans-unit>
       <trans-unit id="6160336790605687552" datatype="html">
         <source>Experimental</source>
@@ -5117,7 +5117,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">636</context>
         </context-group>
-        <target>Experimental</target>
+        <target>实验性</target>
       </trans-unit>
       <trans-unit id="9041159334935490874" datatype="html">
         <source>';' separated list.</source>
@@ -5125,7 +5125,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">639</context>
         </context-group>
-        <target>';' separated list.</target>
+        <target>';' 分隔列表.</target>
       </trans-unit>
       <trans-unit id="6594334664356245979" datatype="html">
         <source>See</source>
@@ -5137,7 +5137,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
           <context context-type="linenumber">78</context>
         </context-group>
-        <target>See</target>
+        <target>查看</target>
       </trans-unit>
       <trans-unit id="174687433494549208" datatype="html">
         <source>Reset database after changing this settings!</source>
@@ -5145,7 +5145,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">647</context>
         </context-group>
-        <target>Reset database after changing this settings!</target>
+        <target>更改此设置后重置数据库!</target>
       </trans-unit>
       <trans-unit id="568052795765814866" datatype="html">
         <source>Restart server after changing this settings!</source>
@@ -5153,7 +5153,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">652</context>
         </context-group>
-        <target>Restart server after changing this settings!</target>
+        <target>更改此设置后重新启动服务器!</target>
       </trans-unit>
       <trans-unit id="6855462350544488601" datatype="html">
         <source>default</source>
@@ -5161,7 +5161,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
           <context context-type="linenumber">195</context>
         </context-group>
-        <target>default</target>
+        <target>默认</target>
       </trans-unit>
       <trans-unit id="3279583516959443817" datatype="html">
         <source>readonly</source>
@@ -5185,7 +5185,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
           <context context-type="linenumber">34</context>
         </context-group>
-        <target>config is not supported with these settings.</target>
+        <target>这些设置不支持配置.</target>
       </trans-unit>
       <trans-unit id="662506850593821474" datatype="html">
         <source>Save </source>
@@ -5225,7 +5225,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">4</context>
         </context-group>
-        <target>User list</target>
+        <target>用户列表</target>
       </trans-unit>
       <trans-unit id="5918723526444903137" datatype="html">
         <source>Add user</source>
@@ -5233,7 +5233,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">48</context>
         </context-group>
-        <target>Add user</target>
+        <target>添加用户</target>
       </trans-unit>
       <trans-unit id="1996265061837601864" datatype="html">
         <source>Add new User</source>
@@ -5461,7 +5461,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
           <context context-type="linenumber">111</context>
         </context-group>
-        <target>failed</target>
+        <target>已失败</target>
       </trans-unit>
       <trans-unit id="8293670171001042991" datatype="html">
         <source>every</source>
@@ -5561,7 +5561,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">249,250</context>
         </context-group>
-        <target>Search query to list photos and videos.</target>
+        <target>搜索查询以列出照片和视频.</target>
       </trans-unit>
       <trans-unit id="7699622144571229146" datatype="html">
         <source>Sort by</source>
@@ -5569,7 +5569,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">256</context>
         </context-group>
-        <target>Sort by</target>
+        <target>排序方式</target>
       </trans-unit>
       <trans-unit id="642273971136998226" datatype="html">
         <source> Sorts the photos and videos by this. </source>
@@ -5577,7 +5577,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">298,299</context>
         </context-group>
-        <target>Sorts the photos and videos by this.</target>
+        <target>按此对照片和视频进行排序.</target>
       </trans-unit>
       <trans-unit id="8698515801873408462" datatype="html">
         <source>Pick</source>
@@ -5585,7 +5585,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">305</context>
         </context-group>
-        <target>Pick</target>
+        <target>挑选</target>
       </trans-unit>
       <trans-unit id="8552498455622807836" datatype="html">
         <source> Number of photos and videos to pick. </source>
@@ -5593,7 +5593,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">315,316</context>
         </context-group>
-        <target>Number of photos and videos to pick.</target>
+        <target>可供选择的照片和视频数量.</target>
       </trans-unit>
       <trans-unit id="5242498003738057671" datatype="html">
         <source>';' separated integers. </source>
@@ -5721,7 +5721,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/sharelogin/share-login.component.html</context>
           <context context-type="linenumber">11,12</context>
         </context-group>
-        <target>Unknown sharing key.</target>
+        <target>未知共享密钥.</target>
       </trans-unit>
       <trans-unit id="6314278975578272694" datatype="html">
         <source>Wrong password</source>
