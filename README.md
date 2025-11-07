@@ -27,6 +27,7 @@ Live Demo @ render: https://pigallery2.onrender.com/
 
 ## Table of contents
 1. [Getting started](#1-getting-started-also-works-on-raspberry-pi)
+* **[🌐 Language and Translation Guide](docs/LANGUAGE_GUIDE.md)**
 2. [Translate the page to your own language](#2-translate-the-page-to-your-own-language)
 3. [Feature list](#3-feature-list)
 4. [Suggest/endorse new features](#4-suggestendorse-new-features)
@@ -130,23 +131,9 @@ apt-get install build-essential  libkrb5-dev gcc g++
 
 
 ## 2. Translate the page to your own language
-1. [Install Pigallery2](#121-b-install-from-source) from source (with the release it won't work) 
-2. add your language e.g: fr
-   * copy `src/frontend/translate/messages.en.xlf` to `src/frontend/translate/messages.fr.xlf`
-   * add the new translation to the `angular.json` `projects->pigallery2->i18n->locales` section 
-3. translate the file by updating the `<target>` tags
-4. test if it works:
-   build and start the app
-   ```bash
-   npm install
-   npm run build
-   npm start
-   ```
-5. (optional) create a pull request at github to add your translation to the project.
+All information regarding supported languages, how to change the language, and how to contribute new translations has been moved to a dedicated guide.
 
-**Note**: you can also build your own release with as described in [1.1.1-b Install from source](#121-b-install-from-source);
-
-
+**Please see the [🌐 Language and Translation Guide](docs/LANGUAGE_GUIDE.md) for detailed information.**
 
 ## 3. Feature list
 
