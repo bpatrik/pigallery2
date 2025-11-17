@@ -14,3 +14,14 @@ To quality check your dockerfile changes you can use hadolint:
 
 ### Building the docker image locally
 TBD
+
+
+### Building a docker image from a specific commit ID
+When you fork this repo, you can build an image using the `docker-buildx-from-commit` github actions workflow. It requires that you set this github secret for your fork
+- `REGISTRY_NAMESPACE`
+
+When you run the workflow, it will ask you for a commit ID and whether you want to `push` to docker hub or generate a `tar`. For local testing you should just generate a `tar` and then download it and import it into your local docker. 
+
+The `push` option is there if you want to publish your particular build to docker hub. In that case you need to have the following github secrets set for your fork:
+- `REGISTRY_USERNAME`
+- `REGISTRY_PASSWORD`
