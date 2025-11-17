@@ -160,25 +160,48 @@ jobs:
             ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}-${{ matrix.container }}
             ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}
 
-      - name: Build docker (tar mode)
-        if: ${{ github.event.inputs.publish_mode == 'tar' }}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/${{ matrix.container }}/Dockerfile.build
-          platforms: linux/amd64   # load only supports single platform
-          load: true
-          tags: |
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}-${{ matrix.container }}
-
-      - name: Save image as tar (tar mode)
+      # Tar mode: build and export one tar per arch
+      - name: Build docker (tar mode amd64)
         if: ${{ github.event.inputs.publish_mode == 'tar' }}
         run: |
-          docker save ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}-${{ matrix.container }} \
-            -o pigallery2-${{ matrix.container }}.tar
-
+          docker buildx build \
+            --platform linux/amd64 \
+            --file docker/${{ matrix.container }}/Dockerfile.build \
+            --tag ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}-${{ matrix.container }}-amd64 \
+            --output type=tar,dest=pigallery2-${{ matrix.container }}-amd64.tar \
+            .
       - uses: actions/upload-artifact@v4
         if: ${{ github.event.inputs.publish_mode == 'tar' }}
         with:
-          name: pigallery2-${{ matrix.container }}
-          path: pigallery2-${{ matrix.container }}.tar
+          name: pigallery2-${{ matrix.container }}-amd64
+          path: pigallery2-${{ matrix.container }}-amd64.tar
+
+      - name: Build docker (tar mode arm64)
+        if: ${{ github.event.inputs.publish_mode == 'tar' }}
+        run: |
+          docker buildx build \
+            --platform linux/arm64 \
+            --file docker/${{ matrix.container }}/Dockerfile.build \
+            --tag ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}-${{ matrix.container }}-arm64 \
+            --output type=tar,dest=pigallery2-${{ matrix.container }}-arm64.tar \
+            .
+      - uses: actions/upload-artifact@v4
+        if: ${{ github.event.inputs.publish_mode == 'tar' }}
+        with:
+          name: pigallery2-${{ matrix.container }}-arm64
+          path: pigallery2-${{ matrix.container }}-arm64.tar
+
+      - name: Build docker (tar mode armv7)
+        if: ${{ github.event.inputs.publish_mode == 'tar' }}
+        run: |
+          docker buildx build \
+            --platform linux/arm/v7 \
+            --file docker/${{ matrix.container }}/Dockerfile.build \
+            --tag ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.event.inputs.commit_id }}-${{ matrix.container }}-armv7 \
+            --output type=tar,dest=pigallery2-${{ matrix.container }}-armv7.tar \
+            .
+      - uses: actions/upload-artifact@v4
+        if: ${{ github.event.inputs.publish_mode == 'tar' }}
+        with:
+          name: pigallery2-${{ matrix.container }}-armv7
+          path: pigallery2-${{ matrix.container }}-armv7.tar
