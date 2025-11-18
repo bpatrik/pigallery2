@@ -27,7 +27,7 @@ on:
         options:
           - amd64
           - arm64
-          - armv7
+          - arm/v7
 
 jobs:
   test:
