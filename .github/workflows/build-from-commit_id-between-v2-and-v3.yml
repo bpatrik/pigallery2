@@ -1,4 +1,8 @@
-name: docker-buildx-from-commit
+# Workflow for pigallery2 pre_alpha builds
+# Covers versions between 2.0.0 (Oct 2023) and 3.0.0 (Jul 2025).
+# Uses semver-style tags: 3.0.0-pre_alpha.YYYYMMDDhhmmss.shortsha
+
+name: docker-buildx-from-commit-between-v2-and-v3
 run-name: Build pre_alpha for commit ${{ github.event.inputs.commit_id }}
 
 on:
@@ -43,6 +47,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commit_id }}
+          fetch-depth: 0   # ensure full history so commit is available
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
@@ -102,6 +107,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commit_id }}
+          fetch-depth: 0   # ensure full history
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -124,15 +130,21 @@ jobs:
     needs: [create-release]
     strategy:
       matrix:
-        container: [alpine]
+        container: [alpine, debian-bullseye, debian-bookworm]
         include:
           - container: alpine
             platforms: linux/amd64,linux/arm64,linux/arm/v7
+          - container: debian-bullseye
+            platforms: linux/amd64,linux/arm64,linux/arm/v7
+          - container: debian-bookworm
+            platforms: linux/amd64,linux/arm64,linux/arm/v7
+
     steps:
       - name: Checkout specific commit
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commit_id }}
+          fetch-depth: 0   # ensure full history
 
       - uses: actions/download-artifact@v4
         with:
