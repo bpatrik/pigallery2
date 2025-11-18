@@ -124,15 +124,10 @@ jobs:
     needs: [create-release]
     strategy:
       matrix:
-        container: [alpine, debian-bullseye, debian-bookworm]
+        container: [alpine]
         include:
           - container: alpine
             platforms: linux/amd64,linux/arm64,linux/arm/v7
-          - container: debian-bullseye
-            platforms: linux/amd64,linux/arm64,linux/arm/v7
-          - container: debian-bookworm
-            platforms: linux/amd64,linux/arm64,linux/arm/v7
-
     steps:
       - name: Checkout specific commit
         uses: actions/checkout@v4
