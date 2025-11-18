@@ -1,5 +1,5 @@
 name: docker-buildx-from-commit
-run-name: Build version ${{ steps.version.outputs.version }}
+run-name: Build pre_alpha for commit ${{ github.event.inputs.commit_id }}
 
 on:
   workflow_dispatch:
