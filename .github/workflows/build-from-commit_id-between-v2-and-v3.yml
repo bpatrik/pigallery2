@@ -148,11 +148,12 @@ jobs:
           short_sha=$(echo "${{ github.event.inputs.commit_id }}" | cut -c1-7)
           echo "version=3.0.0-pre_alpha.${date}.${short_sha}" >> $GITHUB_OUTPUT
 
-      - name: Override package.json version
+      - name: Override release package.json version
         run: |
           ver="${{ steps.version.outputs.version }}"
-          echo "Setting package.json version to $ver"
-          jq --arg v "$ver" '.version=$v' package.json > package.json.tmp && mv package.json.tmp package.json
+          echo "Setting pigallery2-release/package.json version to $ver"
+          jq --arg v "$ver" '.version=$v' pigallery2-release/package.json > pigallery2-release/package.json.tmp && mv pigallery2-release/package.json.tmp pigallery2-release/package.json
+          grep '"version"' pigallery2-release/package.json
 
       - name: Login to DockerHub
         uses: docker/login-action@v3
@@ -167,6 +168,7 @@ jobs:
           file: docker/${{ matrix.container }}/Dockerfile.build
           platforms: ${{ matrix.platforms }}
           push: true
+          no-cache: true
           tags: |
             ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}-${{ matrix.container }}
             ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}
