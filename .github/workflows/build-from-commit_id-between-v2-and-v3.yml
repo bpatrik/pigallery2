@@ -144,7 +144,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.inputs.commit_id }}
-          fetch-depth: 0   # ensure full history
+          fetch-depth: 0
 
       - uses: actions/download-artifact@v4
         with:
@@ -157,11 +157,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Versioning note:
-      # These builds are intended to cover the pre_alpha phase between
-      # version 2.0.0 (October 2023) and version 3.0.0 (around July 2025).
-      # The version string format is:
-      #   3.0.0-pre_alpha.YYYYMMDDhhmmss.shortsha
       - name: Derive version string
         id: version
         run: |
@@ -169,6 +164,13 @@ jobs:
           date=$(date -u -d @$ts +%Y%m%d%H%M%S)
           short_sha=$(echo "${{ github.event.inputs.commit_id }}" | cut -c1-7)
           echo "version=3.0.0-pre_alpha.${date}.${short_sha}" >> $GITHUB_OUTPUT
+
+      - name: Normalize arch string
+        id: normarch
+        run: |
+          arch="${{ github.event.inputs.arch }}"
+          safe_arch="${arch//\//}"   # remove slash for filenames
+          echo "safe_arch=$safe_arch" >> $GITHUB_OUTPUT
 
       - name: Login to DockerHub
         if: ${{ github.event.inputs.publish_mode == 'push' }}
@@ -195,11 +197,12 @@ jobs:
           docker buildx build \
             --platform linux/${{ github.event.inputs.arch }} \
             --file docker/${{ matrix.container }}/Dockerfile.build \
-            --tag ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}-${{ matrix.container }}-${{ github.event.inputs.arch }} \
-            --output type=tar,dest=pigallery2-${{ matrix.container }}-${{ github.event.inputs.arch }}.tar \
+            --tag ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }} \
+            --output type=tar,dest=pigallery2-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }}.tar \
             .
+
       - uses: actions/upload-artifact@v4
         if: ${{ github.event.inputs.publish_mode == 'tar' }}
         with:
-          name: pigallery2-${{ matrix.container }}-${{ github.event.inputs.arch }}-${{ steps.version.outputs.version }}
-          path: pigallery2-${{ matrix.container }}-${{ github.event.inputs.arch }}.tar
+          name: pigallery2-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }}-${{ steps.version.outputs.version }}
+          path: pigallery2-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }}.tar
