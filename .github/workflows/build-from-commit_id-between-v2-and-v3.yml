@@ -11,23 +11,6 @@ on:
       commit_id:
         description: 'Commit SHA to build from'
         required: true
-      publish_mode:
-        description: 'Choose "push" to Docker Hub or "tar" to save as artifact'
-        required: true
-        default: 'tar'
-        type: choice
-        options:
-          - push
-          - tar
-      arch:
-        description: 'Architecture (only used if publish_mode=tar)'
-        required: false
-        default: 'amd64'
-        type: choice
-        options:
-          - amd64
-          - arm64
-          - arm/v7
 
 jobs:
   test:
@@ -165,22 +148,19 @@ jobs:
           short_sha=$(echo "${{ github.event.inputs.commit_id }}" | cut -c1-7)
           echo "version=3.0.0-pre_alpha.${date}.${short_sha}" >> $GITHUB_OUTPUT
 
-      - name: Normalize arch string
-        id: normarch
+      - name: Override package.json version
         run: |
-          arch="${{ github.event.inputs.arch }}"
-          safe_arch="${arch//\//}"   # remove slash for filenames
-          echo "safe_arch=$safe_arch" >> $GITHUB_OUTPUT
+          ver="${{ steps.version.outputs.version }}"
+          echo "Setting package.json version to $ver"
+          jq --arg v "$ver" '.version=$v' package.json > package.json.tmp && mv package.json.tmp package.json
 
       - name: Login to DockerHub
-        if: ${{ github.event.inputs.publish_mode == 'push' }}
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
 
-      - name: Build docker (push mode)
-        if: ${{ github.event.inputs.publish_mode == 'push' }}
+      - name: Build and push docker images
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -190,19 +170,3 @@ jobs:
           tags: |
             ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}-${{ matrix.container }}
             ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}
-
-      - name: Build docker (tar mode)
-        if: ${{ github.event.inputs.publish_mode == 'tar' }}
-        run: |
-          docker buildx build \
-            --platform linux/${{ github.event.inputs.arch }} \
-            --file docker/${{ matrix.container }}/Dockerfile.build \
-            --tag ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }} \
-            --output type=tar,dest=pigallery2-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }}.tar \
-            .
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ github.event.inputs.publish_mode == 'tar' }}
-        with:
-          name: pigallery2-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }}-${{ steps.version.outputs.version }}
-          path: pigallery2-${{ matrix.container }}-${{ steps.normarch.outputs.safe_arch }}.tar
