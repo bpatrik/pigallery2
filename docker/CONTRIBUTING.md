@@ -33,7 +33,7 @@ $ docker buildx build \
   --output=type=docker,dest=pigallery2-test
 ```
 
-### Building a docker image from a specific commit ID
+### Building a docker image from a specific commit ID between version 2.0.0 and 3.0.0
 
 When you fork this repo, you can build and publish an image using the `build-from-commit_id-between-v2-and-v3` github actions workflow.
 
