@@ -35,7 +35,7 @@ $ docker buildx build \
 
 ### Building a docker image from a specific commit ID
 
-When you fork this repo, you can build an image using the `build-from-commit_id-between-v2-and-v3` github actions workflow.
+When you fork this repo, you can build and publish an image using the `build-from-commit_id-between-v2-and-v3` github actions workflow.
 
 > This github actions workflow was created in order to retrospectively create builds and releases of commits between versions 2.0.0 and 3.0.0, which was the period between October 2023 and late June 2025. The workflow will not work on commits in July 2025 and onwards, which was where `arm/v7` support was dropped. Any release made with the workflow, should still support `arm/v7`, e.g. Raspberry Pi 2 and 3, which was the primary reason to create the workflow.
 
