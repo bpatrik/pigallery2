@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import {promises as fsp, FileHandle} from 'fs';
 
 import {Config} from '../../../common/config/private/Config';
 import {FaceRegion, PhotoMetadata} from '../../../common/entities/PhotoDTO';
@@ -217,15 +218,27 @@ export class MetadataLoader {
       }
 
       try {
+        let fh: FileHandle | undefined = undefined; // Initialize FileHandle
         try {
-          const exif = await exifr.parse(fullPath, exifrOptions);
+          // 1. Open the file handle manually (efficient, non-leaky start)
+          fh = await fsp.open(fullPath, 'r');
+          // 2. Pass the FileHandle to exifr for efficient chunked parsing
+          // exifr uses its internal reader to read chunks from this handle
+          const exif = await exifr.parse(fh, exifrOptions);
           MetadataLoader.mapMetadata(metadata, exif, true);
         } catch (err) {
+          // If exifr fails, log it and fall back to sharp (existing logic)
+          Logger.silly(LOG_TAG, 'exifr failed to read:', err);
           try {
             const m = await sharp(fullPath, {failOnError: false}).metadata();
             MetadataLoader.mapMetadata(metadata, this.mapExifReader(exifReader(m.exif)), true);
           } catch (e) {
             // ignoring errors
+          }
+        } finally {
+          // 3. GUARANTEED CLOSURE: This is the critical fix for the memory leak
+          if (fh) {
+            await fh.close();
           }
         }
 
@@ -241,12 +254,26 @@ export class MetadataLoader {
 
           for (const sidecarPath of sidecarPaths) {
             if (fs.existsSync(sidecarPath)) {
-              const sidecarData: any = await exifr.sidecar(sidecarPath, exifrOptions);
-              if (sidecarData !== undefined) {
-                //note that since side cars are loaded last, data loaded here overwrites embedded metadata (in Pigallery2, not in the actual files)
-                // sidecar should not change the image dimension
-                MetadataLoader.mapMetadata(metadata, sidecarData, false);
-                break;
+              let fhSidecar: FileHandle | undefined = undefined;
+              try {
+                // 1. Open the sidecar file handle
+                fhSidecar = await fsp.open(sidecarPath, 'r'); 
+                
+                // 2. Pass the FileHandle to exifr.sidecar() for chunked reading
+                const sidecarData: any = await exifr.sidecar(fhSidecar); 
+                
+                if (sidecarData !== undefined) {
+                  // sidecar should not change the video dimension
+                  MetadataLoader.mapMetadata(metadata, sidecarData, false);
+                  break; 
+                }
+              } catch (e) {
+                Logger.silly(LOG_TAG, 'Sidecar read error:', e);
+              } finally {
+                // 3. GUARANTEED CLOSURE
+                if (fhSidecar) {
+                  await fhSidecar.close();
+                }
               }
             }
           }
