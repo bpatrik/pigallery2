@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-import {promises as fsp, FileHandle} from 'fs';
+import { promises as fsp } from 'fs';
+import type { FileHandle } from 'node:fs/promises';
 
 import {Config} from '../../../common/config/private/Config';
 import {FaceRegion, PhotoMetadata} from '../../../common/entities/PhotoDTO';
