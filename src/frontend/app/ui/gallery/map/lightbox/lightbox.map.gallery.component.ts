@@ -409,29 +409,22 @@ constructor(
           });
           photoTh.OnLoad = setPopUpPhoto;
         }
-
         mkr.on('popupopen', () => {
           const el = mkr.getPopup()?.getElement();
-          if (!el) {
-            return;
-          }
+          if (!el) return;
         
           const btn = el.querySelector<HTMLButtonElement>('.map-photo-popup-open');
-          if (!btn) {
-            return;
-          }
+          if (!btn) return;
         
-        btn.onclick = null;
-        btn.onclick = (ev) => {
-          ev.preventDefault();
-          ev.stopPropagation();
+          btn.onclick = null;
+          btn.onclick = (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
         
-          this.ngZone.run(() => {
-            this.openInLightbox(p);
-          });
-        
-          mkr.closePopup();
-        };
+            this.ngZone.run(() => this.openInLightbox(p));
+            mkr.closePopup();
+          };
+        }); // <- WICHTIG: popupopen hier schließen
           
         mkr.setIcon(MarkerFactory.defIcon);
         // Setting photo icon
