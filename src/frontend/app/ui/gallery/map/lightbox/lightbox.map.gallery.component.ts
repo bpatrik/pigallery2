@@ -1,4 +1,5 @@
 import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, ViewChild,} from '@angular/core';
+import {Router} from '@angular/router';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -6,6 +7,7 @@ import {IconThumbnail, Thumbnail, ThumbnailBase, ThumbnailManagerService,} from 
 import {MediaIcon} from '../../MediaIcon';
 import {Media} from '../../Media';
 import {PageHelper} from '../../../../model/page.helper';
+import {QueryService} from '../../../../model/query.service';
 import {FileDTO} from '../../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../../common/Utils';
 import {Config} from '../../../../../../common/config/public/Config';
@@ -139,13 +141,15 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   darkModeSubscription: Subscription;
   private longPathSEPairs: { [key: string]: number } = {}; // stores how often a long distance path pair comes up
 
-  constructor(
-    public fullScreenService: FullScreenService,
-    private thumbnailService: ThumbnailManagerService,
-    public mapService: MapService,
-    private themeService: ThemeService,
-    private durationPipe:DurationPipe
-  ) {
+constructor(
+  public fullScreenService: FullScreenService,
+  private thumbnailService: ThumbnailManagerService,
+  public mapService: MapService,
+  private themeService: ThemeService,
+  private durationPipe: DurationPipe,
+  private router: Router,
+  private queryService: QueryService,
+) {
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
     this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));
@@ -323,6 +327,13 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       this.leafletMap.setZoom(2);
     }, 500);
   }
+  private openInLightbox(p: PhotoDTO): void {
+    this.router.navigate([], {
+      queryParams: this.queryService.getParams({media: p}),
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }).catch(console.error);
+  }
 
   showImages(): void {
     this.clearImages();
@@ -366,9 +377,15 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
         // Setting popup photo
         const setPopUpPhoto = () => {
-          const photoPopup =
-            `<img style="width: ${width}px; height: ${height}px" ` +
-            `src="${photoTh.Src}" alt="preview">`;
+        const photoPopup =
+          `<div class="map-photo-popup">
+             <img style="width:${width}px;height:${height}px"
+                  src="${photoTh.Src}" alt="preview">
+             <div style="margin-top:8px;display:flex;justify-content:flex-end;">
+               <button type="button" class="map-photo-popup-open">Öffnen</button>
+             </div>
+           </div>`;
+
           if (!mkr.getPopup()) {
             mkr.bindPopup(photoPopup, {minWidth: width});
           } else {
@@ -391,6 +408,26 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
           });
           photoTh.OnLoad = setPopUpPhoto;
         }
+
+        mkr.on('popupopen', () => {
+          const el = mkr.getPopup()?.getElement();
+          if (!el) {
+            return;
+          }
+        
+          const btn = el.querySelector<HTMLButtonElement>('.map-photo-popup-open');
+          if (!btn) {
+            return;
+          }
+        
+          btn.onclick = null;
+          btn.onclick = (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            this.openInLightbox(p);
+            mkr.closePopup();
+          };
+        });
 
         mkr.setIcon(MarkerFactory.defIcon);
         // Setting photo icon
