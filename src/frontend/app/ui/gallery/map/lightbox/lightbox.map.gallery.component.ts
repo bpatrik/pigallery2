@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, ViewChild, NgZone} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, ViewChild, NgZone,} from '@angular/core';
 import {Router} from '@angular/router';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
@@ -432,7 +432,7 @@ constructor(
         
           mkr.closePopup();
         };
-
+          
         mkr.setIcon(MarkerFactory.defIcon);
         // Setting photo icon
         if (Config.Map.useImageMarkers === true) {
