@@ -285,7 +285,7 @@ Environmental variables:
   MetaFile-GPXCompressing-minDistance                                   Filters out entry that are closer than this to each other in meters. (default: 5)
   MetaFile-GPXCompressing-maxMiddleDeviance                             Filters out entry that would fall on the line if we would just connect the previous and the next points. This setting sets the sensitivity for that (higher number, more points are filtered). (default: 5)
   MetaFile-GPXCompressing-minTimeDistance                               Filters out entry that are closer than this in time in milliseconds. (default: 5000)
-  MetaFile-markdown                                                     Reads *.md files in a directory and shows the next to the map. (default: true)
+  MetaFile-markdown                                                     Reads *.md files in a directory and shows them next to the map. (default: true)
   MetaFile-pg2conf                                                      Reads *.pg2conf files (You can use it for custom sorting and saved search (albums)). (default: true)
   MetaFile-supportedFormats                                             The app will read and process these files. (default: ["gpx","pg2conf","md"])
   Album-enabled                                                          (default: true)
