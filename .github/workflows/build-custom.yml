@@ -1,0 +1,334 @@
+# Workflow for manual pigallery2 builds and image creation.
+# Uploads to YOUR docker hub account, given the 3 secrets:
+#   - `REGISTRY_NAMESPACE` (your docker-hub namespace - typically your username)
+#   - `REGISTRY_USERNAME` (your docker-hub username)
+#   - `REGISTRY_PASSWORD` (your generated Personal Access Token from docker-hub - needs to have read and write privileges)
+
+# Why have this?
+# - Easy and fast multi architecture building and image creation.
+# - You don't have to worry about QEMU and other tedious build setups.
+# - You want use and test your fork of pigallery2 on another architecture than the one you are developing on.
+#
+# What makes it different from the build workflow?
+# - Runs only manually.
+# - Runs faster, since you can skip tests and architectures
+# - Allows you to select any commit, if you want to compare behavior
+# - DOES NOT run all the important steps of the real build flow. It is only a development tool.
+
+name: docker-buildx-custom
+run-name: Build pigallery2 from ${{ github.event.inputs.commit_id || github.ref_name }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_id:
+        description: "Commit SHA to build (blank = current branch HEAD)"
+        required: false
+        default: ""
+      arch:
+        description: "Architecture to build (amd64, arm64, armv7, or all)"
+        required: false
+        default: "all"
+      version_name:
+        description: "Override version (leave blank for default: 0.0.0-unstable-YYMMDD-SHORT_SHA)"
+        required: false
+        default: ""
+      run_tests:
+        description: "Run tests? (true/false)"
+        required: false
+        default: "false"
+
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      ref: ${{ steps.ref.outputs.ref }}
+      node_version: ${{ steps.nodever.outputs.version }}
+
+    steps:
+      - name: Determine ref to build
+        id: ref
+        run: |
+          if [ -z "${{ github.event.inputs.commit_id }}" ]; then
+            echo "ref=${GITHUB_REF}" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${{ github.event.inputs.commit_id }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Detect Node version
+        id: nodever
+        run: |
+          if [ -f .nvmrc ]; then
+            echo "version=$(cat .nvmrc)" >> $GITHUB_OUTPUT
+          elif [ -f .node-version ]; then
+            echo "version=$(cat .node-version)" >> $GITHUB_OUTPUT
+          else
+            echo "version=18" >> $GITHUB_OUTPUT
+          fi
+
+  build-release:
+    runs-on: ubuntu-latest
+    needs: prepare
+    outputs:
+      ref: ${{ needs.prepare.outputs.ref }}
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.prepare.outputs.node_version }}
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --unsafe-perm
+          else
+            npm install --unsafe-perm
+          fi
+
+      - name: Run tests (optional)
+        if: ${{ github.event.inputs.run_tests == 'true' }}
+        run: npm test
+
+      - name: Build release
+        run: |
+          if npm run | grep -q create-release; then
+            npm run create-release -- --skip-opt-packages=ffmpeg-static,ffprobe-static --force-opt-packages
+          else
+            npm run build
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pigallery2-release
+          path: release
+
+  detect-docker-targets:
+    runs-on: ubuntu-latest
+    needs: build-release
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build-release.outputs.ref }}
+          fetch-depth: 0
+
+      - name: Detect docker targets + platforms
+        id: set-matrix
+        run: |
+          docker info > /dev/null 2>&1 || true
+
+          entries=()
+
+          # Architecture filter from workflow_dispatch input
+          arch="${{ github.event.inputs.arch }}"
+          [ -z "$arch" ] && arch="all"
+
+          echo "Architecture filter: $arch"
+
+          for d in docker/*; do
+            [ -d "$d" ] || continue
+            [ -f "$d/Dockerfile.build" ] || continue
+
+            container=$(basename "$d")
+            echo "=== Checking container: $container ==="
+
+            # ----------------------------------------------------
+            # STEP 1: Extract base image from Dockerfile
+            # ----------------------------------------------------
+            base_image=$(grep -E '^FROM ' "$d/Dockerfile.build" | head -n 1 | awk '{print $2}')
+            echo "Base image: $base_image"
+
+            # ----------------------------------------------------
+            # STEP 2: Ensure base image exists on Docker Hub
+            # ----------------------------------------------------
+            if ! docker manifest inspect "$base_image" >/dev/null 2>&1; then
+              echo "Skipping $container — base image does not exist"
+              continue
+            fi
+
+            # ----------------------------------------------------
+            # STEP 3: Extract supported platforms
+            # ----------------------------------------------------
+            manifest=$(docker manifest inspect "$base_image" 2>/dev/null || true)
+            raw_platforms=$(echo "$manifest" | jq -r '.manifests[].platform | "\(.os)/\(.architecture)\(.variant // "")"')
+
+            platforms=""
+            for p in $raw_platforms; do
+              case "$p" in
+                linux/amd64) platforms="${platforms},linux/amd64" ;;
+                linux/arm64|linux/arm64v8) platforms="${platforms},linux/arm64" ;;
+                linux/arm/v7|linux/armv7) platforms="${platforms},linux/arm/v7" ;;
+              esac
+            done
+
+            platforms="${platforms#,}"
+
+            if [ -z "$platforms" ]; then
+              echo "Skipping $container — no supported platforms"
+              continue
+            fi
+
+            echo "Detected platforms: $platforms"
+
+            # ----------------------------------------------------
+            # STEP 4: Apply architecture filter
+            # ----------------------------------------------------
+            if [ "$arch" != "all" ]; then
+              case "$arch" in
+                amd64)   wanted="linux/amd64" ;;
+                arm64)   wanted="linux/arm64" ;;
+                armv7)   wanted="linux/arm/v7" ;;
+                *)
+                  echo "Unknown architecture filter: $arch"
+                  exit 1
+                  ;;
+              esac
+
+              if ! echo "$platforms" | grep -q "$wanted"; then
+                echo "Skipping $container — does not support requested architecture '$arch'"
+                continue
+              fi
+
+              platforms="$wanted"
+              echo "Filtered platforms: $platforms"
+            fi
+
+            # ----------------------------------------------------
+            # STEP 5: Detect Debian/Ubuntu inside the container
+            #         and ensure apt-get update works
+            # ----------------------------------------------------
+            if docker run --rm "$base_image" sh -c 'grep -qiE "debian|ubuntu" /etc/os-release' >/dev/null 2>&1; then
+              echo "Testing apt-get update for $base_image..."
+              if ! docker run --rm "$base_image" sh -c "apt-get update" >/dev/null 2>&1; then
+                echo "Skipping $container — apt-get update fails (likely EOL distro)"
+                continue
+              fi
+            fi
+
+            # ----------------------------------------------------
+            # STEP 6: Add to matrix
+            # ----------------------------------------------------
+            entries+=("{\"container\":\"$container\",\"platforms\":\"$platforms\"}")
+            echo "Included."
+            echo
+
+          done  # ← REQUIRED LOOP CLOSURE
+
+          # ----------------------------------------------------
+          # STEP 7: Output final matrix
+          # ----------------------------------------------------
+          if [ ${#entries[@]} -eq 0 ]; then
+            echo "matrix={\"include\":[]}" >> $GITHUB_OUTPUT
+            echo "No valid docker targets found"
+          else
+            json=$(printf ",%s" "${entries[@]}")
+            json="[${json:1}]"
+            echo "matrix={\"include\": $json}" >> $GITHUB_OUTPUT
+            echo "Final docker matrix: $json"
+          fi
+
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: [build-release, detect-docker-targets]
+    if: ${{ needs.detect-docker-targets.outputs.matrix != '{"container":[]}' }}
+
+    strategy:
+      matrix: ${{ fromJson(needs.detect-docker-targets.outputs.matrix) }}
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build-release.outputs.ref }}
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pigallery2-release
+          path: pigallery2-release
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Derive version string
+        id: version
+        run: |
+          # User override from workflow_dispatch
+          override="${{ github.event.inputs.version_name }}"
+
+          if [ -n "$override" ]; then
+            echo "Using user-specified version: $override"
+            echo "version=$override" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Default autogenerated unstable version
+          sha=$(git rev-parse HEAD)
+          ts=$(git show -s --format=%ct "$sha")
+          date=$(date -u -d @$ts +%Y%m%d%H%M%S)
+          short_sha=$(echo "$sha" | cut -c1-7)
+
+          version="0.0.0-unstable.${date}.${short_sha}"
+          echo "Using autogenerated version: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Override release package.json version (append unstable build)
+        run: |
+          # The unstable build version from your version step
+          unstable="${{ steps.version.outputs.version }}"
+
+          # Read the original version from the release artifact
+          original=$(jq -r '.version' pigallery2-release/package.json)
+
+          # Compose the combined version string
+          combined="${original} (${unstable})"
+
+          echo "Setting pigallery2-release/package.json version to: $combined"
+
+          # Write it back
+          jq --arg v "$combined" '.version = $v' \
+            pigallery2-release/package.json \
+            > pigallery2-release/package.json.tmp
+
+          mv pigallery2-release/package.json.tmp pigallery2-release/package.json
+
+          # Show the result
+          grep '"version"' pigallery2-release/package.json
+
+      - name: Build and push docker images
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/${{ matrix.container }}/Dockerfile.build
+          platforms: ${{ matrix.platforms }}
+          push: true
+          tags: |
+            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}-${{ matrix.container }}
+            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ steps.version.outputs.version }}
