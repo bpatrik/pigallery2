@@ -48,7 +48,7 @@ RUN apt-get update \
     fi \
     && apt-get clean -q -y \
     && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /app /app
+COPY --from=builder /build/release /app
 
 # Run build time diagnostics to make sure the app would work after build is finished
 RUN ["node", "--expose-gc", "./src/backend/index", "--run-diagnostics", "--config-path=/app/diagnostics-config.json", "--Server-Log-level=silly"]
