@@ -1,73 +1,92 @@
-#-----------------BUILDER-----------------
-#-----------------------------------------
-FROM node:22-alpine3.22 AS builder
 
-ENV SHARP_FORCE_GLOBAL_LIBVIPS=1
-# inspired by https://github.com/lovell/sharp/issues/4273 and https://github.com/lovell/sharp/issues/4267
-RUN apk add --no-cache --update \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing \
-    vips \
-    vips-dev \
-    vips-heif \
-    vips-magick \
-    libheif \
-    libpng \
-    libjpeg-turbo \
-    libde265 \
-    libwebp \
-    libraw-dev \
-    g++ \
-    make \
-    gcc \
-    build-base \
-    python3 \
-    pkgconfig
+# ============================================================
+# Stage 1: Build libvips with full colourspace + loaders
+# ============================================================
+FROM alpine:3.22 AS vips-build
 
-COPY pigallery2-release /app
+ARG VIPS_VERSION=8.15.2
+
+RUN apk add --no-cache \
+  build-base autoconf automake libtool pkgconfig git curl wget \
+  ca-certificates meson ninja cmake \
+  libjpeg-turbo-dev libpng-dev libwebp-dev tiff-dev lcms2-dev \
+  libexif-dev libimagequant-dev orc-dev glib-dev expat-dev zlib-dev
+
+WORKDIR /tmp
+
+RUN wget https://github.com/libvips/libvips/releases/download/v${VIPS_VERSION}/vips-${VIPS_VERSION}.tar.xz && \
+  tar xf vips-${VIPS_VERSION}.tar.xz && \
+  cd vips-${VIPS_VERSION} && \
+  ./configure \
+    --prefix=/usr \
+    --disable-static \
+    --enable-shared \
+    --with-jpeg \
+    --with-png \
+    --with-tiff \
+    --with-webp \
+    --with-lcms \
+    --with-libexif \
+    --with-imagequant \
+    --with-orc \
+    --without-magick \
+    --without-openslide \
+    --without-fftw \
+    --without-heif \
+    --without-poppler \
+    --without-pdfium \
+    --without-libspng \
+    --without-OpenEXR \
+    --without-matio \
+    --without-nifti \
+    --without-gsf \
+    --without-ppm \
+    --without-analyze && \
+  make -j"$(nproc)" && \
+  make install && \
+  ldconfig || true
+
+# ============================================================
+# Stage 2: Runtime image
+# ============================================================
+FROM node:20-alpine3.22 AS runtime
+
+RUN apk add --no-cache \
+  libjpeg-turbo libpng libwebp tiff lcms2 libexif libimagequant \
+  orc glib expat zlib ffmpeg
+
 WORKDIR /app
-RUN npm install --no-package-lock --save-dev node-addon-api@8.5.0 node-gyp@11.5.0  && \
-    npm prune --production && \
-    npm cache clean --force
 
+# Bring in custom libvips
+COPY --from=vips-build /usr/lib /usr/lib
+COPY --from=vips-build /usr/bin/vips* /usr/bin/
 
-RUN mkdir -p /app/data/config && \
-    mkdir -p /app/data/db && \
-    mkdir -p /app/data/images && \
-    mkdir -p /app/data/tmp
+# Copy prebuilt PiGallery2 release
+COPY pigallery2-release/ /app/
 
+# Install production dependencies
+RUN npm install --omit=dev && npm cache clean --force
 
-#-----------------MAIN--------------------
-#-----------------------------------------
-FROM node:22-alpine3.22 AS main
-WORKDIR /app
+# Create data directories
+RUN mkdir -p /app/data/config \
+  /app/data/db \
+  /app/data/images \
+  /app/data/tmp
+
 ENV NODE_ENV=production \
-    # overrides only the default value of the settings (the actual value can be overwritten through config.json)
-    default-Database-dbFolder=/app/data/db \
-    default-Media-folder=/app/data/images \
-    default-Media-tempFolder=/app/data/tmp \
-    default-Extensions-folder=/app/data/config/extensions \
-    # flagging dockerized environment
-    PI_DOCKER=true
+  default-Database-dbFolder=/app/data/db \
+  default-Media-folder=/app/data/images \
+  default-Media-tempFolder=/app/data/tmp \
+  default-Extensions-folder=/app/data/config/extensions \
+  PI_DOCKER=true
 
 EXPOSE 80
-ARG TARGETARCH
-RUN apk add --no-cache \
-    vips vips-cpp vips-heif vips-magick ffmpeg \
-    && if [ "$TARGETARCH" = "amd64" ]; then \
-        echo "Building for amd64, adding intel-media-driver" && \
-        apk add --no-cache intel-media-driver; \
-    fi \
-    && rm -rf /var/cache/apk/*
-COPY --from=builder /app /app
 
-# Run build time diagnostics to make sure the app would work after build is finished
+# Diagnostics
 RUN ["node", "--expose-gc", "./src/backend/index", "--run-diagnostics", "--config-path=/app/diagnostics-config.json", "--Server-Log-level=silly"]
+
 HEALTHCHECK --interval=40s --timeout=30s --retries=3 --start-period=60s \
   CMD wget --quiet --tries=1 --no-check-certificate --spider \
   http://127.0.0.1:80/heartbeat || exit 1
 
-# after a extensive job (like video converting), pigallery calls gc, to clean up everything as fast as possible
-# Exec form entrypoint is need otherwise (using shell form) ENV variables are not properly passed down to the app
 ENTRYPOINT ["node", "--expose-gc", "./src/backend/index", "--config-path=/app/data/config/config.json"]
