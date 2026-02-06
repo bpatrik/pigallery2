@@ -1,4 +1,3 @@
-
 # ============================================================
 # Stage 1: Build libvips with full colourspace + loaders
 # ============================================================
@@ -65,7 +64,9 @@ COPY --from=vips-build /usr/bin/vips* /usr/bin/
 COPY pigallery2-release/ /app/
 
 # Install production dependencies
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --no-package-lock --save-dev node-addon-api@8.5.0 node-gyp@11.5.0 && \
+    npm prune --production && \
+    npm cache clean --force
 
 # Create data directories
 RUN mkdir -p /app/data/config \
@@ -74,19 +75,31 @@ RUN mkdir -p /app/data/config \
   /app/data/tmp
 
 ENV NODE_ENV=production \
+  # overrides only the default value of the settings (the actual value can be overwritten through config.json)
   default-Database-dbFolder=/app/data/db \
   default-Media-folder=/app/data/images \
   default-Media-tempFolder=/app/data/tmp \
   default-Extensions-folder=/app/data/config/extensions \
+  # flagging dockerized environment
   PI_DOCKER=true
 
 EXPOSE 80
+ARG TARGETARCH
+RUN apk add --no-cache \
+    vips vips-cpp vips-heif vips-magick ffmpeg \
+    && if [ "$TARGETARCH" = "amd64" ]; then \
+        echo "Building for amd64, adding intel-media-driver" && \
+        apk add --no-cache intel-media-driver; \
+    fi \
+    && rm -rf /var/cache/apk/*
 
-# Diagnostics
+# Run build time diagnostics to make sure the app would work after build is finished
 RUN ["node", "--expose-gc", "./src/backend/index", "--run-diagnostics", "--config-path=/app/diagnostics-config.json", "--Server-Log-level=silly"]
 
 HEALTHCHECK --interval=40s --timeout=30s --retries=3 --start-period=60s \
   CMD wget --quiet --tries=1 --no-check-certificate --spider \
   http://127.0.0.1:80/heartbeat || exit 1
 
+# after a extensive job (like video converting), pigallery calls gc, to clean up everything as fast as possible
+# Exec form entrypoint is need otherwise (using shell form) ENV variables are not properly passed down to the app
 ENTRYPOINT ["node", "--expose-gc", "./src/backend/index", "--config-path=/app/data/config/config.json"]
