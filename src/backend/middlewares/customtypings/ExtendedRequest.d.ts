@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {LoginCredential} from '../../../common/entities/LoginCredential';
-import {UserDTO} from '../../../common/entities/UserDTO';
 import {SessionContext} from '../../model/SessionContext';
 
 declare global {
@@ -16,6 +15,7 @@ declare global {
       session: {
         context?: SessionContext;
         rememberMe?: boolean;
+        expires: number;
         oidc?: {
           state: string;
           verifier: string;

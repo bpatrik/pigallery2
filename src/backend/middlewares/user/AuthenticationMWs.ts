@@ -59,6 +59,7 @@ export class AuthenticationMWs {
         req.sessionOptions.expires = new Date(
           Date.now() + Config.Server.sessionTimeout
         );
+        req.session.expires = req.sessionOptions.expires.getTime();
       }
       return next();
     }
@@ -267,6 +268,7 @@ export class AuthenticationMWs {
         req.sessionOptions.expires = new Date(
           Date.now() + Config.Server.sessionTimeout
         );
+        req.session.expires = req.sessionOptions.expires.getTime();
       }
       return next();
     } catch (err) {
