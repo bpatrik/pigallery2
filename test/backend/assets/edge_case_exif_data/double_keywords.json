@@ -1,0 +1,21 @@
+{
+  "cameraData": {
+    "ISO": 500,
+    "exposure": 0.033333,
+    "fStop": 2,
+    "focalLength": 2.96,
+    "make": "HUAWEI",
+    "model": "HUAWEI G6-L11"
+  },
+  "creationDate": 1460819266000,
+  "creationDateOffset": "+02:01",
+  "fileSize": 5891,
+  "keywords": [
+    "kw1",
+    "1"
+  ],
+  "size": {
+    "height": 3264,
+    "width": 1836
+  }
+}
