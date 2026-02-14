@@ -58,6 +58,7 @@ export class RenderingMWs {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {password, creator, ...sharing} = req.resultPipe as SharingDTO;
+    sharing.hasPassword = !!password;
     RenderingMWs.renderMessage(res, sharing);
   }
 

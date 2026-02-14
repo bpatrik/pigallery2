@@ -114,6 +114,7 @@ export class SharingMWs {
         sharingKey,
         searchQuery,
         password: createSharing.password,
+        hasPassword: !!createSharing.password,
         creator: req.session.context?.user,
         expires:
           createSharing.valid >= 0 // if === -1 it's forever
@@ -174,9 +175,10 @@ export class SharingMWs {
           updateSharing.password && updateSharing.password !== ''
             ? updateSharing.password
             : null,
+        hasPassword: !!updateSharing.password,
         creator: req.session.context?.user,
         expires:
-          updateSharing.valid >= 0 // if === -1 its forever
+          updateSharing.valid >= 0 // if === -1 it's forever
             ? Date.now() + updateSharing.valid
             : new Date(9999, 0, 1).getTime(), // never expire
         timeStamp: Date.now(),

@@ -28,12 +28,12 @@ export class NotificationService {
       if (
           this.authService.isAuthenticated() &&
           (!this.lastUser ||
-              this.lastUser.id !== this.authService.user.value.id) &&
-          this.authService.user.value.role >= UserRoles.Guest
+              this.lastUser.id !== this.authService.user.value?.user?.id) &&
+          this.authService.user.value?.user?.role >= UserRoles.Guest
       ) {
         this.getServerNotifications();
       }
-      this.lastUser = this.authService.user.value;
+      this.lastUser = this.authService.user.value?.user;
     });
   }
 

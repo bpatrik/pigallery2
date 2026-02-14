@@ -53,7 +53,7 @@ import {UploaderService} from '../gallery/uploader/uploader.service';
 export class FrameComponent {
   @Input() showSearch = false;
   @Input() showShare = false;
-  public readonly user: BehaviorSubject<UserDTO>;
+  public readonly user: BehaviorSubject<{user:UserDTO}>;
   public readonly authenticationRequired = Config.Users.authenticationRequired;
   public readonly title = Config.Server.applicationTitle;
   public collapsed = true;
@@ -94,14 +94,14 @@ export class FrameComponent {
   }
 
   isAdmin(): boolean {
-    return this.user.value && this.user.value.role >= UserRoles.Admin;
+    return this.user.value && this.user.value?.user?.role >= UserRoles.Admin;
   }
 
   isFacesAvailable(): boolean {
     return (
       Config.Faces.enabled &&
       this.user.value &&
-      this.user.value.role >= Config.Faces.readAccessMinRole
+      this.user.value?.user?.role >= Config.Faces.readAccessMinRole
     );
   }
 
@@ -109,7 +109,7 @@ export class FrameComponent {
   isCustomLinksAvailable(): boolean {
     return (
       this.user.value &&
-      this.user.value.role >= UserRoles.User
+      this.user.value?.user?.role >= UserRoles.User
     );
   }
 
@@ -138,7 +138,7 @@ export class FrameComponent {
   isAlbumsAvailable(): boolean {
     return Config.Album.enabled &&
       this.user.value &&
-      this.user.value.role >= Config.Album.readAccessMinRole;
+      this.user.value?.user?.role >= Config.Album.readAccessMinRole;
   }
 
 

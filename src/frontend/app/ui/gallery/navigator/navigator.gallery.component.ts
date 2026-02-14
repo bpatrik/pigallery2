@@ -137,7 +137,7 @@ export class GalleryNavigatorComponent {
           } else {
             arr.push({
               name: this.RootFolderName,
-              route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
+              route: user?.user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
                   ? '/'
                   : null,
             });
@@ -151,7 +151,7 @@ export class GalleryNavigatorComponent {
             } else {
               arr.push({
                 name,
-                route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
+                route: user?.user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
                     ? route
                     : null,
               });

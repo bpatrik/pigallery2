@@ -12,10 +12,11 @@
       </div>
       <form *ngIf="(shareService.sharingIsValid | async)"
             name="form" id="form" class="form-horizontal" #LoginForm="ngForm" (submit)="onLogin()">
-        <div class="error-message" [hidden]="loginError==false" i18n>Wrong password</div>
+        <div class="error-message" [hidden]="!loginError">{{ loginError }}</div>
 
 
-        <div class="input-group mb-3">
+        <div class="input-group mb-3"
+        *ngIf="(shareService.currentSharing | async).hasPassword == true">
           <div class="input-group-text"><ng-icon name="ionLockClosedOutline"></ng-icon></div>
           <input type="password"
                  i18n-placeholder

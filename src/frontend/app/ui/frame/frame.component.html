@@ -49,7 +49,7 @@
             <ng-container *ngIf="authenticationRequired && user.value">
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
              <span style="white-space: nowrap;">
-               <ng-icon name="ionPersonOutline" class="me-1"></ng-icon><span>{{ user.value.name }}</span>
+               <ng-icon name="ionPersonOutline" class="me-1"></ng-icon><span>{{ user.value?.user?.name }}</span>
               </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
@@ -81,7 +81,7 @@
                     <div style="white-space: nowrap;" class="dropdown-item">
                       <ng-container *ngIf="authenticationRequired && user.value">
                         <ng-icon name="ionPersonOutline"></ng-icon>
-                        <span>{{ user.value.name }}</span>
+                        <span>{{ user.value?.user?.name }}</span>
                       </ng-container>
                       <app-language class="navbar-btn d-inline-block float-end"></app-language>
                     </div>

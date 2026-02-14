@@ -4,6 +4,7 @@ import {IsActiveMatchOptions, Router} from '@angular/router';
 import {ShareService} from '../ui/gallery/share.service';
 import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
+import {ErrorDTO} from '../../../common/entities/Error';
 
 @Injectable()
 export class NavigationService {
@@ -12,10 +13,10 @@ export class NavigationService {
 
   public isLoginPage(): boolean {
     return (
-        this.router.isActive('login',
-            {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
-        this.router.isActive('shareLogin',
-            {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
+      this.router.isActive('login',
+        {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
+      this.router.isActive('shareLogin',
+        {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
     );
   }
 

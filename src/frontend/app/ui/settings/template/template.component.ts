@@ -144,7 +144,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
 
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < UserRoles.Admin
+      this.authService.user.value.user.role < UserRoles.Admin
     ) {
       this.navigation.toLogin();
       return;

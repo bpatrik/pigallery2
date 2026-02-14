@@ -79,7 +79,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   }
 
   public get IsAdmin() {
-    return this.authService.user.value.role > UserRoles.Admin;
+    return this.authService.user.value?.user?.role > UserRoles.Admin;
   }
 
   ngOnInit(): void {

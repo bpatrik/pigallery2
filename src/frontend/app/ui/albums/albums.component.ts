@@ -54,7 +54,7 @@ export class AlbumsComponent implements OnInit {
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.user.getValue().role >= UserRoles.Admin;
+    return this.authenticationService.user.getValue()?.user?.role >= UserRoles.Admin;
   }
 
   async ngOnInit() {

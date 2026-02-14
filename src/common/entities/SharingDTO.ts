@@ -10,6 +10,7 @@ export interface SharingDTO extends SharingDTOKey {
   searchQuery: SearchQueryDTO;
   sharingKey: string;
   password?: string;
+  hasPassword: boolean; // only visible to the client, not stored on the server
   expires: number;
   timeStamp: number;
   creator?: UserDTO;

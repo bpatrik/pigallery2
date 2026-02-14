@@ -81,7 +81,7 @@ export class GallerySearchComponent implements OnDestroy {
   get CanCreateAlbum(): boolean {
     return (
       Config.Album.enabled &&
-      this.authenticationService.user.getValue().role >= UserRoles.Admin
+      this.authenticationService.user.getValue()?.user?.role >= UserRoles.Admin
     );
   }
 
