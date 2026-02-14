@@ -326,32 +326,45 @@ export class MetadataLoader {
   }
 
   private static mapKeywords(metadata: PhotoMetadata, exif: any) {
-    if (exif.dc &&
-      exif.dc.subject &&
-      exif.dc.subject.length > 0) {
-      const subj = Array.isArray(exif.dc.subject) ? exif.dc.subject : [exif.dc.subject];
-      if (metadata.keywords === undefined) {
-        metadata.keywords = [];
-      }
-      for (const kw of subj) {
-        if (metadata.keywords.indexOf(kw) === -1) {
-          metadata.keywords.push(kw);
+    // Initialize Set with existing keywords to ensure global uniqueness
+    const keywordSet = new Set<string>(metadata.keywords || []);
+
+    const processKeywords = (rawKeywords: any, needsEncoding = false) => {
+      if (rawKeywords === undefined || rawKeywords === null) return;
+
+      // Normalize to array
+      const list = Array.isArray(rawKeywords) ? rawKeywords : [rawKeywords];
+
+      for (let kw of list) {
+        // 1. Convert to string if it's a number or other type
+        let cleanedKw = typeof kw === 'string' ? kw : String(kw);
+
+        // 2. Apply UTF8 conversion if required (IPTC)
+        if (needsEncoding) {
+          cleanedKw = Utils.asciiToUTF8(cleanedKw);
+        }
+
+        // 3. Trim whitespace and ensure it's not an empty string
+        const trimmed = cleanedKw.trim();
+        if (trimmed.length > 0) {
+          keywordSet.add(trimmed);
         }
       }
+    };
+
+    // Extract from Dublin Core
+    if (exif.dc?.subject) {
+      processKeywords(exif.dc.subject);
     }
-    if (exif.iptc &&
-      exif.iptc.Keywords &&
-      exif.iptc.Keywords.length > 0) {
-      const subj = Array.isArray(exif.iptc.Keywords) ? exif.iptc.Keywords : [exif.iptc.Keywords];
-      if (metadata.keywords === undefined) {
-        metadata.keywords = [];
-      }
-      for (let kw of subj) {
-        kw = Utils.asciiToUTF8(kw);
-        if (metadata.keywords.indexOf(kw) === -1) {
-          metadata.keywords.push(kw);
-        }
-      }
+
+    // Extract from IPTC
+    if (exif.iptc?.Keywords) {
+      processKeywords(exif.iptc.Keywords, true);
+    }
+
+    // Finalize the metadata array
+    if (keywordSet.size > 0) {
+      metadata.keywords = Array.from(keywordSet);
     }
   }
 
