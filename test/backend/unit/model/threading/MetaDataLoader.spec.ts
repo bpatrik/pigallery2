@@ -363,7 +363,11 @@ describe('MetadataLoader', () => {
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
 
-
+  it('test offset of pixel 7a photo', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/pixel7a-offset.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/pixel7a-offset.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
 
   describe('should load metadata from files with times and coordinates in different parts of the world', () => {
     const root = path.join(__dirname, '/../../../assets/4MinsAroundTheWorld');
