@@ -16,6 +16,6 @@ export class SearchQueryParserService {
   }
 
   stringify(query: SearchQueryDTO): string {
-    return this.parser.stringify(SearchQueryUtils.stripFalseNegate(query));
+    return this.parser.stringify(SearchQueryUtils.stripDefault(query));
   }
 }

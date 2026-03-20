@@ -27,6 +27,7 @@ export enum ErrorCodes {
   LocationLookUp_ERROR = 63,
 
   ALBUM_ERROR = 70,
+  UPLOAD_ERROR = 80,
 }
 
 export class ErrorDTO {

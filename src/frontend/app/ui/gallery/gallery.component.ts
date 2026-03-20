@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -18,39 +18,43 @@ import {PiTitleService} from '../../model/pi-title.service';
 import {GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
 import {MDFilesFilterPipe} from '../../pipes/MDFilesFilterPipe';
 import {ContentLoaderService} from './contentLoader.service';
-import { GalleryLightboxComponent } from './lightbox/lightbox.gallery.component';
-import { FrameComponent } from '../frame/frame.component';
-import { NgIf } from '@angular/common';
-import { RandomQueryBuilderGalleryComponent } from './random-query-builder/random-query-builder.gallery.component';
-import { PhotoFrameBuilderGalleryComponent } from './photo-frame-builder/photo-frame-builder.gallery.component';
-import { GalleryNavigatorComponent } from './navigator/navigator.gallery.component';
-import { DirectoriesComponent } from './directories/directories.component';
-import { GalleryBlogComponent } from './blog/blog.gallery.component';
-import { GalleryMapComponent } from './map/map.gallery.component';
-import { PhotoFilterPipe } from '../../pipes/PhotoFilterPipe';
-import { MediaButtonModalComponent } from './grid/photo/media-button-modal/media-button-modal.component';
+import {GalleryLightboxComponent} from './lightbox/lightbox.gallery.component';
+import {FrameComponent} from '../frame/frame.component';
+import {NgIf} from '@angular/common';
+import {RandomQueryBuilderGalleryComponent} from './random-query-builder/random-query-builder.gallery.component';
+import {PhotoFrameBuilderGalleryComponent} from './photo-frame-builder/photo-frame-builder.gallery.component';
+import {GalleryNavigatorComponent} from './navigator/navigator.gallery.component';
+import {DirectoriesComponent} from './directories/directories.component';
+import {GalleryBlogComponent} from './blog/blog.gallery.component';
+import {GalleryMapComponent} from './map/map.gallery.component';
+import {PhotoFilterPipe} from '../../pipes/PhotoFilterPipe';
+import {MediaButtonModalComponent} from './grid/photo/media-button-modal/media-button-modal.component';
 import {ContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
+import {UploaderService} from './uploader/uploader.service';
+import {GalleryService} from './gallery.service';
+import {UploaderComponent} from './uploader/uploader.gallery.component';
 
 @Component({
-    selector: 'app-gallery',
-    templateUrl: './gallery.component.html',
-    styleUrls: ['./gallery.component.css'],
-    imports: [
-        GalleryLightboxComponent,
-        FrameComponent,
-        NgIf,
-        RandomQueryBuilderGalleryComponent,
-        PhotoFrameBuilderGalleryComponent,
-        GalleryNavigatorComponent,
-        DirectoriesComponent,
-        GalleryBlogComponent,
-        GalleryMapComponent,
-        GalleryGridComponent,
-        GPXFilesFilterPipe,
-        PhotoFilterPipe,
-        MediaButtonModalComponent,
-    ]
+  selector: 'app-gallery',
+  templateUrl: './gallery.component.html',
+  styleUrls: ['./gallery.component.css'],
+  imports: [
+    GalleryLightboxComponent,
+    FrameComponent,
+    NgIf,
+    RandomQueryBuilderGalleryComponent,
+    PhotoFrameBuilderGalleryComponent,
+    GalleryNavigatorComponent,
+    DirectoriesComponent,
+    GalleryBlogComponent,
+    GalleryMapComponent,
+    GalleryGridComponent,
+    GPXFilesFilterPipe,
+    PhotoFilterPipe,
+    MediaButtonModalComponent,
+    UploaderComponent
+  ]
 })
 export class GalleryComponent implements OnInit, OnDestroy {
   @ViewChild(GalleryGridComponent, {static: false})
@@ -71,6 +75,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   } = null;
   public readonly mapEnabled: boolean;
   public directoryContent: GroupedDirectoryContent;
+  public isUploadOver = false;
   private $counter: Observable<number>;
   private subscription: { [key: string]: Subscription } = {
     content: null,
@@ -81,7 +86,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   constructor(
     public contentLoader: ContentLoaderService,
-    public galleryService: ContentService,
+    public contentService: ContentService,
+    public galleryService: GalleryService,
     private authService: AuthenticationService,
     private router: Router,
     private shareService: ShareService,
@@ -92,6 +98,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private piTitleService: PiTitleService,
     private gpxFilesFilterPipe: GPXFilesFilterPipe,
     private mdFilesFilterPipe: MDFilesFilterPipe,
+    public uploaderService: UploaderService,
   ) {
     this.mapEnabled = Config.Map.enabled;
     PageHelper.showScrollY('gallery');
@@ -99,6 +106,14 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   get ContentWrapper(): ContentWrapperWithError {
     return this.contentLoader.content.value;
+  }
+
+  get ShowMarkDown(): boolean {
+    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && this.mdFilesFilterPipe.transform(this.directoryContent.metaFile).length > 0;
+  }
+
+  get ShowMap(): boolean {
+    return (this.isPhotoWithLocation || this.gpxFilesFilterPipe.transform(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
   }
 
   updateTimer(t: number): void {
@@ -156,7 +171,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     this.showRandomPhotoBuilder =
       Config.RandomPhoto.enabled &&
       this.authService.isAuthorized(UserRoles.User);
-    this.subscription.content = this.galleryService.sortedFilteredContent
+    this.subscription.content = this.contentService.sortedFilteredContent
       .subscribe((dc: GroupedDirectoryContent) => {
         this.onContentChange(dc);
       });
@@ -167,6 +182,37 @@ export class GalleryComponent implements OnInit, OnDestroy {
       this.subscription.timer = this.$counter.subscribe((x): void =>
         this.updateTimer(x)
       );
+    }
+  }
+
+  @HostListener('dragover', ['$event'])
+  onDragOver(event: DragEvent): void {
+    if (this.uploaderService.canUpload()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.isUploadOver = true;
+    }
+  }
+
+  @HostListener('dragleave', ['$event'])
+  onDragLeave(event: DragEvent): void {
+    if (this.uploaderService.canUpload()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.isUploadOver = false;
+    }
+  }
+
+  @HostListener('drop', ['$event'])
+  onDrop(event: DragEvent): void {
+    if (this.uploaderService.canUpload()) {
+      event.preventDefault();
+      event.stopPropagation();
+      this.isUploadOver = false;
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        this.uploaderService.uploadFiles(files);
+      }
     }
   }
 
@@ -223,11 +269,4 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   };
 
-  get ShowMarkDown(): boolean {
-    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && this.mdFilesFilterPipe.transform(this.directoryContent.metaFile).length > 0;
-  }
-
-  get ShowMap(): boolean {
-    return (this.isPhotoWithLocation || this.gpxFilesFilterPipe.transform(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
-  }
 }

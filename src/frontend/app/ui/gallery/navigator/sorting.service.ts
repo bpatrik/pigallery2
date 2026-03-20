@@ -173,18 +173,10 @@ export class GallerySortingService {
         break;
       case SortByTypes.Random:
         this.rndService.setSeed(media.length);
-        media.sort((a: PhotoDTO, b: PhotoDTO): number => {
-          if (a.name.toLowerCase() < b.name.toLowerCase()) {
-            return -1;
-          }
-          if (a.name.toLowerCase() > b.name.toLowerCase()) {
-            return 1;
-          }
-          return 0;
-        })
-          .sort((): number => {
-            return this.rndService.get() - 0.5;
-          });
+        for (let i = media.length - 1; i > 0; i--) {
+          const j = Math.floor(this.rndService.get() * (i + 1));
+          [media[i], media[j]] = [media[j], media[i]];
+        }
         break;
     }
     if (!sorting.ascending) {
@@ -273,19 +265,10 @@ export class GallerySortingService {
                             break;
                           case SortByTypes.Random:
                             this.rndService.setSeed(c.directories.length);
-                            c.directories
-                                .sort((a, b): number => {
-                                  if (a.name.toLowerCase() < b.name.toLowerCase()) {
-                                    return 1;
-                                  }
-                                  if (a.name.toLowerCase() > b.name.toLowerCase()) {
-                                    return -1;
-                                  }
-                                  return 0;
-                                })
-                                .sort((): number => {
-                                  return this.rndService.get() - 0.5;
-                                });
+                            for (let i = c.directories.length - 1; i > 0; i--) {
+                              const j = Math.floor(this.rndService.get() * (i + 1));
+                              [c.directories[i], c.directories[j]] = [c.directories[j], c.directories[i]];
+                            }
                             break;
                         }
 

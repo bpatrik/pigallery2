@@ -18,6 +18,7 @@ import {
   ClientServiceConfig,
   ClientSharingConfig,
   ClientSortingConfig,
+  ClientUploadConfig,
   ClientUserConfig,
   ClientUserOIDCConfig,
   ClientVideoConfig,
@@ -1179,6 +1180,10 @@ export class ServerEnvironmentConfig {
 }
 
 
+@SubConfigClass({softReadonly: true})
+export class ServerUploadConfig extends ClientUploadConfig {
+}
+
 @SubConfigClass<TAGS>({softReadonly: true})
 export class ServerConfig extends ClientConfig {
 
@@ -1289,9 +1294,17 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Extensions`,
       uiIcon: 'ionExtensionPuzzleOutline'
-    } as TAGS,
+    } as TAGS
   })
   Extensions: ServerExtensionsConfig = new ServerExtensionsConfig();
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Upload`,
+      uiIcon: 'ionCloudUploadOutline'
+    } as TAGS
+  })
+  Upload: ServerUploadConfig = new ServerUploadConfig();
 
   @ConfigProperty({
     tags: {

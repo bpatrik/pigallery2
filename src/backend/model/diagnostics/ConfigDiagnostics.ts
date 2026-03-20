@@ -445,7 +445,7 @@ export class ConfigDiagnostics {
     }
 
     try {
-      await ConfigDiagnostics.testAlbumsConfig(Config.Album, Config);
+       ConfigDiagnostics.testAlbumsConfig(Config.Album, Config);
     } catch (ex) {
       const err: Error = ex;
       const errorText = 'Albums support error, switching off..' + ConfigDiagnostics.adjustConfigWarn;
@@ -611,6 +611,17 @@ export class ConfigDiagnostics {
     }
 
     await this.removeUnsupportedPhotoExtensions(Config.Media.Photo);
+
+    if(Config.Media.Photo.supportedFormats.length === 0){
+      Logger.error(LOG_TAG, 'No supported image formats found. Something is off. Exiting...');
+      process.exit(1);
+    }
+
+
+    if(Config.Media.Photo.supportedFormats.findIndex(v => v.toLowerCase() === 'jpg') === -1){
+      Logger.error(LOG_TAG, 'JPG is not part of the supported image formats. Something is off. Exiting...');
+      process.exit(1);
+    }
 
   }
 

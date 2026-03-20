@@ -1,7 +1,7 @@
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 
 export interface IObjectManager {
-  onNewDataVersion?: (changedDir?: ParentDirectoryDTO) => Promise<void>;
+  onNewDataVersion?: (changedDir?: DirectoryPathDTO) => Promise<void>;
   cleanUp?: () => Promise<void>;
   init?: () => Promise<void>;
 }

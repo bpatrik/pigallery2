@@ -17,7 +17,7 @@ import {CoverPhotoDTOWithID} from '../database/CoverManager';
 import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
 import {DirectoryScanSettings} from '../fileaccess/DiskManager';
 import {SessionContext} from '../SessionContext';
-import {IClientMediaButtonConfig} from '../../../common/entities/extension/IClientUIConfig';
+import {IClientMediaButtonConfig, IMediaRequestBodyData} from '../../../common/entities/extension/IClientUIConfig';
 import {MediaEntity} from '../database/enitites/MediaEntity';
 import {VideoConverterInput} from '../fileaccess/VideoConverterWorker';
 import {ProjectedDirectoryCacheEntity} from '../database/enitites/ProjectedDirectoryCacheEntity';
@@ -114,6 +114,11 @@ export interface IExtensionApp {
   config: PrivateConfigClass;
 }
 
+export interface IMediaRequestBody {
+  data: IMediaRequestBodyData;
+  media: string;
+}
+
 export interface IExtensionRESTRoute {
   /**
    * Looks for req.body.media for the media path and calls the callback with that media entry.
@@ -125,7 +130,7 @@ export interface IExtensionRESTRoute {
    * @param cb function callback
    * @return newly added REST api path
    */
-  mediaJsonResponse(paths: string[], minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: any, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string;
+  mediaJsonResponse(paths: string[], minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string;
 
   /**
    * Sends a pigallery2 standard JSON object with payload or error message back to the client.
@@ -257,7 +262,7 @@ export interface IUIExtension<C> {
    * @param serverSB If not set the button will be a fake button (i.e.: only show up not clickable)
    */
 
-  addMediaButton(buttonConfig: IClientMediaButtonConfig, serverSB?: (params: ParamsDictionary, body: any, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<void>): void;
+  addMediaButton(buttonConfig: IClientMediaButtonConfig, serverSB?: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<void>): void;
 }
 
 export interface IExtensionConfigInit<C> {

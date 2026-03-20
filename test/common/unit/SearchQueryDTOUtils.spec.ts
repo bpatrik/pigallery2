@@ -151,10 +151,25 @@ describe('SearchQueryDTOUtils.sortQuery', () => {
 // Added tests to cover validateSearchQuery behavior with negate:false
 // The validation should not fail merely because a negate:false property exists, even deeply nested.
 
-describe('SearchQueryDTOUtils.validateSearchQuery with negate:false', () => {
+describe('SearchQueryDTOUtils.validateSearchQuery', () => {
   const assertValid = (q: SearchQueryDTO) => {
     expect(() => SearchQueryUtils.validateSearchQuery(q, 'SearchQuery')).to.not.throw();
   };
+
+  it('should validate a top-level leaf with mathtype exact_match', () => {
+    const q: TextSearch = {type: SearchQueryTypes.person, value: 'alice', matchType: TextSearchQueryMatchTypes.exact_match};
+    assertValid(q);
+  });
+
+  it('should validate a top-level leaf with mathtype like', () => {
+    const q: TextSearch = {type: SearchQueryTypes.person, value: 'alice', matchType: TextSearchQueryMatchTypes.like};
+    assertValid(q);
+  });
+
+  it('should validate a top-level leaf with mathtype like and spaces', () => {
+    const q: TextSearch = {type: SearchQueryTypes.person, value: 'alice doe', matchType: TextSearchQueryMatchTypes.like};
+    assertValid(q);
+  });
 
   it('should validate a top-level leaf with negate:false', () => {
     const q: TextSearch = {type: SearchQueryTypes.person, value: 'alice', negate: false};
@@ -205,8 +220,8 @@ describe('SearchQueryDTOUtils.validateSearchQuery with negate:false', () => {
 
 describe('SearchQueryDTOUtils.urlify', () => {
   const assertValid = (q: SearchQueryDTO) => {
-    expect(SearchQueryUtils.urlify(q).length).to.be.lessThan(JSON.stringify(SearchQueryUtils.stripFalseNegate(q)).length);
-    expect(SearchQueryUtils.parseURLifiedQuery(SearchQueryUtils.urlify(q))).to.deep.equal(SearchQueryUtils.stripFalseNegate(q));
+    expect(SearchQueryUtils.urlify(q).length).to.be.lessThan(JSON.stringify(SearchQueryUtils.stripDefault(q)).length);
+    expect(SearchQueryUtils.parseURLifiedQuery(SearchQueryUtils.urlify(q))).to.deep.equal(SearchQueryUtils.stripDefault(q));
   };
 
   it('should validate a top-level leaf with negate:false', () => {

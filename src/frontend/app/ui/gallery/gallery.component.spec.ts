@@ -31,6 +31,7 @@ import {MediaButtonModalService} from './grid/photo/media-button-modal/media-but
 import {SortingMethod} from '../../../../common/entities/SortingMethods';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
+import {UploaderService, UploadProgress} from './uploader/uploader.service';
 
 
 // Mock services
@@ -117,6 +118,11 @@ class MockRouter {
 }
 
 
+class MockUploaderService{
+  public uploadProgress: unknown[] = [];
+}
+
+
 describe('GalleryComponent', () => {
   let component: GalleryComponent;
   let fixture: ComponentFixture<GalleryComponent>;
@@ -152,6 +158,7 @@ describe('GalleryComponent', () => {
         {provide: GPXFilesFilterPipe, useClass: MockGPXFilesFilterPipe},
         {provide: BlogService, useClass: MockBlogService},
         {provide: MDFilesFilterPipe, useClass: MockMDFilesFilterPipe},
+        {provide: UploaderService, useClass: MockUploaderService},
         {provide: FullScreenService, useValue: jasmine.createSpyObj('FullScreenService', ['mock'])},
         {provide: OverlayService, useValue: jasmine.createSpyObj('OverlayService', ['mock'])},
         {provide: QueryService, useValue: jasmine.createSpyObj('QueryService', ['getParams', 'getMediaStringId', 'getParamsForDirs'])},

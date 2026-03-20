@@ -18,6 +18,7 @@ export interface MediaButtonModalData {
 })
 export class MediaButtonModalService {
   private modalData$ = new BehaviorSubject<MediaButtonModalData | null>(null);
+  private savedModalValues: Record<string, string | number | boolean> = {};
 
   constructor(
     private notificationService: NotificationService,
@@ -42,7 +43,10 @@ export class MediaButtonModalService {
     this.modalData$.next(null);
   }
 
-  async executeButtonAction(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia, formData?: any): Promise<void> {
+  async executeButtonAction(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia, formData?: {
+    fields?: Record<string, any>,
+    customFields?: Record<string, any>
+  }): Promise<void> {
     try {
       if (!button.apiPath) {
         return; // this is a fake button, nothing to call
@@ -80,5 +84,13 @@ export class MediaButtonModalService {
       window.location.reload();
     }
 
+  }
+
+  getValue(id: string): string | number | boolean {
+    return this.savedModalValues[id];
+  }
+
+  setValue(id: string, value: string | number | boolean): void {
+    this.savedModalValues[id] = value;
   }
 }

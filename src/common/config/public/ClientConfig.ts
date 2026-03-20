@@ -1662,6 +1662,33 @@ export class ClientExtensionsConfig {
   enabled: boolean = true;
 }
 
+@SubConfigClass({tags: {client: true}, softReadonly: true})
+export class ClientUploadConfig {
+  @ConfigProperty({
+    tags: {
+      name: $localize`Enabled`,
+    }
+  })
+  enabled: boolean = false;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Minimum user role`,
+    },
+    description: $localize`Minimum user role to enable file upload.`
+  })
+  minimumRole: UserRoles = UserRoles.Admin;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Require uploader.pg2conf`,
+    },
+    description: $localize`Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.`
+  })
+  enforcedDirectoryConfig: boolean = false;
+}
+
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class ClientConfig {
 
@@ -1742,4 +1769,12 @@ export class ClientConfig {
     } as TAGS,
   })
   Extensions: ClientExtensionsConfig = new ClientExtensionsConfig();
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Upload`,
+      uiIcon: 'ionCloudUploadOutline'
+    } as TAGS,
+  })
+  Upload: ClientUploadConfig = new ClientUploadConfig();
 }

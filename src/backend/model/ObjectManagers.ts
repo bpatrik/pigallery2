@@ -3,7 +3,7 @@ import {SQLConnection} from './database/SQLConnection';
 import {Logger} from '../Logger';
 import {LocationManager} from './database/LocationManager';
 import {JobManager} from './jobs/JobManager';
-import {ParentDirectoryDTO} from '../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO, ParentDirectoryDTO} from '../../common/entities/DirectoryDTO';
 import {GalleryManager} from './database/GalleryManager';
 import {UserManager} from './database/UserManager';
 import {IndexingManager} from './database/IndexingManager';
@@ -17,6 +17,7 @@ import {IObjectManager} from './database/IObjectManager';
 import {ExtensionManager} from './extension/ExtensionManager';
 import {ProjectedCacheManager} from './database/ProjectedCacheManager';
 import {SessionManager} from './database/SessionManager';
+import { UploadManager } from './UploadManager';
 
 const LOG_TAG = '[ObjectManagers]';
 
@@ -38,6 +39,7 @@ export class ObjectManagers {
   private albumManager: AlbumManager;
   private extensionManager: ExtensionManager;
   private projectedCacheManager: ProjectedCacheManager;
+  private uploadManager: UploadManager;
   private sessionManager: SessionManager;
   private initDone = false;
 
@@ -106,6 +108,7 @@ export class ObjectManagers {
     this.ExtensionManager = new ExtensionManager();
     this.ProjectedCacheManager = new ProjectedCacheManager();
     this.SessionManager = new SessionManager();
+    this.UploadManager = new UploadManager();
 
     for (const manager of ObjectManagers.getInstance().managers) {
       if (manager === ObjectManagers.getInstance().versionManager) {
@@ -118,7 +121,7 @@ export class ObjectManagers {
   }
 
   public async onDataChange(
-    changedDir: ParentDirectoryDTO = null
+    changedDir: DirectoryPathDTO = null
   ): Promise<void> {
     await this.VersionManager.onNewDataVersion();
 
@@ -251,6 +254,18 @@ export class ObjectManagers {
     }
     this.sharingManager = value;
     this.managers.push(this.sharingManager as IObjectManager);
+  }
+
+  get UploadManager(): UploadManager {
+    return this.uploadManager;
+  }
+
+  set UploadManager(value: UploadManager) {
+    if (this.uploadManager) {
+      this.managers.splice(this.managers.indexOf(this.uploadManager as IObjectManager), 1);
+    }
+    this.uploadManager = value;
+    this.managers.push(this.uploadManager as IObjectManager);
   }
 
   get JobManager(): JobManager {

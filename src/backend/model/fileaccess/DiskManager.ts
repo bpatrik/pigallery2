@@ -1,6 +1,6 @@
 import {promises as fsp, Stats} from 'fs';
 import * as path from 'path';
-import {ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO, ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import {PhotoDTO} from '../../../common/entities/PhotoDTO';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
@@ -24,6 +24,13 @@ declare const global: { gc: () => void };
 export class DiskManager {
   public static calcLastModified(stat: Stats): number {
     return Math.max(stat.ctime.getTime(), stat.mtime.getTime());
+  }
+
+  public static getDTOFromPath(relativeDirectoryName: string): DirectoryPathDTO {
+    return {
+      path: this.pathFromRelativeDirName(relativeDirectoryName),
+      name: DiskManager.dirName(relativeDirectoryName)
+    };
   }
 
   public static normalizeDirPath(dirPath: string): string {
@@ -112,8 +119,8 @@ export class DiskManager {
   ): Promise<ParentDirectoryDTO> {
     Logger.silly(LOG_TAG, 'scanning directory:', relativeDirectoryName);
     relativeDirectoryName = this.normalizeDirPath(relativeDirectoryName);
-    const directoryName = DiskManager.dirName(relativeDirectoryName);
-    const directoryParent = this.pathFromRelativeDirName(relativeDirectoryName);
+    const dto = this.getDTOFromPath(relativeDirectoryName);
+
     const absoluteDirectoryName = path.join(
       ProjectPath.ImageFolder,
       relativeDirectoryName
@@ -125,8 +132,8 @@ export class DiskManager {
     const directory: ParentDirectoryDTO = {
       id: null,
       parent: null,
-      name: directoryName,
-      path: directoryParent,
+      name: dto.name,
+      path: dto.path,
       lastModified: this.calcLastModified(stat),
       directories: [],
       isPartial: settings.coverOnly === true,
@@ -289,7 +296,7 @@ export class DiskManager {
     directory.cache.mediaCount = directory.media.length;
     // TODO: cache is now calculated purely though DB after indexing of the directory is done.
     // Delete is with caution (double check if it still indeed not used)
-    if (!directory.isPartial) {
+    if (!directory.isPartial && !settings.noMetadata) {
       directory.cache.youngestMedia = Number.MAX_SAFE_INTEGER;
       directory.cache.oldestMedia = Number.MIN_SAFE_INTEGER;
 

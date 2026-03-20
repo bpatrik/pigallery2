@@ -63,7 +63,7 @@ export const MetadataSearchQueryTypes = [
 
 export enum TextSearchQueryMatchTypes {
   exact_match = 1,
-  like = 2,
+  like = 2, // default value
 }
 
 export interface SearchQueryDTO {

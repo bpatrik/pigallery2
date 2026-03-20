@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit, HostListener} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
 import {Subscription} from 'rxjs';
 import {NgFor, NgIf} from '@angular/common';
 import {FormsModule} from '@angular/forms';
-import {IClientMediaFields} from '../../../../../../../common/entities/extension/IClientUIConfig';
+import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../common/entities/extension/IClientUIConfig';
 
 @Component({
   selector: 'app-media-button-modal',
@@ -14,7 +14,7 @@ import {IClientMediaFields} from '../../../../../../../common/entities/extension
 })
 export class MediaButtonModalComponent implements OnInit, OnDestroy {
   modalData: MediaButtonModalData | null = null;
-  formData: { [key: string]: any } = {};
+  formData: IMediaRequestBodyData = {};
   private subscription: Subscription;
 
   constructor(private modalService: MediaButtonModalService) {
@@ -48,7 +48,8 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
       bitRate: $localize`Bit Rate`,
       duration: $localize`Duration`,
       fileSize: $localize`File Size`,
-      fps: $localize`FPS`
+      fps: $localize`FPS`,
+      keywords: $localize`Keywords`
     };
     return labels[field] || field;
   }
@@ -64,27 +65,20 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
     switch (field) {
       case 'title':
       case 'caption':
+      case 'bitRate':
+      case 'creationDate':
+      case 'creationDateOffset':
+      case 'duration':
+      case 'fileSize':
+      case 'fps':
         return (metadata as any)[field] || '';
       case 'cameraData':
-        return JSON.stringify((metadata as any).cameraData || {});
       case 'positionData':
-        return JSON.stringify((metadata as any).positionData || {});
-      case 'faces':
-        return JSON.stringify((metadata as any).faces || []);
       case 'size':
-        return JSON.stringify((metadata as any).size || {});
-      case 'creationDate':
-        return (metadata as any).creationDate || '';
-      case 'creationDateOffset':
-        return (metadata as any).creationDateOffset || '';
-      case 'bitRate':
-        return (metadata as any).bitRate || '';
-      case 'duration':
-        return (metadata as any).duration || '';
-      case 'fileSize':
-        return (metadata as any).fileSize || '';
-      case 'fps':
-        return (metadata as any).fps || '';
+        return JSON.stringify((metadata as any)[field] || {});
+      case 'faces':
+      case 'keywords':
+        return JSON.stringify((metadata as any)[field] || []);
       default:
         return '';
     }
@@ -103,11 +97,19 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
 
   executeAction(): void {
     if (this.modalData && this.isFormValid()) {
+      // save value to reuse in the next modal
+      if (this.modalData?.button?.popup?.customFields) {
+        this.modalData.button.popup.customFields.forEach(field => {
+          if (field.keepValue) {
+            this.modalService.setValue(field.id, this.formData.customFields[field.id]);
+          }
+        });
+      }
       this.modalService.executeButtonAction(
         this.modalData.button,
         this.modalData.media,
         this.formData
-      );
+      ).catch(console.error);
     }
   }
 
@@ -119,8 +121,7 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
     // Check if all required custom fields are properly filled
     for (const field of this.modalData.button.popup.customFields) {
       if (field.required) {
-        const fieldKey = 'custom_' + field.id;
-        const value = this.formData[fieldKey];
+        const value = this.formData.customFields[field.id];
 
         // For boolean fields, required means it must be checked (true)
         if (field.type === 'boolean' && !value) {
@@ -145,13 +146,20 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
   private initFormData(): void {
     this.formData = {};
     if (this.modalData?.button?.popup?.fields) {
+      this.formData.fields = {};
       this.modalData.button.popup.fields.forEach(field => {
-        this.formData[field] = this.getFieldValue(field);
+        this.formData.fields[field] = this.getFieldValue(field);
       });
     }
     if (this.modalData?.button?.popup?.customFields) {
+      this.formData.customFields = {};
       this.modalData.button.popup.customFields.forEach(field => {
-        this.formData['custom_' + field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
+        // load last value if we should keep it
+        if (field.keepValue && this.modalService.getValue(field.id) !== undefined) {
+          this.formData.customFields[field.id] = this.modalService.getValue(field.id);
+          return;
+        }
+        this.formData.customFields[field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
       });
     }
   }

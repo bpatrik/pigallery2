@@ -25,7 +25,7 @@
             <input [id]="field"
                    type="text"
                    class="form-control"
-                   [(ngModel)]="formData[field]"
+                   [(ngModel)]="formData.fields[field]"
                    [value]="getFieldValue(field)">
           </div>
         </div>
@@ -43,7 +43,7 @@
                    [id]="'custom_' + customFieldEntry.id"
                    type="text"
                    class="form-control"
-                   [(ngModel)]="formData['custom_' + customFieldEntry.id]"
+                   [(ngModel)]="formData.customFields[customFieldEntry.id]"
                    [required]="customFieldEntry.required">
 
             <!-- Number input -->
@@ -51,7 +51,7 @@
                    [id]="'custom_' + customFieldEntry.id"
                    type="number"
                    class="form-control"
-                   [(ngModel)]="formData['custom_' + customFieldEntry.id]"
+                   [(ngModel)]="formData.customFields[customFieldEntry.id]"
                    [required]="customFieldEntry.required">
 
             <!-- Boolean input -->
@@ -59,7 +59,7 @@
               <input [id]="'custom_' + customFieldEntry.id"
                      type="checkbox"
                      class="form-check-input"
-                     [(ngModel)]="formData['custom_' + customFieldEntry.id]"
+                     [(ngModel)]="formData.customFields[customFieldEntry.id]"v
                      [required]="customFieldEntry.required">
               <label [for]="'custom_' + customFieldEntry.id" class="form-check-label">
                 {{ customFieldEntry.label }}

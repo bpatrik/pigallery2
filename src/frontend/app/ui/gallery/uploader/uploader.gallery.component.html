@@ -1,0 +1,71 @@
+<div class="upload-overlay" [class.active]="isUploadOver" *ngIf="isUploadOver">
+  <div class="upload-overlay-content">
+    <div class="upload-overlay-icon">
+      <ng-icon name="ionCloudUploadOutline" size="4em"></ng-icon>
+    </div>
+    <div class="upload-overlay-text" i18n>Drop files to upload</div>
+  </div>
+</div>
+<div class="upload-progress-container" *ngIf="uploaderService.uploadProgress.length > 0">
+  <div class="upload-progress-list">
+    <!-- Show summary if many files are uploading -->
+    <ng-container *ngIf="uploaderService.uploadProgress.length > 5 && !showDetails; else detailedList">
+      <div class="card mb-2 upload-progress-item summary-card" (click)="toggleDetails()">
+        <div class="card-body p-2">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <small class="text-truncate me-2 fw-bold" ><ng-container i18n>Uploading files</ng-container>: {{ uploaderService.uploadProgress.length }}</small>
+            <ng-icon name="ionChevronUpOutline"></ng-icon>
+          </div>
+          <div class="progress" style="height: 8px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                 [ngStyle]="{'width': getOverallProgress() + '%'}"></div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #detailedList>
+      <div *ngIf="uploaderService.uploadProgress.length > 5 && showDetails"
+           class="card mb-2 upload-progress-item summary-card" (click)="toggleDetails()">
+        <div class="card-body p-2">
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-truncate me-2 fw-bold" ><ng-container i18n>Hide details</ng-container> ({{ uploaderService.uploadProgress.length }} <ng-container i18n>files</ng-container>)</small>
+            <ng-icon name="ionChevronDownOutline"></ng-icon>
+          </div>
+        </div>
+      </div>
+      <ng-container *ngFor="let item of uploaderService.uploadProgress">
+        <div class="card mb-2 upload-progress-item"
+             [class.fading]="item.done && item.lastUpdate < Date.now() - 4500"
+             *ngIf="item.lastUpdate > Date.now() - 5000 || !item.done">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <small class="text-truncate me-2" [title]="item.name" style="max-width: 70%;">{{ item.name }}</small>
+              <div class="d-flex align-items-center">
+                <small class="me-1" *ngIf="!item.error && item.status !== 'queued'">{{ item.progress }}%</small>
+                <small *ngIf="item.status === 'queued'" class="text-muted" i18n>Queued</small>
+                <ng-icon *ngIf="item.done && !item.error" name="ionCheckmarkCircle" class="text-success"></ng-icon>
+                <ng-icon *ngIf="item.error" name="ionAlertCircle" class="text-danger"></ng-icon>
+                <small *ngIf="item.error" class="text-danger ms-1" [title]="item.error">
+                  <ng-container *ngIf="item.count" i18n>Already exists</ng-container>
+                  <ng-container *ngIf="!item.count" i18n>Error</ng-container>
+                </small>
+              </div>
+            </div>
+            <div *ngIf="item.error && !item.count" class="mb-2">
+              <small class="text-danger d-block text-truncate" [title]="item.error">{{item.error}}</small>
+            </div>
+            <div class="progress" style="height: 6px;">
+              <div class="progress-bar" role="progressbar"
+                   [class.bg-danger]="item.error"
+                   [class.bg-success]="item.done && !item.error"
+                   [class.progress-bar-animated]="item.status === 'uploading'"
+                   [class.progress-bar-striped]="item.status === 'uploading'"
+                   [ngStyle]="{'width': item.progress + '%'}"></div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </ng-template>
+  </div>
+</div>

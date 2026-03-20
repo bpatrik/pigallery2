@@ -28,7 +28,7 @@ Default values can be also overwritten by prefixing the options with 'default-',
 App CLI options: 
   --Server-applicationTitle                                                  (default: 'PiGallery 2')
   --Server-publicUrl                                                        If you access the page from local network it's good to know the public url for creating sharing link. (default: '')
-  --Server-urlBase                                                          If you access the gallery under a sub url (like: http://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url. (default: '')
+  --Server-urlBase                                                          If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url. (default: '')
   --Server-apiPath                                                          PiGallery api path. (default: '/pgapi')
   --Server-customHTMLHead                                                   Injects the content of this between the <head></head> HTML tags of the app. (You can use it to add analytics or custom code to the app). (default: '')
   --Server-svgIcon-viewBox                                                  SVG path viewBox. See: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox (default: '0 0 512 512')
@@ -44,9 +44,20 @@ App CLI options:
   --Server-Log-logServerTiming                                              If enabled, the app adds "Server-Timing" http header to the response. (default: false)
   --Users-authenticationRequired                                            Enables user management with login to password protect the gallery. (default: true)
   --Users-unAuthenticatedUserRole                                           Default user right when password protection is disabled. (default: 'Admin')
+  --Users-oidc-enabled                                                       (default: false)
+  --Users-oidc-displayName                                                  Shown on the login button (client-visible). (default: '')
+  --Users-oidc-issuerUrl                                                    OIDC provider Issuer URL (default: '')
+  --Users-oidc-clientId                                                      (default: '')
+  --Users-oidc-clientSecret                                                  (default: '')
+  --Users-oidc-redirectUri                                                  Full callback URL registered at the provider (e.g.: https://example.com/pgapi/auth/oidc/callback) (default: '')
+  --Users-oidc-scopes                                                        (default: ["openid","profile","email"])
+  --Users-oidc-usernameClaim                                                JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty. (default: 'preferred_username')
+  --Users-oidc-emailClaim                                                    (default: 'email')
+  --Users-oidc-allowedDomains                                               If set, only identities with emails in these domains will be accepted. (default: [])
+  --Users-oidc-autoCreateUser                                               If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in. (default: false)
   --Users-enforcedUsers                                                     Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
-  --Users-allowQuery                                                        Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"text":""})
-  --Users-blockQuery                                                        Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"text":""})
+  --Users-allowQuery                                                        Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
+  --Users-blockQuery                                                        Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   --Users-suppressDefUserWarn                                               if true, the app won't show a warning for using the default user. (default: false)
   --Gallery-enableCache                                                     Caches directory contents and search results for better performance. (default: true)
   --Gallery-enableOnScrollRendering                                         Those thumbnails get higher priority that are visible on the screen. (default: true)
@@ -84,7 +95,7 @@ App CLI options:
   --Gallery-Themes-enabled                                                  Enable themes and color modes. (default: true)
   --Gallery-Themes-defaultMode                                              Sets the default theme mode that is used for the application. (default: 'auto')
   --Gallery-Themes-selectedTheme                                            Selected theme to use on the site. (default: 'classic')
-  --Gallery-Themes-availableThemes                                          Adds these css settings as it is to the end of the body tag of the page. (default: [{"name":"classic","theme":":root nav.navbar {\n--bs-navbar-color: rgba(255, 255, 255, 0.55);\n--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n--bs-navbar-active-color: #fff;\n--bs-navbar-brand-color: #fff;\n--bs-navbar-brand-hover-color: #fff;\n--bs-bg-opacity: 1;\nbackground-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n}"}])
+  --Gallery-Themes-availableThemes                                          Adds these CSS settings as it is to the end of the body tag of the page. (default: [{"name":"classic","theme":":root nav.navbar {\n--bs-navbar-color: rgba(255, 255, 255, 0.55);\n--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n--bs-navbar-active-color: #fff;\n--bs-navbar-brand-color: #fff;\n--bs-navbar-brand-hover-color: #fff;\n--bs-bg-opacity: 1;\nbackground-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n}"}])
   --Gallery-InlineBlogStartsOpen                                            Makes inline blog (*.md files content) auto-open. (default: false)
   --Gallery-TopBlogStartsOpen                                               Makes top blog (*.md files content) auto-open. (default: false)
   --Gallery-AutoUpdate-enable                                               Enable auto polling for new photos and videos in the gallery. (default: false)
@@ -154,6 +165,8 @@ App CLI options:
   --Map-MapPathGroupConfig                                                  Markers are grouped and themed by these settings (default: [{"name":"Transportation","matchers":[{"matchers":["flight","flying"],"theme":{"color":"var(--bs-orange)","dashArray":"4 8","svgIcon":{"viewBox":"0 0 567 512","items":"<path d=\"M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64l-116.6 0L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1l-56.2 0c-10.6 0-18.3-10.2-15.4-20.4l49-171.6L112 320 68.8 377.6c-3 4-7.8 6.4-12.8 6.4l-42 0c-7.8 0-14-6.3-14-14c0-1.3 .2-2.6 .5-3.9L32 256 .5 145.9c-.4-1.3-.5-2.6-.5-3.9c0-7.8 6.3-14 14-14l42 0c5 0 9.8 2.4 12.8 6.4L112 192l102.9 0-49-171.6C162.9 10.2 170.6 0 181.2 0l56.2 0c11.5 0 22.1 6.2 27.8 16.1L365.7 192l116.6 0z\"/>"}}},{"matchers":["drive","driving"],"theme":{"color":"var(--bs-orange)","dashArray":"4 8","svgIcon":{"viewBox":"0 0 640 512","items":"<path d=\"M171.3 96H224v96H111.3l30.4-75.9C146.5 104 158.2 96 171.3 96zM272 192V96h81.2c9.7 0 18.9 4.4 25 12l67.2 84H272zm256.2 1L428.2 68c-18.2-22.8-45.8-36-75-36H171.3c-39.3 0-74.6 23.9-89.1 60.3L40.6 196.4C16.8 205.8 0 228.9 0 256V368c0 17.7 14.3 32 32 32H65.3c7.6 45.4 47.1 80 94.7 80s87.1-34.6 94.7-80H385.3c7.6 45.4 47.1 80 94.7 80s87.1-34.6 94.7-80H608c17.7 0 32-14.3 32-32V320c0-65.2-48.8-119-111.8-127zM434.7 368a48 48 0 1 1 90.5 32 48 48 0 1 1 -90.5-32zM160 336a48 48 0 1 1 0 96 48 48 0 1 1 0-96z\"/>"}}},{"matchers":["ship","sailing","cruise"],"theme":{"color":"var(--bs-orange)","dashArray":"4 8","svgIcon":{"viewBox":"0 0 576 512","items":"<path d=\"M256 16c0-7 4.5-13.2 11.2-15.3s13.9 .4 17.9 6.1l224 320c3.4 4.9 3.8 11.3 1.1 16.6s-8.2 8.6-14.2 8.6H272c-8.8 0-16-7.2-16-16V16zM212.1 96.5c7 1.9 11.9 8.2 11.9 15.5V336c0 8.8-7.2 16-16 16H80c-5.7 0-11-3-13.8-8s-2.9-11-.1-16l128-224c3.6-6.3 11-9.4 18-7.5zM5.7 404.3C2.8 394.1 10.5 384 21.1 384H554.9c10.6 0 18.3 10.1 15.4 20.3l-4 14.3C550.7 473.9 500.4 512 443 512H133C75.6 512 25.3 473.9 9.7 418.7l-4-14.3z\"/>"}}}]},{"name":"Sport","matchers":[{"matchers":["(\b|_|-)run"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 417 512","items":"<path d=\"M320 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM125.7 175.5c9.9-9.9 23.4-15.5 37.5-15.5c1.9 0 3.8 .1 5.6 .3L137.6 254c-9.3 28 1.7 58.8 26.8 74.5l86.2 53.9-25.4 88.8c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l28.7-100.4c5.9-20.6-2.6-42.6-20.7-53.9L238 299l30.9-82.4 5.1 12.3C289 264.7 323.9 288 362.7 288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H362.7c-12.9 0-24.6-7.8-29.5-19.7l-6.3-15c-14.6-35.1-44.1-61.9-80.5-73.1l-48.7-15c-11.1-3.4-22.7-5.2-34.4-5.2c-31 0-60.8 12.3-82.7 34.3L57.4 153.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l23.1-23.1zM91.2 352H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h69.6c19 0 36.2-11.2 43.9-28.5L157 361.6l-9.5-6c-17.5-10.9-30.5-26.8-37.9-44.9L91.2 352z\"/>"}}},{"matchers":["(\b|_|-)walk"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 320 512","items":"<path d=\"M160 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM126.5 199.3c-1 .4-1.9 .8-2.9 1.2l-8 3.5c-16.4 7.3-29 21.2-34.7 38.2l-2.6 7.8c-5.6 16.8-23.7 25.8-40.5 20.2s-25.8-23.7-20.2-40.5l2.6-7.8c11.4-34.1 36.6-61.9 69.4-76.5l8-3.5c20.8-9.2 43.3-14 66.1-14c44.6 0 84.8 26.8 101.9 67.9L281 232.7l21.4 10.7c15.8 7.9 22.2 27.1 14.3 42.9s-27.1 22.2-42.9 14.3L247 287.3c-10.3-5.2-18.4-13.8-22.8-24.5l-9.6-23-19.3 65.5 49.5 54c5.4 5.9 9.2 13 11.2 20.8l23 92.1c4.3 17.1-6.1 34.5-23.3 38.8s-34.5-6.1-38.8-23.3l-22-88.1-70.7-77.1c-14.8-16.1-20.3-38.6-14.7-59.7l16.9-63.5zM68.7 398l25-62.4c2.1 3 4.5 5.8 7 8.6l40.7 44.4-14.5 36.2c-2.4 6-6 11.5-10.6 16.1L54.6 502.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L68.7 398z\"/>"}}},{"matchers":["(\b|_|-)hike","(\b|_|-)hiking"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 384 512","items":"<path d=\"M192 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm51.3 182.7L224.2 307l49.7 49.7c9 9 14.1 21.2 14.1 33.9V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V397.3l-73.9-73.9c-15.8-15.8-22.2-38.6-16.9-60.3l20.4-84c8.3-34.1 42.7-54.9 76.7-46.4c19 4.8 35.6 16.4 46.4 32.7L305.1 208H336V184c0-13.3 10.7-24 24-24s24 10.7 24 24v55.8c0 .1 0 .2 0 .2s0 .2 0 .2V488c0 13.3-10.7 24-24 24s-24-10.7-24-24V272H296.6c-16 0-31-8-39.9-21.4l-13.3-20zM81.1 471.9L117.3 334c3 4.2 6.4 8.2 10.1 11.9l41.9 41.9L142.9 488.1c-4.5 17.1-22 27.3-39.1 22.8s-27.3-22-22.8-39.1zm55.5-346L101.4 266.5c-3 12.1-14.9 19.9-27.2 17.9l-47.9-8c-14-2.3-22.9-16.3-19.2-30L31.9 155c9.5-34.8 41.1-59 77.2-59h4.2c15.6 0 27.1 14.7 23.3 29.8z\"/>"}}},{"matchers":["(\b|_|-)bike","(\b|_|-)biking","(\b|_|-)cycling"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 640 512","items":"<path d=\"M400 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm27.2 64l-61.8-48.8c-17.3-13.6-41.7-13.8-59.1-.3l-83.1 64.2c-30.7 23.8-28.5 70.8 4.3 91.6L288 305.1V416c0 17.7 14.3 32 32 32s32-14.3 32-32V288c0-10.7-5.3-20.7-14.2-26.6L295 232.9l60.3-48.5L396 217c5.7 4.5 12.7 7 20 7h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H427.2zM56 384a72 72 0 1 1 144 0A72 72 0 1 1 56 384zm200 0A128 128 0 1 0 0 384a128 128 0 1 0 256 0zm184 0a72 72 0 1 1 144 0 72 72 0 1 1 -144 0zm200 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z\"/>"}}},{"matchers":["(\b|_|-)skiing","(\b|_|-)ski"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 512 512","items":"<path d=\"M380.7 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM2.7 268.9c6.1-11.8 20.6-16.3 32.4-10.2L232.7 361.3l46.2-69.2-75.1-75.1c-14.6-14.6-20.4-33.9-18.4-52.1l108.8 52 39.3 39.3c16.2 16.2 18.7 41.5 6 60.6L289.8 391l128.7 66.8c13.6 7.1 29.8 7.2 43.6 .3l15.2-7.6c11.9-5.9 26.3-1.1 32.2 10.7s1.1 26.3-10.7 32.2l-15.2 7.6c-27.5 13.7-59.9 13.5-87.2-.7L12.9 301.3C1.2 295.2-3.4 280.7 2.7 268.9zM118.9 65.6L137 74.2l8.7-17.4c4-7.9 13.6-11.1 21.5-7.2s11.1 13.6 7.2 21.5l-8.5 16.9 54.7 26.2c1.5-.7 3.1-1.4 4.7-2.1l83.4-33.4c34.2-13.7 72.8 4.2 84.5 39.2l17.1 51.2 52.1 26.1c15.8 7.9 22.2 27.1 14.3 42.9s-27.1 22.2-42.9 14.3l-58.1-29c-11.4-5.7-20-15.7-24.1-27.8l-5.8-17.3-27.3 12.1-6.8 3-6.7-3.2L151.5 116.7l-9.2 18.4c-4 7.9-13.6 11.1-21.5 7.2s-11.1-13.6-7.2-21.5l9-18-17.6-8.4c-8-3.8-11.3-13.4-7.5-21.3s13.4-11.3 21.3-7.5z\"/>"}}}]},{"name":"Other paths","matchers":[{"matchers":[],"theme":{"color":"var(--bs-secondary)","dashArray":"","svgIcon":{"viewBox":"","items":""}}}]}])
   --Map-bendLongPathsTrigger                                                Map will bend the path if two points are this far apart on latitude axes. This intended to bend flight if only the end and the start points are given. (default: 0.5)
   --Faces-enabled                                                            (default: true)
+  --Faces-sorting-method                                                     (default: 'PersonCount')
+  --Faces-sorting-ascending                                                  (default: true)
   --Faces-keywordsToPersons                                                 If a photo has the same face (person) name and keyword, the app removes the duplicate, keeping the face only. (default: true)
   --Faces-writeAccessMinRole                                                Required minimum right to star (favourite) a face. (default: 'Admin')
   --Faces-readAccessMinRole                                                 Required minimum right to show the faces tab. (default: 'User')
@@ -162,6 +175,9 @@ App CLI options:
   --Extensions-repositoryUrl                                                Repository url that points to a list of extensions in .md format. (default: 'https://raw.githubusercontent.com/bpatrik/pigallery2/master/extension/REPOSITORY.md')
   --Extensions-folder                                                       Folder where the app stores all extensions. Individual extensions live in their own sub-folders. (default: 'extensions')
   --Extensions-cleanUpUnusedTables                                          Automatically removes all tables from the DB that are not used anymore. (default: true)
+  --Upload-enabled                                                           (default: false)
+  --Upload-minimumRole                                                      Minimum user role to enable file upload. (default: 'Admin')
+  --Upload-enforcedDirectoryConfig                                          Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
   --Database-type                                                           SQLite is recommended. (default: 'sqlite')
   --Database-dbFolder                                                       All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   --Database-sqlite-DBFileName                                              Sqlite will save the db with this filename. (default: 'sqlite.db')
@@ -174,7 +190,7 @@ App CLI options:
   --Indexing-reIndexingSensitivity                                          Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
   --Indexing-excludeFolderList                                              Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
   --Indexing-excludeFileList                                                Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
-  --AlbumCover-SearchQuery                                                  Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"text":""})
+  --AlbumCover-SearchQuery                                                  Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   --AlbumCover-Sorting                                                      If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   --Duplicates-listingLimit                                                 Maximum number of duplicates to list. (default: 1000)
   --Messaging-Email-emailFrom                                               Some services do not allow sending from random e-mail addresses. Set this accordingly. (default: 'noreply@pigallery2.com')
@@ -191,7 +207,7 @@ App CLI options:
 Environmental variables: 
   Server-applicationTitle                                                (default: 'PiGallery 2')
   Server-publicUrl                                                      If you access the page from local network it's good to know the public url for creating sharing link. (default: '')
-  Server-urlBase                                                        If you access the gallery under a sub url (like: http://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url. (default: '')
+  Server-urlBase                                                        If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url. (default: '')
   Server-apiPath                                                        PiGallery api path. (default: '/pgapi')
   Server-customHTMLHead                                                 Injects the content of this between the <head></head> HTML tags of the app. (You can use it to add analytics or custom code to the app). (default: '')
   Server-svgIcon-viewBox                                                SVG path viewBox. See: https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox (default: '0 0 512 512')
@@ -208,9 +224,20 @@ Environmental variables:
   Server-Log-logServerTiming                                            If enabled, the app adds "Server-Timing" http header to the response. (default: false)
   Users-authenticationRequired                                          Enables user management with login to password protect the gallery. (default: true)
   Users-unAuthenticatedUserRole                                         Default user right when password protection is disabled. (default: 'Admin')
+  Users-oidc-enabled                                                     (default: false)
+  Users-oidc-displayName                                                Shown on the login button (client-visible). (default: '')
+  Users-oidc-issuerUrl                                                  OIDC provider Issuer URL (default: '')
+  Users-oidc-clientId                                                    (default: '')
+  Users-oidc-clientSecret                                                (default: '')
+  Users-oidc-redirectUri                                                Full callback URL registered at the provider (e.g.: https://example.com/pgapi/auth/oidc/callback) (default: '')
+  Users-oidc-scopes                                                      (default: ["openid","profile","email"])
+  Users-oidc-usernameClaim                                              JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty. (default: 'preferred_username')
+  Users-oidc-emailClaim                                                  (default: 'email')
+  Users-oidc-allowedDomains                                             If set, only identities with emails in these domains will be accepted. (default: [])
+  Users-oidc-autoCreateUser                                             If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in. (default: false)
   Users-enforcedUsers                                                   Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
-  Users-allowQuery                                                      Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"text":""})
-  Users-blockQuery                                                      Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"text":""})
+  Users-allowQuery                                                      Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
+  Users-blockQuery                                                      Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   Users-suppressDefUserWarn                                             if true, the app won't show a warning for using the default user. (default: false)
   Gallery-enableCache                                                   Caches directory contents and search results for better performance. (default: true)
   Gallery-enableOnScrollRendering                                       Those thumbnails get higher priority that are visible on the screen. (default: true)
@@ -248,7 +275,7 @@ Environmental variables:
   Gallery-Themes-enabled                                                Enable themes and color modes. (default: true)
   Gallery-Themes-defaultMode                                            Sets the default theme mode that is used for the application. (default: 'auto')
   Gallery-Themes-selectedTheme                                          Selected theme to use on the site. (default: 'classic')
-  Gallery-Themes-availableThemes                                        Adds these css settings as it is to the end of the body tag of the page. (default: [{"name":"classic","theme":":root nav.navbar {\n--bs-navbar-color: rgba(255, 255, 255, 0.55);\n--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n--bs-navbar-active-color: #fff;\n--bs-navbar-brand-color: #fff;\n--bs-navbar-brand-hover-color: #fff;\n--bs-bg-opacity: 1;\nbackground-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n}"}])
+  Gallery-Themes-availableThemes                                        Adds these CSS settings as it is to the end of the body tag of the page. (default: [{"name":"classic","theme":":root nav.navbar {\n--bs-navbar-color: rgba(255, 255, 255, 0.55);\n--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n--bs-navbar-active-color: #fff;\n--bs-navbar-brand-color: #fff;\n--bs-navbar-brand-hover-color: #fff;\n--bs-bg-opacity: 1;\nbackground-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n}"}])
   Gallery-InlineBlogStartsOpen                                          Makes inline blog (*.md files content) auto-open. (default: false)
   Gallery-TopBlogStartsOpen                                             Makes top blog (*.md files content) auto-open. (default: false)
   Gallery-AutoUpdate-enable                                             Enable auto polling for new photos and videos in the gallery. (default: false)
@@ -318,6 +345,8 @@ Environmental variables:
   Map-MapPathGroupConfig                                                Markers are grouped and themed by these settings (default: [{"name":"Transportation","matchers":[{"matchers":["flight","flying"],"theme":{"color":"var(--bs-orange)","dashArray":"4 8","svgIcon":{"viewBox":"0 0 567 512","items":"<path d=\"M482.3 192c34.2 0 93.7 29 93.7 64c0 36-59.5 64-93.7 64l-116.6 0L265.2 495.9c-5.7 10-16.3 16.1-27.8 16.1l-56.2 0c-10.6 0-18.3-10.2-15.4-20.4l49-171.6L112 320 68.8 377.6c-3 4-7.8 6.4-12.8 6.4l-42 0c-7.8 0-14-6.3-14-14c0-1.3 .2-2.6 .5-3.9L32 256 .5 145.9c-.4-1.3-.5-2.6-.5-3.9c0-7.8 6.3-14 14-14l42 0c5 0 9.8 2.4 12.8 6.4L112 192l102.9 0-49-171.6C162.9 10.2 170.6 0 181.2 0l56.2 0c11.5 0 22.1 6.2 27.8 16.1L365.7 192l116.6 0z\"/>"}}},{"matchers":["drive","driving"],"theme":{"color":"var(--bs-orange)","dashArray":"4 8","svgIcon":{"viewBox":"0 0 640 512","items":"<path d=\"M171.3 96H224v96H111.3l30.4-75.9C146.5 104 158.2 96 171.3 96zM272 192V96h81.2c9.7 0 18.9 4.4 25 12l67.2 84H272zm256.2 1L428.2 68c-18.2-22.8-45.8-36-75-36H171.3c-39.3 0-74.6 23.9-89.1 60.3L40.6 196.4C16.8 205.8 0 228.9 0 256V368c0 17.7 14.3 32 32 32H65.3c7.6 45.4 47.1 80 94.7 80s87.1-34.6 94.7-80H385.3c7.6 45.4 47.1 80 94.7 80s87.1-34.6 94.7-80H608c17.7 0 32-14.3 32-32V320c0-65.2-48.8-119-111.8-127zM434.7 368a48 48 0 1 1 90.5 32 48 48 0 1 1 -90.5-32zM160 336a48 48 0 1 1 0 96 48 48 0 1 1 0-96z\"/>"}}},{"matchers":["ship","sailing","cruise"],"theme":{"color":"var(--bs-orange)","dashArray":"4 8","svgIcon":{"viewBox":"0 0 576 512","items":"<path d=\"M256 16c0-7 4.5-13.2 11.2-15.3s13.9 .4 17.9 6.1l224 320c3.4 4.9 3.8 11.3 1.1 16.6s-8.2 8.6-14.2 8.6H272c-8.8 0-16-7.2-16-16V16zM212.1 96.5c7 1.9 11.9 8.2 11.9 15.5V336c0 8.8-7.2 16-16 16H80c-5.7 0-11-3-13.8-8s-2.9-11-.1-16l128-224c3.6-6.3 11-9.4 18-7.5zM5.7 404.3C2.8 394.1 10.5 384 21.1 384H554.9c10.6 0 18.3 10.1 15.4 20.3l-4 14.3C550.7 473.9 500.4 512 443 512H133C75.6 512 25.3 473.9 9.7 418.7l-4-14.3z\"/>"}}}]},{"name":"Sport","matchers":[{"matchers":["(\b|_|-)run"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 417 512","items":"<path d=\"M320 48a48 48 0 1 0 -96 0 48 48 0 1 0 96 0zM125.7 175.5c9.9-9.9 23.4-15.5 37.5-15.5c1.9 0 3.8 .1 5.6 .3L137.6 254c-9.3 28 1.7 58.8 26.8 74.5l86.2 53.9-25.4 88.8c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l28.7-100.4c5.9-20.6-2.6-42.6-20.7-53.9L238 299l30.9-82.4 5.1 12.3C289 264.7 323.9 288 362.7 288H384c17.7 0 32-14.3 32-32s-14.3-32-32-32H362.7c-12.9 0-24.6-7.8-29.5-19.7l-6.3-15c-14.6-35.1-44.1-61.9-80.5-73.1l-48.7-15c-11.1-3.4-22.7-5.2-34.4-5.2c-31 0-60.8 12.3-82.7 34.3L57.4 153.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l23.1-23.1zM91.2 352H32c-17.7 0-32 14.3-32 32s14.3 32 32 32h69.6c19 0 36.2-11.2 43.9-28.5L157 361.6l-9.5-6c-17.5-10.9-30.5-26.8-37.9-44.9L91.2 352z\"/>"}}},{"matchers":["(\b|_|-)walk"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 320 512","items":"<path d=\"M160 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM126.5 199.3c-1 .4-1.9 .8-2.9 1.2l-8 3.5c-16.4 7.3-29 21.2-34.7 38.2l-2.6 7.8c-5.6 16.8-23.7 25.8-40.5 20.2s-25.8-23.7-20.2-40.5l2.6-7.8c11.4-34.1 36.6-61.9 69.4-76.5l8-3.5c20.8-9.2 43.3-14 66.1-14c44.6 0 84.8 26.8 101.9 67.9L281 232.7l21.4 10.7c15.8 7.9 22.2 27.1 14.3 42.9s-27.1 22.2-42.9 14.3L247 287.3c-10.3-5.2-18.4-13.8-22.8-24.5l-9.6-23-19.3 65.5 49.5 54c5.4 5.9 9.2 13 11.2 20.8l23 92.1c4.3 17.1-6.1 34.5-23.3 38.8s-34.5-6.1-38.8-23.3l-22-88.1-70.7-77.1c-14.8-16.1-20.3-38.6-14.7-59.7l16.9-63.5zM68.7 398l25-62.4c2.1 3 4.5 5.8 7 8.6l40.7 44.4-14.5 36.2c-2.4 6-6 11.5-10.6 16.1L54.6 502.6c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L68.7 398z\"/>"}}},{"matchers":["(\b|_|-)hike","(\b|_|-)hiking"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 384 512","items":"<path d=\"M192 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zm51.3 182.7L224.2 307l49.7 49.7c9 9 14.1 21.2 14.1 33.9V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V397.3l-73.9-73.9c-15.8-15.8-22.2-38.6-16.9-60.3l20.4-84c8.3-34.1 42.7-54.9 76.7-46.4c19 4.8 35.6 16.4 46.4 32.7L305.1 208H336V184c0-13.3 10.7-24 24-24s24 10.7 24 24v55.8c0 .1 0 .2 0 .2s0 .2 0 .2V488c0 13.3-10.7 24-24 24s-24-10.7-24-24V272H296.6c-16 0-31-8-39.9-21.4l-13.3-20zM81.1 471.9L117.3 334c3 4.2 6.4 8.2 10.1 11.9l41.9 41.9L142.9 488.1c-4.5 17.1-22 27.3-39.1 22.8s-27.3-22-22.8-39.1zm55.5-346L101.4 266.5c-3 12.1-14.9 19.9-27.2 17.9l-47.9-8c-14-2.3-22.9-16.3-19.2-30L31.9 155c9.5-34.8 41.1-59 77.2-59h4.2c15.6 0 27.1 14.7 23.3 29.8z\"/>"}}},{"matchers":["(\b|_|-)bike","(\b|_|-)biking","(\b|_|-)cycling"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 640 512","items":"<path d=\"M400 96a48 48 0 1 0 0-96 48 48 0 1 0 0 96zm27.2 64l-61.8-48.8c-17.3-13.6-41.7-13.8-59.1-.3l-83.1 64.2c-30.7 23.8-28.5 70.8 4.3 91.6L288 305.1V416c0 17.7 14.3 32 32 32s32-14.3 32-32V288c0-10.7-5.3-20.7-14.2-26.6L295 232.9l60.3-48.5L396 217c5.7 4.5 12.7 7 20 7h64c17.7 0 32-14.3 32-32s-14.3-32-32-32H427.2zM56 384a72 72 0 1 1 144 0A72 72 0 1 1 56 384zm200 0A128 128 0 1 0 0 384a128 128 0 1 0 256 0zm184 0a72 72 0 1 1 144 0 72 72 0 1 1 -144 0zm200 0a128 128 0 1 0 -256 0 128 128 0 1 0 256 0z\"/>"}}},{"matchers":["(\b|_|-)skiing","(\b|_|-)ski"],"theme":{"color":"var(--bs-primary)","dashArray":"","svgIcon":{"viewBox":"0 0 512 512","items":"<path d=\"M380.7 48a48 48 0 1 1 96 0 48 48 0 1 1 -96 0zM2.7 268.9c6.1-11.8 20.6-16.3 32.4-10.2L232.7 361.3l46.2-69.2-75.1-75.1c-14.6-14.6-20.4-33.9-18.4-52.1l108.8 52 39.3 39.3c16.2 16.2 18.7 41.5 6 60.6L289.8 391l128.7 66.8c13.6 7.1 29.8 7.2 43.6 .3l15.2-7.6c11.9-5.9 26.3-1.1 32.2 10.7s1.1 26.3-10.7 32.2l-15.2 7.6c-27.5 13.7-59.9 13.5-87.2-.7L12.9 301.3C1.2 295.2-3.4 280.7 2.7 268.9zM118.9 65.6L137 74.2l8.7-17.4c4-7.9 13.6-11.1 21.5-7.2s11.1 13.6 7.2 21.5l-8.5 16.9 54.7 26.2c1.5-.7 3.1-1.4 4.7-2.1l83.4-33.4c34.2-13.7 72.8 4.2 84.5 39.2l17.1 51.2 52.1 26.1c15.8 7.9 22.2 27.1 14.3 42.9s-27.1 22.2-42.9 14.3l-58.1-29c-11.4-5.7-20-15.7-24.1-27.8l-5.8-17.3-27.3 12.1-6.8 3-6.7-3.2L151.5 116.7l-9.2 18.4c-4 7.9-13.6 11.1-21.5 7.2s-11.1-13.6-7.2-21.5l9-18-17.6-8.4c-8-3.8-11.3-13.4-7.5-21.3s13.4-11.3 21.3-7.5z\"/>"}}}]},{"name":"Other paths","matchers":[{"matchers":[],"theme":{"color":"var(--bs-secondary)","dashArray":"","svgIcon":{"viewBox":"","items":""}}}]}])
   Map-bendLongPathsTrigger                                              Map will bend the path if two points are this far apart on latitude axes. This intended to bend flight if only the end and the start points are given. (default: 0.5)
   Faces-enabled                                                          (default: true)
+  Faces-sorting-method                                                   (default: 'PersonCount')
+  Faces-sorting-ascending                                                (default: true)
   Faces-keywordsToPersons                                               If a photo has the same face (person) name and keyword, the app removes the duplicate, keeping the face only. (default: true)
   Faces-writeAccessMinRole                                              Required minimum right to star (favourite) a face. (default: 'Admin')
   Faces-readAccessMinRole                                               Required minimum right to show the faces tab. (default: 'User')
@@ -326,6 +355,9 @@ Environmental variables:
   Extensions-repositoryUrl                                              Repository url that points to a list of extensions in .md format. (default: 'https://raw.githubusercontent.com/bpatrik/pigallery2/master/extension/REPOSITORY.md')
   Extensions-folder                                                     Folder where the app stores all extensions. Individual extensions live in their own sub-folders. (default: 'extensions')
   Extensions-cleanUpUnusedTables                                        Automatically removes all tables from the DB that are not used anymore. (default: true)
+  Upload-enabled                                                         (default: false)
+  Upload-minimumRole                                                    Minimum user role to enable file upload. (default: 'Admin')
+  Upload-enforcedDirectoryConfig                                        Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
   Database-type                                                         SQLite is recommended. (default: 'sqlite')
   Database-dbFolder                                                     All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   Database-sqlite-DBFileName                                            Sqlite will save the db with this filename. (default: 'sqlite.db')
@@ -343,7 +375,7 @@ Environmental variables:
   Indexing-reIndexingSensitivity                                        Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
   Indexing-excludeFolderList                                            Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
   Indexing-excludeFileList                                              Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
-  AlbumCover-SearchQuery                                                Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"text":""})
+  AlbumCover-SearchQuery                                                Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   AlbumCover-Sorting                                                    If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   Duplicates-listingLimit                                               Maximum number of duplicates to list. (default: 1000)
   Messaging-Email-emailFrom                                             Some services do not allow sending from random e-mail addresses. Set this accordingly. (default: 'noreply@pigallery2.com')
@@ -359,13 +391,14 @@ Environmental variables:
 ```
 
  ### `config.json` sample:
+
 ```json
 {
     "Server": {
         "applicationTitle": "PiGallery 2",
         "//[publicUrl]": "If you access the page from local network it's good to know the public url for creating sharing link.",
         "publicUrl": "",
-        "//[urlBase]": "If you access the gallery under a sub url (like: http://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url.",
+        "//[urlBase]": "If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url.",
         "urlBase": "",
         "//[apiPath]": "PiGallery api path.",
         "apiPath": "/pgapi",
@@ -403,17 +436,41 @@ Environmental variables:
         "authenticationRequired": true,
         "//[unAuthenticatedUserRole]": "Default user right when password protection is disabled.",
         "unAuthenticatedUserRole": "Admin",
+        "//[oidc]": "Setup SSO with external authentication apps like Authentik or Authelia",
+        "oidc": {
+            "enabled": false,
+            "//[displayName]": "Shown on the login button (client-visible).",
+            "displayName": "",
+            "//[issuerUrl]": "OIDC provider Issuer URL",
+            "issuerUrl": "",
+            "clientId": "",
+            "clientSecret": "",
+            "//[redirectUri]": "Full callback URL registered at the provider (e.g.: https://example.com/pgapi/auth/oidc/callback)",
+            "redirectUri": "",
+            "scopes": [
+                "openid",
+                "profile",
+                "email"
+            ],
+            "//[usernameClaim]": "JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty.",
+            "usernameClaim": "preferred_username",
+            "emailClaim": "email",
+            "//[allowedDomains]": "If set, only identities with emails in these domains will be accepted.",
+            "allowedDomains": [],
+            "//[autoCreateUser]": "If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in.",
+            "autoCreateUser": false
+        },
         "//[enforcedUsers]": "Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.",
         "enforcedUsers": [],
         "//[allowQuery]": "Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately.",
         "allowQuery": {
             "type": 100,
-            "text": ""
+            "value": ""
         },
         "//[blockQuery]": "Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately.",
         "blockQuery": {
             "type": 100,
-            "text": ""
+            "value": ""
         },
         "//[suppressDefUserWarn]": "if true, the app won't show a warning for using the default user.",
         "suppressDefUserWarn": false
@@ -522,7 +579,7 @@ Environmental variables:
             "defaultMode": "auto",
             "//[selectedTheme]": "Selected theme to use on the site.",
             "selectedTheme": "classic",
-            "//[availableThemes]": "Adds these css settings as it is to the end of the body tag of the page.",
+            "//[availableThemes]": "Adds these CSS settings as it is to the end of the body tag of the page.",
             "availableThemes": [
                 {
                     "//[name]": "Name of the theme",
@@ -956,6 +1013,11 @@ Environmental variables:
     },
     "Faces": {
         "enabled": true,
+        "//[sorting]": "Default sorting on the faces page",
+        "sorting": {
+            "method": "PersonCount",
+            "ascending": true
+        },
         "//[keywordsToPersons]": "If a photo has the same face (person) name and keyword, the app removes the duplicate, keeping the face only.",
         "keywordsToPersons": true,
         "//[writeAccessMinRole]": "Required minimum right to star (favourite) a face.",
@@ -977,6 +1039,13 @@ Environmental variables:
         "extensions": {},
         "//[cleanUpUnusedTables]": "Automatically removes all tables from the DB that are not used anymore.",
         "cleanUpUnusedTables": true
+    },
+    "Upload": {
+        "enabled": false,
+        "//[minimumRole]": "Minimum user role to enable file upload.",
+        "minimumRole": "Admin",
+        "//[enforcedDirectoryConfig]": "Only enable upload in folder where an \".uploader.pg2conf\" is present in the folder.",
+        "enforcedDirectoryConfig": false
     },
     "Database": {
         "//[type]": "SQLite is recommended.",
@@ -1014,7 +1083,7 @@ Environmental variables:
         "//[SearchQuery]": "Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter.",
         "SearchQuery": {
             "type": 100,
-            "text": ""
+            "value": ""
         },
         "//[Sorting]": "If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method.",
         "Sorting": [
@@ -1151,4 +1220,5 @@ Environmental variables:
             }
         ]
     }
-}```
+}
+```

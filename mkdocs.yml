@@ -1,0 +1,56 @@
+site_name: PiGallery2 Documentation
+site_url: https://bpatrik.github.io/pigallery2/
+repo_url: https://github.com/bpatrik/pigallery2
+repo_name: bpatrik/pigallery2
+
+
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github # Shows the GitHub icon in the header
+  palette:
+    primary: indigo
+    accent: indigo
+
+
+plugins:
+  - search
+  - glightbox
+
+markdown_extensions:
+  - pymdownx.magiclink
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition          # Required for the "info" blocks
+  - pymdownx.details    # Required for the "???" collapsible behavior
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - Home: index.md
+  - FAQ: faq.md
+  - Features: features.md
+  - Getting Started:
+      - Docker (Recommended): setup/docker.md
+      - Advanced:
+          - Portainer & NPM: setup/advanced/advanced-docker-npm-portainer.md
+          - ORCID with Authentik SSO (Optional): setup/advanced/authentik.md
+      - Direct Install (Unsupported): setup/direct-install.md
+  - User Guide:
+      - Configuration: user-guide/configuration.md
+      - User Rights: user-guide/user-rights.md
+  - Development:
+      - Contributing: development/contributing.md
+      - Docker Development: development/docker-contributing.md
+      - Extensions: development/extensions.md
+  - Blog:
+      - How do I use PiGallery2 (2021): blog/How do I use PiGallery2 2021.md
+      - The future of PiGallery2 (2023): blog/The future of pigallery2 v2.0.0 and beyond 2023.md
+      - From Zero To Hero (2025): blog/[Tutorial] Pigallery2 From Zero To Hero 2025.md
+  - References: references.md

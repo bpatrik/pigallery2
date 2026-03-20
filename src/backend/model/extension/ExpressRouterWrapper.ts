@@ -4,7 +4,7 @@ import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {AuthenticationMWs} from '../../middlewares/user/AuthenticationMWs';
 import {RenderingMWs} from '../../middlewares/RenderingMWs';
 import {ParamsDictionary} from 'express-serve-static-core';
-import {IExtensionRESTApi, IExtensionRESTRoute} from './IExtension';
+import {IExtensionRESTApi, IExtensionRESTRoute, IMediaRequestBody} from './IExtension';
 import {ILogger} from '../../Logger';
 import {ExtensionManager} from './ExtensionManager';
 import {Utils} from '../../../common/Utils';
@@ -52,7 +52,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
               private readonly extLogger: ILogger) {
   }
 
-  public mediaJsonResponse(paths: string[], minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: any, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string {
+  public mediaJsonResponse(paths: string[], minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string {
     const fullPaths = paths.map(p => (Utils.concatUrls('/' + this.name + '/' + p)));
     this.router[this.func](fullPaths,
       ...(this.getAuthMWs(minRole).concat([
@@ -78,7 +78,8 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
             req.resultPipe = 'ok';
             next();
           } catch (e) {
-            next(new Error(`[${this.name}]Error during processing:${paths}`));
+            this.extLogger.error(e);
+            next(new Error(`[${this.name}] Error during processing: '${paths}'`));
           }
         },
         RenderingMWs.renderResult

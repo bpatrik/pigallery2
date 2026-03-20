@@ -5,8 +5,11 @@ import {Utils} from './Utils';
  * This contains the action of the supported list of *.pg2conf files.
  * These files are passed down to the client as metaFiles (like photos and directories)
  */
-export const PG2ConfMap: { sorting: Record<string, SortingMethod> } = {
-  sorting: {}
+export const PG2ConfMap: { sorting: Record<string, SortingMethod>, upload: Record<string, boolean> } = {
+  sorting: {},
+  upload: {
+    '.uploader.pg2conf': true
+  }
 };
 
 Utils.enumToArray(SortByTypes).forEach(kv => {

@@ -96,93 +96,89 @@ jobs:
         with:
           name: pigallery2-release
           path: release
-  build-dockerx:
-    runs-on: [ ubuntu-latest ]
-    needs: [ test, create-release ]
+
+  # --- MULTI-PLATFORM DOCKER VERIFICATION ---
+  build-verify-docker:
+    runs-on: ubuntu-latest
+    needs: [test, create-release]
     strategy:
+      fail-fast: false # Ensures one platform failure doesn't stop others from testing
       matrix:
-        container: [alpine,  debian-trixie ]
+        container: [alpine, debian-trixie]
         include:
           - container: alpine
-            platforms: linux/amd64,linux/arm64, linux/arm/v7
+            platforms: linux/amd64,linux/arm64,linux/arm/v7
           - container: debian-trixie
             platforms: linux/amd64,linux/arm64
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v4
         with:
           name: pigallery2-release
           path: pigallery2-release
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
+      - name: Build and Verify Platforms
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/${{ matrix.container }}/Dockerfile.build
+          platforms: ${{ matrix.platforms }}
+          push: false # Do not push yet
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # --- DOCKER LOGIN AND PUSH ---
+  push-docker:
+    runs-on: ubuntu-latest
+    needs: [build-verify-docker]
+    # Only push on branch merges or tags, never on plain PRs
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/experimental'
+    strategy:
+      matrix:
+        container: [alpine, debian-trixie]
+        include:
+          - container: alpine
+            platforms: linux/amd64,linux/arm64,linux/arm/v7
+          - container: debian-trixie
+            platforms: linux/amd64,linux/arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: pigallery2-release
+          path: pigallery2-release
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
-      - name: Build docker
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/${{ matrix.container }}/Dockerfile.build
-          platforms: ${{ matrix.platforms }}
-      - name: Push experimental
-        if: ${{ github.ref == 'refs/heads/experimental' }}
+
+      - name: Push Verified Images
         uses: docker/build-push-action@v5
         with:
           context: .
           file: docker/${{ matrix.container }}/Dockerfile.build
           platforms: ${{ matrix.platforms }}
           push: true
-          tags: ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:experimental-${{ matrix.container }}
-      - name: Push secondary edge builds on new master commit
-        # github.ref:  branches the format is refs/heads/<branch_name>  PRs and Tags are different
-        if: ${{github.ref == 'refs/heads/master' &&  matrix.container != 'debian-trixie'}}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/${{ matrix.container }}/Dockerfile.build
-          platforms: ${{ matrix.platforms }}
-          push: true
-          tags: ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:edge-${{ matrix.container }}
-      - name: Push main edge build on new master commit
-        if: ${{github.ref == 'refs/heads/master' &&  matrix.container == 'debian-trixie'}}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/${{ matrix.container }}/Dockerfile.build
-          platforms: ${{ matrix.platforms }}
-          push: true
+          cache-from: type=gha # Pulls from the cache created in Job 1
           tags: |
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:edge
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:edge-${{ matrix.container }}
-      - name: Push release on new Tag
-        if: ${{ startsWith(github.ref_type , 'tag') &&  !github.event.issue.pull_request &&  matrix.container != 'debian-trixie'}}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/${{ matrix.container }}/Dockerfile.build
-          platforms: ${{ matrix.platforms }}
-          push: true
-          tags: |
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:edge-${{ matrix.container }}
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.ref_name }}-${{ matrix.container }}
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:latest-${{ matrix.container }}
-      - name: Push latest on new Tag
-        if: ${{ startsWith(github.ref_type, 'tag') &&  !github.event.issue.pull_request &&  matrix.container == 'debian-trixie'}}
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: docker/${{ matrix.container }}/Dockerfile.build
-          platforms: ${{ matrix.platforms }}
-          push: true
-          tags: |
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:edge-${{ matrix.container }}
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.ref_name }}-${{ matrix.container }}
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:latest-${{ matrix.container }}
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:${{ github.ref_name }}
-            ${{ secrets.REGISTRY_NAMESPACE }}/pigallery2:latest
+            ${{ (github.ref == 'refs/heads/master' && matrix.container == 'debian-trixie') && format('{0}/pigallery2:edge,{0}/pigallery2:edge-{1}', secrets.REGISTRY_NAMESPACE, matrix.container) || '' }}
+            ${{ (github.ref == 'refs/heads/master' && matrix.container != 'debian-trixie') && format('{0}/pigallery2:edge-{1}', secrets.REGISTRY_NAMESPACE, matrix.container) || '' }}
+            ${{ (github.ref == 'refs/heads/experimental') && format('{0}/pigallery2:experimental-{1}', secrets.REGISTRY_NAMESPACE, matrix.container) || '' }}
+            ${{ (startsWith(github.ref, 'refs/tags/') && matrix.container == 'debian-trixie') && format('{0}/pigallery2:{1},{0}/pigallery2:latest,{0}/pigallery2:edge-{2}', secrets.REGISTRY_NAMESPACE, github.ref_name, matrix.container) || '' }}
+            ${{ (startsWith(github.ref, 'refs/tags/') && matrix.container != 'debian-trixie') && format('{0}/pigallery2:{1}-{2},{0}/pigallery2:latest-{2},{0}/pigallery2:edge-{2}', secrets.REGISTRY_NAMESPACE, github.ref_name, matrix.container) || '' }}

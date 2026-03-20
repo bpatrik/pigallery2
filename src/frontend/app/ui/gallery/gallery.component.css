@@ -1,3 +1,10 @@
+app-frame {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+}
+
 .container-fluid {
   width: 100%;
   padding: 0;
@@ -27,6 +34,10 @@ app-gallery-map {
   width: 100px;
   position: absolute;
   right: 4px
+}
+
+.app-gallery-body{
+  flex-grow: 1;
 }
 
 

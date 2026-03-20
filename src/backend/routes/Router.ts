@@ -12,6 +12,7 @@ import {AlbumRouter} from './AlbumRouter';
 import {ExtensionRouter} from './admin/ExtensionRouter';
 import {VersionMWs} from '../middlewares/VersionMWs';
 import {OIDCRouter} from './OIDCRouter';
+import {UploadRouter} from './UploadRouter';
 
 export class Router {
   public static route(app: Express): void {
@@ -28,6 +29,7 @@ export class Router {
     SettingsRouter.route(app);
     SharingRouter.route(app);
     UserRouter.route(app);
+    UploadRouter.route(app);
 
     ErrorRouter.route(app);
   }

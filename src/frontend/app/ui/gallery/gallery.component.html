@@ -26,6 +26,7 @@
 
   <app-gallery-navbar navbar-appendix></app-gallery-navbar>
   <div body class="container-fluid app-gallery-body" *ngIf="ContentWrapper">
+    <app-gallery-uploader [isUploadOver]="isUploadOver"></app-gallery-uploader>
     <ng-container *ngIf="ContentWrapper.error">
       <div class="alert alert-danger" role="alert">
         {{ ContentWrapper.error }}

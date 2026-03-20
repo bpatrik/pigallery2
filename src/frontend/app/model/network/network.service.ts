@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse} from '@angular/common/http';
+import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message} from '../../../../common/entities/Message';
 import {LoadingBarService} from '@ngx-loading-bar/core';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
@@ -7,7 +7,7 @@ import {Config} from '../../../../common/config/public/Config';
 import {Utils} from '../../../../common/Utils';
 import {CustomHeaders} from '../../../../common/CustomHeaders';
 import {VersionService} from '../version.service';
-import {lastValueFrom} from 'rxjs';
+import {lastValueFrom, Observable, tap} from 'rxjs';
 
 @Injectable()
 export class NetworkService {
@@ -78,6 +78,33 @@ export class NetworkService {
 
   public postJson<T>(url: string, data = {}): Promise<T> {
     return this.callJson('post', url, data);
+  }
+
+  public postFormData<T>(url: string, data: FormData): Observable<HttpEvent<Message<T>>> {
+    this.loadingBarService.useRef().start();
+    return this.http.post<Message<T>>(this.apiBaseUrl + url, data, {
+      reportProgress: true,
+      observe: 'events',
+    }).pipe(tap({
+      next: (event) => {
+        if (event.type === HttpEventType.Response) {
+          this.loadingBarService.useRef().complete();
+          if (event.headers.has(CustomHeaders.dataVersion)) {
+            this.versionService.onNewVersion(
+              event.headers.get(CustomHeaders.dataVersion)
+            );
+          }
+          if (event.headers.has(CustomHeaders.appVersion)) {
+            this.versionService.onNewAppVersion(
+              event.headers.get(CustomHeaders.appVersion)
+            );
+          }
+        }
+      },
+      error: () => {
+        this.loadingBarService.useRef().complete();
+      }
+    }));
   }
 
   public putJson<T>(url: string, data = {}): Promise<T> {

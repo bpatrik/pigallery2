@@ -206,6 +206,14 @@
                       </li>
                     </ul>
                   </li>
+                  <li role="menuitem" *ngIf="uploadService.canUpload()">
+                    <a class="dropdown-item cursor-pointer" (click)="uploadInput.click()">
+                      <ng-icon name="ionCloudUploadOutline"></ng-icon>
+                      <ng-container i18n>Upload</ng-container>
+                      <input #uploadInput type="file" multiple [style.display]="'none'"
+                             (change)="uploadService.uploadFiles(uploadInput.files); uploadInput.value = ''">
+                    </a>
+                  </li>
                   <li role="menuitem" *ngIf="isAdmin()">
                     <a class="dropdown-item" [routerLink]="['/admin']">
                       <ng-icon name="ionSettingsOutline"></ng-icon>

@@ -7,6 +7,7 @@ import {
   SearchQueryTypes,
   SomeOfSearchQuery,
   TextSearch,
+  TextSearchQueryMatchTypes,
   TextSearchQueryTypes
 } from './entities/SearchQueryDTO';
 import {SearchQueryParser} from './SearchQueryParser';
@@ -109,18 +110,22 @@ export const SearchQueryUtils = {
       query.type === undefined ||
       (query.type === SearchQueryTypes.any_text && !(query as TextSearch).value);
   },
-  // Recursively strip negate:false so that optional false flags do not break validation
+  // Recursively strip negate:false and matchType:like so that optional/default flags do not break validation
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stripFalseNegate: (val: any): any => {
+  stripDefault: (val: any): any => {
     if (Array.isArray(val)) {
-      return val.map((v) => SearchQueryUtils.stripFalseNegate(v));
+      return val.map((v) => SearchQueryUtils.stripDefault(v));
     }
     if (val && typeof val === 'object') {
       const out: Record<string, unknown> = {};
       for (const k of Object.keys(val)) {
-        const v = SearchQueryUtils.stripFalseNegate(val[k]);
+        const v = SearchQueryUtils.stripDefault(val[k]);
         if (k === 'negate' && v === false) {
           // drop negate:false
+          continue;
+        }
+        if (k === 'matchType' && v === TextSearchQueryMatchTypes.like) {
+          // drop matchType:like (this is the default)
           continue;
         }
         // keep everything else, including negate:true and undefined-handled by equalsFilter
@@ -139,9 +144,9 @@ export const SearchQueryUtils = {
     const sp = new SearchQueryParser();
     try {
       const parsed = sp.parse(sp.stringify(query));
-      const normParsed = SearchQueryUtils.stripFalseNegate(parsed) as SearchQueryDTO;
-      const normQuery = SearchQueryUtils.stripFalseNegate(query) as SearchQueryDTO;
-      if (!Utils.equalsFilter(normParsed, normQuery)) {
+      const normParsed = SearchQueryUtils.stripDefault(parsed) as SearchQueryDTO;
+      const normQuery = SearchQueryUtils.stripDefault(query) as SearchQueryDTO;
+      if (!Utils.equalsFilter(normParsed, normQuery) || !Utils.equalsFilter(normQuery, normParsed)) {
         throw new Error(
           `${what} is not valid. Expected: ${JSON.stringify(parsed)} to equal: ${JSON.stringify(query)}`
         );
@@ -179,7 +184,7 @@ export const SearchQueryUtils = {
     if (!query) {
       return '';
     }
-    query=SearchQueryUtils.stripFalseNegate(query);
+    query=SearchQueryUtils.stripDefault(query);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const shorten = (obj: any): any => {
       if (Array.isArray(obj)) {

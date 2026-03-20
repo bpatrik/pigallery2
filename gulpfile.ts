@@ -390,9 +390,9 @@ gulp.task('generate-man', async (cb): Promise<void> => {
     '```\n' +
     ConfigClassBuilder.attachPrivateInterface(defCFG).__printMan() +
     '```';
-  txt += '\n\n ### `config.json` sample:\n';
-  txt += '```json\n' + JSON.stringify(defCFG, null, 4) + '```';
-  await fsp.writeFile('MANPAGE.md', txt);
+  txt += '\n\n ### `config.json` sample:\n\n';
+  txt += '```json\n' + JSON.stringify(defCFG, null, 4) + '\n```\n';
+  await fsp.writeFile(path.join(__dirname, 'docs', 'user-guide', 'configuration.md'), txt);
   cb();
 });
 

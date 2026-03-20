@@ -148,7 +148,7 @@ export class GallerySearchComponent implements OnDestroy {
   async saveSearch(): Promise<void> {
     await this.albumService.addSavedSearch(
       this.saveSearchName,
-      SearchQueryUtils.stripFalseNegate(this.searchQueryDTO)
+      SearchQueryUtils.stripDefault(this.searchQueryDTO)
     );
     this.hideSaveSearchModal();
   }

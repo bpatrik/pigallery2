@@ -10,7 +10,7 @@ import {NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 import {Utils} from '../../../../common/Utils';
 import {PageHelper} from '../../model/page.helper';
-import {BsDropdownConfig, BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
+import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {LanguageComponent} from '../language/language.component';
 import {ThemeService} from '../../model/theme.service';
 import {DeviceDetectorService} from 'ngx-device-detector';
@@ -23,6 +23,7 @@ import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {FormsModule} from '@angular/forms';
 import {GalleryService} from '../gallery/gallery.service';
+import {UploaderService} from '../gallery/uploader/uploader.service';
 
 @Component({
   selector: 'app-frame',
@@ -85,7 +86,8 @@ export class FrameComponent {
     private router: Router,
     public themeService: ThemeService,
     private deviceService: DeviceDetectorService,
-    public galleryService: GalleryService
+    public galleryService: GalleryService,
+    public uploadService: UploaderService
   ) {
     this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && !this.deviceService.isDesktop());
     this.user = this.authService.user;

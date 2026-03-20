@@ -64,6 +64,7 @@ import {
   ionChevronUpOutline,
   ionCloseOutline,
   ionCloudOutline,
+  ionCloudUploadOutline,
   ionContractOutline,
   ionCopyOutline,
   ionDocumentOutline,
@@ -72,6 +73,7 @@ import {
   ionExpandOutline,
   ionExtensionPuzzleOutline,
   ionFileTrayFullOutline,
+  ionFingerPrint,
   ionFlagOutline,
   ionFolderOutline,
   ionFunnelOutline,
@@ -122,8 +124,7 @@ import {
   ionVideocamOutline,
   ionVolumeMediumOutline,
   ionVolumeMuteOutline,
-  ionWarningOutline,
-  ionFingerPrint
+  ionWarningOutline
 } from '@ng-icons/ionicons';
 import {ClipboardModule} from 'ngx-clipboard';
 import {TooltipModule} from 'ngx-bootstrap/tooltip';
@@ -143,6 +144,7 @@ import {Marker} from 'leaflet';
 import {MarkerFactory} from './app/ui/gallery/map/MarkerFactory';
 import {DurationPipe} from './app/pipes/DurationPipe';
 import {GalleryService} from './app/ui/gallery/gallery.service';
+import {UploaderService} from './app/ui/gallery/uploader/uploader.service';
 
 if (environment.production) {
   enableProdMode();
@@ -206,7 +208,7 @@ bootstrapApplication(AppComponent, {
         ionBrowsersOutline, ionUnlinkOutline, ionSquareOutline, ionGridOutline,
         ionAppsOutline, ionOpenOutline, ionRefresh, ionExtensionPuzzleOutline, ionList, ionPencil, ionReload,
         ionCaretForward, ionCaretDown,
-        ionFingerPrint
+        ionFingerPrint, ionCloudUploadOutline
       }), ClipboardModule, TooltipModule.forRoot(), ToastrModule.forRoot(),
       ModalModule.forRoot(), CollapseModule.forRoot(), PopoverModule.forRoot(),
       BsDropdownModule.forRoot(), BsDatepickerModule.forRoot(), TimepickerModule.forRoot(),
@@ -246,6 +248,7 @@ bootstrapApplication(AppComponent, {
     FacesService,
     VersionService,
     ScheduledJobsService,
+    UploaderService,
     BackendtextService,
     CookieService,
     GPXFilesFilterPipe,

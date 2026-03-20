@@ -3,7 +3,7 @@ import {IClientMediaButtonConfig} from '../../../common/entities/extension/IClie
 import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {ParamsDictionary} from 'express-serve-static-core';
 import {MediaEntity} from '../database/enitites/MediaEntity';
-import {IUIExtension} from './IExtension';
+import {IMediaRequestBody, IUIExtension} from './IExtension';
 import {Repository} from 'typeorm';
 import {Logger} from '../../Logger';
 
@@ -13,7 +13,7 @@ export class UIExtension<C> implements IUIExtension<C> {
   constructor(private extensionObject: ExtensionObject<C>) {
   }
 
-  public addMediaButton(buttonConfig: IClientMediaButtonConfig, serverSB: (params: ParamsDictionary, body: any, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<void>): void {
+  public addMediaButton(buttonConfig: IClientMediaButtonConfig, serverSB: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<void>): void {
     this.buttonConfigs.push(buttonConfig);
     // api path isn't set
     if (!buttonConfig.apiPath && serverSB) {
