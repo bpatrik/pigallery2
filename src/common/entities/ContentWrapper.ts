@@ -269,6 +269,18 @@ export class ContentWrapperUtils {
       delete (media as MediaDTO).missingThumbnails;
     }
 
+    if (typeof (media as MediaDTO).liveVideoPath !== 'undefined') {
+      // @ts-ignore
+      (media as MediaDTO)['l'] = (media as MediaDTO).liveVideoPath;
+      delete (media as MediaDTO).liveVideoPath;
+    }
+
+    if (typeof (media as MediaDTO).liveVideoInfo !== 'undefined') {
+      // @ts-ignore
+      (media as MediaDTO)['li'] = (media as MediaDTO).liveVideoInfo;
+      delete (media as MediaDTO).liveVideoInfo;
+    }
+
     if ((media as MediaDTO).metadata) {
       // @ts-ignore
       (media as MediaDTO).metadata['d'] = [(media as MediaDTO).metadata.size.width, (media as MediaDTO).metadata.size.height];
@@ -529,6 +541,20 @@ export class ContentWrapperUtils {
       (media as PhotoDTO).missingThumbnails = (media as PhotoDTO)['t'];
       // @ts-ignore
       delete (media as PhotoDTO)['t'];
+    }
+    // @ts-ignore
+    if ((media as MediaDTO)['l']) {
+      // @ts-ignore
+      (media as PhotoDTO).liveVideoPath = (media as PhotoDTO)['l'];
+      // @ts-ignore
+      delete (media as PhotoDTO)['l'];
+    }
+    // @ts-ignore
+    if ((media as MediaDTO)['li']) {
+      // @ts-ignore
+      (media as PhotoDTO).liveVideoInfo = (media as PhotoDTO)['li'];
+      // @ts-ignore
+      delete (media as PhotoDTO)['li'];
     }
 
     // @ts-ignore
