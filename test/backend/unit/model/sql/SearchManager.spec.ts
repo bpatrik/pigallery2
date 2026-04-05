@@ -1980,5 +1980,28 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     }], 1, true))).to.deep.equalInAnyOrder([searchifyMedia(pFaceLess)]);
   });
 
+  it('prepareAndBuildWhereQuery should not fail on directory only', async () => {
+    const sm = new SearchManager();
+    const query = {
+      type: SearchQueryTypes.AND,
+      list: [
+        {
+          matchType: TextSearchQueryMatchTypes.like,
+          negate: true,
+          type: SearchQueryTypes.keyword,
+          value: 'Urbex'
+        },
+        {
+          matchType: TextSearchQueryMatchTypes.like,
+          type: SearchQueryTypes.directory,
+          value: 'KRIKš'
+        } as TextSearch
+      ]
+    } as ANDSearchQuery;
+
+    // This should not throw TypeError: Cannot read properties of null (reading 'queryId')
+    await sm.prepareAndBuildWhereQuery(query, true, {directory: 'directories'});
+  });
+
 
 });

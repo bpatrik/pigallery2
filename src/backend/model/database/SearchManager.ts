@@ -22,7 +22,8 @@ import {
   SearchQueryTypes,
   SomeOfSearchQuery,
   TextSearch,
-  TextSearchQueryMatchTypes, TextSearchQueryTypes,
+  TextSearchQueryMatchTypes,
+  TextSearchQueryTypes,
 } from '../../../common/entities/SearchQueryDTO';
 import {GalleryManager} from './GalleryManager';
 import {ObjectManagers} from '../ObjectManagers';
@@ -484,6 +485,9 @@ export class SearchManager {
     let query = await this.prepareQuery(queryIN);
     if (directoryOnly) {
       query = this.filterDirectoryQuery(query);
+      if (query === null) {
+        return null;
+      }
     }
     return this.buildWhereQuery(query, directoryOnly, aliases);
   }
@@ -888,10 +892,10 @@ export class SearchManager {
     }
 
 
-    if(!TextSearchQueryTypes.includes(query.type)){
-        throw new Error(
-          `Invalid search query: Unknown query type: ${SearchQueryTypes[query.type]}(type: ${query.type})`
-        );
+    if (!TextSearchQueryTypes.includes(query.type)) {
+      throw new Error(
+        `Invalid search query: Unknown query type: ${SearchQueryTypes[query.type]}(type: ${query.type})`
+      );
     }
 
     if (typeof (query as TextSearch).value === 'undefined') {
@@ -1217,7 +1221,7 @@ export class SearchManager {
             this.filterDirectoryQuery(q)
           ),
         } as ANDSearchQuery;
-        // if any of the queries contain non dir query thw whole and query is a non dir query
+        // if any of the queries contain non dir query the whole and query is a non dir query
         if (andRet.list.indexOf(null) !== -1) {
           return null;
         }

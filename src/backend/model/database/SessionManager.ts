@@ -13,31 +13,6 @@ export class SessionManager {
 
   public static readonly NO_PROJECTION_KEY = crypto.createHash('md5').update('No Key').digest('hex');
 
-  private getQueryForUser(user: ContextUser) {
-    let blockQuery = user.overrideAllowBlockList ? user.blockQuery : Config.Users.blockQuery;
-    const allowQuery = user.overrideAllowBlockList ? user.allowQuery : Config.Users.allowQuery;
-
-    if (SearchQueryUtils.isQueryEmpty(allowQuery) && SearchQueryUtils.isQueryEmpty(blockQuery)) {
-      return null;
-    }
-
-    if (!SearchQueryUtils.isQueryEmpty(blockQuery)) {
-      blockQuery = SearchQueryUtils.negate(blockQuery);
-    }
-    let query = !SearchQueryUtils.isQueryEmpty(allowQuery) ? allowQuery : blockQuery;
-    if (!SearchQueryUtils.isQueryEmpty(allowQuery) && !SearchQueryUtils.isQueryEmpty(blockQuery)) {
-      query = {
-        type: SearchQueryTypes.AND,
-        list: [
-          allowQuery,
-          blockQuery
-        ]
-      } as ANDSearchQuery;
-    }
-    return query;
-
-  }
-
   public buildAllowListForSharing(sharing: SharingEntity): SearchQueryDTO {
     const creatorQuery = this.getQueryForUser(sharing.creator);
     let finalQuery = sharing.searchQuery;
@@ -102,5 +77,30 @@ export class SessionManager {
       }
     }
     return sessions;
+  }
+
+  private getQueryForUser(user: ContextUser): SearchQueryDTO {
+    let blockQuery = user.overrideAllowBlockList ? user.blockQuery : Config.Users.blockQuery;
+    const allowQuery = user.overrideAllowBlockList ? user.allowQuery : Config.Users.allowQuery;
+
+    if (SearchQueryUtils.isQueryEmpty(allowQuery) && SearchQueryUtils.isQueryEmpty(blockQuery)) {
+      return null;
+    }
+
+    if (!SearchQueryUtils.isQueryEmpty(blockQuery)) {
+      blockQuery = SearchQueryUtils.negate(blockQuery);
+    }
+    let query = !SearchQueryUtils.isQueryEmpty(allowQuery) ? allowQuery : blockQuery;
+    if (!SearchQueryUtils.isQueryEmpty(allowQuery) && !SearchQueryUtils.isQueryEmpty(blockQuery)) {
+      query = {
+        type: SearchQueryTypes.AND,
+        list: [
+          allowQuery,
+          blockQuery
+        ]
+      } as ANDSearchQuery;
+    }
+    return query;
+
   }
 }
