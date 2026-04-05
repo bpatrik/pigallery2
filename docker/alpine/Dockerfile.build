@@ -1,13 +1,10 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:22-alpine3.22 AS builder
+FROM node:22-alpine3.23 AS builder
 
 ENV SHARP_FORCE_GLOBAL_LIBVIPS=1
 # inspired by https://github.com/lovell/sharp/issues/4273 and https://github.com/lovell/sharp/issues/4267
 RUN apk add --no-cache --update \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/main \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community \
-    --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing \
     vips \
     vips-dev \
     vips-heif \
@@ -40,7 +37,7 @@ RUN mkdir -p /app/data/config && \
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:22-alpine3.22 AS main
+FROM node:22-alpine3.23 AS main
 WORKDIR /app
 ENV NODE_ENV=production \
     # overrides only the default value of the settings (the actual value can be overwritten through config.json)
