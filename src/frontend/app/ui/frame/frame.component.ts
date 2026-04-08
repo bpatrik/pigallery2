@@ -24,6 +24,7 @@ import {NgIconComponent} from '@ng-icons/core';
 import {FormsModule} from '@angular/forms';
 import {GalleryService} from '../gallery/gallery.service';
 import {UploaderService} from '../gallery/uploader/uploader.service';
+import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-frame',
@@ -47,7 +48,6 @@ import {UploaderService} from '../gallery/uploader/uploader.service';
     NgSwitch,
     NgSwitchCase,
     FormsModule,
-    JsonPipe,
   ],
 })
 export class FrameComponent {
@@ -187,6 +187,10 @@ export class FrameComponent {
 
   scrollUp(): void {
     PageHelper.ScrollY = 0;
+  }
+
+  getSearchParams(q: SearchQueryDTO): string {
+    return SearchQueryUtils.urlify(q);
   }
 }
 
