@@ -225,6 +225,7 @@ export class SharingMWs {
       if (req.session.context?.user.role < UserRoles.Admin) {
         const s = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
         if (s.creator.id !== req.session.context?.user.id) {
+          res.status(401);
           return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED, 'Can\'t delete sharing.'));
         }
       }

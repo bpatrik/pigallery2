@@ -47,7 +47,7 @@ export class NavigationService {
   public async toDefault(): Promise<boolean> {
     await this.shareService.wait();
     if (this.shareService.isSharing()) {
-      return this.router.navigate(['share', this.shareService.getSharingKey()]);
+      return this.router.navigate(['/share', this.shareService.getSharingKey()]);
     } else {
       if (Config.Gallery.NavBar.links && Config.Gallery.NavBar.links.length > 0) {
         switch (Config.Gallery.NavBar.links[0].type) {

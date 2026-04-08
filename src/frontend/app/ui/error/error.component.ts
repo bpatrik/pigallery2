@@ -3,6 +3,7 @@ import {Config} from '../../../../common/config/public/Config';
 import {IconComponent} from '../../icon.component';
 import {NgIf} from '@angular/common';
 import {Router} from '@angular/router';
+import {NavigationService} from '../../model/navigation.service';
 
 @Component({
   selector: 'app-error',
@@ -17,12 +18,12 @@ export class ErrorComponent {
   title: string;
   showHelp = false;
 
-  constructor(private router: Router) {
+  constructor(private navigationService: NavigationService) {
     this.title = Config.Server.applicationTitle;
   }
 
   onGoBack(): void {
-    this.router.navigate(['/']).catch(console.error);
+    this.navigationService.toDefault();
   }
 
   toggleHelp(): void {
