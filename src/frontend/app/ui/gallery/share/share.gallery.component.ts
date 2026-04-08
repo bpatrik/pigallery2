@@ -2,7 +2,7 @@ import {Component, Input, OnDestroy, OnInit, TemplateRef} from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
-import {SharingDTO} from '../../../../../common/entities/SharingDTO';
+import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -51,7 +51,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   sharingTarget = '';
   currentMediaCount = 0;
   currentMediaCountIsLowerBound = false;
-  sharing: SharingDTO = null;
+  sharing: ResponseSharingDTO = null;
   contentSubscription: Subscription = null;
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
@@ -59,7 +59,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   modalRef: BsModalRef;
   invalidSettings = $localize`Invalid settings`;
 
-  activeShares: SharingDTO[] = [];
+  activeShares: ResponseSharingDTO[] = [];
 
   text = {
     Yes: 'Yes',
@@ -130,7 +130,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   }
 
 
-  async deleteSharing(sharing: SharingDTO): Promise<void> {
+  async deleteSharing(sharing: ResponseSharingDTO): Promise<void> {
     await this.sharingService.deleteSharing(sharing);
     await this.updateActiveSharesList();
   }

@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {SharingManager} from '../../../../../src/backend/model/database/SharingManager';
-import {SharingDTO} from '../../../../../src/common/entities/SharingDTO';
+import {UpdateSharingDTO} from '../../../../../src/common/entities/SharingDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {DBTestHelper} from '../../../DBTestHelper';
@@ -45,7 +45,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
   it('should create sharing', async () => {
     const sm = new SharingManager();
 
-    const sharing: SharingDTO = {
+    const sharing: UpdateSharingDTO = {
       id: null,
       sharingKey: 'testKey',
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
@@ -68,7 +68,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
   it('should find sharing', async () => {
     const sm = new SharingManager();
 
-    const sharing: SharingDTO = {
+    const sharing: UpdateSharingDTO = {
       id: null,
       sharingKey: 'testKey',
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
@@ -92,7 +92,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
   it('should update sharing', async () => {
     const sm = new SharingManager();
 
-    const sharing: SharingDTO = {
+    const sharing: UpdateSharingDTO = {
       id: null,
       sharingKey: 'testKey',
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
@@ -106,7 +106,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     expect(saved.password).to.equals(sharing.password);
     expect(saved.expires).to.equals(sharing.expires);
 
-    const update: SharingDTO = {
+    const update: UpdateSharingDTO = {
       id: saved.id,
       sharingKey: saved.sharingKey,
       searchQuery: saved.searchQuery,

@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {SharingDTO} from '../../../../../common/entities/SharingDTO';
+import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {SettingsService} from '../settings.service';
 import {ShareService} from '../../gallery/share.service';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
@@ -14,7 +14,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 })
 export class SharingsListComponent implements OnInit {
 
-  public shares: SharingDTO[] = [];
+  public shares: ResponseSharingDTO[] = [];
 
 
   constructor(public sharingService: ShareService,
@@ -30,7 +30,7 @@ export class SharingsListComponent implements OnInit {
     return this.settingsService.settings.value.Sharing.enabled;
   }
 
-  async deleteSharing(sharing: SharingDTO): Promise<void> {
+  async deleteSharing(sharing: ResponseSharingDTO): Promise<void> {
     await this.sharingService.deleteSharing(sharing);
     await this.getSharingList();
   }

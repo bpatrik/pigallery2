@@ -1,17 +1,16 @@
-import {SharingDTO} from '../../../../src/common/entities/SharingDTO';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
 import {Utils} from '../../../../src/common/Utils';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import * as chai from 'chai';
-import * as crypto from 'crypto';
+import {SharingEntity} from '../../../../src/backend/model/database/enitites/SharingEntity';
 
 const should = chai.should();
 
 export class RouteTestingHelper {
 
 
-  static async createSharing(testUser: UserDTO, password: string = null): Promise<SharingDTO> {
+  static async createSharing(testUser: UserDTO, password: string = null): Promise<SharingEntity> {
     const sharing = {
       sharingKey: 'sharing_test_key_' + Date.now(),
       searchQuery: {type: SearchQueryTypes.directory, value: 'test', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
@@ -26,7 +25,7 @@ export class RouteTestingHelper {
     return sharing;
   }
 
-  public static getExpectedSharingUserForUI(sharing: SharingDTO): UserDTO {
+  public static getExpectedSharingUserForUI(sharing: SharingEntity): UserDTO {
     const u = {
       name: 'Guest',
       role: UserRoles.LimitedGuest,

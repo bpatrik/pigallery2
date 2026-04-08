@@ -5,11 +5,13 @@ import {PrivateConfigClass} from '../../common/config/private/PrivateConfigClass
 import {UserDTO, UserRoles} from '../../common/entities/UserDTO';
 import {NotificationManager} from '../model/NotifocationManager';
 import {Logger} from '../Logger';
-import {SharingDTO} from '../../common/entities/SharingDTO';
+import {ResponseSharingDTO} from '../../common/entities/SharingDTO';
 import {Utils} from '../../common/Utils';
 import {LoggerRouter} from '../routes/LoggerRouter';
 import {TAGS} from '../../common/config/public/ClientConfig';
 import {ExtensionConfigWrapper} from '../model/extension/ExtensionConfigWrapper';
+import {SharingEntity} from '../model/database/enitites/SharingEntity';
+import {Config} from '../../common/config/private/Config';
 
 const forcedDebug = process.env['NODE_ENV'] === 'debug';
 
@@ -57,7 +59,8 @@ export class RenderingMWs {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {password, creator, ...sharing} = req.resultPipe as SharingDTO;
+    const {password, creator, ...sharing} = req.resultPipe as SharingEntity;
+    (sharing as ResponseSharingDTO).passwordProtected = Config.Sharing.passwordRequired || !!password;
     RenderingMWs.renderMessage(res, sharing);
   }
 
@@ -70,12 +73,15 @@ export class RenderingMWs {
       return next();
     }
 
-    const shares = Utils.clone(req.resultPipe as SharingDTO[]);
-    shares.forEach((s): void => {
+    const shares = Utils.clone(req.resultPipe as SharingEntity[]);
+    const rs = shares.map((s): ResponseSharingDTO => {
+      let ret = s as unknown as ResponseSharingDTO;
+      ret.passwordProtected = Config.Sharing.passwordRequired || !!s.password;
       delete s.password;
       delete s.creator.password;
+      return ret;
     });
-    return RenderingMWs.renderMessage(res, shares);
+    return RenderingMWs.renderMessage(res, rs);
   }
 
   public static renderFile(

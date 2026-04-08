@@ -78,9 +78,9 @@ export class ContentLoaderService implements OnDestroy {
   public async loadDirectory(directoryName: string, forceReload = false): Promise<void> {
 
     // load from cache
-    let cw = this.galleryCacheService.getDirectory(directoryName);
+    const cachedCw = this.galleryCacheService.getDirectory(directoryName);
 
-    this.setContent(ContentWrapperUtils.unpack(cw));
+    this.setContent(ContentWrapperUtils.unpack(cachedCw));
     this.ongoingContentRequest = directoryName;
     this.lastContentRequest = {type: 'directory', value: directoryName};
 
@@ -92,21 +92,22 @@ export class ContentLoaderService implements OnDestroy {
           this.shareService.getSharingKey();
       }
     }
-
-    if (
-      !forceReload &&
-      cw?.directory &&
-      cw?.directory.lastModified &&
-      cw?.directory.lastScanned &&
-      !cw?.directory.isPartial
-    ) {
-      params[QueryParams.gallery.knownLastModified] =
-        cw?.directory.lastModified;
-      params[QueryParams.gallery.knownLastScanned] =
-        cw?.directory.lastScanned;
-    }
+    let cw :PackedContentWrapperWithError = null;
 
     try {
+      if (
+        !forceReload &&
+        cachedCw?.directory &&
+        cachedCw?.directory.lastModified &&
+        cachedCw?.directory.lastScanned &&
+        !cachedCw?.directory.isPartial
+      ) {
+        params[QueryParams.gallery.knownLastModified] =
+          cachedCw?.directory.lastModified;
+        params[QueryParams.gallery.knownLastScanned] =
+          cachedCw?.directory.lastScanned;
+      }
+
       cw = await this.networkService.getJson<PackedContentWrapperWithError>(
         '/gallery/content/' + encodeURIComponent(directoryName),
         params
@@ -124,7 +125,7 @@ export class ContentLoaderService implements OnDestroy {
       return;
     }
 
-    if(!!cw?.directory) {
+    if (!!cw?.directory) {
       this.galleryCacheService.setDirectory(cw); // save it before adding references
     }
     this.setContent(ContentWrapperUtils.unpack(cw));

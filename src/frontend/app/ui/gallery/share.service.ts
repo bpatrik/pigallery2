@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {CreateSharingDTO, SharingDTO, SharingDTOKey,} from '../../../../common/entities/SharingDTO';
+import {CreateSharingDTO, ResponseSharingDTO, SharingDTOKey,} from '../../../../common/entities/SharingDTO';
 import {Router, RoutesRecognized} from '@angular/router';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
@@ -15,13 +15,13 @@ import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 export class ShareService {
   public readonly UnknownSharingKey = {
     sharingKey: 'UnknownSharingKey'
-  } as SharingDTO;
+  } as ResponseSharingDTO;
   param: string = null;
   queryParam: string = null;
   sharingKey: string = null;
   inited = false;
   public ReadyPR: Promise<void>;
-  public sharingSubject: BehaviorSubject<SharingDTO> = new BehaviorSubject(
+  public sharingSubject: BehaviorSubject<ResponseSharingDTO> = new BehaviorSubject(
     null
   );
   public sharingIsValid: BehaviorSubject<boolean> = new BehaviorSubject(
@@ -67,7 +67,7 @@ export class ShareService {
     });
   }
 
-  public getUrl(share: SharingDTO): string {
+  public getUrl(share: ResponseSharingDTO): string {
     return Utils.concatUrls(Config.Server.publicUrl, '/share/', share.sharingKey);
   }
 
@@ -105,7 +105,7 @@ export class ShareService {
     dir: string,
     password: string,
     valid: number
-  ): Promise<SharingDTO> {
+  ): Promise<ResponseSharingDTO> {
     // Legacy dir-based API: backend will convert to strict directory searchQuery if searchQuery not provided
     return this.networkService.postJson('/share/' + dir, {
       createSharing: {
@@ -119,7 +119,7 @@ export class ShareService {
     searchQuery: SearchQueryDTO,
     password: string,
     valid: number
-  ): Promise<SharingDTO> {
+  ): Promise<ResponseSharingDTO> {
     return this.networkService.postJson('/share/', {
       createSharing: {
         valid,
@@ -134,7 +134,7 @@ export class ShareService {
     sharingId: number,
     password: string,
     valid: number
-  ): Promise<SharingDTO> {
+  ): Promise<ResponseSharingDTO> {
     // Legacy dir-based API: backend will convert to strict directory searchQuery if searchQuery not provided
     return this.networkService.putJson('/share/' + dir, {
       updateSharing: {
@@ -150,7 +150,7 @@ export class ShareService {
     searchQuery: SearchQueryDTO,
     password: string,
     valid: number
-  ): Promise<SharingDTO> {
+  ): Promise<ResponseSharingDTO> {
     return this.networkService.putJson('/share/', {
       updateSharing: {
         id: sharingId,
@@ -171,25 +171,25 @@ export class ShareService {
 
   public async getSharingListForQuery(
     query: SearchQueryDTO
-  ): Promise<SharingDTO[]> {
+  ): Promise<ResponseSharingDTO[]> {
     return this.networkService.getJson('/share/list/' + encodeURIComponent(JSON.stringify(query)));
   }
 
-  public getSharingList(): Promise<SharingDTO[]> {
+  public getSharingList(): Promise<ResponseSharingDTO[]> {
     if (!Config.Sharing.enabled) {
       return Promise.resolve([]);
     }
     return this.networkService.getJson('/share/listAll');
   }
 
-  public deleteSharing(sharing: SharingDTO): Promise<void> {
+  public deleteSharing(sharing: ResponseSharingDTO): Promise<void> {
     return this.networkService.deleteJson('/share/' + encodeURIComponent(sharing.sharingKey));
   }
 
   private async getSharing(): Promise<void> {
     try {
       this.sharingSubject.next(null);
-      const sharing = await this.networkService.getJson<SharingDTO>(
+      const sharing = await this.networkService.getJson<ResponseSharingDTO>(
         '/share/' + this.getSharingKey()
       );
       this.sharingSubject.next(sharing);

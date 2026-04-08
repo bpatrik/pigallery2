@@ -1,11 +1,10 @@
 import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
-import {SharingDTO} from '../../../../common/entities/SharingDTO';
+import {BaseSharingDTO} from '../../../../common/entities/SharingDTO';
 import {UserEntity} from './UserEntity';
-import {UserDTO} from '../../../../common/entities/UserDTO';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 @Entity()
-export class SharingEntity implements SharingDTO {
+export class SharingEntity implements BaseSharingDTO {
   @PrimaryGeneratedColumn({unsigned: true})
   id: number;
 
