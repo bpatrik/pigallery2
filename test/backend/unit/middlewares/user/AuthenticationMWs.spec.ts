@@ -238,7 +238,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHORISED);
         done();
       };
-      AuthenticationMWs.authorise(UserRoles.Developer)(req, null, next);
+      AuthenticationMWs.authorise(UserRoles.Developer)(req, {
+        status: () => {
+          // empty
+        }
+      } as any, next);
 
     });
   });
@@ -379,7 +383,6 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         expect(user).to.be.eql(testUser);
         return testContext;
       };
-
 
 
       AuthenticationMWs.login(req, null, next);

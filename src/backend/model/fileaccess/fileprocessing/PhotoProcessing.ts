@@ -306,7 +306,6 @@ export class PhotoProcessing {
     outPath: string,
     color = '#000'
   ): Promise<string> {
-
     // Generate hash from SVG content and color to create unique filename
     const contentHash = crypto
       .createHash('md5')
@@ -320,7 +319,7 @@ export class PhotoProcessing {
     const dir = path.dirname(outPath);
     const hashedOutPath = path.join(dir, `${baseName}_${contentHash}${ext}`);
 
-    // check if file already exist
+    // check if the file already exists
     try {
       await fsp.access(hashedOutPath, fsConstants.R_OK);
       return hashedOutPath;
