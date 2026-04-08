@@ -187,8 +187,15 @@ export class NetworkService {
     }
   }
 
+  /**
+   * Handle errors from the server.
+   * Also look at error.interceptor.ts
+   * @param error
+   * @private
+   */
   private handleError<T>(error: T): Promise<T> {
     if (typeof (error as ErrorDTO).code !== 'undefined') {
+      // being handled somewhere else (e.g.: not authenticated in the authentication service)
       for (const item of this.globalErrorHandlers) {
         if (item(error as ErrorDTO) === true) {
           return;
@@ -197,7 +204,7 @@ export class NetworkService {
       return Promise.reject(error);
     }
     // instead of just logging it to the console
-    console.error('error:', error);
     return Promise.reject((error as ErrorDTO).message || error || 'Server error');
   }
+
 }

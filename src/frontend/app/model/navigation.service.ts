@@ -12,10 +12,18 @@ export class NavigationService {
 
   public isLoginPage(): boolean {
     return (
-        this.router.isActive('login',
-            {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
-        this.router.isActive('shareLogin',
-            {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
+      this.router.isActive('login',
+        {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
+      this.router.isActive('shareLogin',
+        {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
+    );
+  }
+
+
+  public isErrorPage(): boolean {
+    return (
+      this.router.isActive('error',
+        {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
     );
   }
 
@@ -65,5 +73,9 @@ export class NavigationService {
 
   public async search(searchText: string): Promise<boolean> {
     return this.router.navigate(['search', searchText]);
+  }
+
+  public async toError(): Promise<boolean> {
+    return this.router.navigate(['error']);
   }
 }

@@ -14,7 +14,6 @@ export enum ErrorCodes {
   PHOTO_GENERATION_ERROR = 33,
   PERSON_ERROR = 34,
   METAFILE_ERROR = 35,
-  SERVER_ERROR = 36,
 
   USER_MANAGEMENT_DISABLED = 40,
 
@@ -28,6 +27,7 @@ export enum ErrorCodes {
 
   ALBUM_ERROR = 70,
   UPLOAD_ERROR = 80,
+  INTERNAL = 500
 }
 
 export class ErrorDTO {
@@ -38,13 +38,13 @@ export class ErrorDTO {
   } = {method: '', url: ''};
 
   constructor(
-      public code: ErrorCodes,
-      public message?: string,
-      public details?: any,
-      req?: Request
+    public code: ErrorCodes,
+    public message?: string,
+    public details?: any,
+    req?: Request
   ) {
     this.detailsStr =
-        (this.details ? this.details.toString() : '') || ErrorCodes[code];
+      (this.details ? this.details.toString() : '') || ErrorCodes[code];
     if (req) {
       this.request = {
         method: req.method,

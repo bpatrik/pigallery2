@@ -7,6 +7,7 @@ import {NetworkService} from './network.service';
 import {ErrorDTO} from '../../../../common/entities/Error';
 import {VersionService} from '../version.service';
 import {ShareService} from '../../ui/gallery/share.service';
+import {NavigationService} from '../navigation.service';
 
 class MockUserService {
   public login(credential: LoginCredential): Promise<UserDTO> {
@@ -28,6 +29,16 @@ class MockShareService {
   onNewUser(user: any): void {
     // mock fn
   }
+
+  wait(): Promise<void> {
+    return Promise.resolve();
+  }
+}
+
+class MockNavigationService {
+  toError(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
 }
 
 describe('AuthenticationService', () => {
@@ -39,6 +50,7 @@ describe('AuthenticationService', () => {
         {provide: NetworkService, useClass: MockNetworkService},
         {provide: UserService, useClass: MockUserService},
         {provide: ShareService, useClass: MockShareService},
+        {provide: NavigationService, useClass: MockNavigationService},
         AuthenticationService,
       ],
     });

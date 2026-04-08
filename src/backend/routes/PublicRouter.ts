@@ -272,6 +272,15 @@ export class PublicRouter {
 
     app.get(
       [
+        '/error'
+      ],
+      addTPl, // add template after authentication was successful
+      setLocale,
+      renderIndex
+    );
+
+    app.get(
+      [
         '/',
         '/login',
         '/gallery*',
@@ -297,6 +306,7 @@ export class PublicRouter {
           '/' + l + '/share*',
           '/' + l + '/admin',
           '/' + l + '/search*',
+          '/' + l + '/error',
         ],
         redirectToBase(l)
       );

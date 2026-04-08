@@ -1,0 +1,51 @@
+.title h1 {
+  font-size: 80px;
+  font-weight: bold;
+  text-align: center;
+}
+
+.card {
+  min-width: 400px;
+}
+
+.error-visual {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.help-section {
+  font-size: 0.9rem;
+  color: #6c757d;
+  border-top: 1px solid #dee2e6;
+  padding-top: 1rem;
+}
+
+.help-section h6 {
+  color: #495057;
+  font-weight: bold;
+}
+
+.help-section code {
+  background-color: #f8f9fa;
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
+}
+
+@media screen and ( max-width: 500px ) {
+  .title h1 {
+    font-size: 50px;
+  }
+
+  .card {
+    min-width: auto;
+  }
+}
+
+@media screen and ( min-height: 600px ) {
+  .card {
+    margin-top: calc((100vh - 120px - 295px) / 2 - 60px)
+  }
+}

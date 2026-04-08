@@ -9,6 +9,7 @@ import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
 import {CookieNames} from '../../../../common/CookieNames';
 import {ShareService} from '../../ui/gallery/share.service';
 import {CookieService} from 'ngx-cookie-service';
+import {NavigationService} from '../navigation.service';
 
 /* Injected config / user from server side */
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword, @typescript-eslint/no-namespace
@@ -22,10 +23,11 @@ export class AuthenticationService {
 
   constructor(
       private userService: UserService,
-      private networkService: NetworkService,
+      networkService: NetworkService,
       private shareService: ShareService,
-      private cookieService: CookieService
-  ) {
+      private cookieService: CookieService,
+      private navigation: NavigationService
+    ) {
     this.user = new BehaviorSubject(null);
 
     // picking up session..

@@ -14,6 +14,7 @@ import { DuplicateComponent } from './ui/duplicates/duplicates.component';
 import { FacesComponent } from './ui/faces/faces.component';
 import { AuthGuard } from './model/network/helper/auth.guard';
 import { AlbumsComponent } from './ui/albums/albums.component';
+import { ErrorComponent } from './ui/error/error.component';
 
 export function galleryMatcherFunction(
   segments: UrlSegment[]
@@ -84,12 +85,16 @@ const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'error',
+    component: ErrorComponent,
+  },
+  {
     matcher: galleryMatcherFunction,
     component: GalleryComponent,
     canActivate: [AuthGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/error', pathMatch: 'full' },
 ];
 
 @NgModule({

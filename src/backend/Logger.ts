@@ -99,7 +99,7 @@ export class Logger {
       case ErrorCodes.JOB_ERROR:
       case ErrorCodes.THUMBNAIL_GENERATION_ERROR:
       case ErrorCodes.PHOTO_GENERATION_ERROR:
-      case ErrorCodes.SERVER_ERROR:
+      case ErrorCodes.INTERNAL:
         return Logger.error;
       default:
         return Logger.warn;

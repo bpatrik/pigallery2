@@ -43,9 +43,10 @@ export class ThumbnailGeneratorMWs {
       }
     } catch (error) {
       console.error(error);
+      res.status(500);
       return next(
         new ErrorDTO(
-          ErrorCodes.SERVER_ERROR,
+          ErrorCodes.INTERNAL,
           'error during postprocessing result (adding thumbnail info)',
           error.toString()
         )
@@ -95,9 +96,10 @@ export class ThumbnailGeneratorMWs {
         item.missingThumbnail = !fs.existsSync(thPath);
       }
     } catch (error) {
+      res.status(500);
       return next(
         new ErrorDTO(
-          ErrorCodes.SERVER_ERROR,
+          ErrorCodes.INTERNAL,
           `Error during postprocessing result: adding thumbnail info for persons. Failed on: person ${erroredItem?.name}, at ${erroredItem?.cache?.sampleRegion?.media?.name} `,
           error.toString()
         )

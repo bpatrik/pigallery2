@@ -30,9 +30,10 @@ export class ErrorRouter {
           // Flush out the stack to the console
           Logger.error('Unexpected error:');
           console.error(err);
+          res.status(500);
           return next(
               new ErrorDTO(
-                  ErrorCodes.SERVER_ERROR,
+                  ErrorCodes.INTERNAL,
                   'Unknown server side error',
                   err,
                   req
