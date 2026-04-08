@@ -37,7 +37,7 @@ export class NavigationService {
         });
       } else {
         console.error('Navigating to share login without password protection. Something went somewhere off');
-        this.toLogin();
+        this.toError();
       }
     } else {
       return this.router.navigate(['login']);
