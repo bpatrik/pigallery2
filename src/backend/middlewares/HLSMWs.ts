@@ -67,10 +67,18 @@ function spawnHLSJob(
     cmd
       .videoCodec('libx264')
       .audioCodec('aac')
-      .addOption('-preset', 'fast')
+      .addOption('-preset', 'veryfast')
       .addOption('-crf', '23')
       .addOption('-b:a', '128k')
-      .addOption('-ac', '2');
+      .addOption('-ac', '2')
+      // Force an IDR keyframe every SEGMENT_DURATION_SEC seconds so FFmpeg can
+      // always cut at the requested boundary. Without this, segments follow the
+      // source file's keyframe spacing (often 10-15 s for RealMedia), which means
+      // TARGETDURATION is double hls_time and each segment takes longer to produce.
+      .addOption(
+        '-force_key_frames',
+        `expr:gte(t,n_forced*${SEGMENT_DURATION_SEC})`
+      );
   }
 
   cmd
@@ -78,9 +86,11 @@ function spawnHLSJob(
     .addOption('-avoid_negative_ts', 'make_zero')
     .addOption('-hls_time', String(SEGMENT_DURATION_SEC))
     .addOption('-hls_list_size', '0')
+    .addOption('-hls_playlist_type', 'event')
+    .addOption('-hls_init_time', '0')
     .addOption('-hls_segment_type', 'fmp4')
     .addOption('-hls_segment_filename', segmentPattern)
-    .addOption('-hls_flags', 'independent_segments')
+    .addOption('-hls_flags', 'independent_segments+discont_start')
     .on('start', (cmdLine: string) => {
       console.log('[HLSMWs] FFmpeg started:', cmdLine);
     })
@@ -103,17 +113,33 @@ async function getOrStartJob(fullMediaPath: string): Promise<HLSJob> {
   const cacheDir = path.join(ProjectPath.TempFolder, 'hls', hash);
 
   const existing = activeJobs.get(cacheDir);
-  if (existing) return existing;
+  if (existing) {
+    if (!existing.done) return existing;
+    // done=true: verify the playlist still exists on disk
+    // (could have been deleted by TempFolderCleaningJob or manually)
+    try {
+      await fsp.access(path.join(cacheDir, 'playlist.m3u8'));
+      return existing;
+    } catch {
+      activeJobs.delete(cacheDir);
+      // fall through to re-transcode
+    }
+  }
 
   // Cache already on disk (from a previous server run)
   const playlistPath = path.join(cacheDir, 'playlist.m3u8');
   try {
-    await fsp.access(playlistPath);
-    const {duration} = await detectCodecs(fullMediaPath);
-    const segmentCount = Math.ceil(duration / SEGMENT_DURATION_SEC);
-    const job: HLSJob = {cacheDir, duration, segmentCount, command: null, done: true};
-    activeJobs.set(cacheDir, job);
-    return job;
+    const content = await fsp.readFile(playlistPath, 'utf8');
+    if (content.includes('#EXT-X-ENDLIST')) {
+      // Complete cached transcode — serve instantly
+      const {duration} = await detectCodecs(fullMediaPath);
+      const segmentCount = Math.ceil(duration / SEGMENT_DURATION_SEC);
+      const job: HLSJob = {cacheDir, duration, segmentCount, command: null, done: true};
+      activeJobs.set(cacheDir, job);
+      return job;
+    }
+    // Incomplete playlist (interrupted transcode) — delete and re-transcode
+    await fsp.rm(cacheDir, {recursive: true, force: true});
   } catch {
     // not cached yet — fall through
   }
@@ -152,19 +178,81 @@ async function waitForFile(filePath: string): Promise<boolean> {
   return false;
 }
 
-const PLAYLIST_COMPLETE_TIMEOUT_MS = 5 * 60_000; // 5 min max for long videos
+function countSegments(content: string): number {
+  return content
+    .split('\n')
+    .filter(l => {const t = l.trim(); return t.length > 0 && !t.startsWith('#');})
+    .length;
+}
 
-/** Wait until FFmpeg writes EXT-X-ENDLIST into the playlist (all segments done). */
-async function waitForPlaylistComplete(playlistPath: string): Promise<boolean> {
-  const deadline = Date.now() + PLAYLIST_COMPLETE_TIMEOUT_MS;
+// Minimum segments to deliver on the FIRST response. hls.js treats a 1-segment
+// EVENT playlist as a barely-keeping-up live stream and waits ~10 s before asking
+// again. With 3 segments (18 s of content) it pre-buffers eagerly and re-polls
+// immediately. If FFmpeg hasn't produced 3 segments within FIRST_RESPONSE_WAIT_MS
+// we return whatever is available (at least 1 segment).
+const FIRST_RESPONSE_MIN_SEGMENTS = 3;
+const FIRST_RESPONSE_WAIT_MS = 3_000; // max extra wait for first response
+
+/**
+ * Long-poll: blocks until the playlist has MORE segments than it did when the
+ * request arrived (or until ENDLIST is written).
+ *
+ * - First call (initialCount=0): waits until min(FIRST_RESPONSE_MIN_SEGMENTS,
+ *   whatever is available) segments exist, ensuring hls.js pre-buffers eagerly.
+ * - Subsequent calls (hls.js re-poll, initialCount>0): returns the moment a
+ *   new segment appears — pushes the response as soon as FFmpeg is done,
+ *   eliminating hls.js's poll-interval lag entirely.
+ */
+async function waitForNewContent(cacheDir: string, requiredCount = 0): Promise<boolean> {
+  const playlistPath = path.join(cacheDir, 'playlist.m3u8');
+  const initPath = path.join(cacheDir, 'init.mp4');
+
+  // Snapshot current state at request-arrival time
+  let initialCount = requiredCount;
+  let initExists = false;
+  try {
+    const content = await fsp.readFile(playlistPath, 'utf8');
+    if (content.includes('#EXT-X-ENDLIST')) return true;
+    const current = countSegments(content);
+    if (requiredCount === 0) initialCount = 0; // first load: want ≥ FIRST_RESPONSE_MIN_SEGMENTS
+    else initialCount = Math.max(requiredCount, current); // re-poll: want at least one more
+  } catch { /* playlist not yet created */ }
+  try { await fsp.access(initPath); initExists = true; } catch { /* not yet */ }
+
+  // For the first response, try to accumulate FIRST_RESPONSE_MIN_SEGMENTS before
+  // responding, but don't wait longer than FIRST_RESPONSE_WAIT_MS from the time
+  // the first segment appears.
+  let firstSegmentSeenAt = 0;
+  const deadline = Date.now() + SEGMENT_WAIT_TIMEOUT_MS;
+
   while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, SEGMENT_POLL_INTERVAL_MS));
     try {
       const content = await fsp.readFile(playlistPath, 'utf8');
       if (content.includes('#EXT-X-ENDLIST')) return true;
-    } catch {
-      // file not written yet
-    }
-    await new Promise(r => setTimeout(r, SEGMENT_POLL_INTERVAL_MS));
+      const newCount = countSegments(content);
+
+      // Ensure init.mp4 exists before we respond
+      if (!initExists) {
+        try { await fsp.access(initPath); initExists = true; } catch { continue; }
+      }
+
+      if (newCount > 0 && firstSegmentSeenAt === 0) firstSegmentSeenAt = Date.now();
+
+      const isFirstLoad = requiredCount === 0;
+      if (isFirstLoad) {
+        // Wait for FIRST_RESPONSE_MIN_SEGMENTS unless we've already waited
+        // FIRST_RESPONSE_WAIT_MS since the first segment appeared.
+        const waitedEnough = firstSegmentSeenAt > 0 &&
+          Date.now() - firstSegmentSeenAt >= FIRST_RESPONSE_WAIT_MS;
+        if (newCount >= FIRST_RESPONSE_MIN_SEGMENTS || waitedEnough && newCount >= 1) {
+          return true;
+        }
+      } else {
+        // Re-poll: return as soon as we have more than we started with
+        if (newCount > initialCount) return true;
+      }
+    } catch { /* keep polling */ }
   }
   return false;
 }
@@ -192,18 +280,32 @@ export class HLSMWs {
 
       const playlistPath = path.join(job.cacheDir, 'playlist.m3u8');
 
-      // Wait for FFmpeg to complete the playlist (EXT-X-ENDLIST written).
-      // In transmux mode (most RM/MKV) this completes in seconds.
-      // The playlist has accurate EXTINF durations matching fMP4 tfdt values,
-      // so hls.js calculates seek positions correctly.
-      const ready = await waitForPlaylistComplete(playlistPath);
+      if (job.done) {
+        // Complete cached transcode — serve instantly, no special cache headers needed
+        // (URL already contains SHA256 hash so it's effectively immutable)
+        res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+        res.sendFile(playlistPath);
+        return;
+      }
+
+      // Long-poll: hold the connection until FFmpeg writes a new segment (or ENDLIST).
+      // This eliminates hls.js's fixed poll interval lag — the server responds the
+      // moment new content is available (~100 ms after FFmpeg flushes the segment).
+      const ready = await waitForNewContent(job.cacheDir);
       if (!ready) {
         res.status(503).json({message: 'Playlist not ready in time'});
         return;
       }
 
+      // Read the file ourselves and use res.send() instead of sendFile() so
+      // Express does NOT generate an ETag. With sendFile + ETag, browsers send
+      // If-None-Match on re-polls and get 304 Not Modified — hls.js stalls because
+      // it sees no new segments. With res.send() there is no ETag, so every
+      // re-poll gets a fresh 200 with the current playlist content.
+      const content = await fsp.readFile(playlistPath, 'utf8');
+      res.setHeader('Cache-Control', 'no-cache, no-store');
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-      res.sendFile(playlistPath);
+      res.send(content);
     } catch (err) {
       next(err);
     }
