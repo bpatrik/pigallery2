@@ -111,6 +111,16 @@ export class MediaIcon {
     return Utils.concatUrls(this.getOriginalMediaPath(), '/bestFit');
   }
 
+  getHLSPlaylistPath(): string {
+    return Utils.concatUrls(
+      Config.Server.urlBase,
+      Config.Server.apiPath,
+      '/gallery/hls/',
+      this.getRelativePath(),
+      'playlist.m3u8'
+    );
+  }
+
   equals(other: MediaDTO | MediaIcon): boolean {
     // is gridphoto
     if (other instanceof MediaIcon) {
