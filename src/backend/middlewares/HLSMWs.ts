@@ -6,6 +6,7 @@ import {FfmpegCommand} from 'fluent-ffmpeg';
 import {ProjectPath} from '../ProjectPath';
 import {Config} from '../../common/config/private/Config';
 import {FFmpegFactory} from '../model/FFmpegFactory';
+import {Logger} from '../Logger';
 
 const SEGMENT_DURATION_SEC = 6;
 const SEGMENT_WAIT_TIMEOUT_MS = 30_000;
@@ -92,14 +93,14 @@ function spawnHLSJob(
     .addOption('-hls_segment_filename', segmentPattern)
     .addOption('-hls_flags', 'independent_segments+discont_start')
     .on('start', (cmdLine: string) => {
-      console.log('[HLSMWs] FFmpeg started:', cmdLine);
+      Logger.debug('[HLSMWs] FFmpeg started:', cmdLine);
     })
     .on('end', () => {
       const job = activeJobs.get(cacheDir);
       if (job) job.done = true;
     })
     .on('error', (err: Error) => {
-      console.error('[HLSMWs] FFmpeg error for ' + inputPath + ':', err.message);
+      Logger.error('[HLSMWs] FFmpeg error for ' + inputPath + ':', err.message);
     })
     .save(outputPlaylist);
 
@@ -157,14 +158,6 @@ async function getOrStartJob(fullMediaPath: string): Promise<HLSJob> {
   return job;
 }
 
-/** Parse segment filenames out of FFmpeg's generated M3U8 playlist */
-function parseSegmentFilenames(m3u8: string): string[] {
-  return m3u8
-    .split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 0 && !l.startsWith('#'));
-}
-
 async function waitForFile(filePath: string): Promise<boolean> {
   const deadline = Date.now() + SEGMENT_WAIT_TIMEOUT_MS;
   while (Date.now() < deadline) {
@@ -203,25 +196,25 @@ const FIRST_RESPONSE_WAIT_MS = 3_000; // max extra wait for first response
  *   new segment appears — pushes the response as soon as FFmpeg is done,
  *   eliminating hls.js's poll-interval lag entirely.
  */
-async function waitForNewContent(cacheDir: string, requiredCount = 0): Promise<boolean> {
+async function waitForNewContent(cacheDir: string, knownSegmentCount = 0): Promise<boolean> {
   const playlistPath = path.join(cacheDir, 'playlist.m3u8');
   const initPath = path.join(cacheDir, 'init.mp4');
 
-  // Snapshot current state at request-arrival time
-  let initialCount = requiredCount;
+  // Snapshot segment count at request-arrival time so re-polls detect new ones
+  let baselineCount = knownSegmentCount;
   let initExists = false;
   try {
     const content = await fsp.readFile(playlistPath, 'utf8');
     if (content.includes('#EXT-X-ENDLIST')) return true;
-    const current = countSegments(content);
-    if (requiredCount === 0) initialCount = 0; // first load: want ≥ FIRST_RESPONSE_MIN_SEGMENTS
-    else initialCount = Math.max(requiredCount, current); // re-poll: want at least one more
+    // Re-poll: treat the live segment count as the minimum to beat
+    if (knownSegmentCount > 0) baselineCount = Math.max(knownSegmentCount, countSegments(content));
   } catch { /* playlist not yet created */ }
   try { await fsp.access(initPath); initExists = true; } catch { /* not yet */ }
 
-  // For the first response, try to accumulate FIRST_RESPONSE_MIN_SEGMENTS before
-  // responding, but don't wait longer than FIRST_RESPONSE_WAIT_MS from the time
-  // the first segment appears.
+  // For the first response, accumulate FIRST_RESPONSE_MIN_SEGMENTS before
+  // responding, but cap the extra wait at FIRST_RESPONSE_WAIT_MS after the
+  // first segment appears.
+  const isFirstLoad = knownSegmentCount === 0;
   let firstSegmentSeenAt = 0;
   const deadline = Date.now() + SEGMENT_WAIT_TIMEOUT_MS;
 
@@ -239,18 +232,16 @@ async function waitForNewContent(cacheDir: string, requiredCount = 0): Promise<b
 
       if (newCount > 0 && firstSegmentSeenAt === 0) firstSegmentSeenAt = Date.now();
 
-      const isFirstLoad = requiredCount === 0;
       if (isFirstLoad) {
-        // Wait for FIRST_RESPONSE_MIN_SEGMENTS unless we've already waited
-        // FIRST_RESPONSE_WAIT_MS since the first segment appeared.
+        // Wait for FIRST_RESPONSE_MIN_SEGMENTS unless FIRST_RESPONSE_WAIT_MS elapsed
         const waitedEnough = firstSegmentSeenAt > 0 &&
           Date.now() - firstSegmentSeenAt >= FIRST_RESPONSE_WAIT_MS;
-        if (newCount >= FIRST_RESPONSE_MIN_SEGMENTS || waitedEnough && newCount >= 1) {
+        if (newCount >= FIRST_RESPONSE_MIN_SEGMENTS || (waitedEnough && newCount >= 1)) {
           return true;
         }
       } else {
-        // Re-poll: return as soon as we have more than we started with
-        if (newCount > initialCount) return true;
+        // Re-poll: return as soon as at least one new segment arrived
+        if (newCount > baselineCount) return true;
       }
     } catch { /* keep polling */ }
   }
@@ -321,6 +312,9 @@ export class HLSMWs {
       const filename = req.params['filename'] as string;
       const fullMediaPath = path.join(ProjectPath.ImageFolder, mediaPath);
 
+      // getOrStartJob is called even though the playlist endpoint already started
+      // the job, because the server may have restarted between the two requests.
+      // It is idempotent: an in-memory hit returns instantly.
       const job = await getOrStartJob(fullMediaPath);
       const filePath = path.join(job.cacheDir, filename);
 
