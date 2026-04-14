@@ -9,6 +9,13 @@ declare module 'hls.js' {
     maxMaxBufferLength?: number;
     /** Force playback to start at this position in seconds. Use 0 to start at the beginning. Default -1. */
     startPosition?: number;
+    /**
+     * Timeout for fragment loading in milliseconds. Default 20000.
+     * Must be greater than the backend's segment-wait timeout (30 000 ms) so
+     * hls.js does not abort requests that the server is still holding open while
+     * waiting for FFmpeg to finish writing a segment.
+     */
+    fragLoadingTimeOut?: number;
   }
 
   interface ErrorData {
