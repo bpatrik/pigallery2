@@ -1282,6 +1282,19 @@ export class ClientVideoConfig {
   })
   supportedFormats: string[] = ['mp4', 'webm', 'ogv', 'ogg'];
 
+  @ConfigProperty({
+    tags: {
+      name: $localize`Enable live video transcoding`,
+      priority: ConfigPriority.basic,
+      uiDisabled: (sb: ClientVideoConfig) => !sb.enabled,
+      experimental: true,
+    } as TAGS,
+    description: $localize`If enabled, videos in unsupported formats (MKV, AVI, MOV, etc.)
+  will be transcoded & cached on-demand via HLS when opened in the lightbox.
+  Pre-transcoded files (from the Video Converting job) are always preferred and served natively.`
+  })
+  liveVideoTranscodingEnabled: boolean = false;
+
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})

@@ -13,6 +13,7 @@ import {ExtensionRouter} from './admin/ExtensionRouter';
 import {VersionMWs} from '../middlewares/VersionMWs';
 import {OIDCRouter} from './OIDCRouter';
 import {UploadRouter} from './UploadRouter';
+import {HLSRouter} from './HLSRouter';
 
 export class Router {
   public static route(app: Express): void {
@@ -24,6 +25,7 @@ export class Router {
     OIDCRouter.route(app);
     AlbumRouter.route(app);
     GalleryRouter.route(app);
+    HLSRouter.route(app);
     NotificationRouter.route(app);
     PersonRouter.route(app);
     SettingsRouter.route(app);
