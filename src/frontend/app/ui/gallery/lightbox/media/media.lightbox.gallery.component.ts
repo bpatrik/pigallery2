@@ -242,7 +242,10 @@ export class GalleryLightboxMediaComponent implements OnChanges, OnDestroy {
     if (Hls.isSupported()) {
       // startPosition: 0 forces the player to start at the beginning of the
       // media timeline regardless of fMP4 tfdt PTS offset in the init segment.
-      this.hls = new Hls({maxBufferLength: 30, maxMaxBufferLength: 60, startPosition: 0});
+      // fragLoadingTimeOut must exceed the backend's segment-wait timeout (30 000 ms)
+      // so hls.js does not abort requests the server is holding open while FFmpeg
+      // writes the next segment. Default hls.js value is 20 000 ms — too short.
+      this.hls = new Hls({maxBufferLength: 30, maxMaxBufferLength: 60, startPosition: 0, fragLoadingTimeOut: 60_000});
       // attachMedia MUST come before loadSource per hls.js API docs
       this.hls.attachMedia(videoEl);
       this.hls.loadSource(this.gridMedia.getHLSPlaylistPath());
