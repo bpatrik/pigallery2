@@ -656,6 +656,19 @@ export class ServerIndexingConfig {
     description: $localize`Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing.`,
   })
   excludeFileList: string[] = [];
+  @ConfigProperty({
+    arrayType: 'string',
+    tags:
+      {
+        name: $localize`Exclude Filename List`,
+        priority: ConfigPriority.advanced,
+        uiResetNeeded: {server: true, db: true},
+        uiOptional: true,
+        hint: $localize`.*;*.rm`
+      } as TAGS,
+    description: $localize`Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files.`,
+  })
+  excludeFilenameList: string[] = [];
 }
 
 @SubConfigClass({softReadonly: true})

@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild,} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, ViewChild,} from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -13,7 +13,7 @@ import {NgIf} from '@angular/common';
   templateUrl: './media.lightbox.gallery.component.html',
   imports: [NgIf]
 })
-export class GalleryLightboxMediaComponent implements OnChanges {
+export class GalleryLightboxMediaComponent implements OnChanges, OnDestroy {
   @Input() gridMedia: GridMedia;
   @Input() nextGridMedia: GridMedia;
   @Input() loadMedia = false; // prevents loading media
@@ -43,6 +43,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   // if media not loaded, show thumbnail
   private mediaLoaded = false;
   private videoProgress = 0;
+  private hls: import('hls.js').default | null = null;
+  private hlsInitPending = false;
 
   constructor(public elementRef: ElementRef,
               public lightboxService: LightboxService,
@@ -143,6 +145,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   ngOnChanges(): void {
     // media changed
     if (this.prevGirdPhoto !== this.gridMedia) {
+      this.destroyHLS();
       this.prevGirdPhoto = this.gridMedia;
       this.thumbnailSrc = null;
       this.photo.src = null;
@@ -150,6 +153,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       this.nextImage.onload = null;
       this.nextImage.onerror = null;
       this.mediaLoaded = false;
+      this.videoProgress = 0;
       this.imageLoadFinished = {
         this: false,
         next: false
@@ -213,8 +217,67 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   onSourceError(): void {
-    this.mediaLoaded = false;
-    this.videoSourceError.emit();
+    if (
+      Config.Media.Video.liveVideoTranscodingEnabled &&
+      this.gridMedia.isVideoTranscodingNeeded() &&
+      !this.hlsInitPending &&
+      !this.hls
+    ) {
+      this.initHLSPlayer();
+    } else if (!Config.Media.Video.liveVideoTranscodingEnabled || !this.gridMedia.isVideoTranscodingNeeded()) {
+      this.mediaLoaded = false;
+      this.videoSourceError.emit();
+    }
+  }
+
+  private async initHLSPlayer(): Promise<void> {
+    this.hlsInitPending = true;
+    const Hls = (await import('hls.js')).default;
+    this.hlsInitPending = false;
+
+    if (this.hls) return; // already attached (can happen on double-fire)
+
+    const videoEl = this.video.nativeElement;
+
+    if (Hls.isSupported()) {
+      // startPosition: 0 forces the player to start at the beginning of the
+      // media timeline regardless of fMP4 tfdt PTS offset in the init segment.
+      // fragLoadingTimeOut must exceed the backend's segment-wait timeout (30 000 ms)
+      // so hls.js does not abort requests the server is holding open while FFmpeg
+      // writes the next segment. Default hls.js value is 20 000 ms — too short.
+      this.hls = new Hls({maxBufferLength: 30, maxMaxBufferLength: 60, startPosition: 0, fragLoadingTimeOut: 60_000});
+      // attachMedia MUST come before loadSource per hls.js API docs
+      this.hls.attachMedia(videoEl);
+      this.hls.loadSource(this.gridMedia.getHLSPlaylistPath());
+      this.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        videoEl.play().catch(console.error);
+      });
+      this.hls.on(Hls.Events.ERROR, (_event: any, data: any) => {
+        if (data.fatal) {
+          this.mediaLoaded = false;
+          this.videoSourceError.emit();
+        }
+      });
+    } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari — native HLS
+      videoEl.src = this.gridMedia.getHLSPlaylistPath();
+      videoEl.play().catch(console.error);
+    } else {
+      this.mediaLoaded = false;
+      this.videoSourceError.emit();
+    }
+  }
+
+  private destroyHLS(): void {
+    this.hlsInitPending = false;
+    if (this.hls) {
+      this.hls.destroy();
+      this.hls = null;
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.destroyHLS();
   }
 
   public onVideoProgress(): void {

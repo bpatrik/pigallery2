@@ -7,6 +7,7 @@ import {GPXProcessing} from '../../fileaccess/fileprocessing/GPXProcessing';
 import {PhotoProcessing} from '../../fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../fileaccess/fileprocessing/VideoProcessing';
 import { DynamicConfig } from '../../../../common/entities/DynamicConfig';
+import {HLSMWs} from '../../../middlewares/HLSMWs';
 
 export class TempFolderCleaningJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']];
@@ -62,6 +63,16 @@ export class TempFolderCleaningJob extends Job {
   }
 
   protected async stepTempDirectory(): Promise<boolean> {
+    // Kill any running HLS jobs and remove the HLS cache directory
+    HLSMWs.killAllJobs();
+    const hlsDir = HLSMWs.HLSCacheDir;
+    try {
+      await fs.promises.rm(hlsDir, {recursive: true, force: true});
+      this.Progress.log('cleaned HLS cache: ' + hlsDir);
+    } catch {
+      // ignore if dir doesn't exist
+    }
+
     const files = await this.readDir(ProjectPath.TempFolder);
     const validFiles = [ProjectPath.TranscodedFolder, ProjectPath.FacesFolder];
     for (const file of files) {

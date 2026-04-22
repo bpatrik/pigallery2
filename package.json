@@ -49,6 +49,7 @@
     "exifr": "7.1.3",
     "express": "4.21.2",
     "fluent-ffmpeg": "2.1.3",
+    "hls.js": "^1.5.20",
     "image-size": "2.0.2",
     "locale": "0.1.0",
     "multer": "2.0.2",
