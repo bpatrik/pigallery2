@@ -163,6 +163,10 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
     return this.media && MediaDTOUtils.isPhoto(this.media);
   }
 
+  isLivePhoto(): boolean {
+    return !!this.media?.liveVideoPath;
+  }
+
   calcMpx(): string {
     return (
       (this.media.metadata.size.width * this.media.metadata.size.height) /

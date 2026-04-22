@@ -158,6 +158,25 @@ a {
   background-color: rgba(0, 0, 0, 0.8);
 }
 
+.live-photo-indicator {
+  font-size: small;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  white-space: nowrap;
+  border-bottom-left-radius: 10px !important;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  transition: background-color .3s ease-out;
+}
+
+.photo-container:hover .live-photo-indicator {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
 .photo-keywords ng-icon {
   margin-right: 2px;
 }

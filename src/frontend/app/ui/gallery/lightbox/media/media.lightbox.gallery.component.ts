@@ -23,6 +23,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   @Output() videoSourceError = new EventEmitter();
 
   @ViewChild('video', {static: false}) video: ElementRef<HTMLVideoElement>;
+  @ViewChild('liveVideo', {static: false}) liveVideo: ElementRef<HTMLVideoElement>;
   @ViewChild('image', {static: false}) imageElement: ElementRef<HTMLImageElement>;
 
   prevGirdPhoto: GridMedia = null;
@@ -34,6 +35,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     next: false
   };
   thumbnailSrc: string = null;
+  liveVideoSrc: string = null;
+  liveVideoPlaying = false;
   photo = {
     src: null as string,
     isBestFit: null as boolean,
@@ -145,6 +148,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     if (this.prevGirdPhoto !== this.gridMedia) {
       this.prevGirdPhoto = this.gridMedia;
       this.thumbnailSrc = null;
+      this.liveVideoSrc = null;
       this.photo.src = null;
       this.nextImage.src = '';
       this.nextImage.onload = null;
@@ -162,6 +166,14 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       this.ThumbnailUrl !== null
     ) {
       this.thumbnailSrc = this.ThumbnailUrl;
+    }
+
+    if (
+      this.liveVideoSrc == null &&
+      this.gridMedia &&
+      this.gridMedia.isLivePhoto()
+    ) {
+      this.liveVideoSrc = this.gridMedia.getLiveVideoPath();
     }
 
     this.loadPhoto();
@@ -184,6 +196,23 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     } else {
       this.video.nativeElement.pause();
     }
+  }
+
+  public startLiveVideo(): void {
+    if (!this.liveVideo) {
+      return;
+    }
+    this.liveVideoPlaying = true;
+    this.liveVideo.nativeElement.currentTime = 0;
+    this.liveVideo.nativeElement.play().catch(console.error);
+  }
+
+  public stopLiveVideo(): void {
+    if (!this.liveVideo) {
+      return;
+    }
+    this.liveVideoPlaying = false;
+    this.liveVideo.nativeElement.pause();
   }
 
   onImageError(): void {

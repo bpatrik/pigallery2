@@ -385,4 +385,51 @@ describe('MetadataLoader', () => {
       }
     }
   });
+
+  describe('Live Photo', () => {
+    const livePhotoDir = path.join(__dirname, '/../../../assets/live_photo');
+
+    before(function () {
+      if (!fs.existsSync(livePhotoDir)) {
+        this.skip();
+      }
+      Config.Media.LivePhoto.enabled = true;
+    });
+
+    it('should extract contentIdentifier from Live Photo MOV', async function () {
+      const movPath = path.join(livePhotoDir, 'IMG_7943_HEVC.MOV');
+      if (!fs.existsSync(movPath)) {
+        this.skip();
+      }
+      const data = await MetadataLoader.loadVideoMetadata(movPath);
+      expect((data as any).contentIdentifier).to.be.a('string');
+      expect((data as any).contentIdentifier).to.equal('9B539AB8-A668-4FA6-9207-EB653A5E7E3C');
+    });
+
+    it('should extract contentIdentifier from Live Photo HEIC', async function () {
+      const heicPath = path.join(livePhotoDir, 'IMG_7943.HEIC');
+      if (!fs.existsSync(heicPath)) {
+        this.skip();
+      }
+      const data = await MetadataLoader.loadPhotoMetadata(heicPath);
+      expect((data as any).contentIdentifier).to.be.a('string');
+      expect((data as any).contentIdentifier).to.equal('9B539AB8-A668-4FA6-9207-EB653A5E7E3C');
+    });
+
+    it('should not extract contentIdentifier from regular video', async () => {
+      const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/video.mp4'));
+      expect((data as any).contentIdentifier).to.be.undefined;
+    });
+
+    it('should not extract contentIdentifier when Live Photo is disabled', async function () {
+      const movPath = path.join(livePhotoDir, 'IMG_7943_HEVC.MOV');
+      if (!fs.existsSync(movPath)) {
+        this.skip();
+      }
+      Config.Media.LivePhoto.enabled = false;
+      const data = await MetadataLoader.loadVideoMetadata(movPath);
+      expect((data as any).contentIdentifier).to.be.undefined;
+      Config.Media.LivePhoto.enabled = true;
+    });
+  });
 });

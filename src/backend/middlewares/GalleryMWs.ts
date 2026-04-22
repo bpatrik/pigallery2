@@ -9,6 +9,7 @@ import {ContentWrapper, ContentWrapperUtils} from '../../common/entities/Content
 import {ProjectPath} from '../ProjectPath';
 import {Config} from '../../common/config/private/Config';
 import {MediaDTO, MediaDTOUtils} from '../../common/entities/MediaDTO';
+import {VideoDTO} from '../../common/entities/VideoDTO';
 import {QueryParams} from '../../common/QueryParams';
 import {VideoProcessing} from '../model/fileaccess/fileprocessing/VideoProcessing';
 import {SearchQueryDTO, SearchQueryTypes,} from '../../common/entities/SearchQueryDTO';
@@ -217,6 +218,81 @@ export class GalleryMWs {
         cw.searchResult.media = cw.searchResult.media.filter(
           (m): boolean => !MediaDTOUtils.isVideo(m)
         );
+      }
+    }
+
+    if (Config.Media.LivePhoto.enabled) {
+      const pairLivePhotos = (mediaList: MediaDTO[], parentDir?: ParentDirectoryDTO): MediaDTO[] => {
+        // Build a map of contentIdentifier → video for companion videos
+        // contentIdentifier lives on the DB entity, not the shared DTO
+        const companionMap = new Map<string, MediaDTO>();
+        for (const m of mediaList) {
+          if (
+            MediaDTOUtils.isVideo(m) &&
+            (m.metadata as any)?.contentIdentifier
+          ) {
+            companionMap.set((m.metadata as any).contentIdentifier, m);
+          }
+        }
+
+        // Pair photos with their companion videos, remove paired videos from list
+        const pairedVideoIds = new Set<string>();
+        for (const m of mediaList) {
+          if (
+            !MediaDTOUtils.isVideo(m) &&
+            (m.metadata as any)?.contentIdentifier
+          ) {
+            const companion = companionMap.get((m.metadata as any).contentIdentifier);
+            if (companion) {
+              const dir = companion.directory || parentDir;
+              m.liveVideoPath = path.join(
+                dir?.path || '',
+                dir?.name || '',
+                companion.name
+              );
+              const videoMeta = (companion as VideoDTO).metadata;
+              m.liveVideoInfo = {
+                name: companion.name,
+                size: videoMeta?.size,
+                fileSize: videoMeta?.fileSize,
+                duration: videoMeta?.duration,
+                fps: videoMeta?.fps,
+                bitRate: videoMeta?.bitRate,
+              };
+              pairedVideoIds.add((m.metadata as any).contentIdentifier);
+            }
+          }
+        }
+
+        return mediaList.filter(
+          (m) =>
+            !MediaDTOUtils.isVideo(m) ||
+            !(m.metadata as any)?.contentIdentifier ||
+            !pairedVideoIds.has((m.metadata as any).contentIdentifier)
+        );
+      };
+
+      if (cw.directory) {
+        cw.directory.media = pairLivePhotos(cw.directory.media, cw.directory);
+      }
+      if (cw.searchResult) {
+        cw.searchResult.media = pairLivePhotos(cw.searchResult.media);
+      }
+
+      // Strip contentIdentifier from responses — it's a server-side
+      // matching key, not needed by the client.
+      const stripContentId = (media: MediaDTO[]) => {
+        for (const m of media) {
+          if ((m.metadata as any)?.contentIdentifier) {
+            delete (m.metadata as any).contentIdentifier;
+          }
+        }
+      };
+      if (cw.directory?.media) {
+        stripContentId(cw.directory.media);
+      }
+      if (cw.searchResult?.media) {
+        stripContentId(cw.searchResult.media);
       }
     }
 
