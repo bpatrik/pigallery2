@@ -1,0 +1,29 @@
+{
+  "cameraData": {
+    "ISO": 46,
+    "exposure": 0.000943,
+    "fStop": 1.89,
+    "focalLength": 5.43,
+    "make": "Google",
+    "model": "Pixel 7a"
+  },
+  "creationDate": 1756849708000,
+  "creationDateOffset": "-05:00",
+  "fileSize": 5951,
+  "keywords": [
+    "Illinois",
+    "Chicago",
+    "United States",
+    "America"
+  ],
+  "positionData": {
+    "GPSData": {
+      "latitude": 41.873138,
+      "longitude": -87.626329
+    }
+  },
+  "size": {
+   "height": 7,
+   "width": 5
+  }
+}
