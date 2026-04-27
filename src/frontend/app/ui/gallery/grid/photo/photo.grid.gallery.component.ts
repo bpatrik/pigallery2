@@ -1,4 +1,7 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+
+// Persists for the lifetime of the page — shared across all card instances
+let globalVideoMuted = true;
 import {Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -322,6 +325,20 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     this.stopHoverVideo();
   }
 
+  get videoMuted(): boolean {
+    return globalVideoMuted;
+  }
+
+  toggleVideoMute(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    globalVideoMuted = !globalVideoMuted;
+    const video = this.hoverVideoRef?.nativeElement;
+    if (video) {
+      video.muted = globalVideoMuted;
+    }
+  }
+
   private async startHoverVideo(): Promise<void> {
     const video = this.hoverVideoRef?.nativeElement;
     if (!video) return;
@@ -329,6 +346,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
       video.src = this.gridMedia.getBestFitVideoPath();
       this.videoSrcLoaded = true;
     }
+    video.muted = globalVideoMuted;
     try {
       await video.play();
       if (!video.paused) {

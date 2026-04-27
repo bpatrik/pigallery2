@@ -227,3 +227,26 @@ a {
 .hover-video.visible {
   opacity: 1;
 }
+
+.video-mute-btn {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  cursor: pointer;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+  transition: background-color 0.2s ease;
+}
+
+.video-mute-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}

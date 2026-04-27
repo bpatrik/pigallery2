@@ -25,6 +25,12 @@
          playsinline>
   </video>
 
+  <button *ngIf="videoPlaying"
+          class="video-mute-btn"
+          (click)="toggleVideoMute($event)">
+    <ng-icon [name]="videoMuted ? 'ionVolumeMuteOutline' : 'ionVolumeMediumOutline'"></ng-icon>
+  </button>
+
   <div *ngIf="gridMedia.isVideo()" class="video-indicator">
     {{gridMedia.Video.metadata.duration  | duration}}
     <ng-icon name="ionVideocamOutline"></ng-icon>
