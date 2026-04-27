@@ -31,7 +31,7 @@ describe('Share', () => {
 
         cy.intercept({
           method: 'Get',
-          url: '/pgapi/search/*',
+          url: '/pgapi/gallery/content/*',
         }, (req) => {
           // Remove caching headers to force a 200 OK response from the server
           delete req.headers['if-none-match'];
@@ -42,7 +42,7 @@ describe('Share', () => {
         cy.get('button#button-share-login').click();
 
 
-        cy.get('.mb-0 > :nth-child(1) > .nav-link').contains('Gallery');
+        cy.get('#directory-path');
 
         cy.wait('@getSharedContent').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
@@ -67,7 +67,7 @@ describe('Share', () => {
 
         cy.intercept({
           method: 'Get',
-          url: '/pgapi/search/*',
+          url: '/pgapi/gallery/content/*',
         }, (req) => {
           // Remove caching headers to force a 200 OK response from the server
           delete req.headers['if-none-match'];
@@ -76,7 +76,7 @@ describe('Share', () => {
          cy.visit(link);
 
 
-        cy.get('.mb-0 > :nth-child(1) > .nav-link').contains('Gallery');
+        cy.get('#directory-path');
 
         cy.wait('@getSharedContent').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);
@@ -105,7 +105,7 @@ describe('Share', () => {
 
         cy.intercept({
           method: 'Get',
-          url: '/pgapi/search/*',
+          url: '/pgapi/gallery/content/*',
         }, (req) => {
           // Remove caching headers to force a 200 OK response from the server
           delete req.headers['if-none-match'];
@@ -113,7 +113,7 @@ describe('Share', () => {
         }).as('getSharedContent');
         cy.visit(link);
 
-        cy.get('.mb-0 > :nth-child(1) > .nav-link').contains('Gallery');
+        cy.get('#directory-path');
 
         cy.wait('@getSharedContent').then((interception) => {
           expect(interception.response.statusCode).to.eq(200);

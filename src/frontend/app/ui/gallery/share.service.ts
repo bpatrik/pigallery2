@@ -20,6 +20,7 @@ export class ShareService {
   queryParam: string = null;
   sharingKey: string = null;
   inited = false;
+  sharingPasswordProtected: boolean | null = null;
   public ReadyPR: Promise<void>;
   public sharingSubject: BehaviorSubject<ResponseSharingDTO> = new BehaviorSubject(
     null
@@ -65,7 +66,6 @@ export class ShareService {
         }
       }
     });
-    this.currentSharing.subscribe( (sharing) => console.log('sharing', sharing))
   }
 
   public getUrl(share: ResponseSharingDTO): string {
@@ -203,12 +203,15 @@ export class ShareService {
   private async checkSharing(): Promise<void> {
     try {
       this.sharingIsValid.next(null);
+      this.sharingPasswordProtected = null;
       const sharing = await this.networkService.getJson<SharingDTOKey>(
         '/share/' + this.getSharingKey() + '/key'
       );
       this.sharingIsValid.next(sharing.sharingKey === this.getSharingKey());
+      this.sharingPasswordProtected = sharing.passwordProtected ?? null;
     } catch (e) {
       this.sharingIsValid.next(false);
+      this.sharingPasswordProtected = null;
       console.error(e);
     }
   }

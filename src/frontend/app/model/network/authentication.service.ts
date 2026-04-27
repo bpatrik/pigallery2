@@ -19,6 +19,7 @@ declare module ServerInject {
 @Injectable({providedIn: 'root'})
 export class AuthenticationService {
   public readonly user: BehaviorSubject<UserDTO>;
+  private sessionUserPromise: Promise<void> | null = null;
 
   constructor(
     private userService: UserService,
@@ -39,7 +40,8 @@ export class AuthenticationService {
       ) {
         this.user.next(ServerInject.user);
       }
-      this.getSessionUser().catch(console.error);
+      this.sessionUserPromise = this.getSessionUser();
+      this.sessionUserPromise.catch(console.error);
     } else {
       if (Config.Users.authenticationRequired === false) {
         this.user.next({
@@ -99,14 +101,19 @@ export class AuthenticationService {
   public async logout(): Promise<void> {
     await this.userService.logout();
     this.user.next(null);
-    // even on logout try to get sharing user if it's a sharing
     await this.shareService.wait();
-    if(this.shareService.isSharing()){
+    // Restore a non-password-protected sharing session after logout.
+    // Skip for password-protected shares — getSessionUser always returns 401 until re-auth.
+    if (this.shareService.isSharing() && this.shareService.sharingPasswordProtected !== true) {
       await this.getSessionUser();
     }
   }
 
-  private async getSessionUser(): Promise<void> {
+  public waitForSessionUser(): Promise<void> {
+    return this.sessionUserPromise ?? Promise.resolve();
+  }
+
+  public async getSessionUser(): Promise<void> {
     try {
       this.user.next(await this.userService.getSessionUser());
     } catch (error) {

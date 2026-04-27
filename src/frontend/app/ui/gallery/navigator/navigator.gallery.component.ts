@@ -26,6 +26,7 @@ import { StringifySortingMethod } from '../../../pipes/StringifySortingMethod';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 import { StringifyGridSize } from '../../../pipes/StringifyGridSize';
 import {ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
+import {ShareService} from '../share.service';
 
 @Component({
     selector: 'app-gallery-navbar',
@@ -79,7 +80,8 @@ export class GalleryNavigatorComponent {
       public sortingService: GallerySortingService,
       public navigatorService: GalleryNavigatorService,
       private router: Router,
-      public sanitizer: DomSanitizer
+      public sanitizer: DomSanitizer,
+      private shareService: ShareService,
   ) {
     this.sortingByTypes = Utils.enumToArray(SortByTypes);
     // can't group by random
@@ -130,6 +132,8 @@ export class GalleryNavigatorComponent {
 
           const user = this.authService.user.value;
           const arr: NavigatorPath[] = [];
+          // For sharing users, allow navigation within the shared subtree only
+          const shareRootPath = user.role <= UserRoles.LimitedGuest ? this.getShareRootPath() : null;
 
           // create root link
           if (dirs.length === 0) {
@@ -137,9 +141,7 @@ export class GalleryNavigatorComponent {
           } else {
             arr.push({
               name: this.RootFolderName,
-              route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                  ? '/'
-                  : null,
+              route: user.role > UserRoles.LimitedGuest ? '/' : null,
             });
           }
 
@@ -147,15 +149,15 @@ export class GalleryNavigatorComponent {
           dirs.forEach((name, index) => {
             const route = dirs.slice(0, index + 1).join('/');
             if (dirs.length - 1 === index) {
-              arr.push({name, route: null});
+              arr.push({name, route: null}); // current directory is never a link
             } else {
-              arr.push({
-                name,
-                route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                    ? route
-                    : null,
-              });
-
+              let linkRoute: string | null = null;
+              if (user.role > UserRoles.LimitedGuest) {
+                linkRoute = route;
+              } else if (shareRootPath && (route === shareRootPath || route.startsWith(shareRootPath + '/'))) {
+                linkRoute = route;
+              }
+              arr.push({name, route: linkRoute});
             }
           });
 
@@ -336,6 +338,18 @@ export class GalleryNavigatorComponent {
   }
 
   protected readonly GroupByTypes = GroupByTypes;
+
+  private getShareRootPath(): string | null {
+    const sharing = this.shareService.sharingSubject.value;
+    if (!sharing?.searchQuery) {
+      return null;
+    }
+    const sq = sharing.searchQuery as TextSearch;
+    if (sq.type !== SearchQueryTypes.directory || sq.matchType !== TextSearchQueryMatchTypes.exact_match) {
+      return null;
+    }
+    return sq.value.replace(/^\.\//, '').replace(/\\/g, '/');
+  }
 }
 
 interface NavigatorPath {

@@ -47,9 +47,11 @@ export class SharingMWs {
         return next();
       }
       const sharingKey = req.params[QueryParams.gallery.sharingKey_params];
-
-      req.resultPipe =
-        {sharingKey: (await ObjectManagers.getInstance().SharingManager.findOne(sharingKey)).sharingKey} as SharingDTOKey;
+      const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
+      req.resultPipe = {
+        sharingKey: sharing.sharingKey,
+        passwordProtected: !!(sharing.password || Config.Sharing.passwordRequired),
+      } as SharingDTOKey;
       return next();
     } catch (err) {
       return next(
