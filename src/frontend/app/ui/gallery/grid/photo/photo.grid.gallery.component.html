@@ -1,4 +1,8 @@
-<div #photoContainer class="photo-container rounded" (mouseover)="mouseOver()" (mouseout)="mouseOut()">
+<div #photoContainer class="photo-container rounded"
+     (mouseover)="mouseOver()" (mouseout)="mouseOut()"
+     (mouseenter)="onMouseEnterCard()" (mouseleave)="onMouseLeaveCard()"
+     (touchstart)="onTouchStart()" (touchend)="onTouchEnd()"
+     (touchcancel)="onTouchEnd()">
 
 
   <img alt="{{gridMedia.media.name}}" #img [src]="thumbnail.Src"
@@ -12,6 +16,14 @@
     *ngIf="!thumbnail.Available">
   </app-gallery-grid-photo-loading>
 
+  <video #hoverVideo
+         *ngIf="gridMedia.isVideo() && Config.Gallery.playVideoOnHover"
+         [class.visible]="videoPlaying"
+         class="hover-video"
+         muted
+         loop
+         playsinline>
+  </video>
 
   <div *ngIf="gridMedia.isVideo()" class="video-indicator">
     {{gridMedia.Video.metadata.duration  | duration}}
