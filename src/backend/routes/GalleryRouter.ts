@@ -35,7 +35,7 @@ export class GalleryRouter {
       [Config.Server.apiPath + '/gallery/content/:directory(*)', Config.Server.apiPath + '/gallery/', Config.Server.apiPath + '/gallery//'],
       // common part
       AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.Guest), //sharing user can only go through search. They can't just wander through the whole gallery
+      AuthenticationMWs.authorise(UserRoles.LimitedGuest), // projectionQuery on sharing sessions already limits visible content
       AuthenticationMWs.normalizePathParam('directory'),
       VersionMWs.injectGalleryVersion,
 

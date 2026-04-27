@@ -41,7 +41,7 @@ export class SharingRouter {
       // its a public path
       SharingMWs.getSharingKey,
       ServerTimingMWs.addServerTiming,
-      RenderingMWs.renderSharing
+      RenderingMWs.renderResult
     );
   }
 

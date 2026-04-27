@@ -481,7 +481,8 @@ export class SearchManager {
 
   public async prepareAndBuildWhereQuery(
     queryIN: SearchQueryDTO, directoryOnly = false,
-    aliases: { [key: string]: string } = {}): Promise<Brackets> {
+    aliases: { [key: string]: string } = {},
+    recursiveDir = false): Promise<Brackets> {
     let query = await this.prepareQuery(queryIN);
     if (directoryOnly) {
       query = this.filterDirectoryQuery(query);
@@ -489,7 +490,7 @@ export class SearchManager {
         return null;
       }
     }
-    return this.buildWhereQuery(query, directoryOnly, aliases);
+    return this.buildWhereQuery(query, directoryOnly, aliases, recursiveDir);
   }
 
   public async prepareQuery(queryIN: SearchQueryDTO): Promise<SearchQueryDTO> {
@@ -509,14 +510,15 @@ export class SearchManager {
   public buildWhereQuery(
     query: SearchQueryDTO,
     directoryOnly = false,
-    aliases: { [key: string]: string } = {}
+    aliases: { [key: string]: string } = {},
+    recursiveDir = false
   ): Brackets {
     const queryId = (query as SearchQueryDTOWithID).queryId;
     switch (query.type) {
       case SearchQueryTypes.AND:
         return new Brackets((q): unknown => {
           (query as ANDSearchQuery).list.forEach((sq) => {
-              q.andWhere(this.buildWhereQuery(sq, directoryOnly));
+              q.andWhere(this.buildWhereQuery(sq, directoryOnly, aliases, recursiveDir));
             }
           );
           return q;
@@ -524,7 +526,7 @@ export class SearchManager {
       case SearchQueryTypes.OR:
         return new Brackets((q): unknown => {
           (query as ANDSearchQuery).list.forEach((sq) => {
-              q.orWhere(this.buildWhereQuery(sq, directoryOnly));
+              q.orWhere(this.buildWhereQuery(sq, directoryOnly, aliases, recursiveDir));
             }
           );
           return q;
@@ -968,6 +970,19 @@ export class SearchManager {
             return dq;
           })
         );
+        // When building projection queries for sharing, also allow subdirectories recursively
+        if (
+          recursiveDir &&
+          query.type === SearchQueryTypes.directory &&
+          (query as TextSearch).matchType === TextSearchQueryMatchTypes.exact_match
+        ) {
+          const normalizedDirPath = dirPathStr.endsWith('/') ? dirPathStr : dirPathStr + '/';
+          textParam['subDirPath' + queryId] = normalizedDirPath + '%';
+          q[whereFN](
+            `${alias}.path ${LIKE} :subDirPath${queryId} COLLATE ` + SQL_COLLATE,
+            textParam
+          );
+        }
       }
 
       if (

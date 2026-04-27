@@ -31,6 +31,7 @@ import {PhotoFilterPipe} from '../../pipes/PhotoFilterPipe';
 import {MediaButtonModalComponent} from './grid/photo/media-button-modal/media-button-modal.component';
 import {ContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../common/entities/SearchQueryDTO';
 import {UploaderService} from './uploader/uploader.service';
 import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
@@ -161,6 +162,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<boolean> {
     await this.shareService.wait();
+    await this.authService.waitForSessionUser();
     if (!this.authService.isAuthenticated()) {
       return this.navigation.toLogin();
     }
@@ -234,9 +236,20 @@ export class GalleryComponent implements OnInit, OnDestroy {
       const qParams: { [key: string]: any } = {};
       qParams[QueryParams.gallery.sharingKey_query] =
         this.shareService.getSharingKey();
-      this.router
-        .navigate(['/search', JSON.stringify(sharing.searchQuery)], {queryParams: qParams})
-        .catch(console.error);
+      // For directory shares, use the gallery directory view so subfolders are navigable.
+      // For other query types (date, person, etc.) fall back to the search view.
+      if (
+        sharing.searchQuery?.type === SearchQueryTypes.directory &&
+        (sharing.searchQuery as TextSearch).matchType === TextSearchQueryMatchTypes.exact_match
+      ) {
+        this.router
+          .navigate(['gallery', (sharing.searchQuery as TextSearch).value], {queryParams: qParams})
+          .catch(console.error);
+      } else {
+        this.router
+          .navigate(['/search', JSON.stringify(sharing.searchQuery)], {queryParams: qParams})
+          .catch(console.error);
+      }
       return;
     }
 

@@ -4,7 +4,6 @@ import {IsActiveMatchOptions, Router} from '@angular/router';
 import {ShareService} from '../ui/gallery/share.service';
 import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
-import {firstValueFrom} from 'rxjs';
 
 @Injectable()
 export class NavigationService {
@@ -31,7 +30,7 @@ export class NavigationService {
   public async toLogin(): Promise<boolean> {
     await this.shareService.wait();
     if (this.shareService.isSharing()) {
-      if ((await firstValueFrom(this.shareService.currentSharing)).passwordProtected === true) {
+      if (this.shareService.sharingPasswordProtected === true) {
         return this.router.navigate(['shareLogin'], {
           queryParams: {sk: this.shareService.getSharingKey()},
         });

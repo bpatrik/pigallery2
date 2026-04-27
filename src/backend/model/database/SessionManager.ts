@@ -41,10 +41,10 @@ export class SessionManager {
 
     if (finalQuery) {
       // Build the Brackets-based query
-      context.projectionQuery = await ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(finalQuery);
+      context.projectionQuery = await ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(finalQuery, false, {}, true);
       context.hasDirectoryProjection = ObjectManagers.getInstance().SearchManager.hasDirectoryQuery(finalQuery);
       if (context.hasDirectoryProjection) {
-        context.projectionQueryForSubDir = await ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(finalQuery, true, {directory: 'directories'});
+        context.projectionQueryForSubDir = await ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(finalQuery, true, {directory: 'directories'}, true);
       }
       context.user.projectionKey = this.createProjectionKey(finalQuery);
       if (SearchQueryUtils.isQueryEmpty(finalQuery)) {
