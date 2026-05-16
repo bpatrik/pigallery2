@@ -15,6 +15,30 @@
        (error)="onImageError()"
        #image/>
 
+  <div *ngIf="gridMedia !== null && gridMedia.isLivePhoto() && loadMedia && liveVideoSrc"
+       class="live-photo-container"
+       [class.playing]="liveVideoPlaying">
+    <video [style.width.%]="imageSize.width"
+           [style.height.%]="imageSize.height"
+           [style.transform]="ImageTransform"
+           [loop]="true"
+           [muted]="true"
+           playsinline
+           (error)="onImageError()"
+           #liveVideo>
+      <source [src]="liveVideoSrc" (error)="onSourceError()">
+    </video>
+    <div class="live-photo-badge"
+         [class.active]="liveVideoPlaying"
+         (mouseenter)="startLiveVideo()"
+         (mouseleave)="stopLiveVideo()"
+         (touchstart)="startLiveVideo()"
+         (touchend)="stopLiveVideo()"
+         (touchcancel)="stopLiveVideo()">
+      LIVE
+    </div>
+  </div>
+
   <video *ngIf="gridMedia !== null && gridMedia.isVideo() && loadMedia"
          [style.width.%]="imageSize.width"
          [style.height.%]="imageSize.height"

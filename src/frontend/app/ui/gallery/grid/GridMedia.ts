@@ -2,6 +2,8 @@ import {Media} from '../Media';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {VideoDTO} from '../../../../../common/entities/VideoDTO';
+import {Utils} from '../../../../../common/Utils';
+import {Config} from '../../../../../common/config/public/Config';
 
 export class GridMedia extends Media {
   constructor(
@@ -27,6 +29,27 @@ export class GridMedia extends Media {
 
   isVideo(): boolean {
     return MediaDTOUtils.isVideo(this.media);
+  }
+
+  isLivePhoto(): boolean {
+    return !!this.media.liveVideoPath;
+  }
+
+  getLiveVideoPath(): string {
+    if (!this.media.liveVideoPath) {
+      return null;
+    }
+    const encodedPath = encodeURI(this.media.liveVideoPath)
+      .replace(new RegExp('#', 'g'), '%23')
+      .replace(new RegExp('\\$', 'g'), '%24')
+      .replace(new RegExp('\\?', 'g'), '%3F');
+    return Utils.concatUrls(
+      Config.Server.urlBase,
+      Config.Server.apiPath,
+      '/gallery/content/',
+      encodedPath,
+      '/bestFit'
+    );
   }
 
   public isVideoTranscodingNeeded(): boolean {

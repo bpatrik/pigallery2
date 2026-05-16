@@ -52,6 +52,27 @@
       </div>
     </div>
   </div>
+  <div class="row pt-0" *ngIf="isLivePhoto()" title="Companion video" i18n-title>
+    <div class="col-1 ps-0">
+      <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title></ng-icon>
+    </div>
+    <div class="col-11">
+      <div class="details-main" title="Video filename" i18n-title>
+        {{ media.liveVideoInfo?.name }}
+      </div>
+      <div class="details-sub text-secondary row">
+        <div class="col-4" *ngIf="media.liveVideoInfo?.size" title="Video dimensions in pixels"
+             i18n-title>{{ media.liveVideoInfo.size.width }} x {{ media.liveVideoInfo.size.height }}
+        </div>
+        <div class="col-4" *ngIf="media.liveVideoInfo?.fileSize" title="Video file size on disk"
+             i18n-title>{{ media.liveVideoInfo.fileSize | fileSize }}
+        </div>
+        <div class="col-4" *ngIf="media.liveVideoInfo?.duration" title="Video duration"
+             i18n-title>{{ media.liveVideoInfo.duration | duration }}
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="row" *ngIf="media.metadata.creationDate" title="When this photo or video was taken" i18n-title>
     <div class="col-1 ps-0">

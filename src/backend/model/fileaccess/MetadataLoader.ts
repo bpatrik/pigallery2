@@ -133,6 +133,15 @@ export class MetadataLoader {
             metadata.creationDate;
         }
 
+        // Extract Apple Live Photo Content Identifier from MOV companion videos
+        if (
+          Config.Media.LivePhoto.enabled &&
+          data.format.tags !== undefined &&
+          typeof (data.format.tags as any)['com.apple.quicktime.content.identifier'] === 'string'
+        ) {
+          (metadata as any).contentIdentifier = (data.format.tags as any)['com.apple.quicktime.content.identifier'];
+        }
+
         // eslint-disable-next-line no-empty
       } catch (err) {
         Logger.silly(LOG_TAG, 'Error loading metadata for : ' + fullPath);
@@ -179,7 +188,7 @@ export class MetadataLoader {
       creationDate: 0,
       fileSize: 0,
     };
-    const exifrOptions = {
+    const exifrOptions: any = {
       tiff: true,
       xmp: true,
       icc: false,
@@ -192,6 +201,9 @@ export class MetadataLoader {
       translateValues: false, //don't translate orientation from numbers to strings etc.
       mergeOutput: false //don't merge output, because things like Microsoft Rating (percent) and xmp.rating will be merged
     };
+    if (Config.Media.LivePhoto.enabled) {
+      exifrOptions.makerNote = true;
+    }
     try {
       try {
         const stat = fs.statSync(fullPath);
@@ -220,6 +232,12 @@ export class MetadataLoader {
         try {
           const exif = await exifr.parse(fullPath, exifrOptions);
           MetadataLoader.mapMetadata(metadata, exif, true);
+          if (Config.Media.LivePhoto.enabled && exif?.makerNote) {
+            const contentId = MetadataLoader.parseAppleMakerNoteContentId(exif.makerNote);
+            if (contentId) {
+              (metadata as any).contentIdentifier = contentId;
+            }
+          }
         } catch (err) {
           try {
             const m = await sharp(fullPath, {failOnError: false}).metadata();
@@ -712,5 +730,89 @@ export class MetadataLoader {
     }
 
     return result;
+  }
+
+  /**
+   * Parse Apple MakerNote IFD to extract ContentIdentifier (tag 0x0011).
+   *
+   * Apple MakerNote format:
+   *   - Header: "Apple iOS\0" (10 bytes) + 2-byte version
+   *   - Byte order marker: "MM" (big-endian) or "II" (little-endian)
+   *   - Standard TIFF IFD: 2-byte entry count, then 12-byte entries
+   *   - Each IFD entry: tag(2) + type(2) + count(4) + value/offset(4)
+   *
+   * Tag reference: ExifTool Apple.pm by Phil Harvey
+   * (https://github.com/exiftool/exiftool)
+   */
+  static parseAppleMakerNoteContentId(makerNote: any): string | undefined {
+    try {
+      let buf: Buffer;
+      if (Buffer.isBuffer(makerNote)) {
+        buf = makerNote;
+      } else if (makerNote instanceof Uint8Array) {
+        buf = Buffer.from(makerNote);
+      } else {
+        return undefined;
+      }
+
+      const APPLE_HEADER = 'Apple iOS\0';
+      if (buf.length < 14 || buf.toString('ascii', 0, 10) !== APPLE_HEADER) {
+        return undefined;
+      }
+
+      // Byte order at offset 12-13
+      const byteOrder = buf.toString('ascii', 12, 14);
+      const bigEndian = byteOrder === 'MM';
+      if (!bigEndian && byteOrder !== 'II') {
+        return undefined;
+      }
+
+      const readU16 = bigEndian
+        ? (offset: number) => buf.readUInt16BE(offset)
+        : (offset: number) => buf.readUInt16LE(offset);
+      const readU32 = bigEndian
+        ? (offset: number) => buf.readUInt32BE(offset)
+        : (offset: number) => buf.readUInt32LE(offset);
+
+      // IFD starts at offset 14
+      const ifdOffset = 14;
+      if (buf.length < ifdOffset + 2) {
+        return undefined;
+      }
+      const entryCount = readU16(ifdOffset);
+      const entriesStart = ifdOffset + 2;
+
+      for (let i = 0; i < entryCount; i++) {
+        const entryOffset = entriesStart + i * 12;
+        if (entryOffset + 12 > buf.length) {
+          break;
+        }
+        const tag = readU16(entryOffset);
+        if (tag !== 0x0011) {
+          continue;
+        }
+        // TIFF type 2 = ASCII
+        const count = readU32(entryOffset + 4);
+        let strBuf: Buffer;
+        if (count <= 4) {
+          strBuf = buf.subarray(entryOffset + 8, entryOffset + 8 + count);
+        } else {
+          const valOffset = readU32(entryOffset + 8);
+          if (valOffset + count > buf.length) {
+            return undefined;
+          }
+          strBuf = buf.subarray(valOffset, valOffset + count);
+        }
+        // Strip null terminator
+        let str = strBuf.toString('ascii');
+        if (str.endsWith('\0')) {
+          str = str.slice(0, -1);
+        }
+        return str.trim() || undefined;
+      }
+    } catch (err) {
+      Logger.silly(LOG_TAG, 'Error parsing Apple MakerNote: ' + err);
+    }
+    return undefined;
   }
 }

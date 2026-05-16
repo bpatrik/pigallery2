@@ -1,6 +1,6 @@
 import {Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, TableInheritance, Unique,} from 'typeorm';
 import {DirectoryEntity} from './DirectoryEntity';
-import {MediaDimension, MediaDTO, MediaMetadata,} from '../../../../common/entities/MediaDTO';
+import {LiveVideoInfo, MediaDimension, MediaDTO, MediaMetadata,} from '../../../../common/entities/MediaDTO';
 import {PersonJunctionTable} from './person/PersonJunctionTable';
 import {columnCharsetCS} from './EntityUtils';
 import {CameraMetadata, FaceRegion, GPSMetadata, PositionMetaData,} from '../../../../common/entities/PhotoDTO';
@@ -176,6 +176,9 @@ export class MediaMetadataEntity implements MediaMetadata {
 
   @Column('int', {unsigned: true})
   duration: number;
+
+  @Column({type: 'text', nullable: true})
+  contentIdentifier: string;
 }
 
 // TODO: fix inheritance once its working in typeorm
@@ -201,4 +204,8 @@ export abstract class MediaEntity implements MediaDTO {
   metadata: MediaMetadataEntity;
 
   missingThumbnails: number;
+
+  liveVideoPath: string;
+
+  liveVideoInfo: LiveVideoInfo;
 }
