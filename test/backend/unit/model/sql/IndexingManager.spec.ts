@@ -495,6 +495,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
     DirectoryDTOUtils.removeReferences(selected);
     removeIds(selected);
+    delete selected.cache.cover;
+    delete parent.cache.cover;
     expect(Utils.clone(Utils.removeNullOrEmptyObj(selected)))
       .to.deep.equalInAnyOrder(Utils.removeNullOrEmptyObj(indexifyReturn(parent)));
   });

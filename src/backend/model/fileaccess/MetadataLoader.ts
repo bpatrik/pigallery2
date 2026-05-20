@@ -223,7 +223,7 @@ export class MetadataLoader {
         } catch (err) {
           try {
             const m = await sharp(fullPath, {failOnError: false}).metadata();
-            MetadataLoader.mapMetadata(metadata, this.mapExifReader(exifReader(m.exif)), true);
+            await MetadataLoader.mapSharpMetadata(metadata, m, exifrOptions);
           } catch (e) {
             // ignoring errors
           }
@@ -269,6 +269,36 @@ export class MetadataLoader {
       return MetadataLoader.EMPTY_METADATA;
     }
     return metadata;
+  }
+
+  private static async mapSharpMetadata(metadata: PhotoMetadata, sharpMetadata: sharp.Metadata, exifrOptions: any) {
+    const parsedMetadata: any = {};
+    if (sharpMetadata.exif) {
+      try {
+        Object.assign(parsedMetadata, MetadataLoader.mapExifReader(exifReader(sharpMetadata.exif)));
+      } catch (err) {
+        // ignoring errors
+      }
+    }
+    if (sharpMetadata.xmp) {
+      try {
+        const xmp = await exifr.sidecar(sharpMetadata.xmp, exifrOptions, 'xmp');
+        Object.assign(parsedMetadata, xmp);
+      } catch (err) {
+        // ignoring errors
+      }
+    }
+    if (sharpMetadata.iptc) {
+      try {
+        const iptc = await exifr.sidecar(sharpMetadata.iptc, exifrOptions, 'iptc');
+        Object.assign(parsedMetadata, iptc);
+      } catch (err) {
+        // ignoring errors
+      }
+    }
+    if (Object.keys(parsedMetadata).length > 0) {
+      MetadataLoader.mapMetadata(metadata, parsedMetadata, true);
+    }
   }
 
   private static mapMetadata(metadata: PhotoMetadata | VideoMetadata, exif: any, mapDimension = true) {
@@ -427,8 +457,8 @@ export class MetadataLoader {
     }
 
     //Pads hours and minutes with leading zeroes if needed
-    function normalizeOffset(o: string): string {
-      return o.replace(/^([+-]?)(\d):/, "$10$2:");
+    function normalizeOffset(o?: string): string | undefined {
+      return o?.replace(/^([+-]?)(\d):/, "$10$2:");
     }
 
 
@@ -624,7 +654,7 @@ export class MetadataLoader {
       }
       if (faces.length > 0) {
         metadata.faces = faces; // save faces
-        if (Config.Faces.keywordsToPersons) {
+        if (Config.Faces.keywordsToPersons && metadata.keywords) {
           // remove faces from keywords
           metadata.faces.forEach((f) => {
             const index = metadata.keywords.indexOf(f.name);
