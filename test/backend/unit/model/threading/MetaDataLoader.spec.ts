@@ -53,6 +53,12 @@ describe('MetadataLoader', () => {
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
 
+  it('should load webp metadata exposed by sharp', async () => {
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/metadata_assets/webp_with_metadata.webp'));
+    const expected = require(path.join(__dirname, '/metadata_assets/webp_with_metadata.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+
 
   it('should load png with description', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/title_caption/description.png'));
@@ -312,7 +318,7 @@ describe('MetadataLoader', () => {
     for (let i = 0; i <= 8; ++i) {
       it('Landscape ' + i, async () => {
         const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/orientation/Landscape_' + i + '.jpg'));
-        const expected = require(path.join(__dirname, '/../../../assets/orientation/Landscape.json'));
+        const expected = Utils.clone(require(path.join(__dirname, '/../../../assets/orientation/Landscape.json')));
         delete data.fileSize;
         delete data.creationDate;
         delete data.creationDateOffset;
