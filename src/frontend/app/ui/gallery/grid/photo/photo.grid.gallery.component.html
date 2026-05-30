@@ -18,10 +18,6 @@
     <ng-icon name="ionVideocamOutline"></ng-icon>
   </div>
 
-  <div *ngIf="gridMedia.isLivePhoto()" class="live-photo-indicator">
-    LIVE
-  </div>
-
   <!-- Media buttons -->
   <div class="media-buttons" *ngIf="mediaButtons.length > 0">
     <button *ngFor="let button of mediaButtons"

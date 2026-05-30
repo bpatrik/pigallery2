@@ -1382,19 +1382,6 @@ export class ClientGPXCompressingConfig {
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
-export class ClientLivePhotoConfig {
-  @ConfigProperty({
-    tags: {
-      name: $localize`Enable`,
-      priority: ConfigPriority.advanced,
-      githubIssue: 609
-    },
-    description: $localize`Pairs Apple Live Photo still images with their companion video clips using Content Identifier metadata.`
-  })
-  enabled: boolean = true;
-}
-
-@SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientMediaConfig {
   @ConfigProperty({
     tags: {
@@ -1410,13 +1397,6 @@ export class ClientMediaConfig {
     }
   })
   Photo: ClientPhotoConfig = new ClientPhotoConfig();
-  @ConfigProperty({
-    tags: {
-      name: $localize`Live Photo`,
-      priority: ConfigPriority.advanced
-    }
-  })
-  LivePhoto: ClientLivePhotoConfig = new ClientLivePhotoConfig();
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
