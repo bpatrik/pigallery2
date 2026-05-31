@@ -3,6 +3,7 @@ import {SearchQueryDTO} from './SearchQueryDTO';
 
 export interface SharingDTOKey {
   sharingKey: string;
+  passwordProtected?: boolean;
 }
 
 export interface BaseSharingDTO extends SharingDTOKey {

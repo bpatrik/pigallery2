@@ -31,7 +31,7 @@ describe('Share', () => {
 
         cy.intercept({
           method: 'Get',
-          url: '/pgapi/search/*',
+          url: '/pgapi/gallery/content/**',
         }, (req) => {
           // Remove caching headers to force a 200 OK response from the server
           delete req.headers['if-none-match'];
@@ -69,7 +69,7 @@ describe('Share', () => {
 
         cy.intercept({
           method: 'Get',
-          url: '/pgapi/search/*',
+          url: '/pgapi/gallery/content/**',
         }, (req) => {
           // Remove caching headers to force a 200 OK response from the server
           delete req.headers['if-none-match'];
@@ -107,7 +107,7 @@ describe('Share', () => {
 
         cy.intercept({
           method: 'Get',
-          url: '/pgapi/search/*',
+          url: '/pgapi/gallery/content/**',
         }, (req) => {
           // Remove caching headers to force a 200 OK response from the server
           delete req.headers['if-none-match'];

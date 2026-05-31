@@ -32,6 +32,7 @@ export class ShareService {
     .pipe(filter((s) => s !== null))
     .pipe(distinctUntilChanged());
 
+  public sharingPasswordProtected: boolean | null = null;
   private resolve: () => void;
 
   constructor(private networkService: NetworkService, private router: Router) {
@@ -65,7 +66,6 @@ export class ShareService {
         }
       }
     });
-    this.currentSharing.subscribe( (sharing) => console.log('sharing', sharing))
   }
 
   public getUrl(share: ResponseSharingDTO): string {
@@ -206,6 +206,7 @@ export class ShareService {
       const sharing = await this.networkService.getJson<SharingDTOKey>(
         '/share/' + this.getSharingKey() + '/key'
       );
+      this.sharingPasswordProtected = sharing.passwordProtected ?? null;
       this.sharingIsValid.next(sharing.sharingKey === this.getSharingKey());
     } catch (e) {
       this.sharingIsValid.next(false);

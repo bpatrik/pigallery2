@@ -35,8 +35,9 @@ export class GalleryRouter {
       [Config.Server.apiPath + '/gallery/content/:directory(*)', Config.Server.apiPath + '/gallery/', Config.Server.apiPath + '/gallery//'],
       // common part
       AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.Guest), //sharing user can only go through search. They can't just wander through the whole gallery
+      AuthenticationMWs.authorise(UserRoles.LimitedGuest),
       AuthenticationMWs.normalizePathParam('directory'),
+      AuthenticationMWs.authoriseSharingDirectory, // LimitedGuest: scope-checks the requested directory against the share root
       VersionMWs.injectGalleryVersion,
 
       // specific part
@@ -51,7 +52,7 @@ export class GalleryRouter {
   protected static addDirectoryZip(app: Express): void {
     app.get(
       [Config.Server.apiPath + '/gallery/zip/:searchQueryDTO(*)'],
-      // common part
+      // LimitedGuest allowed; content is scoped to the share by the session projectionQuery
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
 
@@ -162,7 +163,7 @@ export class GalleryRouter {
   protected static addRandom(app: Express): void {
     app.get(
       [Config.Server.apiPath + '/gallery/random/:searchQueryDTO'],
-      // common part
+      // LimitedGuest allowed; content is scoped to the share by the session projectionQuery
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
       VersionMWs.injectGalleryVersion,
@@ -256,7 +257,7 @@ export class GalleryRouter {
   protected static addSearch(app: Express): void {
     app.get(
       Config.Server.apiPath + '/search/:searchQueryDTO(*)',
-      // common part
+      // LimitedGuest allowed; content is scoped to the share by the session projectionQuery
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
       VersionMWs.injectGalleryVersion,
@@ -274,7 +275,7 @@ export class GalleryRouter {
   protected static addAutoComplete(app: Express): void {
     app.get(
       Config.Server.apiPath + '/autocomplete/:value(*)',
-      // common part
+      // LimitedGuest allowed; content is scoped to the share by the session projectionQuery
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
       VersionMWs.injectGalleryVersion,

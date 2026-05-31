@@ -8,7 +8,7 @@ import {Utils} from '../../../../../common/Utils';
 import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
-import {Observable} from 'rxjs';
+import {combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {GallerySortingService} from './sorting.service';
 import {PageHelper} from '../../../model/page.helper';
@@ -26,6 +26,8 @@ import { StringifySortingMethod } from '../../../pipes/StringifySortingMethod';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 import { StringifyGridSize } from '../../../pipes/StringifyGridSize';
 import {ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
+import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
+import {ShareService} from '../share.service';
 
 @Component({
     selector: 'app-gallery-navbar',
@@ -79,7 +81,8 @@ export class GalleryNavigatorComponent {
       public sortingService: GallerySortingService,
       public navigatorService: GalleryNavigatorService,
       private router: Router,
-      public sanitizer: DomSanitizer
+      public sanitizer: DomSanitizer,
+      private shareService: ShareService,
   ) {
     this.sortingByTypes = Utils.enumToArray(SortByTypes);
     // can't group by random
@@ -90,8 +93,13 @@ export class GalleryNavigatorComponent {
     this.directoryContent = this.wrappedContent.pipe(
         map((c) => (c.directory ? c.directory : c.searchResult))
     );
-    this.routes = this.contentLoaderService.content.pipe(
-        map((c) => {
+    // combineLatest ensures routes recompute whenever share metadata arrives,
+    // fixing a race where cached content loads before sharingSubject emits.
+    this.routes = combineLatest([
+      this.contentLoaderService.content,
+      this.shareService.sharingSubject,
+    ]).pipe(
+        map(([c, sharing]) => {
           this.parentPath = null;
           if (!c?.directory && !this.isExactDirectorySearch(c)) {
             return [];
@@ -130,6 +138,7 @@ export class GalleryNavigatorComponent {
 
           const user = this.authService.user.value;
           const arr: NavigatorPath[] = [];
+          const shareRootPath = user.role <= UserRoles.LimitedGuest ? this.getShareRootPath(sharing) : null;
 
           // create root link
           if (dirs.length === 0) {
@@ -137,9 +146,7 @@ export class GalleryNavigatorComponent {
           } else {
             arr.push({
               name: this.RootFolderName,
-              route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                  ? '/'
-                  : null,
+              route: user.role > UserRoles.LimitedGuest ? '/' : null,
             });
           }
 
@@ -149,13 +156,14 @@ export class GalleryNavigatorComponent {
             if (dirs.length - 1 === index) {
               arr.push({name, route: null});
             } else {
-              arr.push({
-                name,
-                route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                    ? route
-                    : null,
-              });
-
+              let linkRoute: string | null = null;
+              if (user.role > UserRoles.LimitedGuest) {
+                linkRoute = route;
+              } else if (shareRootPath !== null && (shareRootPath === '' || route === shareRootPath || route.startsWith(shareRootPath + '/'))) {
+                // shareRootPath==='' means a root-directory share — all subdirectory routes are in scope
+                linkRoute = route;
+              }
+              arr.push({name, route: linkRoute});
             }
           });
 
@@ -336,6 +344,20 @@ export class GalleryNavigatorComponent {
   }
 
   protected readonly GroupByTypes = GroupByTypes;
+
+  /**
+   * Extracts the normalised share-root path from a sharing object, or null for non-directory shares.
+   * Mirrors backend normalizeDirPath: backslashes → '/', trailing slashes stripped, '.' → '' (gallery root).
+   */
+  private getShareRootPath(sharing: ResponseSharingDTO | null): string | null {
+    if (!sharing?.searchQuery) return null;
+    const q = sharing.searchQuery as TextSearch;
+    if (q.type === SearchQueryTypes.directory && q.matchType === TextSearchQueryMatchTypes.exact_match) {
+      const s = q.value.replace(/\\/g, '/').replace(/\/+$/, '');
+      return s === '.' ? '' : s;
+    }
+    return null;
+  }
 }
 
 interface NavigatorPath {

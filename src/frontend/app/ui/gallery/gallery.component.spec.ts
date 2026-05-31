@@ -52,11 +52,12 @@ class MockContentService {
 }
 
 class MockAuthenticationService {
-  user = new BehaviorSubject(null); // Add this line
+  user = new BehaviorSubject(null);
   isAuthenticated = jasmine.createSpy('isAuthenticated').and.returnValue(true);
   canSearch = jasmine.createSpy('canSearch').and.returnValue(true);
   isAuthorized = jasmine.createSpy('isAuthorized').and.returnValue(true);
-  logout = jasmine.createSpy('logout'); // Also add logout method if needed
+  logout = jasmine.createSpy('logout');
+  waitForSessionUser = jasmine.createSpy('waitForSessionUser').and.returnValue(Promise.resolve());
 }
 
 class MockShareService {

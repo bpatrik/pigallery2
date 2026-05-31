@@ -9,6 +9,7 @@ import {QueryParams} from '../../../common/QueryParams';
 import * as path from 'path';
 import {Logger} from '../../Logger';
 import {ContextUser} from '../../model/SessionContext';
+import {ANDSearchQuery, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../common/entities/SearchQueryDTO';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -296,6 +297,71 @@ export class AuthenticationMWs {
   public static logout(req: Request, res: Response, next: NextFunction): void {
     delete req.session.context;
     return next();
+  }
+
+  /**
+   * Canonical form for directory path comparison:
+   * - backslashes → forward slashes
+   * - trailing slashes stripped
+   * - '.' → '' (Utils.concatUrls returns '.' for the gallery root; normalise to empty string)
+   */
+  private static normalizeDirPath(p: string): string {
+    const fwd = p.replace(/\\/g, '/');
+    let end = fwd.length;
+    while (end > 0 && fwd[end - 1] === '/') end--;
+    const s = fwd.slice(0, end);
+    return s === '.' ? '' : s;
+  }
+
+  /**
+   * Middleware: allows LimitedGuest (sharing) users through only when the requested
+   * directory is the share root or a descendant of it. All other roles pass unconditionally.
+   */
+  public static authoriseSharingDirectory(req: Request, res: Response, next: NextFunction): void {
+    if (req.session?.context?.user?.role !== UserRoles.LimitedGuest) {
+      return next();
+    }
+    const allowQuery = req.session.context.user.allowQuery;
+    if (!allowQuery) {
+      return next();
+    }
+    const requestedDir = AuthenticationMWs.normalizeDirPath(req.params['directory'] || '');
+    if (AuthenticationMWs.isDirInShareScope(requestedDir, allowQuery)) {
+      return next();
+    }
+    res.status(401);
+    return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
+  }
+
+  /**
+   * Returns true when `dir` is within the directory scope of a share's allowQuery.
+   *
+   * - Exact-match directory share: dir must equal or be a descendant of the share root.
+   * - AND query: the top-level list must contain an exact-match directory clause; if none
+   *   is found the function fails closed (false) rather than granting access silently.
+   * - Non-directory shares (date, person, etc.): any directory is permitted here because
+   *   the DB-layer projectionQuery already restricts which media rows are returned.
+   */
+  private static isDirInShareScope(dir: string, query: SearchQueryDTO): boolean {
+    if (
+      query.type === SearchQueryTypes.directory &&
+      (query as TextSearch).matchType === TextSearchQueryMatchTypes.exact_match
+    ) {
+      const shareRoot = AuthenticationMWs.normalizeDirPath((query as TextSearch).value);
+      // Empty shareRoot means the gallery root — every directory is in scope.
+      if (shareRoot === '') return true;
+      return dir === shareRoot || dir.startsWith(shareRoot + '/');
+    }
+    if (query.type === SearchQueryTypes.AND) {
+      const dirClause = (query as ANDSearchQuery).list.find(
+        q => q.type === SearchQueryTypes.directory &&
+             (q as TextSearch).matchType === TextSearchQueryMatchTypes.exact_match
+      );
+      // Fail closed: an AND query with no recognisable directory clause is not granted access.
+      return dirClause ? AuthenticationMWs.isDirInShareScope(dir, dirClause) : false;
+    }
+    // Non-directory shares: projectionQuery enforces content scope at the DB layer.
+    return true;
   }
 
   private static async getSharingUser(req: Request): Promise<ContextUser> {
