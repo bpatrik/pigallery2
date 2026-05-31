@@ -1,5 +1,5 @@
 import {DirectoryPathDTO} from './DirectoryDTO';
-import {MediaDimension, MediaDTO, MediaMetadata} from './MediaDTO';
+import {MediaDimension, MediaDTO, MediaMetadata, VideoProperties} from './MediaDTO';
 
 export interface VideoDTO extends MediaDTO {
   id: number;
@@ -8,12 +8,9 @@ export interface VideoDTO extends MediaDTO {
   metadata: VideoMetadata;
 }
 
-export interface VideoMetadata extends MediaMetadata {
+export interface VideoMetadata extends MediaMetadata, VideoProperties {
   size: MediaDimension;
   creationDate: number;
   creationDateOffset?: string;
-  bitRate: number;
-  duration: number; // in milliseconds
   fileSize: number;
-  fps: number;
 }

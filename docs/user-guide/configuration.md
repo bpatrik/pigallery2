@@ -124,6 +124,7 @@ App CLI options:
   --Media-Photo-sharpOptions                                                Add any sharp options here. They will be added to sharp constructor as raw params. See: https://sharp.pixelplumbing.com/api-constructor/. (default: {"test":444})
   --Media-Photo-personFaceMargin                                            This ratio of the face bounding box will be added to the face as a margin. Higher number add more margin. (default: 0.7)
   --Media-Photo-animateGif                                                  Converts Gif to animated webp. (default: true)
+  --Media-LivePhoto-enabled                                                 Pairs Apple Live Photo still images with their companion video clips using Content Identifier metadata. (default: true)
   --Media-folder                                                            Images are loaded from this folder (read permission required) (default: 'demo/images')
   --Media-tempFolder                                                        Thumbnails, converted photos, videos will be stored here (write permission required) (default: 'demo/tmp')
   --MetaFile-gpx                                                            Reads *.gpx files and renders them on the map. (default: true)
@@ -190,6 +191,7 @@ App CLI options:
   --Indexing-reIndexingSensitivity                                          Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
   --Indexing-excludeFolderList                                              Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
   --Indexing-excludeFileList                                                Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
+  --Indexing-excludeFilenameList                                            Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
   --AlbumCover-SearchQuery                                                  Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   --AlbumCover-Sorting                                                      If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   --Duplicates-listingLimit                                                 Maximum number of duplicates to list. (default: 1000)
@@ -304,6 +306,7 @@ Environmental variables:
   Media-Photo-sharpOptions                                              Add any sharp options here. They will be added to sharp constructor as raw params. See: https://sharp.pixelplumbing.com/api-constructor/. (default: {"test":444})
   Media-Photo-personFaceMargin                                          This ratio of the face bounding box will be added to the face as a margin. Higher number add more margin. (default: 0.7)
   Media-Photo-animateGif                                                Converts Gif to animated webp. (default: true)
+  Media-LivePhoto-enabled                                               Pairs Apple Live Photo still images with their companion video clips using Content Identifier metadata. (default: true)
   Media-folder                                                          Images are loaded from this folder (read permission required) (default: 'demo/images')
   Media-tempFolder                                                      Thumbnails, converted photos, videos will be stored here (write permission required) (default: 'demo/tmp')
   MetaFile-gpx                                                          Reads *.gpx files and renders them on the map. (default: true)
@@ -375,6 +378,7 @@ Environmental variables:
   Indexing-reIndexingSensitivity                                        Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
   Indexing-excludeFolderList                                            Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
   Indexing-excludeFileList                                              Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
+  Indexing-excludeFilenameList                                          Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
   AlbumCover-SearchQuery                                                Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   AlbumCover-Sorting                                                    If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   Duplicates-listingLimit                                               Maximum number of duplicates to list. (default: 1000)
@@ -694,6 +698,10 @@ Environmental variables:
             "personFaceMargin": 0.7,
             "//[animateGif]": "Converts Gif to animated webp.",
             "animateGif": true
+        },
+        "LivePhoto": {
+            "//[enabled]": "Pairs Apple Live Photo still images with their companion video clips using Content Identifier metadata.",
+            "enabled": true
         },
         "//[folder]": "Images are loaded from this folder (read permission required)",
         "folder": "demo/images",
@@ -1076,7 +1084,9 @@ Environmental variables:
             "$RECYCLE.BIN"
         ],
         "//[excludeFileList]": "Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing.",
-        "excludeFileList": []
+        "excludeFileList": [],
+        "//[excludeFilenameList]": "Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files.",
+        "excludeFilenameList": []
     },
     "//[AlbumCover]": "Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.",
     "AlbumCover": {
@@ -1222,3 +1232,23 @@ Environmental variables:
     }
 }
 ```
+
+## Supported Directory Configuration (`.pg2conf`) Files
+
+The following files can be placed in gallery directories to customize behavior (such as sorting, file upload permissions, and saved searches):
+
+| File Name | Processing Side | Description |
+| --- | --- | --- |
+| `.order_ascending_date.pg2conf` | Client | Forces the directory contents to be sorted by date in ascending order. |
+| `.order_ascending_filesize.pg2conf` | Client | Forces the directory contents to be sorted by filesize in ascending order. |
+| `.order_ascending_name.pg2conf` | Client | Forces the directory contents to be sorted by name in ascending order. |
+| `.order_ascending_personcount.pg2conf` | Client | Forces the directory contents to be sorted by personcount in ascending order. |
+| `.order_ascending_rating.pg2conf` | Client | Forces the directory contents to be sorted by rating in ascending order. |
+| `.order_descending_date.pg2conf` | Client | Forces the directory contents to be sorted by date in descending order. |
+| `.order_descending_filesize.pg2conf` | Client | Forces the directory contents to be sorted by filesize in descending order. |
+| `.order_descending_name.pg2conf` | Client | Forces the directory contents to be sorted by name in descending order. |
+| `.order_descending_personcount.pg2conf` | Client | Forces the directory contents to be sorted by personcount in descending order. |
+| `.order_descending_rating.pg2conf` | Client | Forces the directory contents to be sorted by rating in descending order. |
+| `.order_random.pg2conf` | Client | Forces the directory contents to be sorted in a random order. |
+| `.uploader.pg2conf` | Client | Whitelists the directory for file uploads. When enforced, users can only upload files to directories containing this file. |
+| `.saved_searches.pg2conf` | Server | Stores saved searches (logical albums) at the directory level. These searches survive database resets and are loaded during directory indexing. |

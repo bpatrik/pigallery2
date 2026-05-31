@@ -6,6 +6,7 @@ import {FileAlreadyExists} from '../exceptions/FileAlreadyExists';
 import {ObjectManagers} from './ObjectManagers';
 import {DiskManager} from './fileaccess/DiskManager';
 import {Config} from '../../common/config/private/Config';
+import {PG2ConfMap} from '../../common/PG2ConfMap';
 
 export interface UploadError {
   filename: string;
@@ -22,8 +23,11 @@ export class UploadManager {
     const fullDirPath = path.join(ProjectPath.ImageFolder, relativeDir);
 
     if (Config.Upload.enforcedDirectoryConfig === true) {
-      const pg2confPath = path.join(fullDirPath, '.uploader.pg2conf');
-      if (!fs.existsSync(pg2confPath)) {
+      const hasUploadConf = Object.keys(PG2ConfMap.upload).some(filename => {
+        const pg2confPath = path.join(fullDirPath, filename);
+        return fs.existsSync(pg2confPath);
+      });
+      if (!hasUploadConf) {
         throw new Error('Upload is not enabled in this directory');
       }
     }

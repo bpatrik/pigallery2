@@ -249,8 +249,10 @@ export class AuthenticationMWs {
     if (
       typeof req.body === 'undefined' ||
       typeof req.body.loginCredential === 'undefined' ||
-      typeof req.body.loginCredential.username === 'undefined' ||
-      typeof req.body.loginCredential.password === 'undefined'
+      typeof req.body.loginCredential.username !== 'string' ||
+      typeof req.body.loginCredential.password !== 'string' ||
+      req.body.loginCredential.username.length === 0 ||
+      req.body.loginCredential.password.length === 0
     ) {
       Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` no user or password provided');
       return next(

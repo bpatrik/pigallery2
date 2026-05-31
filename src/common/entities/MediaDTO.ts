@@ -4,12 +4,26 @@ import {FileDTO} from './FileDTO';
 import {SupportedFormats} from '../SupportedFormats';
 import {Utils} from '../Utils';
 
+export interface VideoProperties {
+  size: MediaDimension;
+  fileSize: number;
+  duration: number;
+  fps: number;
+  bitRate: number;
+}
+
+export interface LiveVideoInfo extends VideoProperties {
+  name: string;
+}
+
 export interface MediaDTO extends FileDTO {
   id: number;
   name: string;
   directory: DirectoryPathDTO;
   metadata: MediaMetadata;
   missingThumbnails?: number;
+  liveVideoPath?: string;
+  liveVideoInfo?: LiveVideoInfo;
 }
 
 export type RatingTypes = 0 | 1 | 2 | 3 | 4 | 5;
@@ -23,6 +37,7 @@ export interface MediaMetadata {
   rating?: RatingTypes;
   title?: string;
   caption?: string;
+  contentIdentifier?: string;
 }
 
 export interface MediaDimension {

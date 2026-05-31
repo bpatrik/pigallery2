@@ -7,6 +7,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NotificationService} from '../../../model/notification.service';
+import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
 
 export interface UploadProgress {
   name: string;
@@ -54,7 +55,7 @@ export class UploaderService {
     }
 
     if (Config.Upload.enforcedDirectoryConfig === true) {
-      if (!dir.metaFile || !dir.metaFile.some(m => m.name === '.uploader.pg2conf')) {
+      if (!dir.metaFile || !dir.metaFile.some(m => PG2ConfMap.upload[m.name])) {
         return false;
       }
     }
