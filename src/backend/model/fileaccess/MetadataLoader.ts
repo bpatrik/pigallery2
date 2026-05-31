@@ -9,7 +9,7 @@ import {Logger} from '../../Logger';
 // @ts-ignore
 import * as exifr from 'exifr';
 import * as exifReader from 'exif-reader';
-import * as from 'sharp';
+import * as sharp from 'sharp';
 import {FfprobeData} from 'fluent-ffmpeg';
 import * as util from 'node:util';
 import * as path from 'path';
