@@ -16,6 +16,28 @@ export class PhotoProcessing {
   private static taskQue: ITaskExecuter<MediaRendererInput | SvgRendererInput, void> = null;
   private static readonly CONVERTED_EXTENSION = '.webp';
 
+  /**
+   * Photo formats that browsers can display natively (no conversion needed).
+   * Formats not in this list (e.g. HEIC, DNG, ARW, TIFF) will be converted
+   * to WebP when serving the full-resolution image.
+   */
+  public static readonly BROWSER_NATIVE_FORMATS = [
+    '.gif', '.jpeg', '.jpg', '.jpe', '.png', '.webp', '.svg', '.avif',
+  ];
+
+  /**
+   * Checks if a converted/thumbnail file exists and is non-empty.
+   * A 0-byte file indicates a previous failed conversion and should be regenerated.
+   */
+  private static async convertedFileExists(filePath: string): Promise<boolean> {
+    try {
+      const stat = await fsp.stat(filePath);
+      return stat.size > 0;
+    } catch (e) {
+      return false;
+    }
+  }
+
   public static init(): void {
     if (this.initDone === true) {
       return;
@@ -60,8 +82,9 @@ export class PhotoProcessing {
 
     // check if thumbnail already exist
     try {
-      await fsp.access(thPath, fsConstants.R_OK);
-      return thPath;
+      if (await PhotoProcessing.convertedFileExists(thPath)) {
+        return thPath;
+      }
     } catch (e) {
       // ignoring errors
     }
@@ -247,14 +270,7 @@ export class PhotoProcessing {
     // generate thumbnail path
     const outPath = PhotoProcessing.generateConvertedPath(mediaPath, size);
 
-    // check if file already exist
-    try {
-      await fsp.access(outPath, fsConstants.R_OK);
-      return true;
-    } catch (e) {
-      // ignoring errors
-    }
-    return false;
+    return PhotoProcessing.convertedFileExists(outPath);
   }
 
 
@@ -269,8 +285,9 @@ export class PhotoProcessing {
 
     // check if file already exist
     try {
-      await fsp.access(outPath, fsConstants.R_OK);
-      return outPath;
+      if (await PhotoProcessing.convertedFileExists(outPath)) {
+        return outPath;
+      }
     } catch (e) {
       // ignoring errors
     }
@@ -291,6 +308,64 @@ export class PhotoProcessing {
 
     const outDir = path.dirname(input.outPath);
 
+    await fsp.mkdir(outDir, {recursive: true});
+    await this.taskQue.execute(input);
+    return outPath;
+  }
+
+  /**
+   * Returns true if the photo format is not natively supported by browsers
+   * and needs to be converted to WebP for display (e.g. HEIC, DNG, ARW, TIFF).
+   */
+  public static needsConversion(mediaPath: string): boolean {
+    const ext = path.extname(mediaPath).toLowerCase();
+    return PhotoProcessing.BROWSER_NATIVE_FORMATS.indexOf(ext) === -1;
+  }
+
+  public static generateConvertedFullResPath(mediaPath: string): string {
+    const file = path.basename(mediaPath);
+    return path.join(
+      ProjectPath.TranscodedFolder,
+      ProjectPath.getRelativePathToImages(path.dirname(mediaPath)),
+      file + '_fullres' +
+      'q' + Config.Media.Photo.quality +
+      (Config.Media.Photo.smartSubsample ? 'cs' : '') +
+      PhotoProcessing.CONVERTED_EXTENSION
+    );
+  }
+
+  /**
+   * Converts a non-browser-native photo (e.g. HEIC) to WebP at full resolution.
+   * The converted file is cached in the TranscodedFolder.
+   */
+  public static async generateConvertedPhoto(
+    mediaPath: string
+  ): Promise<string> {
+    const outPath = PhotoProcessing.generateConvertedFullResPath(mediaPath);
+
+    // check if converted file already exists
+    try {
+      if (await PhotoProcessing.convertedFileExists(outPath)) {
+        return outPath;
+      }
+    } catch (e) {
+      // needs conversion
+    }
+
+    const input = {
+      type: ThumbnailSourceType.Photo,
+      mediaPath,
+      size: 0, // 0 = no resize, keep original dimensions
+      outPath,
+      makeSquare: false,
+      useLanczos3: Config.Media.Photo.useLanczos3,
+      quality: Config.Media.Photo.quality,
+      smartSubsample: Config.Media.Photo.smartSubsample,
+      sharpOptions: Config.Media.Photo.sharpOptions,
+      animate: false,
+    } as MediaRendererInput;
+
+    const outDir = path.dirname(input.outPath);
     await fsp.mkdir(outDir, {recursive: true});
     await this.taskQue.execute(input);
     return outPath;
@@ -321,8 +396,9 @@ export class PhotoProcessing {
 
     // check if the file already exists
     try {
-      await fsp.access(hashedOutPath, fsConstants.R_OK);
-      return hashedOutPath;
+      if (await PhotoProcessing.convertedFileExists(hashedOutPath)) {
+        return hashedOutPath;
+      }
     } catch (e) {
       // ignoring errors
     }

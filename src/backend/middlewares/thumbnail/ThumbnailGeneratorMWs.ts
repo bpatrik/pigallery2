@@ -93,7 +93,14 @@ export class ThumbnailGeneratorMWs {
           size
         );
 
-        item.missingThumbnail = !fs.existsSync(thPath);
+        let thExists = false;
+        try {
+          const stat = fs.statSync(thPath);
+          thExists = stat.size > 0;
+        } catch (e) {
+          // file doesn't exist
+        }
+        item.missingThumbnail = !thExists;
       }
     } catch (error) {
       res.status(500);
@@ -212,6 +219,40 @@ export class ThumbnailGeneratorMWs {
     };
   }
 
+  /**
+   * Converts non-browser-native photo formats (e.g. HEIC, DNG, ARW, TIFF)
+   * to WebP at full resolution for display in the browser.
+   * Browser-native formats (JPG, PNG, WebP, etc.) pass through unchanged.
+   */
+  public static async convertPhoto(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    if (!req.resultPipe) {
+      return next();
+    }
+
+    const mediaPath = req.resultPipe as string;
+
+    if (!PhotoProcessing.needsConversion(mediaPath)) {
+      return next();
+    }
+
+    try {
+      req.resultPipe = await PhotoProcessing.generateConvertedPhoto(mediaPath);
+      return next();
+    } catch (error) {
+      return next(
+        new ErrorDTO(
+          ErrorCodes.THUMBNAIL_GENERATION_ERROR,
+          'Error during converting photo: ' + mediaPath,
+          error.toString()
+        )
+      );
+    }
+  }
+
   private static addThInfoTODir(
     directory: ParentDirectoryDTO | SubDirectoryDTO
   ): void {
@@ -242,7 +283,15 @@ export class ThumbnailGeneratorMWs {
         fullMediaPath,
         entry.size
       );
-      if (fs.existsSync(thPath) !== true) {
+      // Check both existence and non-zero size to catch failed conversions
+      let valid = false;
+      try {
+        const stat = fs.statSync(thPath);
+        valid = stat.size > 0;
+      } catch (e) {
+        // file doesn't exist
+      }
+      if (!valid) {
         if (typeof photo.missingThumbnails === 'undefined') {
           photo.missingThumbnails = 0;
         }

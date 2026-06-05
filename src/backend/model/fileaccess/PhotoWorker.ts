@@ -161,22 +161,25 @@ export class ImageRendererFactory {
     if (input.cut) {
       image.extract(input.cut);
     }
-    if (input.makeSquare === false) {
-      if (metadata.height > metadata.width) {
-        image.resize(Math.min(input.size, metadata.width), null, {
-          kernel,
-        });
+    // size 0 means keep original dimensions (full-res conversion)
+    if (input.size > 0) {
+      if (input.makeSquare === false) {
+        if (metadata.height > metadata.width) {
+          image.resize(Math.min(input.size, metadata.width), null, {
+            kernel,
+          });
+        } else {
+          image.resize(null, Math.min(input.size, metadata.height), {
+            kernel,
+          });
+        }
       } else {
-        image.resize(null, Math.min(input.size, metadata.height), {
+        image.resize(input.size, input.size, {
           kernel,
+          position: sharp.gravity.centre,
+          fit: 'cover',
         });
       }
-    } else {
-      image.resize(input.size, input.size, {
-        kernel,
-        position: sharp.gravity.centre,
-        fit: 'cover',
-      });
     }
     let processedImg: sharp.Sharp;
     if ((input as MediaRendererInput).mediaPath) {

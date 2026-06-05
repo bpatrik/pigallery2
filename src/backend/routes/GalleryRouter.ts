@@ -76,6 +76,7 @@ export class GalleryRouter {
 
       // specific part
       GalleryMWs.loadFile,
+      ThumbnailGeneratorMWs.convertPhoto,
       ServerTimingMWs.addServerTiming,
       RenderingMWs.renderFile
     );
@@ -171,6 +172,7 @@ export class GalleryRouter {
       GalleryMWs.parseSearchQuery,
       GalleryMWs.getRandomImage,
       GalleryMWs.loadFile,
+      ThumbnailGeneratorMWs.convertPhoto,
       ServerTimingMWs.addServerTiming,
       RenderingMWs.renderFile
     );
