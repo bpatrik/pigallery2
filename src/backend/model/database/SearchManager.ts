@@ -344,6 +344,37 @@ export class SearchManager {
 
     if (
       type === SearchQueryTypes.any_text ||
+      type === SearchQueryTypes.title
+    ) {
+      const q = photoRepository
+        .createQueryBuilder('media')
+        .select('DISTINCT(media.metadata.title) as title')
+        .where(
+          'media.metadata.title LIKE :value COLLATE ' + SQL_COLLATE,
+          {value: '%' + value + '%'}
+        );
+
+      if (session.projectionQuery) {
+        if (session.hasDirectoryProjection) {
+          q.leftJoin('media.directory', 'directory');
+        }
+        q.andWhere(session.projectionQuery);
+      }
+      q.limit(
+        Config.Search.AutoComplete.ItemsPerCategory.title
+      );
+      partialResult.push(
+        this.encapsulateAutoComplete(
+          (
+            await q.getRawMany()
+          ).map((r) => r.title),
+          SearchQueryTypes.title
+        )
+      );
+    }
+
+    if (
+      type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.directory
     ) {
       const dirQ = directoryRepository
@@ -1090,6 +1121,16 @@ export class SearchManager {
       ) {
         q[whereFN](
           getLikeExpr('media.metadata.caption', 'text'),
+          textParam
+        );
+      }
+
+      if (
+        (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
+        query.type === SearchQueryTypes.title
+      ) {
+        q[whereFN](
+          `media.metadata.title ${LIKE} :text${queryId} COLLATE ${SQL_COLLATE}`,
           textParam
         );
       }
