@@ -36,6 +36,7 @@
       <div>
                     <span [ngSwitch]="item.type">
                       <ng-icon *ngSwitchCase="SearchQueryTypes.caption" name="ionTextOutline"></ng-icon>
+                      <ng-icon *ngSwitchCase="SearchQueryTypes.title" name="ionTextOutline"></ng-icon>
                       <ng-icon *ngSwitchCase="SearchQueryTypes.directory" name="ionFolderOutline"></ng-icon>
                       <ng-icon *ngSwitchCase="SearchQueryTypes.file_name" name="ionImageOutline"></ng-icon>
                       <ng-icon *ngSwitchCase="SearchQueryTypes.keyword" name="ionPricetagOutline"></ng-icon>

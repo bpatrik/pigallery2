@@ -1453,6 +1453,34 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         } as SearchResultDTO));
       });
 
+      it('as title', async () => {
+        const sm = new SearchManager();
+
+        // explicit title: type
+        let query: TextSearch = {
+          value: 'Shuttle',
+          type: SearchQueryTypes.title
+        } as TextSearch;
+
+        expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query))).to.deep.equalInAnyOrder(removeDir({
+          searchQuery: query,
+          directories: [],
+          media: [p2],
+          metaFile: [],
+          resultOverflow: false
+        } as SearchResultDTO));
+
+        // bare any_text matches the title too (the bug this fixes)
+        query = {value: 'Shuttle', type: SearchQueryTypes.any_text} as TextSearch;
+        expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query))).to.deep.equalInAnyOrder(removeDir({
+          searchQuery: query,
+          directories: [],
+          media: [p2],
+          metaFile: [],
+          resultOverflow: false
+        } as SearchResultDTO));
+      });
+
       it('as file_name', async () => {
         const sm = new SearchManager();
 
