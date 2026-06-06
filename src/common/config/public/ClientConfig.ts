@@ -170,6 +170,17 @@ export class AutoCompleteItemsPerCategoryConfig {
     description: $localize`Maximum number autocomplete items shown per keyword category.`
   })
   keyword: number = 5;
+
+  @ConfigProperty({
+    type: 'unsignedInt',
+    tags:
+      {
+        name: $localize`Max title items`,
+        priority: ConfigPriority.underTheHood
+      },
+    description: $localize`Maximum number autocomplete items shown per title category.`
+  })
+  title: number = 3;
 }
 
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})

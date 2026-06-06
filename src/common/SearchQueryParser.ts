@@ -46,6 +46,7 @@ export interface QueryKeywords {
   keyword: string;
   person: string;
   position: string;
+  title: string;
 }
 
 export const defaultQueryKeywords: QueryKeywords = {
@@ -82,6 +83,7 @@ export const defaultQueryKeywords: QueryKeywords = {
   file_name: 'file-name',
   person: 'person',
   position: 'position',
+  title: 'title',
   someOf: 'some-of',
 };
 
@@ -740,6 +742,7 @@ export class SearchQueryParser {
       case SearchQueryTypes.caption:
       case SearchQueryTypes.file_name:
       case SearchQueryTypes.directory:
+      case SearchQueryTypes.title:
         if (!(query as TextSearch).value) {
           return '';
         }
