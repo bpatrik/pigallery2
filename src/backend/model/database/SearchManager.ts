@@ -1060,9 +1060,19 @@ export class SearchManager {
         (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
         query.type === SearchQueryTypes.title
       ) {
+        // title is sparse: most photos have no title set. When negating, treat
+        // NULL as a match so a `-title:X` (or negated any_text) doesn't filter
+        // out untitled photos due to NULL NOT LIKE = NULL three-valued logic.
         q[whereFN](
-          `media.metadata.title ${LIKE} :text${queryId} COLLATE ${SQL_COLLATE}`,
-          textParam
+          new Brackets((qbr): void => {
+            qbr.where(
+              getLikeExpr('media.metadata.title', 'text'),
+              textParam
+            );
+            if ((query as TextSearch).negate) {
+              qbr.orWhere('media.metadata.title IS NULL');
+            }
+          })
         );
       }
 
