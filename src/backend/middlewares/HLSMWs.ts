@@ -302,6 +302,11 @@ export class HLSMWs {
     }
   }
 
+  // The only filenames FFmpeg writes into a cache dir and that the player ever
+  // requests: the fMP4 init segment and segment_NNN.m4s. Anything else is
+  // either a typo or an attempt to traverse — reject before any FS touch.
+  private static readonly SEGMENT_FILENAME_RE = /^(init\.mp4|segment_\d+\.m4s)$/;
+
   public static async serveSegmentFile(
     req: Request,
     res: Response,
@@ -310,6 +315,10 @@ export class HLSMWs {
     try {
       const mediaPath = req.params['mediaPath'] as string;
       const filename = req.params['filename'] as string;
+      if (!HLSMWs.SEGMENT_FILENAME_RE.test(filename)) {
+        res.status(404).end();
+        return;
+      }
       const fullMediaPath = path.join(ProjectPath.ImageFolder, mediaPath);
 
       // getOrStartJob is called even though the playlist endpoint already started
