@@ -1197,6 +1197,14 @@ export class ClientGalleryConfig {
   })
   captionFirstNaming: boolean = false; // shows the caption instead of the filename in the photo grid
 
+  @ConfigProperty({
+    tags: {
+      name: $localize`Play videos on hover`,
+      priority: ConfigPriority.advanced,
+    },
+    description: $localize`Plays video inline in the gallery grid when hovering the card (desktop) or long-pressing (mobile).`
+  })
+  playVideoOnHover: boolean = true;
 
   @ConfigProperty({
     tags: {
