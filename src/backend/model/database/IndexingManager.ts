@@ -557,6 +557,9 @@ export class IndexingManager {
     if (entities.length === 0) {
       return [];
     }
+    // Clean NaN values before saving to prevent database write failures
+    // NaN can appear in EXIF metadata (e.g., malformed GPS coordinates)
+    entities.forEach(e => Utils.cleanNaN(e));
     if (entities.length < size) {
       return await repository.save(entities);
     }
