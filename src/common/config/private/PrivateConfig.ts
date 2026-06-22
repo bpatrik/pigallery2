@@ -640,7 +640,7 @@ export class ServerIndexingConfig {
         uiOptional: true,
         uiAllowSpaces: true
       } as TAGS,
-    description: $localize`Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded.`,
+    description: $localize`Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards.`,
   })
   excludeFolderList: string[] = ['.Trash-1000', '.dtrash', '$RECYCLE.BIN'];
   @ConfigProperty({
