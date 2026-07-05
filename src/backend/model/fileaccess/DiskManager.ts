@@ -104,7 +104,7 @@ export class DiskManager {
           return true;
         }
       } else {
-        if (exclude === dir.name) {
+        if (DiskManager.globToRegex(exclude).test(dir.name)) {
           return true;
         }
       }
