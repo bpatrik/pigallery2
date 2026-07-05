@@ -36,6 +36,14 @@ export class AlbumMWs {
       return next();
     }
     try {
+      const album = await ObjectManagers.getInstance().AlbumManager.findById(
+        parseInt(req.params['id'], 10)
+      );
+      if (!album || album.userId !== req.session.user.id) {
+        return next(
+          new ErrorDTO(ErrorCodes.ALBUM_ERROR, 'Album not found or access denied')
+        );
+      }
       await ObjectManagers.getInstance().AlbumManager.deleteAlbum(
         parseInt(req.params['id'], 10)
       );
