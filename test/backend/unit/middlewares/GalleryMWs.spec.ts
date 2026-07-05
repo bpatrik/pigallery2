@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
+import * as path from 'path';
 import {expect} from 'chai';
 import {Config} from '../../../../src/common/config/private/Config';
 import {GalleryMWs} from '../../../../src/backend/middlewares/GalleryMWs';
@@ -77,7 +78,7 @@ describe('GalleryMWs', () => {
           // Packed format uses 'n' for name, 'l' for liveVideoPath
           expect(packed.directory.media.length).to.equal(1);
           expect(packed.directory.media[0]['n']).to.equal('IMG_7943.HEIC');
-          expect(packed.directory.media[0]['l']).to.equal('vacation/IMG_7943_HEVC.MOV');
+          expect(packed.directory.media[0]['l']).to.equal(path.join('vacation', 'IMG_7943_HEVC.MOV'));
           // contentIdentifier should be stripped from the response
           expect(packed.directory.media[0]['m']?.contentIdentifier).to.be.undefined;
           done();
@@ -184,7 +185,7 @@ describe('GalleryMWs', () => {
           const packed = req.resultPipe;
           expect(packed.searchResult.media.length).to.equal(1);
           expect(packed.searchResult.media[0]['n']).to.equal('IMG_7943.HEIC');
-          expect(packed.searchResult.media[0]['l']).to.equal('vacation/IMG_7943_HEVC.MOV');
+          expect(packed.searchResult.media[0]['l']).to.equal(path.join('vacation','IMG_7943_HEVC.MOV'));
           // contentIdentifier should be stripped from the response
           expect(packed.searchResult.media[0]['m']?.contentIdentifier).to.be.undefined;
           done();
