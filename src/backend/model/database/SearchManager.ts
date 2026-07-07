@@ -313,6 +313,37 @@ export class SearchManager {
 
     if (
       type === SearchQueryTypes.any_text ||
+      type === SearchQueryTypes.title
+    ) {
+      const q = photoRepository
+        .createQueryBuilder('media')
+        .select('DISTINCT(media.metadata.title) as title')
+        .where(
+          'media.metadata.title LIKE :value COLLATE ' + SQL_COLLATE,
+          {value: '%' + value + '%'}
+        );
+
+      if (session.projectionQuery) {
+        if (session.hasDirectoryProjection) {
+          q.leftJoin('media.directory', 'directory');
+        }
+        q.andWhere(session.projectionQuery);
+      }
+      q.limit(
+        Config.Search.AutoComplete.ItemsPerCategory.title
+      );
+      partialResult.push(
+        this.encapsulateAutoComplete(
+          (
+            await q.getRawMany()
+          ).map((r) => r.title),
+          SearchQueryTypes.title
+        )
+      );
+    }
+
+    if (
+      type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.directory
     ) {
       const dirs = await directoryRepository
@@ -1022,6 +1053,26 @@ export class SearchManager {
         q[whereFN](
           getLikeExpr('media.metadata.caption', 'text'),
           textParam
+        );
+      }
+
+      if (
+        (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
+        query.type === SearchQueryTypes.title
+      ) {
+        // title is sparse: most photos have no title set. When negating, treat
+        // NULL as a match so a `-title:X` (or negated any_text) doesn't filter
+        // out untitled photos due to NULL NOT LIKE = NULL three-valued logic.
+        q[whereFN](
+          new Brackets((qbr): void => {
+            qbr.where(
+              getLikeExpr('media.metadata.title', 'text'),
+              textParam
+            );
+            if ((query as TextSearch).negate) {
+              qbr.orWhere('media.metadata.title IS NULL');
+            }
+          })
         );
       }
 

@@ -134,6 +134,7 @@ describe('SearchQueryParser', () => {
       check({type: SearchQueryTypes.directory, value: '2000.10.15 (Some event) '} as TextSearch);
       check({type: SearchQueryTypes.keyword, value: 'big boom'} as TextSearch);
       check({type: SearchQueryTypes.caption, value: 'caption'} as TextSearch);
+      check({type: SearchQueryTypes.title, value: 'image title'} as TextSearch);
       check({type: SearchQueryTypes.file_name, value: 'filename'} as TextSearch);
       check({type: SearchQueryTypes.position, value: 'New York'} as TextSearch);
       check({

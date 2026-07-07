@@ -213,6 +213,7 @@ export class TestHelper {
     const p = TestHelper.getPhotoEntry(dir);
 
     p.metadata.caption = 'Light saber';
+    p.metadata.title = 'Shuttle';
     p.metadata.keywords = ['Padmé Amidala', 'star wars', 'Natalie Portman', 'death star', 'wookiee'];
     p.metadata.positionData.city = 'Derem City';
     p.metadata.positionData.state = 'Research City';
