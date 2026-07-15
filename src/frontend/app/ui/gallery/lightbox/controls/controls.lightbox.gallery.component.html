@@ -136,6 +136,7 @@
   </div>
 
   <div id="swipeable-container"
+       [class.hide-cursor]="controllersDimmed"
        (swipeleft)="zoom == 1 && nextPhoto.emit()"
        (swiperight)="zoom == 1 && previousPhoto.emit()"
        (swipeup)="zoom == 1 && closed.emit()"
