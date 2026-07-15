@@ -302,6 +302,11 @@ input[type="range"].zoom-progress::-moz-range-track {
   opacity: 0.0;
 }
 
+/* hide the mouse cursor together with the controls (e.g. during slideshow) */
+#swipeable-container.hide-cursor {
+  cursor: none;
+}
+
 .controls-title.controls-nodim {
   opacity: 0.7;
 }
