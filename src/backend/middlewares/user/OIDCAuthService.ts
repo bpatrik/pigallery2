@@ -4,6 +4,7 @@ import {Client, generators, Issuer, TokenSet} from 'openid-client';
 import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
+import {Utils} from '../../../common/Utils';
 
 export class OIDCAuthService {
   private static clientPromise: Promise<Client> | null = null;
@@ -77,7 +78,7 @@ export class OIDCAuthService {
     // cleanup
     delete (req.session as any).oidc;
     // redirect to root or previously stored path
-    res.redirect('/');
+    res.redirect(Utils.concatUrls('/' + Config.Server.urlBase) + '/');
   }
 
   private static async getClient(): Promise<Client> {
