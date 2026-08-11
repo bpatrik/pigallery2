@@ -49,7 +49,7 @@ export class AlbumRouter {
         [Config.Server.apiPath + '/albums/saved-searches'],
         // common part
         AuthenticationMWs.authenticate,
-        AuthenticationMWs.authorise(UserRoles.Admin),
+        AuthenticationMWs.authorise(UserRoles.User),
         VersionMWs.injectGalleryVersion,
 
         // specific part
