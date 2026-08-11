@@ -35,7 +35,7 @@ For more detailed information, please see our [Documentation Website](http://bpa
 Contributions are welcome! Please read our [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing) to get started.
 
 ## ⭐ Star History
-[![Star History Chart](https://api.star-history.com/svg?repos=bpatrik/pigallery2&type=date&legend=top-left)](https://www.star-history.com/#bpatrik/pigallery2&type=date&legend=top-left)
+[![Star History Chart](https://star-history.dera.page/svg?repos=bpatrik/pigallery2&type=date&legend=top-left)](https://star-history.dera.page/#bpatrik/pigallery2&type=date&legend=top-left)
 
 ## 📜 License
 PiGallery2 is licensed under the MIT License.
