@@ -95,6 +95,8 @@ interface PackedMetadata {
   r?: RatingTypes;
   caption?: string;
   a?: string;
+  title?: string;
+  h?: string;
   faces?: PackedFace[];
   f?: number[][]; // [...box, name]
   keywords?: string[];
@@ -460,6 +462,10 @@ export class ContentWrapperUtils {
         metadata.a = metadata.caption;
         delete metadata.caption;
       }
+      if (metadata.title) {
+        metadata.h = metadata.title;
+        delete metadata.title;
+      }
 
       if (metadata.faces) {
         metadata.f = metadata.faces.map(face => [...face.b!, toIndex(cw.map.faces, reverseMap.faces, face.name)]);
@@ -569,6 +575,10 @@ export class ContentWrapperUtils {
         }
         ContentWrapperUtils.mapify(cw, m, isSearchResult);
       } else if (MediaDTOUtils.isVideo(media[i])) {
+        // NOTE: title is deliberately NOT dropped here even though caption is.
+        // loadVideoMetadata() runs mapMetadata() over an XMP sidecar, which sets
+        // both, so a video CAN carry a title — and dropping it would make that
+        // title findable by `title:` search while the UI showed nothing.
         delete metadata.caption;
         delete metadata.cameraData;
         delete metadata.faces;
@@ -678,6 +688,11 @@ export class ContentWrapperUtils {
       if (typeof metadata.a !== 'undefined') {
         metadata.caption = metadata.a;
         delete metadata.a;
+      }
+
+      if (typeof metadata.h !== 'undefined') {
+        metadata.title = metadata.h;
+        delete metadata.h;
       }
 
       metadata.fileSize = metadata.s;
