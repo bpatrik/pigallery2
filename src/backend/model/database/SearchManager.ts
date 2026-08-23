@@ -992,6 +992,28 @@ export class SearchManager {
         return `${fieldName} ${op} :${paramName}${queryId} COLLATE ${SQL_COLLATE}`;
       };
 
+      // A nullable column needs its NULL rows put back when the expression is
+      // negated. `NULL NOT LIKE 'x'` is NULL rather than TRUE, so a negated
+      // clause silently drops every row where the column was never set — and
+      // since negation chains the per-field clauses with AND (whereFN above),
+      // a single such column empties the entire result.
+      //
+      // `media.name` and `directory.path` are NOT NULL and do not need this.
+      // `metadata.caption`, `metadata.title` and the three
+      // `metadata.positionData` columns are all nullable and all do.
+      //
+      // On the positive side the Brackets wrap one term and nothing changes.
+      const matchNullableField = (fieldName: string): void => {
+        q[whereFN](
+          new Brackets((qbr): void => {
+            qbr.where(getLikeExpr(fieldName, 'text'), textParam);
+            if ((query as TextSearch).negate) {
+              qbr.orWhere(`${fieldName} IS NULL`);
+            }
+          })
+        );
+      };
+
       const textParam: { [key: string]: unknown } = {};
       textParam['text' + queryId] = createMatchString(
         (query as TextSearch).value
@@ -1050,46 +1072,23 @@ export class SearchManager {
         (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
         query.type === SearchQueryTypes.caption
       ) {
-        q[whereFN](
-          getLikeExpr('media.metadata.caption', 'text'),
-          textParam
-        );
+        matchNullableField('media.metadata.caption');
       }
 
       if (
         (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
         query.type === SearchQueryTypes.title
       ) {
-        // title is sparse: most photos have no title set. When negating, treat
-        // NULL as a match so a `-title:X` (or negated any_text) doesn't filter
-        // out untitled photos due to NULL NOT LIKE = NULL three-valued logic.
-        q[whereFN](
-          new Brackets((qbr): void => {
-            qbr.where(
-              getLikeExpr('media.metadata.title', 'text'),
-              textParam
-            );
-            if ((query as TextSearch).negate) {
-              qbr.orWhere('media.metadata.title IS NULL');
-            }
-          })
-        );
+        matchNullableField('media.metadata.title');
       }
 
       if (
         (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
         query.type === SearchQueryTypes.position
       ) {
-        q[whereFN](
-          getLikeExpr('media.metadata.positionData.country', 'text'),
-          textParam
-        )[whereFN](
-          getLikeExpr('media.metadata.positionData.state', 'text'),
-          textParam
-        )[whereFN](
-          getLikeExpr('media.metadata.positionData.city', 'text'),
-          textParam
-        );
+        matchNullableField('media.metadata.positionData.country');
+        matchNullableField('media.metadata.positionData.state');
+        matchNullableField('media.metadata.positionData.city');
       }
 
       // Matching for array type fields
