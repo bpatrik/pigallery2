@@ -309,6 +309,11 @@ export class ContentWrapperUtils {
         (media as PhotoDTO).metadata['a'] = (media as PhotoDTO).metadata.caption;
         delete (media as PhotoDTO).metadata.caption;
       }
+      if ((media as PhotoDTO).metadata.title) {
+        // @ts-ignore
+        (media as PhotoDTO).metadata['h'] = (media as PhotoDTO).metadata.title;
+        delete (media as PhotoDTO).metadata.title;
+      }
 
       if ((media as PhotoDTO).metadata.faces) {
         for (let i = 0; i < (media as PhotoDTO).metadata.faces.length; ++i) {
@@ -460,6 +465,10 @@ export class ContentWrapperUtils {
         }
         ContentWrapperUtils.mapify(cw, m, isSearchResult);
       } else if (MediaDTOUtils.isVideo(m)) {
+        // NOTE: title is deliberately NOT dropped here even though caption is.
+        // loadVideoMetadata() runs mapMetadata() over an XMP sidecar, which sets
+        // both, so a video CAN carry a title — and dropping it would make that
+        // title findable by `title:` search while the UI showed nothing.
         delete (m as PhotoDTO).metadata.caption;
         delete (m as PhotoDTO).metadata.cameraData;
         delete (m as PhotoDTO).metadata.faces;
@@ -604,6 +613,14 @@ export class ContentWrapperUtils {
         (media as PhotoDTO).metadata.caption = (media as PhotoDTO).metadata['a'];
         // @ts-ignore
         delete (media as PhotoDTO).metadata['a'];
+      }
+
+      // @ts-ignore
+      if (typeof (media as PhotoDTO).metadata['h'] !== 'undefined') {
+        // @ts-ignore
+        (media as PhotoDTO).metadata.title = (media as PhotoDTO).metadata['h'];
+        // @ts-ignore
+        delete (media as PhotoDTO).metadata['h'];
       }
 
       // @ts-ignore
