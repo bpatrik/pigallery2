@@ -1292,20 +1292,28 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         } as SearchResultDTO), JSON.stringify(query));
 
         query = ({value: 'Boba', negate: true, type: SearchQueryTypes.any_text} as TextSearch);
+        // `v` belongs here: swVideo.mp4 does not contain 'Boba' anywhere, so a
+        // search for everything that is NOT 'Boba' must return it. It used to be
+        // missing because getVideoEntry() leaves caption null and sets no
+        // positionData at all, and the negated caption/country/state/city clauses
+        // had no `IS NULL` guard — `NULL NOT LIKE '%Boba%'` is NULL, not TRUE, so
+        // the row fell out of the AND-chain that negation builds.
         expect(removeDir(await sm.search(DBTestHelper.defaultSession, query)))
           .to.deep.equalInAnyOrder(removeDir({
           searchQuery: query,
           directories: [],
-          media: [p2, pFaceLess, p4],
+          media: [p2, pFaceLess, p4, v],
           metaFile: [],
           resultOverflow: false
         } as SearchResultDTO), JSON.stringify(query));
 
         query = ({value: 'Boba', negate: true, type: SearchQueryTypes.any_text} as TextSearch);
-        // all should have faces
+        // all PHOTOS should have faces. pFaceLess has none by construction, and
+        // v is a video, which carries no face regions at all — it is in this
+        // result set now that the negated NULL handling is correct.
         const sRet = await sm.search(DBTestHelper.defaultSession, query);
         for (const item of sRet.media) {
-          if (item.id === pFaceLess.id) {
+          if (item.id === pFaceLess.id || item.id === v.id) {
             continue;
           }
 
@@ -1448,6 +1456,34 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
           searchQuery: query,
           directories: [],
           media: [p],
+          metaFile: [],
+          resultOverflow: false
+        } as SearchResultDTO));
+      });
+
+      it('as title', async () => {
+        const sm = new SearchManager();
+
+        // explicit title: type
+        let query: TextSearch = {
+          value: 'Shuttle',
+          type: SearchQueryTypes.title
+        } as TextSearch;
+
+        expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query))).to.deep.equalInAnyOrder(removeDir({
+          searchQuery: query,
+          directories: [],
+          media: [p2],
+          metaFile: [],
+          resultOverflow: false
+        } as SearchResultDTO));
+
+        // bare any_text matches the title too (the bug this fixes)
+        query = {value: 'Shuttle', type: SearchQueryTypes.any_text} as TextSearch;
+        expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query))).to.deep.equalInAnyOrder(removeDir({
+          searchQuery: query,
+          directories: [],
+          media: [p2],
           metaFile: [],
           resultOverflow: false
         } as SearchResultDTO));
