@@ -413,6 +413,19 @@ export class Utils {
     return curr;
   }
 
+  /**
+   * Returns the first element in the sorted array that is >= num.
+   * If all elements are smaller than num, returns the largest element.
+   */
+  public static findCeilinginSorted(num: number, arr: number[]): number {
+    for (const item of arr) {
+      if (item >= num) {
+        return item;
+      }
+    }
+    return arr[arr.length - 1];
+  }
+
   public static asciiToUTF8(text: string): string {
     if (text) {
       // Check for corrupted IPTC data - very long strings with binary content indicate corruption
@@ -575,6 +588,27 @@ export class Utils {
       .filter(s => s && s.length > 0)
       .join(',');
   }
+
+  /**
+   * Recursively cleans NaN values from an object, replacing them with null.
+   * Catches both number NaN and string "NaN" values that can appear in EXIF metadata.
+   * This prevents database write failures when NaN values are present.
+   */
+  public static cleanNaN(obj: unknown): void {
+    if (obj !== null && typeof obj === 'object') {
+      for (const key of Object.keys(obj as Record<string, unknown>)) {
+        const val = (obj as Record<string, unknown>)[key];
+        if (val !== null && typeof val === 'object') {
+          Utils.cleanNaN(val);
+        } else if (typeof val === 'number' && isNaN(val)) {
+          (obj as Record<string, unknown>)[key] = null;
+        } else if (typeof val === 'string' && val === 'NaN') {
+          (obj as Record<string, unknown>)[key] = null;
+        }
+      }
+    }
+  }
+
 }
 
 export class LRU<V> {
