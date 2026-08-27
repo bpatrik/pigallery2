@@ -1,4 +1,7 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+
+// Persists for the lifetime of the page — shared across all card instances
+let globalVideoMuted = true;
 import {Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -43,6 +46,9 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   @Input() gridMedia: GridMedia;
   @ViewChild('img', {static: false}) imageRef: ElementRef;
   @ViewChild('photoContainer', {static: true}) container: ElementRef;
+  @ViewChild('hoverVideo', {static: false}) hoverVideoRef: ElementRef<HTMLVideoElement>;
+
+  protected readonly Config = Config;
 
   thumbnail: Thumbnail;
   keywords: { value: string; type: SearchQueryTypes }[] = null;
@@ -54,6 +60,10 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean = null;
   loaded = false;
+  videoPlaying = false;
+  private videoSrcLoaded = false;
+  private hoverTimer: number = null;
+  private touchHoverTimer: number = null;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[];
 
   constructor(
@@ -195,6 +205,9 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     if (this.animationTimer != null) {
       clearTimeout(this.animationTimer);
     }
+    if (this.hoverTimer != null) clearTimeout(this.hoverTimer);
+    if (this.touchHoverTimer != null) clearTimeout(this.touchHoverTimer);
+    this.stopHoverVideo();
   }
 
   isInView(): boolean {
@@ -276,6 +289,80 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     } else {
       this.modalService.executeButtonAction(button, this.gridMedia);
     }
+  }
+
+  onMouseEnterCard(): void {
+    if (!Config.Gallery.playVideoOnHover || !this.gridMedia.isVideo()) return;
+    if (this.hoverTimer != null) clearTimeout(this.hoverTimer);
+    this.hoverTimer = window.setTimeout(() => {
+      this.hoverTimer = null;
+      this.startHoverVideo();
+    }, 300);
+  }
+
+  onMouseLeaveCard(): void {
+    if (this.hoverTimer != null) {
+      clearTimeout(this.hoverTimer);
+      this.hoverTimer = null;
+    }
+    this.stopHoverVideo();
+  }
+
+  onTouchStart(): void {
+    if (!Config.Gallery.playVideoOnHover || !this.gridMedia.isVideo()) return;
+    if (this.touchHoverTimer != null) clearTimeout(this.touchHoverTimer);
+    this.touchHoverTimer = window.setTimeout(() => {
+      this.touchHoverTimer = null;
+      this.startHoverVideo();
+    }, 600);
+  }
+
+  onTouchEnd(): void {
+    if (this.touchHoverTimer != null) {
+      clearTimeout(this.touchHoverTimer);
+      this.touchHoverTimer = null;
+    }
+    this.stopHoverVideo();
+  }
+
+  get videoMuted(): boolean {
+    return globalVideoMuted;
+  }
+
+  toggleVideoMute(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    globalVideoMuted = !globalVideoMuted;
+    const video = this.hoverVideoRef?.nativeElement;
+    if (video) {
+      video.muted = globalVideoMuted;
+    }
+  }
+
+  private async startHoverVideo(): Promise<void> {
+    const video = this.hoverVideoRef?.nativeElement;
+    if (!video) return;
+    if (!this.videoSrcLoaded) {
+      video.src = this.gridMedia.getBestFitVideoPath();
+      this.videoSrcLoaded = true;
+    }
+    video.muted = globalVideoMuted;
+    try {
+      await video.play();
+      if (!video.paused) {
+        this.videoPlaying = true;
+      }
+    } catch {
+      // play() aborted (e.g., mouse left before video loaded)
+    }
+  }
+
+  private stopHoverVideo(): void {
+    this.videoPlaying = false;
+    const video = this.hoverVideoRef?.nativeElement;
+    if (!video) return;
+    video.pause();
+    video.currentTime = 0;
   }
 
   public getDimension(): Dimension {
