@@ -49,7 +49,7 @@
     "exifr": "7.1.3",
     "express": "4.21.2",
     "fluent-ffmpeg": "2.1.3",
-    "image-size": "2.0.2",
+    "image-size": "npm:image-size-next@2.1.1",
     "locale": "0.1.0",
     "multer": "2.0.2",
     "node-geocoder": "4.4.1",
