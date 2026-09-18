@@ -44,6 +44,16 @@ export class SearchManager {
   // makes all search query params unique, so typeorm won't mix them
   private queryIdBase = 0;
 
+  // autocomplete()'s keyword/position branches DISTINCT over a whole raw column
+  // (the comma-joined keywords list, or a country/state/city triple) before
+  // splitting it into the individual values actually compared against the typed
+  // substring. A bounded but generous candidate pool - well above the
+  // per-category display limit in Config.Search.AutoComplete.ItemsPerCategory -
+  // keeps a substring shared by many distinct rows (e.g. a recurring yearly
+  // album name) from losing a real match to an arbitrary row-order cutoff
+  // before that row was ever inspected for a match at all.
+  private static readonly AUTOCOMPLETE_CANDIDATE_LIMIT = 200;
+
   public static setSorting<T>(
     query: SelectQueryBuilder<T>,
     sortings: SortingMethod[]
@@ -121,7 +131,7 @@ export class SearchManager {
       type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.keyword
     ) {
-      const acList: AutoCompleteItem[] = [];
+      let acList: AutoCompleteItem[] = [];
       const q = photoRepository
         .createQueryBuilder('media')
         .select('DISTINCT(media.metadata.keywords)')
@@ -136,7 +146,8 @@ export class SearchManager {
         q.andWhere(session.projectionQuery);
       }
 
-      q.limit(Config.Search.AutoComplete.ItemsPerCategory.keyword);
+      q.orderBy('media.metadata.keywords', 'ASC')
+        .limit(SearchManager.AUTOCOMPLETE_CANDIDATE_LIMIT);
       (await q.getRawMany())
         .map(
           (r): Array<string> =>
@@ -153,6 +164,10 @@ export class SearchManager {
             )
           );
         });
+      acList = SearchManager.autoCompleteItemsUnique(acList).slice(
+        0,
+        Config.Search.AutoComplete.ItemsPerCategory.keyword
+      );
       partialResult.push(acList);
     }
 
@@ -189,7 +204,7 @@ export class SearchManager {
       type === SearchQueryTypes.position ||
       type === SearchQueryTypes.distance
     ) {
-      const acList: AutoCompleteItem[] = [];
+      let acList: AutoCompleteItem[] = [];
       const q = photoRepository
         .createQueryBuilder('media')
         .select(
@@ -223,7 +238,10 @@ export class SearchManager {
       q.groupBy(
         'media.metadata.positionData.country, media.metadata.positionData.state, media.metadata.positionData.city'
       )
-        .limit(Config.Search.AutoComplete.ItemsPerCategory.position);
+        .orderBy('media.metadata.positionData.country', 'ASC')
+        .addOrderBy('media.metadata.positionData.state', 'ASC')
+        .addOrderBy('media.metadata.positionData.city', 'ASC')
+        .limit(SearchManager.AUTOCOMPLETE_CANDIDATE_LIMIT);
       (
 
         await q.getRawMany()
@@ -246,6 +264,10 @@ export class SearchManager {
             )
           );
         });
+      acList = SearchManager.autoCompleteItemsUnique(acList).slice(
+        0,
+        Config.Search.AutoComplete.ItemsPerCategory.position
+      );
       partialResult.push(acList);
     }
 
