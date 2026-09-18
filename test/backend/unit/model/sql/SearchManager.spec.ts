@@ -179,11 +179,15 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       new AutoCompleteItem('Luke Skywalker', SearchQueryTypes.person)]);
 
     Config.Search.AutoComplete.ItemsPerCategory.maxItems = 1;
+    // The keyword slot picks 'Boba Fett' rather than another 'a'-matching keyword
+    // because the keyword branch now orders its raw candidate rows deterministically
+    // (ASC on the raw column) before taking the first match per row, instead of
+    // relying on whatever order an unordered SQL LIMIT happened to return.
     expect((await sm.autocomplete(DBTestHelper.defaultSession, 'a', SearchQueryTypes.any_text))).to.deep.equalInAnyOrder([
       new AutoCompleteItem('Anakin Skywalker', SearchQueryTypes.person),
       new AutoCompleteItem('Amber stone', SearchQueryTypes.caption),
       new AutoCompleteItem('Castilon', SearchQueryTypes.position),
-      new AutoCompleteItem('star wars', SearchQueryTypes.keyword),
+      new AutoCompleteItem('Boba Fett', SearchQueryTypes.keyword),
       new AutoCompleteItem('The Phantom Menace', SearchQueryTypes.directory)]);
     Config.Search.AutoComplete.ItemsPerCategory.maxItems = 5;
     Config.Search.AutoComplete.ItemsPerCategory.fileName = 5;
@@ -2183,5 +2187,48 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     await sm.prepareAndBuildWhereQuery(query, true, {directory: 'directories'});
   });
 
+  // A nested describe(), not a plain it(): mocha runs every bound it() in a
+  // suite before it runs any of that suite's nested describes, regardless of
+  // their declaration order, so a plain trailing it() here would still run
+  // ahead of 'advanced search' above. This test persists extra media into the
+  // shared DB the whole spec file reuses, which would otherwise show up in
+  // every exact-match assertion in 'advanced search' that enumerates the full
+  // fixture's contents - wrapping it keeps it a suite-level sibling that sorts
+  // after 'advanced search' instead.
+  describe('keyword autocomplete candidate LIMIT regression', () => {
+    it('should not drop matches beyond the raw candidate LIMIT', async () => {
+      const sm = new SearchManager();
+
+      // autocomplete()'s keyword branch used to DISTINCT whole comma-joined
+      // keyword blobs and apply the display LIMIT to those raw rows *before*
+      // filtering them for the typed substring, with no ORDER BY - so once
+      // more distinct blobs matched the substring than
+      // ItemsPerCategory.keyword, which ones survived was arbitrary, and a
+      // real, fully-indexed match could be missing from suggestions even
+      // though the exact same value was fully searchable via a direct
+      // keyword: search (e.g. a new yearly trip album sharing a name with
+      // several older ones). Seed more distinct matching photos than the
+      // (lowered, for this test) display limit, nested under the existing
+      // 'Return of the Jedi' subdirectory and inserted in
+      // reverse-alphabetical order so an unordered pre-filter LIMIT would
+      // surface the wrong end of the list.
+      const regressionDir = TestHelper.getDirectoryEntry(subDir2, 'RegressionTripYears');
+      const N = 6;
+      for (let i = N; i >= 1; --i) {
+        const photo = TestHelper.getPhotoEntry(regressionDir);
+        photo.name = `tripyear${i}.jpg`;
+        photo.metadata.keywords = [`tripyear${i}`];
+      }
+      await DBTestHelper.persistTestDir(regressionDir);
+
+      Config.Search.AutoComplete.ItemsPerCategory.keyword = 3;
+      expect(await sm.autocomplete(DBTestHelper.defaultSession, 'tripyear', SearchQueryTypes.keyword))
+        .to.deep.equalInAnyOrder([
+          new AutoCompleteItem('tripyear1', SearchQueryTypes.keyword),
+          new AutoCompleteItem('tripyear2', SearchQueryTypes.keyword),
+          new AutoCompleteItem('tripyear3', SearchQueryTypes.keyword),
+        ]);
+    });
+  });
 
 });
