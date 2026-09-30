@@ -24,6 +24,10 @@ The official and recommended way to run PiGallery2 is using **Docker**.
 ### [Native Installation (Unsupported)](https://bpatrik.github.io/pigallery2/setup/direct-install)
 Native installation is possible for users familiar with Node.js but is not officially supported.
 
+## ☁️ One-Click Deploy
+
+[![Deploy on RepoCloud](https://d16t0pc4846x52.cloudfront.net/deploylobe.svg)](https://repocloud.io/details/PiGallery2/)
+
 ## 📖 Documentation
 For more detailed information, please see our [Documentation Website](http://bpatrik.github.io/pigallery2) or the `docs/` folder:
 - [FAQ (Frequently Asked Questions)](https://bpatrik.github.io/pigallery2/faq)
