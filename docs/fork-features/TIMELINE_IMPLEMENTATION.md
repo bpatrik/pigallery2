@@ -1,6 +1,7 @@
 # Timeline implementation plan
 
-Status: proposed, not implemented.
+Status: proposed, not implemented. See "Work split and status" for per-task
+progress.
 
 ## Goal
 
@@ -266,6 +267,43 @@ Frontend:
 - Windowed rendering of complete rows, bounded page caches, upward paging
   with a `before` cursor, photo deep-link anchors with a defined fallback for
   unavailable photos, sharing support, scan work budget.
+
+## Work split and status
+
+Overall difficulty: Opus-level project, split by risk. The hard part is many
+correct changes to shared, lightly tested frontend code, not new algorithms.
+Rough v1 size: 1.5–2.5k lines including tests.
+
+Owner legend: **Luna** = implements; **Luna + Opus check** = Luna implements,
+Opus reviews the named tests/diff before merge; **Opus** = Opus implements.
+
+Status legend: `todo`, `in progress`, `review`, `done`.
+
+| # | Task | Milestone | Difficulty | Owner | Status |
+|---|---|---|---|---|---|
+| 1 | `getOffsetMinutes` negative sub-hour fix + test (separate commit) | 1 | Routine | Luna | todo |
+| 2 | Effective-time helper + paging function (window, two cursors, `before`, ties across batches) with unit tests | 1 | Subtle, fully specified | Luna + Opus check (tests reviewed first) | todo |
+| 3 | Thumbnail helper extraction from `ThumbnailGeneratorMWs` (Folders unchanged) | 1 | Routine | Luna | todo |
+| 4 | `TimelineManager`, `TimelineMWs` (availability, validation), `TimelineRouter` | 1 | Routine | Luna | todo |
+| 5 | Live-photo filtering/attachment with permission rules | 1 | Moderate | Luna + Opus check (permission tests) | todo |
+| 6 | Both-DB tests (SQLite + MySQL) and dense-burst performance check | 1 | Laborious | Luna | todo |
+| 7 | `ClientTimelineConfig`, nav enum + `toDefault()` fallback, `/timeline` route, i18n | 1 | Routine | Luna | todo |
+| 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | todo |
+| 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | todo |
+| 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | todo |
+| 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | todo |
+| 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | todo |
+| 13 | Year/month rail, mobile picker, `?at=YYYY-MM` | 2 | Medium | Opus | todo |
+| 14 | Dense justified layout, thumbnail-size control | 3 | UI design | Opus (iterating with maintainer) | todo |
+| 15 | Windowed rendering and other scale items | 4 | As measured | Opus | todo |
+
+Suggested order: backend tasks 1–6 (Opus reviews paging and permission tests),
+then 7, then frontend 8–11 by Opus with the Folders regression check right
+after task 9.
+
+Main risks: Folders lightbox regressions (task 9), scroll/Back restore and
+loading races (task 10). Backend risk is concentrated in task 2 and covered by
+its tests.
 
 ## Verification
 
