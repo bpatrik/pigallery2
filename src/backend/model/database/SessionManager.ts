@@ -2,7 +2,7 @@ import * as crypto from 'crypto';
 import {ContextUser, SessionContext} from '../SessionContext';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {Config} from '../../../common/config/private/Config';
-import {ANDSearchQuery, SearchQueryDTO, SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
+import {ANDSearchQuery, SearchListQuery, SearchQueryDTO, SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 import {SharingEntity} from './enitites/SharingEntity';
 import {ObjectManagers} from '../ObjectManagers';
 import {Logger} from '../../Logger';
@@ -33,6 +33,16 @@ export class SessionManager {
     return crypto.createHash('md5').update(canonical).digest('hex');
   }
 
+  public static isTimeDependent(q: SearchQueryDTO): boolean {
+    if (!q) {
+      return false;
+    }
+    if (q.type === SearchQueryTypes.date_pattern) {
+      return true;
+    }
+    return ((q as SearchListQuery).list || []).some(SessionManager.isTimeDependent);
+  }
+
   public async buildContext(user: ContextUser): Promise<SessionContext> {
     const context = new SessionContext();
     context.user = user;
@@ -47,6 +57,7 @@ export class SessionManager {
         context.projectionQueryForSubDir = await ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(finalQuery, true, {directory: 'directories'});
       }
       context.user.projectionKey = this.createProjectionKey(finalQuery);
+      context.hasTimeDependentProjection = SessionManager.isTimeDependent(finalQuery);
       if (SearchQueryUtils.isQueryEmpty(finalQuery)) {
         Logger.silly(LOG_TAG, 'Empty Projection query.');
       } else {

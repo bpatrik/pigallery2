@@ -290,6 +290,7 @@ export class PublicRouter {
         '/duplicates',
         '/faces',
         '/albums',
+        '/timeline',
         '/search*',
       ],
       AuthenticationMWs.tryAuthenticate,
@@ -306,6 +307,7 @@ export class PublicRouter {
           '/' + l + '/share*',
           '/' + l + '/admin',
           '/' + l + '/search*',
+          '/' + l + '/timeline',
           '/' + l + '/error',
         ],
         redirectToBase(l)

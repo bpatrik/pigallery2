@@ -49,6 +49,8 @@ nav:
       - Contributing: development/contributing.md
       - Docker Development: development/docker-contributing.md
       - Extensions: development/extensions.md
+  - Fork Features:
+      - Timeline (plan): fork-features/TIMELINE_IMPLEMENTATION.md
   - Blog:
       - How do I use PiGallery2 (2021): blog/How do I use PiGallery2 2021.md
       - The future of PiGallery2 (2023): blog/The future of pigallery2 v2.0.0 and beyond 2023.md

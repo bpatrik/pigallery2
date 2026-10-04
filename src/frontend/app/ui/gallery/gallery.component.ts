@@ -34,6 +34,8 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 import {UploaderService} from './uploader/uploader.service';
 import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
+import {QueryService} from '../../model/query.service';
+import {MediaDTO} from '../../../../common/entities/MediaDTO';
 
 @Component({
   selector: 'app-gallery',
@@ -99,9 +101,24 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private gpxFilesFilterPipe: GPXFilesFilterPipe,
     private mdFilesFilterPipe: MDFilesFilterPipe,
     public uploaderService: UploaderService,
+    private queryService: QueryService,
   ) {
     this.mapEnabled = Config.Map.enabled;
     PageHelper.showScrollY('gallery');
+  }
+
+  readonly mediaIdFn = (media: MediaDTO): string =>
+    this.queryService.getMediaStringId(media);
+
+  openMedia(media: MediaDTO): void {
+    this.router.navigate([], {
+      queryParams: this.queryService.getParams({media}),
+    }).catch(console.error);
+  }
+
+  closeMissingMedia(): void {
+    this.router.navigate([], {queryParams: this.queryService.getParams()})
+      .catch(console.error);
   }
 
   get ContentWrapper(): ContentWrapperWithError {

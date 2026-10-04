@@ -5,10 +5,16 @@ import {ShareService} from '../ui/gallery/share.service';
 import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
 import {firstValueFrom} from 'rxjs';
+import {AuthenticationService} from './network/authentication.service';
+import {UserRoles} from '../../../common/entities/UserDTO';
 
 @Injectable()
 export class NavigationService {
-  constructor(private router: Router, private shareService: ShareService) {
+  constructor(
+    private router: Router,
+    private shareService: ShareService,
+    private authenticationService: AuthenticationService
+  ) {
   }
 
   public isLoginPage(): boolean {
@@ -37,7 +43,7 @@ export class NavigationService {
         });
       } else {
         console.error('Navigating to share login without password protection. Something went somewhere off');
-        this.toError();
+        return this.toError();
       }
     } else {
       return this.router.navigate(['login']);
@@ -49,8 +55,34 @@ export class NavigationService {
     if (this.shareService.isSharing()) {
       return this.router.navigate(['/share', this.shareService.getSharingKey()]);
     } else {
-      if (Config.Gallery.NavBar.links && Config.Gallery.NavBar.links.length > 0) {
-        switch (Config.Gallery.NavBar.links[0].type) {
+      const user = this.authenticationService.user.value;
+      const role = user?.role ?? (Config.Users.authenticationRequired
+        ? UserRoles.LimitedGuest
+        : Config.Users.unAuthenticatedUserRole);
+      const links = Config.Gallery.NavBar.links || [];
+      for (const link of links) {
+        const available = (() => {
+          switch (link.type) {
+            case NavigationLinkTypes.gallery:
+              return role >= UserRoles.User;
+            case NavigationLinkTypes.albums:
+              return Config.Album.enabled && role >= Config.Album.readAccessMinRole;
+            case NavigationLinkTypes.faces:
+              return Config.Faces.enabled && role >= Config.Faces.readAccessMinRole;
+            case NavigationLinkTypes.search:
+              return Config.Search.enabled && role >= UserRoles.Guest;
+            case NavigationLinkTypes.timeline:
+              return Config.Timeline.enabled &&
+                !user?.usedSharingKey &&
+                role >= Config.Timeline.readAccessMinRole;
+            default:
+              return false;
+          }
+        })();
+        if (!available) {
+          continue;
+        }
+        switch (link.type) {
           case NavigationLinkTypes.gallery:
             return this.router.navigate(['gallery', '']);
           case NavigationLinkTypes.albums:
@@ -58,9 +90,11 @@ export class NavigationService {
           case NavigationLinkTypes.faces:
             return this.router.navigate(['faces']);
           case NavigationLinkTypes.search:
-            return this.router.navigate(['search', JSON.stringify(Config.Gallery.NavBar.links[0].SearchQuery)]);
+            return this.router.navigate(['search', JSON.stringify(link.SearchQuery)]);
+          case NavigationLinkTypes.timeline:
+            return this.router.navigate(['timeline']);
           default:
-            console.error('nowhere to navigate.');
+            break;
         }
       }
 

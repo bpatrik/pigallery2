@@ -3,6 +3,11 @@
     width: 100%;
 }
 
+/* groups sharing a row would otherwise align on their last image row (baseline) */
+.media-group {
+    vertical-align: top;
+}
+
 .media-grid {
     line-height: normal;
     font-size: 0;

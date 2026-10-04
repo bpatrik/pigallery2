@@ -3,12 +3,15 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
   HostListener,
   Input,
   OnChanges,
   OnDestroy,
   OnInit,
+  Output,
   QueryList,
+  SimpleChanges,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
@@ -20,12 +23,11 @@ import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
 import {Subscription} from 'rxjs';
-import {ActivatedRoute, Params, Router} from '@angular/router';
-import {QueryService} from '../../../model/query.service';
+import {ActivatedRoute, Params} from '@angular/router';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
-import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, GroupingMethod} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {AsyncPipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
@@ -58,6 +60,12 @@ export class GalleryGridComponent
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
   @Input() lightbox: GalleryLightboxComponent;
   @Input() mediaGroups: MediaGroup[];
+  @Input() mediaIdFn: (media: MediaDTO) => string;
+  @Input() groupHeaderMethod: GroupingMethod['method'] = null;
+  @Input() showInlineBlog = true;
+  @Input() revealMediaId: string = null;
+  @Output() mediaOpen = new EventEmitter<MediaDTO>();
+  @Output() missingMedia = new EventEmitter<string>();
   mediaToRender: GridMediaGroup[] = [];
   containerWidth = 0;
   containerMinHeight = 0; // used to fix container height while updating photos to prevent flickering
@@ -85,8 +93,6 @@ export class GalleryGridComponent
   constructor(
     private overlayService: OverlayService,
     private changeDetector: ChangeDetectorRef,
-    public queryService: QueryService,
-    private router: Router,
     public sortingService: GallerySortingService,
     public navigatorService: GalleryNavigatorService,
     private route: ActivatedRoute,
@@ -94,7 +100,14 @@ export class GalleryGridComponent
   ) {
   }
 
-  ngOnChanges(): void {
+  get HeaderMethod(): GroupingMethod['method'] {
+    return this.groupHeaderMethod ?? this.sortingService.grouping.value.method;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['revealMediaId'] && this.revealMediaId) {
+      this.delayedRenderUpToPhoto = this.revealMediaId;
+    }
     if (this.isAfterViewInit === false) {
       return;
     }
@@ -205,13 +218,11 @@ export class GalleryGridComponent
   }
 
   photoClicked(media: MediaDTO): void {
-    this.router.navigate([], {
-      queryParams: this.queryService.getParams({media}),
-    });
+    this.mediaOpen.emit(media);
   }
 
   ngAfterViewInit(): void {
-    this.lightbox.setGridPhotoQL(this.gridPhotoQL);
+    this.lightbox?.setGridPhotoQL(this.gridPhotoQL);
 
     if (Config.Gallery.enableOnScrollThumbnailPrioritising === true) {
       this.gridPhotoQL.changes.subscribe((): void => {
@@ -420,7 +431,7 @@ export class GalleryGridComponent
 
     for (let i = 0; i < this.mediaGroups.length; ++i) {
       mediaIndex = this.mediaGroups[i].media.findIndex(
-        (p): boolean => this.queryService.getMediaStringId(p) === mediaStringId
+        (p): boolean => this.mediaIdFn(p) === mediaStringId
       );
       if (mediaIndex !== -1) {
         groupIndex = i;
@@ -428,7 +439,7 @@ export class GalleryGridComponent
       }
     }
     if (groupIndex === -1) {
-      this.router.navigate([], {queryParams: this.queryService.getParams()});
+      this.missingMedia.emit(mediaStringId);
       return;
     }
     // Make sure that at least one more row is rendered

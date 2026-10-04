@@ -2,9 +2,9 @@
      [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
   <ng-container *ngIf="mediaToRender?.length > 0">
     <ng-container *ngFor="let group of mediaToRender">
-      <div class="d-inline-block">
+      <div class="d-inline-block media-group">
         <ng-container *ngIf="group.name">
-          <ng-container [ngSwitch]="sortingService.grouping.value.method">
+          <ng-container [ngSwitch]="HeaderMethod">
             <div *ngSwitchCase="GroupByTypes.Rating" class="mt-4 mb-3">
               <h6 class="ms-2">
                 <ng-icon *ngFor="let i of [0,1,2,3,4]"
@@ -20,7 +20,7 @@
           </ng-container>
         </ng-container>
 
-        <ng-container *ngIf="group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0">
+        <ng-container *ngIf="showInlineBlog && group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0">
           <app-gallery-blog
             [date]="group.date"
             [open]="blogOpen">

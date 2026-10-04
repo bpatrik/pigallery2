@@ -46,3 +46,11 @@ app-info-panel {
 ng-icon.h2 ::ng-deep svg {
   vertical-align: bottom;
 }
+
+.lightbox-load-state {
+  position: absolute;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+}

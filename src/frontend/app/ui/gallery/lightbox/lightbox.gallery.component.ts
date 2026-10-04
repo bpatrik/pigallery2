@@ -21,6 +21,7 @@ import {NgFor, NgIf} from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
+import {GridLightboxSource, LightboxItem, LightboxSource} from './LightboxSource';
 
 export enum LightboxStates {
   Open = 1,
@@ -43,6 +44,9 @@ export enum LightboxStates {
   ]
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {
+  private static readonly MAX_EMPTY_PAGES = 50;
+  // bumped on close, source change and destroy so pending page loads stop advancing
+  private navigationToken = 0;
   @ViewChild('photo', {static: true})
   mediaElement: GalleryLightboxMediaComponent;
   @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
@@ -51,7 +55,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   public navigation = {hasPrev: true, hasNext: true};
   public blackCanvasOpacity = 0;
-  public activePhoto: GalleryPhotoComponent;
+  public activePhoto: LightboxItem;
   public status: LightboxStates = LightboxStates.Closed;
   public infoPanelVisible = false;
   public infoPanelWidth = 0;
@@ -71,7 +75,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private visibilityTimer: number = null;
   private delayedMediaShow: string = null;
   private activePhotoId: number = null;
-  private gridPhotoQL: QueryList<GalleryPhotoComponent>;
+  private source: LightboxSource;
   private subscription: {
     photosChange: Subscription;
     route: Subscription;
@@ -102,17 +106,28 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   get NexGridMedia(): GridMedia {
-    if (!this.gridPhotoQL?.length) {
+    if (!this.source?.length) {
       return null;
     }
-    if (this.activePhotoId + 1 < this.gridPhotoQL?.length) {
-      return this.gridPhotoQL.get(this.activePhotoId + 1)?.gridMedia;
+    if (this.activePhotoId + 1 < this.source.length) {
+      return this.source.get(this.activePhotoId + 1);
+    }
+    if (this.source.hasMore()) {
+      return null;
     }
     if (this.lightboxService.loopSlideshow) {
-      return this.gridPhotoQL.get(0)?.gridMedia;
+      return this.source.get(0);
     }
 
     return null;
+  }
+
+  get LoadState(): string {
+    return this.source?.loadState ?? 'idle';
+  }
+
+  get IsAtLoadedEnd(): boolean {
+    return !!this.source && this.activePhotoId === this.source.length - 1 && this.source.hasMore();
   }
 
   public toggleFullscreen(): void {
@@ -141,7 +156,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
         if (validPhoto) {
           this.delayedMediaShow = params[QueryParams.gallery.photo];
           // photos are not yet available to show
-          if (!this.gridPhotoQL) {
+          if (!this.source) {
             return;
           }
           this.onNavigateTo(params[QueryParams.gallery.photo]);
@@ -156,6 +171,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    this.navigationToken++;
     this.stopSlideShow();
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
@@ -173,23 +189,26 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   setGridPhotoQL(value: QueryList<GalleryPhotoComponent>): void {
+    this.setSource(new GridLightboxSource(value, this.queryService));
+  }
+
+  setSource(source: LightboxSource): void {
+    this.navigationToken++;
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
     }
-    this.gridPhotoQL = value;
-    this.subscription.photosChange = this.gridPhotoQL.changes.subscribe(
+    this.source = source;
+    this.subscription.photosChange = this.source.changes.subscribe(
       (): void => {
         if (this.activePhoto) {
-          const id = this.queryService.getMediaStringId(this.activePhoto.gridMedia.media);
-          const index = this.gridPhotoQL.toArray().findIndex(p =>
-            this.queryService.getMediaStringId(p.gridMedia.media) === id
-          );
+          const id = this.source.getMediaId(this.activePhoto.gridMedia.media);
+          const index = this.source.indexOfId(id);
           // make sure that currently shown media has uses the right index.
           if (index !== -1) {
             this.activePhotoId = index;
             this.updateActivePhoto(this.activePhotoId);
             // if the photo is not available anymore, navigate to the first one.
-          } else if (this.gridPhotoQL.length > 0) {
+          } else if (this.source.length > 0) {
             if (this.status === LightboxStates.Open) {
               this.navigateToPhoto(0);
             }
@@ -222,11 +241,20 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   public nextImage(): void {
-    if (this.activePhotoId + 1 < this.gridPhotoQL.length) {
+    if (this.activePhotoId + 1 < this.source.length) {
       this.navigateToPhoto(this.activePhotoId + 1);
+    } else if (this.source.hasMore()) {
+      // errors need an explicit retry, so the slideshow timer does not hammer the server
+      if (this.source.loadState !== 'error') {
+        this.loadMoreAndAdvance();
+      }
     } else if (this.lightboxService.loopSlideshow) {
       this.navigateToPhoto(0);
     }
+  }
+
+  public retryLoad(): void {
+    this.loadMoreAndAdvance();
   }
 
   public prevImage(): void {
@@ -236,22 +264,19 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
   }
 
-  public showLigthbox(photo: MediaDTO): void {
+  public showLightbox(index: number): void {
     if (this.controls) {
       this.controls.resetZoom();
     }
     this.status = LightboxStates.Opening;
-    const selectedPhoto = this.findPhotoComponent(photo);
-    if (selectedPhoto === null) {
-      throw new Error('Can\'t find Photo');
-    }
+    const gridMedia = this.source.get(index);
 
-    const lightboxDimension = selectedPhoto.getDimension();
+    const lightboxDimension = this.getGridDimension(index);
     lightboxDimension.top -= PageHelper.ScrollY;
     this.animating = true;
     this.animatePhoto(
-      selectedPhoto.getDimension(),
-      this.calcLightBoxPhotoDimension(selectedPhoto.gridMedia.media)
+      this.getGridDimension(index),
+      this.calcLightBoxPhotoDimension(gridMedia.media)
     ).onDone((): void => {
       this.animating = false;
       this.status = LightboxStates.Open;
@@ -264,17 +289,17 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     } as Dimension);
 
     this.blackCanvasOpacity = 0;
-    this.startPhotoDimension = selectedPhoto.getDimension();
+    this.startPhotoDimension = this.getGridDimension(index);
     // disable scroll
     this.overlayService.showOverlay('lightbox');
     this.blackCanvasOpacity = 1.0;
-    this.showPhoto(this.gridPhotoQL.toArray().indexOf(selectedPhoto), false);
-    this.piTitleService.setMediaTitle(selectedPhoto.gridMedia);
+    this.showPhoto(index, false);
+    this.piTitleService.setMediaTitle(gridMedia);
   }
 
   public hide(): void {
     this.router
-      .navigate([], {queryParams: this.queryService.getParams()})
+      .navigate([], {queryParams: this.source ? this.source.queryParams() : this.queryService.getParams()})
       .then(() => {
         this.piTitleService.setLastNonMedia();
       })
@@ -411,7 +436,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private onNavigateTo(photoStringId: string): void {
     if (
       this.activePhoto &&
-      this.queryService.getMediaStringId(this.activePhoto.gridMedia.media) ===
+      this.source.getMediaId(this.activePhoto.gridMedia.media) ===
       photoStringId
     ) {
       return;
@@ -420,18 +445,15 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     if (this.controls) {
       this.controls.resetZoom();
     }
-    const photo = this.gridPhotoQL.find(
-      (i): boolean =>
-        this.queryService.getMediaStringId(i.gridMedia.media) === photoStringId
-    );
-    if (!photo) {
+    const index = this.source.indexOfId(photoStringId);
+    if (index === -1) {
       this.delayedMediaShow = photoStringId;
       return;
     }
     if (this.status === LightboxStates.Closed) {
-      this.showLigthbox(photo.gridMedia.media);
+      this.showLightbox(index);
     } else {
-      this.showPhoto(this.gridPhotoQL.toArray().indexOf(photo));
+      this.showPhoto(index);
     }
     this.delayedMediaShow = null;
   }
@@ -444,7 +466,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   private runSlideShow() {
-    if (!this.activePhoto && this.gridPhotoQL?.length > 0) {
+    if (!this.activePhoto && this.source?.length > 0) {
       this.navigateToPhoto(0);
     }
     this.slideShowRunning = true;
@@ -475,20 +497,66 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   };
 
   private navigateToPhoto(photoIndex: number): void {
+    const gridMedia = this.source.get(photoIndex);
     this.router
       .navigate([], {
-        queryParams: this.queryService.getParams(
-          {media: this.gridPhotoQL.get(photoIndex).gridMedia.media}
-        ),
+        queryParams: this.source.queryParams(gridMedia.media),
         queryParamsHandling: 'merge', // keep existing params
         replaceUrl: true,
       })
       .then(() => {
-        this.piTitleService.setMediaTitle(this.gridPhotoQL.get(photoIndex).gridMedia);
+        this.piTitleService.setMediaTitle(gridMedia);
       })
       .catch((err) => {
         console.error(`Can't navigate to photo ${photoIndex}`, err);
       });
+  }
+
+  private loadMoreAndAdvance(): void {
+    if (!this.activePhoto) {
+      return;
+    }
+    const source = this.source;
+    const token = this.navigationToken;
+    const fromId = source.getMediaId(this.activePhoto.gridMedia.media);
+    // the user may close or move on while a page loads; only advance from the same open item
+    const isSameView = (): boolean =>
+      this.navigationToken === token &&
+      this.source === source &&
+      this.status === LightboxStates.Open &&
+      !!this.activePhoto &&
+      source.getMediaId(this.activePhoto.gridMedia.media) === fromId;
+
+    // pages can add nothing (companion videos, duplicates); keep loading until something new appears
+    const step = (attempt: number): Promise<void> => {
+      if (!isSameView()) {
+        return Promise.resolve();
+      }
+      return source.loadMore().then((): Promise<void> => {
+        if (!isSameView()) {
+          return;
+        }
+        const next = source.indexOfId(fromId) + 1;
+        if (next > 0 && next < source.length) {
+          this.navigateToPhoto(next);
+          return;
+        }
+        if (source.hasMore() && source.loadState !== 'error' && attempt < GalleryLightboxComponent.MAX_EMPTY_PAGES) {
+          return step(attempt + 1);
+        }
+        this.navigation.hasNext = !!this.NexGridMedia || source.hasMore();
+      });
+    };
+    step(1).catch(console.error);
+  }
+
+  private getGridDimension(index: number): Dimension {
+    return this.source.animationTarget(index) ?? {
+      top: PageHelper.ScrollY + this.photoFrameDim.height / 2,
+      left: this.photoFrameDim.width / 2,
+      width: 0,
+      height: 0,
+    } as Dimension;
   }
 
   private showPhoto(photoIndex: number, resize = true): void {
@@ -498,6 +566,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   private hideLightbox(): void {
+    this.navigationToken++;
     if (this.controls) {
       this.controls.resetZoom();
     }
@@ -507,13 +576,13 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.stopSlideShow();
 
     this.animating = true;
-    const lightboxDimension = this.activePhoto.getDimension();
+    const lightboxDimension = this.getGridDimension(this.activePhotoId);
     lightboxDimension.top -= PageHelper.ScrollY;
     this.blackCanvasOpacity = 0;
 
     this.animatePhoto(
       this.calcLightBoxPhotoDimension(this.activePhoto.gridMedia.media),
-      this.activePhoto.getDimension()
+      this.getGridDimension(this.activePhotoId)
     );
     this.animateLightbox(
       {
@@ -534,12 +603,15 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   private updateActivePhoto(photoIndex: number, resize = true): void {
-    if (photoIndex < 0 || photoIndex >= this.gridPhotoQL.length) {
+    if (photoIndex < 0 || photoIndex >= this.source.length) {
       throw new Error('Can\'t find the media');
     }
     this.videoSourceError = false;
     this.activePhotoId = photoIndex;
-    this.activePhoto = this.gridPhotoQL.get(photoIndex);
+    const gridMedia = this.source.get(photoIndex);
+    if (this.activePhoto?.gridMedia !== gridMedia) {
+      this.activePhoto = {gridMedia};
+    }
 
     if (resize) {
       this.animatePhoto(
@@ -547,9 +619,12 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       );
     }
     this.navigation.hasPrev = photoIndex > 0;
-    this.navigation.hasNext = !!this.NexGridMedia;
+    this.navigation.hasNext = !!this.NexGridMedia || this.source.hasMore();
 
-    const to = this.activePhoto.getDimension();
+    const to = this.source.animationTarget(photoIndex);
+    if (!to) {
+      return;
+    }
 
     // if target image out of screen -> scroll to there
     if (
@@ -558,16 +633,6 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     ) {
       PageHelper.ScrollY = to.top;
     }
-  }
-
-  private findPhotoComponent(media: MediaDTO): GalleryPhotoComponent {
-    const galleryPhotoComponents = this.gridPhotoQL.toArray();
-    for (const item of galleryPhotoComponents) {
-      if (item.gridMedia.media === media) {
-        return item;
-      }
-    }
-    return null;
   }
 
   private calcLightBoxPhotoDimension(photo: MediaDTO): Dimension {

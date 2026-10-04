@@ -1121,7 +1121,8 @@ export class SearchManager {
             qbr[whereFN](
               new Brackets((qb): void => {
                 const globPattern = convertGlobToLike((query as TextSearch).value);
-                const esc = ' ESCAPE \'\\\'';
+                // MySQL already escapes LIKE with '\' and cannot parse the literal '\'; SQLite has no default escape
+                const esc = Config.Database.type === DatabaseType.sqlite ? ' ESCAPE \'\\\'' : '';
                 const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
 
                 textParam['CtextC' + queryId] = `%,${globPattern},%`;

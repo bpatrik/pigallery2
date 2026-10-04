@@ -56,6 +56,9 @@
           [gpxFiles]="directoryContent?.metaFile | gpxFiles"></app-gallery-map>
       </div>
       <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
+                        [mediaIdFn]="mediaIdFn"
+                        (mediaOpen)="openMedia($event)"
+                        (missingMedia)="closeMissingMedia()"
                         [lightbox]="lightbox"></app-gallery-grid>
 
     </ng-container>

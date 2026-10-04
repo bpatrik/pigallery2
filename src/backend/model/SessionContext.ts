@@ -8,6 +8,8 @@ export class SessionContext {
   projectionQuery?: Brackets;
   projectionQueryForSubDir?: Brackets; // only the directory part of the query, where it filters 'directories' instead of 'directory' aliases
   hasDirectoryProjection: boolean;
+  // projection depends on the current date (date patterns), so its results change without new data
+  hasTimeDependentProjection?: boolean;
 }
 
 export interface ContextUser extends UserDTO {

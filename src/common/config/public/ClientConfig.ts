@@ -650,7 +650,7 @@ export class ClientMapConfig {
 }
 
 export enum NavigationLinkTypes {
-  gallery = 1, faces, albums, search, url
+  gallery = 1, faces, albums, search, url, timeline
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
@@ -1405,6 +1405,21 @@ export class ClientLivePhotoConfig {
   enabled: boolean = true;
 }
 
+@SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
+export class ClientTimelineConfig {
+  @ConfigProperty({
+    tags: {name: $localize`Enable Timeline`, priority: ConfigPriority.advanced},
+    description: $localize`Shows all permitted indexed media in a chronological timeline.`
+  })
+  enabled: boolean = true;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {name: $localize`Minimum read role`, priority: ConfigPriority.advanced}
+  })
+  readAccessMinRole: UserRoles = UserRoles.Guest;
+}
+
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientMediaConfig {
   @ConfigProperty({
@@ -1736,6 +1751,9 @@ export class ClientConfig {
     } as TAGS,
   })
   Gallery: ClientGalleryConfig = new ClientGalleryConfig();
+
+  @ConfigProperty({tags: {name: $localize`Timeline`, uiIcon: 'ionTimeOutline'} as TAGS})
+  Timeline: ClientTimelineConfig = new ClientTimelineConfig();
 
   @ConfigProperty()
   Media: ClientMediaConfig = new ClientMediaConfig();
