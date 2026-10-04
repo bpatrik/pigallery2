@@ -49,6 +49,8 @@ export class VersionManager implements IObjectManager {
       .getCount();
 
     if (!dir) {
+      // keep the version distinct from the last non-empty state (e.g. after a gallery reset)
+      this.latestDirectoryStatus = {name: '', lastModified: 0, mediaCount: 0};
       return;
     }
     const mediaCount = await connection

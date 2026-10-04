@@ -25,6 +25,7 @@ export class GalleryRestJob extends Job {
     this.Progress.Left = 1;
     this.Progress.Processed++;
     await ObjectManagers.getInstance().IndexingManager.resetDB();
+    await ObjectManagers.getInstance().onDataChange();
     return false;
   }
 }
