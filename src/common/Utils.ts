@@ -232,8 +232,8 @@ export class Utils {
                                                          //-12:00 is the lowest valid UTC-offset, but we allow down to -14 for efficiency
     if (regex.test(offsetString)) {
       const hhmm = offsetString.split(':');
-      const hours = parseInt(hhmm[0]);
-      return hours < 0 ? ((hours * 60) - parseInt(hhmm[1])) : ((hours * 60) + parseInt(hhmm[1]));
+      const sign = offsetString[0] === '-' ? -1 : 1;
+      return sign * (parseInt(hhmm[0].slice(1), 10) * 60 + parseInt(hhmm[1], 10));
     } else {
       return undefined;
     }

@@ -30,6 +30,13 @@ describe('Utils', () => {
     expect(Utils.findClosest(10, [4, 20])).to.be.equal(4);
     expect(Utils.findClosest(10, [20])).to.be.equal(20);
   });
+
+  it('should preserve the sign of negative sub-hour offsets', () => {
+    expect(Utils.getOffsetMinutes('-00:30')).to.equal(-30);
+    expect(Utils.getOffsetMinutes('-01:30')).to.equal(-90);
+    expect(Utils.getOffsetMinutes('+00:30')).to.equal(30);
+  });
+
   it('should find closest number in sorted array', () => {
 
     expect(Utils.findClosestinSorted(10, [3, 5, 8, 10, 15, 20])).to.be.equal(10);
