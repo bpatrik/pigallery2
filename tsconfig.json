@@ -2,6 +2,7 @@
   "compileOnSave": true,
   "compilerOptions": {
     "noImplicitAny": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,

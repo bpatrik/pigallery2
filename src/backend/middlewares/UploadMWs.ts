@@ -4,7 +4,14 @@ import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import multer = require('multer');
 
 const storage = multer.memoryStorage();
-const upload = multer({storage}).array('files');
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024,
+    files: 10,
+    parts: 10,
+  },
+}).array('files');
 
 export class UploadMWs {
   public static async upload(
@@ -14,6 +21,10 @@ export class UploadMWs {
   ): Promise<void> {
     upload(req, res, async (err: any) => {
       if (err) {
+        if (err.code?.startsWith('LIMIT_')) {
+          res.sendStatus(413);
+          return;
+        }
         return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, err.message));
       }
 

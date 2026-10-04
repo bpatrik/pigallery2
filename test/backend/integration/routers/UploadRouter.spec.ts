@@ -44,8 +44,6 @@ describe('UploadRouter', () => {
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, {recursive: true});
     }
-    Config.Media.folder = testDir;
-    ProjectPath.reset();
   });
 
   after(async () => {
@@ -57,6 +55,8 @@ describe('UploadRouter', () => {
   const setUp = async () => {
     Config.Upload.enabled = true;
     await sqlHelper.initDB();
+    Config.Media.folder = testDir;
+    ProjectPath.reset();
     server = new Server(false);
     await server.onStarted.wait();
     await ObjectManagers.getInstance().init();
@@ -102,6 +102,16 @@ describe('UploadRouter', () => {
 
       const savedPath = path.join(testDir, 'test.jpg');
       fs.existsSync(savedPath).should.be.true;
+    });
+
+    it('should reject files larger than the upload limit', async () => {
+      const loginRes = await login(server);
+      const res = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.alloc(50 * 1024 * 1024 + 1), 'large.jpg');
+
+      res.should.have.status(413);
     });
 
     it('should upload a file to a sub-directory', async () => {

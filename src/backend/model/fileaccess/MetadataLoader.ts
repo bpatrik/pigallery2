@@ -9,7 +9,7 @@ import {Logger} from '../../Logger';
 // @ts-ignore
 import * as exifr from 'exifr';
 import * as exifReader from 'exif-reader';
-import * as sharp from 'sharp';
+const sharp = require('sharp') as typeof import('sharp').default;
 import {FfprobeData} from 'fluent-ffmpeg';
 import * as util from 'node:util';
 import * as path from 'path';
@@ -237,7 +237,7 @@ export class MetadataLoader {
           }
         } catch (err) {
           try {
-            const m = await sharp(fullPath, {failOnError: false}).metadata();
+            const m = await sharp(fullPath, {failOn: 'none'}).metadata();
             MetadataLoader.mapMetadata(metadata, this.mapExifReader(exifReader(m.exif)), true);
           } catch (e) {
             // ignoring errors

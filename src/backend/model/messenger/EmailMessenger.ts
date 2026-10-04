@@ -89,7 +89,7 @@ export class EmailMessenger extends Messenger<{
       }
     }
 
-    return await this.transporter.sendMail({
+    await this.transporter.sendMail({
       from: Config.Messaging.Email.emailFrom,
       to: mailSettings.emailTo,
       subject: mailSettings.emailSubject,
