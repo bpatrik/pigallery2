@@ -54,6 +54,15 @@ describe('TimelineManager', (sqlHelper: DBTestHelper) => {
     const standalone = TestHelper.getVideoEntry(directory);
     standalone.name = 'standalone.mp4';
     standalone.metadata.creationDate = Date.UTC(2015, 5, 4);
+    const lastMsOfMonth = TestHelper.getBasePhotoEntry(directory, 'last-ms-of-month.jpg');
+    lastMsOfMonth.metadata.creationDate = Date.UTC(2017, 0, 31, 23, 59, 59, 999);
+    lastMsOfMonth.metadata.creationDateOffset = '+00:00';
+    const offsetCrossesMonth = TestHelper.getBasePhotoEntry(directory, 'offset-crosses-month.jpg');
+    offsetCrossesMonth.metadata.creationDate = Date.UTC(2017, 1, 28, 23, 30);
+    offsetCrossesMonth.metadata.creationDateOffset = '+01:00';
+    const preEpochMonthEnd = TestHelper.getBasePhotoEntry(directory, 'pre-epoch-month-end.jpg');
+    preEpochMonthEnd.metadata.creationDate = Date.UTC(1960, 0, 31, 23, 59, 59, 999);
+    preEpochMonthEnd.metadata.creationDateOffset = '+00:00';
     await DBTestHelper.persistTestDir(directory);
     const connection = await SQLConnection.getConnection();
     const otherDirectory = await connection
@@ -220,6 +229,40 @@ describe('TimelineManager', (sqlHelper: DBTestHelper) => {
 
     await manager.onNewDataVersion();
     expect(await manager.getSummary(DBTestHelper.defaultSession)).to.not.equal(summaryA);
+  });
+
+  it('summary counts equal a full traversal grouped by month, near day and month boundaries', async () => {
+    Config.Media.LivePhoto.enabled = true;
+    for (const ignoreTimestampOffset of [true, false]) {
+      Config.Gallery.ignoreTimestampOffset = ignoreTimestampOffset;
+      const items: MediaDTO[] = [];
+      let cursor: {from: number; after: number} | undefined;
+      for (let request = 0; request < 20; request++) {
+        const page = await manager.getMediaPage(DBTestHelper.defaultSession, {limit: 3, cursor});
+        items.push(...page.media);
+        if (!page.next) {
+          break;
+        }
+        cursor = page.next;
+      }
+      const expected: Record<string, number> = {};
+      for (const item of items) {
+        const date = new Date(getTimelineEffectiveTime(item, ignoreTimestampOffset));
+        const key = `${date.getUTCFullYear()}-${date.getUTCMonth() + 1}`;
+        expected[key] = (expected[key] || 0) + 1;
+      }
+      const actual: Record<string, number> = {};
+      for (const year of (await manager.getSummary(DBTestHelper.defaultSession)).years) {
+        for (const month of year.months) {
+          actual[`${year.year}-${month.month}`] = month.count;
+        }
+      }
+
+      expect(actual, `ignoreTimestampOffset=${ignoreTimestampOffset}`).to.deep.equal(expected);
+      expect(actual['1960-1']).to.equal(1);
+      expect(actual['2017-1']).to.equal(1);
+      expect(actual[ignoreTimestampOffset ? '2017-3' : '2017-2']).to.equal(1);
+    }
   });
 
   it('scans a dense equal-time burst and records page latency on each DB engine', async () => {

@@ -53,7 +53,13 @@ export class TimelineManager implements IObjectManager {
   }
 
   public async getSummary(session: SessionContext): Promise<TimelineSummaryDTO> {
-    const projectionKey = session.user.projectionKey || '';
+    // settings changes do not bump the data version, so they are part of the key
+    const projectionKey = [
+      session.user.projectionKey || '',
+      Config.Gallery.ignoreTimestampOffset,
+      Config.Media.Video.enabled,
+      Config.Media.LivePhoto.enabled,
+    ].join('|');
     const cached = this.summaryCache.get(projectionKey);
     if (cached?.generation === this.generation) {
       this.summaryCache.delete(projectionKey);

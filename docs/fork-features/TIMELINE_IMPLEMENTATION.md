@@ -292,7 +292,7 @@ Status legend: `todo`, `in progress`, `review`, `done`.
 | 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | review |
 | 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | review |
 | 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | review |
-| 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | review |
+| 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | done |
 | 13 | Year/month rail, mobile picker, `?at=YYYY-MM` | 2 | Medium | Opus | todo |
 | 14 | Dense justified layout, thumbnail-size control | 3 | UI design | Opus (iterating with maintainer) | todo |
 | 15 | Windowed rendering and other scale items | 4 | As measured | Opus | todo |
@@ -357,10 +357,24 @@ is missing from this environment.
 
 Open before closing milestone 1:
 
-- Opus check of task 12 (summary endpoint and cache).
 - Run `npm run test-frontend -- --watch=false` with Chrome and the Karma plugin
   available. The last attempt stopped before browser launch because
-  `@angular-devkit/build-angular/plugins/karma` is missing.
+  `@angular-devkit/build-angular/plugins/karma` is missing. Root cause: the
+  package is only installed nested under
+  `@angular-builders/custom-webpack/node_modules` (not hoisted), while
+  `karma.conf.js` requires it from the top level; likely since the dependency
+  update in `f77bb81f`. Not Timeline-specific.
+
+Opus task 12 review (2026-10-04): accepted. Cache invalidation is wired
+(`onDataChange` → `onNewDataVersion` bumps the generation); in-flight builds
+are shared and only publish when the generation is unchanged; failed builds are
+not cached. Fixed: the cache key now includes `ignoreTimestampOffset`,
+`Video.enabled` and `LivePhoto.enabled`, since settings changes do not bump the
+data version. Added a test that summary counts equal a full traversal grouped
+by month in both time bases, with fixtures 1 ms before a month end (also
+pre-1970) and one whose offset moves it into the next month. Checked on
+MariaDB that `FLOOR(x / 86400000)` is exact at those boundaries (no
+`div_precision_increment` rounding). 33 tests pass on SQLite and MariaDB.
 
 Accepted v1 gaps: leaving Timeline drops in-flight responses instead of
 aborting them; deep links outside loaded pages drop `p`; dense bursts scan the
