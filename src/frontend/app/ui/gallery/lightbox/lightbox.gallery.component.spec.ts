@@ -448,4 +448,75 @@ describe('GalleryLightboxComponent - paged source', () => {
     expect(component.activePhoto.gridMedia.media.name).toBe('c.jpg');
     expect(component.navigation.hasNext).toBeFalse();
   }));
+
+  // Pages are queued per loadMore() call; each call appends that page's names once resolved.
+  function pagedSource(initial: string[], pages: string[][]) {
+    const items = initial.map((n, i) => new GridMedia(createMockPhoto(n, i), 1, 1, 0));
+    const changes = new Subject<void>();
+    const resolvers: (() => void)[] = [];
+    let pending: Promise<void> = null;
+    const loadMore = jasmine.createSpy('loadMore').and.callFake(() => {
+      pending = pending || new Promise<void>(resolve => {
+        resolvers.push(() => {
+          const page = pages.shift() || [];
+          page.forEach(n => items.push(new GridMedia(createMockPhoto(n, items.length), 1, 1, 0)));
+          pending = null;
+          changes.next();
+          resolve();
+        });
+      });
+      return pending;
+    });
+    const source: LightboxSource = {
+      changes,
+      get length() {
+        return items.length;
+      },
+      get loadState() {
+        return pending ? 'loading' as const : 'idle' as const;
+      },
+      get: (i: number) => items[i],
+      getMediaId: (m: MediaDTO) => m.name,
+      indexOfId: (id: string) => items.findIndex(g => g.media.name === id),
+      animationTarget: () => null,
+      queryParams: (m?: MediaDTO) => m ? {[QueryParams.gallery.photo]: m.name} : {},
+      hasMore: () => pages.length > 0,
+      loadMore,
+    };
+    return {source, loadMore, finishNext: () => resolvers.shift()()};
+  }
+
+  it('does not navigate when the viewer closes while a page is loading', fakeAsync(() => {
+    const {source, finishNext} = pagedSource(['a.jpg', 'b.jpg'], [['c.jpg']]);
+    component.setSource(source);
+    component.status = LightboxStates.Open;
+    mockActivatedRoute.queryParams.next({[QueryParams.gallery.photo]: 'b.jpg'});
+    tick();
+
+    component.nextImage();
+    component.status = LightboxStates.Closing;
+    finishNext();
+    tick();
+
+    expect(mockActivatedRoute.queryParams.value).toEqual({[QueryParams.gallery.photo]: 'b.jpg'});
+  }));
+
+  it('keeps loading through pages that add nothing until a new item appears', fakeAsync(() => {
+    const {source, loadMore, finishNext} = pagedSource(['a.jpg', 'b.jpg'], [[], [], ['c.jpg']]);
+    component.setSource(source);
+    component.status = LightboxStates.Open;
+    mockActivatedRoute.queryParams.next({[QueryParams.gallery.photo]: 'b.jpg'});
+    tick();
+
+    component.nextImage();
+    finishNext();
+    tick();
+    finishNext();
+    tick();
+    finishNext();
+    tick();
+
+    expect(loadMore).toHaveBeenCalledTimes(3);
+    expect(mockActivatedRoute.queryParams.value).toEqual({[QueryParams.gallery.photo]: 'c.jpg'});
+  }));
 });

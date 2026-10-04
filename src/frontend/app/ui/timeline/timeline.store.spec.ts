@@ -186,6 +186,30 @@ describe('TimelineStore', () => {
     expect(summaryRequests.length).toBe(2);
   }));
 
+  it('refreshes a summary made stale by a version change, even after a month jump', fakeAsync(() => {
+    const oldSummary = {years: [{year: 2015, months: [{month: 6, count: 3}]}]};
+    const newSummary = {years: [{year: 2016, months: [{month: 1, count: 1}]}, ...oldSummary.years]};
+    store.loadSummary();
+    summaryRequests[0].resolve(oldSummary);
+    flushMicrotasks();
+
+    version.next('v2');
+    store.reset(12345);
+    expect(store.summaryStale).toBeTrue();
+    expect(store.summary).toEqual(oldSummary);
+
+    store.loadSummary();
+    expect(summaryRequests.length).toBe(2);
+    expect(store.summary).toEqual(oldSummary);
+    summaryRequests[1].resolve(newSummary);
+    flushMicrotasks();
+    expect(store.summary).toEqual(newSummary);
+    expect(store.summaryStale).toBeFalse();
+
+    store.loadSummary();
+    expect(summaryRequests.length).toBe(2);
+  }));
+
   it('ignores a summary that arrives after the user changed', fakeAsync(() => {
     store.loadSummary();
     user.next({id: 2, name: 'v', role: UserRoles.Guest} as UserDTO);

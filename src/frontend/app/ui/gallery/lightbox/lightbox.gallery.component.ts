@@ -44,6 +44,7 @@ export enum LightboxStates {
   ]
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {
+  private static readonly MAX_EMPTY_PAGES = 50;
   @ViewChild('photo', {static: true})
   mediaElement: GalleryLightboxMediaComponent;
   @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
@@ -508,19 +509,34 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   private loadMoreAndAdvance(): void {
-    const from = this.activePhotoId;
-    this.source.loadMore()
-      .then(() => {
-        if (this.status === LightboxStates.Closed || this.activePhotoId !== from) {
-          return;
-        }
-        if (from + 1 < this.source.length) {
-          this.navigateToPhoto(from + 1);
-        } else {
-          this.navigation.hasNext = !!this.NexGridMedia || this.source.hasMore();
-        }
-      })
-      .catch(console.error);
+    if (!this.activePhoto) {
+      return;
+    }
+    const source = this.source;
+    const fromId = source.getMediaId(this.activePhoto.gridMedia.media);
+    // the user may close or move on while a page loads; only advance from the same open item
+    const isSameView = (): boolean =>
+      this.source === source &&
+      this.status === LightboxStates.Open &&
+      !!this.activePhoto &&
+      source.getMediaId(this.activePhoto.gridMedia.media) === fromId;
+
+    // pages can add nothing (companion videos, duplicates); keep loading until something new appears
+    const step = (attempt: number): Promise<void> => source.loadMore().then((): Promise<void> => {
+      if (!isSameView()) {
+        return;
+      }
+      const next = source.indexOfId(fromId) + 1;
+      if (next > 0 && next < source.length) {
+        this.navigateToPhoto(next);
+        return;
+      }
+      if (source.hasMore() && source.loadState !== 'error' && attempt < GalleryLightboxComponent.MAX_EMPTY_PAGES) {
+        return step(attempt + 1);
+      }
+      this.navigation.hasNext = !!this.NexGridMedia || source.hasMore();
+    });
+    step(1).catch(console.error);
   }
 
   private getGridDimension(index: number): Dimension {

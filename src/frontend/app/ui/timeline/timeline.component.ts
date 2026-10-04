@@ -173,6 +173,11 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!month) {
       return;
     }
+    // the URL already holds this month, so the router would ignore the navigation
+    if (this.atMonth && formatTimelineMonth(this.atMonth) === formatTimelineMonth(month)) {
+      this.startAt(month);
+      return;
+    }
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: {[TimelineComponent.AT_PARAM]: formatTimelineMonth(month), [QueryParams.gallery.photo]: null},
@@ -212,9 +217,6 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   backToNewest(): void {
-    if (this.store.newDataAvailable) {
-      this.store.clearSummary();
-    }
     if (this.atMonth) {
       this.router.navigate([], {
         relativeTo: this.route,
@@ -222,11 +224,8 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
         queryParamsHandling: 'merge',
       }).catch(console.error);
     } else {
-      this.store.reset();
-      PageHelper.ScrollY = 0;
-      this.loadMore();
+      this.startAt(null);
     }
-    this.store.loadSummary().catch(console.error);
   }
 
   private onQueryParams(params: Params, initial: boolean): void {
@@ -245,11 +244,7 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
     this.atMonthName = month ? this.formatMonth(month, 'MMMM y') : null;
     const before = month ? getTimelineMonthEnd(month) : null;
     if (before !== this.store.startBefore) {
-      this.store.reset(before);
-      this.revealMediaId = null;
-      this.currentMonthKey = month ? formatTimelineMonth(month) : null;
-      PageHelper.ScrollY = 0;
-      this.loadMore();
+      this.startAt(month);
     } else if (initial) {
       if (this.store.items.length === 0) {
         this.loadMore();
@@ -257,6 +252,14 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
         this.restoreScroll();
       }
     }
+  }
+
+  private startAt(month: TimelineMonth): void {
+    this.store.reset(month ? getTimelineMonthEnd(month) : null);
+    this.revealMediaId = null;
+    this.currentMonthKey = month ? formatTimelineMonth(month) : null;
+    PageHelper.ScrollY = 0;
+    this.loadMore();
   }
 
   private formatMonth(month: TimelineMonth, format: string): string {
@@ -311,6 +314,9 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private onStoreChange(): void {
+    if (this.store.summaryStale) {
+      this.store.loadSummary().catch(console.error);
+    }
     this.updateRail();
     if (this.renderedItems !== this.store.items || this.store.items.length !== this.groupedCount()) {
       this.renderedItems = this.store.items;

@@ -31,12 +31,15 @@ export class TimelineStore {
   startBefore: number = null;
   scrollAnchor: TimelineScrollAnchor = null;
   summary: TimelineSummaryDTO = null;
+  // set when the gallery version moved past the one the summary was loaded under
+  summaryStale = false;
 
   private ids = new Set<number>();
   private epoch = 0;
   private pending: Promise<void> = null;
   private summaryEpoch = 0;
   private summaryPending: Promise<void> = null;
+  private summaryVersion: string = null;
   private userKey: string = undefined;
   private dataVersion: string = null;
 
@@ -56,6 +59,10 @@ export class TimelineStore {
     versionService.version.subscribe((version): void => {
       if (version && this.dataVersion && version !== this.dataVersion && !this.newDataAvailable) {
         this.newDataAvailable = true;
+        this.changes.next();
+      }
+      if (version && this.summary && this.summaryVersion && version !== this.summaryVersion && !this.summaryStale) {
+        this.summaryStale = true;
         this.changes.next();
       }
     });
@@ -166,10 +173,11 @@ export class TimelineStore {
   }
 
   /**
-   * Loads the year/month counts once; failures leave `summary` null so the rail stays hidden.
+   * Loads the year/month counts; refetches only when stale. A stale summary stays visible
+   * until the new one arrives; failures keep what is there so the rail does not flicker.
    */
   loadSummary(): Promise<void> {
-    if (this.summary) {
+    if (this.summary && !this.summaryStale) {
       return Promise.resolve();
     }
     if (this.summaryPending) {
@@ -181,6 +189,7 @@ export class TimelineStore {
       .then((summary): void => {
         if (epoch === this.summaryEpoch && summary) {
           this.summary = summary;
+          this.summaryVersion = this.versionService.version.value;
         }
       })
       .catch(console.error)
@@ -188,6 +197,8 @@ export class TimelineStore {
         if (epoch !== this.summaryEpoch) {
           return;
         }
+        // also cleared on failure, otherwise every store change would retry
+        this.summaryStale = false;
         this.summaryPending = null;
         this.changes.next();
       });
@@ -198,6 +209,8 @@ export class TimelineStore {
   clearSummary(): void {
     this.summaryEpoch++;
     this.summary = null;
+    this.summaryStale = false;
+    this.summaryVersion = null;
     this.summaryPending = null;
   }
 }

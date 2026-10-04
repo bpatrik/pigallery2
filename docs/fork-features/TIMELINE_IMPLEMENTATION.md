@@ -387,6 +387,14 @@ library (rail counts total 42, jump, empty month, invalid `at`, Back to
 newest, history). The viewer with `at` was checked by spec only: the
 integrated browser tab was hidden, which pauses viewer animations.
 
+Code-review fixes (2026-10-04): (1) a page that finishes loading after the
+viewer started closing no longer navigates; advancing requires the same open
+viewer and active media ID. (2) Viewer "next" keeps loading through pages that
+add nothing (companion videos, duplicates) until a new item, EOF or an error,
+capped at 50 pages. (3) Re-selecting the month already in `?at` repositions
+directly (the router ignores same-URL navigation). (4) Summary freshness is
+tracked by gallery version independently of list resets; a stale rail stays
+visible until the refreshed summary arrives. Karma 136/136; (3) browser-checked.
 Opus task 12 review (2026-10-04): accepted. Cache invalidation is wired
 (`onDataChange` → `onNewDataVersion` bumps the generation); in-flight builds
 are shared and only publish when the generation is unchanged; failed builds are
