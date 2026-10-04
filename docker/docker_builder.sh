@@ -5,7 +5,8 @@
 set -e # Stop on any error
 
 # Configuration
-REPO_URL="https://github.com/bpatrik/pigallery2.git"
+REPO_URL="${PIGALLERY2_REPO_URL:-https://github.com/GitchalWoo/pigallery2.5.git}"
+REPO_REF="${PIGALLERY2_REF:-master}"
 BUILD_DIR="pigallery2_local_build"
 IMAGE_NAME="pigallery2-custom:local"
 
@@ -46,7 +47,7 @@ if [ -d "$BUILD_DIR" ]; then
     echo "Cleaning up old build directory..."
     rm -rf "$BUILD_DIR"
 fi
-git clone --depth 1 $REPO_URL $BUILD_DIR
+git clone --depth 1 --branch "$REPO_REF" "$REPO_URL" "$BUILD_DIR"
 cd $BUILD_DIR
 
 echo "--- 3. Installing Build Dependencies ---"

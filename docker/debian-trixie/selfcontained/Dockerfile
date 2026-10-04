@@ -13,11 +13,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 gi
   libvips-dev && \
   rm -rf /var/lib/apt/lists/*
 
-# copying only package{-lock}.json to make node_modules cachable
-RUN git clone https://github.com/bpatrik/pigallery2.git /build
 WORKDIR /build
-RUN npm install --unsafe-perm \
-    && mkdir -p /build/release/data/config \
+COPY package*.json ./
+RUN npm install --unsafe-perm
+COPY . /build
+RUN mkdir -p /build/release/data/config \
     && mkdir -p /build/release/data/db \
     && mkdir -p /build/release/data/images \
     && mkdir -p /build/release/data/tmp \
@@ -40,6 +40,9 @@ ENV NODE_ENV=production \
 
 EXPOSE 80
 ARG TARGETARCH
+ARG SOURCE_COMMIT=unknown
+LABEL org.opencontainers.image.source="https://github.com/GitchalWoo/pigallery2.5" \
+  org.opencontainers.image.revision="${SOURCE_COMMIT}"
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates wget ffmpeg libvips42 \
     && if [ "$TARGETARCH" = "amd64" ]; then \
