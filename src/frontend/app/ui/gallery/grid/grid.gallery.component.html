@@ -2,7 +2,7 @@
      [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
   <ng-container *ngIf="mediaToRender?.length > 0">
     <ng-container *ngFor="let group of mediaToRender">
-      <div class="d-inline-block">
+      <div class="d-inline-block media-group">
         <ng-container *ngIf="group.name">
           <ng-container [ngSwitch]="HeaderMethod">
             <div *ngSwitchCase="GroupByTypes.Rating" class="mt-4 mb-3">
