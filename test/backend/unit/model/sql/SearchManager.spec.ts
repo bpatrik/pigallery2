@@ -1800,7 +1800,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
       it('should match every media item when flattening from root', async () => {
         const query = {
-          value: Utils.concatUrls('./', dir.path, dir.name) + '/',
+          value: '/',
           type: SearchQueryTypes.directory,
           matchType: TextSearchQueryMatchTypes.globMatch
         } as TextSearch;

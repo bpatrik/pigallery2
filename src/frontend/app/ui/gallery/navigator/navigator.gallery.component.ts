@@ -282,10 +282,11 @@ export class GalleryNavigatorComponent {
     if (!c.directory) {
       return null;
     }
+    const directoryPath = Utils.concatUrls('./', c.directory.path, c.directory.name);
     return JSON.stringify({
       type: SearchQueryTypes.directory,
       matchType: TextSearchQueryMatchTypes.globMatch,
-      value: Utils.concatUrls('./', c.directory.path, c.directory.name) + '/',
+      value: directoryPath === '.' ? '/' : directoryPath + '/',
     } as TextSearch);
   }
 
