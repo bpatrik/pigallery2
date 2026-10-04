@@ -326,8 +326,8 @@ fallback). Browser-checked on the demo library: full traversal, viewer
 next/prev/close, deep link, slideshow, Back restore (±1 px); Folders and
 search viewer, slideshow and inline blog unchanged. Karma specs
 (`timeline.store.spec.ts`, paged-source lightbox spec) type-check but were not
-run: no Chrome in this environment. A page boundary was not exercised in the
-browser (demo library < 100 items).
+run: no Chrome in this environment. The browser follow-up below verified a
+page boundary with a temporary page size of 8.
 
 MariaDB 11.4 run (2026-10-04): all 29 Timeline backend tests pass on SQLite and
 MariaDB, including summary day buckets with a pre-1970 date and both
@@ -340,17 +340,27 @@ all from a pre-existing `origin/master` bug unrelated to Timeline:
 `SearchManager` emits `ESCAPE '\'` (glob support, `4d4c9f42`/`b1be11f8`), which
 MariaDB parses as an unterminated string with default backslash escaping.
 Albums/covers/saved searches then fail; the Timeline DB suite hits it only via
-leftover cover rebuilds and passes in isolation. Needs a separate fix.
+leftover cover rebuilds and passes in isolation. Fixed separately: the explicit
+`ESCAPE` is now SQLite-only (MySQL's default LIKE escape is already `\`), with
+a both-engine regression test; affected suites pass on SQLite and MariaDB.
+
+Luna follow-up (2026-10-04): SQLite Timeline suite passed (21 tests); dense
+burst measured 1,204 rows examined and 132.52 ms. Temporarily lowering
+`TimelineStore.PAGE_SIZE` to 8 confirmed scroll auto-load and viewer next at the
+page boundary (the next photo opened after loading); the source was restored to
+100. With a temporary Timeline-first `Gallery.NavBar.links`, the link rendered
+on desktop and in the mobile menu; with Timeline disabled, `/` fell through to
+`/gallery/`. The temporary config changes were restored. `npm run build-en` and
+`npx tsc -p src/frontend/tsconfig.spec.json --noEmit` passed. The Karma run
+stopped before Chrome launch because `@angular-devkit/build-angular/plugins/karma`
+is missing from this environment.
 
 Open before closing milestone 1:
 
-- Run `npm run test-frontend` where Chrome is available (new Timeline specs
-  plus existing lightbox/grid suites after the refactor).
-- Browser check across a page boundary (library > 100 items, or a temporarily
-  lower `TimelineStore.PAGE_SIZE`): auto-load and viewer next at the end.
-- Nav link: render with `timeline` in `Gallery.NavBar.links`; `toDefault()`
-  fallback when Timeline is first but unavailable.
 - Opus check of task 12 (summary endpoint and cache).
+- Run `npm run test-frontend -- --watch=false` with Chrome and the Karma plugin
+  available. The last attempt stopped before browser launch because
+  `@angular-devkit/build-angular/plugins/karma` is missing.
 
 Accepted v1 gaps: leaving Timeline drops in-flight responses instead of
 aborting them; deep links outside loaded pages drop `p`; dense bursts scan the
