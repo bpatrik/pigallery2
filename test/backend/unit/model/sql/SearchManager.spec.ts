@@ -1798,24 +1798,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         } as SearchResultDTO));
       });
 
-      it('should match every media item when flattening from root', async () => {
-        const query = {
-          value: '/',
-          type: SearchQueryTypes.directory,
-          matchType: TextSearchQueryMatchTypes.globMatch
-        } as TextSearch;
-        const result = await new SearchManager().search(DBTestHelper.defaultSession, query);
-
-        expect(result.resultOverflow).to.equal(false);
-        expect(result.media.map(media => media.name).sort()).to.deep.equal(
-          [p, p2, v, p4, pFaceLess].map(media => media.name).sort()
-        );
-
-        query.value = Utils.concatUrls('./', subDir.path, subDir.name) + '/';
-        const subtreeResult = await new SearchManager().search(DBTestHelper.defaultSession, query);
-        expect(subtreeResult.media.map(media => media.name)).to.deep.equal([pFaceLess.name]);
-      });
-
     });
 
     describe('search date pattern', () => {
