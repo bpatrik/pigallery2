@@ -1,0 +1,38 @@
+<app-gallery-lightbox #lightbox></app-gallery-lightbox>
+<app-frame>
+  <div body class="container-fluid app-gallery-body timeline-body">
+    <div class="alert alert-info d-flex align-items-center mt-2" role="status" *ngIf="store.newDataAvailable">
+      <span class="flex-grow-1" i18n>New photos are available.</span>
+      <button type="button" class="btn btn-sm btn-primary" (click)="backToNewest()" i18n>Back to newest</button>
+    </div>
+
+    <app-gallery-grid [mediaGroups]="mediaGroups"
+                      [mediaIdFn]="mediaIdFn"
+                      [groupHeaderMethod]="headerMethod"
+                      [showInlineBlog]="false"
+                      [revealMediaId]="revealMediaId"
+                      (mediaOpen)="openMedia($event)"
+                      (missingMedia)="onMissingMedia($event)"></app-gallery-grid>
+
+    <div #sentinel class="timeline-sentinel" aria-hidden="true"></div>
+
+    <div class="d-flex justify-content-center my-4" *ngIf="store.loading" role="status">
+      <div class="spinner-border text-secondary" aria-hidden="true"></div>
+      <span class="visually-hidden" i18n>Loading more media…</span>
+    </div>
+
+    <div class="alert alert-danger d-flex align-items-center my-3" role="alert" *ngIf="store.error">
+      <span class="flex-grow-1">
+        <ng-container i18n>Could not load the timeline.</ng-container>
+        {{ store.error }}
+      </span>
+      <button type="button" class="btn btn-sm btn-outline-danger" (click)="retry()" i18n>Retry</button>
+    </div>
+
+    <div class="no-item-msg text-center my-5" *ngIf="ready && !store.hasMore && store.items.length === 0 && !store.error">
+      <h2 i18n>No media to show.</h2>
+    </div>
+  </div>
+</app-frame>
+
+<app-media-button-modal></app-media-button-modal>

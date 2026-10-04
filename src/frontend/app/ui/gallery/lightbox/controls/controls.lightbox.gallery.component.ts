@@ -1,7 +1,7 @@
 import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, ViewChild,} from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
-import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
+import {LightboxItem} from '../LightboxSource';
 import {interval, Subscription} from 'rxjs';
 import {filter, skip} from 'rxjs/operators';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
@@ -47,7 +47,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   @Output() nextPhoto = new EventEmitter();
   @Output() previousPhoto = new EventEmitter();
   @Input() navigation = {hasPrev: true, hasNext: true};
-  @Input() activePhoto: GalleryPhotoComponent;
+  @Input() activePhoto: LightboxItem;
   @Input() mediaElement: GalleryLightboxMediaComponent;
   @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
   @Input() slideShowRunning: boolean;

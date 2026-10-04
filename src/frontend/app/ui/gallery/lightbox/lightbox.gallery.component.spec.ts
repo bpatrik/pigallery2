@@ -2,7 +2,7 @@ import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing'
 import {ChangeDetectorRef, QueryList} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AnimationBuilder} from '@angular/animations';
-import {BehaviorSubject, of} from 'rxjs';
+import {BehaviorSubject, of, Subject} from 'rxjs';
 
 import {GalleryLightboxComponent, LightboxStates} from './lightbox.gallery.component';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
@@ -21,6 +21,7 @@ import {FileSizePipe} from '../../../pipes/FileSizePipe';
 import {DatePipe} from '@angular/common';
 import {Utils} from '../../../../../common/Utils';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {LightboxSource} from './LightboxSource';
 
 // Mock classes
 class MockFullScreenService {
@@ -356,4 +357,95 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     // Act & Assert
     expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia);
   });
+});
+
+describe('GalleryLightboxComponent - paged source', () => {
+  let component: GalleryLightboxComponent;
+  let mockActivatedRoute: MockActivatedRoute;
+
+  beforeEach(async () => {
+    mockActivatedRoute = new MockActivatedRoute();
+    await TestBed.configureTestingModule({
+      imports: [GalleryLightboxComponent],
+      providers: [
+        ChangeDetectorRef,
+        {provide: FullScreenService, useClass: MockFullScreenService},
+        {provide: OverlayService, useClass: MockOverlayService},
+        {provide: WakeLockService, useClass: MockWakeLockService},
+        {provide: AnimationBuilder, useClass: MockAnimationBuilder},
+        {provide: Router, useValue: new MockRouter(mockActivatedRoute)},
+        {provide: QueryService, useClass: MockQueryService},
+        {provide: ActivatedRoute, useValue: mockActivatedRoute},
+        {provide: PiTitleService, useClass: MockPiTitleService},
+        {provide: AuthenticationService, useValue: new MockAuthenticationService()},
+        {provide: GalleryCacheService, useValue: new MockGalleryCacheService()},
+        {provide: FileSizePipe, useValue: MockFileSizePipe},
+        {provide: DatePipe, useValue: MockFileSizePipe},
+      ]
+    }).compileComponents();
+    const fixture = TestBed.createComponent(GalleryLightboxComponent);
+    component = fixture.componentInstance;
+    component.controls = {
+      resetZoom: jasmine.createSpy('resetZoom'),
+      runSlideShow: jasmine.createSpy('runSlideShow'),
+      stopSlideShow: jasmine.createSpy('stopSlideShow')
+    } as any;
+    fixture.detectChanges();
+  });
+
+  it('loads the next page at the end of loaded media and opens the next item without a rendered thumbnail', fakeAsync(() => {
+    const items = ['a.jpg', 'b.jpg'].map((n, i) => new GridMedia(createMockPhoto(n, i), 1, 1, 0));
+    const changes = new Subject<void>();
+    let more = true;
+    let pending: Promise<void> = null;
+    let finishLoad: () => void;
+    const loadMore = jasmine.createSpy('loadMore').and.callFake(() => {
+      pending = pending || new Promise<void>(resolve => {
+        finishLoad = () => {
+          items.push(new GridMedia(createMockPhoto('c.jpg', 2), 1, 1, 0));
+          more = false;
+          pending = null;
+          changes.next();
+          resolve();
+        };
+      });
+      return pending;
+    });
+    const source: LightboxSource = {
+      changes,
+      get length() {
+        return items.length;
+      },
+      get loadState() {
+        return pending ? 'loading' as const : 'idle' as const;
+      },
+      get: (i: number) => items[i],
+      getMediaId: (m: MediaDTO) => m.name,
+      indexOfId: (id: string) => items.findIndex(g => g.media.name === id),
+      animationTarget: () => null,
+      queryParams: (m?: MediaDTO) => m ? {[QueryParams.gallery.photo]: m.name} : {},
+      hasMore: () => more,
+      loadMore,
+    };
+    component.setSource(source);
+    component.status = LightboxStates.Open;
+    mockActivatedRoute.queryParams.next({[QueryParams.gallery.photo]: 'b.jpg'});
+    tick();
+
+    expect(component.activePhoto.gridMedia.media.name).toBe('b.jpg');
+    expect(component.navigation.hasNext).toBeTrue();
+    expect(component.NexGridMedia).toBeNull();
+
+    component.nextImage();
+    component.nextImage();
+    expect(loadMore).toHaveBeenCalled();
+    expect(component.IsAtLoadedEnd).toBeTrue();
+
+    finishLoad();
+    tick();
+
+    expect(mockActivatedRoute.queryParams.value).toEqual({[QueryParams.gallery.photo]: 'c.jpg'});
+    expect(component.activePhoto.gridMedia.media.name).toBe('c.jpg');
+    expect(component.navigation.hasNext).toBeFalse();
+  }));
 });

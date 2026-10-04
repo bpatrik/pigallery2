@@ -47,6 +47,12 @@
       [photoFrameDim]="photoFrameDim"
       [mediaElement]="mediaElement">
     </app-lightbox-controls>
+
+    <div class="lightbox-load-state" *ngIf="isOpen() && IsAtLoadedEnd && LoadState !== 'idle'">
+      <span *ngIf="LoadState === 'loading'" class="badge bg-dark" i18n>Loading more media…</span>
+      <button *ngIf="LoadState === 'error'" type="button" class="btn btn-light btn-sm"
+              (click)="retryLoad()" i18n>Loading more media failed. Retry</button>
+    </div>
   </div>
 
   <app-info-panel *ngIf="activePhoto && infoPanelVisible"

@@ -414,7 +414,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1687</context>
+          <context context-type="linenumber">1688</context>
         </context-group>
         <target>OpenID Connect</target>
       </trans-unit>
@@ -426,7 +426,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1693</context>
+          <context context-type="linenumber">1694</context>
         </context-group>
         <target>Setup SSO with external authentication apps like Authentik or Authelia</target>
       </trans-unit>
@@ -598,7 +598,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1462</context>
+          <context context-type="linenumber">1463</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
@@ -1058,7 +1058,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1426</context>
+          <context context-type="linenumber">1427</context>
         </context-group>
         <target state="translated">Video</target>
       </trans-unit>
@@ -1078,7 +1078,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1433</context>
+          <context context-type="linenumber">1434</context>
         </context-group>
         <target state="translated">Foto</target>
       </trans-unit>
@@ -1266,7 +1266,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1815</context>
+          <context context-type="linenumber">1816</context>
         </context-group>
         <target>Extensions</target>
       </trans-unit>
@@ -1278,7 +1278,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1823</context>
+          <context context-type="linenumber">1824</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -1418,19 +1418,19 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1504</context>
+          <context context-type="linenumber">1505</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1637</context>
+          <context context-type="linenumber">1638</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1703</context>
+          <context context-type="linenumber">1704</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1714</context>
+          <context context-type="linenumber">1715</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
@@ -1978,7 +1978,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1610</context>
+          <context context-type="linenumber">1611</context>
         </context-group>
         <target>Svg Icon</target>
       </trans-unit>
@@ -2210,7 +2210,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1514</context>
+          <context context-type="linenumber">1515</context>
         </context-group>
         <target>Default sorting</target>
       </trans-unit>
@@ -3022,7 +3022,7 @@
         <source>Minimum read role</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1417</context>
+          <context context-type="linenumber">1418</context>
         </context-group>
         <target>Minimum read role</target>
       </trans-unit>
@@ -3030,7 +3030,7 @@
         <source>Live Photo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1440</context>
+          <context context-type="linenumber">1441</context>
         </context-group>
         <target>Live Photo</target>
       </trans-unit>
@@ -3038,7 +3038,7 @@
         <source>*.gpx files</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1451</context>
+          <context context-type="linenumber">1452</context>
         </context-group>
         <target>*.gpx files</target>
       </trans-unit>
@@ -3046,7 +3046,7 @@
         <source>Reads *.gpx files and renders them on the map.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1456</context>
+          <context context-type="linenumber">1457</context>
         </context-group>
         <target>Reads *.gpx files and renders them on the map.</target>
       </trans-unit>
@@ -3054,7 +3054,7 @@
         <source>Markdown files</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1471</context>
+          <context context-type="linenumber">1472</context>
         </context-group>
         <target>Markdown files</target>
       </trans-unit>
@@ -3062,7 +3062,7 @@
         <source>Reads *.md files in a directory and shows the next to the map.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1475</context>
+          <context context-type="linenumber">1476</context>
         </context-group>
         <target>Reads *.md files in a directory and shows the next to the map.</target>
       </trans-unit>
@@ -3070,7 +3070,7 @@
         <source>*.pg2conf files</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1481</context>
+          <context context-type="linenumber">1482</context>
         </context-group>
         <target>*.pg2conf files</target>
       </trans-unit>
@@ -3078,7 +3078,7 @@
         <source>Reads *.pg2conf files (You can use it for custom sorting and saved search (albums)).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1485</context>
+          <context context-type="linenumber">1486</context>
         </context-group>
         <target>Reads *.pg2conf files (You can use it for custom sorting and saved search (albums)).</target>
       </trans-unit>
@@ -3086,7 +3086,7 @@
         <source>Supported formats</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1491</context>
+          <context context-type="linenumber">1492</context>
         </context-group>
         <target>Supported formats</target>
       </trans-unit>
@@ -3094,7 +3094,7 @@
         <source>The app will read and process these files.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1495</context>
+          <context context-type="linenumber">1496</context>
         </context-group>
         <target>The app will read and process these files.</target>
       </trans-unit>
@@ -3102,7 +3102,7 @@
         <source>Default sorting on the faces page</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1517</context>
+          <context context-type="linenumber">1518</context>
         </context-group>
         <target>Default sorting on the faces page</target>
       </trans-unit>
@@ -3110,7 +3110,7 @@
         <source>Override keywords</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1523</context>
+          <context context-type="linenumber">1524</context>
         </context-group>
         <target state="translated">Ignorare le parole chiave</target>
       </trans-unit>
@@ -3118,7 +3118,7 @@
         <source>If a photo has the same face (person) name and keyword, the app removes the duplicate, keeping the face only.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1527</context>
+          <context context-type="linenumber">1528</context>
         </context-group>
         <target state="translated">Se una foto ha lo stesso volto (persona) nome e parola chiave, l'applicazione rimuove il duplicato, mantenendo solo il volto.</target>
       </trans-unit>
@@ -3126,7 +3126,7 @@
         <source>Face starring right</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1532</context>
+          <context context-type="linenumber">1533</context>
         </context-group>
         <target state="translated">Ruoli che possono rendere preferita una faccia</target>
       </trans-unit>
@@ -3134,7 +3134,7 @@
         <source>Required minimum right to star (favourite) a face.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1535</context>
+          <context context-type="linenumber">1536</context>
         </context-group>
         <target>Required minimum right to star (favourite) a face.</target>
       </trans-unit>
@@ -3142,7 +3142,7 @@
         <source>Face listing right</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1540</context>
+          <context context-type="linenumber">1541</context>
         </context-group>
         <target>Face listing right</target>
       </trans-unit>
@@ -3150,7 +3150,7 @@
         <source>Required minimum right to show the faces tab.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1543</context>
+          <context context-type="linenumber">1544</context>
         </context-group>
         <target>Required minimum right to show the faces tab.</target>
       </trans-unit>
@@ -3158,7 +3158,7 @@
         <source>Page title</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1553</context>
+          <context context-type="linenumber">1554</context>
         </context-group>
         <target state="translated">Titolo pagina</target>
       </trans-unit>
@@ -3166,7 +3166,7 @@
         <source>If you access the page from local network it's good to know the public url for creating sharing link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1559</context>
+          <context context-type="linenumber">1560</context>
         </context-group>
         <target>If you access the page from local network it's good to know the public url for creating sharing link.</target>
       </trans-unit>
@@ -3174,7 +3174,7 @@
         <source>Page public url</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1561</context>
+          <context context-type="linenumber">1562</context>
         </context-group>
         <target state="translated">URL pubblica</target>
       </trans-unit>
@@ -3182,7 +3182,7 @@
         <source>If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1569</context>
+          <context context-type="linenumber">1570</context>
         </context-group>
         <target>If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url.</target>
       </trans-unit>
@@ -3190,7 +3190,7 @@
         <source>Url Base</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1571</context>
+          <context context-type="linenumber">1572</context>
         </context-group>
         <target state="translated">Url Base</target>
       </trans-unit>
@@ -3198,7 +3198,7 @@
         <source>Api path</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1584</context>
+          <context context-type="linenumber">1585</context>
         </context-group>
         <target>Api path</target>
       </trans-unit>
@@ -3206,7 +3206,7 @@
         <source>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it to add analytics or custom code to the app).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1595</context>
+          <context context-type="linenumber">1596</context>
         </context-group>
         <target>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it to add analytics or custom code to the app).</target>
       </trans-unit>
@@ -3214,7 +3214,7 @@
         <source>Custom HTML Head</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1597</context>
+          <context context-type="linenumber">1598</context>
         </context-group>
         <target>Custom HTML Head</target>
       </trans-unit>
@@ -3222,7 +3222,7 @@
         <source>Sets the icon of the app. Rendered icons are cached in the tmp folder.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1615</context>
+          <context context-type="linenumber">1616</context>
         </context-group>
         <target>Sets the icon of the app. Rendered icons are cached in the tmp folder.</target>
       </trans-unit>
@@ -3230,7 +3230,7 @@
         <source>Reload client on server update</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1623</context>
+          <context context-type="linenumber">1624</context>
         </context-group>
         <target>Reload client on server update</target>
       </trans-unit>
@@ -3238,7 +3238,7 @@
         <source>If set the UI will auto reload when client related config changed or the app was restarted (except when the UI shows the settings page).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1627</context>
+          <context context-type="linenumber">1628</context>
         </context-group>
         <target>If set the UI will auto reload when client related config changed or the app was restarted (except when the UI shows the settings page).</target>
       </trans-unit>
@@ -3246,7 +3246,7 @@
         <source>Display name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1646</context>
+          <context context-type="linenumber">1647</context>
         </context-group>
         <target>Display name</target>
       </trans-unit>
@@ -3254,7 +3254,7 @@
         <source>Shown on the login button (client-visible).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1652</context>
+          <context context-type="linenumber">1653</context>
         </context-group>
         <target>Shown on the login button (client-visible).</target>
       </trans-unit>
@@ -3262,7 +3262,7 @@
         <source>Password protection</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1668</context>
+          <context context-type="linenumber">1669</context>
         </context-group>
         <target state="translated">Protezione con password</target>
       </trans-unit>
@@ -3270,7 +3270,7 @@
         <source>Enables user management with login to password protect the gallery.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1670</context>
+          <context context-type="linenumber">1671</context>
         </context-group>
         <target>Enables user management with login to password protect the gallery.</target>
       </trans-unit>
@@ -3278,7 +3278,7 @@
         <source>Default user right</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1676</context>
+          <context context-type="linenumber">1677</context>
         </context-group>
         <target>Default user right</target>
       </trans-unit>
@@ -3286,7 +3286,7 @@
         <source>Default user right when password protection is disabled.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1681</context>
+          <context context-type="linenumber">1682</context>
         </context-group>
         <target>Default user right when password protection is disabled.</target>
       </trans-unit>
@@ -3294,7 +3294,7 @@
         <source>Minimum user role</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1722</context>
+          <context context-type="linenumber">1723</context>
         </context-group>
         <target>Minimum user role</target>
       </trans-unit>
@@ -3302,7 +3302,7 @@
         <source>Minimum user role to enable file upload.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1724</context>
+          <context context-type="linenumber">1725</context>
         </context-group>
         <target>Minimum user role to enable file upload.</target>
       </trans-unit>
@@ -3310,7 +3310,7 @@
         <source>Require uploader.pg2conf</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1730</context>
+          <context context-type="linenumber">1731</context>
         </context-group>
         <target>Require uploader.pg2conf</target>
       </trans-unit>
@@ -3318,7 +3318,7 @@
         <source>Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1732</context>
+          <context context-type="linenumber">1733</context>
         </context-group>
         <target>Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.</target>
       </trans-unit>
@@ -3326,7 +3326,7 @@
         <source>Gallery</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1748</context>
+          <context context-type="linenumber">1749</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3346,7 +3346,7 @@
         <source>Timeline</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1754</context>
+          <context context-type="linenumber">1755</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3360,13 +3360,17 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">143</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.ts</context>
+          <context context-type="linenumber">88</context>
+        </context-group>
         <target>Timeline</target>
       </trans-unit>
       <trans-unit id="1393837337557373364" datatype="html">
         <source>Album</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1765</context>
+          <context context-type="linenumber">1766</context>
         </context-group>
         <target>Album</target>
       </trans-unit>
@@ -3374,7 +3378,7 @@
         <source>Search</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1777</context>
+          <context context-type="linenumber">1778</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3402,7 +3406,7 @@
         <source>Map</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1788</context>
+          <context context-type="linenumber">1789</context>
         </context-group>
         <target state="translated">Mappa</target>
       </trans-unit>
@@ -3410,7 +3414,7 @@
         <source>Faces</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1796</context>
+          <context context-type="linenumber">1797</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3446,7 +3450,7 @@
         <source>Random photo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1804</context>
+          <context context-type="linenumber">1805</context>
         </context-group>
         <target>Random photo</target>
       </trans-unit>
@@ -3454,7 +3458,7 @@
         <source>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1808</context>
+          <context context-type="linenumber">1809</context>
         </context-group>
         <target>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</target>
       </trans-unit>
@@ -4652,7 +4656,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">15,17</context>
         </context-group>
-        <target> Take me back to safety </target>
+        <target>Take me back to safety</target>
       </trans-unit>
       <trans-unit id="8195169877713600295" datatype="html">
         <source>help me fix this</source>
@@ -4780,7 +4784,7 @@
       </trans-unit>
       <trans-unit id="596018110493075337" datatype="html">
         <source>
-          If you're still stuck, please  report the issue on GitHub .
+          If you're still stuck, please  report the issue on GitHub . 
           <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>"/>
           <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a>"/>
         </source>
@@ -4789,7 +4793,7 @@
           <context context-type="linenumber">38,42</context>
         </context-group>
         <target>
-          If you're still stuck, please  report the issue on GitHub .
+          If you're still stuck, please  report the issue on GitHub . 
           <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>"/>
           <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a>"/>
         </target>
@@ -4963,6 +4967,10 @@
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
           <context context-type="linenumber">157</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.store.ts</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>Unknown server error</target>
       </trans-unit>
@@ -5662,6 +5670,26 @@
         </context-group>
         <target state="translated">Probabilmente il video non è stato transcodificato. Può essere fatto nelle impostazioni. Devi transcodificare questi video per guardarli online:</target>
       </trans-unit>
+      <trans-unit id="6033761370244217690" datatype="html">
+        <source>Loading more media…</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.html</context>
+          <context context-type="linenumber">52</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">21</context>
+        </context-group>
+        <target>Loading more media…</target>
+      </trans-unit>
+      <trans-unit id="2809410413694811150" datatype="html">
+        <source>Loading more media failed. Retry</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <target>Loading more media failed. Retry</target>
+      </trans-unit>
       <trans-unit id="3681011128402308176" datatype="html">
         <source>Sport</source>
         <context-group purpose="location">
@@ -6228,7 +6256,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.ts</context>
           <context context-type="linenumber">189</context>
         </context-group>
-        <target>Negative open and start  match</target>
+        <target>Negative open and start match</target>
       </trans-unit>
       <trans-unit id="4418103546924666303" datatype="html">
         <source>glob match (supports wildcards: * and ?)</source>
@@ -6672,6 +6700,10 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">25</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">29</context>
+        </context-group>
         <target>Retry</target>
       </trans-unit>
       <trans-unit id="1451533126518313032" datatype="html">
@@ -6712,7 +6744,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">65,67</context>
         </context-group>
-        <target> Manual installation </target>
+        <target>Manual installation</target>
       </trans-unit>
       <trans-unit id="4894835484717268716" datatype="html">
         <source>Installed</source>
@@ -7834,6 +7866,38 @@
           <context context-type="linenumber">38,39</context>
         </context-group>
         <target state="translated">Enter</target>
+      </trans-unit>
+      <trans-unit id="310475845229863816" datatype="html">
+        <source>New photos are available.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">5</context>
+        </context-group>
+        <target>New photos are available.</target>
+      </trans-unit>
+      <trans-unit id="4644234420580744324" datatype="html">
+        <source>Back to newest</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <target>Back to newest</target>
+      </trans-unit>
+      <trans-unit id="1980579053509598245" datatype="html">
+        <source>Could not load the timeline.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">26</context>
+        </context-group>
+        <target>Could not load the timeline.</target>
+      </trans-unit>
+      <trans-unit id="6113542044870207774" datatype="html">
+        <source>No media to show.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">33</context>
+        </context-group>
+        <target>No media to show.</target>
       </trans-unit>
     </body>
   </file>

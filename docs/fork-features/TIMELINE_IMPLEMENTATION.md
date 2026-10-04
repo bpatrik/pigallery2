@@ -287,11 +287,11 @@ Status legend: `todo`, `in progress`, `review`, `done`.
 | 4 | `TimelineManager`, `TimelineMWs` (availability, validation), `TimelineRouter` | 1 | Routine | Luna | done |
 | 5 | Live-photo filtering/attachment with permission rules | 1 | Moderate | Luna + Opus check (permission tests) | done |
 | 6 | Both-DB tests (SQLite + MySQL) and dense-burst performance check | 1 | Laborious | Luna | in progress |
-| 7 | `ClientTimelineConfig`, nav enum + `toDefault()` fallback, `/timeline` route, i18n | 1 | Routine | Luna | in progress |
-| 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | todo |
-| 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | todo |
-| 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | todo |
-| 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | todo |
+| 7 | `ClientTimelineConfig`, nav enum + `toDefault()` fallback, `/timeline` route, i18n | 1 | Routine | Luna | done |
+| 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | review |
+| 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | review |
+| 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | review |
+| 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | review |
 | 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | in progress |
 | 13 | Year/month rail, mobile picker, `?at=YYYY-MM` | 2 | Medium | Opus | todo |
 | 14 | Dense justified layout, thumbnail-size control | 3 | UI design | Opus (iterating with maintainer) | todo |
@@ -314,6 +314,20 @@ positive companion attachment. `/timeline` is now served by `PublicRouter`;
 `toDefault()` skips custom URL links instead of leaving the app. Still open:
 MySQL run for tasks 6 and 12, and the dense-burst cost (each page scans the
 whole burst plus the 14 h window).
+
+Opus frontend (2026-10-04): tasks 8–11 implemented; task 7 done with the
+`/timeline` route. The grid takes `mediaIdFn`, `groupHeaderMethod`,
+`showInlineBlog`, `revealMediaId` and emits `mediaOpen`/`missingMedia`; Folders
+supplies the old `QueryService` behavior. The lightbox navigates a
+`LightboxSource` (`GridLightboxSource` for Folders, `TimelineLightboxSource`
+over the store). Cancellation drops stale responses (epoch) rather than
+aborting HTTP. Deep links to items outside loaded pages drop `p` (milestone 4
+fallback). Browser-checked on the demo library: full traversal, viewer
+next/prev/close, deep link, slideshow, Back restore (±1 px); Folders and
+search viewer, slideshow and inline blog unchanged. Karma specs
+(`timeline.store.spec.ts`, paged-source lightbox spec) type-check but were not
+run: no Chrome in this environment. A page boundary was not exercised in the
+browser (demo library < 100 items).
 
 Suggested order: backend tasks 1–6 (Opus reviews paging and permission tests),
 then 7, then frontend 8–11 by Opus with the Folders regression check right
