@@ -73,6 +73,7 @@ EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.search]] = $localize`Se
 EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.gallery]] = $localize`Gallery`;
 EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.albums]] = $localize`Albums`;
 EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.faces]] = $localize`Faces`;
+EnumTranslations[NavigationLinkTypes[NavigationLinkTypes.timeline]] = $localize`Timeline`;
 
 
 // Lightbox title text options

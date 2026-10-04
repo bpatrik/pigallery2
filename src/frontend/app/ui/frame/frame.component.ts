@@ -149,6 +149,13 @@ export class FrameComponent {
       this.user.value.role >= Config.Album.readAccessMinRole;
   }
 
+  isTimelineAvailable(): boolean {
+    return Config.Timeline.enabled &&
+      this.user.value &&
+      !this.user.value.usedSharingKey &&
+      this.user.value.role >= Config.Timeline.readAccessMinRole;
+  }
+
 
   @HostListener('window:scroll')
   onScroll(): void {

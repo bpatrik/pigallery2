@@ -13,6 +13,7 @@ import {ExtensionRouter} from './admin/ExtensionRouter';
 import {VersionMWs} from '../middlewares/VersionMWs';
 import {OIDCRouter} from './OIDCRouter';
 import {UploadRouter} from './UploadRouter';
+import {TimelineRouter} from './TimelineRouter';
 
 export class Router {
   public static route(app: Express): void {
@@ -30,6 +31,7 @@ export class Router {
     SharingRouter.route(app);
     UserRouter.route(app);
     UploadRouter.route(app);
+    TimelineRouter.route(app);
 
     ErrorRouter.route(app);
   }

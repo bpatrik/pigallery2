@@ -39,7 +39,7 @@ export class ThumbnailGeneratorMWs {
         ThumbnailGeneratorMWs.addThInfoTODir(cw.directory);
       }
       if (cw.searchResult && cw.searchResult.media) {
-        ThumbnailGeneratorMWs.addThInfoToPhotos(cw.searchResult.media);
+        ThumbnailGeneratorMWs.addThumbnailInfoToMedia(cw.searchResult.media);
       }
     } catch (error) {
       console.error(error);
@@ -54,6 +54,12 @@ export class ThumbnailGeneratorMWs {
     }
 
     return next();
+  }
+
+  public static addThumbnailInfoToMedia(media: MediaDTO[]): void {
+    ThumbnailGeneratorMWs.ThumbnailMapEntries =
+      Config.Media.Photo.generateThumbnailMapEntries();
+    ThumbnailGeneratorMWs.addThInfoToPhotos(media);
   }
 
   // eslint-disable-next-line @typescript-eslint/typedef, @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types

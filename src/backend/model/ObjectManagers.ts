@@ -18,6 +18,7 @@ import {ExtensionManager} from './extension/ExtensionManager';
 import {ProjectedCacheManager} from './database/ProjectedCacheManager';
 import {SessionManager} from './database/SessionManager';
 import { UploadManager } from './UploadManager';
+import {TimelineManager} from './timeline/TimelineManager';
 
 const LOG_TAG = '[ObjectManagers]';
 
@@ -41,6 +42,7 @@ export class ObjectManagers {
   private projectedCacheManager: ProjectedCacheManager;
   private uploadManager: UploadManager;
   private sessionManager: SessionManager;
+  private timelineManager: TimelineManager;
   private initDone = false;
 
   constructor() {
@@ -109,6 +111,7 @@ export class ObjectManagers {
     this.ProjectedCacheManager = new ProjectedCacheManager();
     this.SessionManager = new SessionManager();
     this.UploadManager = new UploadManager();
+    this.TimelineManager = new TimelineManager();
 
     for (const manager of ObjectManagers.getInstance().managers) {
       if (manager === ObjectManagers.getInstance().versionManager) {
@@ -313,6 +316,18 @@ export class ObjectManagers {
     }
     this.sessionManager = value;
     this.managers.push(this.sessionManager as IObjectManager);
+  }
+
+  get TimelineManager(): TimelineManager {
+    return this.timelineManager;
+  }
+
+  set TimelineManager(value: TimelineManager) {
+    if (this.timelineManager) {
+      this.managers.splice(this.managers.indexOf(this.timelineManager), 1);
+    }
+    this.timelineManager = value;
+    this.managers.push(this.timelineManager);
   }
 
 }
