@@ -210,6 +210,31 @@ describe('TimelineStore', () => {
     expect(summaryRequests.length).toBe(2);
   }));
 
+  it('keeps a failed summary refresh stale without retrying automatically', fakeAsync(() => {
+    const oldSummary = {years: [{year: 2015, months: [{month: 6, count: 3}]}]};
+    const newSummary = {years: [{year: 2016, months: [{month: 1, count: 1}]}]};
+    store.loadSummary();
+    summaryRequests[0].resolve(oldSummary);
+    flushMicrotasks();
+
+    version.next('v2');
+    expect(store.shouldRefreshSummary).toBeTrue();
+    store.loadSummary();
+    summaryRequests[1].reject('down');
+    flushMicrotasks();
+    expect(store.summary).toEqual(oldSummary);
+    expect(store.summaryStale).toBeTrue();
+    expect(store.shouldRefreshSummary).toBeFalse();
+
+    store.loadSummary();
+    expect(summaryRequests.length).toBe(3);
+    summaryRequests[2].resolve(newSummary);
+    flushMicrotasks();
+    expect(store.summary).toEqual(newSummary);
+    expect(store.summaryStale).toBeFalse();
+    expect(store.summaryFailed).toBeFalse();
+  }));
+
   it('ignores a summary that arrives after the user changed', fakeAsync(() => {
     store.loadSummary();
     user.next({id: 2, name: 'v', role: UserRoles.Guest} as UserDTO);

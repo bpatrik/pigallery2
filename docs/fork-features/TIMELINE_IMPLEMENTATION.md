@@ -410,6 +410,13 @@ videos pushed the next day's header down).
 
 Maintainer decision: scrolling up to newer items after a month jump (upward
 paging) is postponed; "Back to newest" covers it for the test release.
+
+Follow-up review fixes (2026-10-04): the lightbox keeps a navigation token,
+bumped on close, source change and destroy, and checks it before each page
+fetch and before advancing, so leaving Timeline mid-load stops the empty-page
+loop. A failed summary refresh keeps the summary stale and records the
+failure: automatic refreshes stop, while opening Timeline (explicit
+`loadSummary()`) or a new gallery version retries. Karma 138/138.
 Opus task 12 review (2026-10-04): accepted. Cache invalidation is wired
 (`onDataChange` → `onNewDataVersion` bumps the generation); in-flight builds
 are shared and only publish when the generation is unchanged; failed builds are

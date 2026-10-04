@@ -33,6 +33,7 @@ export class TimelineStore {
   summary: TimelineSummaryDTO = null;
   // set when the gallery version moved past the one the summary was loaded under
   summaryStale = false;
+  summaryFailed = false;
 
   private ids = new Set<number>();
   private epoch = 0;
@@ -61,8 +62,9 @@ export class TimelineStore {
         this.newDataAvailable = true;
         this.changes.next();
       }
-      if (version && this.summary && this.summaryVersion && version !== this.summaryVersion && !this.summaryStale) {
+      if (version && this.summary && this.summaryVersion && version !== this.summaryVersion) {
         this.summaryStale = true;
+        this.summaryFailed = false;
         this.changes.next();
       }
     });
@@ -187,18 +189,28 @@ export class TimelineStore {
     const request = this.networkService
       .getJson<TimelineSummaryDTO>('/timeline/summary')
       .then((summary): void => {
-        if (epoch === this.summaryEpoch && summary) {
-          this.summary = summary;
-          this.summaryVersion = this.versionService.version.value;
+        if (epoch !== this.summaryEpoch) {
+          return;
         }
+        if (!summary) {
+          throw new Error('Empty timeline summary');
+        }
+        this.summary = summary;
+        this.summaryVersion = this.versionService.version.value;
+        this.summaryStale = false;
+        this.summaryFailed = false;
       })
-      .catch(console.error)
+      .catch((err): void => {
+        if (epoch === this.summaryEpoch) {
+          // keeps staleness; only explicit loadSummary() calls retry until the next version change
+          this.summaryFailed = true;
+        }
+        console.error(err);
+      })
       .finally((): void => {
         if (epoch !== this.summaryEpoch) {
           return;
         }
-        // also cleared on failure, otherwise every store change would retry
-        this.summaryStale = false;
         this.summaryPending = null;
         this.changes.next();
       });
@@ -206,10 +218,15 @@ export class TimelineStore {
     return request;
   }
 
+  get shouldRefreshSummary(): boolean {
+    return this.summaryStale && !this.summaryFailed && !this.summaryPending;
+  }
+
   clearSummary(): void {
     this.summaryEpoch++;
     this.summary = null;
     this.summaryStale = false;
+    this.summaryFailed = false;
     this.summaryVersion = null;
     this.summaryPending = null;
   }

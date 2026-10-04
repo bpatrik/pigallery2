@@ -45,6 +45,8 @@ export enum LightboxStates {
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private static readonly MAX_EMPTY_PAGES = 50;
+  // bumped on close, source change and destroy so pending page loads stop advancing
+  private navigationToken = 0;
   @ViewChild('photo', {static: true})
   mediaElement: GalleryLightboxMediaComponent;
   @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
@@ -169,6 +171,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy(): void {
+    this.navigationToken++;
     this.stopSlideShow();
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
@@ -190,6 +193,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   setSource(source: LightboxSource): void {
+    this.navigationToken++;
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
     }
@@ -513,29 +517,36 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       return;
     }
     const source = this.source;
+    const token = this.navigationToken;
     const fromId = source.getMediaId(this.activePhoto.gridMedia.media);
     // the user may close or move on while a page loads; only advance from the same open item
     const isSameView = (): boolean =>
+      this.navigationToken === token &&
       this.source === source &&
       this.status === LightboxStates.Open &&
       !!this.activePhoto &&
       source.getMediaId(this.activePhoto.gridMedia.media) === fromId;
 
     // pages can add nothing (companion videos, duplicates); keep loading until something new appears
-    const step = (attempt: number): Promise<void> => source.loadMore().then((): Promise<void> => {
+    const step = (attempt: number): Promise<void> => {
       if (!isSameView()) {
-        return;
+        return Promise.resolve();
       }
-      const next = source.indexOfId(fromId) + 1;
-      if (next > 0 && next < source.length) {
-        this.navigateToPhoto(next);
-        return;
-      }
-      if (source.hasMore() && source.loadState !== 'error' && attempt < GalleryLightboxComponent.MAX_EMPTY_PAGES) {
-        return step(attempt + 1);
-      }
-      this.navigation.hasNext = !!this.NexGridMedia || source.hasMore();
-    });
+      return source.loadMore().then((): Promise<void> => {
+        if (!isSameView()) {
+          return;
+        }
+        const next = source.indexOfId(fromId) + 1;
+        if (next > 0 && next < source.length) {
+          this.navigateToPhoto(next);
+          return;
+        }
+        if (source.hasMore() && source.loadState !== 'error' && attempt < GalleryLightboxComponent.MAX_EMPTY_PAGES) {
+          return step(attempt + 1);
+        }
+        this.navigation.hasNext = !!this.NexGridMedia || source.hasMore();
+      });
+    };
     step(1).catch(console.error);
   }
 
@@ -555,6 +566,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   private hideLightbox(): void {
+    this.navigationToken++;
     if (this.controls) {
       this.controls.resetZoom();
     }

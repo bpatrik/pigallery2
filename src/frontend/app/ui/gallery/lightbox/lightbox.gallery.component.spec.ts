@@ -501,6 +501,22 @@ describe('GalleryLightboxComponent - paged source', () => {
     expect(mockActivatedRoute.queryParams.value).toEqual({[QueryParams.gallery.photo]: 'b.jpg'});
   }));
 
+  it('stops loading and does not navigate after the viewer is destroyed mid-load', fakeAsync(() => {
+    const {source, loadMore, finishNext} = pagedSource(['a.jpg', 'b.jpg'], [[], ['c.jpg']]);
+    component.setSource(source);
+    component.status = LightboxStates.Open;
+    mockActivatedRoute.queryParams.next({[QueryParams.gallery.photo]: 'b.jpg'});
+    tick();
+
+    component.nextImage();
+    component.ngOnDestroy();
+    finishNext();
+    tick();
+
+    expect(loadMore).toHaveBeenCalledTimes(1);
+    expect(mockActivatedRoute.queryParams.value).toEqual({[QueryParams.gallery.photo]: 'b.jpg'});
+  }));
+
   it('keeps loading through pages that add nothing until a new item appears', fakeAsync(() => {
     const {source, loadMore, finishNext} = pagedSource(['a.jpg', 'b.jpg'], [[], [], ['c.jpg']]);
     component.setSource(source);

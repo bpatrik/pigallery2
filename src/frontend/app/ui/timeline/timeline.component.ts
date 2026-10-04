@@ -314,7 +314,7 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private onStoreChange(): void {
-    if (this.store.summaryStale) {
+    if (this.store.shouldRefreshSummary) {
       this.store.loadSummary().catch(console.error);
     }
     this.updateRail();
