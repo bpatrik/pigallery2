@@ -285,7 +285,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       const sm = new SearchManager();
       const query = (value: string): TextSearch => ({
         value,
-        matchType: TextSearchQueryMatchTypes.exact_match,
+        matchType: TextSearchQueryMatchTypes.globMatch,
         type: SearchQueryTypes.keyword
       } as TextSearch);
 
