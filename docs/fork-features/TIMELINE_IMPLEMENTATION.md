@@ -329,9 +329,24 @@ search viewer, slideshow and inline blog unchanged. Karma specs
 run: no Chrome in this environment. A page boundary was not exercised in the
 browser (demo library < 100 items).
 
-Suggested order: backend tasks 1–6 (Opus reviews paging and permission tests),
-then 7, then frontend 8–11 by Opus with the Folders regression check right
-after task 9.
+Open before closing milestone 1:
+
+- Run `npm run test-frontend` where Chrome is available (new Timeline specs
+  plus existing lightbox/grid suites after the refactor).
+- MySQL run of the backend Timeline tests and dense-burst probe (tasks 6, 12).
+- Browser check across a page boundary (library > 100 items, or a temporarily
+  lower `TimelineStore.PAGE_SIZE`): auto-load and viewer next at the end.
+- Nav link: render with `timeline` in `Gallery.NavBar.links`; `toDefault()`
+  fallback when Timeline is first but unavailable.
+- Opus check of task 12 (summary endpoint and cache).
+
+Accepted v1 gaps: leaving Timeline drops in-flight responses instead of
+aborting them; deep links outside loaded pages drop `p`; dense bursts scan the
+whole burst plus the 14 h window per page (all milestone 4 if measured).
+
+Suggested order: close the items above, then milestone 2 (task 13; the store
+already supports a `before` start), then milestone 3 (task 14), then
+milestone 4 (task 15) as measurements require.
 
 Main risks: Folders lightbox regressions (task 9), scroll/Back restore and
 loading races (task 10). Backend risk is concentrated in task 2 and covered by
