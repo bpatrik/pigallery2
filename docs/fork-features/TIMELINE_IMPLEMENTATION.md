@@ -282,10 +282,10 @@ Status legend: `todo`, `in progress`, `review`, `done`.
 | # | Task | Milestone | Difficulty | Owner | Status |
 |---|---|---|---|---|---|
 | 1 | `getOffsetMinutes` negative sub-hour fix + test (separate commit) | 1 | Routine | Luna | done |
-| 2 | Effective-time helper + paging function (window, two cursors, `before`, ties across batches) with unit tests | 1 | Subtle, fully specified | Luna + Opus check (tests reviewed first) | review |
+| 2 | Effective-time helper + paging function (window, two cursors, `before`, ties across batches) with unit tests | 1 | Subtle, fully specified | Luna + Opus check (tests reviewed first) | done |
 | 3 | Thumbnail helper extraction from `ThumbnailGeneratorMWs` (Folders unchanged) | 1 | Routine | Luna | done |
 | 4 | `TimelineManager`, `TimelineMWs` (availability, validation), `TimelineRouter` | 1 | Routine | Luna | done |
-| 5 | Live-photo filtering/attachment with permission rules | 1 | Moderate | Luna + Opus check (permission tests) | review |
+| 5 | Live-photo filtering/attachment with permission rules | 1 | Moderate | Luna + Opus check (permission tests) | done |
 | 6 | Both-DB tests (SQLite + MySQL) and dense-burst performance check | 1 | Laborious | Luna | in progress |
 | 7 | `ClientTimelineConfig`, nav enum + `toDefault()` fallback, `/timeline` route, i18n | 1 | Routine | Luna | in progress |
 | 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | todo |
@@ -305,6 +305,15 @@ environment. Task 7's config, navigation, and translation catalogs are updated;
 the Angular route depends on the `TimelineComponent` owned by task 11. Task 12's
 summary endpoint, SQL bucket expressions, and generation-checked LRU are in
 place and pass SQLite coverage; MySQL and Opus review remain outstanding.
+
+Opus review (2026-10-04): paging and live-photo logic match the plan; tasks 2
+and 5 accepted. Added tests for equal effective times split across pages, an
+empty final page at exact EOF, seeded full traversals with mixed offsets (both
+time bases, with and without `before`), directory-level projection, and
+positive companion attachment. `/timeline` is now served by `PublicRouter`;
+`toDefault()` skips custom URL links instead of leaving the app. Still open:
+MySQL run for tasks 6 and 12, and the dense-burst cost (each page scans the
+whole burst plus the 14 h window).
 
 Suggested order: backend tasks 1–6 (Opus reviews paging and permission tests),
 then 7, then frontend 8–11 by Opus with the Folders regression check right

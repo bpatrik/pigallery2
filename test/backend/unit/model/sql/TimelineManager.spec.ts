@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import * as path from 'path';
 import {Brackets} from 'typeorm';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
@@ -54,6 +55,13 @@ describe('TimelineManager', (sqlHelper: DBTestHelper) => {
     standalone.name = 'standalone.mp4';
     standalone.metadata.creationDate = Date.UTC(2015, 5, 4);
     await DBTestHelper.persistTestDir(directory);
+    const connection = await SQLConnection.getConnection();
+    const otherDirectory = await connection
+      .getRepository(DirectoryEntity)
+      .save(TestHelper.getDirectoryEntry(null, 'timeline-other'));
+    const otherPhoto = TestHelper.getBasePhotoEntry(otherDirectory, 'other.jpg');
+    otherPhoto.metadata.creationDate = Date.UTC(2016, 0, 1);
+    await connection.getRepository(PhotoEntity).save(otherPhoto);
     await ObjectManagers.getInstance().init();
     manager = ObjectManagers.getInstance().TimelineManager;
   });
@@ -110,6 +118,45 @@ describe('TimelineManager', (sqlHelper: DBTestHelper) => {
     const summary = await manager.getSummary(session);
     expect(page.media.map(item => item.id)).to.deep.equal([allowed.id]);
     expect(summary.years.flatMap(year => year.months).reduce((sum, month) => sum + month.count, 0)).to.equal(1);
+  });
+
+  it('applies directory-level projection to pages and summary counts', async () => {
+    const session = {
+      user: {projectionKey: 'timeline-test-directory-projection'},
+      projectionQuery: new Brackets(qb =>
+        qb.where('directory.name = :allowedDirectory', {allowedDirectory: 'timeline-other'})
+      ),
+    } as any;
+
+    const page = await manager.getMediaPage(session, {limit: 10});
+    const summary = await manager.getSummary(session);
+    expect(page.media.map(item => item.name)).to.deep.equal(['other.jpg']);
+    expect(summary).to.deep.equal({years: [{year: 2016, months: [{month: 1, count: 1}]}]});
+  });
+
+  it('attaches a permitted companion video and hides it from the listing', async () => {
+    Config.Media.LivePhoto.enabled = true;
+    const items: MediaDTO[] = [];
+    let cursor: {from: number; after: number} | undefined;
+    for (let request = 0; request < 10; request++) {
+      const page = await manager.getMediaPage(DBTestHelper.defaultSession, {limit: 2, cursor});
+      items.push(...page.media);
+      if (!page.next) {
+        break;
+      }
+      cursor = page.next;
+    }
+
+    const names = items.map(item => item.name);
+    expect(names).to.include('live.jpg');
+    expect(names).to.include('standalone.mp4');
+    expect(names).to.not.include('companion.mp4');
+    const live = items.find(item => item.name === 'live.jpg')!;
+    expect(live.liveVideoPath).to.equal(
+      path.join(live.directory.path, live.directory.name, 'companion.mp4')
+    );
+    expect(live.liveVideoInfo.name).to.equal('companion.mp4');
+    expect(items.every(item => !item.metadata.contentIdentifier)).to.be.true;
   });
 
   it('pairs a video whose photo is outside the selected page and respects projection', async () => {

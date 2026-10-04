@@ -71,8 +71,6 @@ export class NavigationService {
               return Config.Faces.enabled && role >= Config.Faces.readAccessMinRole;
             case NavigationLinkTypes.search:
               return Config.Search.enabled && role >= UserRoles.Guest;
-            case NavigationLinkTypes.url:
-              return role >= UserRoles.User && !!link.url;
             case NavigationLinkTypes.timeline:
               return Config.Timeline.enabled &&
                 !user?.usedSharingKey &&
@@ -95,9 +93,6 @@ export class NavigationService {
             return this.router.navigate(['search', JSON.stringify(link.SearchQuery)]);
           case NavigationLinkTypes.timeline:
             return this.router.navigate(['timeline']);
-          case NavigationLinkTypes.url:
-            window.location.assign(link.url!);
-            return true;
           default:
             break;
         }

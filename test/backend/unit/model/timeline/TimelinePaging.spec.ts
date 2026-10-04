@@ -1,5 +1,6 @@
 import {expect} from 'chai';
 import {
+  getTimelineEffectiveTime,
   loadTimelinePage,
   TimelineScanCursor,
 } from '../../../../../src/backend/model/timeline/TimelinePaging';
@@ -142,4 +143,97 @@ describe('TimelinePaging', () => {
 
     expect(page.media.map(item => item.id)).to.deep.equal([2, 1]);
   });
+
+  it('splits equal effective times across pages without skipping lower ids', async () => {
+    // Same effective time (10:00 local) reached through different raw timestamps.
+    const hour = 60 * 60 * 1000;
+    const rows = [
+      media(6, 10 * hour - 2 * hour, '+02:00'),
+      media(5, 10 * hour, '+00:00'),
+      media(4, 10 * hour + 3 * hour, '-03:00'),
+      media(3, 10 * hour - 2 * hour, '+02:00'),
+      media(2, 10 * hour + 3 * hour, '-03:00'),
+      media(1, 9 * hour, '+00:00'),
+    ];
+    const first = await loadTimelinePage(fetcher(rows), {
+      limit: 3,
+      batchSize: 1,
+      ignoreTimestampOffset: true,
+    });
+    expect(first.media.map(item => item.id)).to.deep.equal([6, 5, 4]);
+    expect(first.next).to.deep.equal({from: 10 * hour, after: 4});
+
+    const second = await loadTimelinePage(fetcher(rows), {
+      limit: 3,
+      batchSize: 1,
+      ignoreTimestampOffset: true,
+      cursor: first.next!,
+    });
+    expect(second.media.map(item => item.id)).to.deep.equal([3, 2, 1]);
+  });
+
+  it('returns an empty final page when the previous page ended exactly at EOF', async () => {
+    const rows = [media(2, 200), media(1, 100)];
+    const first = await loadTimelinePage(fetcher(rows), {
+      limit: 2,
+      ignoreTimestampOffset: false,
+    });
+    expect(first.media.map(item => item.id)).to.deep.equal([2, 1]);
+    expect(first.next).to.deep.equal({from: 100, after: 1});
+
+    const last = await loadTimelinePage(fetcher(rows), {
+      limit: 2,
+      ignoreTimestampOffset: false,
+      cursor: first.next!,
+    });
+    expect(last.media).to.be.empty;
+    expect(last.next).to.equal(null);
+  });
+
+  for (const ignoreTimestampOffset of [true, false]) {
+    it(`traverses mixed offsets exactly once (ignoreTimestampOffset=${ignoreTimestampOffset})`, async () => {
+      let seed = 42;
+      const random = (max: number): number => {
+        seed = (seed * 1103515245 + 12345) % 2147483648;
+        return seed % max;
+      };
+      const offsets = [undefined, 'bad', '+00:00', '-00:30', '+05:45', '-12:00', '+14:00'];
+      const rows = Array.from({length: 120}, (_, index) =>
+        media(index + 1, random(48) * 30 * 60 * 1000, offsets[random(offsets.length)])
+      );
+      const expected = [...rows]
+        .sort((left, right) =>
+          getTimelineEffectiveTime(right, ignoreTimestampOffset) -
+          getTimelineEffectiveTime(left, ignoreTimestampOffset) ||
+          right.id - left.id
+        )
+        .map(item => item.id);
+
+      for (const startBefore of [undefined, getTimelineEffectiveTime(rows[7], ignoreTimestampOffset)]) {
+        const ids: number[] = [];
+        let page = await loadTimelinePage(fetcher(rows), {
+          limit: 7,
+          batchSize: 3,
+          ignoreTimestampOffset,
+          before: startBefore,
+        });
+        ids.push(...page.media.map(item => item.id));
+        while (page.next) {
+          page = await loadTimelinePage(fetcher(rows), {
+            limit: 7,
+            batchSize: 3,
+            ignoreTimestampOffset,
+            cursor: page.next,
+          });
+          ids.push(...page.media.map(item => item.id));
+        }
+        const expectedIds = startBefore === undefined
+          ? expected
+          : expected.filter(id =>
+            getTimelineEffectiveTime(rows[id - 1], ignoreTimestampOffset) < startBefore
+          );
+        expect(ids).to.deep.equal(expectedIds);
+      }
+    });
+  }
 });
