@@ -60,7 +60,9 @@ export class TimelineManager implements IObjectManager {
       Config.Media.Video.enabled,
       Config.Media.LivePhoto.enabled,
     ].join('|');
-    const cached = this.summaryCache.get(projectionKey);
+    // date-relative permissions change at day boundaries without a data version bump
+    const cacheable = !session.hasTimeDependentProjection;
+    const cached = cacheable ? this.summaryCache.get(projectionKey) : undefined;
     if (cached?.generation === this.generation) {
       this.summaryCache.delete(projectionKey);
       this.summaryCache.set(projectionKey, cached);
@@ -75,7 +77,7 @@ export class TimelineManager implements IObjectManager {
     const generation = this.generation;
     let promise: Promise<TimelineSummaryDTO>;
     promise = this.buildSummary(session).then(value => {
-      if (this.generation === generation) {
+      if (cacheable && this.generation === generation) {
         this.summaryCache.delete(projectionKey);
         this.summaryCache.set(projectionKey, {generation, value});
         while (this.summaryCache.size > TimelineManager.SUMMARY_CACHE_SIZE) {

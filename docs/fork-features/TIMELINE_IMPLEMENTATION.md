@@ -395,6 +395,21 @@ capped at 50 pages. (3) Re-selecting the month already in `?at` repositions
 directly (the router ignores same-URL navigation). (4) Summary freshness is
 tracked by gallery version independently of list resets; a stale rail stays
 visible until the refreshed summary arrives. Karma 136/136; (3) browser-checked.
+
+Backend review fixes (2026-10-04): (5) Gallery Reset now calls
+`ObjectManagers.onDataChange()`, and `VersionManager` reports a distinct
+version for an empty database, so cached summaries (and upstream caches) are
+invalidated. (6) Projections containing a `date_pattern` are flagged
+(`SessionContext.hasTimeDependentProjection`); their summaries are built per
+request (in-flight requests still shared) instead of cached, since such
+permissions change at day boundaries without a data version bump. Known gap:
+the client keeps its summary until the gallery version changes, so a tab left
+open across midnight can show the previous day's counts until reload.
+Also fixed: inline media groups sharing a grid row are top-aligned (wide
+videos pushed the next day's header down).
+
+Maintainer decision: scrolling up to newer items after a month jump (upward
+paging) is postponed; "Back to newest" covers it for the test release.
 Opus task 12 review (2026-10-04): accepted. Cache invalidation is wired
 (`onDataChange` → `onNewDataVersion` bumps the generation); in-flight builds
 are shared and only publish when the generation is unchanged; failed builds are

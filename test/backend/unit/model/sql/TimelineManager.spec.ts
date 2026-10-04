@@ -14,6 +14,15 @@ import {DirectoryEntity} from '../../../../../src/backend/model/database/enitite
 import {TestHelper} from '../../../../TestHelper';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {SessionManager} from '../../../../../src/backend/model/database/SessionManager';
+import {GalleryRestJob} from '../../../../../src/backend/model/jobs/jobs/GalleryResetJob';
+import {JobProgress} from '../../../../../src/backend/model/jobs/jobs/JobProgress';
+import {
+  ANDSearchQuery,
+  DatePatternFrequency,
+  DatePatternSearch,
+  SearchQueryTypes,
+  TextSearch,
+} from '../../../../../src/common/entities/SearchQueryDTO';
 
 declare let describe: any;
 declare const before: any;
@@ -265,6 +274,21 @@ describe('TimelineManager', (sqlHelper: DBTestHelper) => {
     }
   });
 
+  it('detects date-relative projections and does not cache their summary', async () => {
+    const keyword = {type: SearchQueryTypes.keyword, value: 'x'} as TextSearch;
+    const daysAgo = {type: SearchQueryTypes.date_pattern, frequency: DatePatternFrequency.days_ago, agoNumber: 3} as DatePatternSearch;
+    expect(SessionManager.isTimeDependent(keyword)).to.be.false;
+    expect(SessionManager.isTimeDependent({type: SearchQueryTypes.AND, list: [keyword, daysAgo]} as ANDSearchQuery)).to.be.true;
+
+    const stable = {user: {projectionKey: 'timeline-stable'}, projectionQuery: null} as any;
+    const relative = {user: {projectionKey: 'timeline-relative'}, projectionQuery: null, hasTimeDependentProjection: true} as any;
+    expect(await manager.getSummary(stable)).to.equal(await manager.getSummary(stable));
+    const first = await manager.getSummary(relative);
+    const second = await manager.getSummary(relative);
+    expect(second).to.not.equal(first);
+    expect(second).to.deep.equal(first);
+  });
+
   it('scans a dense equal-time burst and records page latency on each DB engine', async () => {
     const connection = await SQLConnection.getConnection();
     const denseDate = Date.UTC(2020, 0, 1);
@@ -296,5 +320,20 @@ describe('TimelineManager', (sqlHelper: DBTestHelper) => {
     );
     expect(rowsExamined).to.be.greaterThanOrEqual(denseCount);
     expect(elapsedMs).to.be.greaterThanOrEqual(0);
+  });
+
+  // keep last: deletes the fixture
+  it('drops the cached summary and changes the data version after a gallery reset', async () => {
+    const versionBefore = await ObjectManagers.getInstance().VersionManager.getDataVersion();
+    const before = await manager.getSummary(DBTestHelper.defaultSession);
+    expect(before.years).to.not.be.empty;
+
+    const job = new GalleryRestJob();
+    (job as any).progress = new JobProgress(job.Name, job.Name, '[test]');
+    await (job as any).step();
+
+    expect(await manager.getSummary(DBTestHelper.defaultSession)).to.deep.equal({years: []});
+    expect((await manager.getMediaPage(DBTestHelper.defaultSession, {limit: 10})).media).to.be.empty;
+    expect(await ObjectManagers.getInstance().VersionManager.getDataVersion()).to.not.equal(versionBefore);
   });
 });
