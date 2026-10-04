@@ -363,7 +363,11 @@ Open before closing milestone 1:
   package is only installed nested under
   `@angular-builders/custom-webpack/node_modules` (not hoisted), while
   `karma.conf.js` requires it from the top level; likely since the dependency
-  update in `f77bb81f`. Not Timeline-specific.
+  update in `f77bb81f`. Not Timeline-specific. Fixed in `karma.conf.js` by
+  resolving the plugin through the builder; with Brave as `CHROME_BIN` the full
+  Karma suite passes (127/127), including the Timeline store/grouping and
+  paged-source lightbox specs (20/20 when run alone). Milestone 1 has no open
+  items left; tasks 8–11 can move to done after the maintainer's review.
 
 Opus task 12 review (2026-10-04): accepted. Cache invalidation is wired
 (`onDataChange` → `onNewDataVersion` bumps the generation); in-flight builds
