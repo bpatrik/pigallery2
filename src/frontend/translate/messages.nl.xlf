@@ -3362,7 +3362,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.ts</context>
-          <context context-type="linenumber">88</context>
+          <context context-type="linenumber">119</context>
         </context-group>
         <target>Timeline</target>
       </trans-unit>
@@ -4970,7 +4970,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.store.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <target>Onbekende serverfout</target>
       </trans-unit>
@@ -5678,7 +5678,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
-          <context context-type="linenumber">21</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <target>Loading more media…</target>
       </trans-unit>
@@ -6702,7 +6702,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <target>Retry</target>
       </trans-unit>
@@ -7867,27 +7867,61 @@
         </context-group>
         <target>Toegang</target>
       </trans-unit>
-      <trans-unit id="310475845229863816" datatype="html">
-        <source>New photos are available.</source>
+      <trans-unit id="5575984833578192546" datatype="html">
+        <source>
+          Showing from 
+          <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong>"/>
+          <x id="INTERPOLATION" equiv-text="&lt;/st"/>
+          <x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/span>"/>
+        </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
-          <context context-type="linenumber">5</context>
+          <context context-type="linenumber">5,6</context>
         </context-group>
-        <target>New photos are available.</target>
+        <target>
+          Showing from 
+          <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong>"/>
+          <x id="INTERPOLATION" equiv-text="&lt;/st"/>
+          <x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/span>"/>
+        </target>
       </trans-unit>
       <trans-unit id="4644234420580744324" datatype="html">
         <source>Back to newest</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
-          <context context-type="linenumber">6</context>
+          <context context-type="linenumber">8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">23</context>
         </context-group>
         <target>Back to newest</target>
+      </trans-unit>
+      <trans-unit id="8166035097097841262" datatype="html">
+        <source>Jump to month</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">11</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">12</context>
+        </context-group>
+        <target>Jump to month</target>
+      </trans-unit>
+      <trans-unit id="310475845229863816" datatype="html">
+        <source>New photos are available.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">22</context>
+        </context-group>
+        <target>New photos are available.</target>
       </trans-unit>
       <trans-unit id="1980579053509598245" datatype="html">
         <source>Could not load the timeline.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
-          <context context-type="linenumber">26</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <target>Could not load the timeline.</target>
       </trans-unit>
@@ -7895,9 +7929,17 @@
         <source>No media to show.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">50</context>
         </context-group>
         <target>No media to show.</target>
+      </trans-unit>
+      <trans-unit id="1198016582197234216" datatype="html">
+        <source>Years and months</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/timeline/timeline.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <target>Years and months</target>
       </trans-unit>
     </body>
   </file>

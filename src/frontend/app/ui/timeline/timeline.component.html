@@ -1,6 +1,23 @@
 <app-gallery-lightbox #lightbox></app-gallery-lightbox>
 <app-frame>
-  <div body class="container-fluid app-gallery-body timeline-body">
+  <div body class="container-fluid app-gallery-body timeline-body" [class.timeline-has-rail]="railYears.length > 0">
+    <div class="d-flex align-items-center gap-2 mt-2" *ngIf="atMonth || railYears.length > 0">
+      <span class="flex-grow-1" *ngIf="atMonth" role="status" i18n>Showing from <strong>{{ atMonthName }}</strong></span>
+      <span class="flex-grow-1" *ngIf="!atMonth"></span>
+      <button type="button" class="btn btn-sm btn-outline-secondary" *ngIf="atMonth"
+              (click)="backToNewest()" i18n>Back to newest</button>
+      <select class="form-select form-select-sm d-md-none w-auto" *ngIf="railYears.length > 0"
+              (change)="onPickMonth($event)"
+              aria-label="Jump to month" i18n-aria-label>
+        <option value="" selected i18n>Jump to month</option>
+        <optgroup *ngFor="let year of railYears" [label]="year.year">
+          <option *ngFor="let month of year.months" [value]="month.key">
+            {{ month.longName }} ({{ month.count }})
+          </option>
+        </optgroup>
+      </select>
+    </div>
+
     <div class="alert alert-info d-flex align-items-center mt-2" role="status" *ngIf="store.newDataAvailable">
       <span class="flex-grow-1" i18n>New photos are available.</span>
       <button type="button" class="btn btn-sm btn-primary" (click)="backToNewest()" i18n>Back to newest</button>
@@ -32,6 +49,21 @@
     <div class="no-item-msg text-center my-5" *ngIf="ready && !store.hasMore && store.items.length === 0 && !store.error">
       <h2 i18n>No media to show.</h2>
     </div>
+
+    <nav class="timeline-rail d-none d-md-block" *ngIf="railYears.length > 0"
+         aria-label="Years and months" i18n-aria-label>
+      <div *ngFor="let year of railYears" class="timeline-rail-year">
+        <button type="button" class="btn btn-link timeline-rail-year-label"
+                (click)="jumpToMonth(year.months[0].key)">{{ year.year }}</button>
+        <button type="button" *ngFor="let month of year.months"
+                class="btn btn-link timeline-rail-month"
+                [class.active]="month.key === currentMonthKey"
+                [attr.aria-current]="month.key === currentMonthKey ? 'true' : null"
+                [attr.aria-label]="month.longName + ' (' + month.count + ')'"
+                [title]="month.longName + ' (' + month.count + ')'"
+                (click)="jumpToMonth(month.key)">{{ month.shortName }}</button>
+      </div>
+    </nav>
   </div>
 </app-frame>
 

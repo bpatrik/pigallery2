@@ -3,14 +3,15 @@ import {
   ChangeDetectorRef,
   Component,
   ElementRef,
+  HostListener,
   Inject,
   LOCALE_ID,
   OnDestroy,
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {formatDate, NgIf} from '@angular/common';
-import {ActivatedRoute, Router} from '@angular/router';
+import {formatDate, NgFor, NgIf} from '@angular/common';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {FrameComponent} from '../frame/frame.component';
 import {GalleryGridComponent} from '../gallery/grid/grid.gallery.component';
@@ -27,8 +28,30 @@ import {PiTitleService} from '../../model/pi-title.service';
 import {PageHelper} from '../../model/page.helper';
 import {ShareService} from '../gallery/share.service';
 import {TimelineStore} from './timeline.store';
-import {getTimelineMediaId, groupTimelineByDay} from './timeline-grouping';
+import {
+  formatTimelineMonth,
+  getTimelineMediaId,
+  getTimelineMonth,
+  getTimelineMonthEnd,
+  groupTimelineByDay,
+  parseTimelineMonth,
+  TimelineMonth,
+} from './timeline-grouping';
 import {TimelineLightboxSource} from './timeline-lightbox.source';
+import {TimelineSummaryDTO} from '../../../../common/entities/TimelineDTO';
+
+export interface TimelineRailMonth {
+  key: string;
+  month: number;
+  count: number;
+  shortName: string;
+  longName: string;
+}
+
+export interface TimelineRailYear {
+  year: number;
+  months: TimelineRailMonth[];
+}
 
 @Component({
   selector: 'app-timeline',
@@ -39,10 +62,12 @@ import {TimelineLightboxSource} from './timeline-lightbox.source';
     GalleryGridComponent,
     GalleryLightboxComponent,
     MediaButtonModalComponent,
+    NgFor,
     NgIf,
   ]
 })
 export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
+  static readonly AT_PARAM = 'at';
   private static readonly PRELOAD_MARGIN_PX = 800;
 
   @ViewChild(GalleryGridComponent, {static: true}) grid: GalleryGridComponent;
@@ -54,12 +79,18 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   ready = false;
   readonly mediaIdFn = getTimelineMediaId;
   readonly headerMethod = GroupByTypes.Date;
+  atMonth: TimelineMonth = null;
+  atMonthName: string = null;
+  currentMonthKey: string = null;
+  railYears: TimelineRailYear[] = [];
 
   private observer: IntersectionObserver;
-  private subscription: Subscription = null;
+  private subscription = new Subscription();
   private renderedItems: MediaDTO[] = null;
+  private railSummary: TimelineSummaryDTO = null;
   private restoreTimer: number = null;
   private recheckTimer: number = null;
+  private scrollFrame: number = null;
 
   constructor(
     public store: TimelineStore,
@@ -87,20 +118,25 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.piTitleService.setTitle($localize`Timeline`);
     this.ready = true;
-    this.subscription = this.store.changes.subscribe((): void => this.onStoreChange());
+    this.subscription.add(this.store.changes.subscribe((): void => this.onStoreChange()));
     this.revealMediaId = this.store.scrollAnchor?.mediaId ?? null;
     this.onStoreChange();
     this.changeDetector.detectChanges();
     this.observeSentinel();
-    if (this.store.items.length === 0) {
-      this.loadMore();
-    } else {
-      this.restoreScroll();
-    }
+    let initial = true;
+    this.subscription.add(this.route.queryParams.subscribe((params): void => {
+      this.onQueryParams(params, initial);
+      initial = false;
+    }));
+    this.store.loadSummary().catch(console.error);
   }
 
   ngAfterViewInit(): void {
-    this.lightbox.setSource(new TimelineLightboxSource(this.store, this.grid.gridPhotoQL));
+    this.lightbox.setSource(new TimelineLightboxSource(
+      this.store,
+      this.grid.gridPhotoQL,
+      (): Params => this.atMonth ? {[TimelineComponent.AT_PARAM]: formatTimelineMonth(this.atMonth)} : {}
+    ));
   }
 
   ngOnDestroy(): void {
@@ -108,14 +144,46 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
       this.store.scrollAnchor = this.getScrollAnchor();
     }
     this.store.cancel();
-    this.subscription?.unsubscribe();
+    this.subscription.unsubscribe();
     this.observer?.disconnect();
     if (this.restoreTimer !== null) {
       cancelAnimationFrame(this.restoreTimer);
     }
+    if (this.scrollFrame !== null) {
+      cancelAnimationFrame(this.scrollFrame);
+    }
     if (this.recheckTimer !== null) {
       clearTimeout(this.recheckTimer);
     }
+  }
+
+  @HostListener('window:scroll')
+  onScroll(): void {
+    if (this.scrollFrame !== null || !this.ready) {
+      return;
+    }
+    this.scrollFrame = requestAnimationFrame((): void => {
+      this.scrollFrame = null;
+      this.updateCurrentMonth();
+    });
+  }
+
+  jumpToMonth(key: string): void {
+    const month = parseTimelineMonth(key);
+    if (!month) {
+      return;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {[TimelineComponent.AT_PARAM]: formatTimelineMonth(month), [QueryParams.gallery.photo]: null},
+      queryParamsHandling: 'merge',
+    }).catch(console.error);
+  }
+
+  onPickMonth(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.jumpToMonth(select.value);
+    select.value = '';
   }
 
   openMedia(media: MediaDTO): void {
@@ -144,9 +212,94 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   backToNewest(): void {
-    this.store.reset();
-    PageHelper.ScrollY = 0;
-    this.loadMore();
+    if (this.store.newDataAvailable) {
+      this.store.clearSummary();
+    }
+    if (this.atMonth) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {[TimelineComponent.AT_PARAM]: null, [QueryParams.gallery.photo]: null},
+        queryParamsHandling: 'merge',
+      }).catch(console.error);
+    } else {
+      this.store.reset();
+      PageHelper.ScrollY = 0;
+      this.loadMore();
+    }
+    this.store.loadSummary().catch(console.error);
+  }
+
+  private onQueryParams(params: Params, initial: boolean): void {
+    const raw = params[TimelineComponent.AT_PARAM];
+    const month = parseTimelineMonth(raw);
+    if (raw !== undefined && !month) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: {[TimelineComponent.AT_PARAM]: null},
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      }).catch(console.error);
+      return;
+    }
+    this.atMonth = month;
+    this.atMonthName = month ? this.formatMonth(month, 'MMMM y') : null;
+    const before = month ? getTimelineMonthEnd(month) : null;
+    if (before !== this.store.startBefore) {
+      this.store.reset(before);
+      this.revealMediaId = null;
+      this.currentMonthKey = month ? formatTimelineMonth(month) : null;
+      PageHelper.ScrollY = 0;
+      this.loadMore();
+    } else if (initial) {
+      if (this.store.items.length === 0) {
+        this.loadMore();
+      } else {
+        this.restoreScroll();
+      }
+    }
+  }
+
+  private formatMonth(month: TimelineMonth, format: string): string {
+    return formatDate(getTimelineMonthEnd({year: month.year, month: month.month - 1}), format, this.locale, 'UTC');
+  }
+
+  private updateRail(): void {
+    if (this.railSummary === this.store.summary) {
+      return;
+    }
+    this.railSummary = this.store.summary;
+    this.railYears = (this.store.summary?.years ?? [])
+      .map((y): TimelineRailYear => ({
+        year: y.year,
+        months: y.months
+          .filter((m): boolean => m.count > 0)
+          .map((m): TimelineRailMonth => ({
+            key: formatTimelineMonth({year: y.year, month: m.month}),
+            month: m.month,
+            count: m.count,
+            shortName: this.formatMonth({year: y.year, month: m.month}, 'MMM'),
+            longName: this.formatMonth({year: y.year, month: m.month}, 'MMMM y'),
+          }))
+          .reverse(),
+      }))
+      .filter((y): boolean => y.months.length > 0)
+      .reverse();
+  }
+
+  private updateCurrentMonth(): void {
+    const photos = this.grid?.gridPhotoQL?.toArray() || [];
+    for (const photo of photos) {
+      if (photo.container.nativeElement.getBoundingClientRect().bottom > 0) {
+        const key = formatTimelineMonth(
+          getTimelineMonth(photo.gridMedia.media, Config.Gallery.ignoreTimestampOffset)
+        );
+        if (key !== this.currentMonthKey) {
+          this.currentMonthKey = key;
+          this.changeDetector.markForCheck();
+        }
+        return;
+      }
+    }
   }
 
   private isAvailable(): boolean {
@@ -158,6 +311,7 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private onStoreChange(): void {
+    this.updateRail();
     if (this.renderedItems !== this.store.items || this.store.items.length !== this.groupedCount()) {
       this.renderedItems = this.store.items;
       this.mediaGroups = groupTimelineByDay(
@@ -201,6 +355,7 @@ export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.recheckTimer = window.setTimeout((): void => {
       this.recheckTimer = null;
+      this.updateCurrentMonth();
       const top = this.sentinel.nativeElement.getBoundingClientRect().top;
       if (top < window.innerHeight + TimelineComponent.PRELOAD_MARGIN_PX) {
         this.loadMore();

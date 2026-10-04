@@ -20,7 +20,8 @@ export class TimelineLightboxSource implements LightboxSource {
 
   constructor(
     private store: TimelineStore,
-    private photos: QueryList<GalleryPhotoComponent>
+    private photos: QueryList<GalleryPhotoComponent>,
+    private pageParams: () => Params = () => ({})
   ) {
     this.changes = merge(store.changes, photos.changes);
   }
@@ -69,7 +70,8 @@ export class TimelineLightboxSource implements LightboxSource {
   }
 
   queryParams(media?: MediaDTO): Params {
-    return media ? {[QueryParams.gallery.photo]: getTimelineMediaId(media)} : {};
+    const params = this.pageParams();
+    return media ? {...params, [QueryParams.gallery.photo]: getTimelineMediaId(media)} : params;
   }
 
   hasMore(): boolean {

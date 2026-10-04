@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
-import {TimelinePageDTO} from '../../../../common/entities/TimelineDTO';
+import {TimelinePageDTO, TimelineSummaryDTO} from '../../../../common/entities/TimelineDTO';
 import {UserDTO} from '../../../../common/entities/UserDTO';
 import {NetworkService} from '../../model/network/network.service';
 import {AuthenticationService} from '../../model/network/authentication.service';
@@ -30,10 +30,13 @@ export class TimelineStore {
   newDataAvailable = false;
   startBefore: number = null;
   scrollAnchor: TimelineScrollAnchor = null;
+  summary: TimelineSummaryDTO = null;
 
   private ids = new Set<number>();
   private epoch = 0;
   private pending: Promise<void> = null;
+  private summaryEpoch = 0;
+  private summaryPending: Promise<void> = null;
   private userKey: string = undefined;
   private dataVersion: string = null;
 
@@ -46,6 +49,7 @@ export class TimelineStore {
       const key = TimelineStore.getUserKey(user);
       if (key !== this.userKey) {
         this.userKey = key;
+        this.clearSummary();
         this.reset();
       }
     });
@@ -159,5 +163,41 @@ export class TimelineStore {
     this.scrollAnchor = null;
     this.startBefore = startBefore;
     this.changes.next();
+  }
+
+  /**
+   * Loads the year/month counts once; failures leave `summary` null so the rail stays hidden.
+   */
+  loadSummary(): Promise<void> {
+    if (this.summary) {
+      return Promise.resolve();
+    }
+    if (this.summaryPending) {
+      return this.summaryPending;
+    }
+    const epoch = this.summaryEpoch;
+    const request = this.networkService
+      .getJson<TimelineSummaryDTO>('/timeline/summary')
+      .then((summary): void => {
+        if (epoch === this.summaryEpoch && summary) {
+          this.summary = summary;
+        }
+      })
+      .catch(console.error)
+      .finally((): void => {
+        if (epoch !== this.summaryEpoch) {
+          return;
+        }
+        this.summaryPending = null;
+        this.changes.next();
+      });
+    this.summaryPending = request;
+    return request;
+  }
+
+  clearSummary(): void {
+    this.summaryEpoch++;
+    this.summary = null;
+    this.summaryPending = null;
   }
 }

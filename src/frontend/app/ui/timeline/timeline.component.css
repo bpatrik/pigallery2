@@ -5,3 +5,48 @@
 .timeline-sentinel {
   height: 1px;
 }
+
+.timeline-rail {
+  position: fixed;
+  top: 4.5rem;
+  bottom: 1rem;
+  right: 0.25rem;
+  width: 4.25rem;
+  overflow-y: auto;
+  z-index: 10;
+  scrollbar-width: thin;
+  text-align: right;
+}
+
+.timeline-rail .btn {
+  display: block;
+  width: 100%;
+  padding: 0 0.25rem;
+  text-align: right;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.timeline-rail-year-label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.timeline-rail-month {
+  font-size: 0.75rem;
+  color: var(--bs-secondary-color);
+}
+
+.timeline-rail-month.active,
+.timeline-rail .btn:hover,
+.timeline-rail .btn:focus-visible {
+  color: var(--bs-emphasis-color);
+  font-weight: 600;
+}
+
+@media (min-width: 768px) {
+  .timeline-has-rail {
+    padding-right: 4.75rem;
+  }
+}

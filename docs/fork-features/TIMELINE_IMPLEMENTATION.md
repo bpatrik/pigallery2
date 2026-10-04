@@ -288,14 +288,14 @@ Status legend: `todo`, `in progress`, `review`, `done`.
 | 5 | Live-photo filtering/attachment with permission rules | 1 | Moderate | Luna + Opus check (permission tests) | done |
 | 6 | Both-DB tests (SQLite + MySQL) and dense-burst performance check | 1 | Laborious | Luna | done |
 | 7 | `ClientTimelineConfig`, nav enum + `toDefault()` fallback, `/timeline` route, i18n | 1 | Routine | Luna | done |
-| 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | review |
-| 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | review |
-| 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | review |
-| 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | review |
+| 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | done |
+| 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | done |
+| 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | done |
+| 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | done |
 | 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | done |
-| 13 | Year/month rail, mobile picker, `?at=YYYY-MM` | 2 | Medium | Opus | todo |
-| 14 | Dense justified layout, thumbnail-size control | 3 | UI design | Opus (iterating with maintainer) | todo |
-| 15 | Windowed rendering and other scale items | 4 | As measured | Opus | todo |
+| 13 | Year/month rail, mobile picker, `?at=YYYY-MM` | 2 | Medium | Opus | review |
+| 14 | Dense justified layout, thumbnail-size control | 3 | UI design | Opus (iterating with maintainer) | deferred |
+| 15 | Windowed rendering and other scale items | 4 | As measured | Opus | deferred |
 
 Luna progress (2026-10-04): Tasks 1 and 3 are complete; task 2 is implemented
 and its paging tests are ready for Opus review. Tasks 4 and 5 are implemented,
@@ -367,7 +367,25 @@ Open before closing milestone 1:
   resolving the plugin through the builder; with Brave as `CHROME_BIN` the full
   Karma suite passes (127/127), including the Timeline store/grouping and
   paged-source lightbox specs (20/20 when run alone). Milestone 1 has no open
-  items left; tasks 8–11 can move to done after the maintainer's review.
+  items left; tasks 8–11 marked done after the maintainer's review. Tasks 14
+  and 15 are deferred by the maintainer; task 13 is next, then a test release.
+
+Opus task 13 (2026-10-04): implemented. `TimelineStore.loadSummary()` loads the
+per-month counts once (dropped on user/projection change, refreshed by "Back
+to newest" after new data). Desktop shows a fixed year/month rail (buttons
+with full month name and count as accessible label; the month of the first
+visible photo is highlighted); below `md` a native `<select>` picker replaces
+it. `?at=YYYY-MM` is validated (invalid values are removed), maps to `before` =
+first instant of the following month in effective time, resets the list and
+loads from there; a "Showing from … / Back to newest" bar appears. Viewer
+open/close keeps `at` (the Timeline lightbox source merges page params); Back
+from Folders restores the same `at` position; history Back/Forward between
+jumps works. Specs: month parsing/boundaries (including pre-1970 and years
+< 100), effective-time month, summary load/coalesce/clear, `at` kept by the
+lightbox source. Full Karma suite 133/133; browser-checked on the demo
+library (rail counts total 42, jump, empty month, invalid `at`, Back to
+newest, history). The viewer with `at` was checked by spec only: the
+integrated browser tab was hidden, which pauses viewer animations.
 
 Opus task 12 review (2026-10-04): accepted. Cache invalidation is wired
 (`onDataChange` → `onNewDataVersion` bumps the generation); in-flight builds
