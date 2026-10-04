@@ -286,13 +286,13 @@ Status legend: `todo`, `in progress`, `review`, `done`.
 | 3 | Thumbnail helper extraction from `ThumbnailGeneratorMWs` (Folders unchanged) | 1 | Routine | Luna | done |
 | 4 | `TimelineManager`, `TimelineMWs` (availability, validation), `TimelineRouter` | 1 | Routine | Luna | done |
 | 5 | Live-photo filtering/attachment with permission rules | 1 | Moderate | Luna + Opus check (permission tests) | done |
-| 6 | Both-DB tests (SQLite + MySQL) and dense-burst performance check | 1 | Laborious | Luna | in progress |
+| 6 | Both-DB tests (SQLite + MySQL) and dense-burst performance check | 1 | Laborious | Luna | done |
 | 7 | `ClientTimelineConfig`, nav enum + `toDefault()` fallback, `/timeline` route, i18n | 1 | Routine | Luna | done |
 | 8 | Grid presentation inputs (remove global-loader identity dependency) | 1 | Medium–high, shared Folders code | Opus | review |
 | 9 | `LightboxSource` with Folders and Timeline adapters (data-driven viewer) | 1 | Highest risk | Opus + manual Folders check | review |
 | 10 | `TimelineStore` + `loadNextPage()` (coalescing, stale responses, Back/scroll restore, logout) | 1 | Medium–high, races | Opus | review |
 | 11 | `TimelineComponent` wiring, day grouping, auto-load sentinel, hidden features | 1 | Medium | Opus | review |
-| 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | in progress |
+| 12 | Summary endpoint, SQL day buckets on both dialects, LRU + generation cache | 2 | Moderate | Luna + Opus check | review |
 | 13 | Year/month rail, mobile picker, `?at=YYYY-MM` | 2 | Medium | Opus | todo |
 | 14 | Dense justified layout, thumbnail-size control | 3 | UI design | Opus (iterating with maintainer) | todo |
 | 15 | Windowed rendering and other scale items | 4 | As measured | Opus | todo |
@@ -329,11 +329,23 @@ search viewer, slideshow and inline blog unchanged. Karma specs
 run: no Chrome in this environment. A page boundary was not exercised in the
 browser (demo library < 100 items).
 
+MariaDB 11.4 run (2026-10-04): all 29 Timeline backend tests pass on SQLite and
+MariaDB, including summary day buckets with a pre-1970 date and both
+projection kinds. Dense burst (1,200 equal-time rows, `limit=2`): 1,204 rows
+examined, 132 ms SQLite, 703 ms MariaDB. The probe is pessimistic: batches are
+`2 × limit` = 4 rows, so it issues ~300 queries; at the default `limit=100`
+the same burst takes ~7 batches. Task 6 done; task 12 awaits the Opus check.
+Full backend suite on both engines: 567 passing, 8 failing, all MariaDB-only and
+all from a pre-existing `origin/master` bug unrelated to Timeline:
+`SearchManager` emits `ESCAPE '\'` (glob support, `4d4c9f42`/`b1be11f8`), which
+MariaDB parses as an unterminated string with default backslash escaping.
+Albums/covers/saved searches then fail; the Timeline DB suite hits it only via
+leftover cover rebuilds and passes in isolation. Needs a separate fix.
+
 Open before closing milestone 1:
 
 - Run `npm run test-frontend` where Chrome is available (new Timeline specs
   plus existing lightbox/grid suites after the refactor).
-- MySQL run of the backend Timeline tests and dense-burst probe (tasks 6, 12).
 - Browser check across a page boundary (library > 100 items, or a temporarily
   lower `TimelineStore.PAGE_SIZE`): auto-load and viewer next at the end.
 - Nav link: render with `timeline` in `Gallery.NavBar.links`; `toDefault()`

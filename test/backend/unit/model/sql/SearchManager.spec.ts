@@ -281,6 +281,19 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
     });
 
+    it('keyword glob escapes LIKE wildcards on every engine', async () => {
+      const sm = new SearchManager();
+      const query = (value: string): TextSearch => ({
+        value,
+        matchType: TextSearchQueryMatchTypes.exact_match,
+        type: SearchQueryTypes.keyword
+      } as TextSearch);
+
+      expect(await sm.getCount(DBTestHelper.defaultSession, query('wookie?s'))).to.equal(1);
+      expect(await sm.getCount(DBTestHelper.defaultSession, query('wookie_s'))).to.equal(0);
+      expect(await sm.getCount(DBTestHelper.defaultSession, query('wookie%'))).to.equal(0);
+    });
+
     it('getNMedia should respect projectionQuery', async () => {
       const sm = new SearchManager();
 
