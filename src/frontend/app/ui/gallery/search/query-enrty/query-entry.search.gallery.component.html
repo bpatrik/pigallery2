@@ -1,300 +1,322 @@
-<div class="row mt-1 mb-1" *ngIf="queryEntry">
-  <ng-container *ngIf="IsListQuery">
-    <div class="col-md-3 col-4">
-      <select
-        [id]="'listSearchType'+id"
-        [name]="'listSearchType'+id"
-        class="form-select"
-        [(ngModel)]="queryEntry.type"
-        (ngModelChange)="onChangeType()">
-        <option *ngFor="let opt of SearchQueryTypesEnum" [ngValue]="opt.key">{{opt.key | stringifySearchType}}
-        </option>
-      </select>
-    </div>
-    <ng-container *ngIf="queryEntry.type == SearchQueryTypes.SOME_OF">
-      <label class="col-4 col-sm-auto control-label" [for]="'someOfMinValue'+id">
-        <ng-container i18n>At least this many</ng-container>
-        (1-{{AsListQuery.list.length}}):</label>
-      <div class="col-md col">
-        <input
-          type="number" min="1" [max]="AsListQuery.list.length"
-          class="form-control" placeholder="1"
-          title="At least this many"
-          i18n-title
-          [(ngModel)]="AsSomeOfQuery.min"
-          (ngModelChange)="onChange()"
-          [name]="'someOfMinValue'+id"
-          [id]="'someOfMinValue'+id"
-          required="required">
-      </div>
-    </ng-container>
-
-    <ng-container *ngIf="queryEntry.type != SearchQueryTypes.SOME_OF">
-      <div class="col"></div>
-    </ng-container>
-
-    <button [ngClass]="'btn-danger'"
-            class="btn float-end col-1 align-self-center"
-            (click)="deleteItem()">
-      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-    </button>
-    <div class="container query-list">
-      <app-gallery-search-query-entry *ngFor="let sq of AsListQuery.list; index as i"
-                                      [id]="id+'_'+i"
-                                      [(ngModel)]="AsListQuery.list[i]"
-                                      (delete)="itemDeleted(i)">
-      </app-gallery-search-query-entry>
-    </div>
-    <div class="col query-list d-flex justify-content-start">
-      <button class="btn btn-primary" (click)="addQuery()">
-        <ng-icon
-          class="me-1"
-          style="margin-left: -0.1em; margin-right: -0.1em"
-          [name]="'ionAddOutline'+id"
-          title="Add" i18n-title></ng-icon>
-        <span i18n>Add</span>
-      </button>
-    </div>
-  </ng-container>
-  <ng-container *ngIf="!IsListQuery">
-    <div class="col-auto">
-      <div class="input-group">
+@if (queryEntry) {
+  <div class="row mt-1 mb-1">
+    @if (IsListQuery) {
+      <div class="col-md-3 col-4">
         <select
-          [id]="'searchType'+id"
-          [name]="'searchType'+id"
+          [id]="'listSearchType'+id"
+          [name]="'listSearchType'+id"
           class="form-select"
           [(ngModel)]="queryEntry.type"
           (ngModelChange)="onChangeType()">
-          <option *ngFor="let opt of SearchQueryTypesEnum" [ngValue]="opt.key">{{opt.key | stringifySearchType}}
-          </option>
-        </select>
-        <select
-          [id]="'negate'+id"
-          [name]="'negate'+id"
-          class="form-select w-auto flex-grow-0"
-          title="Matching type"
-          i18n-title
-          [(ngModel)]="SelectedMatchType"
-          (ngModelChange)="onChange()">
-          <option *ngFor="let mt of MatchingTypes" [ngValue]="mt" [title]="getMatchingTypesDescription(mt)">{{mt}}
+          @for (opt of SearchQueryTypesEnum; track opt) {
+            <option [ngValue]="opt.key">{{opt.key | stringifySearchType}}
+            </option>
+          }
         </select>
       </div>
-    </div>
-    <div class="col-10 col-lg" *ngIf="IsTextQuery">
-      <div class="input-group">
-        <input
-          [id]="'searchField'+id"
-          [name]="'searchField'+id"
-          placeholder="Search text"
-          i18n-placeholder
-          class="form-control rounded-2"
-          [(ngModel)]="AsTextQuery.value"
-          (change)="onChange()"
-          (ngModelChange)="onChange()"
-          type="text"/>
-      </div>
-    </div>
-    <ng-container [ngSwitch]="queryEntry.type">
-      <div *ngSwitchCase="SearchQueryTypes.distance" class="col-10 col-lg">
-        <div class="row">
-          <div class="col-md-4">
-            <div class="input-group">
-              <input type="number" class="form-control" placeholder="1"
-                     id="distance"
-                     min="0"
-                     step="0.1"
-                     [(ngModel)]="AsDistanceQuery.distance"
-                     (ngModelChange)="onChange()"
-                     [name]="'distance'+id" required>
-              <span class="input-group-text">km</span>
-            </div>
-          </div>
-          <div class="col-md-8">
-            <div class="input-group">
-              <label class="control-label me-2" [for]="'locationInput'+id" i18n>From</label>
-              <input [name]="'locationInput'+id"
-                     [id]="'locationInput'+id"
-                     title="Location or coordinates (lat, lng)"
-                     placeholder="New York or 40.7128, -74.0060"
-                     i18n-title
-                     class="form-control input-md rounded-2"
-                     [ngModel]="locationInputText"
-                     (ngModelChange)="onLocationInputChange($event)"
-                     type="text">
-            </div>
-          </div>
+      @if (queryEntry.type == SearchQueryTypes.SOME_OF) {
+        <label class="col-4 col-sm-auto control-label" [for]="'someOfMinValue'+id">
+          <ng-container i18n>At least this many</ng-container>
+        (1-{{AsListQuery.list.length}}):</label>
+        <div class="col-md col">
+          <input
+            type="number" min="1" [max]="AsListQuery.list.length"
+            class="form-control" placeholder="1"
+            title="At least this many"
+            i18n-title
+            [(ngModel)]="AsSomeOfQuery.min"
+            (ngModelChange)="onChange()"
+            [name]="'someOfMinValue'+id"
+            [id]="'someOfMinValue'+id"
+            required="required">
         </div>
-      </div>
-      <!-- Range Search Query -->
-      <div *ngSwitchCase="SearchQueryTypes.date" class="col-10 col-lg d-flex">
-        <input id="date_min"
-               name="date_min"
-               title="start date"
-               i18n-title
-               [ngModel]="AsRangeQuery.min | date:'yyyy-MM-dd'"
-               (ngModelChange)="AsRangeQuery.min = $event; onChange() "
-               [value]="AsRangeQuery.min | date:'yyyy-MM-dd'"
-               #date_min="ngModel"
-               class="form-control input-md rounded-2"
-               type="date">
-        <input id="date_max"
-               name="date_max"
-               title="end date"
-               i18n-title
-               [ngModel]="AsRangeQuery.max | date:'yyyy-MM-dd'"
-               (ngModelChange)="AsRangeQuery.max = $event; onChange() "
-               [value]="AsRangeQuery.max | date:'yyyy-MM-dd'"
-               #date_max="ngModel"
-               class="form-control input-md rounded-2"
-               type="date">
-      </div>
-      <div *ngSwitchCase="SearchQueryTypes.rating" class="col-10 col-lg d-flex">
-        <input [id]="'minRating'+id"
-               [name]="'minRating'+id"
-               title="Minimum Rating"
-               placeholder="0"
-               i18n-title
-               min="0"
-               max="5"
-               class="form-control input-md rounded-2"
-               [(ngModel)]="AsRangeQuery.min"
-               (ngModelChange)="onChange()"
-               type="number">
-        <input [id]="'maxRating'+id"
-               [name]="'maxRating'+id"
-               title="Maximum Rating"
-               placeholder="5"
-               i18n-title
-               min="0"
-               max="5"
-               class="form-control input-md rounded-2"
-               [(ngModel)]="AsRangeQuery.max"
-               (ngModelChange)="onChange()"
-               type="number">
-      </div>
-      <div *ngSwitchCase="SearchQueryTypes.person_count" class="col-10 col-lg d-flex">
-        <input [id]="'min_person_count'+id"
-               [name]="'min_person_count'+id"
-               title="Minimum Person count"
-               placeholder="0"
-               i18n-title
-               min="0"
-               max="5"
-               class="form-control input-md rounded-2"
-               [(ngModel)]="AsRangeQuery.min"
-               (ngModelChange)="onChange()"
-               type="number">
-        <input [id]="'max_person_count'+id"
-               [name]="'max_person_count'+id"
-               title="Maximum Person count"
-               placeholder="5"
-               i18n-title
-               min="0"
-               max="5"
-               class="form-control input-md rounded-2"
-               [(ngModel)]="AsRangeQuery.max"
-               (ngModelChange)="onChange()"
-               type="number">
-      </div>
-      <div *ngSwitchCase="SearchQueryTypes.resolution" class="col-10 col-lg">
-        <div class="input-group">
-          <input [id]="'minResolution'+id"
-                 [name]="'minResolution'+id"
-                 title="Minimum Resolution"
-                 placeholder="0"
-                 i18n-title
-                 min="0"
-                 class="form-control input-md"
-                 [(ngModel)]="AsRangeQuery.min"
-                 (ngModelChange)="onChange()"
-                 type="number">
-          <span class="input-group-text">Mpx</span>
-        </div>
-        <div class="input-group">
-          <input [id]="'maxResolution'+id"
-                 [name]="'maxResolution'+id"
-                 title="Maximum Resolution"
-                 placeholder="5"
-                 i18n-title
-                 [min]="0"
-                 class="form-control input-md"
-                 [(ngModel)]="AsRangeQuery.max"
-                 (ngModelChange)="onChange()"
-                 type="number">
-          <span class="input-group-text">Mpx</span>
-        </div>
-      </div>
-      <div *ngSwitchCase="SearchQueryTypes.orientation" class="col-10 col-lg d-flex">
-        <div class="input-group col-md-6">
-          <select [id]="'orientation-select'+id"
-                  [name]="'orientation-select'+id"
-                  class="form-select rounded-2"
-                  [(ngModel)]="AsOrientationQuery.landscape"
-                  (ngModelChange)="onChange()"
-                  title="Orientation"
-                  required>
-            <option [ngValue]="true" i18n>Landscape</option>
-            <option [ngValue]="false" i18n>Portrait</option>
-          </select>
-        </div>
-      </div>
-      <div *ngSwitchCase="SearchQueryTypes.date_pattern" class="col-10 col-lg d-flex">
-
-        <div class="row">
-          <div class="input-group col-md-6">
-            <span class="input-group-text" i18n>Last</span>
-            <input [id]="'daysLength'+id"
-                   [name]="'daysLength'+id"
-                   title="Last N Days"
-                   placeholder="1"
-                   i18n-title
-                   [min]="0"
-                   class="form-control input-md"
-                   [(ngModel)]="AsDatePatternQuery.daysLength"
-                   (ngModelChange)="onChange()"
-                   type="number">
-            <span class="input-group-text" i18n>days</span>
-          </div>
-
-          <div class="input-group col-md-6">
-            <input
-              *ngIf="AsDatePatternQuery.frequency == DatePatternFrequency.days_ago || AsDatePatternQuery.frequency == DatePatternFrequency.weeks_ago || AsDatePatternQuery.frequency == DatePatternFrequency.months_ago || AsDatePatternQuery.frequency == DatePatternFrequency.years_ago"
-              [id]="'agoNumber'+id"
-              [name]="'agoNumber'+id"
-              title="Ago"
-              placeholder="1"
-              i18n-title
-              [min]="0"
-              class="form-control input-md"
-              [(ngModel)]="AsDatePatternQuery.agoNumber"
-              (ngModelChange)="onChange()"
-              type="number">
-            <select class="form-select rounded-2"
-                    [(ngModel)]="AsDatePatternQuery.frequency"
-                    (ngModelChange)="onChange()"
-                    [id]="'date_pattern-select'+id"
-                    [name]="'date_pattern-select'+id"
-                    title="Date Pattern"
-                    required>
-              <option [ngValue]="DatePatternFrequency.days_ago" i18n>Day(s) ago</option>
-              <option [ngValue]="DatePatternFrequency.weeks_ago" i18n>Week(s) ago</option>
-              <option [ngValue]="DatePatternFrequency.months_ago" i18n>Month(s) ago</option>
-              <option [ngValue]="DatePatternFrequency.years_ago" i18n>Year(s) ago</option>
-              <option [ngValue]="DatePatternFrequency.every_week" i18n>Every week</option>
-              <option [ngValue]="DatePatternFrequency.every_month" i18n>Every Month</option>
-              <option [ngValue]="DatePatternFrequency.every_year" i18n>Every year</option>
-            </select>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-    <div class="col-2 col-lg-1 align-self-center">
+      }
+      @if (queryEntry.type != SearchQueryTypes.SOME_OF) {
+        <div class="col"></div>
+      }
       <button [ngClass]="'btn-danger'"
-              class="btn  w-auto float-end"
-              (click)="deleteItem()">
+        class="btn float-end col-1 align-self-center"
+        (click)="deleteItem()">
         <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
       </button>
-    </div>
-  </ng-container>
-
-</div>
+      <div class="container query-list">
+        @for (sq of AsListQuery.list; track sq; let i = $index) {
+          <app-gallery-search-query-entry
+            [id]="id+'_'+i"
+            [(ngModel)]="AsListQuery.list[i]"
+            (delete)="itemDeleted(i)">
+          </app-gallery-search-query-entry>
+        }
+      </div>
+      <div class="col query-list d-flex justify-content-start">
+        <button class="btn btn-primary" (click)="addQuery()">
+          <ng-icon
+            class="me-1"
+            style="margin-left: -0.1em; margin-right: -0.1em"
+            [name]="'ionAddOutline'+id"
+          title="Add" i18n-title></ng-icon>
+          <span i18n>Add</span>
+        </button>
+      </div>
+    }
+    @if (!IsListQuery) {
+      <div class="col-auto">
+        <div class="input-group">
+          <select
+            [id]="'searchType'+id"
+            [name]="'searchType'+id"
+            class="form-select"
+            [(ngModel)]="queryEntry.type"
+            (ngModelChange)="onChangeType()">
+            @for (opt of SearchQueryTypesEnum; track opt) {
+              <option [ngValue]="opt.key">{{opt.key | stringifySearchType}}
+              </option>
+            }
+          </select>
+          <select
+            [id]="'negate'+id"
+            [name]="'negate'+id"
+            class="form-select w-auto flex-grow-0"
+            title="Matching type"
+            i18n-title
+            [(ngModel)]="SelectedMatchType"
+            (ngModelChange)="onChange()">
+            @for (mt of MatchingTypes; track mt) {
+              <option [ngValue]="mt" [title]="getMatchingTypesDescription(mt)">{{mt}}</option>
+            }
+          </select>
+            </div>
+          </div>
+          @if (IsTextQuery) {
+            <div class="col-10 col-lg">
+              <div class="input-group">
+                <input
+                  [id]="'searchField'+id"
+                  [name]="'searchField'+id"
+                  placeholder="Search text"
+                  i18n-placeholder
+                  class="form-control rounded-2"
+                  [(ngModel)]="AsTextQuery.value"
+                  (change)="onChange()"
+                  (ngModelChange)="onChange()"
+                  type="text"/>
+              </div>
+            </div>
+          }
+          @switch (queryEntry.type) {
+            @case (SearchQueryTypes.distance) {
+              <div class="col-10 col-lg">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="input-group">
+                      <input type="number" class="form-control" placeholder="1"
+                        id="distance"
+                        min="0"
+                        step="0.1"
+                        [(ngModel)]="AsDistanceQuery.distance"
+                        (ngModelChange)="onChange()"
+                        [name]="'distance'+id" required>
+                      <span class="input-group-text">km</span>
+                    </div>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="input-group">
+                      <label class="control-label me-2" [for]="'locationInput'+id" i18n>From</label>
+                      <input [name]="'locationInput'+id"
+                        [id]="'locationInput'+id"
+                        title="Location or coordinates (lat, lng)"
+                        placeholder="New York or 40.7128, -74.0060"
+                        i18n-title
+                        class="form-control input-md rounded-2"
+                        [ngModel]="locationInputText"
+                        (ngModelChange)="onLocationInputChange($event)"
+                        type="text">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            <!-- Range Search Query -->
+            @case (SearchQueryTypes.date) {
+              <div class="col-10 col-lg d-flex">
+                <input id="date_min"
+                  name="date_min"
+                  title="start date"
+                  i18n-title
+                  [ngModel]="AsRangeQuery.min | date:'yyyy-MM-dd'"
+                  (ngModelChange)="AsRangeQuery.min = $event; onChange() "
+                  [value]="AsRangeQuery.min | date:'yyyy-MM-dd'"
+                  #date_min="ngModel"
+                  class="form-control input-md rounded-2"
+                  type="date">
+                <input id="date_max"
+                  name="date_max"
+                  title="end date"
+                  i18n-title
+                  [ngModel]="AsRangeQuery.max | date:'yyyy-MM-dd'"
+                  (ngModelChange)="AsRangeQuery.max = $event; onChange() "
+                  [value]="AsRangeQuery.max | date:'yyyy-MM-dd'"
+                  #date_max="ngModel"
+                  class="form-control input-md rounded-2"
+                  type="date">
+              </div>
+            }
+            @case (SearchQueryTypes.rating) {
+              <div class="col-10 col-lg d-flex">
+                <input [id]="'minRating'+id"
+                  [name]="'minRating'+id"
+                  title="Minimum Rating"
+                  placeholder="0"
+                  i18n-title
+                  min="0"
+                  max="5"
+                  class="form-control input-md rounded-2"
+                  [(ngModel)]="AsRangeQuery.min"
+                  (ngModelChange)="onChange()"
+                  type="number">
+                <input [id]="'maxRating'+id"
+                  [name]="'maxRating'+id"
+                  title="Maximum Rating"
+                  placeholder="5"
+                  i18n-title
+                  min="0"
+                  max="5"
+                  class="form-control input-md rounded-2"
+                  [(ngModel)]="AsRangeQuery.max"
+                  (ngModelChange)="onChange()"
+                  type="number">
+              </div>
+            }
+            @case (SearchQueryTypes.person_count) {
+              <div class="col-10 col-lg d-flex">
+                <input [id]="'min_person_count'+id"
+                  [name]="'min_person_count'+id"
+                  title="Minimum Person count"
+                  placeholder="0"
+                  i18n-title
+                  min="0"
+                  max="5"
+                  class="form-control input-md rounded-2"
+                  [(ngModel)]="AsRangeQuery.min"
+                  (ngModelChange)="onChange()"
+                  type="number">
+                <input [id]="'max_person_count'+id"
+                  [name]="'max_person_count'+id"
+                  title="Maximum Person count"
+                  placeholder="5"
+                  i18n-title
+                  min="0"
+                  max="5"
+                  class="form-control input-md rounded-2"
+                  [(ngModel)]="AsRangeQuery.max"
+                  (ngModelChange)="onChange()"
+                  type="number">
+              </div>
+            }
+            @case (SearchQueryTypes.resolution) {
+              <div class="col-10 col-lg">
+                <div class="input-group">
+                  <input [id]="'minResolution'+id"
+                    [name]="'minResolution'+id"
+                    title="Minimum Resolution"
+                    placeholder="0"
+                    i18n-title
+                    min="0"
+                    class="form-control input-md"
+                    [(ngModel)]="AsRangeQuery.min"
+                    (ngModelChange)="onChange()"
+                    type="number">
+                  <span class="input-group-text">Mpx</span>
+                </div>
+                <div class="input-group">
+                  <input [id]="'maxResolution'+id"
+                    [name]="'maxResolution'+id"
+                    title="Maximum Resolution"
+                    placeholder="5"
+                    i18n-title
+                    [min]="0"
+                    class="form-control input-md"
+                    [(ngModel)]="AsRangeQuery.max"
+                    (ngModelChange)="onChange()"
+                    type="number">
+                  <span class="input-group-text">Mpx</span>
+                </div>
+              </div>
+            }
+            @case (SearchQueryTypes.orientation) {
+              <div class="col-10 col-lg d-flex">
+                <div class="input-group col-md-6">
+                  <select [id]="'orientation-select'+id"
+                    [name]="'orientation-select'+id"
+                    class="form-select rounded-2"
+                    [(ngModel)]="AsOrientationQuery.landscape"
+                    (ngModelChange)="onChange()"
+                    title="Orientation"
+                    required>
+                    <option [ngValue]="true" i18n>Landscape</option>
+                    <option [ngValue]="false" i18n>Portrait</option>
+                  </select>
+                </div>
+              </div>
+            }
+            @case (SearchQueryTypes.date_pattern) {
+              <div class="col-10 col-lg d-flex">
+                <div class="row">
+                  <div class="input-group col-md-6">
+                    <span class="input-group-text" i18n>Last</span>
+                    <input [id]="'daysLength'+id"
+                      [name]="'daysLength'+id"
+                      title="Last N Days"
+                      placeholder="1"
+                      i18n-title
+                      [min]="0"
+                      class="form-control input-md"
+                      [(ngModel)]="AsDatePatternQuery.daysLength"
+                      (ngModelChange)="onChange()"
+                      type="number">
+                    <span class="input-group-text" i18n>days</span>
+                  </div>
+                  <div class="input-group col-md-6">
+                    @if (AsDatePatternQuery.frequency == DatePatternFrequency.days_ago || AsDatePatternQuery.frequency == DatePatternFrequency.weeks_ago || AsDatePatternQuery.frequency == DatePatternFrequency.months_ago || AsDatePatternQuery.frequency == DatePatternFrequency.years_ago) {
+                      <input
+                        [id]="'agoNumber'+id"
+                        [name]="'agoNumber'+id"
+                        title="Ago"
+                        placeholder="1"
+                        i18n-title
+                        [min]="0"
+                        class="form-control input-md"
+                        [(ngModel)]="AsDatePatternQuery.agoNumber"
+                        (ngModelChange)="onChange()"
+                        type="number">
+                    }
+                    <select class="form-select rounded-2"
+                      [(ngModel)]="AsDatePatternQuery.frequency"
+                      (ngModelChange)="onChange()"
+                      [id]="'date_pattern-select'+id"
+                      [name]="'date_pattern-select'+id"
+                      title="Date Pattern"
+                      required>
+                      <option [ngValue]="DatePatternFrequency.days_ago" i18n>Day(s) ago</option>
+                      <option [ngValue]="DatePatternFrequency.weeks_ago" i18n>Week(s) ago</option>
+                      <option [ngValue]="DatePatternFrequency.months_ago" i18n>Month(s) ago</option>
+                      <option [ngValue]="DatePatternFrequency.years_ago" i18n>Year(s) ago</option>
+                      <option [ngValue]="DatePatternFrequency.every_week" i18n>Every week</option>
+                      <option [ngValue]="DatePatternFrequency.every_month" i18n>Every Month</option>
+                      <option [ngValue]="DatePatternFrequency.every_year" i18n>Every year</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            }
+          }
+          <div class="col-2 col-lg-1 align-self-center">
+            <button [ngClass]="'btn-danger'"
+              class="btn  w-auto float-end"
+              (click)="deleteItem()">
+              <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+            </button>
+          </div>
+        }
+      </div>
+    }

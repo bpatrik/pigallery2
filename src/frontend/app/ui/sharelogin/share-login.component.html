@@ -7,38 +7,39 @@
   </div>
   <div class="row card align-self-center">
     <div class="card-body">
-      <div *ngIf="!(shareService.sharingIsValid | async)"
-           class="h3 text-center text-danger" i18n>Unknown sharing key.
+      @if (!(shareService.sharingIsValid | async)) {
+        <div
+          class="h3 text-center text-danger" i18n>Unknown sharing key.
       </div>
-      <form *ngIf="(shareService.sharingIsValid | async)"
-            name="form" id="form" class="form-horizontal" #LoginForm="ngForm" (submit)="onLogin()">
-        <div class="error-message" [hidden]="loginError==false" i18n>Wrong password</div>
-
-
-        <div class="input-group mb-3">
-          <div class="input-group-text"><ng-icon name="ionLockClosedOutline"></ng-icon></div>
-          <input type="password"
-                 i18n-placeholder
-                 class="form-control"
-                 name="password"
-                 id="password"
-                 placeholder="Password"
-                 autocomplete="login-password"
-                 autocorrect="off"
-                 autocapitalize="none"
-                 [(ngModel)]="password"
-                 required>
-        </div>
-
-        <div class="col-sm-12 controls d-grid gap-2">
-          <button class="btn btn-primary btn-lg"
-                  id="button-share-login"
-                  [disabled]="!LoginForm.form.valid || inProgress"
-                  type="submit"
-                  name="action" i18n>Enter
+      }
+      @if ((shareService.sharingIsValid | async)) {
+        <form
+          name="form" id="form" class="form-horizontal" #LoginForm="ngForm" (submit)="onLogin()">
+          <div class="error-message" [hidden]="loginError==false" i18n>Wrong password</div>
+          <div class="input-group mb-3">
+            <div class="input-group-text"><ng-icon name="ionLockClosedOutline"></ng-icon></div>
+            <input type="password"
+              i18n-placeholder
+              class="form-control"
+              name="password"
+              id="password"
+              placeholder="Password"
+              autocomplete="login-password"
+              autocorrect="off"
+              autocapitalize="none"
+              [(ngModel)]="password"
+              required>
+          </div>
+          <div class="col-sm-12 controls d-grid gap-2">
+            <button class="btn btn-primary btn-lg"
+              id="button-share-login"
+              [disabled]="!LoginForm.form.valid || inProgress"
+              type="submit"
+              name="action" i18n>Enter
           </button>
-        </div>
-      </form>
+          </div>
+        </form>
+      }
 
     </div>
   </div>

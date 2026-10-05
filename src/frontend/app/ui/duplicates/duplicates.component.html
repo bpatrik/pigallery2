@@ -1,39 +1,49 @@
 <app-frame>
 
   <div body class="container">
-    <ng-template [ngIf]="renderedDirGroups">
-      <div class="alert alert-secondary" role="alert" *ngIf=" duplicateCount.photos >0">
-        Listing <strong>{{duplicateCount.pairs}}</strong> duplicates ({{duplicateCount.photos}} photos).
-      </div>
-      <div class="alert alert-secondary" role="alert" *ngIf=" duplicateCount.photos ==0" i18n>
+    @if (renderedDirGroups) {
+      @if ( duplicateCount.photos >0) {
+        <div class="alert alert-secondary" role="alert">
+          Listing <strong>{{duplicateCount.pairs}}</strong> duplicates ({{duplicateCount.photos}} photos).
+        </div>
+      }
+      @if ( duplicateCount.photos ==0) {
+        <div class="alert alert-secondary" role="alert" i18n>
         No duplicates found
       </div>
-      <div *ngFor="let group of renderedDirGroups">
-        <strong>{{group.name}}</strong>
-        <div *ngFor="let pairs of group.duplicates" class="card">
-          <div class="card-body">
-            <a *ngFor="let media of pairs.media"
-               class="row text-body rounded-2 p-2"
-               [routerLink]="['/gallery', getDirectoryPath(media.directory)]"
-               [queryParams]="queryService.getParams()">
-              <app-duplicates-photo class="col-1 align-self-center" [media]="media"></app-duplicates-photo>
-              <div class="col-6 align-self-center">
-                /{{getDirectoryPath(media.directory)}}/<strong>{{media.name}}</strong>
+      }
+      @for (group of renderedDirGroups; track group) {
+        <div>
+          <strong>{{group.name}}</strong>
+          @for (pairs of group.duplicates; track pairs) {
+            <div class="card">
+              <div class="card-body">
+                @for (media of pairs.media; track media) {
+                  <a
+                    class="row text-body rounded-2 p-2"
+                    [routerLink]="['/gallery', getDirectoryPath(media.directory)]"
+                    [queryParams]="queryService.getParams()">
+                    <app-duplicates-photo class="col-1 align-self-center" [media]="media"></app-duplicates-photo>
+                    <div class="col-6 align-self-center">
+                      /{{getDirectoryPath(media.directory)}}/<strong>{{media.name}}</strong>
+                    </div>
+                    <div class="col-2 align-self-center">
+                      {{media.metadata.fileSize | fileSize}}
+                    </div>
+                    <div class="col-3 align-self-center" [title]="media.metadata.creationDate">
+                      {{ media.metadata.creationDate | date : 'longDate' : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }},
+                      {{ media.metadata.creationDate | date : (media.metadata.creationDateOffset ? 'HH:mm:ss ZZZZZ' : 'HH:mm:ss') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+                    </div>
+                  </a>
+                }
               </div>
-              <div class="col-2 align-self-center">
-                {{media.metadata.fileSize | fileSize}}
-              </div>
-              <div class="col-3 align-self-center" [title]="media.metadata.creationDate">
-                {{ media.metadata.creationDate | date : 'longDate' : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}, 
-                {{ media.metadata.creationDate | date : (media.metadata.creationDateOffset ? 'HH:mm:ss ZZZZZ' : 'HH:mm:ss') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
-              </div>
-            </a>
-          </div>
+            </div>
+          }
         </div>
-      </div>
-    </ng-template>
-    <ng-template [ngIf]="!renderedDirGroups">
+      }
+    }
+    @if (!renderedDirGroups) {
       loading
-    </ng-template>
+    }
   </div>
 </app-frame>

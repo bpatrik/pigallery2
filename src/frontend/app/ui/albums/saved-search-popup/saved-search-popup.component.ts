@@ -1,6 +1,5 @@
 import {Component, Input, TemplateRef} from '@angular/core';
-import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
 import { NgIconComponent } from '@ng-icons/core';
 import { JsonPipe } from '@angular/common';

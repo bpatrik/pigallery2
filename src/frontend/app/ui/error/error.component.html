@@ -22,26 +22,28 @@
           <span i18n>help me fix this</span> {{ showHelp ? '<<' : '>>' }}
         </button>
 
-        <div *ngIf="showHelp" class="mt-3 help-section">
-          <h6 i18n>How to debug this?</h6>
-          <p i18n>To enable full debug logging, set the <code>NODE_ENV</code> environment variable to <code>debug</code>.</p>
-          <h6 i18n>How to look at the server logs?</h6>
-          <p i18n>If you're using Docker, you can follow these steps:</p>
-          <ol>
-            <li i18n>List all containers with <code>docker ps -a</code> to get pigallery2's container.</li>
-            <li i18n>Get logs for the pigallery2 container: <code>docker logs -f pigallery2</code></li>
-          </ol>
-          <p i18n>For non-Docker setups, check the standard output of the Node.js process.</p>
-          <h6 i18n>How to look at the client logs?</h6>
-          <p><span i18n>In most browser</span>&nbsp;<a href="https://developer.chrome.com/docs/devtools/open" i18n>right->click inspect</a>&nbsp;<span i18n>should bring up the developer console.</span></p>
-          <hr>
-          <p i18n>If you're still stuck, please
+        @if (showHelp) {
+          <div class="mt-3 help-section">
+            <h6 i18n>How to debug this?</h6>
+            <p i18n>To enable full debug logging, set the <code>NODE_ENV</code> environment variable to <code>debug</code>.</p>
+            <h6 i18n>How to look at the server logs?</h6>
+            <p i18n>If you're using Docker, you can follow these steps:</p>
+            <ol>
+              <li i18n>List all containers with <code>docker ps -a</code> to get pigallery2's container.</li>
+              <li i18n>Get logs for the pigallery2 container: <code>docker logs -f pigallery2</code></li>
+            </ol>
+            <p i18n>For non-Docker setups, check the standard output of the Node.js process.</p>
+            <h6 i18n>How to look at the client logs?</h6>
+            <p><span i18n>In most browser</span>&nbsp;<a href="https://developer.chrome.com/docs/devtools/open" i18n>right->click inspect</a>&nbsp;<span i18n>should bring up the developer console.</span></p>
+            <hr>
+              <p i18n>If you're still stuck, please
             <a href="https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md" target="_blank" rel="noopener">
               report the issue on GitHub
             </a>.
           </p>
+            </div>
+          }
         </div>
       </div>
     </div>
   </div>
-</div>

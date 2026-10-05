@@ -1,29 +1,34 @@
 <app-frame>
 
   <div body #container class="container-fluid">
-    <app-album *ngFor="let album of albumsService.albums | async"
-               [album]="album"
-               [size]="size"></app-album>
+    @for (album of albumsService.albums | async; track album) {
+      <app-album
+        [album]="album"
+      [size]="size"></app-album>
+    }
 
-    <div class="add-saved-search btn btn-secondary"
-         *ngIf="CanCreateAlbum"
-         [style.width.px]="size"
-         [style.height.px]="size"
-         (click)="openModal(modal)">
-      <div class="text">
-        <ng-icon name="ionAddOutline" class="mb-2"></ng-icon>
-        <span i18n>Add saved search</span>
+    @if (CanCreateAlbum) {
+      <div class="add-saved-search btn btn-secondary"
+        [style.width.px]="size"
+        [style.height.px]="size"
+        (click)="openModal(modal)">
+        <div class="text">
+          <ng-icon name="ionAddOutline" class="mb-2"></ng-icon>
+          <span i18n>Add saved search</span>
+        </div>
       </div>
-    </div>
+    }
 
-    <div class="d-flex no-item-msg"
-         *ngIf="(albumsService.albums | async) && (albumsService.albums | async).length == 0">
-      <div class="flex-fill">
-        <h2>:(
-          <ng-container i18n>No albums to show.</ng-container>
-        </h2>
+    @if ((albumsService.albums | async) && (albumsService.albums | async).length == 0) {
+      <div class="d-flex no-item-msg"
+        >
+        <div class="flex-fill">
+          <h2>:(
+            <ng-container i18n>No albums to show.</ng-container>
+          </h2>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </app-frame>
 
@@ -65,8 +70,8 @@
           [savedSearchDTO]="savedSearch">
         </app-saved-search-popup-btn>
         <button class="btn btn-primary" type="button"
-                [disabled]="savedSearch.searchQuery.value == ''"
-                (click)="saveSearch()">
+          [disabled]="savedSearch.searchQuery.value == ''"
+          (click)="saveSearch()">
           <ng-icon name="ionSaveOutline" class="me-1"></ng-icon><span i18n>Save</span>
         </button>
       </div>

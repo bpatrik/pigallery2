@@ -17,7 +17,7 @@ import {AuthenticationService} from '../../../../model/network/authentication.se
 import {LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';
 import {ThemeService} from '../../../../model/theme.service';
 import {ContentLoaderService} from '../../contentLoader.service';
-import {NgIf, NgFor, NgSwitch, NgSwitchCase, DatePipe} from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {RouterLink} from '@angular/router';
 import {LeafletModule} from '@bluehalo/ngx-leaflet';
@@ -30,17 +30,13 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
   styleUrls: ['./info-panel.lightbox.gallery.component.css'],
   templateUrl: './info-panel.lightbox.gallery.component.html',
   imports: [
-    NgIf,
     NgIconComponent,
     RouterLink,
-    NgFor,
-    NgSwitch,
-    NgSwitchCase,
     LeafletModule,
     DatePipe,
     DurationPipe,
-    FileSizePipe,
-  ]
+    FileSizePipe
+]
 })
 export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   @Input() media: MediaDTO;

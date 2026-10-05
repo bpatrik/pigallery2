@@ -22,7 +22,7 @@ import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationError
 import {SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
 import {SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
-import { NgFor, NgIf, NgSwitch, NgSwitchCase, AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { JobButtonComponent } from './button/job-button.settings.component';
@@ -49,23 +49,19 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
         },
     ],
     imports: [
-        NgFor,
-        NgIf,
-        PopoverDirective,
-        NgIconComponent,
-        NgSwitch,
-        NgSwitchCase,
-        JobButtonComponent,
-        FormsModule,
-        TimeStampDatePickerComponent,
-        TimeStampTimePickerComponent,
-        GallerySearchFieldComponent,
-        SortingMethodSettingsEntryComponent,
-        JobProgressComponent,
-        ModalDirective,
-        AsyncPipe,
-        DatePipe,
-    ]
+    PopoverDirective,
+    NgIconComponent,
+    JobButtonComponent,
+    FormsModule,
+    TimeStampDatePickerComponent,
+    TimeStampTimePickerComponent,
+    GallerySearchFieldComponent,
+    SortingMethodSettingsEntryComponent,
+    JobProgressComponent,
+    ModalDirective,
+    AsyncPipe,
+    DatePipe
+]
 })
 export class WorkflowComponent implements ControlValueAccessor, Validator, OnInit, OnDestroy {
 

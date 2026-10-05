@@ -6,7 +6,7 @@ import {map} from 'rxjs/operators';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
-import { NgFor, NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { FaceComponent } from './face/face.component';
 import {SortByDirectionalTypes} from '../../../../common/entities/SortingMethods';
 import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
@@ -16,13 +16,11 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
     templateUrl: './faces.component.html',
     styleUrls: ['./faces.component.css'],
     imports: [
-        FrameComponent,
-        NgFor,
-        FaceComponent,
-        NgIf,
-        AsyncPipe,
-        FacesNavigatorComponent,
-    ]
+    FrameComponent,
+    FaceComponent,
+    AsyncPipe,
+    FacesNavigatorComponent
+]
 })
 export class FacesComponent implements OnInit {
   @ViewChild('container', {static: true}) container: ElementRef;

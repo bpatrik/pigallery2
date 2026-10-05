@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {FacesService} from '../faces.service';
 import {SortByDirectionalTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
-import {NgFor} from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../utils/sorting-method-icon/sorting-method-icon.component';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
@@ -13,14 +13,13 @@ import {StringifySortingMethod} from '../../../pipes/StringifySortingMethod';
   styleUrls: ['./navigator.faces.component.css'],
   templateUrl: './navigator.faces.component.html',
   imports: [
-    NgFor,
     NgIconComponent,
     BsDropdownDirective,
     BsDropdownToggleDirective,
     SortingMethodIconComponent,
     BsDropdownMenuDirective,
-    StringifySortingMethod,
-  ]
+    StringifySortingMethod
+]
 })
 export class FacesNavigatorComponent {
   public readonly sortingByTypes: { key: number; value: string }[] = [];

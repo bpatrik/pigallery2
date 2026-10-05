@@ -2,77 +2,88 @@
 <app-frame [showSearch]="showSearchBar" [showShare]="showShare">
 
   <ng-container navbar>
-    <li class="nav-item navbar-text me-2" *ngIf="countDown">
-      <span>
-        <ng-container i18n>Link availability</ng-container>
-        : {{ countDown.day }}
-        <ng-container i18n>days</ng-container>
-        ,
-        {{ ("0" + countDown.hour).slice(-2) }}:{{ ("0" + countDown.minute).slice(-2) }}
-        :{{ ("0" + countDown.second).slice(-2) }}
-      </span>
-    </li>
+    @if (countDown) {
+      <li class="nav-item navbar-text me-2">
+        <span>
+          <ng-container i18n>Link availability</ng-container>
+          : {{ countDown.day }}
+          <ng-container i18n>days</ng-container>
+          ,
+          {{ ("0" + countDown.hour).slice(-2) }}:{{ ("0" + countDown.minute).slice(-2) }}
+          :{{ ("0" + countDown.second).slice(-2) }}
+        </span>
+      </li>
+    }
   </ng-container>
 
   <ng-container navbar-menu>
-    <li role="menuitem" *ngIf="showRandomPhotoBuilder">
-      <app-gallery-random-query-builder></app-gallery-random-query-builder>
-    </li>
-    <li role="menuitem" *ngIf="showRandomPhotoBuilder">
-      <app-gallery-photo-frame-builder></app-gallery-photo-frame-builder>
-    </li>
+    @if (showRandomPhotoBuilder) {
+      <li role="menuitem">
+        <app-gallery-random-query-builder></app-gallery-random-query-builder>
+      </li>
+    }
+    @if (showRandomPhotoBuilder) {
+      <li role="menuitem">
+        <app-gallery-photo-frame-builder></app-gallery-photo-frame-builder>
+      </li>
+    }
   </ng-container>
 
 
   <app-gallery-navbar navbar-appendix></app-gallery-navbar>
-  <div body class="container-fluid app-gallery-body" *ngIf="ContentWrapper">
-    <app-gallery-uploader [isUploadOver]="isUploadOver"></app-gallery-uploader>
-    <ng-container *ngIf="ContentWrapper.error">
-      <div class="alert alert-danger" role="alert">
-        {{ ContentWrapper.error }}
-      </div>
-    </ng-container>
-    <ng-container *ngIf="!ContentWrapper.error && (ContentWrapper.searchResult || ContentWrapper.directory)">
-      <!-- Show search result overflow -->
-      <div class="alert alert-info" role="alert"
-           *ngIf="ContentWrapper.searchResult && ContentWrapper.searchResult.resultOverflow == true" i18n>
+  @if (ContentWrapper) {
+    <div body class="container-fluid app-gallery-body">
+      <app-gallery-uploader [isUploadOver]="isUploadOver"></app-gallery-uploader>
+      @if (ContentWrapper.error) {
+        <div class="alert alert-danger" role="alert">
+          {{ ContentWrapper.error }}
+        </div>
+      }
+      @if (!ContentWrapper.error && (ContentWrapper.searchResult || ContentWrapper.directory)) {
+        <!-- Show search result overflow -->
+        @if (ContentWrapper.searchResult && ContentWrapper.searchResult.resultOverflow == true) {
+          <div class="alert alert-info" role="alert"
+            i18n>
         Too many results to show. Refine your search.
       </div>
-
-
-      <app-gallery-directories class="directories"
-                               [directories]="directoryContent?.directories || []"></app-gallery-directories>
-
-      <div class="blog-map-row" *ngIf="ShowMarkDown || ShowMap">
-        <app-gallery-blog
-          [style.width]="blogOpen ?  '100%' : 'calc(100% - 100px)'"
-          *ngIf="ShowMarkDown"
-          [(open)]="blogOpen"></app-gallery-blog>
-        <app-gallery-map
-          class="rounded"
-          [class.rounded-start-0]="ShowMarkDown"
-          *ngIf="ShowMap"
-          [photos]="directoryContent?.mediaGroups | photosOnly"
-          [gpxFiles]="directoryContent?.metaFile | gpxFiles"></app-gallery-map>
-      </div>
-      <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
-                        [mediaIdFn]="mediaIdFn"
-                        (mediaOpen)="openMedia($event)"
-                        (missingMedia)="closeMissingMedia()"
-                        [lightbox]="lightbox"></app-gallery-grid>
-
-    </ng-container>
-  </div>
-
-  <div body class="container spinner-container"
-       *ngIf="ContentWrapper && ((!ContentWrapper.directory ||
-        ContentWrapper.directory.isPartial == true)
-       && !ContentWrapper.searchResult
-       && !ContentWrapper.error)">
-    <div class="spinner rounded">
-
+        }
+        <app-gallery-directories class="directories"
+        [directories]="directoryContent?.directories || []"></app-gallery-directories>
+        @if (ShowMarkDown || ShowMap) {
+          <div class="blog-map-row">
+            @if (ShowMarkDown) {
+              <app-gallery-blog
+                [style.width]="blogOpen ?  '100%' : 'calc(100% - 100px)'"
+              [(open)]="blogOpen"></app-gallery-blog>
+            }
+            @if (ShowMap) {
+              <app-gallery-map
+                class="rounded"
+                [class.rounded-start-0]="ShowMarkDown"
+                [photos]="directoryContent?.mediaGroups | photosOnly"
+              [gpxFiles]="directoryContent?.metaFile | gpxFiles"></app-gallery-map>
+            }
+          </div>
+        }
+        <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
+          [mediaIdFn]="mediaIdFn"
+          (mediaOpen)="openMedia($event)"
+          (missingMedia)="closeMissingMedia()"
+        [lightbox]="lightbox"></app-gallery-grid>
+      }
     </div>
-  </div>
+  }
+
+  @if (ContentWrapper && ((!ContentWrapper.directory ||
+    ContentWrapper.directory.isPartial == true)
+    && !ContentWrapper.searchResult
+    && !ContentWrapper.error)) {
+    <div body class="container spinner-container"
+      >
+      <div class="spinner rounded">
+      </div>
+    </div>
+  }
 </app-frame>
 
 <!-- Media button modal (gallery-wide) -->

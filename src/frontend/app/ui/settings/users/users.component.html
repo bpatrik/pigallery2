@@ -1,4 +1,4 @@
-<ng-container *ngIf="Enabled">
+@if (Enabled) {
   <div class="row mt-2">
     <div class="col-auto">
       <h5 i18n>User list</h5>
@@ -7,49 +7,48 @@
       <hr/>
     </div>
   </div>
-
   <div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error }}</div>
-
   <table class="table table-hover">
     <thead>
-    <tr>
-      <th i18n>Name</th>
-      <th i18n>Role</th>
-      <th></th>
-    </tr>
+      <tr>
+        <th i18n>Name</th>
+        <th i18n>Role</th>
+        <th></th>
+      </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let user of users">
-      <td>{{ user.name }}</td>
-      <td>
-        {{ user.role | stringifyRole }}
-      </td>
-      <td>
-        <button [disabled]="!canDeleteUser(user)" (click)="deleteUser(user)"
-                [ngClass]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
-                class="btn float-end ms-2">
-          <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-        </button>
-        <button [disabled]="!canModifyUser(user)" (click)="openEditUser(user)"
-                [ngClass]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
-                class="btn float-end ms-2">
-          <ng-icon name="ionPencil" title="Edit" i18n-title></ng-icon>
-        </button>
-      </td>
-    </tr>
+      @for (user of users; track user) {
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>
+            {{ user.role | stringifyRole }}
+          </td>
+          <td>
+            <button [disabled]="!canDeleteUser(user)" (click)="deleteUser(user)"
+              [ngClass]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
+              class="btn float-end ms-2">
+              <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+            </button>
+            <button [disabled]="!canModifyUser(user)" (click)="openEditUser(user)"
+              [ngClass]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
+              class="btn float-end ms-2">
+              <ng-icon name="ionPencil" title="Edit" i18n-title></ng-icon>
+            </button>
+          </td>
+        </tr>
+      }
     </tbody>
   </table>
-
   <button class="btn btn-primary float-end"
-          (click)="initNewUser()">
+    (click)="initNewUser()">
     <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
     <span i18n>Add user</span>
   </button>
-</ng-container>
+}
 
 <!-- Modal -->
 <div bsModal #userModal="bs-modal" class="modal fade" id="userModal" tabindex="-1" role="dialog"
-     aria-labelledby="userModalLabel">
+  aria-labelledby="userModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -60,22 +59,26 @@
       <form #NewUserForm="ngForm">
         <div class="modal-body">
           <input type="text" class="form-control" i18n-placeholder placeholder="Username"
-                 [(ngModel)]="newUser.name" name="name" required>
+            [(ngModel)]="newUser.name" name="name" required>
           <input type="password" class="form-control" i18n-placeholder placeholder="Password"
-                 [(ngModel)]="newUser.password" name="password" autocomplete="off" required>
+            [(ngModel)]="newUser.password" name="password" autocomplete="off" required>
           <input type="password" class="form-control mt-2" i18n-placeholder placeholder="Confirm Password"
-                 [(ngModel)]="newUserPasswordConfirm" name="passwordConfirm" autocomplete="off" required>
-          <div class="text-danger small mt-1" *ngIf="NewUserForm.form.dirty && newUserPasswordsMismatch" i18n>Passwords do not match.</div>
+            [(ngModel)]="newUserPasswordConfirm" name="passwordConfirm" autocomplete="off" required>
+          @if (NewUserForm.form.dirty && newUserPasswordsMismatch) {
+            <div class="text-danger small mt-1" i18n>Passwords do not match.</div>
+          }
           <select class="form-select mt-2" [(ngModel)]="newUser.role" name="role" required>
-            <option *ngFor="let repository of userRoles" [value]="repository.key">{{ repository.value }}
-            </option>
+            @for (repository of userRoles; track repository) {
+              <option [value]="repository.key">{{ repository.value }}
+              </option>
+            }
           </select>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="userModal.hide()" i18n>Close</button>
           <button type="button" class="btn btn-primary" data-dismiss="modal"
-                  (click)="addNewUser()"
-                  [disabled]="!NewUserForm.form.valid || newUserPasswordsMismatch" i18n>Add User
+            (click)="addNewUser()"
+            [disabled]="!NewUserForm.form.valid || newUserPasswordsMismatch" i18n>Add User
           </button>
         </div>
       </form>
@@ -85,7 +88,7 @@
 
 <!-- Edit User Modal -->
 <div bsModal #editUserModal="bs-modal" class="modal fade" id="editUserModal" tabindex="-1" role="dialog"
-     aria-labelledby="editUserModalLabel">
+  aria-labelledby="editUserModalLabel">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -97,64 +100,68 @@
         </button>
       </div>
       <form #EditUserForm="ngForm">
-        <div class="modal-body" *ngIf="editUser">
-          <div class="mb-3">
-            <label class="form-label" for="editRole" i18n>Role</label>
-            <select id="editRole" [disabled]="!canModifyRole(editOriginalUser)" class="form-select"
-                    [(ngModel)]="editUser.role" name="editRole" required>
-              <option *ngFor="let repository of userRoles" [value]="repository.key">{{ repository.value }}</option>
-            </select>
-            <small class="text-muted" i18n>Controls the permissions of the user.</small>
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label" for="newPassword" i18n>New password</label>
-            <input id="newPassword" type="password" class="form-control" i18n-placeholder
-                   placeholder="Leave blank to keep password"
-                   [(ngModel)]="newPassword" name="newPassword" autocomplete="off">
-            <input id="confirmNewPassword" type="password" class="form-control mt-2" i18n-placeholder
-                   placeholder="Confirm new password"
-                   [(ngModel)]="confirmNewPassword" name="confirmNewPassword" autocomplete="off">
-            <div class="text-danger small mt-1" *ngIf="editPasswordsMismatch" i18n>Passwords do not match.</div>
-            <small class="text-muted" i18n>Leave empty to keep the current password.</small>
-          </div>
-
-          <div class="form-check form-switch my-3">
-            <input class="form-check-input" type="checkbox" id="overrideAllowBlockList"
-                   [(ngModel)]="editSettings.overrideAllowBlockList" name="overrideAllowBlockList">
-            <label class="form-check-label" for="overrideAllowBlockList" i18n>Override allow/block list</label>
-            <div><small class="text-muted" i18n>Enable to apply the queries below to limit what this user can
+        @if (editUser) {
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label" for="editRole" i18n>Role</label>
+              <select id="editRole" [disabled]="!canModifyRole(editOriginalUser)" class="form-select"
+                [(ngModel)]="editUser.role" name="editRole" required>
+                @for (repository of userRoles; track repository) {
+                  <option [value]="repository.key">{{ repository.value }}</option>
+                }
+              </select>
+              <small class="text-muted" i18n>Controls the permissions of the user.</small>
+            </div>
+            <div class="mb-2">
+              <label class="form-label" for="newPassword" i18n>New password</label>
+              <input id="newPassword" type="password" class="form-control" i18n-placeholder
+                placeholder="Leave blank to keep password"
+                [(ngModel)]="newPassword" name="newPassword" autocomplete="off">
+              <input id="confirmNewPassword" type="password" class="form-control mt-2" i18n-placeholder
+                placeholder="Confirm new password"
+                [(ngModel)]="confirmNewPassword" name="confirmNewPassword" autocomplete="off">
+              @if (editPasswordsMismatch) {
+                <div class="text-danger small mt-1" i18n>Passwords do not match.</div>
+              }
+              <small class="text-muted" i18n>Leave empty to keep the current password.</small>
+            </div>
+            <div class="form-check form-switch my-3">
+              <input class="form-check-input" type="checkbox" id="overrideAllowBlockList"
+                [(ngModel)]="editSettings.overrideAllowBlockList" name="overrideAllowBlockList">
+              <label class="form-check-label" for="overrideAllowBlockList" i18n>Override allow/block list</label>
+              <div><small class="text-muted" i18n>Enable to apply the queries below to limit what this user can
               see.</small></div>
-          </div>
-
-          <div *ngIf="editSettings.overrideAllowBlockList">
-            <div class="mb-3">
-              <label class="form-label" i18n>Allowed query</label>
-              <app-gallery-search-field
-                name="allowQuery"
-                [(ngModel)]="editSettings.allowQuery"
-                i18n-placeholder
-                placeholder="Allowed query">
-              </app-gallery-search-field>
-              <small class="text-muted" i18n>Only items matching this query will be visible.</small>
             </div>
-
-            <div class="mb-3">
-              <label class="form-label" i18n>Blocked query</label>
-              <app-gallery-search-field
-                name="blockQuery"
-                [(ngModel)]="editSettings.blockQuery"
-                placeholder="Blocked query"
-                i18n-placeholder>
-              </app-gallery-search-field>
-              <small class="text-muted" i18n>Items matching this query will be hidden.</small>
-            </div>
+            @if (editSettings.overrideAllowBlockList) {
+              <div>
+                <div class="mb-3">
+                  <label class="form-label" i18n>Allowed query</label>
+                  <app-gallery-search-field
+                    name="allowQuery"
+                    [(ngModel)]="editSettings.allowQuery"
+                    i18n-placeholder
+                    placeholder="Allowed query">
+                  </app-gallery-search-field>
+                  <small class="text-muted" i18n>Only items matching this query will be visible.</small>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label" i18n>Blocked query</label>
+                  <app-gallery-search-field
+                    name="blockQuery"
+                    [(ngModel)]="editSettings.blockQuery"
+                    placeholder="Blocked query"
+                    i18n-placeholder>
+                  </app-gallery-search-field>
+                  <small class="text-muted" i18n>Items matching this query will be hidden.</small>
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="editUserModal.hide()" i18n>Close</button>
           <button type="button" class="btn btn-primary" data-dismiss="modal"
-                  (click)="saveEditUser()" [disabled]="editPasswordsMismatch">
+            (click)="saveEditUser()" [disabled]="editPasswordsMismatch">
             <ng-container i18n>Save changes</ng-container>
           </button>
         </div>

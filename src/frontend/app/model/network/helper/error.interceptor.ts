@@ -19,16 +19,22 @@ export class ErrorInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<any>> {
     return next.handle(request).pipe(
       catchError((err) => {
-        if (err.status === 401) {
+        if (
+          err.status === 401 &&
+          this.authenticationService.isAuthenticated() &&
+          !request.url.includes('/user/me') &&
+          !request.url.includes('/login') &&
+          !request.url.includes('/logout')
+        ) {
           // auto logout if 401 response returned from server
           this.authenticationService.logout();
         }
-        if (err.status === 500 && err.error.error.code === ErrorCodes.INTERNAL) {
+        if (err.status === 500 && err.error?.error?.code === ErrorCodes.INTERNAL) {
           // Unknown server error
           this.navigationService.toError();
         }
 
-        const error = err.error.error || err.error.message || err.statusText;
+        const error = err.error?.error || err.error?.message || err.statusText;
         return throwError(error);
       })
     );

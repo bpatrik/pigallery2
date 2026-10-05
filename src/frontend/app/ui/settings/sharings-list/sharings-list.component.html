@@ -1,4 +1,4 @@
-<ng-container *ngIf="Enabled">
+@if (Enabled) {
   <div class="row mt-2">
     <div class="col-auto">
       <h5 i18n>Active shares</h5>
@@ -7,36 +7,37 @@
       <hr/>
     </div>
   </div>
-  <ng-container *ngIf="shares && shares.length >0">
+  @if (shares && shares.length >0) {
     <table class="table table-hover">
       <thead>
-      <tr>
-        <th i18n>Key</th>
-        <th i18n>Sharing</th>
-        <th i18n>Creator</th>
-        <th i18n>Expires</th>
-        <th></th>
-      </tr>
+        <tr>
+          <th i18n>Key</th>
+          <th i18n>Sharing</th>
+          <th i18n>Creator</th>
+          <th i18n>Expires</th>
+          <th></th>
+        </tr>
       </thead>
       <tbody>
-      <tr *ngFor="let share of shares">
-        <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
-        <td>{{share.searchQuery | searchQuery}}</td>
-        <td>{{share.creator.name}}</td>
-        <td>{{share.expires | date}}</td>
-        <td>
-          <button (click)="deleteSharing(share)" class="btn btn-danger float-end">
-            <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-          </button>
-        </td>
-      </tr>
+        @for (share of shares; track share) {
+          <tr>
+            <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
+            <td>{{share.searchQuery | searchQuery}}</td>
+            <td>{{share.creator.name}}</td>
+            <td>{{share.expires | date}}</td>
+            <td>
+              <button (click)="deleteSharing(share)" class="btn btn-danger float-end">
+                <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+              </button>
+            </td>
+          </tr>
+        }
       </tbody>
     </table>
-  </ng-container>
-
-  <ng-container *ngIf="!shares || shares.length  == 0">
+  }
+  @if (!shares || shares.length  == 0) {
     <div class="panel-info" i18n>
       No sharing was created.
     </div>
-  </ng-container>
-</ng-container>
+  }
+}

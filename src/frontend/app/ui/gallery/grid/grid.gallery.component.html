@@ -1,43 +1,51 @@
 <div #gridContainer [style.min-height]="containerMinHeight+'px'"
-     [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
-  <ng-container *ngIf="mediaToRender?.length > 0">
-    <ng-container *ngFor="let group of mediaToRender">
+  [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
+  @if (mediaToRender?.length > 0) {
+    @for (group of mediaToRender; track group) {
       <div class="d-inline-block media-group">
-        <ng-container *ngIf="group.name">
-          <ng-container [ngSwitch]="HeaderMethod">
-            <div *ngSwitchCase="GroupByTypes.Rating" class="mt-4 mb-3">
-              <h6 class="ms-2">
-                <ng-icon *ngFor="let i of [0,1,2,3,4]"
-                         [name]="(i < (group.name | parseInt)) ? 'ionStar' : 'ionStarOutline'"></ng-icon>
-              </h6>
-            </div>
-            <div *ngSwitchCase="GroupByTypes.PersonCount" class="mt-4 mb-3">
-              <h6 class="ms-2">{{ group.name }}
-                <ng-icon class="ms-1" name="ionPeopleOutline"></ng-icon>
-              </h6>
-            </div>
-            <div *ngSwitchDefault class="mt-4 mb-3"><h6 class="ms-2">{{ group.name }}</h6></div>
-          </ng-container>
-        </ng-container>
-
-        <ng-container *ngIf="showInlineBlog && group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0">
+        @if (group.name) {
+          @switch (HeaderMethod) {
+            @case (GroupByTypes.Rating) {
+              <div class="mt-4 mb-3">
+                <h6 class="ms-2">
+                  @for (i of [0,1,2,3,4]; track i) {
+                    <ng-icon
+                    [name]="(i < (group.name | parseInt)) ? 'ionStar' : 'ionStarOutline'"></ng-icon>
+                  }
+                </h6>
+              </div>
+            }
+            @case (GroupByTypes.PersonCount) {
+              <div class="mt-4 mb-3">
+                <h6 class="ms-2">{{ group.name }}
+                  <ng-icon class="ms-1" name="ionPeopleOutline"></ng-icon>
+                </h6>
+              </div>
+            }
+            @default {
+              <div class="mt-4 mb-3"><h6 class="ms-2">{{ group.name }}</h6></div>
+            }
+          }
+        }
+        @if (showInlineBlog && group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0) {
           <app-gallery-blog
             [date]="group.date"
             [open]="blogOpen">
           </app-gallery-blog>
-        </ng-container>
+        }
         <div class="media-grid">
-          <app-gallery-grid-photo
-            *ngFor="let gridPhoto of group.media"
-            (click)="photoClicked(gridPhoto.media)"
-            [gridMedia]="gridPhoto"
-            [style.width.px]="gridPhoto.renderWidth"
-            [style.height.px]="gridPhoto.renderHeight"
-            [style.margin.px]="IMAGE_MARGIN">
-          </app-gallery-grid-photo>
+          @for (gridPhoto of group.media; track gridPhoto) {
+            <app-gallery-grid-photo
+              (click)="photoClicked(gridPhoto.media)"
+              [gridMedia]="gridPhoto"
+              [style.width.px]="gridPhoto.renderWidth"
+              [style.height.px]="gridPhoto.renderHeight"
+              [style.margin.px]="IMAGE_MARGIN">
+            </app-gallery-grid-photo>
+          }
         </div>
       </div>
-    </ng-container>
-  </ng-container>
+    }
+  }
 
 </div>

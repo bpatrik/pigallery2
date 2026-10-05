@@ -20,7 +20,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
-import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { GallerySearchFieldComponent } from '../../../gallery/search/search-field/search-field.gallery.component';
 import { NgIconComponent } from '@ng-icons/core';
 import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-method.settings-entry.component';
@@ -65,19 +65,15 @@ interface IState {
         },
     ],
     imports: [
-        NgIf,
-        NgSwitch,
-        NgSwitchCase,
-        GallerySearchFieldComponent,
-        FormsModule,
-        NgFor,
-        NgIconComponent,
-        SortingMethodSettingsEntryComponent,
-        WorkflowComponent,
-        NgClass,
-        PopoverDirective,
-        SafeHtmlPipe,
-    ]
+    GallerySearchFieldComponent,
+    FormsModule,
+    NgIconComponent,
+    SortingMethodSettingsEntryComponent,
+    WorkflowComponent,
+    NgClass,
+    PopoverDirective,
+    SafeHtmlPipe
+]
 })
 export class SettingsEntryComponent
     implements ControlValueAccessor, Validator, OnChanges {

@@ -1,8 +1,7 @@
 import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {NotificationService} from '../../../model/notification.service';
-import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
@@ -10,7 +9,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { ClipboardModule } from 'ngx-clipboard';
-import { NgFor, NgIf } from '@angular/common';
+
 import { StringifyEnum } from '../../../pipes/StringifyEnum';
 import { LightBoxTitleTexts } from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
@@ -20,13 +19,11 @@ import {Utils} from '../../../../../common/Utils';
     templateUrl: './photo-frame-builder.gallery.component.html',
     styleUrls: ['./photo-frame-builder.gallery.component.css'],
     imports: [
-        NgIconComponent,
-        FormsModule,
-        ClipboardModule,
-        NgFor,
-        NgIf,
-        StringifyEnum,
-    ]
+    NgIconComponent,
+    FormsModule,
+    ClipboardModule,
+    StringifyEnum
+]
   })
   export class PhotoFrameBuilderGalleryComponent implements OnInit, OnDestroy {
     enabled = true;

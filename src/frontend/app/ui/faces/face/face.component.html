@@ -1,27 +1,30 @@
 <a [routerLink]="['/search', searchQueryDTOstr]"
-   style="display: inline-block;">
+  style="display: inline-block;">
 
 
   <div class="photo-container rounded overflow-hidden"
-       [style.width.px]="size"
-       [style.height.px]="size">
+    [style.width.px]="size"
+    [style.height.px]="size">
 
-    <div class="photo"
-         *ngIf="thumbnail && thumbnail.Available"
-         [style.background-image]="getSanitizedThUrl()"></div>
+    @if (thumbnail && thumbnail.Available) {
+      <div class="photo"
+      [style.background-image]="getSanitizedThUrl()"></div>
+    }
 
-    <ng-icon *ngIf="!thumbnail || !thumbnail.Available"
-             class="no-image" name="ionPersonOutline"></ng-icon>
+    @if (!thumbnail || !thumbnail.Available) {
+      <ng-icon
+      class="no-image" name="ionPersonOutline"></ng-icon>
+    }
   </div>
 
 
   <!--Info box -->
   <div class="info rounded-bottom">
     <ng-icon class="star"
-             [name]="person.isFavourite ? 'ionStar' : 'ionStarOutline'"
-             [class.favourite]="person.isFavourite"
-             [class.clickable]="CanUpdate"
-             (click)="CanUpdate && toggleFavourite($event)"
+      [name]="person.isFavourite ? 'ionStar' : 'ionStarOutline'"
+      [class.favourite]="person.isFavourite"
+      [class.clickable]="CanUpdate"
+      (click)="CanUpdate && toggleFavourite($event)"
     ></ng-icon>
     {{person.name}} ({{person.cache?.count}})
 

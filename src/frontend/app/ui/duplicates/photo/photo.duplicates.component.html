@@ -1,17 +1,21 @@
 <div class="photo-container">
   <ng-template #popTemplate>
-    <img alt="{{media.name}}"
-         class="big-icon"
-         [src]="thumbnail.Src"
-         *ngIf="thumbnail.Available">
+    @if (thumbnail.Available) {
+      <img alt="{{media.name}}"
+        class="big-icon"
+        [src]="thumbnail.Src"
+        >
+    }
   </ng-template>
 
-  <img alt="{{media.name}}"
-       class="icon"
-       [popover]="popTemplate"
-       container="body"
-       triggers="mouseenter:mouseleave"
-       [src]="thumbnail.Src"
-       *ngIf="thumbnail.Available">
+  @if (thumbnail.Available) {
+    <img alt="{{media.name}}"
+      class="icon"
+      [popover]="popTemplate"
+      container="body"
+      triggers="mouseenter:mouseleave"
+      [src]="thumbnail.Src"
+      >
+  }
 
 </div>

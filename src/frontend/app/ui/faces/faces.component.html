@@ -3,21 +3,29 @@
   <app-faces-navbar navbar-appendix></app-faces-navbar>
 
   <div body #container class="container-fluid">
-    <app-face *ngFor="let person of favourites | async"
-              [person]="person"
-              [size]="size"></app-face>
-    <hr *ngIf="(nonFavourites | async).length > 0"/>
-    <app-face *ngFor="let person of nonFavourites | async"
-              [person]="person"
-              [size]="size"></app-face>
+    @for (person of favourites | async; track person) {
+      <app-face
+        [person]="person"
+      [size]="size"></app-face>
+    }
+    @if ((nonFavourites | async).length > 0) {
+      <hr/>
+    }
+    @for (person of nonFavourites | async; track person) {
+      <app-face
+        [person]="person"
+      [size]="size"></app-face>
+    }
 
-    <div class="d-flex no-face-msg"
-         *ngIf="(nonFavourites | async).length == 0 && (favourites | async).length == 0">
-      <div class="flex-fill">
-        <h2>:(
-          <ng-container i18n>No faces to show.</ng-container>
-        </h2>
+    @if ((nonFavourites | async).length == 0 && (favourites | async).length == 0) {
+      <div class="d-flex no-face-msg"
+        >
+        <div class="flex-fill">
+          <h2>:(
+            <ng-container i18n>No faces to show.</ng-container>
+          </h2>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </app-frame>

@@ -1,198 +1,236 @@
 <ngx-loading-bar [includeSpinner]="false" color="#337ab7" height="3px"></ngx-loading-bar>
 <div #navContainer class="navbar-container auto-hide-navbar"
-     [class.navbar-keep-top]="navbarKeepTop || fixNavbarOnTop"
-     [class.hide-navbar]="!navbarKeepTop && shouldHideNavbar"
-     [class.animate-navbar]="animateNavbar">
+  [class.navbar-keep-top]="navbarKeepTop || fixNavbarOnTop"
+  [class.hide-navbar]="!navbarKeepTop && shouldHideNavbar"
+  [class.animate-navbar]="animateNavbar">
   <nav class="navbar navbar-expand bg-body">
     <div class="container-fluid">
       <a class="navbar-brand d-none d-sm-block" [routerLink]="['/gallery']"
-         [queryParams]="queryService.getParams()">
+        [queryParams]="queryService.getParams()">
         <app-icon class="d-inline-block align-top me-1" [width]="30" [height]="30"></app-icon>
         <strong class="d-none d-lg-inline-block">{{ title }}</strong>
       </a>
       <div class="collapse navbar-collapse text-center" id="navbarCollapse" [collapse]="collapsed">
         <ul class="navbar-nav mb-0 me-2 text-lg-start d-none d-md-flex">
-          <ng-container *ngFor="let link of navbarLinks">
-            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
-              <a class="nav-link" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')" i18n>Albums</a>
-            </li>
-            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.faces && isFacesAvailable()">
-              <a class="nav-link" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')" i18n>Faces</a>
-            </li>
-            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.gallery && isGalleryAvailable()">
-              <a class="nav-link"
-                 [routerLink]="['/gallery']"
-                 [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')" i18n>Gallery</a>
-            </li>
-            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.timeline && isTimelineAvailable()">
-              <a class="nav-link" [routerLink]="['/timeline']" [class.active]="isLinkActive('/timeline')" i18n>Timeline</a>
-            </li>
-            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.url && isCustomLinksAvailable()">
-              <a class="nav-link" [href]="link.url" [class.active]="isLinkActive(link.url)">{{ link.name }}</a>
-            </li>
-            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.search && isCustomLinksAvailable()">
-              <a class="nav-link" [routerLink]="['/search', getSearchParams(link.SearchQuery)]"
-                 [class.active]="isSearchActive(link.SearchQuery)">{{ link.name }}</a>
-            </li>
-          </ng-container>
+          @for (link of navbarLinks; track link) {
+            @if (link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {
+              <li class="nav-item">
+                <a class="nav-link" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')" i18n>Albums</a>
+              </li>
+            }
+            @if (link.type === NavigationLinkTypes.faces && isFacesAvailable()) {
+              <li class="nav-item">
+                <a class="nav-link" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')" i18n>Faces</a>
+              </li>
+            }
+            @if (link.type === NavigationLinkTypes.gallery && isGalleryAvailable()) {
+              <li class="nav-item">
+                <a class="nav-link"
+                  [routerLink]="['/gallery']"
+                [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')" i18n>Gallery</a>
+              </li>
+            }
+            @if (link.type === NavigationLinkTypes.timeline && isTimelineAvailable()) {
+              <li class="nav-item">
+                <a class="nav-link" [routerLink]="['/timeline']" [class.active]="isLinkActive('/timeline')" i18n>Timeline</a>
+              </li>
+            }
+            @if (link.type === NavigationLinkTypes.url && isCustomLinksAvailable()) {
+              <li class="nav-item">
+                <a class="nav-link" [href]="link.url" [class.active]="isLinkActive(link.url)">{{ link.name }}</a>
+              </li>
+            }
+            @if (link.type === NavigationLinkTypes.search && isCustomLinksAvailable()) {
+              <li class="nav-item">
+                <a class="nav-link" [routerLink]="['/search', getSearchParams(link.SearchQuery)]"
+                [class.active]="isSearchActive(link.SearchQuery)">{{ link.name }}</a>
+              </li>
+            }
+          }
         </ul>
         <div class="text-lg-end w-100">
           <ul class="navbar-nav">
             <li class="flex-grow-1"></li>
             <ng-content select="[navbar]"></ng-content>
-            <li class="nav-item w-100" *ngIf="showSearch">
-              <app-gallery-search></app-gallery-search>
-            </li>
-            <li class="nav-item d-xl-block d-none" *ngIf="showShare">
-              <app-gallery-share></app-gallery-share>
-            </li>
-            <li class="nav-item divider-vertical  d-xl-block d-none"
-                *ngIf="authenticationRequired && user.value && showShare">
-            </li>
-            <ng-container *ngIf="authenticationRequired && user.value">
+            @if (showSearch) {
+              <li class="nav-item w-100">
+                <app-gallery-search></app-gallery-search>
+              </li>
+            }
+            @if (showShare) {
+              <li class="nav-item d-xl-block d-none">
+                <app-gallery-share></app-gallery-share>
+              </li>
+            }
+            @if (authenticationRequired && user.value && showShare) {
+              <li class="nav-item divider-vertical  d-xl-block d-none"
+                >
+              </li>
+            }
+            @if (authenticationRequired && user.value) {
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
-             <span style="white-space: nowrap;">
-               <ng-icon name="ionPersonOutline" class="me-1"></ng-icon><span>{{ user.value.name }}</span>
-              </span>
+                <span style="white-space: nowrap;">
+                  <ng-icon name="ionPersonOutline" class="me-1"></ng-icon><span>{{ user.value.name }}</span>
+                </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
               </li>
-            </ng-container>
+            }
             <li class="nav-item d-xl-block d-none">
-            <span>
-              <app-language #languageSelector class="navbar-btn"></app-language>
-            </span>
+              <span>
+                <app-language #languageSelector class="navbar-btn"></app-language>
+              </span>
             </li>
             <li class="nav-item divider-vertical d-xl-block d-none">
             </li>
             <li class="nav-item dropdown">
               <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom"
-                   [autoClose]="false" container="body">
+                [autoClose]="false" container="body">
                 <button id="button-frame-menu" dropdownToggle
-                        type="button" class="btn btn-tertiary dropdown-toggle"
-                        aria-controls="dropdown-frame-menu">
+                  type="button" class="btn btn-tertiary dropdown-toggle"
+                  aria-controls="dropdown-frame-menu">
                   <ng-icon class="align-text-top" size="1.2em" name="ionMenuOutline"></ng-icon>
-                  <span *ngIf="isAdmin() && notificationService.numberOfNotifications>0"
-                        class="navbar-badge badge text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                  @if (isAdmin() && notificationService.numberOfNotifications>0) {
+                    <span
+                    class="navbar-badge badge text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                  }
                 </button>
                 <ul id="dropdown-frame-menu" *dropdownMenu
-                    #dropdownMenu
-                    class="dropdown-menu dropdown-menu-right"
-                    role="menu" aria-labelledby="button-frame-menu">
+                  #dropdownMenu
+                  class="dropdown-menu dropdown-menu-right"
+                  role="menu" aria-labelledby="button-frame-menu">
 
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">
-                      <ng-container *ngIf="authenticationRequired && user.value">
+                      @if (authenticationRequired && user.value) {
                         <ng-icon name="ionPersonOutline"></ng-icon>
                         <span>{{ user.value.name }}</span>
-                      </ng-container>
+                      }
                       <app-language class="navbar-btn d-inline-block float-end"></app-language>
                     </div>
                   </li>
-                  <li class="nav-item d-xl-none" *ngIf="showShare">
-                    <app-gallery-share [dropDownItem]="true"></app-gallery-share>
-                  </li>
-                  <li role="menuitem" *ngIf="themesEnabled">
-                    <div class="dropdown-item bg-transparent">
-                      <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
-                        <ng-container [ngSwitch]="themeService.mode">
-                          <ng-container *ngSwitchCase="ThemeModes.light">
-                            <ng-icon name="ionSunnyOutline"></ng-icon>
-                            <ng-container i18n>Light</ng-container>
-                          </ng-container>
-                          <ng-container *ngSwitchCase="ThemeModes.dark">
-                            <ng-icon name="ionMoonOutline"></ng-icon>
-                            <ng-container i18n>Dark</ng-container>
-                          </ng-container>
-                          <ng-container *ngSwitchCase="ThemeModes.auto">
-                            <ng-icon name="ionMoonOutline"></ng-icon>
-                            <ng-icon name="ionSunnyOutline" style="margin-left: -0.3rem"></ng-icon>
-                            <ng-container i18n>Auto</ng-container>
-                          </ng-container>
-                        </ng-container>
-                      </button>
-                    </div>
-                  </li>
+                  @if (showShare) {
+                    <li class="nav-item d-xl-none">
+                      <app-gallery-share [dropDownItem]="true"></app-gallery-share>
+                    </li>
+                  }
+                  @if (themesEnabled) {
+                    <li role="menuitem">
+                      <div class="dropdown-item bg-transparent">
+                        <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
+                          @switch (themeService.mode) {
+                            @case (ThemeModes.light) {
+                              <ng-icon name="ionSunnyOutline"></ng-icon>
+                              <ng-container i18n>Light</ng-container>
+                            }
+                            @case (ThemeModes.dark) {
+                              <ng-icon name="ionMoonOutline"></ng-icon>
+                              <ng-container i18n>Dark</ng-container>
+                            }
+                            @case (ThemeModes.auto) {
+                              <ng-icon name="ionMoonOutline"></ng-icon>
+                              <ng-icon name="ionSunnyOutline" style="margin-left: -0.3rem"></ng-icon>
+                              <ng-container i18n>Auto</ng-container>
+                            }
+                          }
+                        </button>
+                      </div>
+                    </li>
+                  }
                   <hr/>
-                  <ng-container *ngFor="let link of navbarLinks">
-                    <li class="nav-item d-md-none"
-                        *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
-                      <a class="dropdown-item" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')">
-                        <ng-icon name="ionAlbumsOutline"></ng-icon>
-                        <ng-container i18n>Albums</ng-container>
-                      </a>
-                    </li>
-                    <li class="nav-item d-md-none"
-                        *ngIf="link.type === NavigationLinkTypes.faces && isFacesAvailable()">
-                      <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')">
-                        <ng-icon name="ionPeopleOutline"></ng-icon>
-                        <ng-container i18n>Faces</ng-container>
-                      </a>
-                    </li>
-                    <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.gallery  && isGalleryAvailable()">
-                      <a class="dropdown-item"
-                         [routerLink]="['/gallery']"
-                         [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')">
-                        <ng-icon name="ionImagesOutline"></ng-icon>
-                        <ng-container i18n>Gallery</ng-container>
-                      </a>
-                    </li>
-                    <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.timeline && isTimelineAvailable()">
-                      <a class="dropdown-item" [routerLink]="['/timeline']" [class.active]="isLinkActive('/timeline')">
-                        <ng-icon name="ionTimeOutline"></ng-icon>
-                        <ng-container i18n>Timeline</ng-container>
-                      </a>
-                    </li>
-                    <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.url  && isCustomLinksAvailable()">
-                      <a class="dropdown-item" [href]="link.url" [class.active]="isLinkActive(link.url)">
-                        <ng-icon name="ionLinkOutline"></ng-icon>
-                        <span>{{ link.name }}</span>
-                      </a>
-                    </li>
-                    <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.search  && isCustomLinksAvailable()">
-                      <a class="dropdown-item" [routerLink]="['/search', getSearchParams(link.SearchQuery)]"
-                         [class.active]="isSearchActive(link.SearchQuery)">
-                        <ng-icon name="ionSearchOutline"></ng-icon>
-                        <span>{{ link.name }}</span>
-                      </a>
-                    </li>
-                  </ng-container>
+                  @for (link of navbarLinks; track link) {
+                    @if (link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {
+                      <li class="nav-item d-md-none"
+                        >
+                        <a class="dropdown-item" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')">
+                          <ng-icon name="ionAlbumsOutline"></ng-icon>
+                          <ng-container i18n>Albums</ng-container>
+                        </a>
+                      </li>
+                    }
+                    @if (link.type === NavigationLinkTypes.faces && isFacesAvailable()) {
+                      <li class="nav-item d-md-none"
+                        >
+                        <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')">
+                          <ng-icon name="ionPeopleOutline"></ng-icon>
+                          <ng-container i18n>Faces</ng-container>
+                        </a>
+                      </li>
+                    }
+                    @if (link.type === NavigationLinkTypes.gallery  && isGalleryAvailable()) {
+                      <li class="nav-item d-md-none">
+                        <a class="dropdown-item"
+                          [routerLink]="['/gallery']"
+                          [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')">
+                          <ng-icon name="ionImagesOutline"></ng-icon>
+                          <ng-container i18n>Gallery</ng-container>
+                        </a>
+                      </li>
+                    }
+                    @if (link.type === NavigationLinkTypes.timeline && isTimelineAvailable()) {
+                      <li class="nav-item d-md-none">
+                        <a class="dropdown-item" [routerLink]="['/timeline']" [class.active]="isLinkActive('/timeline')">
+                          <ng-icon name="ionTimeOutline"></ng-icon>
+                          <ng-container i18n>Timeline</ng-container>
+                        </a>
+                      </li>
+                    }
+                    @if (link.type === NavigationLinkTypes.url  && isCustomLinksAvailable()) {
+                      <li class="nav-item d-md-none">
+                        <a class="dropdown-item" [href]="link.url" [class.active]="isLinkActive(link.url)">
+                          <ng-icon name="ionLinkOutline"></ng-icon>
+                          <span>{{ link.name }}</span>
+                        </a>
+                      </li>
+                    }
+                    @if (link.type === NavigationLinkTypes.search  && isCustomLinksAvailable()) {
+                      <li class="nav-item d-md-none">
+                        <a class="dropdown-item" [routerLink]="['/search', getSearchParams(link.SearchQuery)]"
+                          [class.active]="isSearchActive(link.SearchQuery)">
+                          <ng-icon name="ionSearchOutline"></ng-icon>
+                          <span>{{ link.name }}</span>
+                        </a>
+                      </li>
+                    }
+                  }
                   <hr class="d-md-none"/>
 
                   <li role="button" dropdown [autoClose]="false"
-                      placement="bottom left" container="body">
+                    placement="bottom left" container="body">
                     <a dropdownToggle class="dropdown-item cursor-pointer">
                       <ng-icon name="ionHammerOutline"></ng-icon>
                       <ng-container i18n>Tools</ng-container>
                     </a>
                     <ul class="dropdown-menu"
-                        [style.right.px]="-dropdownMenu.clientWidth"
-                        *dropdownMenu role="menu">
+                      [style.right.px]="-dropdownMenu.clientWidth"
+                      *dropdownMenu role="menu">
                       <ng-content select="[navbar-menu]"></ng-content>
-                      <li role="menuitem" *ngIf="isAdmin()">
-                        <a class="dropdown-item"
-                           [routerLink]="['/duplicates']">
-                          <ng-icon name="ionCopyOutline"></ng-icon>
-                          <ng-container i18n>Duplicates</ng-container>
-                        </a>
-                      </li>
+                      @if (isAdmin()) {
+                        <li role="menuitem">
+                          <a class="dropdown-item"
+                            [routerLink]="['/duplicates']">
+                            <ng-icon name="ionCopyOutline"></ng-icon>
+                            <ng-container i18n>Duplicates</ng-container>
+                          </a>
+                        </li>
+                      }
                       <li role="menuitem">
                         <div class="dropdown-item d-flex justify-content-between">
                           <span title="key: c" i18n-title i18n>Fix navbar</span>
                           <div class="form-check form-switch">
                             <input class="form-check-input"
-                                   type="checkbox"
-                                   role="switch"
-                                   name="fix-navbar"
-                                   id="fix-switch"
-                                   [(ngModel)]="fixNavbarOnTop">
+                              type="checkbox"
+                              role="switch"
+                              name="fix-navbar"
+                              id="fix-switch"
+                              [(ngModel)]="fixNavbarOnTop">
                           </div>
                         </div>
                       </li>
                       <li role="menuitem">
                         <div class="dropdown-item d-flex justify-content-between">
                           <span title="Automatically shows new photos and videos" i18n-title
-                                i18n>Auto update gallery</span>
+                          i18n>Auto update gallery</span>
                           <div class="form-check form-switch">
                             <select
                               class="form-select d-inline-block w-auto"
@@ -215,28 +253,36 @@
                       </li>
                     </ul>
                   </li>
-                  <li role="menuitem" *ngIf="uploadService.canUpload()">
-                    <a class="dropdown-item cursor-pointer" (click)="uploadInput.click()">
-                      <ng-icon name="ionCloudUploadOutline"></ng-icon>
-                      <ng-container i18n>Upload</ng-container>
-                      <input #uploadInput type="file" multiple [style.display]="'none'"
-                             (change)="uploadService.uploadFiles(uploadInput.files); uploadInput.value = ''">
-                    </a>
-                  </li>
-                  <li role="menuitem" *ngIf="isAdmin()">
-                    <a class="dropdown-item" [routerLink]="['/admin']">
-                      <ng-icon name="ionSettingsOutline"></ng-icon>
-                      <span *ngIf="notificationService.numberOfNotifications>0"
-                            class="badge rounded-pill position-absolute p-0 text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
-                      <ng-container i18n>Settings</ng-container>
-                    </a>
-                  </li>
-                  <li role="menuitem" *ngIf="authenticationRequired">
-                    <button class="dropdown-item btn btn-link" (click)="logout()">
-                      <ng-icon name="ionLogOutOutline"></ng-icon>
-                      <ng-container i18n>Logout</ng-container>
-                    </button>
-                  </li>
+                  @if (uploadService.canUpload()) {
+                    <li role="menuitem">
+                      <a class="dropdown-item cursor-pointer" (click)="uploadInput.click()">
+                        <ng-icon name="ionCloudUploadOutline"></ng-icon>
+                        <ng-container i18n>Upload</ng-container>
+                        <input #uploadInput type="file" multiple [style.display]="'none'"
+                          (change)="uploadService.uploadFiles(uploadInput.files); uploadInput.value = ''">
+                      </a>
+                    </li>
+                  }
+                  @if (isAdmin()) {
+                    <li role="menuitem">
+                      <a class="dropdown-item" [routerLink]="['/admin']">
+                        <ng-icon name="ionSettingsOutline"></ng-icon>
+                        @if (notificationService.numberOfNotifications>0) {
+                          <span
+                          class="badge rounded-pill position-absolute p-0 text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                        }
+                        <ng-container i18n>Settings</ng-container>
+                      </a>
+                    </li>
+                  }
+                  @if (authenticationRequired) {
+                    <li role="menuitem">
+                      <button class="dropdown-item btn btn-link" (click)="logout()">
+                        <ng-icon name="ionLogOutOutline"></ng-icon>
+                        <ng-container i18n>Logout</ng-container>
+                      </button>
+                    </li>
+                  }
                 </ul>
               </div>
             </li>
@@ -249,10 +295,11 @@
   <ng-content select="[navbar-appendix]"></ng-content>
 </div>
 <ng-content select="[body]"></ng-content>
-<button
-  *ngIf="enableScrollUpButton"
-  (click)="scrollUp()"
-  [class.show-btn-scroll-up]="!shouldHideNavbar && !navbarKeepTop"
-  class="btn btn-tertiary rounded-pill btn-scroll-up">
-  <ng-icon name="ionChevronUpOutline"></ng-icon>
-</button>
+@if (enableScrollUpButton) {
+  <button
+    (click)="scrollUp()"
+    [class.show-btn-scroll-up]="!shouldHideNavbar && !navbarKeepTop"
+    class="btn btn-tertiary rounded-pill btn-scroll-up">
+    <ng-icon name="ionChevronUpOutline"></ng-icon>
+  </button>
+}

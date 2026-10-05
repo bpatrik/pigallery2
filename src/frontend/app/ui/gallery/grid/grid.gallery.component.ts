@@ -30,7 +30,7 @@ import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
 import {GroupByTypes, GroupingMethod} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {AsyncPipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
@@ -41,17 +41,12 @@ import {BlogService} from '../blog/blog.service';
   templateUrl: './grid.gallery.component.html',
   styleUrls: ['./grid.gallery.component.css'],
   imports: [
-    NgIf,
-    NgFor,
-    NgSwitch,
-    NgSwitchCase,
     NgIconComponent,
-    NgSwitchDefault,
     GalleryBlogComponent,
     GalleryPhotoComponent,
     ParseIntPipe,
-    AsyncPipe,
-  ]
+    AsyncPipe
+]
 })
 export class GalleryGridComponent
   implements OnInit, OnChanges, AfterViewInit, OnDestroy {
