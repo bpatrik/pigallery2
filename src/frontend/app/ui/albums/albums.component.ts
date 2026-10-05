@@ -1,7 +1,6 @@
 import {Component, ElementRef, OnInit, TemplateRef, ViewChild,} from '@angular/core';
 import {AlbumsService} from './albums.service';
-import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {SearchQueryTypes, TextSearch,} from '../../../../common/entities/SearchQueryDTO';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../model/network/authentication.service';

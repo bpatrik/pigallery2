@@ -25,6 +25,7 @@ import {
   MapOptions,
   Marker,
   marker,
+  MarkerCluster,
   markerClusterGroup,
   MarkerClusterGroup,
   Point,
@@ -32,6 +33,7 @@ import {
   tileLayer,
   TileLayer
 } from 'leaflet';
+import 'leaflet.markercluster';
 import {ThemeService} from '../../../../model/theme.service';
 import {Subscription} from 'rxjs';
 import {MarkerFactory} from '../MarkerFactory';
@@ -104,7 +106,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     overlays: {
       Photos: markerClusterGroup({
         maxClusterRadius: 20,
-        iconCreateFunction: (cluster) => {
+        iconCreateFunction: (cluster: MarkerCluster) => {
           const childCount = cluster.getChildCount();
           let size: number;
           let c = ' marker-cluster-';

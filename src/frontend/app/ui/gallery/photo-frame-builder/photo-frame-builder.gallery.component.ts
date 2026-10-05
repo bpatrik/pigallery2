@@ -1,8 +1,7 @@
 import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {NotificationService} from '../../../model/notification.service';
-import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
