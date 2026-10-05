@@ -184,7 +184,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
-  @HostListener('pinch', ['$event'])
+  // Hammer supplies gesture objects rather than DOM Events.
+  @HostListener('pinch', ['$any($event)'])
   pinch($event: { scale: number }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
@@ -193,7 +194,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.Zoom = this.prevZoom * $event.scale;
   }
 
-  @HostListener('pinchend', ['$event'])
+  @HostListener('pinchend', ['$any($event)'])
   pinchend($event: { scale: number }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;

@@ -5,6 +5,7 @@
     "outDir": "../../out-tsc/spec",
     "target": "ES2022",
     "module": "ES2022",
+    "moduleResolution": "bundler",
     "types": [
       "jasmine"
     ]
@@ -16,5 +17,6 @@
   "include": [
     "**/*.spec.ts",
     "**/*.d.ts"
-  ]
+  ],
+  "exclude": []
 }

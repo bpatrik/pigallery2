@@ -184,7 +184,8 @@ Marker.prototype.options.icon = MarkerFactory.defIcon;
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideZoneChangeDetection(),importProvidersFrom(BrowserModule, HammerModule, FormsModule, AppRoutingModule, NgIconsModule.withIcons({
+    provideZoneChangeDetection(),
+    importProvidersFrom(BrowserModule, HammerModule, FormsModule, AppRoutingModule, NgIconsModule.withIcons({
         ionDownloadOutline, ionFunnelOutline,
         ionGitBranchOutline, ionArrowDownOutline, ionArrowUpOutline,
         ionStarOutline, ionStar, ionCalendarOutline, ionPersonOutline, ionShuffleOutline,

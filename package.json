@@ -64,6 +64,7 @@
   },
   "devDependencies": {
     "@angular-builders/custom-webpack": "21.1.0",
+    "@angular-devkit/schematics": "21.2.25",
     "@angular/animations": "21.2.25",
     "@angular/cli": "21.2.25",
     "@angular/common": "21.2.25",
@@ -81,6 +82,7 @@
     "@ng-icons/core": "34.0.0",
     "@ng-icons/ionicons": "34.0.0",
     "@ngx-loading-bar/core": "7.0.1",
+    "@schematics/angular": "21.2.25",
     "@types/adm-zip": "0.5.7",
     "@types/archiver": "6.0.3",
     "@types/bcrypt": "6.0.0",
@@ -129,7 +131,7 @@
     "leaflet": "1.9.4",
     "leaflet.markercluster": "1.5.3",
     "mocha": "11.7.1",
-    "ngx-bootstrap": "21.2.2",
+    "ngx-bootstrap": "21.0.1",
     "ngx-clipboard": "16.0.0",
     "ngx-cookie-service": "21.3.1",
     "ngx-device-detector": "11.0.0",
@@ -151,6 +153,6 @@
     "mysql": "2.18.1"
   },
   "engines": {
-    "node": ">=22 <24.0"
+    "node": ">=22.12.0 <24.0"
   }
 }

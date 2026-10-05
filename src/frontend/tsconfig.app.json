@@ -6,6 +6,7 @@
     "types": [],
     "target": "ES2022",
     "module": "ES2022",
+    "moduleResolution": "bundler"
   },
   "files": [
     "./main.ts",
@@ -13,5 +14,6 @@
   ],
   "include": [
     "./**/*.d.ts"
-  ]
+  ],
+  "exclude": []
 }
