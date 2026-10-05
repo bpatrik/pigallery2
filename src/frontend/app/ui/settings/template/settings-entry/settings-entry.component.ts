@@ -1,7 +1,7 @@
-import {Component, forwardRef, Input, OnChanges, TemplateRef} from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
+import {Component, forwardRef, Input, type OnChanges, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import { type ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, type Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
-import {propertyTypes} from 'typeconfig/common';
+import {type propertyTypes} from 'typeconfig/common';
 import {SearchQueryParserService} from '../../../gallery/search/search-query-parser.service';
 import {
   MapLayers,
@@ -9,7 +9,7 @@ import {
   MapPathGroupThemeConfig,
   NavigationLinkConfig,
   NavigationLinkTypes,
-  TAGS,
+  type TAGS,
   ThemeConfig
 } from '../../../../../../common/config/public/ClientConfig';
 import {ConfigStyle, SettingsService} from '../../settings.service';
@@ -64,6 +64,7 @@ interface IState {
             multi: true,
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     GallerySearchFieldComponent,
     FormsModule,

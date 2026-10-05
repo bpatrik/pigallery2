@@ -148,15 +148,17 @@
     </div>
   </div>
 
-  <div id="swipeable-container"
+  <div id="swipeable-container" appLightboxGestures
     [class.hide-cursor]="controllersDimmed"
     (swipeleft)="zoom == 1 && nextPhoto.emit()"
     (swiperight)="zoom == 1 && previousPhoto.emit()"
     (swipeup)="zoom == 1 && closed.emit()"
     (tap)="tap($event)"
-    (pan)="pan($any($event))"
-    (wheel)="wheel($event)"
-    (click)="mediaElement.playPause()">
+    (pan)="pan($event)"
+    (pinchstart)="pinchstart()"
+    (pinch)="pinch($event)"
+    (pinchend)="pinchend($event)"
+    (wheel)="wheel($event)">
 
     @if (facesEnabled && activePhoto && activePhoto.gridMedia.Photo.metadata.faces && activePhoto.gridMedia.Photo.metadata.faces.length > 0) {
       <div class="faces-container"

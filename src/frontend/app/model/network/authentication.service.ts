@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
+import {type UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {BehaviorSubject} from 'rxjs';
 import {UserService} from './user.service';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
@@ -12,7 +12,7 @@ import {CookieService} from 'ngx-cookie-service';
 
 /* Injected config / user from server side */
 // eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword, @typescript-eslint/no-namespace
-declare module ServerInject {
+declare namespace ServerInject {
   export let user: UserDTO;
 }
 

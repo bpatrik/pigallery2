@@ -1,24 +1,25 @@
 import {
-  AfterViewInit,
+  type AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   HostListener,
   Inject,
   LOCALE_ID,
-  OnDestroy,
-  OnInit,
+  type OnDestroy,
+  type OnInit,
   ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { formatDate } from '@angular/common';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, type Params, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {FrameComponent} from '../frame/frame.component';
 import {GalleryGridComponent} from '../gallery/grid/grid.gallery.component';
 import {GalleryLightboxComponent} from '../gallery/lightbox/lightbox.gallery.component';
 import {MediaButtonModalComponent} from '../gallery/grid/photo/media-button-modal/media-button-modal.component';
-import {MediaGroup} from '../gallery/navigator/sorting.service';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type MediaGroup} from '../gallery/navigator/sorting.service';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
 import {GroupByTypes} from '../../../../common/entities/SortingMethods';
 import {QueryParams} from '../../../../common/QueryParams';
 import {Config} from '../../../../common/config/public/Config';
@@ -35,10 +36,10 @@ import {
   getTimelineMonthEnd,
   groupTimelineByDay,
   parseTimelineMonth,
-  TimelineMonth,
+  type TimelineMonth,
 } from './timeline-grouping';
 import {TimelineLightboxSource} from './timeline-lightbox.source';
-import {TimelineSummaryDTO} from '../../../../common/entities/TimelineDTO';
+import {type TimelineSummaryDTO} from '../../../../common/entities/TimelineDTO';
 
 export interface TimelineRailMonth {
   key: string;
@@ -57,6 +58,7 @@ export interface TimelineRailYear {
   selector: 'app-timeline',
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
     GalleryGridComponent,

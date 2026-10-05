@@ -1,4 +1,4 @@
-import {PersonCacheDTO, PersonDTO} from '../../../../common/entities/PersonDTO';
+import {type PersonCacheDTO, type PersonDTO} from '../../../../common/entities/PersonDTO';
 import {Config} from '../../../../common/config/public/Config';
 import {Utils} from '../../../../common/Utils';
 

@@ -1,9 +1,9 @@
 import {QueryList} from '@angular/core';
-import {Params} from '@angular/router';
+import {type Params} from '@angular/router';
 import {Observable} from 'rxjs';
 import {GridMedia} from '../grid/GridMedia';
-import {Dimension} from '../../../model/IRenderable';
-import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {type Dimension} from '../../../model/IRenderable';
+import {type MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {QueryService} from '../../../model/query.service';
 import type {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
 

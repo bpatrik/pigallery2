@@ -1,6 +1,6 @@
-import {Component, forwardRef, Input, OnInit} from '@angular/core';
-import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
-import {SortByDirectionalTypes, SortingMethod} from '../../../../../../../common/entities/SortingMethods';
+import {Component, forwardRef, Input, type OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {type ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, type Validator} from '@angular/forms';
+import {SortByDirectionalTypes, type SortingMethod} from '../../../../../../../common/entities/SortingMethods';
 import {enumToTranslatedArray} from '../../../../EnumTranslations';
 import {AutoCompleteService} from '../../../../gallery/search/autocomplete.service';
 import {Utils} from '../../../../../../../common/Utils';
@@ -28,6 +28,7 @@ import {NotificationService} from '../../../../../model/notification.service';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,

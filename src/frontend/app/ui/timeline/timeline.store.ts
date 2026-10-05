@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {Subject} from 'rxjs';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
-import {TimelinePageDTO, TimelineSummaryDTO} from '../../../../common/entities/TimelineDTO';
-import {UserDTO} from '../../../../common/entities/UserDTO';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type TimelinePageDTO, type TimelineSummaryDTO} from '../../../../common/entities/TimelineDTO';
+import {type UserDTO} from '../../../../common/entities/UserDTO';
 import {NetworkService} from '../../model/network/network.service';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {VersionService} from '../../model/version.service';

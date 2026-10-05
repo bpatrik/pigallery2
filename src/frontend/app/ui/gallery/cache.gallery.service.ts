@@ -1,17 +1,17 @@
 import {Injectable} from '@angular/core';
-import {ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
+import {type ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
-import {IAutoCompleteItem} from '../../../../common/entities/AutoCompleteItem';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
-import {GroupingMethod, SortingMethod} from '../../../../common/entities/SortingMethods';
+import {type IAutoCompleteItem} from '../../../../common/entities/AutoCompleteItem';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type GroupingMethod, type SortingMethod} from '../../../../common/entities/SortingMethods';
 import {VersionService} from '../../model/version.service';
-import {SearchQueryDTO, SearchQueryTypes,} from '../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO, SearchQueryTypes,} from '../../../../common/entities/SearchQueryDTO';
 import {
-  ContentWrapper,
-  ContentWrapperWithError,
-  PackedContentWrapper,
-  PackedContentWrapperWithError
+  type ContentWrapper,
+  type ContentWrapperWithError,
+  type PackedContentWrapper,
+  type PackedContentWrapperWithError
 } from '../../../../common/entities/ContentWrapper';
 import {ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {GridSizes} from '../../../../common/entities/GridSizes';

@@ -1,14 +1,14 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {CreateSharingDTO, ResponseSharingDTO, SharingDTOKey,} from '../../../../common/entities/SharingDTO';
+import {type CreateSharingDTO, type ResponseSharingDTO, type SharingDTOKey,} from '../../../../common/entities/SharingDTO';
 import {Router, RoutesRecognized} from '@angular/router';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {QueryParams} from '../../../../common/QueryParams';
-import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
+import {type UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
-import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 
 @Injectable()

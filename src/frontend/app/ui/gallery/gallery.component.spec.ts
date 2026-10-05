@@ -2,7 +2,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import {BehaviorSubject, Observable, of} from 'rxjs';
 import {ChangeDetectorRef} from '@angular/core';
-import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideHttpClient, withInterceptorsFromDi, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {DatePipe} from '@angular/common';
 
@@ -28,7 +28,7 @@ import {QueryService} from '../../model/query.service';
 import {NotificationService} from '../../model/notification.service';
 import {GalleryNavigatorService} from './navigator/navigator.service';
 import {MediaButtonModalService} from './grid/photo/media-button-modal/media-button-modal.service';
-import {SortingMethod} from '../../../../common/entities/SortingMethods';
+import {type SortingMethod} from '../../../../common/entities/SortingMethods';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
 import {UploaderService, UploadProgress} from './uploader/uploader.service';
@@ -191,7 +191,7 @@ describe('GalleryComponent', () => {
           }
         },
         LeafletMarkerClusterModule,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
         provideNoopAnimations(),
         provideRouter([])

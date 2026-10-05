@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {NetworkService} from './network.service';
-import {UserDTO} from '../../../../common/entities/UserDTO';
+import {type UserDTO} from '../../../../common/entities/UserDTO';
 import {Config} from '../../../../common/config/public/Config';
 import {ShareService} from '../../ui/gallery/share.service';
 import {QueryParams} from '../../../../common/QueryParams';

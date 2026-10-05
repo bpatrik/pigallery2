@@ -1,8 +1,8 @@
-import {Component, EventEmitter, forwardRef, Input, Output, TemplateRef} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
-import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
-import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
+import {type SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
+import {type ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, type Validator} from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
 import {BsModalRef, BsModalService,} from 'ngx-bootstrap/modal';
 import {Utils} from '../../../../../../common/Utils';
@@ -27,6 +27,7 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GallerySearchFieldBaseComponent,
     FormsModule,

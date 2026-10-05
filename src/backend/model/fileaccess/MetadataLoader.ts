@@ -8,8 +8,8 @@ import {Logger} from '../../Logger';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as exifr from 'exifr';
-import * as exifReader from 'exif-reader';
-const sharp = require('sharp') as typeof import('sharp').default;
+import exifReader from 'exif-reader';
+const sharp = require('sharp') as typeof import('sharp');
 import {FfprobeData} from 'fluent-ffmpeg';
 import * as util from 'node:util';
 import * as path from 'path';

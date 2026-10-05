@@ -1,5 +1,5 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
+import {Pipe, type PipeTransform} from '@angular/core';
+import {type SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryParserService} from '../ui/gallery/search/search-query-parser.service';
 
 @Pipe({

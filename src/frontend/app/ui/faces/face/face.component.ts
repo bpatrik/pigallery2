@@ -1,12 +1,12 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {PersonDTO} from '../../../../../common/entities/PersonDTO';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
+import {type PersonDTO} from '../../../../../common/entities/PersonDTO';
+import {DomSanitizer, type SafeStyle} from '@angular/platform-browser';
 import {PersonThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {FacesService} from '../faces.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {Config} from '../../../../../common/config/public/Config';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryTypes, type TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
 
 import { NgIconComponent } from '@ng-icons/core';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
@@ -15,6 +15,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     selector: 'app-face',
     templateUrl: './face.component.html',
     styleUrls: ['./face.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     NgIconComponent

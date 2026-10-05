@@ -1,12 +1,12 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild,} from '@angular/core';
-import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
-import {Dimension} from '../../../../model/IRenderable';
+import {Component, ElementRef, HostListener, Input, type OnChanges, type OnDestroy, type SimpleChanges, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {type PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {type Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
 import {IconThumbnail, Thumbnail, ThumbnailBase, ThumbnailManagerService,} from '../../thumbnailManager.service';
 import {MediaIcon} from '../../MediaIcon';
 import {Media} from '../../Media';
 import {PageHelper} from '../../../../model/page.helper';
-import {FileDTO} from '../../../../../../common/entities/FileDTO';
+import {type FileDTO} from '../../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../../common/Utils';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MapService} from '../map.service';
@@ -20,9 +20,9 @@ import {
   icon,
   latLng,
   LatLngBounds,
-  LatLngLiteral,
+  type LatLngLiteral,
   Map,
-  MapOptions,
+  type MapOptions,
   Marker,
   marker,
   MarkerCluster,
@@ -42,7 +42,7 @@ import {LeafletControlLayersConfig, LeafletModule} from '@bluehalo/ngx-leaflet';
 
 import {NgIconComponent} from '@ng-icons/core';
 import {DurationPipe} from '../../../../pipes/DurationPipe';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, type Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../../common/QueryParams';
 import {QueryService} from '../../../../model/query.service';
 
@@ -51,6 +51,7 @@ import {QueryService} from '../../../../model/query.service';
   selector: 'app-gallery-map-lightbox',
   styleUrls: ['./lightbox.map.gallery.component.css'],
   templateUrl: './lightbox.map.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LeafletModule,
     NgIconComponent

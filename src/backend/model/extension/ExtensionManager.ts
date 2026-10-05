@@ -14,7 +14,7 @@ import {SQLConnection} from '../database/SQLConnection';
 import {ExtensionObject} from './ExtensionObject';
 import {ExtensionDecoratorObject} from './ExtensionDecorator';
 import * as util from 'util';
-import * as AdmZip from 'adm-zip';
+import AdmZip from 'adm-zip';
 import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 import {ExtensionRepository} from './ExtensionRepository';
 import {ExtensionListItem} from '../../../common/entities/extension/ExtensionListItem';

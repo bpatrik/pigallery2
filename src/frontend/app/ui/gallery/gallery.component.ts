@@ -1,6 +1,6 @@
-import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, HostListener, type OnDestroy, type OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, type Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
 import {GalleryGridComponent} from './grid/grid.gallery.component';
 import {Config} from '../../../../common/config/public/Config';
@@ -9,10 +9,10 @@ import {NavigationService} from '../../model/navigation.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {interval, Observable, Subscription} from 'rxjs';
 import {PageHelper} from '../../model/page.helper';
-import {PhotoDTO} from '../../../../common/entities/PhotoDTO';
+import {type PhotoDTO} from '../../../../common/entities/PhotoDTO';
 import {QueryParams} from '../../../../common/QueryParams';
 import {take} from 'rxjs/operators';
-import {GallerySortingService, GroupedDirectoryContent} from './navigator/sorting.service';
+import {GallerySortingService, type GroupedDirectoryContent} from './navigator/sorting.service';
 import {FilterService} from './filter/filter.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
@@ -29,18 +29,19 @@ import {GalleryBlogComponent} from './blog/blog.gallery.component';
 import {GalleryMapComponent} from './map/map.gallery.component';
 import {PhotoFilterPipe} from '../../pipes/PhotoFilterPipe';
 import {MediaButtonModalComponent} from './grid/photo/media-button-modal/media-button-modal.component';
-import {ContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
+import {type ContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 import {UploaderService} from './uploader/uploader.service';
 import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
 import {QueryService} from '../../model/query.service';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
 
 @Component({
   selector: 'app-gallery',
   templateUrl: './gallery.component.html',
   styleUrls: ['./gallery.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryLightboxComponent,
     FrameComponent,

@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {BehaviorSubject} from 'rxjs';
-import {PersonDTO} from '../../../../common/entities/PersonDTO';
-import {SortByDirectionalTypes, SortingMethod} from '../../../../common/entities/SortingMethods';
+import {type PersonDTO} from '../../../../common/entities/PersonDTO';
+import {SortByDirectionalTypes, type SortingMethod} from '../../../../common/entities/SortingMethods';
 import {Config} from '../../../../common/config/public/Config';
 
 @Injectable()

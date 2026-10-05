@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import {
   RouterModule,
-  Routes,
-  UrlMatchResult,
+  type Routes,
+  type UrlMatchResult,
   UrlSegment,
 } from '@angular/router';
 import { LoginComponent } from './ui/login/login.component';

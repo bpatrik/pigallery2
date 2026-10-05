@@ -1,5 +1,5 @@
 import {GPSMetadata} from '../../../common/entities/PhotoDTO';
-import * as NodeGeocoder from 'node-geocoder';
+import NodeGeocoder from 'node-geocoder';
 import {LocationLookupException} from '../../exceptions/LocationLookupException';
 import {LRU} from '../../../common/Utils';
 import {IObjectManager} from './IObjectManager';

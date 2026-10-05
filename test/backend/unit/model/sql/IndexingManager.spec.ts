@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
@@ -470,8 +470,9 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry();
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1');
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2');
+    // Keep cover selection deterministic while checking numeric persistence.
+    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 5);
+    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 1);
     const minFloat = parseFloat((1.1 * Math.pow(10, -38)).toFixed(10));
     const maxFloat = parseFloat((3.4 * Math.pow(10, +38)).toFixed(10));
     p1.metadata.cameraData.fStop = minFloat;

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import * as path from 'path';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';

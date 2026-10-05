@@ -1,20 +1,20 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import {Component, ElementRef, HostListener, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {QueryService} from '../../../model/query.service';
 import {Utils} from '../../../../../common/Utils';
-import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, type GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO, SearchQueryTypes, type TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {GallerySortingService} from './sorting.service';
 import {PageHelper} from '../../../model/page.helper';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {FilterService} from '../filter/filter.service';
-import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
+import {ContentLoaderService, type DirectoryContent} from '../contentLoader.service';
 import {GalleryNavigatorService} from './navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import { AsyncPipe } from '@angular/common';
@@ -25,12 +25,13 @@ import {GalleryFilterComponent} from '../filter/filter.gallery.component';
 import {StringifySortingMethod} from '../../../pipes/StringifySortingMethod';
 import {StringifySearchQuery} from '../../../pipes/StringifySearchQuery';
 import {StringifyGridSize} from '../../../pipes/StringifyGridSize';
-import {ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
+import {type ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 
 @Component({
   selector: 'app-gallery-navbar',
   styleUrls: ['./navigator.gallery.component.css'],
   templateUrl: './navigator.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     RouterLink,
     NgIconComponent,

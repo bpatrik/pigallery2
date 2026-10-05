@@ -3,14 +3,14 @@ import * as fs from 'fs';
 import {promises as fsp} from 'fs';
 import * as path from 'path';
 import * as util from 'util';
-import * as zip from 'gulp-zip';
+import zip from 'gulp-zip';
 import * as ts from 'gulp-typescript';
 import * as sourcemaps from 'gulp-sourcemaps';
 import * as xml2js from 'xml2js';
 import * as child_process from 'child_process';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import * as jeditor from 'gulp-json-editor';
+import jeditor from 'gulp-json-editor';
 import {XLIFF} from 'xlf-google-translate';
 import {PrivateConfigClass} from './src/common/config/private/PrivateConfigClass';
 import {ConfigClassBuilder} from 'typeconfig/src/decorators/builders/ConfigClassBuilder';

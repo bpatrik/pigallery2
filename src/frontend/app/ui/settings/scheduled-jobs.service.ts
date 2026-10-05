@@ -1,12 +1,12 @@
 import {EventEmitter, Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
-import {JobProgressDTO, JobProgressStates, OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
+import {type JobProgressDTO, JobProgressStates, type OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
 import {NetworkService} from '../../model/network/network.service';
-import {JobScheduleDTO} from '../../../../common/entities/job/JobScheduleDTO';
-import {JobDTO, JobDTOUtils, JobStartDTO} from '../../../../common/entities/job/JobDTO';
+import {type JobScheduleDTO} from '../../../../common/entities/job/JobScheduleDTO';
+import {type JobDTO, JobDTOUtils, type JobStartDTO} from '../../../../common/entities/job/JobDTO';
 import {BackendtextService} from '../../model/backendtext.service';
 import {NotificationService} from '../../model/notification.service';
-import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
+import {type DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 @Injectable()
 export class ScheduledJobsService {

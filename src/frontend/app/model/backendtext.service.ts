@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {backendText, backendTexts} from '../../../common/BackendTexts';
+import {type backendText, backendTexts} from '../../../common/BackendTexts';
 import {DefaultsJobs} from '../../../common/entities/job/JobDTO';
 
 @Injectable()

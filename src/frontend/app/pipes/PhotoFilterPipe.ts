@@ -1,7 +1,7 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {MediaDTO, MediaDTOUtils} from '../../../common/entities/MediaDTO';
-import {PhotoDTO} from '../../../common/entities/PhotoDTO';
-import {MediaGroup} from '../ui/gallery/navigator/sorting.service';
+import {Pipe, type PipeTransform} from '@angular/core';
+import {type MediaDTO, MediaDTOUtils} from '../../../common/entities/MediaDTO';
+import {type PhotoDTO} from '../../../common/entities/PhotoDTO';
+import {type MediaGroup} from '../ui/gallery/navigator/sorting.service';
 
 @Pipe({
     name: 'photosOnly',

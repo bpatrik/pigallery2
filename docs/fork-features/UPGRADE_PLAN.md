@@ -1,7 +1,7 @@
 # Platform upgrade plan
 
-Status: Steps 0–2 completed and validated. Angular 21 is on the local
-`upgrade/angular-21` branch; next is Step 3 (Angular 22).
+Status: Steps 0–2 completed and merged. Step 3 is completed and validated on
+`upgrade/angular-22`, awaiting merge.
 
 ## Goal
 
@@ -76,11 +76,11 @@ Compatibility matrix (fill in during step 0):
 
 | Package | Ng 20 | Ng 21 | Ng 22 | Notes |
 |---|---|---|---|---|
-| typescript | ~5.8.3 / ~5.9.0 | ~5.9.0 / ~6.0.0 | ~6.0.0 | Compiler-cli peer ranges: Ng 20 (`>=5.8 <6.0`), Ng 21 (`>=5.9 <6.1`), Ng 22 (`>=6.0 <6.1`). Directly pinned to `5.8.3` in Step 0, then `5.9.3` in Step 2 |
+| typescript | ~5.8.3 / ~5.9.0 | ~5.9.0 | 6.0.3 | Current compiler-cli peers: Ng 20 (`>=5.8 <6.0`), Ng 21 (`>=5.9 <6.0`), Ng 22 (`>=6.0 <6.1`). Step 3 pins `6.0.3` |
 | zone.js | ~0.15.1 | ~0.15.1 / 0.16.3 | 0.16.3 | Ng 20 supports `~0.15.0`; Ng 21 & 22 support `~0.15.0 \|\| ~0.16.0` |
 | @angular-builders/custom-webpack | 20.0.0 | 21.1.0 | 22.0.1 | Official stable releases exist for all three versions (blocks resolved) |
 | angular-eslint | 20.7.0 | 21.4.0 | 22.5.0 | Regular major releases match Angular versions |
-| ngx-bootstrap | 20.0.2 | 21.0.1 | 22.0.0 (requires zoneless review) | Step 2 retains 21.0.1: 21.2+ requires zoneless and signal inputs, incompatible with this step's constraints |
+| ngx-bootstrap | 20.0.2 | 21.0.1 | 22.0.0 | Step 3 adopts signal APIs and removes `forRoot()`, retaining zone.js subject to runtime validation. See the compatibility decision below |
 | @bluehalo/ngx-leaflet (+ markercluster) | 20.0.0 (cluster: 20.0.3) | 21.2.1 (cluster: 21.1.0) | 22.0.0 (cluster: 22.0.0) | Synchronized with Angular releases |
 | ngx-markdown | 20.1.0 | 21.3.0 | 22.1.0 | Synchronized with Angular releases |
 | ngx-toastr | 19.1.0 | 20.0.5 | 20.0.5 (overrides) | 19.1.0 peer is `>=16.0.0-0` (works on 20); 20.0.5 peer is `^21.0.0` (works on 21); for Ng 22, use npm overrides or local toast service |
@@ -174,22 +174,128 @@ screenshots are under `/tmp/pg-angular21-smoke-screenshots/`.
 
 ### Step 3 – Angular 21 → 22 (branch `upgrade/angular-22`)
 
-- [ ] `ng update @angular/core@22 @angular/cli@22`, plus the matrix bumps.
-- [ ] If TypeScript 6 is required: replace the deprecated `moduleResolution:
+- [x] `ng update @angular/core@22 @angular/cli@22`, plus the matrix bumps.
+- [x] If TypeScript 6 is required: replace the deprecated `moduleResolution:
       node` and `downlevelIteration`. The frontend probably needs `bundler`
       and the backend `node16`/`nodenext`. The frontend already uses `bundler`
       and is excluded from the root compile since Step 2; finish separating
       backend settings instead of using `ignoreDeprecations`. Re-check
       `gulp-typescript` and `ts-node` against the new TypeScript.
-- [ ] Resolve the ngx-bootstrap zoneless requirement before the planned v22
+- [x] Resolve the ngx-bootstrap zoneless requirement before the planned v22
       bump: review signals and change detection as a separate sub-plan, or
       choose a replacement. Step 2 deliberately retains zone.js and 21.0.1.
-- [ ] If `custom-webpack` has no v22 release, fall back to
+- [x] If `custom-webpack` has no v22 release, fall back to
       `@angular/build:application`. Replace the `IgnorePlugin` (for example
       by fixing the import or using `externalDependencies`), and adapt the
       backend static path for the `dist/<locale>/browser` layout. Treat this
       as a separate sub-plan.
-- [ ] Validation gate.
+- [x] Validation gate (2026-10-06): frontend app/spec and Cypress type checks,
+      backend compile, all **16 locale** builds and lint pass; Mocha
+      **635 passing** on SQLite and MariaDB/MySQL; Karma **145 SUCCESS** in
+      Brave; **7/7 Cypress specs** pass (the six existing specs plus a new
+      Bootstrap regression spec, run separately; **18 passing**, **12
+      intentionally pending** documentation tests); additional Brave smoke
+      **9/9 passing**; production audit **0 vulnerabilities**.
+
+Implementation notes:
+
+- Based on `master` at `08d3c531`, after the Angular 21 branch was merged.
+  Official dependency updates and schematics are committed separately from
+  manual compatibility fixes. Angular framework/CLI and schematic packages
+  are **22.2.1**, custom-webpack **22.0.1**, angular-eslint **22.5.0**,
+  typescript-eslint **8.71.1**, TypeScript **6.0.3**, zone.js **0.16.3**.
+- Node remains on major 22; engines now require **>=22.22.3 <24**, matching
+  [Angular 22's minimum](https://angular.dev/reference/versions).
+  Validation uses Node **22.23.3** and npm **10.9.9**. Node 24 remains Step 4.
+- `tsconfig.base.json` holds shared compiler options. The root backend config
+  uses `NodeNext` module and resolution settings, and still emits CommonJS
+  because the package has no ESM `type`. Frontend app/spec configs use
+  `bundler`/`ES2022` independently, with strict Angular template checking.
+  Removed `downlevelIteration`; no `ignoreDeprecations` workaround is used.
+  Explicit types and `rootDir` account for TS 6 defaults, while `strict: false`
+  preserves the prior TypeScript settings alongside `noImplicitAny: true`.
+- TS 6 always enables CommonJS interop: callable imports use default imports,
+  the cookie-session import loads its request augmentation, filesystem mocks
+  mutate the actual module, and sharp's require types match its CommonJS
+  export. Type-only frontend imports prevent interfaces in decorator metadata
+  from becoming nonexistent runtime exports. `tslib` is now an explicit
+  runtime dependency for emitted helpers.
+- The builder's jiti migration removed `ts-node`; restored **10.9.2** for
+  Gulp, then verified loading `gulpfile.ts` through ts-node and the
+  `gulp-typescript` release backend build. Both tools remain in place.
+- Angular 22's schematics add `ChangeDetectionStrategy.Eager` to preserve
+  rendering and `withXhr()` to preserve upload progress. Safe-navigation
+  wrappers preserve pre-v22 template semantics. Webpack and Karma remain;
+  `dist/<locale>` serving and the nested Karma plugin lookup are unchanged.
+- Angular 22 removes Hammer's Angular integration APIs. Replaced the lightbox
+  bindings with a scoped pointer gesture directive (capture, swipe, drag,
+  pinch, double tap and cancellation), removed HammerJS, and added seven
+  gesture regression tests. Angular animations remain available and retained.
+- Cypress **15.19.0** is required for TS 6: v14's preprocessor unconditionally
+  sets deprecated `downlevelIteration`. Official TS 6 support starts at
+  [15.14.0](https://docs.cypress.io/app/tooling/typescript-support#history).
+  Added `marked-katex-extension` **5.1.6**, an optional ngx-markdown peer that
+  its webpack-resolved dynamic import requires even without math rendering.
+
+ngx-bootstrap compatibility decision and separate zoneless sub-plan:
+
+- Retain `provideZoneChangeDetection()` for the app and upgrade ngx-bootstrap
+  to **22.0.0**, importing its modules directly without `forRoot()`. Keeping
+  21.0.1 is impossible: its component loader uses `ComponentFactoryResolver`,
+  removed in Angular 22. No ngx-bootstrap peer override remains.
+- The [21.2 migration guide](https://github.com/valor-software/ngx-bootstrap/releases/tag/v21.2.0)
+  prescribes zoneless. Inspection of the published v22 implementation shows
+  signal inputs, `createComponent`, explicit render notifications, and no
+  zoneless bootstrap assertion. The zone-based combination is therefore a
+  local compatibility choice. The full gate passed, including dropdown,
+  popover, modal, datepicker and timepicker interactions. A persistent
+  `test/cypress/e2e/bootstrap.cy.ts` regression spec covers these controls.
+- ngx-toastr's latest release is still **20.0.5**, with Angular 21 peers.
+  Keep a scoped npm override for its Angular common/core peers only; require
+  a visible toast during upload validation. Remove it when a compatible
+  release is available.
+- A future zoneless branch should inventory async state writes in Gallery,
+  Timeline, authentication, settings and upload services; replace implicit
+  updates with signals, AsyncPipe or `markForCheck`; adapt reactive forms and
+  third-party callbacks; switch bootstrap and tests together; then remove
+  zone.js. Require the complete gate plus notification, job-progress, live-photo
+  and nonzero Timeline Back restoration checks before merging.
+
+Validation notes:
+
+- The integrated browser was unavailable. The nine automated Brave smoke
+  checks used a visible document and an isolated backend on **8081**, copied
+  demo media, separate config/database/cache paths, and enabled uploads.
+  Checked login/Folders Back, Timeline month and nonzero scroll restoration
+  through in-app Back, lightbox keyboard/swipe/pinch and animation, map,
+  search, upload progress and visible toast, share link, Bootstrap controls,
+  and advancing video playback. Screenshots were visually inspected.
+- The existing service on port 8080 and ignored `test/setup-local.js` were
+  preserved. A temporary Mocha setup selected the test-only MariaDB database;
+  temporary Cypress configs supplied Brave and consistent physical paths.
+  Mocha and Karma were stopped only after capturing their final success
+  totals; their existing keepalive behavior remains T5.
+- TS 6 interop required filesystem mocks to import the actual `fs` module.
+  The extreme-value indexing fixture now assigns distinct photo ratings to
+  avoid an unrelated nondeterministic MySQL cover-selection tie (T6).
+- Release `gulp build-backend`, `build-extension-interface`, and loading
+  `gulpfile.ts` through ts-node pass. The selected dependency tree has no
+  invalid Angular peers after the scoped ngx-toastr override.
+- The frontend build retains existing translation/locale-data warnings and
+  an initial-bundle warning (**2.13 MB** against **2 MB**; below the **5 MB**
+  error threshold). Webpack, Karma, Angular animations and zone.js remain
+  documented follow-up work. Full audit is **36 advisories** (1 low, 12
+  moderate, 21 high, 2 critical), all in devDependencies/tooling.
+
+Local validation artifacts: `/tmp/pg-angular22-build-en.log`,
+`/tmp/pg-angular22-backend-final.log`, `/tmp/pg-angular22-karma-final.log`,
+`/tmp/pg-angular22-cypress-final.log`, `/tmp/pg-angular22-bootstrap-cypress.log`,
+`/tmp/pg-angular22-smoke-final.log`, `/tmp/pg-angular22-release-backend-final.log`,
+`/tmp/pg-angular22-extension-final.log`, `/tmp/pg-angular22-ts-node.log`,
+`/tmp/pg-angular22-selected-tree.log`, and
+`/tmp/pg-angular22-audit-{prod,all}.json`. Temporary smoke spec/config:
+`/tmp/pg-angular22-smoke.cy.js`, `/tmp/pg-angular22-smoke.config.cjs`;
+screenshots: `/tmp/pg-angular22-smoke-screenshots/`.
 
 ### Step 4 – Node 24 and npm (branch `upgrade/node-24`)
 
@@ -265,8 +371,8 @@ Can start any time after step 1, since Angular 20+ supports Node 24.
 |---|---|---|
 | 0 Baseline / matrix | `stack-upgrade` | Completed |
 | 1 Angular 20 | `upgrade/angular-20` | Completed |
-| 2 Angular 21 | `upgrade/angular-21` | Completed and validated (local branch) |
-| 3 Angular 22 | `upgrade/angular-22` | Not started |
+| 2 Angular 21 | `upgrade/angular-21` | Completed, validated and merged |
+| 3 Angular 22 | `upgrade/angular-22` | Completed and validated; awaiting merge |
 | 4 Node 24 | `upgrade/node-24` | Not started |
 | 5 openid-client 6 | `upgrade/openid-client-6` | Not started |
 | 6 ffmpeg wrapper | `upgrade/ffmpeg-wrapper` | Not started |

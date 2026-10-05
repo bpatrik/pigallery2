@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
+import {type DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
 import {BehaviorSubject} from 'rxjs';
 
 @Injectable()

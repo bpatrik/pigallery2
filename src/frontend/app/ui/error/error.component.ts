@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {IconComponent} from '../../icon.component';
 
@@ -9,6 +9,7 @@ import {NavigationService} from '../../model/navigation.service';
   selector: 'app-error',
   templateUrl: './error.component.html',
   styleUrls: ['./error.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     IconComponent
 ]

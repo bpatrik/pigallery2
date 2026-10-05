@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
+import {HttpClient, type HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message} from '../../../../common/entities/Message';
 import {LoadingBarService} from '@ngx-loading-bar/core';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';

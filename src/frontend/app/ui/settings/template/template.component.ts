@@ -1,21 +1,21 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, Input, type OnChanges, type OnDestroy, type OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
 import {ConfigStyle, SettingsService} from '../settings.service';
 import {WebConfig} from '../../../../../common/config/private/WebConfig';
-import {JobProgressDTO} from '../../../../../common/entities/job/JobProgressDTO';
+import {type JobProgressDTO} from '../../../../../common/entities/job/JobProgressDTO';
 import {JobDTOUtils} from '../../../../../common/entities/job/JobDTO';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {FormsModule, UntypedFormControl} from '@angular/forms';
 import {Subscription} from 'rxjs';
-import {IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
-import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientConfig';
+import {type IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
+import {ConfigPriority, type TAGS} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {WebConfigClassBuilder} from 'typeconfig/web';
 import {ErrorDTO} from '../../../../../common/entities/Error';
-import {ISettingsComponent} from './ISettingsComponent';
+import {type ISettingsComponent} from './ISettingsComponent';
 import {CustomSettingsEntries} from './CustomSettingsEntries';
 import {NgIconComponent} from '@ng-icons/core';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
@@ -61,6 +61,7 @@ export interface RecursiveState extends ConfigState {
   selector: 'app-settings-template',
   templateUrl: './template.component.html',
   styleUrls: ['./template.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {

@@ -1,6 +1,6 @@
-import {Component, Input, TemplateRef} from '@angular/core';
+import {Component, Input, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
-import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
 import { NgIconComponent } from '@ng-icons/core';
 import { JsonPipe } from '@angular/common';
 
@@ -8,6 +8,7 @@ import { JsonPipe } from '@angular/common';
     selector: 'app-saved-search-popup-btn',
     templateUrl: './saved-search-popup.component.html',
     styleUrls: ['./saved-search-popup.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent, JsonPipe]
 })
 export class SavedSearchPopupComponent {

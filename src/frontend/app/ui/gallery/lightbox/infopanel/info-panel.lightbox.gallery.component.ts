@@ -1,20 +1,20 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output,} from '@angular/core';
-import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
+import {Component, EventEmitter, Input, type OnChanges, type OnInit, Output, ChangeDetectionStrategy} from '@angular/core';
+import {type CameraMetadata, type PhotoDTO, type PhotoMetadata, type PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
-import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
-import {VideoDTO, VideoMetadata,} from '../../../../../../common/entities/VideoDTO';
+import {type MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
+import {type VideoDTO, type VideoMetadata,} from '../../../../../../common/entities/VideoDTO';
 import {Utils} from '../../../../../../common/Utils';
 import {QueryService} from '../../../../model/query.service';
 import {MapService} from '../../map/map.service';
 import {
-  ANDSearchQuery,
-  DistanceSearch, DateSearch,
+  type ANDSearchQuery,
+  type DistanceSearch, type DateSearch,
   SearchQueryTypes,
-  TextSearch,
+  type TextSearch,
   TextSearchQueryMatchTypes,
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
-import {LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';
+import {type LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';
 import {ThemeService} from '../../../../model/theme.service';
 import {ContentLoaderService} from '../../contentLoader.service';
 import { DatePipe } from '@angular/common';
@@ -29,6 +29,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
   selector: 'app-info-panel',
   styleUrls: ['./info-panel.lightbox.gallery.component.css'],
   templateUrl: './info-panel.lightbox.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     RouterLink,

@@ -1,12 +1,12 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
-import {SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
+import {Component, Input, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {DomSanitizer, type SafeStyle} from '@angular/platform-browser';
+import {type SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
 import {RouterLink} from '@angular/router';
 import {Utils} from '../../../../../../common/Utils';
 import {Media} from '../../Media';
 import {Thumbnail, ThumbnailManagerService,} from '../../thumbnailManager.service';
 import {QueryService} from '../../../../model/query.service';
-import {CoverPhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {type CoverPhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 
 import { IconComponent } from '../../../../icon.component';
 
@@ -14,6 +14,7 @@ import { IconComponent } from '../../../../icon.component';
     selector: 'app-gallery-directory',
     templateUrl: './directory.gallery.component.html',
     styleUrls: ['./directory.gallery.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     IconComponent

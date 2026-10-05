@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, ChangeDetectionStrategy} from '@angular/core';
 import {Config} from '../../common/config/public/Config';
 import { SafeHtmlPipe } from './pipes/SafeHTMLPipe';
 
@@ -14,6 +14,7 @@ import { SafeHtmlPipe } from './pipes/SafeHTMLPipe';
            [attr.viewBox]="Config.Server.svgIcon.viewBox || '0 0 512 512'"
            [innerHtml]="Config.Server.svgIcon.items | safeHtml">
       </svg>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [SafeHtmlPipe]
 })
 export class IconComponent {

@@ -2,8 +2,8 @@ import {Injectable} from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
-import {NotificationDTO, NotificationType,} from '../../../common/entities/NotificationDTO';
-import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
+import {type NotificationDTO, NotificationType,} from '../../../common/entities/NotificationDTO';
+import {type UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 
 export interface CountedNotificationDTO extends NotificationDTO {
   count: number;

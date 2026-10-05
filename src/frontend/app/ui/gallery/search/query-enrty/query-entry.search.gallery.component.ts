@@ -1,29 +1,29 @@
-import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output, ChangeDetectionStrategy} from '@angular/core';
 import {
   DatePatternFrequency,
-  DatePatternSearch,
-  DistanceSearch,
+  type DatePatternSearch,
+  type DistanceSearch,
   ListSearchQueryTypes,
-  OrientationSearch,
-  RangeSearch,
+  type OrientationSearch,
+  type RangeSearch,
   RangeSearchQueryTypes,
-  SearchListQuery,
-  SearchQueryDTO,
+  type SearchListQuery,
+  type SearchQueryDTO,
   SearchQueryTypes,
-  SomeOfSearchQuery,
-  TextSearch,
+  type SomeOfSearchQuery,
+  type TextSearch,
   TextSearchQueryMatchTypes,
   TextSearchQueryTypes,
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {Utils} from '../../../../../../common/Utils';
 import {
-  ControlValueAccessor,
+  type ControlValueAccessor,
   FormsModule,
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
   UntypedFormControl,
-  ValidationErrors,
-  Validator
+  type ValidationErrors,
+  type Validator
 } from '@angular/forms';
 import { DatePipe, NgClass } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
@@ -45,6 +45,7 @@ import {StringifySearchType} from '../../../../pipes/StringifySearchType';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     NgClass,

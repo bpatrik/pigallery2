@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
+import {Component, type OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {type ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {SettingsService} from '../settings.service';
 import {ShareService} from '../../gallery/share.service';
 import { DatePipe } from '@angular/common';
@@ -10,6 +10,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     selector: 'app-settigns-sharings-list',
     templateUrl: './sharings-list.component.html',
     styleUrls: ['./sharings-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent, DatePipe, StringifySearchQuery]
 })
 export class SharingsListComponent implements OnInit {

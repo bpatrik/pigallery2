@@ -1,5 +1,5 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {Component, Input, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {type MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {IconThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {MediaIcon} from '../../gallery/MediaIcon';
 
@@ -9,6 +9,7 @@ import { PopoverDirective } from 'ngx-bootstrap/popover';
     selector: 'app-duplicates-photo',
     templateUrl: './photo.duplicates.component.html',
     styleUrls: ['./photo.duplicates.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [PopoverDirective]
 })
 export class DuplicatesPhotoComponent implements OnInit, OnDestroy {

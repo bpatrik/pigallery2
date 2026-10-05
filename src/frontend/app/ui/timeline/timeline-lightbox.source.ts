@@ -1,11 +1,11 @@
 import {QueryList} from '@angular/core';
-import {Params} from '@angular/router';
+import {type Params} from '@angular/router';
 import {merge, Observable} from 'rxjs';
-import {LightboxLoadState, LightboxSource} from '../gallery/lightbox/LightboxSource';
+import {type LightboxLoadState, type LightboxSource} from '../gallery/lightbox/LightboxSource';
 import {GridMedia} from '../gallery/grid/GridMedia';
 import {GalleryPhotoComponent} from '../gallery/grid/photo/photo.grid.gallery.component';
-import {Dimension} from '../../model/IRenderable';
-import {MediaDTO, MediaDTOUtils} from '../../../../common/entities/MediaDTO';
+import {type Dimension} from '../../model/IRenderable';
+import {type MediaDTO, MediaDTOUtils} from '../../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../../common/QueryParams';
 import {TimelineStore} from './timeline.store';
 import {getTimelineMediaId} from './timeline-grouping';

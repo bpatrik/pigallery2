@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject, Observable} from 'rxjs';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {DirectoryContent} from '../contentLoader.service';
+import {type PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {type DirectoryContent} from '../contentLoader.service';
 import {map, switchMap} from 'rxjs/operators';
 import {Config} from '../../../../../common/config/public/Config';
 import {Utils} from '../../../../../common/Utils';

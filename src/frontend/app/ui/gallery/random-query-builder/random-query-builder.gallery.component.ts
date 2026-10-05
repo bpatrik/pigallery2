@@ -1,12 +1,12 @@
-import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import {Component, type OnDestroy, type OnInit, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import {type ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
-import {ActivatedRoute, Params} from '@angular/router';
+import {type SearchQueryDTO, SearchQueryTypes, type TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
+import {ActivatedRoute, type Params} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {SearchQueryParserService} from '../search/search-query-parser.service';
 import {ContentLoaderService} from '../contentLoader.service';
@@ -20,6 +20,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     selector: 'app-gallery-random-query-builder',
     templateUrl: './random-query-builder.gallery.component.html',
     styleUrls: ['./random-query-builder.gallery.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         NgIconComponent,
         FormsModule,

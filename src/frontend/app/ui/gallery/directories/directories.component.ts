@@ -1,6 +1,6 @@
-import {Component, ElementRef, HostListener, Input, OnChanges} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, type OnChanges, ChangeDetectionStrategy} from '@angular/core';
 import {DeviceDetectorService} from 'ngx-device-detector';
-import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
+import {type SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
 import { GalleryDirectoryComponent } from './directory/directory.gallery.component';
 
@@ -8,6 +8,7 @@ import { GalleryDirectoryComponent } from './directory/directory.gallery.compone
     selector: 'app-gallery-directories',
     templateUrl: './directories.component.html',
     styleUrls: ['./directories.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [GalleryDirectoryComponent]
 })
 export class DirectoriesComponent implements OnChanges {

@@ -1,19 +1,20 @@
 import {
-  AfterViewInit,
+  type AfterViewInit,
   ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
   HostListener,
   Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
+  type OnChanges,
+  type OnDestroy,
+  type OnInit,
   Output,
   QueryList,
-  SimpleChanges,
+  type SimpleChanges,
   ViewChild,
   ViewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
@@ -23,11 +24,11 @@ import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
 import {Subscription} from 'rxjs';
-import {ActivatedRoute, Params} from '@angular/router';
-import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
+import {ActivatedRoute, type Params} from '@angular/router';
+import {type MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../../../common/QueryParams';
-import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
-import {GroupByTypes, GroupingMethod} from '../../../../../common/entities/SortingMethods';
+import {GallerySortingService, type MediaGroup} from '../navigator/sorting.service';
+import {GroupByTypes, type GroupingMethod} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import { AsyncPipe } from '@angular/common';
@@ -40,6 +41,7 @@ import {BlogService} from '../blog/blog.service';
   selector: 'app-gallery-grid',
   templateUrl: './grid.gallery.component.html',
   styleUrls: ['./grid.gallery.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     GalleryBlogComponent,

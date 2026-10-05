@@ -1,11 +1,11 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
-import {FileDTO} from '../../../../../common/entities/FileDTO';
+import {type FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
 import {ContentService} from '../content.service';
 import {map, mergeMap, Observable, shareReplay} from 'rxjs';
 import {MDFilesFilterPipe} from '../../../pipes/MDFilesFilterPipe';
-import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
+import {type MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {Config} from '../../../../../common/config/public/Config';
 
 @Injectable()

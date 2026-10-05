@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 
-import {IsActiveMatchOptions, Router} from '@angular/router';
+import {type IsActiveMatchOptions, Router} from '@angular/router';
 import {ShareService} from '../ui/gallery/share.service';
 import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';

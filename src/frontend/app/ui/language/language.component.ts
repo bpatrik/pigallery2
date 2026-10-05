@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
@@ -10,6 +10,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-language',
     templateUrl: './language.component.html',
     styleUrls: ['./language.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,

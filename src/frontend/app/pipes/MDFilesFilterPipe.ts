@@ -1,6 +1,6 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {FileDTO} from '../../../common/entities/FileDTO';
-import {MDFileDTO} from '../../../common/entities/MDFileDTO';
+import {Pipe, type PipeTransform} from '@angular/core';
+import {type FileDTO} from '../../../common/entities/FileDTO';
+import {type MDFileDTO} from '../../../common/entities/MDFileDTO';
 
 @Pipe({
     name: 'mdFiles',

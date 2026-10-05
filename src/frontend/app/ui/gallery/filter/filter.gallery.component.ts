@@ -1,6 +1,6 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {FilterOption, FilterService, SelectedFilter} from './filter.service';
+import {type FilterOption, FilterService, type SelectedFilter} from './filter.service';
 import { NgClass, DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
     selector: 'app-gallery-filter',
     styleUrls: ['./filter.gallery.component.css'],
     templateUrl: './filter.gallery.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     PopoverDirective,
     NgIconComponent,

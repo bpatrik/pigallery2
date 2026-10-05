@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import {Pipe, type PipeTransform} from '@angular/core';
 import {GroupByTypes, SortByTypes} from '../../../common/entities/SortingMethods';
 import {EnumTranslations} from '../ui/EnumTranslations';
 
