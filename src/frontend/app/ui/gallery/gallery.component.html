@@ -60,12 +60,12 @@
               <app-gallery-map
                 class="rounded"
                 [class.rounded-start-0]="ShowMarkDown"
-                [photos]="directoryContent?.mediaGroups | photosOnly"
-              [gpxFiles]="directoryContent?.metaFile | gpxFiles"></app-gallery-map>
+                [photos]="$safeNavigationMigration(directoryContent?.mediaGroups) | photosOnly"
+              [gpxFiles]="$safeNavigationMigration(directoryContent?.metaFile) | gpxFiles"></app-gallery-map>
             }
           </div>
         }
-        <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
+        <app-gallery-grid [mediaGroups]="$safeNavigationMigration(directoryContent?.mediaGroups)"
           [mediaIdFn]="mediaIdFn"
           (mediaOpen)="openMedia($event)"
           (missingMedia)="closeMissingMedia()"

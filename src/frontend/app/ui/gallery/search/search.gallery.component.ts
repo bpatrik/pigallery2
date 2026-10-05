@@ -1,4 +1,4 @@
-import {Component, OnDestroy, TemplateRef} from '@angular/core';
+import {Component, OnDestroy, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
 import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
@@ -24,6 +24,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
   templateUrl: './search.gallery.component.html',
   styleUrls: ['./search.gallery.component.css'],
   providers: [AutoCompleteService],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     GallerySearchFieldBaseComponent,

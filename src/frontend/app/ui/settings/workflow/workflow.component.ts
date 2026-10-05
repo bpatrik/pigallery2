@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren, ChangeDetectionStrategy} from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -48,6 +48,7 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
             multi: true,
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     PopoverDirective,
     NgIconComponent,

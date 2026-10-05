@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnDestroy, TemplateRef,} from '@angular/core';
+import {Component, Input, OnChanges, OnDestroy, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {Subscription, timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
@@ -12,6 +12,7 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
     selector: 'app-settings-job-progress',
     templateUrl: './job-progress.settings.component.html',
     styleUrls: ['./job-progress.settings.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,

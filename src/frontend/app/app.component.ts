@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
@@ -13,6 +13,7 @@ import { RouterOutlet } from '@angular/router';
     selector: 'app-pi-gallery2',
     template: `
     <router-outlet></router-outlet>`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterOutlet]
 })
 export class AppComponent implements OnInit, OnDestroy {

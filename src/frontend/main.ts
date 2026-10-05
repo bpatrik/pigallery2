@@ -1,6 +1,6 @@
 import {enableProdMode, importProvidersFrom, Injectable, provideZoneChangeDetection} from '@angular/core';
 import {environment} from './environments/environment';
-import {HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr} from '@angular/common/http';
 import {ErrorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, UrlSerializer, UrlTree} from '@angular/router';
 import {bootstrapApplication, BrowserModule, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule} from '@angular/platform-browser';
@@ -257,7 +257,7 @@ bootstrapApplication(AppComponent, {
     FileSizePipe,
     DatePipe,
     DurationPipe,
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
     provideAnimations()
   ]
 })

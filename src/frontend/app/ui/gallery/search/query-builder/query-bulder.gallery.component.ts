@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output,} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output, ChangeDetectionStrategy} from '@angular/core';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../../common/entities/SearchQueryDTO';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
@@ -22,6 +22,7 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
             multi: true,
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         GallerySearchFieldBaseComponent,
         FormsModule,

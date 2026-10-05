@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output,OnChanges} from '@angular/core';
+import {Component, EventEmitter, Input, Output, OnChanges, ChangeDetectionStrategy} from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {map, Observable} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
@@ -10,6 +10,7 @@ import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathP
     selector: 'app-gallery-blog',
     templateUrl: './blog.gallery.component.html',
     styleUrls: ['./blog.gallery.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     MarkdownComponent,
     NgIconComponent,

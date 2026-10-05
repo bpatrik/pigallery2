@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild,} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -51,6 +51,7 @@ import {QueryService} from '../../../../model/query.service';
   selector: 'app-gallery-map-lightbox',
   styleUrls: ['./lightbox.map.gallery.component.css'],
   templateUrl: './lightbox.map.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LeafletModule,
     NgIconComponent

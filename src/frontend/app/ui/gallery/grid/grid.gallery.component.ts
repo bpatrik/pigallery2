@@ -14,6 +14,7 @@ import {
   SimpleChanges,
   ViewChild,
   ViewChildren,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
@@ -40,6 +41,7 @@ import {BlogService} from '../blog/blog.service';
   selector: 'app-gallery-grid',
   templateUrl: './grid.gallery.component.html',
   styleUrls: ['./grid.gallery.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     GalleryBlogComponent,

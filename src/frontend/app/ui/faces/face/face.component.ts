@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {PersonDTO} from '../../../../../common/entities/PersonDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -15,6 +15,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     selector: 'app-face',
     templateUrl: './face.component.html',
     styleUrls: ['./face.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     NgIconComponent

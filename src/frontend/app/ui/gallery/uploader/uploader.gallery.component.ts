@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { NgStyle } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';
@@ -7,6 +7,7 @@ import {UploaderService} from './uploader.service';
   selector: 'app-gallery-uploader',
   templateUrl: './uploader.gallery.component.html',
   styleUrls: ['./uploader.gallery.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     NgStyle

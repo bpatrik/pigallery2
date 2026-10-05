@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, TemplateRef} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -21,6 +21,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     selector: 'app-gallery-share',
     templateUrl: './share.gallery.component.html',
     styleUrls: ['./share.gallery.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,

@@ -649,7 +649,7 @@
           }
           @if (state.tags?.githubIssue) {
             <a
-              [href]="'https://github.com/bpatrik/pigallery2/issues/'+state.tags?.githubIssue">
+              [href]="'https://github.com/bpatrik/pigallery2/issues/'+$safeNavigationMigration(state.tags?.githubIssue)">
               <ng-container i18n>See</ng-container>
             #{{state.tags?.githubIssue}}.</a>
           }

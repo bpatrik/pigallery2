@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ExtensionInstallerService } from './extension-installer.service';
 import { ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
 import { NotificationService } from '../../../model/notification.service';
@@ -11,6 +11,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-extension-installer',
     templateUrl: './extension-installer.component.html',
     styleUrls: ['./extension-installer.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent, ModalDirective]
 })
 export class ExtensionInstallerComponent {

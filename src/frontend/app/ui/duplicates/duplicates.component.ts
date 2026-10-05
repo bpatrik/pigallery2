@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DuplicateService} from './duplicates.service';
 import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
@@ -24,6 +24,7 @@ interface GroupedDuplicate {
     selector: 'app-duplicate',
     templateUrl: './duplicates.component.html',
     styleUrls: ['./duplicates.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     RouterLink,

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
+import {Component, EventEmitter, forwardRef, Input, Output, ChangeDetectionStrategy} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -45,6 +45,7 @@ import {StringifySearchType} from '../../../../pipes/StringifySearchType';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     NgClass,

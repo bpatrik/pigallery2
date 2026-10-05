@@ -6,7 +6,7 @@ import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {LoadingBarService} from '@ngx-loading-bar/core';
 import {ShareService} from '../../ui/gallery/share.service';
 import {VersionService} from '../version.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, withXhr } from '@angular/common/http';
 
 class MockShareService {
   wait(): Promise<boolean> {
@@ -28,7 +28,7 @@ describe('UserService', (): void => {
         LoadingBarService,
         NetworkService,
         { provide: ShareService, useClass: MockShareService },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr(), withInterceptorsFromDi()),
         provideHttpClientTesting(),
     ]
 });

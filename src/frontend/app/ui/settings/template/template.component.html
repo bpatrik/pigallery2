@@ -39,7 +39,7 @@
         @if (states.tags?.uiJob && !states.tags?.uiJob[0].description) {
           <div class="col-auto">
             <ng-container
-              *ngTemplateOutlet="JobTemplate; context:{ uiJob: states.tags?.uiJob }"
+              *ngTemplateOutlet="JobTemplate; context:{ uiJob: $safeNavigationMigration(states.tags?.uiJob) }"
             ></ng-container>
           </div>
         }
@@ -59,7 +59,7 @@
       @if (states.tags?.uiJob && !states.tags?.uiJob[0].description) {
         <div>
           <ng-container
-            *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states.tags?.uiJob }"
+            *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: $safeNavigationMigration(states.tags?.uiJob) }"
           ></ng-container>
         </div>
       }
@@ -67,10 +67,10 @@
         <div>
           <hr/>
           <ng-container
-            *ngTemplateOutlet="JobTemplate; context:{ uiJob: states.tags?.uiJob }"
+            *ngTemplateOutlet="JobTemplate; context:{ uiJob: $safeNavigationMigration(states.tags?.uiJob) }"
           ></ng-container>
           <ng-container
-            *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states.tags?.uiJob }"
+            *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: $safeNavigationMigration(states.tags?.uiJob) }"
           ></ng-container>
         </div>
       }
@@ -87,7 +87,7 @@
         {{ rStates.description }}
         @if (rStates.tags?.githubIssue) {
           <a
-            [href]="'https://github.com/bpatrik/pigallery2/issues/'+rStates.tags?.githubIssue">
+            [href]="'https://github.com/bpatrik/pigallery2/issues/'+$safeNavigationMigration(rStates.tags?.githubIssue)">
             <ng-container i18n>See</ng-container>
           #{{ rStates.tags?.githubIssue }}.</a>
         }
@@ -129,7 +129,7 @@
                 [id]="ConfigPath+'.'+ck">
                 <div class="card-body">
                   <h5 class="card-title">
-                    <ng-icon [name]="rStates?.value.__state[ck].tags?.uiIcon"></ng-icon>
+                    <ng-icon [name]="$safeNavigationMigration(rStates?.value.__state[ck].tags?.uiIcon)"></ng-icon>
                     {{ rStates?.value.__state[ck].tags?.name || ck }}
                   </h5>
                   <ng-container
@@ -174,10 +174,10 @@
     @if (rStates.tags?.uiJob && !skipJobs) {
       <div>
         <ng-container
-          *ngTemplateOutlet="JobTemplate; context:{ uiJob: rStates.tags?.uiJob }"
+          *ngTemplateOutlet="JobTemplate; context:{ uiJob: $safeNavigationMigration(rStates.tags?.uiJob) }"
         ></ng-container>
         <ng-container
-          *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: rStates.tags?.uiJob }"
+          *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: $safeNavigationMigration(rStates.tags?.uiJob) }"
         ></ng-container>
       </div>
     }

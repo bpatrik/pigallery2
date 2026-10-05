@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -26,6 +26,7 @@ export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaBut
   selector: 'app-gallery-grid-photo',
   templateUrl: './photo.grid.gallery.component.html',
   styleUrls: ['./photo.grid.gallery.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryPhotoLoadingComponent,
     NgIconComponent,

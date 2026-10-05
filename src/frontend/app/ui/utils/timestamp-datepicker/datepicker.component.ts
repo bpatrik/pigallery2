@@ -1,10 +1,11 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ChangeDetectionStrategy} from '@angular/core';
 import { BsDatepickerInputDirective, BsDatepickerDirective } from 'ngx-bootstrap/datepicker';
 import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-timestamp-datepicker',
     templateUrl: './datepicker.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         BsDatepickerInputDirective,
         FormsModule,

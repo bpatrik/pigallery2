@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import {Component, HostListener, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
 import {Subscription} from 'rxjs';
 
@@ -10,6 +10,7 @@ import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../co
   templateUrl: './media-button-modal.component.html',
   styleUrls: ['./media-button-modal.component.css'],
   imports: [FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class MediaButtonModalComponent implements OnInit, OnDestroy {

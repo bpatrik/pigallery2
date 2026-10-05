@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
+import {Component, EventEmitter, Input, Output, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -14,6 +14,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-settings-job-button',
     templateUrl: './job-button.settings.component.html',
     styleUrls: ['./job-button.settings.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent]
 })
 export class JobButtonComponent {

@@ -9,6 +9,7 @@ import {
   OnDestroy,
   OnInit,
   ViewChild,
+  ChangeDetectionStrategy
 } from '@angular/core';
 import { formatDate } from '@angular/common';
 import {ActivatedRoute, Params, Router} from '@angular/router';
@@ -57,6 +58,7 @@ export interface TimelineRailYear {
   selector: 'app-timeline',
   templateUrl: './timeline.component.html',
   styleUrls: ['./timeline.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
     GalleryGridComponent,

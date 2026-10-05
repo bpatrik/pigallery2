@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {FacesService} from './faces.service';
 import {QueryService} from '../../model/query.service';
 import {combineLatest, Observable} from 'rxjs';
@@ -15,6 +15,7 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
     selector: 'app-faces',
     templateUrl: './faces.component.html',
     styleUrls: ['./faces.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     FaceComponent,

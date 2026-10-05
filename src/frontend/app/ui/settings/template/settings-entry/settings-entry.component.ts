@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, TemplateRef} from '@angular/core';
+import {Component, forwardRef, Input, OnChanges, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
@@ -64,6 +64,7 @@ interface IState {
             multi: true,
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     GallerySearchFieldComponent,
     FormsModule,

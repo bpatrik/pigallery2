@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
@@ -14,6 +14,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-share-login',
     templateUrl: './share-login.component.html',
     styleUrls: ['./share-login.component.css'],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     LanguageComponent,
     IconComponent,

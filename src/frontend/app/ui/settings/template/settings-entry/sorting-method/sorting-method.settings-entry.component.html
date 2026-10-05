@@ -4,11 +4,11 @@
   <button dropdownToggle type="button"
     class="btn dropdown-toggle btn-outline-primary btn-navigator"
     aria-controls="sorting-dropdown">
-    @if (sortingMethod?.ascending !== null) {
+    @if ($safeNavigationMigration(sortingMethod?.ascending) !== null) {
       <ng-icon
       [name]="!sortingMethod?.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
     }
-    <app-sorting-method-icon [method]="sortingMethod?.method"></app-sorting-method-icon>
+    <app-sorting-method-icon [method]="$safeNavigationMigration(sortingMethod?.method)"></app-sorting-method-icon>
 
   </button>
   <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
@@ -24,7 +24,7 @@
       </div>
     }
 
-    @if (isBidirectional(sortingMethod?.method)) {
+    @if (isBidirectional($safeNavigationMigration(sortingMethod?.method))) {
       <hr>
         <div class="dropdown-item " role="menuitem"
           [class.active]="sortingMethod?.ascending == true"

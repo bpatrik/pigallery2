@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, TemplateRef, ViewChild,} from '@angular/core';
+import {Component, ElementRef, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {SearchQueryTypes, TextSearch,} from '../../../../common/entities/SearchQueryDTO';
@@ -19,6 +19,7 @@ import {NavigationService} from '../../model/navigation.service';
   selector: 'app-albums',
   templateUrl: './albums.component.html',
   styleUrls: ['./albums.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
     AlbumComponent,
