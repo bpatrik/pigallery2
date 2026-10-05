@@ -9,7 +9,7 @@
 
 ## Upgrade Handoff
 
-- Steps 0–3 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged. Step 4 is completed and validated on `upgrade/node-24` (awaiting merge), based on `master` at `de0ce1c4` (the Angular 22 merge). Check branch/merge state before starting Step 5 and base it on the latest completed step, rather than the original `stack-upgrade` baseline.
+- Steps 0–4 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged into `master` (Step 4 / PR #5 merged at `e1b1b561`). Step 5 (`upgrade/openid-client-6`) will base on `master` at `e1b1b561`.
 - Step 4 validation on Node 24.21.0 / npm 11.19.0 passed: backend 635 tests on SQLite and MariaDB, Karma 145 tests, all 16 locale builds, seven Cypress specs (18 passing, 12 intentionally pending documentation tests), and nine automated Brave smoke checks. All three amd64 Dockerfiles build and pass diagnostics; native SQLite/bcrypt and HEIC/AVIF/JPEG/PNG decoding pass. Detailed results are in the upgrade plan and [Techdebt.md](docs/fork-features/Techdebt.md). Temporary `/tmp/pg-node24-*` harnesses and logs are local artifacts; future runs must not assume they exist. Arm64 image builds remain a CI check.
 - Angular 22.2.1 requires TypeScript 6; this project pins 6.0.3. The backend uses NodeNext settings while emitting CommonJS; frontend configs use bundler resolution. ngx-bootstrap is now 22.0.0 with signal APIs and direct module imports; the app retains zone.js. A separate zoneless sub-plan is in the upgrade plan. Hammer integration was removed upstream and replaced with pointer gestures; Angular animations remain follow-up work.
 

@@ -452,7 +452,7 @@ future runs must recreate their harnesses.
 | 1 Angular 20 | `upgrade/angular-20` | Completed |
 | 2 Angular 21 | `upgrade/angular-21` | Completed, validated and merged |
 | 3 Angular 22 | `upgrade/angular-22` | Completed, validated and merged |
-| 4 Node 24 | `upgrade/node-24` | Completed and validated; awaiting merge |
+| 4 Node 24 | `upgrade/node-24` | Completed, validated and merged |
 | 5 openid-client 6 | `upgrade/openid-client-6` | Not started |
 | 6 ffmpeg wrapper | `upgrade/ffmpeg-wrapper` | Not started |
 | 7 Express 5 | `upgrade/express-5` | Not started |
