@@ -18,7 +18,10 @@ To keep development organized, please follow our feature workflow and rule of th
 ## How to develop
 
 1. Download the source files
-2. install dependencies `npm install`
+2. Use Node.js **>=24.15.0 <25** and npm **11.19.0**. With nvm, run
+   `nvm install && nvm use`, then `npm install --global npm@11.19.0` and
+   install dependencies with `npm ci`. Reinstall dependencies when changing
+   Node major versions so native modules match the active runtime.
 3. Build client  `npm run run-dev`
    * This will build the client with english localization and will keep building if you change the source files. 
    * Note: This process does not exit, so you need another terminal to run the next step.

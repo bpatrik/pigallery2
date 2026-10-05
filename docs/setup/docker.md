@@ -10,7 +10,10 @@ available tags:
 
 **Note**: Some changes may require database reset or config changes, see [#317](https://github.com/bpatrik/pigallery2/issues/317) (If you want to reduce the frequency of those, use stable builds (`latest`)
 
-We support multiple architectures, including `amd64`, `arm64v8`, `arm32v7` (deprecated [see](https://github.com/bpatrik/pigallery2/issues/1027)).
+This fork's Node 24 images support `amd64` and `arm64v8`. ARMv7 / 32-bit
+images are no longer built because the official
+[Node 24 base images](https://github.com/nodejs/docker-node/blob/main/versions.json)
+do not support that architecture. Raspberry Pi deployments need a 64-bit OS.
 
 It contains all necessary dependencies, auto-restarts on reboot, supports HTTPS, and is easy to upgrade.
 
