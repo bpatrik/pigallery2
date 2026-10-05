@@ -13,7 +13,7 @@ Hard constraints:
 - Keep the existing architecture: the backend serves the built frontend,
   TypeORM managers/routers stay as they are, and there are no
   schema/`DataStructureVersion` changes.
-- One upgrade step per branch, created from `master`. Each branch merges only
+- One upgrade step per branch, created from `stack-upgrade`. Each branch merges only
   when its validation gate passes.
 - Commit automatic migrations (`ng update`, schematics) separately from manual
   fixes, so the diffs are easy to review and later upstream cherry-picks can be
@@ -57,15 +57,16 @@ Hard constraints:
 
 ### Step 0 – Baseline and compatibility matrix
 
-- [ ] Run the full validation gate on current `master` / Node 22 and record any
-      failures that already exist.
-- [ ] Add `typescript` as a pinned direct devDependency, at the version
-      currently resolved.
-- [ ] For Angular 20, 21 and 22, find the library versions whose peer ranges
+- [x] Run the full validation gate on current `stack-upgrade` / Node 22 and record any
+      failures that already exist. (Validation passed: 0 failures; Mocha 635 passing on
+      SQLite & MariaDB/MySQL, Karma 138 SUCCESS, build & lint clean, full gate passed).
+- [x] Add `typescript` as a pinned direct devDependency, at the version
+      currently resolved (`5.8.3`).
+- [x] For Angular 20, 21 and 22, find the library versions whose peer ranges
       match (`npm view <pkg>@<ver> peerDependencies`). Check every library in
       the table above plus `@angular-builders/custom-webpack`,
       `angular-eslint`, `zone.js` and `typescript`. Fill in the matrix below.
-- [ ] For every library with no release for a target version, decide:
+- [x] For every library with no release for a target version, decide:
       upgrade, replace, remove, or a temporary `overrides` entry. Likely
       candidates: `ngx-clipboard`, `@ngx-loading-bar/core`.
 
@@ -73,19 +74,19 @@ Compatibility matrix (fill in during step 0):
 
 | Package | Ng 20 | Ng 21 | Ng 22 | Notes |
 |---|---|---|---|---|
-| typescript | | | | |
-| zone.js | | | | |
-| @angular-builders/custom-webpack | | | | Blocks each step |
-| angular-eslint | | | | |
-| ngx-bootstrap | | | | |
-| @bluehalo/ngx-leaflet (+ markercluster) | | | | |
-| ngx-markdown | | | | |
-| ngx-toastr | | | | |
-| ngx-cookie-service | | | | |
-| ngx-device-detector | | | | |
-| @ng-icons/core, ionicons | | | | |
-| ngx-clipboard | | | | Possibly unmaintained |
-| @ngx-loading-bar/core | | | | Possibly unmaintained |
+| typescript | ~5.8.3 / ~5.9.0 | ~5.9.0 / ~6.0.0 | ~6.0.0 | Compiler-cli peer ranges: Ng 20 (`>=5.8 <6.0`), Ng 21 (`>=5.9 <6.1`), Ng 22 (`>=6.0 <6.1`). Directly pinned to `5.8.3` in Step 0 |
+| zone.js | ~0.15.1 | ~0.15.1 / 0.16.3 | 0.16.3 | Ng 20 supports `~0.15.0`; Ng 21 & 22 support `~0.15.0 \|\| ~0.16.0` |
+| @angular-builders/custom-webpack | 20.0.0 | 21.1.0 | 22.0.1 | Official stable releases exist for all three versions (blocks resolved) |
+| angular-eslint | 20.7.0 | 21.4.0 | 22.5.0 | Regular major releases match Angular versions |
+| ngx-bootstrap | 20.0.2 | 21.2.2 | 22.0.0 | Synchronized with Angular releases |
+| @bluehalo/ngx-leaflet (+ markercluster) | 20.0.0 (cluster: 20.0.3) | 21.2.1 (cluster: 21.1.0) | 22.0.0 (cluster: 22.0.0) | Synchronized with Angular releases |
+| ngx-markdown | 20.1.0 | 21.3.0 | 22.1.0 | Synchronized with Angular releases |
+| ngx-toastr | 19.1.0 | 20.0.5 | 20.0.5 (overrides) | 19.1.0 peer is `>=16.0.0-0` (works on 20); 20.0.5 peer is `^21.0.0` (works on 21); for Ng 22, use npm overrides or local toast service |
+| ngx-cookie-service | 20.1.1 | 21.3.1 | 22.0.0 | Synchronized with Angular releases |
+| ngx-device-detector | 10.1.0 | 11.0.0 | 12.0.0 | Versioned independently (v10 for Ng 20, v11 for Ng 21, v12 for Ng 22) |
+| @ng-icons/core, ionicons | 32.0.0 | 34.0.0 | 36.1.0 | Versioned independently (v32 for Ng 20, v34 for Ng 21, v36 for Ng 22) |
+| ngx-clipboard | 16.0.0 | 16.0.0 | 16.0.0 | Unmaintained (peer is `>=13.0.0`, installs cleanly). Decision: replace with native `navigator.clipboard` or `@angular/cdk/clipboard` in Step 1 |
+| @ngx-loading-bar/core | 7.0.1 | 7.0.1 | 7.0.1 | Peer is `>=16.0.0` (installs cleanly). Decision: retain 7.0.1 or replace with lightweight local progress bar component in Step 1 |
 
 ### Step 1 – Angular 19 → 20 (branch `upgrade/angular-20`)
 
@@ -197,7 +198,7 @@ Can start any time after step 1, since Angular 20+ supports Node 24.
 
 | Step | Branch | Status |
 |---|---|---|
-| 0 Baseline / matrix | `upgrade/baseline` | Not started |
+| 0 Baseline / matrix | `stack-upgrade` | Completed |
 | 1 Angular 20 | `upgrade/angular-20` | Not started |
 | 2 Angular 21 | `upgrade/angular-21` | Not started |
 | 3 Angular 22 | `upgrade/angular-22` | Not started |

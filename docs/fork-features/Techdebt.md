@@ -18,7 +18,7 @@ later, **L** = cleanup.
 | F5 | Webpack-based builder through `@angular-builders/custom-webpack` | `angular.json`, `angular.webpack.js`, `karma.conf.js` | M | Only customisation is one `IgnorePlugin`; moving to `@angular/build:application` changes the output layout and backend serving |
 | F6 | Karma + Jasmine test runner | `karma.conf.js` | M | Angular is moving to Vitest; Karma is deprecated upstream. The nested plugin resolution workaround is fragile |
 | F7 | zone.js change detection | `polyfills.ts` | L | Zoneless is the new default; adopt only after a signals review |
-| F8 | Possibly unmaintained Angular libraries: `ngx-clipboard` 16, `@ngx-loading-bar/core` 7 | `package.json` | M | Confirm in upgrade step 0; both are small enough to replace with local code |
+| F8 | Possibly unmaintained Angular libraries: `ngx-clipboard` 16, `@ngx-loading-bar/core` 7 | `package.json` | M | Confirmed in step 0: `ngx-clipboard` has unbounded peers (`>=13.0.0`) but is stagnant (plan replacement in step 1 with navigator.clipboard / CDK); `@ngx-loading-bar/core` has unbounded peers (`>=16.0.0`) and installs cleanly |
 | F9 | `ts-helpers` dependency | `package.json` | L | Likely obsolete with `importHelpers` / tslib; check usage and remove |
 
 ## Backend
@@ -31,7 +31,7 @@ later, **L** = cleanup.
 | B4 | `mysql` 2.18.1 driver is unmaintained | `optionalDependencies` | M | TypeORM supports `mysql2`; needs a driver switch plus MySQL/MariaDB test run |
 | B5 | Node `engines` capped at `<24` | `package.json` | M | Upgrade step 4 |
 | B6 | Root `tsconfig.json` shared by the frontend and the CommonJS backend, using `moduleResolution: node` and `downlevelIteration` | `tsconfig.json` | M | Deprecated in TS 6; split the configs (upgrade step 3) |
-| B7 | `typescript` not a direct dependency | `package.json` | L | Pin it in upgrade step 0 |
+| B7 | `typescript` not a direct dependency | `package.json` | L | Resolved: pinned to `5.8.3` as devDependency in upgrade step 0 |
 
 ## Security follow-ups
 
