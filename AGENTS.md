@@ -9,13 +9,13 @@
 
 ## Upgrade Handoff
 
-- Steps 0–2 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are complete. Angular 21 changes are on `upgrade/angular-21`; check branch/merge state before starting Step 3 (`upgrade/angular-22`) and base it on the latest completed step, rather than the original `stack-upgrade` baseline.
-- Step 2 validation passed: backend 635 tests on SQLite and MariaDB, Karma 138 tests, all 16 locale builds, the six existing Cypress specs, and eight automated Brave smoke checks. Detailed results and remaining work are in the upgrade plan and [Techdebt.md](docs/fork-features/Techdebt.md). Temporary `/tmp/pg-angular21-*` harnesses and logs are local artifacts; future runs must not assume they exist.
-- Step 3 still needs the TypeScript 6 backend configuration work and a decision about ngx-bootstrap's zoneless requirement. HammerJS and Angular animations remain deprecated follow-up work; Step 2 retained them.
+- Steps 0–2 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged. Step 3 is completed and validated on `upgrade/angular-22`, based on `master` at `08d3c531`; it has not been merged. Check branch/merge state before starting Step 4 and base it on the latest completed step, rather than the original `stack-upgrade` baseline.
+- Step 3 validation passed: backend 635 tests on SQLite and MariaDB, Karma 145 tests (including seven new pointer gesture tests), all 16 locale builds, seven Cypress specs (18 passing, 12 intentionally pending documentation tests), and nine automated Brave smoke checks. Bootstrap controls with zone.js and an upload toast were verified. Detailed results are in the upgrade plan and [Techdebt.md](docs/fork-features/Techdebt.md). Temporary `/tmp/pg-angular22-*` harnesses and logs are local artifacts; future runs must not assume they exist.
+- Angular 22.2.1 requires TypeScript 6; this project pins 6.0.3. The backend uses NodeNext settings while emitting CommonJS; frontend configs use bundler resolution. ngx-bootstrap is now 22.0.0 with signal APIs and direct module imports; the app retains zone.js. A separate zoneless sub-plan is in the upgrade plan. Hammer integration was removed upstream and replaced with pointer gestures; Angular animations remain follow-up work.
 
 ## Project Setup
 
-- Use Node.js 22 (`nvm use 22`). The project supports Node `>=22.12.0 <24`; native modules such as `better-sqlite3` must be built for the active Node ABI.
+- Use Node.js 22 (`nvm use 22`). The project supports Node `>=22.22.3 <24`; native modules such as `better-sqlite3` must be built for the active Node ABI.
 - To run the local app, build the English frontend with `npm run build-en`, then start the backend with `npm start -- --Server-port=8081`; open `http://localhost:8081/`. The backend serves the built frontend. Do not change Angular's serve configuration for this workflow.
 - Despite its name, `npm run build-en` currently builds all locales: the Gulp frontend command does not forward the language filter. Check `dist/<locale>/index.html` outputs before scheduling a redundant full-locale build.
 - TypeScript under `src/` is authoritative. `npm run build-backend` compiles it; avoid hand-editing generated JavaScript.
@@ -41,7 +41,7 @@
   - Run specific spec: `source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && unset ELECTRON_RUN_AS_NODE && npx cypress run --spec test/cypress/e2e/share.cy.ts`.
   - Full suite: `source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && unset ELECTRON_RUN_AS_NODE && npm run cypress:run`.
   - Overriding target server: Pass `CYPRESS_baseUrl=http://localhost:8081` to run Cypress specs against another running instance (such as the smoke test server on port 8081).
-  - Cypress 14 did not recognize Brave through its executable path alone. A temporary `setupNodeEvents` browser definition worked with `family: 'chromium'`, `name: 'chromium'`, `channel: 'stable'`, the installed browser version, and `/usr/bin/brave-browser-stable`; run with `--browser chromium`. Configs outside the repo need explicit project/support paths.
+  - Cypress 15.19.0 is required for TypeScript 6; Cypress 14 hardcodes deprecated `downlevelIteration`. A temporary `setupNodeEvents` browser definition works for Brave with `family: 'chromium'`, `name: 'chromium'`, `channel: 'stable'`, the installed browser version, and `/usr/bin/brave-browser-stable`; run with `--browser chromium`. Configs outside the repo need explicit project/support paths. Resolve all of these paths consistently: mixing `/home/...` symlinks and `/mnt/...` real paths can trigger TS 6 `rootDir` errors.
 - Browser checks: build with `npm run build-en`, start the backend on 8081, and drive it with the integrated browser tools. Timeline/Folders client state is in memory, so test Back restore with in-app navigation, not full reloads.
 - If the integrated browser is unavailable, use automated browser smoke checks and record that distinction. For upload checks, copy demo media into an isolated fixture with separate config/database/cache paths and enable uploads there. Timeline Back checks must restore a nonzero scroll position in the same document; lazily rendered gallery items may require repeated scrolling before assertions.
 - If another server already holds 8081, start a second one on 8082 instead of killing it. When the integrated browser tab is not visible (`document.visibilityState === 'hidden'`), `requestAnimationFrame` and animations pause and Playwright clicks/keys never complete; use `page.evaluate(() => el.click())` and verify viewer animations in a visible tab.
@@ -50,18 +50,23 @@
 
 - **Root `tsconfig.json` vs CommonJS Backend**:
   - `ng update` attempts to set `"moduleResolution": "bundler"` in root `tsconfig.json`.
-  - Because the backend compiles to CommonJS (`"module": "CommonJS"`), TypeScript rejects `"bundler"` (`TS5095: Option 'bundler' can only be used when 'module' is set to 'es2015' or later`).
-  - The root `tsconfig.json` MUST keep `"moduleResolution": "node"` while the backend remains CommonJS. Since Step 2 it excludes `src/frontend/**/*`; frontend app and spec configs override resolution to `bundler` and reset `exclude` so their own files remain included. Angular 21 package exports require this separation already, before the TS 6 backend work in Step 3.
-- **Angular 21 & zone.js / ngx-bootstrap**:
-  - Keep `provideZoneChangeDetection()` in the application bootstrap to preserve zone.js behavior; Angular 21 defaults to zoneless.
-  - `ngx-bootstrap` is pinned to `21.0.1`. Releases `21.2+` require zoneless change detection, change inputs to signals, and remove `forRoot()`; don't bump to them without a separate migration.
+  - The backend remains CommonJS, so bundler resolution must not be applied to the root config. Since Step 3 it uses `"module": "NodeNext"` / `"moduleResolution": "NodeNext"`; absence of a package ESM `type` preserves CommonJS output. Do not restore deprecated `node` resolution or `downlevelIteration` under TS 6.
+  - Shared options are in `tsconfig.base.json`. Frontend app/spec configs inherit that base independently of backend settings and use `bundler`/`ES2022`. Keep strict Angular template checking in the frontend config and frontend sources excluded from the backend compile.
+  - TS 6 defaults differ: retain explicit `rootDir`, `types`, and `strict: false` alongside the existing `noImplicitAny: true`. Callable CommonJS modules need default imports; mocks must mutate the module itself, rather than the read-only namespace wrapper. `tslib` is a direct runtime dependency for emitted helpers.
+- **Angular 22 & zone.js / ngx-bootstrap**:
+  - Keep `provideZoneChangeDetection()` and explicit `ChangeDetectionStrategy.Eager` to preserve the app's current rendering behavior. Keep `withXhr()` for upload progress; Angular 22 otherwise defaults to fetch.
+  - ngx-bootstrap **22.0.0** uses signal inputs and direct module imports (no `forRoot()`). The published 21.2 guide prescribes zoneless, but the inspected v22 implementation has no bootstrap assertion and uses explicit render notifications. Retaining zone.js is a local compatibility choice; exercise all Bootstrap controls when updating this combination.
+  - Do not revert to ngx-bootstrap 21.0.1 on Angular 22: its `ComponentFactoryResolver` dependency was removed. ngx-toastr **20.0.5** still needs a scoped Angular common/core peer override; verify a visible toast and remove the override when a compatible release exists.
 - **Angular Tooling Dependency Pins**:
-  - Keep `@angular-devkit/schematics` and `@schematics/angular` aligned with the CLI (currently `21.2.25`). ng-icons' unbounded peer ranges initially pulled Angular 22 schematics; inspect `npm ls` after updates.
-  - `typescript-eslint` was updated to `8.56.1` because the previous `8.38` did not support TypeScript 5.9. Check compiler support when updating lint tooling.
+  - Keep `@angular-devkit/schematics` and `@schematics/angular` aligned with the CLI (currently `22.2.1`). ng-icons has unbounded peer ranges; inspect `npm ls` after updates.
+  - `typescript-eslint` **8.71.1** supports TypeScript 6. Check compiler support when updating lint tooling.
   - Keep the obsolete `marked/marked.min.js` entry out of Angular's global scripts. ngx-markdown imports its supported Marked peer directly.
-- **Angular 21 Host Listener Type Checking**:
+  - ngx-markdown 22's optional `marked-katex-extension` peer must be installed for webpack to resolve its dynamic import, even when math rendering is unused.
+  - custom-webpack 22 uses jiti for build configs. Its migration removed ts-node, but this project still needs **10.9.2** to load `gulpfile.ts`; do not remove it merely because the builder no longer needs it. `gulp-typescript` 5 and ts-node were checked with TS 6.
+- **Angular 22 Type Checking and Gestures**:
   - A resize handler with no parameters must use `@HostListener('window:resize')`, without an event argument.
-  - Hammer pinch callbacks receive gesture objects, not DOM Events. The host-listener bindings use `$any($event)` while retaining the typed `{scale: number}` handler parameters.
+  - Interfaces in decorated frontend classes need explicit type-only imports under TS 6 to avoid nonexistent runtime exports. Do not change runtime class imports used as injection tokens to type-only imports.
+  - Angular removed its Hammer APIs in v22. `LightboxGesturesDirective` now handles pointer capture, swipe/pan/pinch/tap and cancellation only on the lightbox gesture surface. Preserve its interactive-child exclusions and regression tests.
 - **Backend Tests Need a Built Frontend**:
   - Build the frontend before running the full backend suite. `PublicRouter` sharing tests read `dist/en/index.html` and fail with `ENOENT` if it is absent.
 - **Known SQLite Search Issue (Techdebt B8)**:
@@ -84,7 +89,7 @@
 
 ## Security Context
 
-- Security remediation snapshot from 2026-10-05 (Angular 21 migration): `npm audit --omit=dev` reports 0 vulnerabilities.
-- Full `npm audit` reports 40 advisories (1 low, 14 moderate, 23 high, 2 critical), reduced from 48 after Step 1; all remaining advisories are in devDependencies/tooling, including webpack build/serve dependencies, Karma, mocha, cypress, coveralls, nyc and gulp. Angular is now 21.2.25, with TypeScript 5.9.3.
+- Security remediation snapshot from 2026-10-06 (Angular 22 migration): `npm audit --omit=dev` reports 0 vulnerabilities.
+- Full `npm audit` reports 36 advisories (1 low, 12 moderate, 21 high, 2 critical), reduced from 40 after Step 2; all remaining advisories are in devDependencies/tooling, including webpack build/serve dependencies, Karma, mocha, cypress, coveralls, nyc and gulp. Angular is now 22.2.1, with TypeScript 6.0.3.
 - Uploads are authenticated and role-gated. Multer uses memory storage; the current parser limits each file to 50 MiB and each request to 10 file parts. Keep these bounds in mind when changing upload behavior; concurrent requests can still consume significant memory.
 - Security review also flagged implicit cookie/CSRF policy and no visible login throttling. Treat these as follow-up review items; deployment proxy and HTTPS configuration affect the right fix.
