@@ -90,16 +90,16 @@ Compatibility matrix (fill in during step 0):
 
 ### Step 1 – Angular 19 → 20 (branch `upgrade/angular-20`)
 
-- [ ] `ng update @angular/core@20 @angular/cli@20` (commit as is).
-- [ ] Bump TypeScript, `custom-webpack`, `angular-eslint`, zone.js and the
+- [x] `ng update @angular/core@20 @angular/cli@20` (commit as is).
+- [x] Bump TypeScript, `custom-webpack`, `angular-eslint`, zone.js and the
       ngx-* libraries to the step 0 matrix versions.
-- [ ] Remove the `beasties` override and the related `notes` entry.
-- [ ] Check that `karma.conf.js` still resolves the builder's own Karma plugin.
-- [ ] Separate commit: run the control-flow migration
+- [x] Remove the `beasties` override and the related `notes` entry.
+- [x] Check that `karma.conf.js` still resolves the builder's own Karma plugin.
+- [x] Separate commit: run the control-flow migration
       (`ng g @angular/core:control-flow`), since `*ngIf` / `*ngFor` are
       deprecated from v20. Review the templates that use `else` / `trackBy`
       by hand.
-- [ ] Validation gate.
+- [x] Validation gate (Gates 1–9 passed: clean tsc, Mocha 635 passing on SQLite & MySQL, Karma 138 SUCCESS, Cypress 6/6 specs passing, browser smoke test on 8081 passing 8/8, 0 vulnerabilities in production audit).
 
 ### Step 2 – Angular 20 → 21 (branch `upgrade/angular-21`)
 
@@ -199,7 +199,7 @@ Can start any time after step 1, since Angular 20+ supports Node 24.
 | Step | Branch | Status |
 |---|---|---|
 | 0 Baseline / matrix | `stack-upgrade` | Completed |
-| 1 Angular 20 | `upgrade/angular-20` | Not started |
+| 1 Angular 20 | `upgrade/angular-20` | Completed |
 | 2 Angular 21 | `upgrade/angular-21` | Not started |
 | 3 Angular 22 | `upgrade/angular-22` | Not started |
 | 4 Node 24 | `upgrade/node-24` | Not started |

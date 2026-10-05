@@ -29,7 +29,7 @@
 
 ## Security Context
 
-- Security remediation snapshot from 2026-10-04: direct backend dependencies were upgraded to patched releases, and `npm audit --omit=dev` reports 0 vulnerabilities. Re-run the audit before relying on this snapshot.
-- Full `npm audit` still reports 86 advisories (4 low, 35 moderate, 43 high, 4 critical). Several are development-tool transitive dependencies. Angular 19.2.15 is also bundled into the frontend and has high XSS advisories; the latest 19.2 release is still affected, while npm recommends Angular 22.2.1. Treat that framework-major migration as separate work and verify compatibility before upgrading.
+- Security remediation snapshot from 2026-10-05 (Angular 20 migration): direct backend and frontend production dependencies report 0 vulnerabilities via `npm audit --omit=dev`.
+- Full `npm audit` reports 48 advisories (1 low, 14 moderate, 31 high, 2 critical), reduced from 86; all remaining advisories are in devDependencies/tooling (mocha, cypress, coveralls, nyc, gulp-sourcemaps). Angular has been updated to 20.3.16, resolving previous Angular 19 bundled vulnerabilities.
 - Uploads are authenticated and role-gated. Multer uses memory storage; the current parser limits each file to 50 MiB and each request to 10 file parts. Keep these bounds in mind when changing upload behavior; concurrent requests can still consume significant memory.
 - Security review also flagged implicit cookie/CSRF policy and no visible login throttling. Treat these as follow-up review items; deployment proxy and HTTPS configuration affect the right fix.

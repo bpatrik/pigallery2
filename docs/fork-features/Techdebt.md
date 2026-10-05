@@ -11,8 +11,8 @@ later, **L** = cleanup.
 
 | # | Item | Where | Priority | Notes |
 |---|---|---|---|---|
-| F1 | Angular 19 is unsupported; the bundled framework has XSS advisories | `package.json` | H | Covered by [UPGRADE_PLAN.md](UPGRADE_PLAN.md) steps 1–3 |
-| F2 | Legacy structural directives `*ngIf` / `*ngFor` (44 files) | `src/frontend/app/**` | M | Deprecated in v20; migrated in upgrade step 1 |
+| F1 | Angular 19 is unsupported; the bundled framework has XSS advisories | `package.json` | H | Upgraded to Angular 20.3.16 in Step 1; remaining migrations to 21 & 22 covered by steps 2–3 |
+| F2 | Legacy structural directives `*ngIf` / `*ngFor` (44 files) | `src/frontend/app/**` | M | Resolved: migrated to Angular block control flow (`@if`, `@for`, `@switch`) across all templates in upgrade step 1 |
 | F3 | HammerJS gestures (`HammerModule`, `HAMMER_GESTURE_CONFIG`, `import 'hammerjs'`) | `main.ts`, `app.component.ts` | M | Deprecated by Angular; replace with pointer events in the lightbox and other gesture users |
 | F4 | `@angular/animations` (`AnimationBuilder`, `provideAnimations`) | lightbox, `main.ts` | M | Deprecated in favour of CSS / `animate.enter`/`leave`; check the lightbox open/close animation in a visible tab |
 | F5 | Webpack-based builder through `@angular-builders/custom-webpack` | `angular.json`, `angular.webpack.js`, `karma.conf.js` | M | Only customisation is one `IgnorePlugin`; moving to `@angular/build:application` changes the output layout and backend serving |
@@ -40,7 +40,7 @@ later, **L** = cleanup.
 | S1 | Implicit cookie / CSRF policy | H | Define `SameSite`/`Secure` and CSRF protection; depends on proxy/HTTPS deployment |
 | S2 | No visible login throttling | H | Add rate limiting / backoff on login and the OIDC callback |
 | S3 | Upload memory use: multer memory storage, 50 MiB × 10 files per request, no concurrency cap | M | Consider disk storage or a global concurrent-upload limit |
-| S4 | Full `npm audit`: 86 advisories (mostly dev-tool transitive dependencies) | M | Re-check after each upgrade step; `--omit=dev` was 0 at the 2026-10-04 snapshot |
+| S4 | Full `npm audit`: 48 advisories (all dev-tool transitive dependencies) | M | Re-check after each upgrade step; `--omit=dev` was 0 at the 2026-10-05 snapshot (reduced from 86 advisories) |
 
 ## Tooling / repo hygiene
 
