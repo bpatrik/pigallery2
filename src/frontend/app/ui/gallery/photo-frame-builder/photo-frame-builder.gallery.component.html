@@ -130,7 +130,7 @@
             <label for="topLeftTitle" class="mb-0" i18n>Top-left title(s)</label>
           </div>
           <div class="col">
-            @for (_ of topLeftTitle; track trackByIndex(i, _); let i = $index) {
+            @for (_ of topLeftTitle; track $index; let i = $index) {
               <div>
                 <select class="form-select mb-1"
                   [(ngModel)]="topLeftTitle[i]"
@@ -150,7 +150,7 @@
             <label for="topLeftSubtitle" class="mb-0" i18n>Top-left subtitle(s)</label>
           </div>
           <div class="col">
-            @for (_ of topLeftSubtitle; track trackByIndex(i, _); let i = $index) {
+            @for (_ of topLeftSubtitle; track $index; let i = $index) {
               <div>
                 <select class="form-select mb-1"
                   [(ngModel)]="topLeftSubtitle[i]"
@@ -170,7 +170,7 @@
             <label for="bottomLeftTitle" class="mb-0" i18n>Bottom-left title(s)</label>
           </div>
           <div class="col">
-            @for (_ of bottomLeftTitle; track trackByIndex(i, _); let i = $index) {
+            @for (_ of bottomLeftTitle; track $index; let i = $index) {
               <div>
                 <select class="form-select mb-1"
                   [(ngModel)]="bottomLeftTitle[i]"
@@ -190,7 +190,7 @@
             <label for="bottomLeftSubtitle" class="mb-0" i18n>Bottom-left subtitle(s)</label>
           </div>
           <div class="col">
-            @for (_ of bottomLeftSubtitle; track trackByIndex(i, _); let i = $index) {
+            @for (_ of bottomLeftSubtitle; track $index; let i = $index) {
               <div>
                 <select class="form-select mb-1"
                   [(ngModel)]="bottomLeftSubtitle[i]"

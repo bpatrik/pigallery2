@@ -1,7 +1,7 @@
 import {backendText} from '../BackendTexts';
 
 
-export type fieldType = 'string' | 'string-array' | 'number' | 'boolean' | 'number-array' | 'MediaPickDTO-array' | 'messenger';
+export type fieldType = 'string' | 'string-array' | 'number' | 'boolean' | 'number-array' | 'MediaPickDTO-array' | 'messenger' | 'SearchQuery';
 
 
 /**
