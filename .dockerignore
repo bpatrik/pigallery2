@@ -9,7 +9,8 @@ PiGallery2.iml
 docs/
 out-tsc/
 test/
-docker/
+docker/*
+!docker/build-libvips.sh
 src/**/*.js
 src/**/*.js.map
 gulpfile.js

@@ -1,21 +1,27 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:22-trixie AS builder
+FROM node:24.21.0-trixie AS builder
+
+RUN npm install --global npm@11.19.0
 # LABEL maintainer="Patrik J. Braun"
 
-ENV SHARP_FORCE_GLOBAL_LIBVIPS=1
+ENV SHARP_FORCE_GLOBAL_LIBVIPS=1 \
+    PKG_CONFIG_PATH=/usr/local/lib/pkgconfig \
+    LD_LIBRARY_PATH=/usr/local/lib
 
 # inspired by: https://dev.to/ilyasa1211/converting-heic-image-extension-in-nodejs-with-the-sharp-library-39mg
 # also see: https://github.com/bpatrik/pigallery2/issues/965
 
 # Install build and vips dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends curl python3 git build-essential pkg-config \
-  libvips-dev && \
+  libvips-dev libheif-dev libmagickwand-dev meson ninja-build && \
   rm -rf /var/lib/apt/lists/*
 
+COPY docker/build-libvips.sh /tmp/build-libvips.sh
+RUN sh /tmp/build-libvips.sh && rm /tmp/build-libvips.sh
 WORKDIR /build
 COPY package*.json ./
-RUN npm install --unsafe-perm
+RUN npm ci
 COPY . /build
 RUN mkdir -p /build/release/data/config \
     && mkdir -p /build/release/data/db \
@@ -23,13 +29,15 @@ RUN mkdir -p /build/release/data/config \
     && mkdir -p /build/release/data/tmp \
     && npm run create-release
 WORKDIR /build/release
-RUN npm install --unsafe-perm --no-package-lock node-addon-api@8.5.0 node-gyp@11.5.0
+RUN npm install --no-package-lock node-addon-api@8.5.0 node-gyp@11.5.0 && \
+    npm run build --prefix node_modules/sharp
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:22-trixie-slim AS main
+FROM node:24.21.0-trixie-slim AS main
 WORKDIR /app
 ENV NODE_ENV=production \
+    LD_LIBRARY_PATH=/usr/local/lib \
     # overrides only the default value of the settings (the actualy value can be overwritten through config.json)
     default-Database-dbFolder=/app/data/db \
     default-Media-folder=/app/data/images \
@@ -52,6 +60,7 @@ RUN apt-get update \
     && apt-get clean -q -y \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /build/release /app
+COPY --from=builder /usr/local/lib /usr/local/lib
 
 # Run build time diagnostics to make sure the app would work after build is finished
 RUN ["node", "--expose-gc", "./src/backend/index", "--run-diagnostics", "--config-path=/app/diagnostics-config.json", "--Server-Log-level=silly"]

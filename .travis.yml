@@ -1,7 +1,7 @@
-dist: xenial
+dist: noble
 language: node_js
 node_js:
-  - '16'
+  - '24'
 env:
   - PORT=35000 MYSQL_HOST='localhost' MYSQL_PASSWORD='' MYSQL_USERNAME='root' MYSQL_DATABASE='pigallery2_test'
 services:
@@ -9,6 +9,7 @@ services:
 addons:
   chrome: stable
 before_install:
+  - npm install --global npm@11.19.0
   - # start your web application and listen on `localhost`
   - google-chrome-stable --headless --disable-gpu --remote-debugging-port=9222 http://localhost &
 install:

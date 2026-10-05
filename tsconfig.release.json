@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./release"
+  },
+  "include": [
+    "src/common/**/*.ts",
+    "src/backend/**/*.ts",
+    "benchmark/**/*.ts"
+  ]
+}
