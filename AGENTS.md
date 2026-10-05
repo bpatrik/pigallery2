@@ -9,7 +9,7 @@
 
 ## Project Setup
 
-- Use Node.js 22 (`nvm use 22`). The project supports Node `>=22 <24`; native modules such as `better-sqlite3` must be built for the active Node ABI.
+- Use Node.js 22 (`nvm use 22`). The project supports Node `>=22.12.0 <24`; native modules such as `better-sqlite3` must be built for the active Node ABI.
 - To run the local app, build the English frontend with `npm run build-en`, then start the backend with `npm start -- --Server-port=8081`; open `http://localhost:8081/`. The backend serves the built frontend. Do not change Angular's serve configuration for this workflow.
 - TypeScript under `src/` is authoritative. `npm run build-backend` compiles it; avoid hand-editing generated JavaScript.
 - Backend tests run with `npm run test-backend`. To narrow Mocha tests, append a grep, for example `npm run test-backend -- --grep UploadRouter`.
@@ -40,7 +40,15 @@
 - **Root `tsconfig.json` vs CommonJS Backend**:
   - `ng update` attempts to set `"moduleResolution": "bundler"` in root `tsconfig.json`.
   - Because the backend compiles to CommonJS (`"module": "CommonJS"`), TypeScript rejects `"bundler"` (`TS5095: Option 'bundler' can only be used when 'module' is set to 'es2015' or later`).
-  - The root `tsconfig.json` MUST keep `"moduleResolution": "node"` until the backend and frontend tsconfigs are cleanly separated (Upgrade Step 3).
+  - The root `tsconfig.json` MUST keep `"moduleResolution": "node"` while the backend remains CommonJS. Since Step 2 it excludes `src/frontend/**/*`; frontend app and spec configs override resolution to `bundler` and reset `exclude` so their own files remain included. Angular 21 package exports require this separation already, before the TS 6 backend work in Step 3.
+- **Angular 21 & zone.js / ngx-bootstrap**:
+  - Keep `provideZoneChangeDetection()` in the application bootstrap to preserve zone.js behavior; Angular 21 defaults to zoneless.
+  - `ngx-bootstrap` is pinned to `21.0.1`. Releases `21.2+` require zoneless change detection, change inputs to signals, and remove `forRoot()`; don't bump to them without a separate migration.
+- **Angular 21 Host Listener Type Checking**:
+  - A resize handler with no parameters must use `@HostListener('window:resize')`, without an event argument.
+  - Hammer pinch callbacks receive gesture objects, not DOM Events. The host-listener bindings use `$any($event)` while retaining the typed `{scale: number}` handler parameters.
+- **Backend Tests Need a Built Frontend**:
+  - Build the frontend before running the full backend suite. `PublicRouter` sharing tests read `dist/en/index.html` and fail with `ENOENT` if it is absent.
 - **Leaflet & MarkerCluster Typing**:
   - `@bluehalo/ngx-leaflet-markercluster` 20+ no longer ambiently exports/imports the `leaflet.markercluster` module.
   - Any file referencing `MarkerClusterGroup` or `L.markerClusterGroup` must explicitly include `import 'leaflet.markercluster';`.
@@ -59,7 +67,7 @@
 
 ## Security Context
 
-- Security remediation snapshot from 2026-10-05 (Angular 20 migration): direct backend and frontend production dependencies report 0 vulnerabilities via `npm audit --omit=dev`.
-- Full `npm audit` reports 48 advisories (1 low, 14 moderate, 31 high, 2 critical), reduced from 86; all remaining advisories are in devDependencies/tooling (mocha, cypress, coveralls, nyc, gulp-sourcemaps). Angular has been updated to 20.3.16, resolving previous Angular 19 bundled vulnerabilities.
+- Security remediation snapshot from 2026-10-05 (Angular 21 migration): `npm audit --omit=dev` reports 0 vulnerabilities.
+- Full `npm audit` reports 40 advisories (1 low, 14 moderate, 23 high, 2 critical), reduced from 48 after Step 1; all remaining advisories are in devDependencies/tooling, including webpack build/serve dependencies, Karma, mocha, cypress, coveralls, nyc and gulp. Angular is now 21.2.25, with TypeScript 5.9.3.
 - Uploads are authenticated and role-gated. Multer uses memory storage; the current parser limits each file to 50 MiB and each request to 10 file parts. Keep these bounds in mind when changing upload behavior; concurrent requests can still consume significant memory.
 - Security review also flagged implicit cookie/CSRF policy and no visible login throttling. Treat these as follow-up review items; deployment proxy and HTTPS configuration affect the right fix.
