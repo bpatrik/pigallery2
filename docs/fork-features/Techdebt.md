@@ -29,7 +29,7 @@ later, **L** = cleanup.
 | B2 | `openid-client` 5 (legacy API), stale `@types/openid-client` 3.x | `OIDCAuthService.ts` | M | Upgrade step 5 |
 | B3 | `fluent-ffmpeg` is archived | `FFmpegFactory.ts`, `MetadataLoader.ts`, `PhotoWorker.ts`, `VideoConverterWorker.ts` | M | Upgrade step 6 |
 | B4 | `mysql` 2.18.1 driver is unmaintained | `optionalDependencies` | M | TypeORM supports `mysql2`; needs a driver switch plus MySQL/MariaDB test run |
-| B5 | Node `engines` capped at `<24` | `package.json` | M | Upgrade step 4 |
+| B5 | Node `engines` capped at `<24` | `package.json` | M | Resolved in Step 4: Node >=24.15.0 <25, npm 11.19.0, Node 24 types and better-sqlite3 12.11.1; native runtime and both database engines validated |
 | B6 | Backend uses legacy `moduleResolution: node` and `downlevelIteration` | `tsconfig.json`, frontend tsconfigs | M | Resolved in Step 3: shared `tsconfig.base.json`, backend NodeNext settings with CommonJS output, independent frontend bundler settings; `downlevelIteration` removed without `ignoreDeprecations` |
 | B7 | `typescript` not a direct dependency | `package.json` | L | Resolved in Step 0; direct devDependency is now pinned to `6.0.3` after Step 3 |
 | B8 | SQLite text searches miss literal `_` / `%` characters | `SearchManager.ts` (`convertGlobToLike`, `getLikeExpr`) | M | Found during Step 2 smoke validation in unchanged backend code: `IMG_5910.jpg` does not match, while `5910` does. Escaped LIKE patterns need an explicit SQLite `ESCAPE` clause. Fix separately with regression coverage for both database engines |
@@ -41,15 +41,16 @@ later, **L** = cleanup.
 | S1 | Implicit cookie / CSRF policy | H | Define `SameSite`/`Secure` and CSRF protection; depends on proxy/HTTPS deployment |
 | S2 | No visible login throttling | H | Add rate limiting / backoff on login and the OIDC callback |
 | S3 | Upload memory use: multer memory storage, 50 MiB × 10 files per request, no concurrency cap | M | Consider disk storage or a global concurrent-upload limit |
-| S4 | Full `npm audit`: 36 advisories in devDependencies/tooling | M | Step 3 snapshot, 2026-10-06: 36 advisories (1 low, 12 moderate, 21 high, 2 critical); `--omit=dev` is 0. Reduced from 40 after Step 2. Includes webpack build/serve tooling and Karma as well as the existing Mocha/Cypress/Gulp/coverage advisories |
+| S4 | Full `npm audit`: 30 advisories in devDependencies/tooling | M | Step 4 snapshot, 2026-10-06: 30 advisories (1 low, 7 moderate, 20 high, 2 critical); `--omit=dev` is 0. Removing the obsolete release compiler reduced the Step 3 total from 36. Includes webpack build/serve tooling, Karma and Mocha/Cypress/Gulp/coverage advisories |
 
 ## Tooling / repo hygiene
 
 | # | Item | Priority | Notes |
 |---|---|---|---|
 | T1 | Generated `.js` / `.js.map` files next to TypeScript sources (e.g. `src/frontend/main.js`, `gulpfile.js`) | L | Make sure they are git-ignored, not edited by hand, and not picked up by tools |
-| T2 | `gulp-typescript` 5 (unmaintained) in the release pipeline | L | Checked in Step 3 against TS 6.0.3: `gulp build-backend` succeeds and emits the release CommonJS backend. Retained; replacement with plain `tsc` remains cleanup |
+| T2 | `gulp-typescript` 5 (unmaintained) in the release pipeline | L | Resolved in Step 4: Docker startup exposed ESM output from its virtual filesystem under NodeNext, despite a successful compile in Step 3. The release task now uses plain `tsc` and `tsconfig.release.json`; removed gulp-typescript, gulp-sourcemaps and its types. All 194 release JS files match the tested development CommonJS output (excluding source-map URLs) |
 | T3 | `coveralls` 3 (deprecated package) | L | Replace or drop if coverage upload isn't used |
-| T4 | `ts-node` 10 | L | TS 6.0.3 check passed: ts-node 10.9.2 loads `gulpfile.ts`. Restored after custom-webpack 22 migration removed it for the builder. Node 24 compatibility remains Step 4 |
+| T4 | `ts-node` 10 | L | TS 6.0.3 check passed: ts-node 10.9.2 loads `gulpfile.ts`. Restored after custom-webpack 22 migration removed it for the builder. Node 24 compatibility passed in Step 4 with TypeScript 6.0.3 and ts-node 10.9.2 |
 | T5 | Backend test runner remains alive after final Mocha totals | L | Observed in Step 2: all 635 tests passed, but the process needed explicit termination. Review worker/timer cleanup so the suite exits naturally; Karma's similar behavior is documented in AGENTS.md |
 | T6 | Backend test fixtures can tie when selecting unrated album covers | L | Found in Step 3: the MySQL extreme-value test sometimes expected Photo1 while the DB selected Photo2. That test now assigns distinct ratings; audit other tied-cover fixtures separately |
+| T7 | npm 12 dependency install-script policy | M | Step 4 pins the npm 11.19.0 release bundled with Node 24.21.0. npm 12 blocks dependency install scripts by default, including native binaries and Cypress/FFmpeg setup. Review explicit script approvals and incomplete registry metadata in the inherited lockfile before lifting the npm engine cap |

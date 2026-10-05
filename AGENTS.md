@@ -9,13 +9,13 @@
 
 ## Upgrade Handoff
 
-- Steps 0–2 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged. Step 3 is completed and validated on `upgrade/angular-22`, based on `master` at `08d3c531`; it has not been merged. Check branch/merge state before starting Step 4 and base it on the latest completed step, rather than the original `stack-upgrade` baseline.
-- Step 3 validation passed: backend 635 tests on SQLite and MariaDB, Karma 145 tests (including seven new pointer gesture tests), all 16 locale builds, seven Cypress specs (18 passing, 12 intentionally pending documentation tests), and nine automated Brave smoke checks. Bootstrap controls with zone.js and an upload toast were verified. Detailed results are in the upgrade plan and [Techdebt.md](docs/fork-features/Techdebt.md). Temporary `/tmp/pg-angular22-*` harnesses and logs are local artifacts; future runs must not assume they exist.
+- Steps 0–3 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged. Step 4 is completed and validated on `upgrade/node-24` (awaiting merge), based on `master` at `de0ce1c4` (the Angular 22 merge). Check branch/merge state before starting Step 5 and base it on the latest completed step, rather than the original `stack-upgrade` baseline.
+- Step 4 validation on Node 24.21.0 / npm 11.19.0 passed: backend 635 tests on SQLite and MariaDB, Karma 145 tests, all 16 locale builds, seven Cypress specs (18 passing, 12 intentionally pending documentation tests), and nine automated Brave smoke checks. All three amd64 Dockerfiles build and pass diagnostics; native SQLite/bcrypt and HEIC/AVIF/JPEG/PNG decoding pass. Detailed results are in the upgrade plan and [Techdebt.md](docs/fork-features/Techdebt.md). Temporary `/tmp/pg-node24-*` harnesses and logs are local artifacts; future runs must not assume they exist. Arm64 image builds remain a CI check.
 - Angular 22.2.1 requires TypeScript 6; this project pins 6.0.3. The backend uses NodeNext settings while emitting CommonJS; frontend configs use bundler resolution. ngx-bootstrap is now 22.0.0 with signal APIs and direct module imports; the app retains zone.js. A separate zoneless sub-plan is in the upgrade plan. Hammer integration was removed upstream and replaced with pointer gestures; Angular animations remain follow-up work.
 
 ## Project Setup
 
-- Use Node.js 22 (`nvm use 22`). The project supports Node `>=22.22.3 <24`; native modules such as `better-sqlite3` must be built for the active Node ABI.
+- Use Node.js 24 (`nvm use`, using `.nvmrc` at 24.21.0). The project supports Node `>=24.15.0 <25` and npm `>=11.19.0 <12`; install the pinned npm with `npm install --global npm@11.19.0`, then run `npm ci`. Native modules such as `better-sqlite3` must match the active Node ABI (137 on Node 24).
 - To run the local app, build the English frontend with `npm run build-en`, then start the backend with `npm start -- --Server-port=8081`; open `http://localhost:8081/`. The backend serves the built frontend. Do not change Angular's serve configuration for this workflow.
 - Despite its name, `npm run build-en` currently builds all locales: the Gulp frontend command does not forward the language filter. Check `dist/<locale>/index.html` outputs before scheduling a redundant full-locale build.
 - TypeScript under `src/` is authoritative. `npm run build-backend` compiles it; avoid hand-editing generated JavaScript.
@@ -23,10 +23,10 @@
 
 ## Running Tests (for AI agents)
 
-- New terminals do not inherit Node 22. Prefix commands with `source ~/.nvm/nvm.sh && nvm use 22 >/dev/null &&`; otherwise `better-sqlite3` fails with a `NODE_MODULE_VERSION` mismatch.
+- New terminals do not inherit Node 24. Prefix commands with `source ~/.nvm/nvm.sh && nvm use >/dev/null &&`; otherwise `better-sqlite3` fails with a `NODE_MODULE_VERSION` mismatch.
 - Backend (Mocha): DB tests run on SQLite always and on MySQL only when one is reachable. Without MySQL, `mysql` "before all" hooks fail with `ECONNREFUSED`; that is environmental, not a regression.
 - MySQL/MariaDB for tests: a local container `pigallery-db` (MariaDB 11.4, `127.0.0.1:3306`, user `pigallery`, password `password`) may exist; check with `podman exec pigallery-db healthcheck.sh --connect --innodb_initialized`. Run with `MYSQL_HOST=127.0.0.1 MYSQL_PORT=3306 MYSQL_USERNAME=pigallery MYSQL_PASSWORD=password TEST_MYSQL=true npm run test-backend`. Tests drop and recreate `pigallery2_test`; never point them at a database with real data.
-- `.mocharc.js` loads the ignored `test/setup-local.js`. Inspect it before choosing test connection settings: local assignments can override command-line `MYSQL_*` environment variables. Preserve the user's local setup.
+- `.mocharc.js` loads the ignored `test/setup-local.js`. Inspect it before choosing test connection settings: local assignments can override command-line `MYSQL_*` environment variables. Preserve the user's local setup. When using a temporary setup with `--no-config`, retain `--recursive --timeout=20000` and explicitly exclude `test/folder-reset.js`; the script's basename-only exclusion does not match that path.
 - The full backend suite on both engines takes several minutes; redirect to a log (`> /tmp/pg-tests.log 2>&1`) and grep `passing|failing` plus `^\s+[0-9]+\) ` for failures instead of piping live output.
 - Mocha can remain alive after its final totals (Techdebt T5). Capture the runner PID/process group, verify the complete result, then stop only processes started for that run.
 - Frontend (Karma): no Chrome is installed; use Brave via `CHROME_BIN=/usr/bin/brave-browser-stable npx ng test --watch=false`. Narrow with `--include='src/frontend/app/ui/timeline/**/*.spec.ts'` (repeatable).
@@ -38,8 +38,8 @@
   - **`ELECTRON_RUN_AS_NODE=1` gotcha**: The assistant environment sets `ELECTRON_RUN_AS_NODE=1`. When Cypress runs Electron, it treats Electron as raw Node.js and crashes on flags like `--no-sandbox`. **Always prefix Cypress commands with `unset ELECTRON_RUN_AS_NODE &&`**.
   - **Sandbox / Xvfb gotcha**: Cypress headless requires X11/Xvfb display support (`spawn Xvfb ENOENT` occurs inside sandboxes). Use the tool's sandbox escalation option (`sandbox_permissions: "require_escalated"` with `exec_command`).
   - **Port 8080 conflict**: Podman container `src_searxng_1` might bind host port 8080. Prefer a separate backend on an available port and override `CYPRESS_baseUrl`. If temporarily stopping the container is necessary, restore it after testing.
-  - Run specific spec: `source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && unset ELECTRON_RUN_AS_NODE && npx cypress run --spec test/cypress/e2e/share.cy.ts`.
-  - Full suite: `source ~/.nvm/nvm.sh && nvm use 22 >/dev/null && unset ELECTRON_RUN_AS_NODE && npm run cypress:run`.
+  - Run specific spec: `source ~/.nvm/nvm.sh && nvm use >/dev/null && unset ELECTRON_RUN_AS_NODE && npx cypress run --spec test/cypress/e2e/share.cy.ts`.
+  - Full suite: `source ~/.nvm/nvm.sh && nvm use >/dev/null && unset ELECTRON_RUN_AS_NODE && npm run cypress:run`.
   - Overriding target server: Pass `CYPRESS_baseUrl=http://localhost:8081` to run Cypress specs against another running instance (such as the smoke test server on port 8081).
   - Cypress 15.19.0 is required for TypeScript 6; Cypress 14 hardcodes deprecated `downlevelIteration`. A temporary `setupNodeEvents` browser definition works for Brave with `family: 'chromium'`, `name: 'chromium'`, `channel: 'stable'`, the installed browser version, and `/usr/bin/brave-browser-stable`; run with `--browser chromium`. Configs outside the repo need explicit project/support paths. Resolve all of these paths consistently: mixing `/home/...` symlinks and `/mnt/...` real paths can trigger TS 6 `rootDir` errors.
 - Browser checks: build with `npm run build-en`, start the backend on 8081, and drive it with the integrated browser tools. Timeline/Folders client state is in memory, so test Back restore with in-app navigation, not full reloads.
@@ -62,7 +62,7 @@
   - `typescript-eslint` **8.71.1** supports TypeScript 6. Check compiler support when updating lint tooling.
   - Keep the obsolete `marked/marked.min.js` entry out of Angular's global scripts. ngx-markdown imports its supported Marked peer directly.
   - ngx-markdown 22's optional `marked-katex-extension` peer must be installed for webpack to resolve its dynamic import, even when math rendering is unused.
-  - custom-webpack 22 uses jiti for build configs. Its migration removed ts-node, but this project still needs **10.9.2** to load `gulpfile.ts`; do not remove it merely because the builder no longer needs it. `gulp-typescript` 5 and ts-node were checked with TS 6.
+  - custom-webpack 22 uses jiti for build configs. Its migration removed ts-node, but this project still needs **10.9.2** to load `gulpfile.ts`; do not remove it merely because the builder no longer needs it. ts-node was checked with TS 6 and Node 24. Since Step 4 the release backend uses plain `tsc` with `tsconfig.release.json`, because gulp-typescript did not preserve CommonJS emission under NodeNext.
 - **Angular 22 Type Checking and Gestures**:
   - A resize handler with no parameters must use `@HostListener('window:resize')`, without an event argument.
   - Interfaces in decorated frontend classes need explicit type-only imports under TS 6 to avoid nonexistent runtime exports. Do not change runtime class imports used as injection tokens to type-only imports.
@@ -84,12 +84,17 @@
 - **Backend CLI Configuration Flags**:
   - Backend configuration uses `typeconfig`. Command-line flags map to nested keys with hyphens, e.g. `--Server-port=8081` and `--Upload-enabled=true`.
   - By default, `Upload.enabled` is `false`. When testing upload workflows against a standalone server instance, start with `--Upload-enabled=true`.
+- **Node 24 / npm and Docker native builds**:
+  - Keep the Node 24 minimum at 24.15.0 for Angular 22. `.nvmrc` pins the validated patch; CI and Docker use npm 11.19.0. Node 22 is no longer supported by this fork.
+  - Angular DevKit 22 has an optional Chokidar 5 peer. Pin `chokidar` 5.0.0 directly: regenerating the lockfile can otherwise drop its nested copies and resolve the peer to Mocha's Chokidar 4, producing an invalid tree. Check `npm ls --all` after lockfile changes. npm 12 is deferred: its new default blocks dependency install scripts; review explicit approvals before removing the npm <12 cap (Techdebt T7).
+  - Sharp 0.35.5 no longer builds itself during `npm install` / `npm rebuild`. Docker explicitly runs its `build` script. It needs libvips >=8.18.7; `docker/build-libvips.sh` builds the pinned, checksum-verified version with the distribution codec libraries and HEIC support. Preserve `/usr/local/lib`, its loader path and the Docker context exception in `.dockerignore`.
+  - Official Node 24 images do not support ARMv7. Build amd64 and arm64 images; Raspberry Pi deployments require a 64-bit OS.
 - **Git Operations in Sandbox**:
   - `.git` is protected/read-only in standard sandbox mode. Git mutations require the tool's sandbox escalation option (`sandbox_permissions: "require_escalated"` with `exec_command`).
 
 ## Security Context
 
-- Security remediation snapshot from 2026-10-06 (Angular 22 migration): `npm audit --omit=dev` reports 0 vulnerabilities.
-- Full `npm audit` reports 36 advisories (1 low, 12 moderate, 21 high, 2 critical), reduced from 40 after Step 2; all remaining advisories are in devDependencies/tooling, including webpack build/serve dependencies, Karma, mocha, cypress, coveralls, nyc and gulp. Angular is now 22.2.1, with TypeScript 6.0.3.
+- Security remediation snapshot from 2026-10-06 (Node 24 migration): `npm audit --omit=dev` reports 0 vulnerabilities.
+- Full `npm audit` reports 30 advisories (1 low, 7 moderate, 20 high, 2 critical), reduced from 36 after removing the obsolete release compiler in Step 4; all remaining advisories are in devDependencies/tooling, including webpack build/serve dependencies, Karma, mocha, cypress, coveralls, nyc and gulp. Angular is now 22.2.1, with TypeScript 6.0.3.
 - Uploads are authenticated and role-gated. Multer uses memory storage; the current parser limits each file to 50 MiB and each request to 10 file parts. Keep these bounds in mind when changing upload behavior; concurrent requests can still consume significant memory.
 - Security review also flagged implicit cookie/CSRF policy and no visible login throttling. Treat these as follow-up review items; deployment proxy and HTTPS configuration affect the right fix.

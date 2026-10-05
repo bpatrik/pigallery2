@@ -14,11 +14,12 @@ echo "--- 1. Pre-flight Environment Check ---"
 
 # Check for Node.js
 if ! command -v node &> /dev/null; then
-    echo "Error: node is not installed. Please install Node.js (v22 recommended)."
+    echo "Error: node is not installed. Please install Node.js 24 (>=24.15.0)."
     exit 1
 else
     NODE_VER=$(node -v)
     echo "Found Node.js: $NODE_VER"
+    node -e 'const [major, minor] = process.versions.node.split(".").map(Number); if (major !== 24 || minor < 15) { console.error("Node.js >=24.15.0 <25 is required."); process.exit(1); }'
 fi
 
 # Check for npm
@@ -28,6 +29,7 @@ if ! command -v npm &> /dev/null; then
 else
     NPM_VER=$(npm -v)
     echo "Found npm: $NPM_VER"
+    node -e 'const [major, minor] = process.argv[1].split(".").map(Number); if (major !== 11 || minor < 19) { console.error("npm >=11.19.0 <12 is required (npm install --global npm@11.19.0)."); process.exit(1); }' "$NPM_VER"
 fi
 
 # Check for Docker (required for the build-docker step)
@@ -51,8 +53,7 @@ git clone --depth 1 --branch "$REPO_REF" "$REPO_URL" "$BUILD_DIR"
 cd $BUILD_DIR
 
 echo "--- 3. Installing Build Dependencies ---"
-# --unsafe-perm handles permission issues during lifecycle scripts (like sharp/libvips)
-npm install --unsafe-perm
+npm ci
 
 echo "--- 4. Creating Production Release ---"
 # This mirrors the GitHub Action workflow you provided

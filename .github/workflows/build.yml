@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [24.x]
     steps:
     - uses: getong/mariadb-action@v1.11
       with:
@@ -31,6 +31,9 @@ jobs:
       uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
+
+    - name: Use project npm version
+      run: npm install --global npm@11.19.0
 
     - name: Verify MariaDB connection
       env:
@@ -85,10 +88,13 @@ jobs:
         name: Setup Node.js for use with actions
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version-file: .nvmrc
+      -
+        name: Use project npm version
+        run: npm install --global npm@11.19.0
       -
         name: Install Deps
-        run: npm install --unsafe-perm
+        run: npm ci
       -
         name: Create Release
         run: npm run create-release -- --skip-opt-packages=ffmpeg-static,ffprobe-static --force-opt-packages
@@ -107,7 +113,7 @@ jobs:
         container: [alpine, debian-trixie]
         include:
           - container: alpine
-            platforms: linux/amd64,linux/arm64,linux/arm/v7
+            platforms: linux/amd64,linux/arm64
           - container: debian-trixie
             platforms: linux/amd64,linux/arm64
     steps:
@@ -145,7 +151,7 @@ jobs:
         container: [alpine, debian-trixie]
         include:
           - container: alpine
-            platforms: linux/amd64,linux/arm64,linux/arm/v7
+            platforms: linux/amd64,linux/arm64
           - container: debian-trixie
             platforms: linux/amd64,linux/arm64
     steps:

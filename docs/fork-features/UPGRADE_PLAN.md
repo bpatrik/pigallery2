@@ -1,7 +1,8 @@
 # Platform upgrade plan
 
-Status: Steps 0–2 completed and merged. Step 3 is completed and validated on
-`upgrade/angular-22`, awaiting merge.
+Status: Steps 0–3 completed and merged. Step 4 is completed and validated on
+`upgrade/node-24`, based on the Angular 22 merge (`master` at `de0ce1c4`),
+awaiting merge.
 
 ## Goal
 
@@ -299,16 +300,94 @@ screenshots: `/tmp/pg-angular22-smoke-screenshots/`.
 
 ### Step 4 – Node 24 and npm (branch `upgrade/node-24`)
 
-Can start any time after step 1, since Angular 20+ supports Node 24.
+- [x] Engines **>=24.15.0 <25** (Angular 22's Node 24 minimum);
+      `@types/node` **24.19.1**. Node 22 is no longer supported.
+- [x] better-sqlite3 **12.11.1**, with Node 24 prebuilds (ABI **137**,
+      SQLite **3.53.2**), within TypeORM 0.3.31's supported peer range.
+      Clean-installed and rebuilt bcrypt **6.0.0** and sharp **0.35.5**.
+- [x] Regenerated the lockfile and verified `npm ci` with Node **24.21.0**
+      and its bundled npm **11.19.0**; pinned `.nvmrc`, `packageManager` and
+      npm engines. `npm ls --all` passes.
+- [x] Updated all Docker base images, GitHub Actions, the legacy Travis
+      configuration, the local Docker builder and Node setup instructions.
+- [x] Validation gate (2026-10-06): frontend app/spec and Cypress type
+      checks, backend compilation, all **16 locale** builds and lint pass;
+      Mocha **635 passing** on SQLite and MariaDB; Karma **145 SUCCESS**;
+      **7/7 Cypress specs** (**18 passing**, **12 intentionally pending**
+      documentation tests); additional Brave smoke **9/9 passing**;
+      production audit **0 vulnerabilities**.
 
-- [ ] `engines` → `>=24 <25` (or `>=22 <25` during the transition);
-      `@types/node` 24.
-- [ ] Bump better-sqlite3 to a release with Node 24 prebuilds; rebuild bcrypt
-      and sharp.
-- [ ] Regenerate `package-lock.json` with npm on Node 24.
-- [ ] Update the Docker base images, CI, and the Node instructions in
-      AGENTS.md.
-- [ ] Validation gate on Node 24 (and Node 22 if both stay supported).
+Implementation notes:
+
+- Based on merged Angular 22 at `master` **de0ce1c4**. The existing app
+  architecture and database schema/`DataStructureVersion` remain unchanged.
+  No Node 22 transition range or second runtime gate is retained.
+- npm 12 was evaluated, but this step uses Node 24's bundled npm 11.19.0.
+  npm 12 blocks dependency install scripts by default, including native
+  binaries and Cypress/FFmpeg setup; explicit script approvals and some
+  incomplete registry records in the inherited lockfile need review before
+  that separate upgrade (Techdebt T7).
+- Pin **chokidar 5.0.0** directly for Angular DevKit 22's optional peer.
+  Lockfile regeneration otherwise drops its nested copies and resolves that
+  peer to Mocha's Chokidar 4, yielding an invalid tree. The final tree passes
+  a full `npm ls`; platform-specific optional binary entries are retained.
+- Docker pins Node **24.21.0** on Alpine 3.23 and Debian Trixie. Official
+  [Node 24 images](https://github.com/nodejs/docker-node/blob/main/versions.json)
+  omit ARMv7, so both verification and publishing matrices now use amd64 and
+  arm64. Raspberry Pi deployments need a 64-bit OS.
+- Docker startup validation exposed two inherited release problems. Sharp
+  0.35.5 has a separate build command and requires libvips **>=8.18.7**; the
+  distributions provide 8.16.1 / 8.17.3. `docker/build-libvips.sh` downloads
+  the pinned **8.18.7** release, checks its SHA-256 and builds against system
+  codecs, including libheif and ImageMagick. Install under `/usr/local`,
+  which Sharp searches before distribution pkg-config paths, and copy the
+  libraries into the runtime stage. Explicitly build Sharp afterwards.
+- `gulp-typescript`'s virtual filesystem emitted ESM under NodeNext despite
+  successful compilation, causing packaged startup to fail on extensionless
+  imports. The release task now calls plain `tsc` with
+  `tsconfig.release.json`, preserving CommonJS and the existing release
+  layout. All **194** emitted backend/common/benchmark JS files match the
+  tested development output apart from source-map URLs. Removed
+  gulp-typescript, gulp-sourcemaps and its types; Gulp and ts-node remain.
+
+Validation notes:
+
+- All **three amd64 Dockerfiles** build and pass their built-in diagnostics,
+  including a complete `create-release` from source in the self-contained
+  image. Native SQLite queries, bcrypt round trips and JPEG/PNG/HEIC/AVIF
+  thumbnail decoding pass in all three images. Debian and Alpine entrypoints
+  serve `/heartbeat` and the built frontend from isolated test containers.
+  Hadolint passes with the repository's configured exclusions. Arm64 and
+  hosted CI execution remain checks for the remote pipeline.
+- The integrated browser was unavailable. Automated Brave smoke checks used
+  a visible document and an isolated backend on **8081**, with copied demo
+  media, separate config/database/cache paths and enabled uploads. Checked
+  login/Folders Back, Timeline month and nonzero scroll restoration through
+  in-app Back, lightbox keys/swipe/pinch and animation, map, search, upload
+  progress and a visible toast, share links, Bootstrap controls and advancing
+  video playback. Screenshots were visually inspected.
+- Preserved the existing service on 8080, the database container and ignored
+  `test/setup-local.js`. A temporary Mocha setup used only `pigallery2_test`;
+  temporary Cypress configs supplied Brave and consistent physical paths.
+  Stopped only the test processes/containers created for this step. The
+  existing Mocha/Karma keepalive behavior remains T5.
+- Loading `gulpfile.ts` with ts-node **10.9.2** passes on Node 24 / TS 6.0.3.
+  Existing locale/translation warnings and the **2.13 MB** initial-bundle
+  warning remain. Full audit is now **30 advisories** (1 low, 7 moderate,
+  20 high, 2 critical), all in tooling, down from 36 after removing the old
+  release compiler; production audit remains zero.
+
+Local validation artifacts: `/tmp/pg-node24-install-final.log`,
+`/tmp/pg-node24-build-final.log`, `/tmp/pg-node24-tooling-final.log`,
+`/tmp/pg-node24-static-final.log`, `/tmp/pg-node24-backend-final.log`,
+`/tmp/pg-node24-karma-final.log`, `/tmp/pg-node24-e2e.log`,
+`/tmp/pg-node24-smoke.log`, `/tmp/pg-node24-smoke-screenshots/`,
+`/tmp/pg-node24-release-backend-final.log`, `/tmp/pg-node24-ts-node-final.log`,
+`/tmp/pg-node24-dependency-tree.log`, `/tmp/pg-node24-docker-{debian,alpine}-final.log`,
+`/tmp/pg-node24-docker-selfcontained.log`, `/tmp/pg-node24-docker-lint.log`,
+`/tmp/pg-node24-container-{native,http}.log`, and
+`/tmp/pg-node24-audit-{prod,all}.json`. These are local temporary artifacts;
+future runs must recreate their harnesses.
 
 ### Step 5 – openid-client 5 → 6 (branch `upgrade/openid-client-6`)
 
@@ -372,8 +451,8 @@ Can start any time after step 1, since Angular 20+ supports Node 24.
 | 0 Baseline / matrix | `stack-upgrade` | Completed |
 | 1 Angular 20 | `upgrade/angular-20` | Completed |
 | 2 Angular 21 | `upgrade/angular-21` | Completed, validated and merged |
-| 3 Angular 22 | `upgrade/angular-22` | Completed and validated; awaiting merge |
-| 4 Node 24 | `upgrade/node-24` | Not started |
+| 3 Angular 22 | `upgrade/angular-22` | Completed, validated and merged |
+| 4 Node 24 | `upgrade/node-24` | Completed and validated; awaiting merge |
 | 5 openid-client 6 | `upgrade/openid-client-6` | Not started |
 | 6 ffmpeg wrapper | `upgrade/ffmpeg-wrapper` | Not started |
 | 7 Express 5 | `upgrade/express-5` | Not started |

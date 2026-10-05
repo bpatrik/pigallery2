@@ -4,7 +4,7 @@
     Running PiGallery2 natively (non-Docker) is possible but **not officially supported**. The maintainer will not answer questions or fix bugs specifically related to native installations. For the best experience and support, use the [Docker Installation](docker.md).
 
 ## Prerequisites
-- **Node.js**: The app requires Node.js (check `package.json` for supported versions).
+- **Node.js**: Node.js **>=24.15.0 <25** and npm **11.19.0** (see `package.json`).
 - **Build Tools**: Required for building some native modules.
   ```bash
   sudo apt-get install build-essential libkrb5-dev gcc g++
@@ -14,8 +14,9 @@
 
 ### 1. Install Node.js
 ```bash
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_24.x | sudo -E bash -
 sudo apt-get install -y nodejs
+sudo npm install --global npm@11.19.0
 ```
 
 ### 2. Install PiGallery2
@@ -34,7 +35,7 @@ npm install
 wget https://github.com/bpatrik/pigallery2/archive/master.zip
 unzip master.zip
 cd pigallery2-master
-npm install
+npm ci
 npm run build
 ```
 
