@@ -17,7 +17,7 @@ import {DeviceDetectorService} from 'ngx-device-detector';
 import {LoadingBarModule} from '@ngx-loading-bar/core';
 import {IconComponent} from '../../icon.component';
 import {CollapseDirective} from 'ngx-bootstrap/collapse';
-import {NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+
 import {GallerySearchComponent} from '../gallery/search/search.gallery.component';
 import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
@@ -36,8 +36,6 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
     RouterLink,
     IconComponent,
     CollapseDirective,
-    NgFor,
-    NgIf,
     GallerySearchComponent,
     GalleryShareComponent,
     NgIconComponent,
@@ -45,10 +43,8 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
     BsDropdownDirective,
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
-    NgSwitch,
-    NgSwitchCase,
-    FormsModule,
-  ],
+    FormsModule
+],
 })
 export class FrameComponent {
   @Input() showSearch = false;

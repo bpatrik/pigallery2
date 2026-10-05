@@ -1,58 +1,80 @@
 <div class="input-group" style="border-radius: inherit">
   <input type="text"
-         class="form-control search-text"
-         [placeholder]="placeholder"
-         (keyup)="onSearchChange()"
-         (blur)="onFocusLost()"
-         (focus)="onFocus()"
-         [(ngModel)]="rawSearchText"
-         (ngModelChange)="onChange()"
-         (keydown.enter)="OnEnter()"
-         (keydown.arrowRight)="applyHint($event)"
-         (keydown.arrowUp)="selectAutocompleteUp()"
-         (keydown.arrowDown)="selectAutocompleteDown()"
-         (scroll)="Scrolled()"
-         (selectionchange)="Scrolled()"
-         #name="ngModel"
-         ngControl="search"
-         name="srch-term"
-         #SearchField
-         autocomplete="off">
+    class="form-control search-text"
+    [placeholder]="placeholder"
+    (keyup)="onSearchChange()"
+    (blur)="onFocusLost()"
+    (focus)="onFocus()"
+    [(ngModel)]="rawSearchText"
+    (ngModelChange)="onChange()"
+    (keydown.enter)="OnEnter()"
+    (keydown.arrowRight)="applyHint($event)"
+    (keydown.arrowUp)="selectAutocompleteUp()"
+    (keydown.arrowDown)="selectAutocompleteDown()"
+    (scroll)="Scrolled()"
+    (selectionchange)="Scrolled()"
+    #name="ngModel"
+    ngControl="search"
+    name="srch-term"
+    #SearchField
+    autocomplete="off">
   <input type="text"
-         class="form-control search-hint"
-         [ngModel]="SearchHint"
-         name="srch-term-hint"
-         #SearchHintField
-         autocomplete="off">
+    class="form-control search-hint"
+    [ngModel]="SearchHint"
+    name="srch-term-hint"
+    #SearchHintField
+    autocomplete="off">
 
 
-  <div class="autocomplete-list" *ngIf="autoCompleteRenders.length > 0"
-       (mouseover)="setMouseOverAutoComplete(true)" (mouseout)="setMouseOverAutoComplete(false)">
-    <div class="autocomplete-item text-start"
-         [ngClass]="{'autocomplete-item-selected': highlightedAutoCompleteItem === i}"
-         (mouseover)="setMouseOverAutoCompleteItem(i)"
-         (click)="searchAutoComplete(item)"
-         *ngFor="let item of autoCompleteRenders; let i = index">
-      <div>
-                    <span [ngSwitch]="item.type">
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.caption" name="ionTextOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.title" name="ionTextOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.directory" name="ionFolderOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.file_name" name="ionImageOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.keyword" name="ionPricetagOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.person" name="ionPersonOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.position" name="ionLocationOutline"></ng-icon>
-                      <ng-icon *ngSwitchCase="SearchQueryTypes.distance" name="ionLocationOutline"></ng-icon>
-                    </span>
-        {{item.preText}}<strong>{{item.highLightText}}</strong>{{item.postText}}
-        <ng-icon name="ionChevronForwardOutline"
-                 class="insert-button float-end"
-                 (click)="applyAutoComplete(item)"
-                 title="Insert"
-                 i18n-title></ng-icon>
-      </div>
+  @if (autoCompleteRenders.length > 0) {
+    <div class="autocomplete-list"
+      (mouseover)="setMouseOverAutoComplete(true)" (mouseout)="setMouseOverAutoComplete(false)">
+      @for (item of autoCompleteRenders; track item; let i = $index) {
+        <div class="autocomplete-item text-start"
+          [ngClass]="{'autocomplete-item-selected': highlightedAutoCompleteItem === i}"
+          (mouseover)="setMouseOverAutoCompleteItem(i)"
+          (click)="searchAutoComplete(item)"
+          >
+          <div>
+            <span>
+              @switch (item.type) {
+                @case (SearchQueryTypes.caption) {
+                  <ng-icon name="ionTextOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.title) {
+                  <ng-icon name="ionTextOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.directory) {
+                  <ng-icon name="ionFolderOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.file_name) {
+                  <ng-icon name="ionImageOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.keyword) {
+                  <ng-icon name="ionPricetagOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.person) {
+                  <ng-icon name="ionPersonOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.position) {
+                  <ng-icon name="ionLocationOutline"></ng-icon>
+                }
+                @case (SearchQueryTypes.distance) {
+                  <ng-icon name="ionLocationOutline"></ng-icon>
+                }
+              }
+            </span>
+            {{item.preText}}<strong>{{item.highLightText}}</strong>{{item.postText}}
+            <ng-icon name="ionChevronForwardOutline"
+              class="insert-button float-end"
+              (click)="applyAutoComplete(item)"
+              title="Insert"
+            i18n-title></ng-icon>
+          </div>
+        </div>
+      }
     </div>
-  </div>
+  }
 
 </div>
 

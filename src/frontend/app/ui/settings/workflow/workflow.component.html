@@ -1,47 +1,51 @@
 <div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error }}</div>
-<div *ngFor="let schedule of sortedSchedules() as sortedSchedules; let i= index">
+@for (schedule of sortedSchedules(); track schedule.name; let i = $index) {
   <div
-    class="card bg-body-tertiary mt-2 mb-2  no-changed-settings {{shouldIdent(schedule,sortedSchedules[i-1])? 'ms-4' : ''}}">
+    class="card bg-body-tertiary mt-2 mb-2  no-changed-settings {{shouldIdent(schedule,sortedSchedules()[i-1])? 'ms-4' : ''}}">
     <div class="card-header">
       <div class="d-flex justify-content-between">
         <div (click)="showDetails[schedule.name]=!showDetails[schedule.name]">
-          <span
-            *ngIf="!jobsService.isValidJob(schedule.jobName)"
-            triggers="mouseenter:mouseleave"
-            placement="bottom"
-            container="body"
-            [popover]="'Unknown job type: ' + schedule.jobName"
-            class="text-danger me-2">
-          <ng-icon name="ionWarningOutline"></ng-icon>
-          </span>
+          @if (!jobsService.isValidJob(schedule.jobName)) {
+            <span
+              triggers="mouseenter:mouseleave"
+              placement="bottom"
+              container="body"
+              [popover]="'Unknown job type: ' + schedule.jobName"
+              class="text-danger me-2">
+              <ng-icon name="ionWarningOutline"></ng-icon>
+            </span>
+          }
           <ng-icon style="font-size: 1.3em; margin-left: -4px"
-                   [name]="showDetails[schedule.name] ? 'ionChevronDownOutline' : 'ionChevronForwardOutline'"></ng-icon>
+          [name]="showDetails[schedule.name] ? 'ionChevronDownOutline' : 'ionChevronForwardOutline'"></ng-icon>
           {{ schedule.name }}
-          <ng-container [ngSwitch]="schedule.trigger.type">
-            <ng-container *ngSwitchCase="JobTriggerType.periodic">
+          @switch (schedule.trigger.type) {
+            @case (JobTriggerType.periodic) {
               <span class="badge bg-primary" i18n>every</span>
               {{ periods[$any(schedule.trigger).periodicity] }} {{ atTimeLocal($any(schedule.trigger).atTime) | date:"HH:mm (z)" }}
-            </ng-container>
-            <ng-container
-              *ngSwitchCase="JobTriggerType.scheduled">&#64;{{ $any(schedule.trigger).time | date:"medium" }}
-            </ng-container>
-            <span class="badge bg-secondary" *ngSwitchCase="JobTriggerType.never" i18n>never</span>
-            <ng-container *ngSwitchCase="JobTriggerType.after">
+            }
+            @case (JobTriggerType.scheduled) {
+              &#64;{{ $any(schedule.trigger).time | date:"medium" }}
+            }
+            @case (JobTriggerType.never) {
+              <span class="badge bg-secondary" i18n>never</span>
+            }
+            @case (JobTriggerType.after) {
               <span class="badge bg-primary" i18n>after</span>
               {{ $any(schedule.trigger).afterScheduleName }}
-            </ng-container>
-          </ng-container>
+            }
+          }
         </div>
         <div>
           <button class="btn btn-danger ms-0" (click)="remove(schedule)">
             <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
           </button>
-          <app-settings-job-button class="ms-md-2 mt-2 mt-md-0"
-                                   *ngIf="jobsService.isValidJob(schedule.jobName)"
-                                   (jobError)="error=$event"
-                                   [allowParallelRun]="schedule.allowParallelRun"
-                                   [jobName]="schedule.jobName" [config]="schedule.config"
-                                   [shortName]="true"></app-settings-job-button>
+          @if (jobsService.isValidJob(schedule.jobName)) {
+            <app-settings-job-button class="ms-md-2 mt-2 mt-md-0"
+              (jobError)="error=$event"
+              [allowParallelRun]="schedule.allowParallelRun"
+              [jobName]="schedule.jobName" [config]="schedule.config"
+            [shortName]="true"></app-settings-job-button>
+          }
         </div>
       </div>
     </div>
@@ -51,11 +55,13 @@
       <div class="row">
 
         <div class="col-md-12">
-          <div class="alert alert-secondary" role="alert"
-               *ngIf="settingsService.configStyle == ConfigStyle.full">
-            <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
-            {{ getJobDescription(schedule.jobName) }}
-          </div>
+          @if (settingsService.configStyle == ConfigStyle.full) {
+            <div class="alert alert-secondary" role="alert"
+              >
+              <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+              {{ getJobDescription(schedule.jobName) }}
+            </div>
+          }
           <div class="mb-1 row">
             <label class="col-md-2 control-label" i18n>Job:</label>
             <div class="col-md-4">
@@ -63,11 +69,11 @@
             </div>
             <div class="col-md-6">
               <app-settings-job-button class="float-end"
-                                       [id]="'jobName'+i"
-                                       [jobName]="schedule.jobName"
-                                       [allowParallelRun]="schedule.allowParallelRun"
-                                       (jobError)="error=$event"
-                                       [config]="schedule.config"></app-settings-job-button>
+                [id]="'jobName'+i"
+                [jobName]="schedule.jobName"
+                [allowParallelRun]="schedule.allowParallelRun"
+                (jobError)="error=$event"
+              [config]="schedule.config"></app-settings-job-button>
 
             </div>
           </div>
@@ -75,83 +81,99 @@
             <label class="col-md-2 control-label" [for]="'repeatType'+i" i18n>Periodicity:</label>
             <div class="col-md-10">
               <select class="form-select" [(ngModel)]="schedule.trigger.type"
-                      (ngModelChange)="jobTriggerTypeChanged($event,schedule); onChange($event);"
-                      [name]="'repeatType'+i"
-                      [id]="'repeatType'+i"
-                      required>
-                <option *ngFor="let jobTrigger of JobTriggerTypeMap"
-                        [ngValue]="jobTrigger.key">{{ jobTrigger.value }}
-                </option>
-              </select>
-              <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                     i18n>Set the time to run the job.
-              </small>
-            </div>
-          </div>
-
-          <div class="mb-1 row"
-               [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
-               *ngIf="schedule.trigger.type == JobTriggerType.after">
-            <label class="col-md-2 control-label" [for]="'triggerAfter'+i" i18n>After:</label>
-            <div class="col-md-10">
-              <select class="form-select"
-                      [(ngModel)]="schedule.trigger.afterScheduleName"
-                      (ngModelChange)="onChange($event)"
-                      [name]="'triggerAfter'+i"
-                      [id]="'triggerAfter'+i" required>
-                <ng-container *ngFor="let sch of sortedSchedules">
-                  <option *ngIf="sch.name !== schedule.name"
-                          [ngValue]="sch.name">{{ sch.name }}
-                  </option>
-                </ng-container>
-              </select>
-              <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                     i18n>The job will run after that job finishes.
-              </small>
-            </div>
-          </div>
-
-
-          <div class="mb-1 row"
-               [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
-               *ngIf="schedule.trigger.type == JobTriggerType.scheduled">
-            <label class="col-md-2 control-label" [for]="'triggerTime'+i" i18n>At:</label>
-            <div class="col-md-10">
-              <app-timestamp-datepicker
-                [name]="'triggerTime'+i"
-                [id]="'triggerTime'+i"
-                (timestampChange)="onChange($event)"
-                [(timestamp)]="schedule.trigger.time"></app-timestamp-datepicker>
-            </div>
-          </div>
-
-          <div class="mb-1 row"
-               [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
-               *ngIf="schedule.trigger.type == JobTriggerType.periodic">
-            <label class="col-md-2 control-label" [for]="'periodicity'+i" i18n>At:</label>
-            <div class="col-md-10">
-              <select
-                class="form-select"
-                [(ngModel)]="schedule.trigger.periodicity"
-                (ngModelChange)="onChange($event)"
-                [name]="'periodicity' + i"
-                [id]="'periodicity' + i"
+                (ngModelChange)="jobTriggerTypeChanged($event,schedule); onChange($event);"
+                [name]="'repeatType'+i"
+                [id]="'repeatType'+i"
                 required>
-                <option *ngFor="let period of periods; let i = index"
-                        [ngValue]="i">
-                  <ng-container i18n>every</ng-container>
-                  {{ period }}
-                </option>
+                @for (jobTrigger of JobTriggerTypeMap; track jobTrigger) {
+                  <option
+                    [ngValue]="jobTrigger.key">{{ jobTrigger.value }}
+                  </option>
+                }
               </select>
-              <app-timestamp-timepicker
-                [name]="'atTime'+i"
-                (timestampChange)="onChange($event)"
-                [(timestamp)]="schedule.trigger.atTime"></app-timestamp-timepicker>
+              @if (settingsService.configStyle == ConfigStyle.full) {
+                <small class="form-text text-muted"
+                  i18n>Set the time to run the job.
+              </small>
+              }
             </div>
           </div>
 
+          @if (schedule.trigger.type == JobTriggerType.after) {
+            <div class="mb-1 row"
+              [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+              >
+              <label class="col-md-2 control-label" [for]="'triggerAfter'+i" i18n>After:</label>
+              <div class="col-md-10">
+                <select class="form-select"
+                  [(ngModel)]="schedule.trigger.afterScheduleName"
+                  (ngModelChange)="onChange($event)"
+                  [name]="'triggerAfter'+i"
+                  [id]="'triggerAfter'+i" required>
+                  @for (sch of sortedSchedules(); track sch.name) {
+                    @if (sch.name !== schedule.name) {
+                      <option
+                        [ngValue]="sch.name">{{ sch.name }}
+                      </option>
+                    }
+                  }
+                </select>
+                @if (settingsService.configStyle == ConfigStyle.full) {
+                  <small class="form-text text-muted"
+                    i18n>The job will run after that job finishes.
+              </small>
+                }
+              </div>
+            </div>
+          }
+
+
+          @if (schedule.trigger.type == JobTriggerType.scheduled) {
+            <div class="mb-1 row"
+              [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+              >
+              <label class="col-md-2 control-label" [for]="'triggerTime'+i" i18n>At:</label>
+              <div class="col-md-10">
+                <app-timestamp-datepicker
+                  [name]="'triggerTime'+i"
+                  [id]="'triggerTime'+i"
+                  (timestampChange)="onChange($event)"
+                [(timestamp)]="schedule.trigger.time"></app-timestamp-datepicker>
+              </div>
+            </div>
+          }
+
+          @if (schedule.trigger.type == JobTriggerType.periodic) {
+            <div class="mb-1 row"
+              [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+              >
+              <label class="col-md-2 control-label" [for]="'periodicity'+i" i18n>At:</label>
+              <div class="col-md-10">
+                <select
+                  class="form-select"
+                  [(ngModel)]="schedule.trigger.periodicity"
+                  (ngModelChange)="onChange($event)"
+                  [name]="'periodicity' + i"
+                  [id]="'periodicity' + i"
+                  required>
+                  @for (period of periods; track period; let i = $index) {
+                    <option
+                      [ngValue]="i">
+                      <ng-container i18n>every</ng-container>
+                      {{ period }}
+                    </option>
+                  }
+                </select>
+                <app-timestamp-timepicker
+                  [name]="'atTime'+i"
+                  (timestampChange)="onChange($event)"
+                [(timestamp)]="schedule.trigger.atTime"></app-timestamp-timepicker>
+              </div>
+            </div>
+          }
+
           <div class="mb-1 row"
-               [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+            [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
             <label class="col-md-2 control-label" [for]="'allowParallelRun'+'_'+i" i18n>Allow parallel run</label>
             <div class="col-md-10">
               <div class="input-group">
@@ -159,17 +181,19 @@
                 <div
                   class="form-check form-switch  fs-5">
                   <input class="form-check-input"
-                         type="checkbox"
-                         role="switch"
-                         [name]="'allowParallelRun'+'_'+i"
-                         [id]="'allowParallelRun'+'_'+i"
-                         (ngModelChange)="onChange($event)"
-                         [(ngModel)]="schedule.allowParallelRun">
+                    type="checkbox"
+                    role="switch"
+                    [name]="'allowParallelRun'+'_'+i"
+                    [id]="'allowParallelRun'+'_'+i"
+                    (ngModelChange)="onChange($event)"
+                    [(ngModel)]="schedule.allowParallelRun">
                 </div>
               </div>
-              <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                     i18n>Enables the job to start even if another job is already running.
+              @if (settingsService.configStyle == ConfigStyle.full) {
+                <small class="form-text text-muted"
+                  i18n>Enables the job to start even if another job is already running.
               </small>
+              }
             </div>
           </div>
         </div>
@@ -177,226 +201,228 @@
 
       </div>
 
-      <ng-container *ngIf="jobsService.getConfigTemplate(schedule.jobName)">
+      @if (jobsService.getConfigTemplate(schedule.jobName)) {
         <hr/>
-        <div *ngFor="let configEntry of  jobsService.getConfigTemplate(schedule.jobName)">
-
-          <div class="mb-1 row"
-               *ngIf="!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue"
-               [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
-            <label class="col-md-2 control-label"
-                   [for]="configEntry.id+'_'+i">{{ backendTextService.get(configEntry.name) }}</label>
-            <div class="col-md-10">
-              <div [class.input-group]="'MediaPickDTO-array'!=configEntry.type">
-                <ng-container [ngSwitch]="configEntry.type">
-                  <div
-                    *ngSwitchCase="'boolean'"
-                    class="form-check form-switch  fs-5">
-                    <input class="form-check-input"
-                           type="checkbox"
-                           role="switch"
-                           [name]="configEntry.id+'_'+i"
-                           [id]="configEntry.id+'_'+i"
-                           (ngModelChange)="onChange($event)"
-                           [(ngModel)]="schedule.config[configEntry.id]">
-                  </div>
-
-                  <ng-container *ngSwitchCase="'string'">
-                    <input type="text" class="form-control" [name]="configEntry.id+'_'+i"
-                           [id]="configEntry.id+'_'+i"
-                           (ngModelChange)="onChange($event)"
-                           [(ngModel)]="schedule.config[configEntry.id]" required>
-                  </ng-container>
-
-                  <ng-container *ngSwitchCase="'string-array'">
-                    <input type="text" class="form-control"
-                           [name]="configEntry.id+'_'+i"
-                           [id]="configEntry.id+'_'+i"
-                           (ngModelChange)="setEmailArray(schedule.config,configEntry.id,$event); onChange($event);"
-                           [ngModel]="getArray($any(schedule.config),configEntry.id)" required>
-                  </ng-container>
-
-                  <ng-container *ngSwitchCase="'number'">
-                    <input type="number" class="form-control" [name]="configEntry.id+'_'+i"
-                           [id]="configEntry.id+'_'+i"
-                           (ngModelChange)="onChange($event)"
-                           [(ngModel)]="schedule.config[configEntry.id]" required>
-                  </ng-container>
-
-                  <ng-container *ngSwitchCase="'number-array'">
-                    <input type="text" class="form-control"
-                           [name]="configEntry.id+'_'+i"
-                           [id]="configEntry.id+'_'+i"
-                           (ngModelChange)="setNumberArray(schedule.config,configEntry.id,$event); onChange($event);"
-                           [ngModel]="getArray($any(schedule.config),configEntry.id)" required>
-                  </ng-container>
-
-                  <app-gallery-search-field
-                    *ngSwitchCase="'SearchQuery'"
-                    [(ngModel)]="schedule.config[configEntry.id]"
-                    [id]="configEntry.id+'_'+i"
-                    [name]="configEntry.id+'_'+i"
-                    (change)="onChange($event)"
-                    placeholder="Search Query">
-                  </app-gallery-search-field>
-
-                  <select
-                    *ngSwitchCase="'messenger'"
-                    [id]="configEntry.id+'_'+i"
-                    [name]="configEntry.id+'_'+i"
-                    (ngModelChange)="onChange($event)"
-                    [(ngModel)]="schedule.config[configEntry.id]"
-                    class="form-select">
-                    <option *ngFor="let msg of jobsService.availableMessengers | async" [ngValue]="msg">{{ msg }}
-                    </option>
-                  </select>
-
-
-                  <ng-container *ngSwitchCase="'MediaPickDTO-array'">
-                    <ng-container *ngFor="let mp of AsMediaPickDTOArray(schedule.config[configEntry.id]); let j=index">
-
-                      <div class="mb-1 row"
-                           [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
-                        <label class="col-md-2 control-label"
-                               [for]="configEntry.id+'_'+i">
-                          <ng-container>Search Query</ng-container>
-                          - {{ (j + 1) }}</label>
-                        <div class="col-md-10">
-                          <div class="input-group">
-                            <app-gallery-search-field
-                              [(ngModel)]="mp.searchQuery"
-                              [id]="'sq_'+configEntry.id+'_'+i+'_'+j"
-                              [name]="'sq_'+configEntry.id+'_'+i+'_'+j"
-                              (change)="onChange($event)"
-                              placeholder="Search Query">
-                            </app-gallery-search-field>
-                          </div>
-                          <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                                 i18n>
+        @for (configEntry of  jobsService.getConfigTemplate(schedule.jobName); track configEntry) {
+          <div>
+            @if (!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue) {
+              <div class="mb-1 row"
+                [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                <label class="col-md-2 control-label"
+                [for]="configEntry.id+'_'+i">{{ backendTextService.get(configEntry.name) }}</label>
+                <div class="col-md-10">
+                  <div [class.input-group]="'MediaPickDTO-array'!=configEntry.type">
+                    @switch (configEntry.type) {
+                      @case ('boolean') {
+                        <div
+                          class="form-check form-switch  fs-5">
+                          <input class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            [name]="configEntry.id+'_'+i"
+                            [id]="configEntry.id+'_'+i"
+                            (ngModelChange)="onChange($event)"
+                            [(ngModel)]="schedule.config[configEntry.id]">
+                        </div>
+                      }
+                      @case ('string') {
+                        <input type="text" class="form-control" [name]="configEntry.id+'_'+i"
+                          [id]="configEntry.id+'_'+i"
+                          (ngModelChange)="onChange($event)"
+                          [(ngModel)]="schedule.config[configEntry.id]" required>
+                      }
+                      @case ('string-array') {
+                        <input type="text" class="form-control"
+                          [name]="configEntry.id+'_'+i"
+                          [id]="configEntry.id+'_'+i"
+                          (ngModelChange)="setEmailArray(schedule.config,configEntry.id,$event); onChange($event);"
+                          [ngModel]="getArray($any(schedule.config),configEntry.id)" required>
+                      }
+                      @case ('number') {
+                        <input type="number" class="form-control" [name]="configEntry.id+'_'+i"
+                          [id]="configEntry.id+'_'+i"
+                          (ngModelChange)="onChange($event)"
+                          [(ngModel)]="schedule.config[configEntry.id]" required>
+                      }
+                      @case ('number-array') {
+                        <input type="text" class="form-control"
+                          [name]="configEntry.id+'_'+i"
+                          [id]="configEntry.id+'_'+i"
+                          (ngModelChange)="setNumberArray(schedule.config,configEntry.id,$event); onChange($event);"
+                          [ngModel]="getArray($any(schedule.config),configEntry.id)" required>
+                      }
+                      @case ('SearchQuery') {
+                        <app-gallery-search-field
+                          [(ngModel)]="schedule.config[configEntry.id]"
+                          [id]="configEntry.id+'_'+i"
+                          [name]="configEntry.id+'_'+i"
+                          (change)="onChange($event)"
+                          placeholder="Search Query">
+                        </app-gallery-search-field>
+                      }
+                      @case ('messenger') {
+                        <select
+                          [id]="configEntry.id+'_'+i"
+                          [name]="configEntry.id+'_'+i"
+                          (ngModelChange)="onChange($event)"
+                          [(ngModel)]="schedule.config[configEntry.id]"
+                          class="form-select">
+                          @for (msg of jobsService.availableMessengers | async; track msg) {
+                            <option [ngValue]="msg">{{ msg }}
+                            </option>
+                          }
+                        </select>
+                      }
+                      @case ('MediaPickDTO-array') {
+                        @for (mp of AsMediaPickDTOArray(schedule.config[configEntry.id]); track mp; let j = $index) {
+                          <div class="mb-1 row"
+                            [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                            <label class="col-md-2 control-label"
+                              [for]="configEntry.id+'_'+i">
+                              <ng-container>Search Query</ng-container>
+                            - {{ (j + 1) }}</label>
+                            <div class="col-md-10">
+                              <div class="input-group">
+                                <app-gallery-search-field
+                                  [(ngModel)]="mp.searchQuery"
+                                  [id]="'sq_'+configEntry.id+'_'+i+'_'+j"
+                                  [name]="'sq_'+configEntry.id+'_'+i+'_'+j"
+                                  (change)="onChange($event)"
+                                  placeholder="Search Query">
+                                </app-gallery-search-field>
+                              </div>
+                              @if (settingsService.configStyle == ConfigStyle.full) {
+                                <small class="form-text text-muted"
+                                  i18n>
                             Search query to list photos and videos.
                           </small>
-                        </div>
-                      </div>
-                      <div class="mb-1 row"
-                           [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
-                        <label class="col-md-2 control-label"
-                               [for]="configEntry.id+'_'+i" i18n>Sort by</label>
-                        <div class="col-md-10">
-                          <div class="input-group">
-                            <div
-                              *ngFor="let _ of mp.sortBy; let k=index"
-                              class="row col-12 mt-1 m-0 p-0">
-                              <div class="col p-0">
-
-                                <app-settings-entry-sorting-method
-                                  [(ngModel)]="mp.sortBy[k]"
-                                  [id]="configEntry.id+'_'+i+'_'+j+'_'+k"
-                                  [name]="configEntry.id+'_'+i+'_'+j+'_'+k"
-                                  [sortingByEnum]="SortByTypes"
-                                  (change)="onChange($event)">
-                                </app-settings-entry-sorting-method>
-
-
-                              </div>
-                              <div class="col-auto pe-0">
-                                <button class="btn btn-danger float-end"
+                              }
+                            </div>
+                          </div>
+                          <div class="mb-1 row"
+                            [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                            <label class="col-md-2 control-label"
+                            [for]="configEntry.id+'_'+i" i18n>Sort by</label>
+                            <div class="col-md-10">
+                              <div class="input-group">
+                                @for (_ of mp.sortBy; track _; let k = $index) {
+                                  <div
+                                    class="row col-12 mt-1 m-0 p-0">
+                                    <div class="col p-0">
+                                      <app-settings-entry-sorting-method
+                                        [(ngModel)]="mp.sortBy[k]"
+                                        [id]="configEntry.id+'_'+i+'_'+j+'_'+k"
+                                        [name]="configEntry.id+'_'+i+'_'+j+'_'+k"
+                                        [sortingByEnum]="SortByTypes"
+                                        (change)="onChange($event)">
+                                      </app-settings-entry-sorting-method>
+                                    </div>
+                                    <div class="col-auto pe-0">
+                                      <button class="btn btn-danger float-end"
                                         [class.btn-secondary]="mp.sortBy.length < 2"
                                         [class.btn-danger]="mp.sortBy.length >= 2"
                                         [disabled]="mp.sortBy.length < 2"
                                         [id]="'list_btn_'+configEntry.id+'_'+i+'_'+j+'_'+k"
                                         [name]="'list_btn_'+configEntry.id+'_'+i+'_'+j+'_'+k"
                                         (click)="removeFromArray(mp.sortBy,k)">
-                                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                                </button>
+                                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                                      </button>
+                                    </div>
+                                  </div>
+                                }
+                                <div class="col-12 p-0">
+                                  <button class="btn btn-primary mt-1 float-end"
+                                    [id]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
+                                    [name]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
+                                    (click)="AddNewSorting(mp.sortBy)">
+                                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                                    <span i18n>Add</span>
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                            <div class="col-12 p-0">
-                              <button class="btn btn-primary mt-1 float-end"
-                                      [id]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
-                                      [name]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
-                                      (click)="AddNewSorting(mp.sortBy)">
-                                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                                <span i18n>Add</span>
-                              </button>
-                            </div>
-                          </div>
-                          <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                                 i18n>
+                              @if (settingsService.configStyle == ConfigStyle.full) {
+                                <small class="form-text text-muted"
+                                  i18n>
                             Sorts the photos and videos by this.
                           </small>
-                        </div>
-                      </div>
-                      <div class="mb-1 row"
-                           [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
-                        <label class="col-md-2 control-label"
-                               [for]="configEntry.id+'_'+i+'_'+j" i18n>Pick</label>
-                        <div class="col-md-10">
-                          <div class="input-group">
-                            <input type="number" class="form-control" [name]="configEntry.id+'_'+i+'_'+j"
-                                   [id]="configEntry.id+'_'+i+'_'+j"
-                                   (ngModelChange)="onChange($event)"
-                                   [(ngModel)]="mp.pick" required>
+                              }
+                            </div>
                           </div>
-                          <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                                 i18n>
+                          <div class="mb-1 row"
+                            [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                            <label class="col-md-2 control-label"
+                            [for]="configEntry.id+'_'+i+'_'+j" i18n>Pick</label>
+                            <div class="col-md-10">
+                              <div class="input-group">
+                                <input type="number" class="form-control" [name]="configEntry.id+'_'+i+'_'+j"
+                                  [id]="configEntry.id+'_'+i+'_'+j"
+                                  (ngModelChange)="onChange($event)"
+                                  [(ngModel)]="mp.pick" required>
+                              </div>
+                              @if (settingsService.configStyle == ConfigStyle.full) {
+                                <small class="form-text text-muted"
+                                  i18n>
                             Number of photos and videos to pick.
                           </small>
-                        </div>
-                      </div>
-
-                      <div class="row">
-                        <button class="btn float-end"
-                                [class.btn-secondary]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length < 2"
-                                [class.btn-danger]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length >= 2"
-                                [disabled]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length < 2"
-                                [id]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
-                                [name]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
-                                (click)="removeFromArray(AsMediaPickDTOArray(schedule.config[configEntry.id]),j)">
-                          <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                        </button>
-                      </div>
-                      <hr/>
-                    </ng-container>
-
-                    <ng-container>
-                      <div class="col-12 p-0">
-                        <button class="btn btn-primary mt-1 float-end"
-                                [id]="'btn_add_'+configEntry.id+'_'+i"
-                                [name]="'btn_add_'+configEntry.id+'_'+i"
-                                (click)="AddNewMediaPickDTO(schedule.config[configEntry.id])">
-                          <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                          <span i18n>Add</span>
-                        </button>
-                      </div>
-                    </ng-container>
-                  </ng-container>
-
-
+                              }
+                            </div>
+                          </div>
+                          <div class="row">
+                            <button class="btn float-end"
+                              [class.btn-secondary]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length < 2"
+                              [class.btn-danger]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length >= 2"
+                              [disabled]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length < 2"
+                              [id]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
+                              [name]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
+                              (click)="removeFromArray(AsMediaPickDTOArray(schedule.config[configEntry.id]),j)">
+                              <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                            </button>
+                          </div>
+                          <hr/>
+                        }
+                        <ng-container>
+                          <div class="col-12 p-0">
+                            <button class="btn btn-primary mt-1 float-end"
+                              [id]="'btn_add_'+configEntry.id+'_'+i"
+                              [name]="'btn_add_'+configEntry.id+'_'+i"
+                              (click)="AddNewMediaPickDTO(schedule.config[configEntry.id])">
+                              <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                              <span i18n>Add</span>
+                            </button>
+                          </div>
+                        </ng-container>
+                      }
+                    }
+                  </div>
+                  @if (settingsService.configStyle == ConfigStyle.full) {
+                    <small class="form-text text-muted">
+                      @if (configEntry.type == 'number-array') {
+                        <ng-container i18n>';' separated integers.
                 </ng-container>
+                      }
+                      {{ backendTextService.get(configEntry.description) }}
+                    </small>
+                  }
+                </div>
               </div>
-              <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full">
-                <ng-container *ngIf="configEntry.type == 'number-array'" i18n>';' separated integers.
-                </ng-container>
-                {{ backendTextService.get(configEntry.description) }}
-              </small>
-            </div>
+            }
           </div>
-
-        </div>
-      </ng-container>
+        }
+      }
     </div>
 
-    <app-settings-job-progress
-      class="card-footer bg-transparent"
-      *ngIf="getProgress(schedule)"
-      [progress]="getProgress(schedule)">
-    </app-settings-job-progress>
+    @if (getProgress(schedule)) {
+      <app-settings-job-progress
+        class="card-footer bg-transparent"
+        [progress]="getProgress(schedule)">
+      </app-settings-job-progress>
+    }
 
   </div>
-</div>
+}
 
 <button class="btn btn-primary float-end mt-2"
-        (click)="prepareNewJob()">
+  (click)="prepareNewJob()">
   <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
   <span i18n>Add Job</span>
 </button>
@@ -404,7 +430,7 @@
 
 <!-- Modal -->
 <div bsModal #jobModal="bs-modal" class="modal fade" id="jobModal" tabindex="-1" role="dialog"
-     aria-labelledby="jobModalLabel">
+  aria-labelledby="jobModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -415,23 +441,27 @@
       <form #jobModalForm="ngForm">
         <div class="modal-body">
           <select class="form-select"
-                  (change)="jobTypeChanged(newSchedule)"
-                  [(ngModel)]="newSchedule.jobName"
-                  name="newJobName" required>
-            <option *ngFor="let availableJob of jobsService.availableJobs | async"
-                    [ngValue]="availableJob.Name">{{ backendTextService.getJobName(availableJob.Name) }}
-            </option>
+            (change)="jobTypeChanged(newSchedule)"
+            [(ngModel)]="newSchedule.jobName"
+            name="newJobName" required>
+            @for (availableJob of jobsService.availableJobs | async; track availableJob) {
+              <option
+                [ngValue]="availableJob.Name">{{ backendTextService.getJobName(availableJob.Name) }}
+              </option>
+            }
           </select>
-          <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full"
-                 i18n>Select a job to schedule.
+          @if (settingsService.configStyle == ConfigStyle.full) {
+            <small class="form-text text-muted"
+              i18n>Select a job to schedule.
           </small>
+          }
 
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" (click)="jobModal.hide()" i18n>Close</button>
           <button type="button" class="btn btn-primary" data-dismiss="modal"
-                  (click)="addNewJob()"
-                  [disabled]="!jobModalForm.form.valid" i18n>Add Job
+            (click)="addNewJob()"
+            [disabled]="!jobModalForm.form.valid" i18n>Add Job
           </button>
         </div>
       </form>

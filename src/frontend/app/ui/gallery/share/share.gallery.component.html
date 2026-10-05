@@ -1,15 +1,18 @@
-<button id="shareButton" class="nav-link btn  btn-link"
-        style="white-space:nowrap"
-        *ngIf="!dropDownItem"
-        type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
-  <ng-icon name="ionShareSocialOutline" class="me-1"></ng-icon>
-  <ng-container i18n>Share</ng-container>
-</button>
+@if (!dropDownItem) {
+  <button id="shareButton" class="nav-link btn  btn-link"
+    style="white-space:nowrap"
+    type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
+    <ng-icon name="ionShareSocialOutline" class="me-1"></ng-icon>
+    <ng-container i18n>Share</ng-container>
+  </button>
+}
 
-<a class="dropdown-item" (click)="openModal(shareModal)" *ngIf="dropDownItem">
-  <ng-icon name="ionShareSocialOutline"></ng-icon>
-  <ng-container i18n>Share</ng-container>
-</a>
+@if (dropDownItem) {
+  <a class="dropdown-item" (click)="openModal(shareModal)">
+    <ng-icon name="ionShareSocialOutline"></ng-icon>
+    <ng-container i18n>Share</ng-container>
+  </a>
+}
 
 <ng-template #shareModal>
   <!-- sharing Modal-->
@@ -23,31 +26,33 @@
       <div class="row">
         <div class="col-7 col-sm-9">
           <input id="shareLink"
-                 name="shareLink"
-                 placeholder="link"
-                 class="form-control input-md"
-                 type="text"
-                 readonly
-                 [disabled]="!shareForm.form.valid || !urlValid"
-                 [ngModel]="shareForm.form.valid ? url: invalidSettings">
+            name="shareLink"
+            placeholder="link"
+            class="form-control input-md"
+            type="text"
+            readonly
+            [disabled]="!shareForm.form.valid || !urlValid"
+            [ngModel]="shareForm.form.valid ? url: invalidSettings">
         </div>
         <div class="col-5 col-sm-3">
-          <button
-            *ngIf="!sharing"
-            id="getShareButton" name="getShareButton"
-            (click)="share()"
-            [disabled]="!shareForm.form.valid"
-            class="btn btn-primary btn-block float-end"
+          @if (!sharing) {
+            <button
+              id="getShareButton" name="getShareButton"
+              (click)="share()"
+              [disabled]="!shareForm.form.valid"
+              class="btn btn-primary btn-block float-end"
             i18n>Share</button>
-          <button
-            *ngIf="sharing"
-            id="copyButton" name="copyButton"
-            ngxClipboard
-            [cbContent]="url"
-            (cbOnSuccess)="onCopy()"
-            [disabled]="!shareForm.form.valid"
-            class="btn btn-primary btn-block float-end"
+          }
+          @if (sharing) {
+            <button
+              id="copyButton" name="copyButton"
+              ngxClipboard
+              [cbContent]="url"
+              (cbOnSuccess)="onCopy()"
+              [disabled]="!shareForm.form.valid"
+              class="btn btn-primary btn-block float-end"
             i18n>Copy</button>
+          }
         </div>
       </div>
       <hr/>
@@ -57,101 +62,116 @@
         </div>
         <div class="col-8">
           <input disabled type="text"
-                 name="sharing-dir"
-                 id="sharing-dir"
-                 class="full-width form-control"
-                 [ngModel]="galleryService.isSearchResult() ? (currentQuery | searchQuery) : sharingTarget">
+            name="sharing-dir"
+            id="sharing-dir"
+            class="full-width form-control"
+            [ngModel]="galleryService.isSearchResult() ? (currentQuery | searchQuery) : sharingTarget">
         </div>
       </div>
 
       <div class="row mt-2">
         <div class="col-12">
           <small class="text-muted">
-            <span i18n>Sharing</span>&nbsp;<ng-container *ngIf="currentMediaCountIsLowerBound"><span
+            <span i18n>Sharing</span>&nbsp;@if (currentMediaCountIsLowerBound) {
+            <span
             i18n>at least</span>&nbsp;
-          </ng-container>
-            <span class="fw-bold">{{ currentMediaCount }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;<span i18n>Folders are not shared.</span>
-          </small>
-        </div>
+          }
+          <span class="fw-bold">{{ currentMediaCount }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;<span i18n>Folders are not shared.</span>
+        </small>
       </div>
+    </div>
 
-      <div class="row">
-        <div class="col-4">
-          <label class="control-label" for="share-password">
-            <ng-container i18n>Password</ng-container>
-            <ng-container *ngIf="passwordRequired">*</ng-container>
-          </label>
-        </div>
-        <div class="col-8">
-          <input id="share-password"
-                 class="form-control"
-                 name="share-password"
-                 type="password"
-                 (change)="update()"
-                 [(ngModel)]="input.password"
-                 i18n-placeholder
-                 placeholder="Password"
-                 [required]="passwordRequired">
-        </div>
+    <div class="row">
+      <div class="col-4">
+        <label class="control-label" for="share-password">
+          <ng-container i18n>Password</ng-container>
+          @if (passwordRequired) {
+            *
+          }
+        </label>
       </div>
+      <div class="col-8">
+        <input id="share-password"
+          class="form-control"
+          name="share-password"
+          type="password"
+          (change)="update()"
+          [(ngModel)]="input.password"
+          i18n-placeholder
+          placeholder="Password"
+          [required]="passwordRequired">
+      </div>
+    </div>
 
-      <div class="row">
-        <div class="col-4">
-          <label class="control-label" for="valid-from" i18n>Valid:</label>
-        </div>
-        <div class="col-4" style="padding-right: 1px">
-          <input class="form-control" [(ngModel)]="input.valid.amount" (change)="update()"
-                 name="valid-from"
-                 id="valid-from"
-                 [disabled]="input.valid.type === ValidityTypes.Forever"
-                 type="number" min="1" step="1"/>
-        </div>
-        <div class="col-4" style="padding-left: 1px">
-          <select class="form-select"
-                  [(ngModel)]="input.valid.type" (change)="update()" name="valid-to"
-                  required>
-            <option [ngValue]="ValidityTypes.Minutes" i18n>Minutes</option>
-            <option [ngValue]="ValidityTypes.Hours" i18n>Hours</option>
-            <option [ngValue]="ValidityTypes.Days" i18n>Days</option>
-            <option [ngValue]="ValidityTypes.Months" i18n>Months</option>
-            <option [ngValue]="ValidityTypes.Forever" i18n>Forever</option>
-          </select>
-        </div>
+    <div class="row">
+      <div class="col-4">
+        <label class="control-label" for="valid-from" i18n>Valid:</label>
       </div>
-    </form>
-  </div>
-  <div class="modal-footer" *ngIf="activeShares && activeShares.length>0">
-    <a *ngIf="!showSharingList"
-       (click)="showSharingList = true"
-       class="list-shares-button m-0">
-      <span class="badge text-bg-secondary me-1">{{ activeShares.length }}</span>
-      <ng-container i18n>active share(s) for this folder.
+      <div class="col-4" style="padding-right: 1px">
+        <input class="form-control" [(ngModel)]="input.valid.amount" (change)="update()"
+          name="valid-from"
+          id="valid-from"
+          [disabled]="input.valid.type === ValidityTypes.Forever"
+          type="number" min="1" step="1"/>
+      </div>
+      <div class="col-4" style="padding-left: 1px">
+        <select class="form-select"
+          [(ngModel)]="input.valid.type" (change)="update()" name="valid-to"
+          required>
+          <option [ngValue]="ValidityTypes.Minutes" i18n>Minutes</option>
+          <option [ngValue]="ValidityTypes.Hours" i18n>Hours</option>
+          <option [ngValue]="ValidityTypes.Days" i18n>Days</option>
+          <option [ngValue]="ValidityTypes.Months" i18n>Months</option>
+          <option [ngValue]="ValidityTypes.Forever" i18n>Forever</option>
+        </select>
+      </div>
+    </div>
+  </form>
+</div>
+@if (activeShares && activeShares.length>0) {
+  <div class="modal-footer">
+    @if (!showSharingList) {
+      <a
+        (click)="showSharingList = true"
+        class="list-shares-button m-0">
+        <span class="badge text-bg-secondary me-1">{{ activeShares.length }}</span>
+        <ng-container i18n>active share(s) for this folder.
       </ng-container>
-      <ng-icon name="ionChevronForwardOutline" class="ms-1"></ng-icon>
-    </a>
-    <table class="table table-hover table-sm" *ngIf="showSharingList">
-      <thead>
-      <tr>
-        <th i18n>Sharing</th>
-        <th *ngIf="IsAdmin" i18n>Creator</th>
-        <th i18n>Expires</th>
-        <th></th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let share of activeShares">
-        <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
-        <td *ngIf="IsAdmin">{{share.creator.name}}</td>
-        <td>{{share.expires | date}}</td>
-        <td>
-          <button (click)="deleteSharing(share)"
+        <ng-icon name="ionChevronForwardOutline" class="ms-1"></ng-icon>
+      </a>
+    }
+    @if (showSharingList) {
+      <table class="table table-hover table-sm">
+        <thead>
+          <tr>
+            <th i18n>Sharing</th>
+            @if (IsAdmin) {
+              <th i18n>Creator</th>
+            }
+            <th i18n>Expires</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (share of activeShares; track share) {
+            <tr>
+              <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
+              @if (IsAdmin) {
+                <td>{{share.creator.name}}</td>
+              }
+              <td>{{share.expires | date}}</td>
+              <td>
+                <button (click)="deleteSharing(share)"
                   [disabled]="share.sharingKey == sharing?.sharingKey"
                   class="btn btn-danger float-end">
-            <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-          </button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   </div>
+}
 </ng-template>

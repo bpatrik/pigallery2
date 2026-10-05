@@ -1,18 +1,22 @@
 <div class="dropdown" dropdown   #dropdown="bs-dropdown">
   <button dropdownToggle
-          class="btn btn-tertiary dropdown-toggle"
-          type="button"
-          id="language"
-          data-toggle="dropdown"
-          aria-haspopup="true"
-          aria-expanded="true">
-    <ng-container *ngIf="current != null">
+    class="btn btn-tertiary dropdown-toggle"
+    type="button"
+    id="language"
+    data-toggle="dropdown"
+    aria-haspopup="true"
+    aria-expanded="true">
+    @if (current != null) {
       {{current}}
-    </ng-container>
-    <ng-icon  *ngIf="current == null" name="ionGlobeOutline"></ng-icon>
+    }
+    @if (current == null) {
+      <ng-icon  name="ionGlobeOutline"></ng-icon>
+    }
 
   </button>
   <div *dropdownMenu class="dropdown-menu" aria-labelledby="language">
-    <a *ngFor="let lang of languages" class="dropdown-item" href="{{urlBase}}/{{lang}}">{{lang}}</a>
+    @for (lang of languages; track lang) {
+      <a class="dropdown-item" href="{{urlBase}}/{{lang}}">{{lang}}</a>
+    }
   </div>
 </div>

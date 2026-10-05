@@ -8,19 +8,18 @@ import {LanguageComponent} from '../language/language.component';
 import {IconComponent} from '../../icon.component';
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
-import {NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
   imports: [
-    NgIf,
     LanguageComponent,
     IconComponent,
     FormsModule,
-    NgIconComponent,
-  ]
+    NgIconComponent
+]
 })
 export class LoginComponent implements OnInit {
   loginCredential: LoginCredential;

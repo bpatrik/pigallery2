@@ -9,7 +9,7 @@ import {Media} from '../../gallery/Media';
 import {SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDTO';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {Config} from '../../../../../common/config/public/Config';
-import { NgIf } from '@angular/common';
+
 import { IconComponent } from '../../../icon.component';
 import { NgIconComponent } from '@ng-icons/core';
 
@@ -18,11 +18,10 @@ import { NgIconComponent } from '@ng-icons/core';
     templateUrl: './album.component.html',
     styleUrls: ['./album.component.css'],
     imports: [
-        RouterLink,
-        NgIf,
-        IconComponent,
-        NgIconComponent,
-    ]
+    RouterLink,
+    IconComponent,
+    NgIconComponent
+]
 })
 export class AlbumComponent implements OnInit, OnDestroy {
   @Input() album: AlbumBaseDTO;

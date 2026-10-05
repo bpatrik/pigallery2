@@ -4,656 +4,667 @@
   Make sure, that you know what you are doing.
 </ng-template>
 
-<ng-container *ngIf="state">
+@if (state) {
   <div class="mb-1 row"
-       [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
-       [class.changed-settings]="changed"
-       [class.docker-warning]="dockerWarning"
-       [hidden]="shouldHide">
+    [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+    [class.changed-settings]="changed"
+    [class.docker-warning]="dockerWarning"
+    [hidden]="shouldHide">
     <label class="col-sm-3 col-md-2 control-label" [for]="idName">{{name}}</label>
     <div class="col-12 col-sm">
-      <div class="input-group" [ngSwitch]="uiType">
-        <app-gallery-search-field
-          *ngSwitchCase="'SearchQuery'"
-          [(ngModel)]="state.value"
-          [id]="idName"
-          [name]="idName"
-          [title]="title"
-          [disabled]="state.readonly || Disabled"
-          (change)="onChange($event)"
-          placeholder="Search Query">
-        </app-gallery-search-field>
-
-        <div class="input-group"
-             style="flex: 1"
-             *ngSwitchCase="'StringInput'">
-          <input
-            [type]="HTMLInputType"
-            [min]="state.min"
-            [max]="state.max" class="form-control"
-            [placeholder]="placeholder"
-            [title]="title"
-            [(ngModel)]="StringValue"
-            (ngModelChange)="onChange($event)"
-            [name]="idName"
-            [disabled]="state.readonly || Disabled"
-            [id]="idName"
-            required="true">
-          <span class="input-group-text"
-                *ngIf="state.tags?.unit && !this.state.tags?.uiOptions">{{state.tags?.unit}}</span>
-        </div>
-
-        <select
-          *ngSwitchCase="'EnumType'"
-          [id]="idName"
-          [name]="idName"
-          [title]="title"
-          (ngModelChange)="onChange($event)"
-          [disabled]="state.readonly || Disabled"
-          class="form-select" [(ngModel)]="state.value">
-          <option *ngFor="let opt of getOptionsView(state)" [ngValue]="opt.key">{{opt.value}}
-          </option>
-        </select>
-
-
-        <div class="form-check form-switch fs-5"
-             *ngSwitchCase="'Boolean'">
-          <input class="form-check-input"
-                 [id]="idName"
-                 [name]="idName"
-                 [title]="title"
-                 [disabled]="state.readonly || Disabled"
-                 type="checkbox"
-                 role="switch"
-                 (ngModelChange)="onChange($event)"
-                 [(ngModel)]="state.value">
-        </div>
-
-        <div class="input-group"
-             *ngSwitchCase="'ThemeSelector'">
-          <select
-            [id]="idName"
-            [name]="idName"
-            [title]="title"
-            (ngModelChange)="onChange($event)"
-            [disabled]="state.readonly || Disabled"
-            class="form-select" [(ngModel)]="state.value">
-            <option *ngFor="let th of AvailableThemes" [ngValue]="th.key">{{th.value}}
-            </option>
-          </select>
-
-          <button class="btn btn-primary"
-                  (click)="showNewThemeModal(newThemeModal)">
-            <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-            <ng-container i18n>Add new</ng-container>
-          </button>
-          <button class="btn btn-danger"
-                  *ngIf="state.value !== 'default'"
-                  (click)="removeTheme()">
-            <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-          </button>
-
-          <ng-template #newThemeModal>
-            <div class="modal-header">
-              <h5 class="modal-title" i18n>Add new theme</h5>
-              <button type="button" class="btn-close" (click)="hideNewThemeModal()" data-dismiss="modal"
-                      aria-label="Close">
+      <div class="input-group">
+        @switch (uiType) {
+          @case ('SearchQuery') {
+            <app-gallery-search-field
+              [(ngModel)]="state.value"
+              [id]="idName"
+              [name]="idName"
+              [title]="title"
+              [disabled]="state.readonly || Disabled"
+              (change)="onChange($event)"
+              placeholder="Search Query">
+            </app-gallery-search-field>
+          }
+          @case ('StringInput') {
+            <div class="input-group"
+              style="flex: 1"
+              >
+              <input
+                [type]="HTMLInputType"
+                [min]="state.min"
+                [max]="state.max" class="form-control"
+                [placeholder]="placeholder"
+                [title]="title"
+                [(ngModel)]="StringValue"
+                (ngModelChange)="onChange($event)"
+                [name]="idName"
+                [disabled]="state.readonly || Disabled"
+                [id]="idName"
+                required="true">
+              @if (state.tags?.unit && !this.state.tags?.uiOptions) {
+                <span class="input-group-text"
+                >{{state.tags?.unit}}</span>
+              }
+            </div>
+          }
+          @case ('EnumType') {
+            <select
+              [id]="idName"
+              [name]="idName"
+              [title]="title"
+              (ngModelChange)="onChange($event)"
+              [disabled]="state.readonly || Disabled"
+              class="form-select" [(ngModel)]="state.value">
+              @for (opt of getOptionsView(state); track opt) {
+                <option [ngValue]="opt.key">{{opt.value}}
+                </option>
+              }
+            </select>
+          }
+          @case ('Boolean') {
+            <div class="form-check form-switch fs-5"
+              >
+              <input class="form-check-input"
+                [id]="idName"
+                [name]="idName"
+                [title]="title"
+                [disabled]="state.readonly || Disabled"
+                type="checkbox"
+                role="switch"
+                (ngModelChange)="onChange($event)"
+                [(ngModel)]="state.value">
+            </div>
+          }
+          @case ('ThemeSelector') {
+            <div class="input-group"
+              >
+              <select
+                [id]="idName"
+                [name]="idName"
+                [title]="title"
+                (ngModelChange)="onChange($event)"
+                [disabled]="state.readonly || Disabled"
+                class="form-select" [(ngModel)]="state.value">
+                @for (th of AvailableThemes; track th) {
+                  <option [ngValue]="th.key">{{th.value}}
+                  </option>
+                }
+              </select>
+              <button class="btn btn-primary"
+                (click)="showNewThemeModal(newThemeModal)">
+                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                <ng-container i18n>Add new</ng-container>
               </button>
-            </div>
-            <div class="modal-body">
-              <form class="form-horizontal">
-                <label for="themeName" i18n>Theme name</label>
-                <input
-                  id="themeName"
-                  name="themeName"
-                  placeholder="name"
-                  i18n-placeholder
-                  class="form-control input-md"
-                  required="required"
-                  [(ngModel)]="newThemeName"
-                  type="text"/>
-              </form>
-            </div>
-
-            <div class="modal-footer">
-
-              <div class="btn-group float-end row mt-2" role="group" style="display: block">
-                <div class="pe-0">
-                  <button class="btn btn-primary" type="button"
-                          (click)="addNewTheme()">
-                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                    <ng-container i18n>Add new theme</ng-container>
+              @if (state.value !== 'default') {
+                <button class="btn btn-danger"
+                  (click)="removeTheme()">
+                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                </button>
+              }
+              <ng-template #newThemeModal>
+                <div class="modal-header">
+                  <h5 class="modal-title" i18n>Add new theme</h5>
+                  <button type="button" class="btn-close" (click)="hideNewThemeModal()" data-dismiss="modal"
+                    aria-label="Close">
                   </button>
                 </div>
-              </div>
-            </div>
-          </ng-template>
-        </div>
-
-        <textarea
-          rows="5"
-          *ngSwitchCase="'ThemeConfig-Array'"
-          type="text"
-          class="form-control"
-          [title]="title"
-          [id]="idName"
-          [(ngModel)]="SelectedThemeSettings.theme"
-          (ngModelChange)="onChange($event)"
-          [name]="idName"
-          [disabled]="state.readonly || Disabled"
-          required="required">
-        </textarea>
-
-
-
-        <app-settings-entry-sorting-method
-          class="w-100"
-          *ngSwitchCase="'ClientSortingConfig'"
-          [(ngModel)]="state.value"
-          [sortingByEnum]="SortByTypes"
-          [id]="idName"
-          [name]="idName"
-          (ngModelChange)="onChange($event)">
-        </app-settings-entry-sorting-method>
-
-        <app-settings-entry-sorting-method
-          class="w-100"
-          *ngSwitchCase="'ClientGroupingConfig'"
-          [(ngModel)]="state.value"
-          [sortingByEnum]="GroupByTypes"
-          [id]="idName"
-          [name]="idName"
-          (ngModelChange)="onChange($event)">
-        </app-settings-entry-sorting-method>
-
-
-        <app-settings-workflow
-          class="w-100"
-          *ngSwitchCase="'JobScheduleConfig-Array'"
-          [(ngModel)]="state.value"
-          [id]="idName"
-          [name]="idName"
-          (ngModelChange)="onChange($event)">
-        </app-settings-workflow>
-
-        <ng-container *ngSwitchCase="'SVGIconConfig'">
-          <button class="btn btn-outline-primary"
-                  (click)="showIconModal(iconModalTmp)">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="1em"
-                 fill="currentcolor"
-                 [attr.viewBox]="state.value.viewBox || '0 0 512 512'"
-                 [innerHtml]="state.value.items | safeHtml">
-            </svg>
-          </button>
-
-
-          <ng-template #iconModalTmp>
-            <div class="modal-header">
-              <h5 class="modal-title" i18n>Icon</h5>
-              <button type="button" class="btn-close" (click)="hideIconModal()" data-dismiss="modal"
-                      aria-label="Close">
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="row mb-4">
-                <div class="col text-center">
-                  <svg xmlns="http://www.w3.org/2000/svg"
-                       width="2em"
-                       fill="currentcolor"
-                       [attr.viewBox]="state.value.viewBox || '0 0 512 512'"
-                       [innerHtml]="state.value.items | safeHtml">
-                  </svg>
+                <div class="modal-body">
+                  <form class="form-horizontal">
+                    <label for="themeName" i18n>Theme name</label>
+                    <input
+                      id="themeName"
+                      name="themeName"
+                      placeholder="name"
+                      i18n-placeholder
+                      class="form-control input-md"
+                      required="required"
+                      [(ngModel)]="newThemeName"
+                      type="text"/>
+                  </form>
                 </div>
-              </div>
-              <div *ngIf="iconModal?.error" class="alert alert-danger">{{iconModal.error}}</div>
-
-              <div class="row">
-                <div class="col-md-2 control-label">
-                  <label [for]="'icon_f_'+idName" class="form-label" i18n>Load from SVG file</label>
+                <div class="modal-footer">
+                  <div class="btn-group float-end row mt-2" role="group" style="display: block">
+                    <div class="pe-0">
+                      <button class="btn btn-primary" type="button"
+                        (click)="addNewTheme()">
+                        <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                        <ng-container i18n>Add new theme</ng-container>
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                <div class="col-md-10">
-                  <input type="file" class="form-control" [id]="'icon_f_'+idName" accept="image/svg+xml"
-                         (change)="newSvgFile($event)">
-
-                  <small class="form-text text-muted" i18n>To auto load these values from file: pick an SVG file with a
+              </ng-template>
+            </div>
+          }
+          @case ('ThemeConfig-Array') {
+            <textarea
+              rows="5"
+              type="text"
+              class="form-control"
+              [title]="title"
+              [id]="idName"
+              [(ngModel)]="SelectedThemeSettings.theme"
+              (ngModelChange)="onChange($event)"
+              [name]="idName"
+              [disabled]="state.readonly || Disabled"
+              required="required">
+            </textarea>
+          }
+          @case ('ClientSortingConfig') {
+            <app-settings-entry-sorting-method
+              class="w-100"
+              [(ngModel)]="state.value"
+              [sortingByEnum]="SortByTypes"
+              [id]="idName"
+              [name]="idName"
+              (ngModelChange)="onChange($event)">
+            </app-settings-entry-sorting-method>
+          }
+          @case ('ClientGroupingConfig') {
+            <app-settings-entry-sorting-method
+              class="w-100"
+              [(ngModel)]="state.value"
+              [sortingByEnum]="GroupByTypes"
+              [id]="idName"
+              [name]="idName"
+              (ngModelChange)="onChange($event)">
+            </app-settings-entry-sorting-method>
+          }
+          @case ('JobScheduleConfig-Array') {
+            <app-settings-workflow
+              class="w-100"
+              [(ngModel)]="state.value"
+              [id]="idName"
+              [name]="idName"
+              (ngModelChange)="onChange($event)">
+            </app-settings-workflow>
+          }
+          @case ('SVGIconConfig') {
+            <button class="btn btn-outline-primary"
+              (click)="showIconModal(iconModalTmp)">
+              <svg xmlns="http://www.w3.org/2000/svg"
+                width="1em"
+                fill="currentcolor"
+                [attr.viewBox]="state.value.viewBox || '0 0 512 512'"
+                [innerHtml]="state.value.items | safeHtml">
+              </svg>
+            </button>
+            <ng-template #iconModalTmp>
+              <div class="modal-header">
+                <h5 class="modal-title" i18n>Icon</h5>
+                <button type="button" class="btn-close" (click)="hideIconModal()" data-dismiss="modal"
+                  aria-label="Close">
+                </button>
+              </div>
+              <div class="modal-body">
+                <div class="row mb-4">
+                  <div class="col text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                      width="2em"
+                      fill="currentcolor"
+                      [attr.viewBox]="state.value.viewBox || '0 0 512 512'"
+                      [innerHtml]="state.value.items | safeHtml">
+                    </svg>
+                  </div>
+                </div>
+                @if (iconModal?.error) {
+                  <div class="alert alert-danger">{{iconModal.error}}</div>
+                }
+                <div class="row">
+                  <div class="col-md-2 control-label">
+                    <label [for]="'icon_f_'+idName" class="form-label" i18n>Load from SVG file</label>
+                  </div>
+                  <div class="col-md-10">
+                    <input type="file" class="form-control" [id]="'icon_f_'+idName" accept="image/svg+xml"
+                      (change)="newSvgFile($event)">
+                    <small class="form-text text-muted" i18n>To auto load these values from file: pick an SVG file with a
                     single 'path'. You can use e.g: http://fontawesome.com/icons.
                   </small>
+                  </div>
                 </div>
-
-              </div>
-              <hr/>
-
-              <app-settings-entry
-                [ngModel]="state.value.__state.viewBox"
-                [noChangeDetection]="true"
-                [name]="'icon_w_'+idName"
-                [id]="'icon_w_'+idName"
+                <hr/>
+                <app-settings-entry
+                  [ngModel]="state.value.__state.viewBox"
+                  [noChangeDetection]="true"
+                  [name]="'icon_w_'+idName"
+                  [id]="'icon_w_'+idName"
                 (change)="onChange($event)"></app-settings-entry>
-
-              <app-settings-entry
-                [ngModel]="state.value.__state.items"
-                [noChangeDetection]="true"
-                [name]="'icon_i_'+idName"
-                [id]="'icon_i_'+idName"
+                <app-settings-entry
+                  [ngModel]="state.value.__state.items"
+                  [noChangeDetection]="true"
+                  [name]="'icon_i_'+idName"
+                  [id]="'icon_i_'+idName"
                 (change)="onChange($event)"></app-settings-entry>
-            </div>
-
-            <div class="modal-footer">
-
-              <div class="btn-group float-end row mt-2" role="group" style="display: block">
-                <div class="pe-0">
-                  <button class="btn btn-primary" type="button"
-                          (click)="hideIconModal()">
-                    <ng-container i18n>Save & Close</ng-container>
-                  </button>
+              </div>
+              <div class="modal-footer">
+                <div class="btn-group float-end row mt-2" role="group" style="display: block">
+                  <div class="pe-0">
+                    <button class="btn btn-primary" type="button"
+                      (click)="hideIconModal()">
+                      <ng-container i18n>Save & Close</ng-container>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </ng-template>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'MapLayers-Array'">
-          <div class="container">
-            <table class="table">
-              <thead>
-              <tr>
-                <th scope="col" i18n>Name</th>
-                <th scope="col" i18n>Tile Url*</th>
-                <th scope="col"></th>
-              </tr>
-              </thead>
-              <tr *ngFor="let layer of state.value; let i = index">
-                <td><input type="text" class="form-control" placeholder="Street"
-                           [(ngModel)]="layer.name"
-                           (ngModelChange)="onChange($event)"
-                           [name]="'list_ml_'+idName+i" [id]="'list_ml_'+idName+i" required></td>
-                <td>
-                  <input type="text" class="form-control"
-                         placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                         [(ngModel)]="layer.url"
-                         (ngModelChange)="onChange($event)"
-                         [name]="'list_ml_url_'+idName+i" [id]="'list_ml_url_'+idName+i" required>
-                </td>
-                <td>
-                  <button [disabled]="state.value.length == 1"
-                          [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
-                          (click)="removeLayer(layer)"
-                          class="btn float-end">
-                    <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                  </button>
-                </td>
-              </tr>
-            </table>
-
-            <div class="row justify-content-end">
-              <button class="btn btn-primary"
-                      (click)="addNewLayer()">
-                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                <span i18n>Add Layer</span>
-              </button>
-            </div>
-          </div>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'MapPathGroupThemeConfig-Array'">
-          <div class="container">
-            <div class="row  mt-1 mb-1 bg-body-tertiary" *ngFor="let val of state.value; index as i; last as isLast">
-              <div class="row  mt-1 mb-1 bg-body-tertiary">
-                <div class="col ps-0">
-                  <app-settings-entry
-                    [ngModel]="val.__state.matchers"
-                    [noChangeDetection]="true"
-                    [name]="'val_m_'+idName+i"
-                    [id]="'val_m_'+idName+i"
-                    (change)="onChange($event)"></app-settings-entry>
-                </div>
-                <div class="col-1 pe-0">
-                  <button [disabled]="state.value.length == 1" (click)="remove(i)"
-                          [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
-                          class="btn float-end">
-                    <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                  </button>
-                </div>
-              </div>
-              <div class="row  mt-1 mb-1 bg-body-tertiary">
-                <app-settings-entry
-                  [ngModel]="val.theme.__state.color"
-                  [noChangeDetection]="true"
-                  [name]="'color_m_'+idName+i"
-                  [id]="'color_m_'+idName+i"
-                  (change)="onChange($event)"></app-settings-entry>
-              </div>
-              <div class="row  mt-1 mb-1 bg-body-tertiary">
-
-                <app-settings-entry
-                  [ngModel]="val.theme.__state.dashArray"
-                  [noChangeDetection]="true"
-                  [name]="'dashArray_n_'+idName+i"
-                  [id]="'dashArray_n_'+idName+i"
-                  (change)="onChange($event)"></app-settings-entry>
-              </div>
-              <div class="row  mt-1 mb-1 bg-body-tertiary">
-                <app-settings-entry
-                  [ngModel]="val.theme.__state.svgIcon"
-                  [noChangeDetection]="true"
-                  [name]="'svgIcon_'+idName+i"
-                  [id]="'svgIcon_'+idName+i"
-                  (ngModelChange)="onChange($event)">
-                </app-settings-entry>
-              </div>
-
-              <hr *ngIf="!isLast"/>
-            </div>
-
-            <div class="row">
-              <div class="col pe-0">
-                <button class="btn btn-primary float-end"
-                        (click)="AddNew()">
+            </ng-template>
+          }
+          @case ('MapLayers-Array') {
+            <div class="container">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col" i18n>Name</th>
+                    <th scope="col" i18n>Tile Url*</th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                @for (layer of state.value; track layer; let i = $index) {
+                  <tr>
+                    <td><input type="text" class="form-control" placeholder="Street"
+                      [(ngModel)]="layer.name"
+                      (ngModelChange)="onChange($event)"
+                    [name]="'list_ml_'+idName+i" [id]="'list_ml_'+idName+i" required></td>
+                    <td>
+                      <input type="text" class="form-control"
+                        placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        [(ngModel)]="layer.url"
+                        (ngModelChange)="onChange($event)"
+                        [name]="'list_ml_url_'+idName+i" [id]="'list_ml_url_'+idName+i" required>
+                    </td>
+                    <td>
+                      <button [disabled]="state.value.length == 1"
+                        [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                        (click)="removeLayer(layer)"
+                        class="btn float-end">
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </table>
+              <div class="row justify-content-end">
+                <button class="btn btn-primary"
+                  (click)="addNewLayer()">
                   <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                  <span i18n>Add matcher</span>
+                  <span i18n>Add Layer</span>
                 </button>
               </div>
             </div>
-          </div>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'MapPathGroupConfig-Array'">
-          <div class="container">
-            <div class="bg-body-tertiary row mt-1 mb-1" *ngFor="let arr of state.value; let i = index">
-              <div class="row  mt-1 mb-1 me-0 ms-0 pe-0 ps-0">
-                <div class="col ps-0">
-                  <input type="text" class="form-control"
-                         placeholder="Name"
-                         [(ngModel)]="arr.name"
-                         (ngModelChange)="onChange($event)"
-                         [name]="'arr_n_'+idName+i"
-                         [id]="'arr_n_'+idName+i" required>
-                </div>
-                <div class="col-1 pe-0">
-                  <button [disabled]="state.value.length == 1" (click)="remove(i)"
-                          [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
-                          class="btn float-end">
-                    <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                  </button>
-                </div>
-
-              </div>
-              <div class="row  mt-1 mb-1 me-0 ms-0">
-
-                <div class="col">
-                  <app-settings-entry
-                    [noChangeDetection]="true"
-                    [ngModel]="arr.__state.matchers"
-                    [name]="'arr_m_'+idName+i"
-                    [id]="'arr_m_'+idName+i"
-                    (ngModelChange)="onChange($event)">
-                  </app-settings-entry>
-                </div>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col pe-0">
-                <button class="btn btn-primary float-end"
-                        (click)="AddNew()">
-                  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                  <span i18n>Add path theme group</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'NavigationLinkConfig-Array'">
-          <div class="container">
-            <div class="row  mt-1 mb-1 bg-body-tertiary" *ngFor="let link of state.value; let i = index">
-              <div class="col ps-0">
-                <select
-                  [name]="'link_t_'+idName+i"
-                  [id]="'link_t_'+idName+i"
-                  (ngModelChange)="onChange($event)"
-                  class="form-select"
-                  [(ngModel)]="link.type">
-                  <option *ngFor="let opt of getOptionsView(link.__state.type)" [ngValue]="opt.key">{{opt.value}}
-                  </option>
-                </select>
-              </div>
-              <div class="col"
-                   *ngIf="link.type === NavigationLinkTypes.url || link.type === NavigationLinkTypes.search">
-                <input type="text" class="form-control"
-                       placeholder="Name"
-                       [(ngModel)]="link.name"
-                       (ngModelChange)="onChange($event)"
-                       [name]="'link_n_'+idName+i"
-                       [id]="'link_n_'+idName+i" required>
-              </div>
-              <div class="col"
-                   *ngIf="link.type === NavigationLinkTypes.url || link.type === NavigationLinkTypes.search">
-                <input type="text" class="form-control"
-                       *ngIf="link.type === NavigationLinkTypes.url"
-                       placeholder="github.com/bpatrik/pigallery2"
-                       [(ngModel)]="link.url"
-                       (ngModelChange)="onChange($event)"
-                       [name]="'link_u_'+idName+i"
-                       [id]="'link_u_'+idName+i"
-                       required>
-                <app-gallery-search-field
-                  class="d-inline-block"
-                  *ngIf="link.type === NavigationLinkTypes.search"
-                  [(ngModel)]="link.SearchQuery"
-                  [name]="'link_s_'+idName+i"
-                  [id]="'link_s_'+idName+i"
-                  (change)="onChange($event)"
-                  placeholder="Search Query">
-
-                </app-gallery-search-field>
-              </div>
-              <div class="col-1 pe-0">
-                <button [disabled]="state.value.length == 1" (click)="remove(i)"
+          }
+          @case ('MapPathGroupThemeConfig-Array') {
+            <div class="container">
+              @for (val of state.value; track val; let i = $index; let isLast = $last) {
+                <div class="row  mt-1 mb-1 bg-body-tertiary">
+                  <div class="row  mt-1 mb-1 bg-body-tertiary">
+                    <div class="col ps-0">
+                      <app-settings-entry
+                        [ngModel]="val.__state.matchers"
+                        [noChangeDetection]="true"
+                        [name]="'val_m_'+idName+i"
+                        [id]="'val_m_'+idName+i"
+                      (change)="onChange($event)"></app-settings-entry>
+                    </div>
+                    <div class="col-1 pe-0">
+                      <button [disabled]="state.value.length == 1" (click)="remove(i)"
                         [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
-                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                </button>
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="row  mt-1 mb-1 bg-body-tertiary">
+                    <app-settings-entry
+                      [ngModel]="val.theme.__state.color"
+                      [noChangeDetection]="true"
+                      [name]="'color_m_'+idName+i"
+                      [id]="'color_m_'+idName+i"
+                    (change)="onChange($event)"></app-settings-entry>
+                  </div>
+                  <div class="row  mt-1 mb-1 bg-body-tertiary">
+                    <app-settings-entry
+                      [ngModel]="val.theme.__state.dashArray"
+                      [noChangeDetection]="true"
+                      [name]="'dashArray_n_'+idName+i"
+                      [id]="'dashArray_n_'+idName+i"
+                    (change)="onChange($event)"></app-settings-entry>
+                  </div>
+                  <div class="row  mt-1 mb-1 bg-body-tertiary">
+                    <app-settings-entry
+                      [ngModel]="val.theme.__state.svgIcon"
+                      [noChangeDetection]="true"
+                      [name]="'svgIcon_'+idName+i"
+                      [id]="'svgIcon_'+idName+i"
+                      (ngModelChange)="onChange($event)">
+                    </app-settings-entry>
+                  </div>
+                  @if (!isLast) {
+                    <hr/>
+                  }
+                </div>
+              }
+              <div class="row">
+                <div class="col pe-0">
+                  <button class="btn btn-primary float-end"
+                    (click)="AddNew()">
+                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <span i18n>Add matcher</span>
+                  </button>
+                </div>
               </div>
-
             </div>
-            <div class="row">
-              <div class="col pe-0">
-                <button class="btn btn-primary float-end"
-                        (click)="AddNew()">
-                  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                  <span i18n>Add Link</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </ng-container>
-
-
-        <ng-container *ngSwitchCase="'UserConfig-Array'">
-          <div class="container ps-0 pe-0">
-            <div class="row ms-0 me-0 mt-1 mb-1 bg-body-tertiary" *ngFor="let item of state.value; let i = index">
-
-              <div class="col ps-0">
-                <input type="text" class="form-control"
-                       placeholder="Name"
-                       [(ngModel)]="item.name"
-                       (ngModelChange)="onChange($event)"
-                       [disabled]="state.readonly"
-                       [name]="'link_n_'+idName+i"
-                       [id]="'link_n_'+idName+i" required>
-              </div>
-              <div class="col">
-                <select
-                  [name]="'item_r_'+idName+i"
-                  [id]="'item_r_'+idName+i"
-                  [disabled]="state.readonly"
-                  (ngModelChange)="onChange($event)"
-                  class="form-select"
-                  [(ngModel)]="item.role">
-                  <option *ngFor="let opt of getOptionsView(item.__state.role)" [ngValue]="opt.key">{{opt.value}}
-                  </option>
-                </select>
-              </div>
-              <div class="col">
-                <input *ngIf="!item.encrypted"
-                       type="password"
-                       class="form-control"
-                       [(ngModel)]="item.password"
-                       [disabled]="state.readonly"
-                       (ngModelChange)="onChange($event)"
-                       [name]="'item_p_'+idName+i"
-                       [id]="'item_p_'+idName+i"
-                       required>
-                <input *ngIf="item.encrypted"
-                       type="password"
-                       class="form-control"
-                       value="*****"
-                       disabled
-                       [name]="'item_p_'+idName+i"
-                       [id]="'item_p_'+idName+i">
-              </div>
-              <div class="col-1 pe-0">
-                <button [disabled]="(state.value.length == 1 && !state.tags.uiOptional) || state.readonly"
-                        (click)="remove(i)"
-                        [ngClass]="(state.value.length > 1  || state.tags.uiOptional)? 'btn-danger':'btn-secondary'"
+          }
+          @case ('MapPathGroupConfig-Array') {
+            <div class="container">
+              @for (arr of state.value; track arr; let i = $index) {
+                <div class="bg-body-tertiary row mt-1 mb-1">
+                  <div class="row  mt-1 mb-1 me-0 ms-0 pe-0 ps-0">
+                    <div class="col ps-0">
+                      <input type="text" class="form-control"
+                        placeholder="Name"
+                        [(ngModel)]="arr.name"
+                        (ngModelChange)="onChange($event)"
+                        [name]="'arr_n_'+idName+i"
+                        [id]="'arr_n_'+idName+i" required>
+                    </div>
+                    <div class="col-1 pe-0">
+                      <button [disabled]="state.value.length == 1" (click)="remove(i)"
+                        [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
-                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                </button>
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="row  mt-1 mb-1 me-0 ms-0">
+                    <div class="col">
+                      <app-settings-entry
+                        [noChangeDetection]="true"
+                        [ngModel]="arr.__state.matchers"
+                        [name]="'arr_m_'+idName+i"
+                        [id]="'arr_m_'+idName+i"
+                        (ngModelChange)="onChange($event)">
+                      </app-settings-entry>
+                    </div>
+                  </div>
+                </div>
+              }
+              <div class="row">
+                <div class="col pe-0">
+                  <button class="btn btn-primary float-end"
+                    (click)="AddNew()">
+                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <span i18n>Add path theme group</span>
+                  </button>
+                </div>
               </div>
-
             </div>
-            <div class="row me-0">
-              <div class="col pe-0">
-                <button class="btn btn-primary float-end"
+          }
+          @case ('NavigationLinkConfig-Array') {
+            <div class="container">
+              @for (link of state.value; track link; let i = $index) {
+                <div class="row  mt-1 mb-1 bg-body-tertiary">
+                  <div class="col ps-0">
+                    <select
+                      [name]="'link_t_'+idName+i"
+                      [id]="'link_t_'+idName+i"
+                      (ngModelChange)="onChange($event)"
+                      class="form-select"
+                      [(ngModel)]="link.type">
+                      @for (opt of getOptionsView(link.__state.type); track opt) {
+                        <option [ngValue]="opt.key">{{opt.value}}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                  @if (link.type === NavigationLinkTypes.url || link.type === NavigationLinkTypes.search) {
+                    <div class="col"
+                      >
+                      <input type="text" class="form-control"
+                        placeholder="Name"
+                        [(ngModel)]="link.name"
+                        (ngModelChange)="onChange($event)"
+                        [name]="'link_n_'+idName+i"
+                        [id]="'link_n_'+idName+i" required>
+                    </div>
+                  }
+                  @if (link.type === NavigationLinkTypes.url || link.type === NavigationLinkTypes.search) {
+                    <div class="col"
+                      >
+                      @if (link.type === NavigationLinkTypes.url) {
+                        <input type="text" class="form-control"
+                          placeholder="github.com/bpatrik/pigallery2"
+                          [(ngModel)]="link.url"
+                          (ngModelChange)="onChange($event)"
+                          [name]="'link_u_'+idName+i"
+                          [id]="'link_u_'+idName+i"
+                          required>
+                      }
+                      @if (link.type === NavigationLinkTypes.search) {
+                        <app-gallery-search-field
+                          class="d-inline-block"
+                          [(ngModel)]="link.SearchQuery"
+                          [name]="'link_s_'+idName+i"
+                          [id]="'link_s_'+idName+i"
+                          (change)="onChange($event)"
+                          placeholder="Search Query">
+                        </app-gallery-search-field>
+                      }
+                    </div>
+                  }
+                  <div class="col-1 pe-0">
+                    <button [disabled]="state.value.length == 1" (click)="remove(i)"
+                      [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                      class="btn float-end">
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+              <div class="row">
+                <div class="col pe-0">
+                  <button class="btn btn-primary float-end"
+                    (click)="AddNew()">
+                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <span i18n>Add Link</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+          @case ('UserConfig-Array') {
+            <div class="container ps-0 pe-0">
+              @for (item of state.value; track item; let i = $index) {
+                <div class="row ms-0 me-0 mt-1 mb-1 bg-body-tertiary">
+                  <div class="col ps-0">
+                    <input type="text" class="form-control"
+                      placeholder="Name"
+                      [(ngModel)]="item.name"
+                      (ngModelChange)="onChange($event)"
+                      [disabled]="state.readonly"
+                      [name]="'link_n_'+idName+i"
+                      [id]="'link_n_'+idName+i" required>
+                  </div>
+                  <div class="col">
+                    <select
+                      [name]="'item_r_'+idName+i"
+                      [id]="'item_r_'+idName+i"
+                      [disabled]="state.readonly"
+                      (ngModelChange)="onChange($event)"
+                      class="form-select"
+                      [(ngModel)]="item.role">
+                      @for (opt of getOptionsView(item.__state.role); track opt) {
+                        <option [ngValue]="opt.key">{{opt.value}}
+                        </option>
+                      }
+                    </select>
+                  </div>
+                  <div class="col">
+                    @if (!item.encrypted) {
+                      <input
+                        type="password"
+                        class="form-control"
+                        [(ngModel)]="item.password"
                         [disabled]="state.readonly"
-                        (click)="AddNew()">
+                        (ngModelChange)="onChange($event)"
+                        [name]="'item_p_'+idName+i"
+                        [id]="'item_p_'+idName+i"
+                        required>
+                    }
+                    @if (item.encrypted) {
+                      <input
+                        type="password"
+                        class="form-control"
+                        value="*****"
+                        disabled
+                        [name]="'item_p_'+idName+i"
+                        [id]="'item_p_'+idName+i">
+                    }
+                  </div>
+                  <div class="col-1 pe-0">
+                    <button [disabled]="(state.value.length == 1 && !state.tags.uiOptional) || state.readonly"
+                      (click)="remove(i)"
+                      [ngClass]="(state.value.length > 1  || state.tags.uiOptional)? 'btn-danger':'btn-secondary'"
+                      class="btn float-end">
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+              <div class="row me-0">
+                <div class="col pe-0">
+                  <button class="btn btn-primary float-end"
+                    [disabled]="state.readonly"
+                    (click)="AddNew()">
+                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <span i18n>Add</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+          @case ('ClientSortingConfig-Array') {
+            @for (_ of state.value; track _; let i = $index) {
+              <div class="row col-12 mt-1 m-0 p-0">
+                <div class="col p-0">
+                  <app-settings-entry-sorting-method
+                    class="w-100"
+                    [(ngModel)]="state.value[i]"
+                    [sortingByEnum]="SortByTypes"
+                    [id]="'list_'+idName+i"
+                    [name]="'list_'+idName+i"
+                    (ngModelChange)="onChange($event)">
+                  </app-settings-entry-sorting-method>
+                </div>
+                <ng-container>
+                  <div class="col-auto pe-0">
+                    <button class="btn float-end"
+                      [disabled]="state.value.length == 1"
+                      [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                      [id]="'list_btn_'+idName+i"
+                      [name]="'list_btn_'+idName+i" (click)="remove(i)">
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                    </button>
+                  </div>
+                </ng-container>
+              </div>
+            }
+            <ng-container>
+              <div class="col-12 p-0">
+                <button class="btn btn-primary mt-1 float-end"
+                  [id]="'btn_add_'+idName"
+                  [name]="'btn_add_'+idName"
+                  (click)="AddNew()">
                   <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
                   <span i18n>Add</span>
                 </button>
               </div>
-            </div>
+            </ng-container>
+          }
+          @case ('EnumArray') {
+            @for (_ of state.value; track _; let i = $index) {
+              <div class="row col-12 mt-1 m-0 p-0">
+                <div class="col p-0">
+                  <select
+                    [id]="'list_'+idName+i"
+                    [name]="'list_'+idName+i"
+                    [title]="title"
+                    (ngModelChange)="onChange($event)"
+                    [disabled]="state.readonly || Disabled"
+                    class="form-select" [(ngModel)]="state.value[i]">
+                    @for (opt of getOptionsView(state); track opt) {
+                      <option [ngValue]="opt.key">{{opt.value}}
+                      </option>
+                    }
+                  </select>
+                </div>
+                <ng-container>
+                  <div class="col-auto pe-0">
+                    <button class="btn float-end"
+                      [disabled]="state.value.length == 1"
+                      [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                      [id]="'list_btn_'+idName+i"
+                      [name]="'list_btn_'+idName+i" (click)="remove(i)">
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                    </button>
+                  </div>
+                </ng-container>
+              </div>
+            }
+            <ng-container>
+              <div class="col-12 p-0">
+                <button class="btn btn-primary mt-1 float-end"
+                  [id]="'btn_add_'+idName"
+                  [name]="'btn_add_'+idName"
+                  (click)="AddNew()">
+                  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                  <span i18n>Add</span>
+                </button>
+              </div>
+            </ng-container>
+          }
+        }
+        @if (dockerWarning && changed) {
+          <div class="input-group-append">
+            <span
+              triggers="mouseenter:mouseleave"
+              placement="bottom"
+              container="body"
+              [popover]="popTemplate"
+              class="text-warning warning-icon ms-2">
+              <ng-icon name="ionWarningOutline"></ng-icon>
+            </span>
           </div>
-        </ng-container>
-
-
-        <ng-container *ngSwitchCase="'ClientSortingConfig-Array'">
-          <ng-container *ngFor="let _ of state.value; let i=index">
-            <div class="row col-12 mt-1 m-0 p-0">
-              <div class="col p-0">
-                <app-settings-entry-sorting-method
-                  class="w-100"
-                  [(ngModel)]="state.value[i]"
-                  [sortingByEnum]="SortByTypes"
-                  [id]="'list_'+idName+i"
-                  [name]="'list_'+idName+i"
-                  (ngModelChange)="onChange($event)">
-                </app-settings-entry-sorting-method>
-
-
-              </div>
-              <ng-container>
-                <div class="col-auto pe-0">
-                  <button class="btn float-end"
-                          [disabled]="state.value.length == 1"
-                          [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
-                          [id]="'list_btn_'+idName+i"
-                          [name]="'list_btn_'+idName+i" (click)="remove(i)">
-                    <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                  </button>
-                </div>
-              </ng-container>
-            </div>
-          </ng-container>
-          <ng-container>
-            <div class="col-12 p-0">
-              <button class="btn btn-primary mt-1 float-end"
-                      [id]="'btn_add_'+idName"
-                      [name]="'btn_add_'+idName"
-                      (click)="AddNew()">
-                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                <span i18n>Add</span>
-              </button>
-            </div>
-          </ng-container>
-        </ng-container>
-
-        <ng-container *ngSwitchCase="'EnumArray'">
-          <ng-container *ngFor="let _ of state.value; let i=index">
-            <div class="row col-12 mt-1 m-0 p-0">
-              <div class="col p-0">
-                <select
-                  [id]="'list_'+idName+i"
-                  [name]="'list_'+idName+i"
-                  [title]="title"
-                  (ngModelChange)="onChange($event)"
-                  [disabled]="state.readonly || Disabled"
-                  class="form-select" [(ngModel)]="state.value[i]">
-                  <option *ngFor="let opt of getOptionsView(state)" [ngValue]="opt.key">{{opt.value}}
-                  </option>
-                </select>
-
-
-              </div>
-              <ng-container>
-                <div class="col-auto pe-0">
-                  <button class="btn float-end"
-                          [disabled]="state.value.length == 1"
-                          [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
-                          [id]="'list_btn_'+idName+i"
-                          [name]="'list_btn_'+idName+i" (click)="remove(i)">
-                    <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
-                  </button>
-                </div>
-              </ng-container>
-            </div>
-          </ng-container>
-          <ng-container>
-            <div class="col-12 p-0">
-              <button class="btn btn-primary mt-1 float-end"
-                      [id]="'btn_add_'+idName"
-                      [name]="'btn_add_'+idName"
-                      (click)="AddNew()">
-                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
-                <span i18n>Add</span>
-              </button>
-            </div>
-          </ng-container>
-        </ng-container>
-        <div class="input-group-append" *ngIf="dockerWarning && changed">
-          <span
-            triggers="mouseenter:mouseleave"
-            placement="bottom"
-            container="body"
-            [popover]="popTemplate"
-            class="text-warning warning-icon ms-2">
-          <ng-icon name="ionWarningOutline"></ng-icon>
-          </span>
-        </div>
+        }
       </div>
-
-      <small class="form-text text-muted" *ngIf="settingsService.configStyle == ConfigStyle.full">
-        <ng-container *ngIf="experimental">
-          <ng-icon name="ionWarningOutline"></ng-icon>
-          [<span i18n>Experimental</span>]
-        </ng-container>
-        <ng-container *ngIf="description">{{description}} </ng-container>
-        <span *ngIf="type==='array' && (state.arrayType === 'string' || isNumberArray)" i18n>';' separated list.</span>
-        <a *ngIf="state.tags?.githubIssue"
-           [href]="'https://github.com/bpatrik/pigallery2/issues/'+state.tags?.githubIssue">
-          <ng-container i18n>See</ng-container>
-          #{{state.tags?.githubIssue}}.</a>
-        <ng-container *ngIf="state.tags?.uiResetNeeded?.db && !isOriginal">
-          <br/>
-          <ng-icon name="ionWarningOutline"></ng-icon>
-          <span i18n>Reset database after changing this settings!</span>
-        </ng-container>
-        <ng-container *ngIf="state.tags?.uiResetNeeded?.server && !isOriginal">
-          <br/>
-          <ng-icon name="ionWarningOutline"></ng-icon>
-          <span i18n>Restart server after changing this settings!</span>
-        </ng-container>
-      </small>
+      @if (settingsService.configStyle == ConfigStyle.full) {
+        <small class="form-text text-muted">
+          @if (experimental) {
+            <ng-icon name="ionWarningOutline"></ng-icon>
+            [<span i18n>Experimental</span>]
+          }
+          @if (description) {
+            {{description}}
+          }
+          @if (type==='array' && (state.arrayType === 'string' || isNumberArray)) {
+            <span i18n>';' separated list.</span>
+          }
+          @if (state.tags?.githubIssue) {
+            <a
+              [href]="'https://github.com/bpatrik/pigallery2/issues/'+state.tags?.githubIssue">
+              <ng-container i18n>See</ng-container>
+            #{{state.tags?.githubIssue}}.</a>
+          }
+          @if (state.tags?.uiResetNeeded?.db && !isOriginal) {
+            <br/>
+            <ng-icon name="ionWarningOutline"></ng-icon>
+            <span i18n>Reset database after changing this settings!</span>
+          }
+          @if (state.tags?.uiResetNeeded?.server && !isOriginal) {
+            <br/>
+            <ng-icon name="ionWarningOutline"></ng-icon>
+            <span i18n>Restart server after changing this settings!</span>
+          }
+        </small>
+      }
     </div>
   </div>
-</ng-container>
+}

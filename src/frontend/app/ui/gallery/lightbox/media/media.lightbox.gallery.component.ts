@@ -5,13 +5,13 @@ import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {SupportedFormats} from '../../../../../../common/SupportedFormats';
 import {Config} from '../../../../../../common/config/public/Config';
 import {LightboxService} from '../lightbox.service';
-import {NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'app-gallery-lightbox-media',
   styleUrls: ['./media.lightbox.gallery.component.css'],
   templateUrl: './media.lightbox.gallery.component.html',
-  imports: [NgIf]
+  imports: []
 })
 export class GalleryLightboxMediaComponent implements OnChanges {
   @Input() gridMedia: GridMedia;

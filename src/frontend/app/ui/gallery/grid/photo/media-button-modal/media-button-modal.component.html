@@ -1,84 +1,100 @@
-<div class="modal fade"
-     [class.show]="modalData?.visible"
-     [style.display]="modalData?.visible ? 'block' : 'none'"
-     *ngIf="modalData">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4 class="modal-title">{{ modalData.button.popup?.header || modalData.button.name }}</h4>
-        <button type="button" class="btn-close" (click)="closeModal()"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Media info -->
-        <div class="media-info mb-3">
-          <strong>Media:</strong> {{ modalData.media.media.name }}
+@if (modalData) {
+  <div class="modal fade"
+    [class.show]="modalData?.visible"
+    [style.display]="modalData?.visible ? 'block' : 'none'"
+    >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">{{ modalData.button.popup?.header || modalData.button.name }}</h4>
+          <button type="button" class="btn-close" (click)="closeModal()"></button>
         </div>
-
-        <hr/>
-
-        <p *ngIf="modalData.button.popup?.body">{{ modalData.button.popup.body }}</p>
-
-        <!-- Form fields -->
-        <div *ngIf="modalData.button.popup?.fields && modalData.button.popup.fields.length > 0">
-          <div *ngFor="let field of modalData.button.popup.fields" class="mb-3">
-            <label [for]="field" class="form-label">{{ getFieldLabel(field) }}</label>
-            <input [id]="field"
-                   type="text"
-                   class="form-control"
-                   [(ngModel)]="formData.fields[field]"
-                   [value]="getFieldValue(field)">
+        <div class="modal-body">
+          <!-- Media info -->
+          <div class="media-info mb-3">
+            <strong>Media:</strong> {{ modalData.media.media.name }}
           </div>
-        </div>
-
-        <!-- Custom fields -->
-        <div *ngIf="modalData.button.popup?.customFields">
-          <div *ngFor="let customFieldEntry of modalData.button.popup?.customFields" class="mb-3">
-            <label [for]="'custom_' + customFieldEntry.id" class="form-label">
-              {{ customFieldEntry.label }}
-              <span *ngIf="customFieldEntry.required" class="text-danger">*</span>
-            </label>
-
-            <!-- String input -->
-            <input *ngIf="customFieldEntry.type === 'string'"
-                   [id]="'custom_' + customFieldEntry.id"
-                   type="text"
-                   class="form-control"
-                   [(ngModel)]="formData.customFields[customFieldEntry.id]"
-                   [required]="customFieldEntry.required">
-
-            <!-- Number input -->
-            <input *ngIf="customFieldEntry.type === 'number'"
-                   [id]="'custom_' + customFieldEntry.id"
-                   type="number"
-                   class="form-control"
-                   [(ngModel)]="formData.customFields[customFieldEntry.id]"
-                   [required]="customFieldEntry.required">
-
-            <!-- Boolean input -->
-            <div *ngIf="customFieldEntry.type === 'boolean'" class="form-check">
-              <input [id]="'custom_' + customFieldEntry.id"
-                     type="checkbox"
-                     class="form-check-input"
-                     [(ngModel)]="formData.customFields[customFieldEntry.id]"v
-                     [required]="customFieldEntry.required">
-              <label [for]="'custom_' + customFieldEntry.id" class="form-check-label">
-                {{ customFieldEntry.label }}
-                <span *ngIf="customFieldEntry.required" class="text-danger">*</span>
-              </label>
+          <hr/>
+          @if (modalData.button.popup?.body) {
+            <p>{{ modalData.button.popup.body }}</p>
+          }
+          <!-- Form fields -->
+          @if (modalData.button.popup?.fields && modalData.button.popup.fields.length > 0) {
+            <div>
+              @for (field of modalData.button.popup.fields; track field) {
+                <div class="mb-3">
+                  <label [for]="field" class="form-label">{{ getFieldLabel(field) }}</label>
+                  <input [id]="field"
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="formData.fields[field]"
+                    [value]="getFieldValue(field)">
+                </div>
+              }
             </div>
-          </div>
+          }
+          <!-- Custom fields -->
+          @if (modalData.button.popup?.customFields) {
+            <div>
+              @for (customFieldEntry of modalData.button.popup?.customFields; track customFieldEntry) {
+                <div class="mb-3">
+                  <label [for]="'custom_' + customFieldEntry.id" class="form-label">
+                    {{ customFieldEntry.label }}
+                    @if (customFieldEntry.required) {
+                      <span class="text-danger">*</span>
+                    }
+                  </label>
+                  <!-- String input -->
+                  @if (customFieldEntry.type === 'string') {
+                    <input
+                      [id]="'custom_' + customFieldEntry.id"
+                      type="text"
+                      class="form-control"
+                      [(ngModel)]="formData.customFields[customFieldEntry.id]"
+                      [required]="customFieldEntry.required">
+                  }
+                  <!-- Number input -->
+                  @if (customFieldEntry.type === 'number') {
+                    <input
+                      [id]="'custom_' + customFieldEntry.id"
+                      type="number"
+                      class="form-control"
+                      [(ngModel)]="formData.customFields[customFieldEntry.id]"
+                      [required]="customFieldEntry.required">
+                  }
+                  <!-- Boolean input -->
+                  @if (customFieldEntry.type === 'boolean') {
+                    <div class="form-check">
+                      <input [id]="'custom_' + customFieldEntry.id"
+                        type="checkbox"
+                        class="form-check-input"
+                        [(ngModel)]="formData.customFields[customFieldEntry.id]"v
+                        [required]="customFieldEntry.required">
+                      <label [for]="'custom_' + customFieldEntry.id" class="form-check-label">
+                        {{ customFieldEntry.label }}
+                        @if (customFieldEntry.required) {
+                          <span class="text-danger">*</span>
+                        }
+                      </label>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
-        <button type="button" class="btn btn-primary" (click)="executeAction()" [disabled]="!isFormValid()">
-          {{ modalData.button.popup?.buttonString || 'Execute' }}
-        </button>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" (click)="executeAction()" [disabled]="!isFormValid()">
+            {{ modalData.button.popup?.buttonString || 'Execute' }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
-<div class="modal-backdrop fade"
-     [class.show]="modalData?.visible"
-     *ngIf="modalData?.visible"
-     (click)="closeModal()"></div>
+}
+@if (modalData?.visible) {
+  <div class="modal-backdrop fade"
+    [class.show]="modalData?.visible"
+  (click)="closeModal()"></div>
+}

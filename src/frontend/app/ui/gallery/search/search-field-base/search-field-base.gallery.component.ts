@@ -6,7 +6,7 @@ import {MetadataSearchQueryTypes, SearchQueryTypes,} from '../../../../../../com
 import {Config} from '../../../../../../common/config/public/Config';
 import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
 import {AutoCompleteRenderItem} from '../AutoCompleteRenderItem';
-import {NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+import { NgClass } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 
 @Component({
@@ -28,13 +28,9 @@ import {NgIconComponent} from '@ng-icons/core';
   ],
   imports: [
     FormsModule,
-    NgIf,
-    NgFor,
     NgClass,
-    NgSwitch,
-    NgSwitchCase,
-    NgIconComponent,
-  ]
+    NgIconComponent
+]
 })
 export class GallerySearchFieldBaseComponent
   implements ControlValueAccessor, Validator, OnDestroy {

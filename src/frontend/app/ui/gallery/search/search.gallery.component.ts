@@ -15,7 +15,7 @@ import {FormsModule} from '@angular/forms';
 import {GallerySearchFieldBaseComponent} from './search-field-base/search-field-base.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {GallerySearchQueryBuilderComponent} from './query-builder/query-bulder.gallery.component';
-import {NgIf} from '@angular/common';
+
 import {SavedSearchPopupComponent} from '../../albums/saved-search-popup/saved-search-popup.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
@@ -30,9 +30,8 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     RouterLink,
     NgIconComponent,
     GallerySearchQueryBuilderComponent,
-    NgIf,
-    SavedSearchPopupComponent,
-  ]
+    SavedSearchPopupComponent
+]
 })
 export class GallerySearchComponent implements OnDestroy {
   public searchQueryDTO: SearchQueryDTO = {

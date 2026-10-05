@@ -1,64 +1,79 @@
 <div [hidden]="!isVisible()" #root>
 
   <div class="blackCanvas"
-       [style.opacity]="blackCanvasOpacity">
+    [style.opacity]="blackCanvasOpacity">
   </div>
 
   <div class="lightbox" #lightbox>
     <app-gallery-lightbox-media [gridMedia]="activePhoto ? activePhoto.gridMedia : null"
-                                [nextGridMedia]="NexGridMedia"
-                                [loadMedia]="!animating"
-                                [zoom]="controls?.Zoom ?? 1"
-                                [drag]="controls?.drag ?? {x:0,y:0}"
-                                [windowAspect]="photoFrameDim.aspect"
-                                (videoSourceError)="onVideoSourceError()"
-                                #photo>
+      [nextGridMedia]="NexGridMedia"
+      [loadMedia]="!animating"
+      [zoom]="controls?.Zoom ?? 1"
+      [drag]="controls?.drag ?? {x:0,y:0}"
+      [windowAspect]="photoFrameDim.aspect"
+      (videoSourceError)="onVideoSourceError()"
+      #photo>
     </app-gallery-lightbox-media>
 
-    <div class="container h-100 flex-column" *ngIf="videoSourceError && activePhoto">
-      <div class="row justify-content-center align-items-center h-100">
-        <div class="col-md-8 text-white text-center">
-          <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom"></ng-icon><span class="h2" i18n>Error during loading the video.</span>
-          <br/>
-          <ng-container *ngIf="activePhoto.gridMedia.isVideoTranscodingNeeded()" i18n>
+    @if (videoSourceError && activePhoto) {
+      <div class="container h-100 flex-column">
+        <div class="row justify-content-center align-items-center h-100">
+          <div class="col-md-8 text-white text-center">
+            <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom"></ng-icon><span class="h2" i18n>Error during loading the video.</span>
+            <br/>
+            @if (activePhoto.gridMedia.isVideoTranscodingNeeded()) {
+              <ng-container i18n>
             Most likely the video is not transcoded.
             It can be done in the settings.
             You need to transcode these videos to watch them online:
           </ng-container>
-          <ng-container *ngFor="let ext of transcodeNeedVideos;let last = last">*.{{ext}}
-            <ng-container *ngIf="!last">,&nbsp;</ng-container>
-          </ng-container>
+            }
+            @for (ext of transcodeNeedVideos; track ext; let last = $last) {
+              *.{{ext}}
+              @if (!last) {
+                ,&nbsp;
+              }
+            }
+          </div>
         </div>
       </div>
+    }
 
-    </div>
+    @if (isOpen()) {
+      <app-lightbox-controls
+        #controls
+        [activePhoto]="activePhoto"
+        [slideShowRunning]="slideShowRunning"
+        (closed)="hide()"
+        [navigation]="navigation"
+        (nextPhoto)="nextImage()"
+        (previousPhoto)="prevImage()"
+        (toggleInfoPanel)="toggleInfoPanel()"
+        (toggleFullScreen)="toggleFullscreen()"
+        [photoFrameDim]="photoFrameDim"
+        [mediaElement]="mediaElement">
+      </app-lightbox-controls>
+    }
 
-    <app-lightbox-controls
-      *ngIf="isOpen()"
-      #controls
-      [activePhoto]="activePhoto"
-      [slideShowRunning]="slideShowRunning"
-      (closed)="hide()"
-      [navigation]="navigation"
-      (nextPhoto)="nextImage()"
-      (previousPhoto)="prevImage()"
-      (toggleInfoPanel)="toggleInfoPanel()"
-      (toggleFullScreen)="toggleFullscreen()"
-      [photoFrameDim]="photoFrameDim"
-      [mediaElement]="mediaElement">
-    </app-lightbox-controls>
-
-    <div class="lightbox-load-state" *ngIf="isOpen() && IsAtLoadedEnd && LoadState !== 'idle'">
-      <span *ngIf="LoadState === 'loading'" class="badge bg-dark" i18n>Loading more media…</span>
-      <button *ngIf="LoadState === 'error'" type="button" class="btn btn-light btn-sm"
-              (click)="retryLoad()" i18n>Loading more media failed. Retry</button>
-    </div>
+    @if (isOpen() && IsAtLoadedEnd && LoadState !== 'idle') {
+      <div class="lightbox-load-state">
+        @if (LoadState === 'loading') {
+          <span class="badge bg-dark" i18n>Loading more media…</span>
+        }
+        @if (LoadState === 'error') {
+          <button type="button" class="btn btn-light btn-sm"
+          (click)="retryLoad()" i18n>Loading more media failed. Retry</button>
+        }
+      </div>
+    }
   </div>
 
-  <app-info-panel *ngIf="activePhoto && infoPanelVisible"
-                  id="info-panel"
-                  [style.width.px]="infoPanelWidth"
-                  [media]="activePhoto.gridMedia.media"
-                  (closed)="hideInfoPanel()">
-  </app-info-panel>
+  @if (activePhoto && infoPanelVisible) {
+    <app-info-panel
+      id="info-panel"
+      [style.width.px]="infoPanelWidth"
+      [media]="activePhoto.gridMedia.media"
+      (closed)="hideInfoPanel()">
+    </app-info-panel>
+  }
 </div>

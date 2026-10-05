@@ -20,7 +20,7 @@ import {MDFilesFilterPipe} from '../../pipes/MDFilesFilterPipe';
 import {ContentLoaderService} from './contentLoader.service';
 import {GalleryLightboxComponent} from './lightbox/lightbox.gallery.component';
 import {FrameComponent} from '../frame/frame.component';
-import {NgIf} from '@angular/common';
+
 import {RandomQueryBuilderGalleryComponent} from './random-query-builder/random-query-builder.gallery.component';
 import {PhotoFrameBuilderGalleryComponent} from './photo-frame-builder/photo-frame-builder.gallery.component';
 import {GalleryNavigatorComponent} from './navigator/navigator.gallery.component';
@@ -44,7 +44,6 @@ import {MediaDTO} from '../../../../common/entities/MediaDTO';
   imports: [
     GalleryLightboxComponent,
     FrameComponent,
-    NgIf,
     RandomQueryBuilderGalleryComponent,
     PhotoFrameBuilderGalleryComponent,
     GalleryNavigatorComponent,
@@ -56,7 +55,7 @@ import {MediaDTO} from '../../../../common/entities/MediaDTO';
     PhotoFilterPipe,
     MediaButtonModalComponent,
     UploaderComponent
-  ]
+]
 })
 export class GalleryComponent implements OnInit, OnDestroy {
   @ViewChild(GalleryGridComponent, {static: false})

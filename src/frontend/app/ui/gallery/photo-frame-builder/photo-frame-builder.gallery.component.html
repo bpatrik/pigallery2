@@ -15,182 +15,198 @@
     <div class="row">
       <div class="col">
         <input id="photoFrameLink"
-               name="photoFrameLink"
-               placeholder="link"
-               class="form-control input-md"
-               type="text"
-               [ngModel]="url">
+          name="photoFrameLink"
+          placeholder="link"
+          class="form-control input-md"
+          type="text"
+          [ngModel]="url">
       </div>
       <div class="col-auto">
         <button id="copyButton" name="copyButton"
-                ngxClipboard [cbContent]="url"
-                (cbOnSuccess)="onCopy()"
-                class="btn btn-primary btn-block" i18n>Copy
+          ngxClipboard [cbContent]="url"
+          (cbOnSuccess)="onCopy()"
+          class="btn btn-primary btn-block" i18n>Copy
         </button>
       </div>
     </div>
     <div class="d-flex align-items-center mt-2 mb-2">
       <button type="button" class="btn btn-link p-0 me-2 text-body" (click)="toggleSettings()">
         <ng-container >settings</ng-container>
-        <ng-icon name="ionCaretForward" class="mb-2"  *ngIf="!showSettings"></ng-icon>
-        <ng-icon name="ionCaretDown" class="mb-2"  *ngIf="showSettings"></ng-icon>
+        @if (!showSettings) {
+          <ng-icon name="ionCaretForward" class="mb-2" ></ng-icon>
+        }
+        @if (showSettings) {
+          <ng-icon name="ionCaretDown" class="mb-2" ></ng-icon>
+        }
       </button>
-      <hr class="flex-grow-1 m-0" *ngIf="!showSettings" />
+      @if (!showSettings) {
+        <hr class="flex-grow-1 m-0" />
+      }
     </div>
-    <form class="form-horizontal" *ngIf="showSettings">
-      <!-- Auto update gallery -->
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="autoPollSwitch" class="mb-0" i18n>Auto update gallery</label>
-        </div>
-        <div class="col-auto">
-          <select id="autoPollInterval" name="autoPollInterval" class="form-select"
-                  [(ngModel)]="autoPollInterval" (change)="onOptionsChange()">
-            <option [ngValue]="0">off</option>
-            <option [ngValue]="5">5s</option>
-            <option [ngValue]="10">10s</option>
-            <option [ngValue]="30">30s</option>
-            <option [ngValue]="60">1m</option>
-            <option [ngValue]="120">2m</option>
-            <option [ngValue]="300">5m</option>
-            <option [ngValue]="600">10m</option>
-            <option [ngValue]="1800">30m</option>
-            <option [ngValue]="3600">1h</option>
-            <option [ngValue]="7200">2h</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Loop slideshow -->
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="loopSlideshowSwitch" class="mb-0" i18n>Loop slideshow</label>
-        </div>
-        <div class="col-auto">
-          <div class="form-check form-switch m-0">
-            <input class="form-check-input" type="checkbox" id="loopSlideshowSwitch" [(ngModel)]="loopSlideshow"
-                   name="loopSlideshow" (change)="onOptionsChange()">
+    @if (showSettings) {
+      <form class="form-horizontal">
+        <!-- Auto update gallery -->
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="autoPollSwitch" class="mb-0" i18n>Auto update gallery</label>
           </div>
-        </div>
-      </div>
-
-      <!-- Show captions always -->
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="captionAlwaysOnSwitch" class="mb-0" i18n>Show captions always</label>
-        </div>
-        <div class="col-auto">
-          <div class="form-check form-switch m-0">
-            <input class="form-check-input" type="checkbox" id="captionAlwaysOnSwitch" [(ngModel)]="captionAlwaysOn"
-                   name="captionAlwaysOn" (change)="onOptionsChange()">
-          </div>
-        </div>
-      </div>
-
-      <!-- Hide controls -->
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="hideControlsSwitch" class="mb-0" i18n>Hide controls</label>
-        </div>
-        <div class="col-auto">
-          <div class="form-check form-switch m-0">
-            <input class="form-check-input" type="checkbox" id="hideControlsSwitch" [(ngModel)]="hideControls"
-                   name="hideControlsSwitch" (change)="onOptionsChange()">
-          </div>
-        </div>
-      </div>
-
-      <!-- Slideshow speed -->
-      <div class="row g-2 align-items-center mt-2">
-        <div class="col-auto">
-          <label for="slideshowSpeed" class="col-form-label mb-0" i18n>Slideshow speed</label>
-        </div>
-        <div class="col-auto">
-          <select id="slideshowSpeed" name="slideshowSpeed" class="form-select"
-                  [(ngModel)]="slideshowSpeed" (change)="onOptionsChange()">
-            <option [ngValue]="1">1s</option>
-            <option [ngValue]="5">5s</option>
-            <option [ngValue]="30">30s</option>
-            <option [ngValue]="60">1m</option>
-            <option [ngValue]="120">2m</option>
-            <option [ngValue]="300">5m</option>
-            <option [ngValue]="600">10m</option>
-            <option [ngValue]="1800">30m</option>
-            <option [ngValue]="3600">60m</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Lightbox title overrides -->
-      <hr/>
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="topLeftTitle" class="mb-0" i18n>Top-left title(s)</label>
-        </div>
-        <div class="col">
-          <div *ngFor="let _ of topLeftTitle; let i = index; trackBy: trackByIndex">
-            <select class="form-select mb-1"
-                    [(ngModel)]="topLeftTitle[i]"
-                    name="topLeftTitle_{{i}}"
-                    id="pfb_topLeftTitle_{{i}}"
-                    (ngModelChange)="onOptionsChange()">
-              <option *ngFor="let opt of LightBoxTitleTextsArr" [ngValue]="opt">{{opt | stringifyEnum}}</option>
+          <div class="col-auto">
+            <select id="autoPollInterval" name="autoPollInterval" class="form-select"
+              [(ngModel)]="autoPollInterval" (change)="onOptionsChange()">
+              <option [ngValue]="0">off</option>
+              <option [ngValue]="5">5s</option>
+              <option [ngValue]="10">10s</option>
+              <option [ngValue]="30">30s</option>
+              <option [ngValue]="60">1m</option>
+              <option [ngValue]="120">2m</option>
+              <option [ngValue]="300">5m</option>
+              <option [ngValue]="600">10m</option>
+              <option [ngValue]="1800">30m</option>
+              <option [ngValue]="3600">1h</option>
+              <option [ngValue]="7200">2h</option>
             </select>
           </div>
         </div>
-      </div>
-
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="topLeftSubtitle" class="mb-0" i18n>Top-left subtitle(s)</label>
+        <!-- Loop slideshow -->
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="loopSlideshowSwitch" class="mb-0" i18n>Loop slideshow</label>
+          </div>
+          <div class="col-auto">
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" id="loopSlideshowSwitch" [(ngModel)]="loopSlideshow"
+                name="loopSlideshow" (change)="onOptionsChange()">
+            </div>
+          </div>
         </div>
-        <div class="col">
-          <div *ngFor="let _ of topLeftSubtitle; let i = index; trackBy: trackByIndex">
-            <select class="form-select mb-1"
-                    [(ngModel)]="topLeftSubtitle[i]"
-                    name="topLeftSubtitle_{{i}}"
-                    id="pfb_topLeftSubtitle_{{i}}"
-                    (change)="onOptionsChange()">
-              <option *ngFor="let opt of LightBoxTitleTextsArr" [ngValue]="opt">{{opt | stringifyEnum}}</option>
+        <!-- Show captions always -->
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="captionAlwaysOnSwitch" class="mb-0" i18n>Show captions always</label>
+          </div>
+          <div class="col-auto">
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" id="captionAlwaysOnSwitch" [(ngModel)]="captionAlwaysOn"
+                name="captionAlwaysOn" (change)="onOptionsChange()">
+            </div>
+          </div>
+        </div>
+        <!-- Hide controls -->
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="hideControlsSwitch" class="mb-0" i18n>Hide controls</label>
+          </div>
+          <div class="col-auto">
+            <div class="form-check form-switch m-0">
+              <input class="form-check-input" type="checkbox" id="hideControlsSwitch" [(ngModel)]="hideControls"
+                name="hideControlsSwitch" (change)="onOptionsChange()">
+            </div>
+          </div>
+        </div>
+        <!-- Slideshow speed -->
+        <div class="row g-2 align-items-center mt-2">
+          <div class="col-auto">
+            <label for="slideshowSpeed" class="col-form-label mb-0" i18n>Slideshow speed</label>
+          </div>
+          <div class="col-auto">
+            <select id="slideshowSpeed" name="slideshowSpeed" class="form-select"
+              [(ngModel)]="slideshowSpeed" (change)="onOptionsChange()">
+              <option [ngValue]="1">1s</option>
+              <option [ngValue]="5">5s</option>
+              <option [ngValue]="30">30s</option>
+              <option [ngValue]="60">1m</option>
+              <option [ngValue]="120">2m</option>
+              <option [ngValue]="300">5m</option>
+              <option [ngValue]="600">10m</option>
+              <option [ngValue]="1800">30m</option>
+              <option [ngValue]="3600">60m</option>
             </select>
           </div>
         </div>
-      </div>
-
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="bottomLeftTitle" class="mb-0" i18n>Bottom-left title(s)</label>
-        </div>
-        <div class="col">
-          <div *ngFor="let _ of bottomLeftTitle; let i = index; trackBy: trackByIndex">
-            <select class="form-select mb-1"
-                    [(ngModel)]="bottomLeftTitle[i]"
-                    name="bottomLeftTitle_{{i}}"
-                    id="pfb_bottomLeftTitle_{{i}}"
-                    (change)="onOptionsChange()">
-              <option *ngFor="let opt of LightBoxTitleTextsArr" [ngValue]="opt">{{opt | stringifyEnum}}</option>
-            </select>
+        <!-- Lightbox title overrides -->
+        <hr/>
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="topLeftTitle" class="mb-0" i18n>Top-left title(s)</label>
+          </div>
+          <div class="col">
+            @for (_ of topLeftTitle; track trackByIndex(i, _); let i = $index) {
+              <div>
+                <select class="form-select mb-1"
+                  [(ngModel)]="topLeftTitle[i]"
+                  name="topLeftTitle_{{i}}"
+                  id="pfb_topLeftTitle_{{i}}"
+                  (ngModelChange)="onOptionsChange()">
+                  @for (opt of LightBoxTitleTextsArr; track opt) {
+                    <option [ngValue]="opt">{{opt | stringifyEnum}}</option>
+                  }
+                </select>
+              </div>
+            }
           </div>
         </div>
-      </div>
-
-      <div class="row align-items-center mb-2">
-        <div class="col-auto">
-          <label for="bottomLeftSubtitle" class="mb-0" i18n>Bottom-left subtitle(s)</label>
-        </div>
-        <div class="col">
-          <div *ngFor="let _ of bottomLeftSubtitle; let i = index; trackBy: trackByIndex">
-            <select class="form-select mb-1"
-                    [(ngModel)]="bottomLeftSubtitle[i]"
-                    name="bottomLeftSubtitle_{{i}}"
-                    id="pfb_bottomLeftSubtitle_{{i}}"
-                    (change)="onOptionsChange()">
-              <option *ngFor="let opt of LightBoxTitleTextsArr" [ngValue]="opt">{{opt | stringifyEnum}}</option>
-            </select>
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="topLeftSubtitle" class="mb-0" i18n>Top-left subtitle(s)</label>
+          </div>
+          <div class="col">
+            @for (_ of topLeftSubtitle; track trackByIndex(i, _); let i = $index) {
+              <div>
+                <select class="form-select mb-1"
+                  [(ngModel)]="topLeftSubtitle[i]"
+                  name="topLeftSubtitle_{{i}}"
+                  id="pfb_topLeftSubtitle_{{i}}"
+                  (change)="onOptionsChange()">
+                  @for (opt of LightBoxTitleTextsArr; track opt) {
+                    <option [ngValue]="opt">{{opt | stringifyEnum}}</option>
+                  }
+                </select>
+              </div>
+            }
           </div>
         </div>
-      </div>
-      <div class="form-text" i18n>Autoplay is always enabled for photo frames.</div>
-    </form>
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="bottomLeftTitle" class="mb-0" i18n>Bottom-left title(s)</label>
+          </div>
+          <div class="col">
+            @for (_ of bottomLeftTitle; track trackByIndex(i, _); let i = $index) {
+              <div>
+                <select class="form-select mb-1"
+                  [(ngModel)]="bottomLeftTitle[i]"
+                  name="bottomLeftTitle_{{i}}"
+                  id="pfb_bottomLeftTitle_{{i}}"
+                  (change)="onOptionsChange()">
+                  @for (opt of LightBoxTitleTextsArr; track opt) {
+                    <option [ngValue]="opt">{{opt | stringifyEnum}}</option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="row align-items-center mb-2">
+          <div class="col-auto">
+            <label for="bottomLeftSubtitle" class="mb-0" i18n>Bottom-left subtitle(s)</label>
+          </div>
+          <div class="col">
+            @for (_ of bottomLeftSubtitle; track trackByIndex(i, _); let i = $index) {
+              <div>
+                <select class="form-select mb-1"
+                  [(ngModel)]="bottomLeftSubtitle[i]"
+                  name="bottomLeftSubtitle_{{i}}"
+                  id="pfb_bottomLeftSubtitle_{{i}}"
+                  (change)="onOptionsChange()">
+                  @for (opt of LightBoxTitleTextsArr; track opt) {
+                    <option [ngValue]="opt">{{opt | stringifyEnum}}</option>
+                  }
+                </select>
+              </div>
+            }
+          </div>
+        </div>
+        <div class="form-text" i18n>Autoplay is always enabled for photo frames.</div>
+      </form>
+    }
   </div>
 </ng-template>

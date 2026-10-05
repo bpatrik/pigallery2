@@ -2,20 +2,20 @@
   <div class="input-group flex-nowrap" style="place-content: flex-end;">
 
     <app-gallery-search-field-base [(ngModel)]="rawSearchText"
-                                   (ngModelChange)="validateRawSearchText()"
-                                   class="search-field form-control p-0"
-                                   (search)="Search()"
-                                   name="search-field">
+      (ngModelChange)="validateRawSearchText()"
+      class="search-field form-control p-0"
+      (search)="Search()"
+      name="search-field">
 
     </app-gallery-search-field-base>
 
     <button class="btn btn-tertiary lh-0" type="button"
-            [routerLink]="['/search', HTMLSearchQuery]">
+      [routerLink]="['/search', HTMLSearchQuery]">
       <ng-icon name="ionSearchOutline"></ng-icon>
     </button>
     <button class="btn btn-tertiary lh-0"  type="button" (click)="openSearchModal(searchModal)">
       <ng-icon size="1.2em" style="margin-left: -0.1em; margin-right: -0.1em;"
-               name="ionChevronDownOutline"></ng-icon>
+      name="ionChevronDownOutline"></ng-icon>
     </button>
   </div>
 </form>
@@ -43,16 +43,18 @@
   <div class="modal-footer">
     <div class="btn-group float-end row" style="display: block">
       <div class="pe-0">
-        <button *ngIf="CanCreateAlbum"
-                class="btn btn-secondary me-2" type="button"
-                [disabled]="rawSearchText == ''"
-                (click)="openSaveSearchModal(saveSearchModal)">
-          <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
-          <ng-container i18n>Save</ng-container>
-        </button>
+        @if (CanCreateAlbum) {
+          <button
+            class="btn btn-secondary me-2" type="button"
+            [disabled]="rawSearchText == ''"
+            (click)="openSaveSearchModal(saveSearchModal)">
+            <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
+            <ng-container i18n>Save</ng-container>
+          </button>
+        }
         <button class="btn btn-primary" type="button"
-                [routerLink]="['/search', HTMLSearchQuery]"
-                (click)="hideSearchModal()">
+          [routerLink]="['/search', HTMLSearchQuery]"
+          (click)="hideSearchModal()">
           <ng-icon name="ionSearchOutline" class="me-1"></ng-icon>
           <ng-container i18n>Search</ng-container>
         </button>
@@ -92,8 +94,8 @@
             [savedSearchDTO]="{name:saveSearchName, searchQuery:searchQueryDTO}">
           </app-saved-search-popup-btn>
           <button class="btn btn-primary" type="button"
-                  [disabled]="saveSearchName == ''"
-                  (click)="saveSearch()">
+            [disabled]="saveSearchName == ''"
+            (click)="saveSearch()">
             <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
             <ng-container i18n>Save as album</ng-container>
           </button>

@@ -8,7 +8,7 @@ import {Utils} from '../../../../../common/Utils';
 import {ErrorCodes, ErrorDTO} from '../../../../../common/entities/Error';
 import {UsersSettingsService} from './users.service';
 import {SettingsService} from '../settings.service';
-import {NgClass, NgFor, NgIf} from '@angular/common';
+import { NgClass } from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifyRole} from '../../../pipes/StringifyRolePipe';
@@ -20,7 +20,7 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
   selector: 'app-settings-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css'],
-  imports: [NgIf, NgFor, FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent]
+  imports: [FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent]
 })
 export class UsersComponent implements OnInit {
 

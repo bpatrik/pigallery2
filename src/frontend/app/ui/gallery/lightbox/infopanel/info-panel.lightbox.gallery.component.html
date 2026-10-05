@@ -5,34 +5,42 @@
     </button>
   </div>
 
-  <div class="row" *ngIf="media.metadata.caption || media.metadata.title" title="Title and description of the media"
-       i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionDocumentTextOutline" title="Title and caption" i18n-title></ng-icon>
-    </div>
-    <div class="col-11">
-      <h4 *ngIf="media.metadata.title">
-        {{ media.metadata.title }}
-      </h4>
-      <div class="details-main" *ngIf="media.metadata.caption">
-        <div class="caption-body">{{ media.metadata.caption }}</div>
+  @if (media.metadata.caption || media.metadata.title) {
+    <div class="row" title="Title and description of the media"
+      i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionDocumentTextOutline" title="Title and caption" i18n-title></ng-icon>
+      </div>
+      <div class="col-11">
+        @if (media.metadata.title) {
+          <h4>
+            {{ media.metadata.title }}
+          </h4>
+        }
+        @if (media.metadata.caption) {
+          <div class="details-main">
+            <div class="caption-body">{{ media.metadata.caption }}</div>
+          </div>
+        }
       </div>
     </div>
-  </div>
+  }
 
-  <div class="row" *ngIf="contentLoaderService.isSearchResult()">
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionFolderOutline"></ng-icon>
+  @if (contentLoaderService.isSearchResult()) {
+    <div class="row">
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionFolderOutline"></ng-icon>
+      </div>
+      <div class="col-11">
+        <a class="details-main dir-link"
+          title="{{DirectoryPath}}"
+          [routerLink]="['/gallery', DirectoryPath]"
+          [queryParams]="queryService.getParams()">
+          {{ DirectoryPathStr }}
+        </a>
+      </div>
     </div>
-    <div class="col-11">
-      <a class="details-main dir-link"
-         title="{{DirectoryPath}}"
-         [routerLink]="['/gallery', DirectoryPath]"
-         [queryParams]="queryService.getParams()">
-        {{ DirectoryPathStr }}
-      </a>
-    </div>
-  </div>
+  }
   <div class="row" title="File information and properties" i18n-title>
     <div class="col-1 ps-0">
       <ng-icon class="details-icon" name="ionImageOutline" title="File information" i18n-title></ng-icon>
@@ -45,196 +53,268 @@
         <div class="col-4" title="Image dimensions in pixels" i18n-title>{{ media.metadata.size.width }}
           x {{ media.metadata.size.height }}
         </div>
-        <div class="col-4" *ngIf="isPhoto()" title="Megapixels" i18n-title>{{ calcMpx() }}MP</div>
-        <div class="col-4" *ngIf="media.metadata.fileSize" title="File size on disk"
-             i18n-title>{{ media.metadata.fileSize | fileSize }}
-        </div>
+        @if (isPhoto()) {
+          <div class="col-4" title="Megapixels" i18n-title>{{ calcMpx() }}MP</div>
+        }
+        @if (media.metadata.fileSize) {
+          <div class="col-4" title="File size on disk"
+            i18n-title>{{ media.metadata.fileSize | fileSize }}
+          </div>
+        }
       </div>
     </div>
   </div>
-  <div class="row pt-0" *ngIf="isLivePhoto()" title="Companion video" i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title></ng-icon>
-    </div>
-    <div class="col-11">
-      <div class="details-main" title="Video filename" i18n-title>
-        {{ media.liveVideoInfo?.name }}
+  @if (isLivePhoto()) {
+    <div class="row pt-0" title="Companion video" i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title></ng-icon>
       </div>
-      <div class="details-sub text-secondary row">
-        <div class="col-4" *ngIf="media.liveVideoInfo?.size" title="Video dimensions in pixels"
-             i18n-title>{{ media.liveVideoInfo.size.width }} x {{ media.liveVideoInfo.size.height }}
+      <div class="col-11">
+        <div class="details-main" title="Video filename" i18n-title>
+          {{ media.liveVideoInfo?.name }}
         </div>
-        <div class="col-4" *ngIf="media.liveVideoInfo?.fileSize" title="Video file size on disk"
-             i18n-title>{{ media.liveVideoInfo.fileSize | fileSize }}
-        </div>
-        <div class="col-4" *ngIf="media.liveVideoInfo?.duration" title="Video duration"
-             i18n-title>{{ media.liveVideoInfo.duration | duration }}
+        <div class="details-sub text-secondary row">
+          @if (media.liveVideoInfo?.size) {
+            <div class="col-4" title="Video dimensions in pixels"
+              i18n-title>{{ media.liveVideoInfo.size.width }} x {{ media.liveVideoInfo.size.height }}
+            </div>
+          }
+          @if (media.liveVideoInfo?.fileSize) {
+            <div class="col-4" title="Video file size on disk"
+              i18n-title>{{ media.liveVideoInfo.fileSize | fileSize }}
+            </div>
+          }
+          @if (media.liveVideoInfo?.duration) {
+            <div class="col-4" title="Video duration"
+              i18n-title>{{ media.liveVideoInfo.duration | duration }}
+            </div>
+          }
         </div>
       </div>
     </div>
-  </div>
+  }
 
-  <div class="row" *ngIf="media.metadata.creationDate" title="When this photo or video was taken" i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionCalendarOutline" title="Creation date and time" i18n-title></ng-icon>
-    </div>
-    <div class="col-11">
-      <div class="details-main clickable" title="Click to search for media from the same date" i18n-title>
-        <a *ngIf="searchEnabled" [routerLink]="['/search', getDateSearchQuery()]">
-          {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
-        </a>
-        <span *ngIf="!searchEnabled">
-          {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
-        </span>
+  @if (media.metadata.creationDate) {
+    <div class="row" title="When this photo or video was taken" i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionCalendarOutline" title="Creation date and time" i18n-title></ng-icon>
       </div>
-      <div class="details-sub  text-secondary row">
-        <div class="col-12" title="Detailed time information"
-             i18n-title>{{ media.metadata.creationDate | date : (media.metadata.creationDateOffset ? 'EEEE, HH:mm:ss ZZZZZ' : 'EEEE, HH:mm:ss') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+      <div class="col-11">
+        <div class="details-main clickable" title="Click to search for media from the same date" i18n-title>
+          @if (searchEnabled) {
+            <a [routerLink]="['/search', getDateSearchQuery()]">
+              {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+            </a>
+          }
+          @if (!searchEnabled) {
+            <span>
+              {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+            </span>
+          }
+        </div>
+        <div class="details-sub  text-secondary row">
+          <div class="col-12" title="Detailed time information"
+            i18n-title>{{ media.metadata.creationDate | date : (media.metadata.creationDateOffset ? 'EEEE, HH:mm:ss ZZZZZ' : 'EEEE, HH:mm:ss') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+          </div>
         </div>
       </div>
     </div>
-  </div>
-
-
-  <div class="row" *ngIf="VideoData && (VideoData.duration || VideoData.bitRate)" title="Video technical information"
-       i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionVideocamOutline" title="Video properties" i18n-title></ng-icon>
-    </div>
-    <div class="col-11">
-      <div class="details-main">
-        {{ "Video" }}
-      </div>
-      <div class="details-sub  text-secondary row">
-        <div class="col-6" *ngIf="VideoData.duration" title="How long the video is" i18n-title>
-          <ng-container i18n>duration</ng-container>
-          : {{ VideoData.duration | duration }}
-        </div>
-        <div class="col-6" *ngIf="VideoData.fps" title="Frames per second - video smoothness" i18n-title>
-          fps: {{ VideoData.fps }}/s
-        </div>
-        <div class="col-6" *ngIf="VideoData.bitRate" title="Data rate - video quality indicator" i18n-title>
-          <ng-container i18n>bit rate</ng-container>
-          : {{ VideoData.bitRate | fileSize }}/s
-        </div>
-      </div>
-    </div>
-  </div>
+  }
 
 
-  <div class="row" *ngIf="CameraData" title="Camera and lens information used to take this photo" i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionCameraOutline" title="Camera information" i18n-title></ng-icon>
-    </div>
-    <div class="col-11">
-      <div class="details-main">
-        {{ CameraData.model || CameraData.make || "Camera" }}
+  @if (VideoData && (VideoData.duration || VideoData.bitRate)) {
+    <div class="row" title="Video technical information"
+      i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionVideocamOutline" title="Video properties" i18n-title></ng-icon>
       </div>
-      <div class="details-sub  text-secondary row">
-        <div class="col-3" *ngIf="CameraData.ISO" title="ISO sensitivity - higher values for darker conditions"
-             i18n-title>ISO{{ CameraData.ISO }}
+      <div class="col-11">
+        <div class="details-main">
+          {{ "Video" }}
         </div>
-        <div class="col-3" *ngIf="CameraData.fStop" title="Aperture - lower numbers mean more background blur"
-             i18n-title>f/{{ CameraData.fStop }}
+        <div class="details-sub  text-secondary row">
+          @if (VideoData.duration) {
+            <div class="col-6" title="How long the video is" i18n-title>
+              <ng-container i18n>duration</ng-container>
+              : {{ VideoData.duration | duration }}
+            </div>
+          }
+          @if (VideoData.fps) {
+            <div class="col-6" title="Frames per second - video smoothness" i18n-title>
+              fps: {{ VideoData.fps }}/s
+            </div>
+          }
+          @if (VideoData.bitRate) {
+            <div class="col-6" title="Data rate - video quality indicator" i18n-title>
+              <ng-container i18n>bit rate</ng-container>
+              : {{ VideoData.bitRate | fileSize }}/s
+            </div>
+          }
         </div>
-        <div class="col-3" *ngIf="CameraData.exposure" title="Shutter speed - how long the sensor was exposed to light"
-             i18n-title>
-          {{ toFraction(CameraData.exposure) }}s
-        </div>
-        <div class="col-3" *ngIf="CameraData.focalLength" title="Focal length - zoom level of the lens" i18n-title>
-          {{ CameraData.focalLength }}mm
-        </div>
-        <div class="col-12" *ngIf="CameraData.lens" title="Specific lens model used" i18n-title>{{ CameraData.lens }}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="row" *ngIf="Rating">
-    <div class="col-1 ps-0" title="rating" p18n-rating>
-      <ng-icon class="details-icon" name="ionStarOutline"></ng-icon>
-    </div>
-    <div class="col-11">
-      <div class="details-main" [title]="Rating + ' stars'">
-        <ng-icon *ngFor="let stars of [].constructor(Rating)" class="text-body me-1" name="ionStar"></ng-icon>
-        <ng-icon *ngFor="let stars of [].constructor(5-Rating)" class="text-body-tertiary me-1"
-                 name="ionStarOutline"></ng-icon>
       </div>
     </div>
-  </div>
-
-  <div class="row" *ngIf="keywords" title="Keywords and people tags associated with this media" i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionPricetagOutline" title="Keywords and people" i18n-title></ng-icon>
-    </div>
-    <div class="col-11 keywords clickable">
-      <ng-template ngFor let-keyword [ngForOf]="keywords" let-last="last">
-        <a *ngIf="searchEnabled"
-           [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]" [ngSwitch]="keyword.type">
-          <ng-template [ngSwitchCase]="SearchQueryTypes.keyword">#</ng-template><!--
-       -->
-          <ng-template [ngSwitchCase]="SearchQueryTypes.person">
-            <ng-icon name="ionPersonOutline"></ng-icon>
-          </ng-template><!--
-       -->{{ keyword.value }}</a>
-        <span *ngIf="!searchEnabled" [ngSwitch]="keyword.type">
-          <ng-template [ngSwitchCase]="SearchQueryTypes.keyword">#</ng-template><!--
-       --><ng-template [ngSwitchCase]="SearchQueryTypes.person"><ng-icon
-          name="ionPersonOutline"></ng-icon></ng-template><!--
-       -->{{ keyword.value }}</span>
-        <ng-template [ngIf]="!last">,&#32;</ng-template>
-      </ng-template>
-    </div>
-  </div>
+  }
 
 
-  <div class="row" *ngIf="hasTextPositionData() || hasGPS()" title="Location information where this media was captured"
-       i18n-title>
-    <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionLocationOutline" title="Location information" i18n-title></ng-icon>
-    </div>
-    <div class="col-11">
-      <div class="details-main clickable" title="Click location parts to search for media from the same area"
-           i18n-title>
-        <ng-container *ngIf="searchEnabled && hasTextPositionData()">
-          <ng-container *ngFor="let item of getPositionParts(); let i = index; let isLast = last">
-            <a [routerLink]="['/search', getTextSearchQuery(item, SearchQueryTypes.position)]">{{ item }}</a><!--
-            -->
-            <ng-container *ngIf="!isLast">,</ng-container>
-          </ng-container>
-        </ng-container>
-        <span *ngIf="!searchEnabled || !hasTextPositionData()">
-          {{ getPositionText() || "Position" }}
-        </span>
+  @if (CameraData) {
+    <div class="row" title="Camera and lens information used to take this photo" i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionCameraOutline" title="Camera information" i18n-title></ng-icon>
       </div>
-      <div class="details-sub text-secondary row clickable" *ngIf="hasGPS()">
-        <div class="col-12" title="Click GPS coordinates to search for nearby media" i18n-title>
-          <a *ngIf="searchEnabled"
-             [routerLink]="['/search', getDistanceSearchQuery()]">
-            {{ PositionData.GPSData.latitude.toFixed(6) }},
-            {{ PositionData.GPSData.longitude.toFixed(6) }}
-          </a>
-          <span *ngIf="!searchEnabled">
-            {{ PositionData.GPSData.latitude.toFixed(6) }},
-            {{ PositionData.GPSData.longitude.toFixed(6) }}
-          </span>
+      <div class="col-11">
+        <div class="details-main">
+          {{ CameraData.model || CameraData.make || "Camera" }}
+        </div>
+        <div class="details-sub  text-secondary row">
+          @if (CameraData.ISO) {
+            <div class="col-3" title="ISO sensitivity - higher values for darker conditions"
+              i18n-title>ISO{{ CameraData.ISO }}
+            </div>
+          }
+          @if (CameraData.fStop) {
+            <div class="col-3" title="Aperture - lower numbers mean more background blur"
+              i18n-title>f/{{ CameraData.fStop }}
+            </div>
+          }
+          @if (CameraData.exposure) {
+            <div class="col-3" title="Shutter speed - how long the sensor was exposed to light"
+              i18n-title>
+              {{ toFraction(CameraData.exposure) }}s
+            </div>
+          }
+          @if (CameraData.focalLength) {
+            <div class="col-3" title="Focal length - zoom level of the lens" i18n-title>
+              {{ CameraData.focalLength }}mm
+            </div>
+          }
+          @if (CameraData.lens) {
+            <div class="col-12" title="Specific lens model used" i18n-title>{{ CameraData.lens }}
+            </div>
+          }
         </div>
       </div>
     </div>
-  </div>
+  }
+
+  @if (Rating) {
+    <div class="row">
+      <div class="col-1 ps-0" title="rating" p18n-rating>
+        <ng-icon class="details-icon" name="ionStarOutline"></ng-icon>
+      </div>
+      <div class="col-11">
+        <div class="details-main" [title]="Rating + ' stars'">
+          @for (stars of [].constructor(Rating); track stars) {
+            <ng-icon class="text-body me-1" name="ionStar"></ng-icon>
+          }
+          @for (stars of [].constructor(5-Rating); track stars) {
+            <ng-icon class="text-body-tertiary me-1"
+            name="ionStarOutline"></ng-icon>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (keywords) {
+    <div class="row" title="Keywords and people tags associated with this media" i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionPricetagOutline" title="Keywords and people" i18n-title></ng-icon>
+      </div>
+      <div class="col-11 keywords clickable">
+        @for (keyword of keywords; track keyword; let last = $last) {
+          @if (searchEnabled) {
+            <a
+              [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]">
+              @switch (keyword.type) {
+                @case (SearchQueryTypes.keyword) {
+                  #
+                }
+                @case (SearchQueryTypes.person) {
+                  <ng-icon name="ionPersonOutline"></ng-icon>
+                }
+              }
+            {{ keyword.value }}</a>
+          }
+          @if (!searchEnabled) {
+            <span>
+              @switch (keyword.type) {
+                @case (SearchQueryTypes.keyword) {
+                  #
+                }
+                @case (SearchQueryTypes.person) {
+                  <ng-icon name="ionPersonOutline"></ng-icon>
+                }
+              }
+            {{ keyword.value }}</span>
+          }
+          @if (!last) {
+            ,&#32;
+          }
+        }
+      </div>
+    </div>
+  }
+
+
+  @if (hasTextPositionData() || hasGPS()) {
+    <div class="row" title="Location information where this media was captured"
+      i18n-title>
+      <div class="col-1 ps-0">
+        <ng-icon class="details-icon" name="ionLocationOutline" title="Location information" i18n-title></ng-icon>
+      </div>
+      <div class="col-11">
+        <div class="details-main clickable" title="Click location parts to search for media from the same area"
+          i18n-title>
+          @if (searchEnabled && hasTextPositionData()) {
+            @for (item of getPositionParts(); track item; let i = $index; let isLast = $last) {
+              <a [routerLink]="['/search', getTextSearchQuery(item, SearchQueryTypes.position)]">{{ item }}</a><!--
+              -->
+              @if (!isLast) {
+                ,
+              }
+            }
+          }
+          @if (!searchEnabled || !hasTextPositionData()) {
+            <span>
+              {{ getPositionText() || "Position" }}
+            </span>
+          }
+        </div>
+        @if (hasGPS()) {
+          <div class="details-sub text-secondary row clickable">
+            <div class="col-12" title="Click GPS coordinates to search for nearby media" i18n-title>
+              @if (searchEnabled) {
+                <a
+                  [routerLink]="['/search', getDistanceSearchQuery()]">
+                  {{ PositionData.GPSData.latitude.toFixed(6) }},
+                  {{ PositionData.GPSData.longitude.toFixed(6) }}
+                </a>
+              }
+              @if (!searchEnabled) {
+                <span>
+                  {{ PositionData.GPSData.latitude.toFixed(6) }},
+                  {{ PositionData.GPSData.longitude.toFixed(6) }}
+                </span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
   <div class="mt-auto" style="height: 400px">
-    <div
-      *ngIf="hasGPS() && mapEnabled"
-
-      id="map"
-      leaflet
+    @if (hasGPS() && mapEnabled) {
+      <div
+        id="map"
+        leaflet
       [leafletOptions]="{zoom:10,
           center:{lat:PositionData.GPSData.latitude,
           lng:PositionData.GPSData.longitude},
           layers:[baseLayer],
           zoomControl: false}"
-      [leafletLayers]="markerLayer">
-    </div>
+        [leafletLayers]="markerLayer">
+      </div>
+    }
   </div>
 
 </div>

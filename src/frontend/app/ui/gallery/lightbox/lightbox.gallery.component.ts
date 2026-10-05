@@ -17,7 +17,7 @@ import {ControlsLightboxComponent} from './controls/controls.lightbox.gallery.co
 import {SupportedFormats} from '../../../../../common/SupportedFormats';
 import {GridMedia} from '../grid/GridMedia';
 import {PiTitleService} from '../../../model/pi-title.service';
-import {NgFor, NgIf} from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
@@ -36,12 +36,10 @@ export enum LightboxStates {
   templateUrl: './lightbox.gallery.component.html',
   imports: [
     GalleryLightboxMediaComponent,
-    NgIf,
     NgIconComponent,
-    NgFor,
     ControlsLightboxComponent,
-    InfoPanelLightboxComponent,
-  ]
+    InfoPanelLightboxComponent
+]
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private static readonly MAX_EMPTY_PAGES = 50;

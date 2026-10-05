@@ -1,77 +1,91 @@
 <div #photoContainer class="photo-container rounded" (mouseover)="mouseOver()" (mouseout)="mouseOut()">
 
+  @if (thumbnail.Available) {
+    <img alt="{{gridMedia.media.name}}" #img [src]="thumbnail.Src"
+         (load)="loaded=true"
+         [class.loading]="!loaded">
+  } @else {
+    <app-gallery-grid-photo-loading
+      [error]="thumbnail.Error"
+      [animate]="thumbnail.loading">
+    </app-gallery-grid-photo-loading>
+  }
 
-  <img alt="{{gridMedia.media.name}}" #img [src]="thumbnail.Src"
-       (load)="loaded=true"
-       [class.loading]="!loaded"
-       *ngIf="thumbnail.Available">
+  @if (gridMedia.isVideo()) {
+    <div class="video-indicator">
+      {{gridMedia.Video.metadata.duration  | duration}}
+      <ng-icon name="ionVideocamOutline"></ng-icon>
+    </div>
+  }
 
-  <app-gallery-grid-photo-loading
-    [error]="thumbnail.Error"
-    [animate]="thumbnail.loading"
-    *ngIf="!thumbnail.Available">
-  </app-gallery-grid-photo-loading>
-
-
-  <div *ngIf="gridMedia.isVideo()" class="video-indicator">
-    {{gridMedia.Video.metadata.duration  | duration}}
-    <ng-icon name="ionVideocamOutline"></ng-icon>
-  </div>
-
-  <div *ngIf="gridMedia.isLivePhoto()" class="live-photo-indicator">
-    LIVE
-  </div>
+  @if (gridMedia.isLivePhoto()) {
+    <div class="live-photo-indicator">
+      LIVE
+    </div>
+  }
 
   <!-- Media buttons -->
-  <div class="media-buttons" *ngIf="mediaButtons.length > 0">
-    <button *ngFor="let button of mediaButtons"
-            class="media-button"
-            [class.always-visible]="button.alwaysVisible"
-            [class.no-click]="!button.apiPath"
-            [title]="button.name"
-            (click)="onMediaButtonClick(button, $event)">
-      <svg xmlns="http://www.w3.org/2000/svg"
-           class="media-button-icon"
-           fill="currentcolor"
-           [attr.viewBox]="button.svgIcon.viewBox || '0 0 512 512'"
-           [innerHtml]="button.svgIcon.items | safeHtml">
-      </svg>
-    </button>
-  </div>
-
+  @if (mediaButtons.length > 0) {
+    <div class="media-buttons">
+      @for (button of mediaButtons; track button.name) {
+        <button class="media-button"
+                [class.always-visible]="button.alwaysVisible"
+                [class.no-click]="!button.apiPath"
+                [title]="button.name"
+                (click)="onMediaButtonClick(button, $event)">
+          <svg xmlns="http://www.w3.org/2000/svg"
+               class="media-button-icon"
+               fill="currentcolor"
+               [attr.viewBox]="button.svgIcon.viewBox || '0 0 512 512'"
+               [innerHtml]="button.svgIcon.items | safeHtml">
+          </svg>
+        </button>
+      }
+    </div>
+  }
 
   <!--Info box -->
-  <div class="info rounded-bottom"
-       *ngIf="infoBarVisible">
-    <div class="photo-name">{{Title}}</div>
+  @if (infoBarVisible) {
+    <div class="info rounded-bottom">
+      <div class="photo-name">{{Title}}</div>
 
-    <div class="photo-position" *ngIf="gridMedia.hasPositionData()">
-      <ng-icon name="ionLocationOutline"></ng-icon>
-      <ng-template [ngIf]="getPositionText()">
-        <a [routerLink]="['/search', getPositionSearchQuery()]"
-           *ngIf="searchEnabled">{{getPositionText()}}</a>
-        <span *ngIf="!searchEnabled">{{getPositionText()}}</span>
-      </ng-template>
+      @if (gridMedia.hasPositionData()) {
+        <div class="photo-position">
+          <ng-icon name="ionLocationOutline"></ng-icon>
+          @if (getPositionText()) {
+            @if (searchEnabled) {
+              <a [routerLink]="['/search', getPositionSearchQuery()]">{{getPositionText()}}</a>
+            } @else {
+              <span>{{getPositionText()}}</span>
+            }
+          }
+        </div>
+      }
+
+      @if (keywords) {
+        <div class="photo-keywords">
+          @for (keyword of keywords; track keyword.value; let last = $last) {
+            @if (searchEnabled) {
+              <a [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]">
+                @switch (keyword.type) {
+                  @case (SearchQueryTypes.keyword) {#}
+                  @case (SearchQueryTypes.person) {
+                    <ng-icon name="ionPersonOutline"></ng-icon>
+                  }
+                }{{keyword.value}}</a>
+            } @else {
+              <span>
+                @switch (keyword.type) {
+                  @case (SearchQueryTypes.keyword) {#}
+                  @case (SearchQueryTypes.person) {
+                    <ng-icon name="ionPersonOutline"></ng-icon>
+                  }
+                }{{keyword.value}}</span>
+            }
+            @if (!last) {,&#160;}
+          }
+        </div>
+      }
     </div>
-
-    <div class="photo-keywords" *ngIf="keywords">
-      <ng-template ngFor let-keyword [ngForOf]="keywords" let-last="last">
-        <a *ngIf="searchEnabled"
-           [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]" [ngSwitch]="keyword.type">
-          <ng-template [ngSwitchCase]="SearchQueryTypes.keyword">#</ng-template><!--
-       -->
-          <ng-template [ngSwitchCase]="SearchQueryTypes.person">
-            <ng-icon name="ionPersonOutline"></ng-icon>
-          </ng-template><!--
-       -->{{keyword.value}}</a>
-        <span *ngIf="!searchEnabled" [ngSwitch]="keyword.type">
-          <ng-template [ngSwitchCase]="SearchQueryTypes.keyword">#</ng-template><!--
-       --><ng-template [ngSwitchCase]="SearchQueryTypes.person"><ng-icon
-          name="ionPersonOutline"></ng-icon></ng-template><!--
-       -->{{keyword.value}}</span>
-        <ng-template [ngIf]="!last">,&#160;</ng-template>
-      </ng-template>
-
-    </div>
-  </div>
+  }
 </div>

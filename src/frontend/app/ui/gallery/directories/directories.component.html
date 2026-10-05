@@ -1,4 +1,6 @@
-<app-gallery-directory *ngFor="let directory of directories"
-                       [directory]="directory"
-                       [size]="size"></app-gallery-directory>
+@for (directory of directories; track directory) {
+  <app-gallery-directory
+    [directory]="directory"
+  [size]="size"></app-gallery-directory>
+}
 

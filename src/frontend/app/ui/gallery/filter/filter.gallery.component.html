@@ -4,122 +4,141 @@
     <div class="row">
       <div class="col-md-1-half col-12  d-table">
       </div>
-      <div class="col-md-9 col-12 date-frequency" *ngIf="showStatistic">
-        <ng-container *ngFor="let freq of filterService.statistic; count as length">
-          <div class="d-inline-block date-frequency-column"
-               [style.width.%]="(1/length)*100"
-               container="body"
-               triggers="mouseenter:mouseleave"
-               placement="bottom start"
-               [popover]="(freq.date | date: 'medium') + ' (' + freq.count+')'">
-            <div class=" text-center  " [style.height.%]="100-(freq.count/freq.max)*100">
-              <div class="d-none d-lg-block" *ngIf="freq.count < freq.max/2">{{freq.count}}</div>
+      @if (showStatistic) {
+        <div class="col-md-9 col-12 date-frequency">
+          @for (freq of filterService.statistic; track freq; let length = $count) {
+            <div class="d-inline-block date-frequency-column"
+              [style.width.%]="(1/length)*100"
+              container="body"
+              triggers="mouseenter:mouseleave"
+              placement="bottom start"
+              [popover]="(freq.date | date: 'medium') + ' (' + freq.count+')'">
+              <div class=" text-center  " [style.height.%]="100-(freq.count/freq.max)*100">
+                @if (freq.count < freq.max/2) {
+                  <div class="d-none d-lg-block">{{freq.count}}</div>
+                }
+              </div>
+              <div class="text-bg-primary text-center  border border-primary"
+                [class.text-bg-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
+                [class.border-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
+                [style.height.%]="(freq.count/freq.max)*100">
+                @if (freq.count >= freq.max/2) {
+                  <div class="d-none d-lg-block">{{freq.count}}</div>
+                }
+              </div>
+              <div class="text-center d-none d-xl-block overflow-x-hidden text-nowrap ps-1 pe-1">
+                {{freq.date | date: freq.dateStr}}
+              </div>
             </div>
-            <div class="text-bg-primary text-center  border border-primary"
-                 [class.text-bg-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
-                 [class.border-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
-                 [style.height.%]="(freq.count/freq.max)*100">
-              <div class="d-none d-lg-block" *ngIf="freq.count >= freq.max/2">{{freq.count}}</div>
-            </div>
-            <div class="text-center d-none d-xl-block overflow-x-hidden text-nowrap ps-1 pe-1">
-              {{freq.date | date: freq.dateStr}}
-            </div>
-          </div>
-        </ng-container>
-      </div>
+          }
+        </div>
+      }
       <div class="col-md-1-half col-12  d-table"></div>
 
     </div>
     <div class="row">
-      <div class="position-absolute w-auto start-50" *ngIf="filterService.statistic.length>1">
-        <div class="text-md-center">
-          <ng-icon
-            [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
-            style="top: -2px; cursor: pointer"
-            class="position-relative"
+      @if (filterService.statistic.length>1) {
+        <div class="position-absolute w-auto start-50">
+          <div class="text-md-center">
+            <ng-icon
+              [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
+              style="top: -2px; cursor: pointer"
+              class="position-relative"
             (click)="showStatistic = !showStatistic"></ng-icon>
+          </div>
         </div>
-      </div>
+      }
       <div class="col-md-1-half col-12  d-table">
-        <div
-          *ngIf="ActiveFilters.dateFilter.minFilter !== NUMBER_MIN_VALUE"
-          [title]="ActiveFilters.dateFilter.minFilter | date: 'medium'"
-          class="d-table-cell align-middle text-center">
-          {{ActiveFilters.dateFilter.minFilter | date: 'longDate'}}
-        </div>
+        @if (ActiveFilters.dateFilter.minFilter !== NUMBER_MIN_VALUE) {
+          <div
+            [title]="ActiveFilters.dateFilter.minFilter | date: 'medium'"
+            class="d-table-cell align-middle text-center">
+            {{ActiveFilters.dateFilter.minFilter | date: 'longDate'}}
+          </div>
+        }
       </div>
       <div class="date-filter-wrapper col-md-9 col-12">
         <div>
           <div class="inverse-left"
-               [style.width.%]="MinDatePrc"></div>
+          [style.width.%]="MinDatePrc"></div>
           <div class="inverse-right"
-               [style.width.%]="100-MaxDatePrc"></div>
+          [style.width.%]="100-MaxDatePrc"></div>
           <div class="range"
-               [style.left.%]="MinDatePrc"
-               [style.right.%]="100-MaxDatePrc"></div>
+            [style.left.%]="MinDatePrc"
+          [style.right.%]="100-MaxDatePrc"></div>
           <span class="thumb"
-                [style.left.%]="MinDatePrc"></span>
+          [style.left.%]="MinDatePrc"></span>
           <span class="thumb"
-                [style.left.%]="MaxDatePrc"></span>
+          [style.left.%]="MaxDatePrc"></span>
 
         </div>
         <input type="range"
-               [max]="ActiveFilters.dateFilter.maxDate"
-               [min]="ActiveFilters.dateFilter.minDate"
-               [(ngModel)]="ActiveFilters.dateFilter.minFilter"
-               step="60"
-               (change)="newMinDate($event); filterService.onFilterChange()"/>
+          [max]="ActiveFilters.dateFilter.maxDate"
+          [min]="ActiveFilters.dateFilter.minDate"
+          [(ngModel)]="ActiveFilters.dateFilter.minFilter"
+          step="60"
+          (change)="newMinDate($event); filterService.onFilterChange()"/>
         <input type="range"
-               step="60"
-               [max]="ActiveFilters.dateFilter.maxDate"
-               [min]="ActiveFilters.dateFilter.minDate"
-               [(ngModel)]="ActiveFilters.dateFilter.maxFilter"
-               (change)="newMaxDate($event); filterService.onFilterChange()"/>
+          step="60"
+          [max]="ActiveFilters.dateFilter.maxDate"
+          [min]="ActiveFilters.dateFilter.minDate"
+          [(ngModel)]="ActiveFilters.dateFilter.maxFilter"
+          (change)="newMaxDate($event); filterService.onFilterChange()"/>
 
       </div>
       <div class="col-md-1-half col-12  d-table">
-        <div class="d-table-cell align-middle text-center"
-             [title]="ActiveFilters.dateFilter.maxFilter | date: 'medium'"
-             *ngIf="ActiveFilters.dateFilter.maxFilter !== NUMBER_MAX_VALUE">
-          {{ActiveFilters.dateFilter.maxFilter | date: 'longDate'}}
-        </div>
+        @if (ActiveFilters.dateFilter.maxFilter !== NUMBER_MAX_VALUE) {
+          <div class="d-table-cell align-middle text-center"
+            [title]="ActiveFilters.dateFilter.maxFilter | date: 'medium'"
+            >
+            {{ActiveFilters.dateFilter.maxFilter | date: 'longDate'}}
+          </div>
+        }
       </div>
     </div>
     <div class="row">
-      <div class="col-12 col-md-6 col-lg-3 mt-2 mt-lg-1"
-           *ngFor="let filter of ActiveFilters.selectedFilters; let i=index">
-        <select [(ngModel)]="filter.filter"
-                (ngModelChange)="filterService.onFilterChange()"
-                class="form-select" id="gallery-filter-{{i}}">
-          <option *ngFor="let f of filterService.AVAILABLE_FILTERS"
-                  [ngValue]="f">{{f.name}}</option>
-        </select>
-        <div class="filter-column">
-          <ul class="list-group" *ngIf="filter.options.length > 0">
-            <li
-              *ngFor="let option of filter.options"
-              [class.unselected]="!option.selected"
-              (click)="option.selected = !option.selected; filterService.onFilterChange()"
-              class="filter-option list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-
-              <div>
-                <ng-icon name="ionFlagOutline"
-                         class="pin"
-                         (click)="toggleSelectOnly(filter, option, $event)"
-                         title="Select only this"
-                         [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
-                         i18n-title></ng-icon>
-                {{option.name === undefined ? unknownText : option.name}}
-              </div>
-              <span class="badge"
-                    [class.bg-primary]="option.selected"
-                    [class.bg-secondary]="!option.selected"
-              >{{option.count}}</span>
-            </li>
-          </ul>
-          <div class="card-body text-center" *ngIf="filter.options.length === 0" i18n>Nothing to filter</div>
+      @for (filter of ActiveFilters.selectedFilters; track filter; let i = $index) {
+        <div class="col-12 col-md-6 col-lg-3 mt-2 mt-lg-1"
+          >
+          <select [(ngModel)]="filter.filter"
+            (ngModelChange)="filterService.onFilterChange()"
+            class="form-select" id="gallery-filter-{{i}}">
+            @for (f of filterService.AVAILABLE_FILTERS; track f) {
+              <option
+              [ngValue]="f">{{f.name}}</option>
+            }
+          </select>
+          <div class="filter-column">
+            @if (filter.options.length > 0) {
+              <ul class="list-group">
+                @for (option of filter.options; track option) {
+                  <li
+                    [class.unselected]="!option.selected"
+                    (click)="option.selected = !option.selected; filterService.onFilterChange()"
+                    class="filter-option list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <div>
+                      <ng-icon name="ionFlagOutline"
+                        class="pin"
+                        (click)="toggleSelectOnly(filter, option, $event)"
+                        title="Select only this"
+                        [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
+                      i18n-title></ng-icon>
+                      {{option.name === undefined ? unknownText : option.name}}
+                    </div>
+                    <span class="badge"
+                      [class.bg-primary]="option.selected"
+                      [class.bg-secondary]="!option.selected"
+                    >{{option.count}}</span>
+                  </li>
+                }
+              </ul>
+            }
+            @if (filter.options.length === 0) {
+              <div class="card-body text-center" i18n>Nothing to filter</div>
+            }
+          </div>
         </div>
-      </div>
+      }
     </div>
     <div class="row">
       <div class="col mt-2">

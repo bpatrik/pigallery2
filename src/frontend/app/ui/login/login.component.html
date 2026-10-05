@@ -5,7 +5,7 @@
   <div class="row title  align-self-center">
     <h1>
       <app-icon [width]="80"></app-icon>
-      {{title}}</h1>
+    {{title}}</h1>
   </div>
   <div class="row card align-self-center">
     <div class="card-body">
@@ -16,56 +16,58 @@
         </div>
 
         <!-- OIDC login option -->
-        <div class="d-grid gap-2 mb-3" *ngIf="oidcEnabled">
-          <button type="button" class="btn btn-primary btn-lg" (click)="onLoginWithOIDC()">
-            <ng-icon name="ionLogInOutline" class="me-1"></ng-icon>
-            <span i18n>Login with</span> {{oidcDisplayName}}
-          </button>
-          <div class="text-center text-muted" i18n>or</div>
-        </div>
+        @if (oidcEnabled) {
+          <div class="d-grid gap-2 mb-3">
+            <button type="button" class="btn btn-primary btn-lg" (click)="onLoginWithOIDC()">
+              <ng-icon name="ionLogInOutline" class="me-1"></ng-icon>
+              <span i18n>Login with</span> {{oidcDisplayName}}
+            </button>
+            <div class="text-center text-muted" i18n>or</div>
+          </div>
+        }
 
         <div class="input-group mb-3">
           <div class="input-group-text"><ng-icon name="ionPersonOutline"></ng-icon></div>
           <input type="text"
-                 i18n-placeholder
-                 class="form-control"
-                 name="username"
-                 id="username"
-                 autocomplete="login-username"
-                 [(ngModel)]="loginCredential.username"
-                 placeholder="Username"
-                 required>
+            i18n-placeholder
+            class="form-control"
+            name="username"
+            id="username"
+            autocomplete="login-username"
+            [(ngModel)]="loginCredential.username"
+            placeholder="Username"
+            required>
         </div>
 
         <div class="input-group mb-3">
           <div class="input-group-text"><ng-icon name="ionLockClosedOutline"></ng-icon></div>
           <input type="password"
-                 i18n-placeholder
-                 class="form-control"
-                 name="password"
-                 id="password"
-                 placeholder="Password"
-                 autocomplete="login-password"
-                 autocorrect="off"
-                 autocapitalize="none"
-                 [(ngModel)]="loginCredential.password"
-                 required>
+            i18n-placeholder
+            class="form-control"
+            name="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="login-password"
+            autocorrect="off"
+            autocapitalize="none"
+            [(ngModel)]="loginCredential.password"
+            required>
         </div>
 
         <div class="form-check">
           <input type="checkbox" class="form-check-input" name="rememberMe" id="rememberMe"
-                 [(ngModel)]="loginCredential.rememberMe">
+            [(ngModel)]="loginCredential.rememberMe">
           <label class="form-check-label" for="rememberMe" i18n>Remember me</label>
         </div>
 
         <!-- Button -->
         <div class="col-sm-12 controls d-grid gap-2">
           <button class="btn  btn-lg"
-                  [class.btn-outline-secondary]="oidcEnabled"
-                  [class.btn-primary]="!oidcEnabled"
-                  [disabled]="!LoginForm.form.valid || inProgress"
-                  type="submit"
-                  name="action" i18n>Login
+            [class.btn-outline-secondary]="oidcEnabled"
+            [class.btn-primary]="!oidcEnabled"
+            [disabled]="!LoginForm.form.valid || inProgress"
+            type="submit"
+            name="action" i18n>Login
           </button>
         </div>
       </form>

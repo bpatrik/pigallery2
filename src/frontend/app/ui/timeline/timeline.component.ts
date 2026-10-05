@@ -10,7 +10,7 @@ import {
   OnInit,
   ViewChild,
 } from '@angular/core';
-import {formatDate, NgFor, NgIf} from '@angular/common';
+import { formatDate } from '@angular/common';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {FrameComponent} from '../frame/frame.component';
@@ -61,10 +61,8 @@ export interface TimelineRailYear {
     FrameComponent,
     GalleryGridComponent,
     GalleryLightboxComponent,
-    MediaButtonModalComponent,
-    NgFor,
-    NgIf,
-  ]
+    MediaButtonModalComponent
+]
 })
 export class TimelineComponent implements OnInit, AfterViewInit, OnDestroy {
   static readonly AT_PARAM = 'at';

@@ -12,7 +12,7 @@ import {AuthenticationService} from '../../../../model/network/authentication.se
 import {LightboxService} from '../lightbox.service';
 import {Utils} from '../../../../../../common/Utils';
 import {FileSizePipe} from '../../../../pipes/FileSizePipe';
-import {DatePipe, NgFor, NgIf} from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 import {NgIconComponent} from '@ng-icons/core';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
@@ -26,15 +26,13 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
   styleUrls: ['./controls.lightbox.gallery.component.css', './inputrange.css'],
   templateUrl: './controls.lightbox.gallery.component.html',
   imports: [
-    NgIf,
     NgIconComponent,
     BsDropdownDirective,
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
     FormsModule,
-    NgFor,
-    RouterLink,
-  ]
+    RouterLink
+]
 })
 export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   readonly MAX_ZOOM = 10;

@@ -3,7 +3,7 @@ import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entit
 import {Subscription, timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {BackendtextService} from '../../../../model/backendtext.service';
-import { NgIf, NgFor, DecimalPipe, DatePipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { DurationPipe } from '../../../../pipes/DurationPipe';
@@ -13,14 +13,12 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
     templateUrl: './job-progress.settings.component.html',
     styleUrls: ['./job-progress.settings.component.css'],
     imports: [
-        NgIf,
-        NgIconComponent,
-        FormsModule,
-        NgFor,
-        DecimalPipe,
-        DatePipe,
-        DurationPipe,
-    ]
+    NgIconComponent,
+    FormsModule,
+    DecimalPipe,
+    DatePipe,
+    DurationPipe
+]
 })
 export class JobProgressComponent implements OnDestroy, OnChanges {
   @Input() progress: JobProgressDTO;
