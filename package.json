@@ -41,7 +41,7 @@
     "adm-zip": "0.6.1",
     "archiver": "7.0.1",
     "bcrypt": "6.0.0",
-    "better-sqlite3": "11.10.0",
+    "better-sqlite3": "12.11.1",
     "cookie-parser": "1.4.7",
     "cookie-session": "2.1.1",
     "ejs": "3.1.10",
@@ -95,14 +95,13 @@
     "@types/express": "4.17.25",
     "@types/fluent-ffmpeg": "2.1.27",
     "@types/gulp": "4.0.17",
-    "@types/gulp-sourcemaps": "0.0.38",
     "@types/gulp-zip": "4.0.4",
     "@types/jasmine": "5.1.8",
     "@types/leaflet": "1.9.20",
     "@types/leaflet.markercluster": "1.5.5",
     "@types/mocha": "10.0.10",
     "@types/multer": "1.4.12",
-    "@types/node": "22.16.5",
+    "@types/node": "24.19.1",
     "@types/node-geocoder": "4.2.6",
     "@types/nodemailer": "6.4.17",
     "@types/openid-client": "3.1.6",
@@ -112,6 +111,7 @@
     "chai": "5.2.1",
     "chai-as-promised": "8.0.2",
     "chai-http": "5.1.2",
+    "chokidar": "5.0.0",
     "coveralls": "3.1.1",
     "cypress": "15.19.0",
     "deep-equal-in-any-order": "2.0.6",
@@ -120,8 +120,6 @@
     "eslint-plugin-chai-friendly": "1.1.0",
     "gulp": "5.0.1",
     "gulp-json-editor": "2.6.0",
-    "gulp-sourcemaps": "3.0.0",
-    "gulp-typescript": "5.0.1",
     "gulp-zip": "5.1.0",
     "jasmine-core": "5.9.0",
     "karma": "6.4.4",
@@ -155,8 +153,10 @@
     "mysql": "2.18.1"
   },
   "engines": {
-    "node": ">=22.22.3 <24.0"
+    "node": ">=24.15.0 <25.0.0",
+    "npm": ">=11.19.0 <12.0.0"
   },
+  "packageManager": "npm@11.19.0",
   "overrides": {
     "ngx-toastr": {
       "@angular/common": "$@angular/common",
