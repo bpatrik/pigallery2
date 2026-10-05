@@ -1,18 +1,18 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, HostListener, type OnDestroy, type OnInit, QueryList, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
-import {Dimension, DimensionUtils} from '../../../model/IRenderable';
+import {type Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
 import {OverlayService} from '../overlay.service';
 import {WakeLockService} from '../wakelock.service';
-import {animate, AnimationBuilder, AnimationPlayer, style,} from '@angular/animations';
+import {animate, AnimationBuilder, type AnimationPlayer, style,} from '@angular/animations';
 import {GalleryLightboxMediaComponent} from './media/media.lightbox.gallery.component';
 import {Subscription} from 'rxjs';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, type Params, Router} from '@angular/router';
 import {PageHelper} from '../../../model/page.helper';
 import {QueryService} from '../../../model/query.service';
-import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {type MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../../../common/QueryParams';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {type PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {ControlsLightboxComponent} from './controls/controls.lightbox.gallery.component';
 import {SupportedFormats} from '../../../../../common/SupportedFormats';
 import {GridMedia} from '../grid/GridMedia';
@@ -21,7 +21,7 @@ import {PiTitleService} from '../../../model/pi-title.service';
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
-import {GridLightboxSource, LightboxItem, LightboxSource} from './LightboxSource';
+import {GridLightboxSource, type LightboxItem, type LightboxSource} from './LightboxSource';
 
 export enum LightboxStates {
   Open = 1,

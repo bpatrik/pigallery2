@@ -1,6 +1,6 @@
 import { Component, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ExtensionInstallerService } from './extension-installer.service';
-import { ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
+import { type ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
 import { NotificationService } from '../../../model/notification.service';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import {SettingsService} from '../settings.service';

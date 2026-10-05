@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
-import {UserDTO} from '../../../../../common/entities/UserDTO';
+import {type UserDTO} from '../../../../../common/entities/UserDTO';
 import {NetworkService} from '../../../model/network/network.service';
-import {UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
+import {type UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
 
 @Injectable({
   providedIn: 'root'

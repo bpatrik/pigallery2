@@ -1,11 +1,11 @@
-import {Component, ElementRef, Input, OnChanges, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {Dimension, IRenderable} from '../../../model/IRenderable';
+import {Component, ElementRef, Input, type OnChanges, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {type PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {type Dimension, type IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
-import {FileDTO} from '../../../../../common/entities/FileDTO';
+import {type FileDTO} from '../../../../../common/entities/FileDTO';
 import {MapService} from './map.service';
 import {Config} from '../../../../../common/config/public/Config';
-import {LatLngLiteral, Map, MapOptions, Marker, marker, tileLayer, TileLayer} from 'leaflet';
+import {type LatLngLiteral, Map, type MapOptions, Marker, marker, tileLayer, TileLayer} from 'leaflet';
 import {ThemeService} from '../../../model/theme.service';
 import {Subscription} from 'rxjs';
 import {MarkerFactory} from './MarkerFactory';

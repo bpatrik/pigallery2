@@ -4,13 +4,13 @@ import {NetworkService} from '../../model/network/network.service';
 
 import {WebConfig} from '../../../../common/config/private/WebConfig';
 import {WebConfigClassBuilder} from 'typeconfig/src/decorators/builders/WebConfigClassBuilder';
-import {ConfigPriority, TAGS} from '../../../../common/config/public/ClientConfig';
+import {ConfigPriority, type TAGS} from '../../../../common/config/public/ClientConfig';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
-import {StatisticDTO} from '../../../../common/entities/settings/StatisticDTO';
+import {type StatisticDTO} from '../../../../common/entities/settings/StatisticDTO';
 import {ScheduledJobsService} from './scheduled-jobs.service';
-import {IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
+import {type IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
 
 
 export enum ConfigStyle {

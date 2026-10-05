@@ -1,8 +1,8 @@
-import {Component, Input, OnDestroy, OnInit, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import {Component, Input, type OnDestroy, type OnInit, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
-import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
+import {type ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import {type ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
@@ -14,7 +14,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import { DatePipe } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import { SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
+import { type SearchQueryDTO, SearchQueryTypes, type TextSearch, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 
 @Component({

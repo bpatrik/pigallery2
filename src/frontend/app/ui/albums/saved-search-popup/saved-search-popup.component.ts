@@ -1,6 +1,6 @@
 import {Component, Input, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
-import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
 import { NgIconComponent } from '@ng-icons/core';
 import { JsonPipe } from '@angular/common';
 

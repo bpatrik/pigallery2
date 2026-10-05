@@ -1,7 +1,7 @@
 import {Media} from '../Media';
-import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {VideoDTO} from '../../../../../common/entities/VideoDTO';
+import {type MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
+import {type PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {type VideoDTO} from '../../../../../common/entities/VideoDTO';
 import {Utils} from '../../../../../common/Utils';
 import {Config} from '../../../../../common/config/public/Config';
 

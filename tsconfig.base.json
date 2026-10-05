@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "strict": false,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "sourceMap": true,
+    "declaration": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "rootDir": ".",
+    "useDefineForClassFields": false
+  }
+}

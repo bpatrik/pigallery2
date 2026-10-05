@@ -1,9 +1,9 @@
-import {enableProdMode, importProvidersFrom, Injectable, provideZoneChangeDetection} from '@angular/core';
+import {enableProdMode, importProvidersFrom, provideZoneChangeDetection} from '@angular/core';
 import {environment} from './environments/environment';
 import {HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi, withXhr} from '@angular/common/http';
 import {ErrorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, UrlSerializer, UrlTree} from '@angular/router';
-import {bootstrapApplication, BrowserModule, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule} from '@angular/platform-browser';
+import {bootstrapApplication, BrowserModule} from '@angular/platform-browser';
 import {StringifySortingMethod} from './app/pipes/StringifySortingMethod';
 import {NetworkService} from './app/model/network/network.service';
 import {ShareService} from './app/ui/gallery/share.service';
@@ -150,17 +150,6 @@ if (environment.production) {
   enableProdMode();
 }
 
-@Injectable()
-export class MyHammerConfig extends HammerGestureConfig {
-  events: string[] = ['pinch'];
-  overrides = {
-    pan: {threshold: 1},
-    swipe: {direction: 31}, // enable swipe up
-    pinch: {enable: true},
-  };
-}
-
-
 export class CustomUrlSerializer implements UrlSerializer {
   private defaultUrlSerializer: DefaultUrlSerializer =
     new DefaultUrlSerializer();
@@ -185,7 +174,7 @@ Marker.prototype.options.icon = MarkerFactory.defIcon;
 bootstrapApplication(AppComponent, {
   providers: [
     provideZoneChangeDetection(),
-    importProvidersFrom(BrowserModule, HammerModule, FormsModule, AppRoutingModule, NgIconsModule.withIcons({
+    importProvidersFrom(BrowserModule, FormsModule, AppRoutingModule, NgIconsModule.withIcons({
         ionDownloadOutline, ionFunnelOutline,
         ionGitBranchOutline, ionArrowDownOutline, ionArrowUpOutline,
         ionStarOutline, ionStar, ionCalendarOutline, ionPersonOutline, ionShuffleOutline,
@@ -210,14 +199,13 @@ bootstrapApplication(AppComponent, {
         ionAppsOutline, ionOpenOutline, ionRefresh, ionExtensionPuzzleOutline, ionList, ionPencil, ionReload,
         ionCaretForward, ionCaretDown,
         ionFingerPrint, ionCloudUploadOutline
-      }), ClipboardModule, TooltipModule.forRoot(), ToastrModule.forRoot(),
-      ModalModule.forRoot(), CollapseModule.forRoot(), PopoverModule.forRoot(),
-      BsDropdownModule.forRoot(), BsDatepickerModule.forRoot(), TimepickerModule.forRoot(),
+      }), ClipboardModule, TooltipModule, ToastrModule.forRoot(),
+      ModalModule, CollapseModule, PopoverModule,
+      BsDropdownModule, BsDatepickerModule, TimepickerModule,
       LoadingBarModule, LeafletModule, LeafletMarkerClusterModule,
       MarkdownModule.forRoot({loader: HttpClient})),
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: UrlSerializer, useClass: CustomUrlSerializer},
-    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
     StringifySortingMethod,
     NetworkService,
     ShareService,

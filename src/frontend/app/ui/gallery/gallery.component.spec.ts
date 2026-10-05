@@ -28,7 +28,7 @@ import {QueryService} from '../../model/query.service';
 import {NotificationService} from '../../model/notification.service';
 import {GalleryNavigatorService} from './navigator/navigator.service';
 import {MediaButtonModalService} from './grid/photo/media-button-modal/media-button-modal.service';
-import {SortingMethod} from '../../../../common/entities/SortingMethods';
+import {type SortingMethod} from '../../../../common/entities/SortingMethods';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
 import {UploaderService, UploadProgress} from './uploader/uploader.service';

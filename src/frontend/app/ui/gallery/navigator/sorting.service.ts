@@ -3,17 +3,17 @@ import {DatePipe} from '@angular/common';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Config} from '../../../../../common/config/public/Config';
-import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, type GroupingMethod, SortByTypes, type SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
-import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
+import {type PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {map, switchMap} from 'rxjs/operators';
 import {SeededRandomService} from '../../../model/seededRandom.service';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
-import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
-import {MediaDTO} from '../../../../../common/entities/MediaDTO';
-import {FileDTO} from '../../../../../common/entities/FileDTO';
+import {type ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import {type SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
+import {type MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {type FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
-import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
+import {ContentLoaderService, type DirectoryContent} from '../contentLoader.service';
 
 @Injectable()
 export class GallerySortingService {

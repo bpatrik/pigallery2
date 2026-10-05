@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
-import {IAutoCompleteItem} from '../../../../../common/entities/AutoCompleteItem';
+import {type IAutoCompleteItem} from '../../../../../common/entities/AutoCompleteItem';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {SearchQueryParserService} from './search-query-parser.service';
 import {BehaviorSubject} from 'rxjs';

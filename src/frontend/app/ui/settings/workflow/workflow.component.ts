@@ -1,16 +1,16 @@
-import {Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren, ChangeDetectionStrategy} from '@angular/core';
+import {Component, forwardRef, type OnDestroy, type OnInit, QueryList, ViewChildren, ChangeDetectionStrategy} from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
-  AfterJobTrigger,
-  JobScheduleDTO,
+  type AfterJobTrigger,
+  type JobScheduleDTO,
   JobScheduleDTOUtils,
   JobTriggerType,
-  ScheduledJobTrigger
+  type ScheduledJobTrigger
 } from '../../../../../common/entities/job/JobScheduleDTO';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {BackendtextService} from '../../../model/backendtext.service';
 import {ConfigStyle, SettingsService} from '../settings.service';
-import {JobProgressDTO, JobProgressStates} from '../../../../../common/entities/job/JobProgressDTO';
+import {type JobProgressDTO, JobProgressStates} from '../../../../../common/entities/job/JobProgressDTO';
 import {
   AfterJobTriggerConfig,
   JobScheduleConfig,
@@ -18,10 +18,10 @@ import {
   PeriodicJobTriggerConfig,
   ScheduledJobTriggerConfig
 } from '../../../../../common/config/private/PrivateConfig';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
-import {SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
-import {MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
-import {SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
+import { type ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, type Validator, FormsModule } from '@angular/forms';
+import {SortByTypes, type SortingMethod} from '../../../../../common/entities/SortingMethods';
+import {type MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
+import {SearchQueryTypes, type TextSearch} from '../../../../../common/entities/SearchQueryDTO';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';

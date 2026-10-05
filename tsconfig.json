@@ -1,26 +1,10 @@
 {
+  "extends": "./tsconfig.base.json",
   "compileOnSave": true,
   "compilerOptions": {
-    "noImplicitAny": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "noFallthroughCasesInSwitch": true,
-    "sourceMap": true,
-    "declaration": false,
-    "downlevelIteration": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "moduleResolution": "node",
-    "importHelpers": true,
-    "target": "ES2022",
-    "module": "CommonJS",
-    "useDefineForClassFields": false
-  },
-  "angularCompilerOptions": {
-    "enableI18nLegacyMessageIdFormat": false,
-    "strictInjectionParameters": true,
-    "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext",
+    "types": ["node", "mocha"]
   },
   "exclude": [
     "src/frontend/**/*",

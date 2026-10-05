@@ -1,13 +1,13 @@
 import {Component, ElementRef, HostListener, Input, ViewChild, ViewEncapsulation, ChangeDetectionStrategy} from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
-import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
+import {type UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {Config} from '../../../../common/config/public/Config';
 import {BehaviorSubject} from 'rxjs';
 import {NotificationService} from '../../model/notification.service';
 import {QueryService} from '../../model/query.service';
 import {NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/public/ClientConfig';
-import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 import {Utils} from '../../../../common/Utils';
 import {PageHelper} from '../../model/page.helper';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';

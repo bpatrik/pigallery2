@@ -1,13 +1,13 @@
-import {Component, HostListener, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, HostListener, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {DuplicateService} from './duplicates.service';
 import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
-import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
-import {DirectoryPathDTO} from '../../../../common/entities/DirectoryDTO';
+import {type DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
+import {type DirectoryPathDTO} from '../../../../common/entities/DirectoryDTO';
 import {Subscription} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
 import {PageHelper} from '../../model/page.helper';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
 import { DatePipe } from '@angular/common';

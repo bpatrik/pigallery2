@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {ChangeDetectorRef, Component, Input, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import { NgStyle } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';

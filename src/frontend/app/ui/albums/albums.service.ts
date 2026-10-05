@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {BehaviorSubject} from 'rxjs';
-import {AlbumBaseDTO} from '../../../../common/entities/album/AlbumBaseDTO';
-import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {type AlbumBaseDTO} from '../../../../common/entities/album/AlbumBaseDTO';
+import {type SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 @Injectable()
 export class AlbumsService {

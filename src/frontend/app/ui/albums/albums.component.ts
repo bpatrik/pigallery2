@@ -1,7 +1,7 @@
-import {Component, ElementRef, OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, ElementRef, type OnInit, TemplateRef, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
-import {SearchQueryTypes, TextSearch,} from '../../../../common/entities/SearchQueryDTO';
+import {SearchQueryTypes, type TextSearch,} from '../../../../common/entities/SearchQueryDTO';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';

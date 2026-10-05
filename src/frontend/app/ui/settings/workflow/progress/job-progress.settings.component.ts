@@ -1,5 +1,5 @@
-import {Component, Input, OnChanges, OnDestroy, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
-import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
+import {Component, Input, type OnChanges, type OnDestroy, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import {type JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {Subscription, timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {BackendtextService} from '../../../../model/backendtext.service';

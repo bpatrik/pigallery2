@@ -1,13 +1,13 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Input, type OnChanges, type OnDestroy, Output, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
-import {LightboxItem} from '../LightboxSource';
+import {type LightboxItem} from '../LightboxSource';
 import {interval, Subscription} from 'rxjs';
 import {filter, skip} from 'rxjs/operators';
-import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {type PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
 import {Config} from '../../../../../../common/config/public/Config';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryTypes, type TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {LightboxService} from '../lightbox.service';
 import {Utils} from '../../../../../../common/Utils';
@@ -19,6 +19,7 @@ import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective}
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {LightboxGesturesDirective} from './lightbox-gestures.directive';
 
 
 @Component({
@@ -27,6 +28,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
   templateUrl: './controls.lightbox.gallery.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
+    LightboxGesturesDirective,
     NgIconComponent,
     BsDropdownDirective,
     BsDropdownToggleDirective,
@@ -185,8 +187,10 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
-  // Hammer supplies gesture objects rather than DOM Events.
-  @HostListener('pinch', ['$any($event)'])
+  pinchstart(): void {
+    this.prevZoom = this.zoom;
+  }
+
   pinch($event: { scale: number }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
@@ -195,7 +199,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.Zoom = this.prevZoom * $event.scale;
   }
 
-  @HostListener('pinchend', ['$any($event)'])
   pinchend($event: { scale: number }): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
@@ -205,11 +208,15 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.prevZoom = this.zoom;
   }
 
-  tap($event: Event): void {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+  tap($event: {tapCount: number}): void {
+    if (!this.activePhoto) {
       return;
     }
-    if (($event as unknown as { tapCount: number }).tapCount < 2) {
+    if (this.activePhoto.gridMedia.isVideo()) {
+      this.mediaElement.playPause();
+      return;
+    }
+    if ($event.tapCount < 2) {
       return;
     }
 

@@ -1,7 +1,7 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import {Injectable, type OnDestroy} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {ContentWrapperUtils, ContentWrapperWithError, PackedContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
-import {SubDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
+import {ContentWrapperUtils, type ContentWrapperWithError, type PackedContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
+import {type SubDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {GalleryCacheService} from './cache.gallery.service';
 import {BehaviorSubject, EMPTY, from, Observable, Subject, Subscription, timer} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
@@ -9,10 +9,10 @@ import {ShareService} from './share.service';
 import {QueryParams} from '../../../../common/QueryParams';
 import {ErrorCodes} from '../../../../common/entities/Error';
 import {filter, map, startWith, switchMap} from 'rxjs/operators';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
-import {FileDTO} from '../../../../common/entities/FileDTO';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type FileDTO} from '../../../../common/entities/FileDTO';
 import {GalleryService} from './gallery.service';
-import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 @Injectable()
 export class ContentLoaderService implements OnDestroy {

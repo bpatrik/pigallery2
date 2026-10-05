@@ -1,6 +1,6 @@
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
 import {ContentWrapperUtils} from '../../../../common/entities/ContentWrapper';
 
 export class MediaIcon {

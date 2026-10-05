@@ -1,5 +1,5 @@
-import {Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {Component, Input, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {type MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {IconThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {MediaIcon} from '../../gallery/MediaIcon';
 

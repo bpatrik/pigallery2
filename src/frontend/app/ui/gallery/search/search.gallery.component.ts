@@ -1,9 +1,9 @@
-import {Component, OnDestroy, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
+import {Component, type OnDestroy, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
-import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, type Params, Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {QueryParams} from '../../../../../common/QueryParams';
-import {MetadataSearchQueryTypes, SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
+import {MetadataSearchQueryTypes, type SearchQueryDTO, SearchQueryTypes, type TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {SearchQueryParserService} from './search-query-parser.service';
 import {AlbumsService} from '../../albums/albums.service';

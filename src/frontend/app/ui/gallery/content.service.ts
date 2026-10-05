@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable, shareReplay} from 'rxjs';
-import {GallerySortingService, GroupedDirectoryContent} from './navigator/sorting.service';
+import {GallerySortingService, type GroupedDirectoryContent} from './navigator/sorting.service';
 import {FilterService} from './filter/filter.service';
 import {ContentLoaderService} from './contentLoader.service';
 

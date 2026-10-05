@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output, TemplateRef, ChangeDetectionStrategy} from '@angular/core';
-import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
+import {JobProgressStates, type OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
 import {NotificationService} from '../../../../model/notification.service';

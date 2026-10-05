@@ -1,10 +1,10 @@
 import {Injectable} from '@angular/core';
 import {ShareService} from '../ui/gallery/share.service';
-import {MediaDTO} from '../../../common/entities/MediaDTO';
+import {type MediaDTO} from '../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../common/QueryParams';
 import {Utils} from '../../../common/Utils';
 import {Config} from '../../../common/config/public/Config';
-import {ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
+import {type ParentDirectoryDTO, type SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import {ContentLoaderService} from '../ui/gallery/contentLoader.service';
 
 @Injectable()

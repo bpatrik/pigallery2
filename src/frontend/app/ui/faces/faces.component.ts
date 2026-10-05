@@ -1,9 +1,9 @@
-import {Component, ElementRef, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, ElementRef, type OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {FacesService} from './faces.service';
 import {QueryService} from '../../model/query.service';
 import {combineLatest, Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-import {PersonDTO} from '../../../../common/entities/PersonDTO';
+import {type PersonDTO} from '../../../../common/entities/PersonDTO';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
 import { AsyncPipe } from '@angular/common';

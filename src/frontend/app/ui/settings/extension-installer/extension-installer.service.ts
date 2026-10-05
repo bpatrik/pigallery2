@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
-import {ExtensionListItem} from '../../../../../common/entities/extension/ExtensionListItem';
+import {type ExtensionListItem} from '../../../../../common/entities/extension/ExtensionListItem';
 
 @Injectable({
   providedIn: 'root'

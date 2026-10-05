@@ -1,11 +1,11 @@
 import {Config} from '../common/config/private/Config';
-import * as express from 'express';
-import * as cookieParser from 'cookie-parser';
+import express from 'express';
+import cookieParser from 'cookie-parser';
 import * as _http from 'http';
 import {Server as HttpServer} from 'http';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import * as locale from 'locale';
+import locale from 'locale';
 import {ObjectManagers} from './model/ObjectManagers';
 import {Logger} from './Logger';
 import {LoggerRouter} from './routes/LoggerRouter';
@@ -20,8 +20,7 @@ import {ConfigClassBuilder} from 'typeconfig/node';
 import {ConfigClassOptions} from 'typeconfig/src/decorators/class/IConfigClass';
 import {ServerConfig} from '../common/config/private/PrivateConfig';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const session = require('cookie-session');
+import session from 'cookie-session';
 
 declare const process: NodeJS.Process;
 

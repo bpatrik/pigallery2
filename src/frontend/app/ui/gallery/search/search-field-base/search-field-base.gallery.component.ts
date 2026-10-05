@@ -1,10 +1,10 @@
-import {Component, ElementRef, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, ElementRef, EventEmitter, forwardRef, Input, type OnDestroy, Output, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
-import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
+import {AutoCompleteService, type RenderableAutoCompleteItem,} from '../autocomplete.service';
 import {MetadataSearchQueryTypes, SearchQueryTypes,} from '../../../../../../common/entities/SearchQueryDTO';
 import {Config} from '../../../../../../common/config/public/Config';
-import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
+import {type ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, type Validator} from '@angular/forms';
 import {AutoCompleteRenderItem} from '../AutoCompleteRenderItem';
 import { NgClass } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';

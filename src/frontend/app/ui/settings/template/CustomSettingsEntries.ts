@@ -1,4 +1,4 @@
-import {propertyTypes} from 'typeconfig/common';
+import {type propertyTypes} from 'typeconfig/common';
 import {
   ClientGroupingConfig,
   ClientSortingConfig,

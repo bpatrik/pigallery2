@@ -54,7 +54,7 @@
  *
  */
 /***************************************************************************************************
- * Zone JS is required by default for Angular itself.
+ * Required while main.ts explicitly opts into zone-based change detection.
  */
 import 'zone.js'; // Included with Angular CLI.
 

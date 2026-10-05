@@ -1,12 +1,12 @@
-import {Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, Input, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
+import {DomSanitizer, type SafeStyle} from '@angular/platform-browser';
 import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {AlbumsService} from '../albums.service';
-import {AlbumBaseDTO} from '../../../../../common/entities/album/AlbumBaseDTO';
+import {type AlbumBaseDTO} from '../../../../../common/entities/album/AlbumBaseDTO';
 import {Media} from '../../gallery/Media';
-import {SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDTO';
+import {type SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDTO';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {Config} from '../../../../../common/config/public/Config';
 

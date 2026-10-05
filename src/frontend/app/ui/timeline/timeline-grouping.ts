@@ -1,6 +1,6 @@
-import {MediaDTO} from '../../../../common/entities/MediaDTO';
+import {type MediaDTO} from '../../../../common/entities/MediaDTO';
 import {Utils} from '../../../../common/Utils';
-import {MediaGroup} from '../gallery/navigator/sorting.service';
+import {type MediaGroup} from '../gallery/navigator/sorting.service';
 
 const DAY_MS = 86400000;
 

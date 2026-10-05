@@ -3,7 +3,7 @@ import {GalleryCacheService} from './cache.gallery.service';
 import {Media} from './Media';
 import {MediaIcon} from './MediaIcon';
 import {Config} from '../../../../common/config/public/Config';
-import {PersonDTO} from '../../../../common/entities/PersonDTO';
+import {type PersonDTO} from '../../../../common/entities/PersonDTO';
 import {Person} from '../faces/Person';
 
 export enum ThumbnailLoadingPriority {

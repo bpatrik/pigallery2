@@ -1,9 +1,8 @@
-import {Component, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
 import {ShareService} from './ui/gallery/share.service';
-import 'hammerjs';
 import {Subscription} from 'rxjs';
 import {NavigationService} from './model/navigation.service';
 import {ThemeService} from './model/theme.service';

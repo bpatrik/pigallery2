@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, type Params, Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
 import {QueryParams} from '../../../../common/QueryParams';

@@ -1,7 +1,7 @@
 import {Utils} from '../../../../common/Utils';
 import {MediaIcon} from './MediaIcon';
 import {Config} from '../../../../common/config/public/Config';
-import {MediaDTO, MediaDTOUtils} from '../../../../common/entities/MediaDTO';
+import {type MediaDTO, MediaDTOUtils} from '../../../../common/entities/MediaDTO';
 
 export class Media extends MediaIcon {
 

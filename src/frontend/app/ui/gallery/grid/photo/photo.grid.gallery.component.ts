@@ -1,12 +1,12 @@
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
-import {Dimension, IRenderable} from '../../../../model/IRenderable';
+import {Component, ElementRef, Input, type OnDestroy, type OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {type Dimension, type IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
 import {Thumbnail, ThumbnailManagerService,} from '../../thumbnailManager.service';
 import {Config} from '../../../../../../common/config/public/Config';
 import {PageHelper} from '../../../../model/page.helper';
-import {PhotoDTO, PhotoMetadata,} from '../../../../../../common/entities/PhotoDTO';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
+import {type PhotoDTO, type PhotoMetadata,} from '../../../../../../common/entities/PhotoDTO';
+import {SearchQueryTypes, type TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {ExtensionService} from '../../../../model/extension.service';
 import {MediaButtonModalService} from './media-button-modal/media-button-modal.service';
@@ -14,7 +14,7 @@ import {GalleryPhotoLoadingComponent} from './loading/loading.photo.grid.gallery
 import {NgIconComponent} from '@ng-icons/core';
 import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
-import {IClientMediaButtonConfig} from '../../../../../../common/entities/extension/IClientUIConfig';
+import {type IClientMediaButtonConfig} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 

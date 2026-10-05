@@ -3,7 +3,7 @@ import {Config} from '../../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
 import {GridMedia} from '../ui/gallery/grid/GridMedia';
 import {SearchQueryParserService} from '../ui/gallery/search/search-query-parser.service';
-import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
+import {type SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 
 @Injectable({
   providedIn: 'root'

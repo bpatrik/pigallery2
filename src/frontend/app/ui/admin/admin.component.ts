@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren, ChangeDetectionStrategy} from '@angular/core';
+import {type AfterViewInit, Component, ElementRef, type OnInit, QueryList, ViewChildren, ChangeDetectionStrategy} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {NotificationService} from '../../model/notification.service';
@@ -8,7 +8,7 @@ import { ViewportScroller, AsyncPipe, JsonPipe, DatePipe } from '@angular/common
 import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
-import {ISettingsComponent} from '../settings/template/ISettingsComponent';
+import {type ISettingsComponent} from '../settings/template/ISettingsComponent';
 import {WebConfigClassBuilder} from 'typeconfig/src/decorators/builders/WebConfigClassBuilder';
 import {enumToTranslatedArray} from '../EnumTranslations';
 import {PiTitleService} from '../../model/pi-title.service';

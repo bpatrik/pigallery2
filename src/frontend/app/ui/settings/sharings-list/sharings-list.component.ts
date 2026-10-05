@@ -1,5 +1,5 @@
-import {Component, OnInit, ChangeDetectionStrategy} from '@angular/core';
-import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
+import {Component, type OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {type ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {SettingsService} from '../settings.service';
 import {ShareService} from '../../gallery/share.service';
 import { DatePipe } from '@angular/common';

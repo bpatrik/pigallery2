@@ -1,6 +1,6 @@
-import {Component, OnDestroy, OnInit, ChangeDetectionStrategy} from '@angular/core';
+import {Component, type OnDestroy, type OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {FilterOption, FilterService, SelectedFilter} from './filter.service';
+import {type FilterOption, FilterService, type SelectedFilter} from './filter.service';
 import { NgClass, DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';

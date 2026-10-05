@@ -1,6 +1,6 @@
-import {Component, OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
+import {Component, type OnInit, ViewChild, ChangeDetectionStrategy} from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
-import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
+import {type UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -12,8 +12,8 @@ import { NgClass } from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifyRole} from '../../../pipes/StringifyRolePipe';
-import {UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
+import {type UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
+import {type SearchQueryDTO, SearchQueryTypes, type TextSearch} from '../../../../../common/entities/SearchQueryDTO';
 import {GallerySearchFieldComponent} from '../../gallery/search/search-field/search-field.gallery.component';
 
 @Component({

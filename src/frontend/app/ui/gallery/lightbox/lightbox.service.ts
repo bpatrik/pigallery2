@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
-import {ActivatedRoute, Params, Router} from '@angular/router';
+import {ActivatedRoute, type Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {Subscription} from 'rxjs';
 import {LightBoxTitleTexts} from '../../../../../common/config/public/ClientConfig';

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {GridMedia} from '../../GridMedia';
-import {IClientMediaButtonConfigWithBaseApiPath} from '../photo.grid.gallery.component';
+import {type IClientMediaButtonConfigWithBaseApiPath} from '../photo.grid.gallery.component';
 import {NotificationService} from '../../../../../model/notification.service';
 import {NetworkService} from '../../../../../model/network/network.service';
 import {Utils} from '../../../../../../../common/Utils';

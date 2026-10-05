@@ -1,5 +1,5 @@
-import {Pipe, PipeTransform} from '@angular/core';
-import {FileDTO} from '../../../common/entities/FileDTO';
+import {Pipe, type PipeTransform} from '@angular/core';
+import {type FileDTO} from '../../../common/entities/FileDTO';
 import {Utils} from '../../../common/Utils';
 
 @Pipe({

@@ -1,6 +1,6 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, ChangeDetectionStrategy} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, type OnChanges, ChangeDetectionStrategy} from '@angular/core';
 import {DeviceDetectorService} from 'ngx-device-detector';
-import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
+import {type SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
 import { GalleryDirectoryComponent } from './directory/directory.gallery.component';
 
