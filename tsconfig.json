@@ -14,11 +14,7 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "CommonJS",
-    "useDefineForClassFields": false,
-    "lib": [
-      "ES2022",
-      "dom"
-    ]
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
@@ -27,6 +23,7 @@
     "strictTemplates": true
   },
   "exclude": [
+    "src/frontend/**/*",
     "cypress.config.ts",
     // See https://github.com/cypress-io/cypress/issues/7552#issuecomment-763498855
     "test/cypress/**/*",

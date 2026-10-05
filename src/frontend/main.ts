@@ -1,4 +1,4 @@
-import {enableProdMode, importProvidersFrom, Injectable} from '@angular/core';
+import {enableProdMode, importProvidersFrom, Injectable, provideZoneChangeDetection} from '@angular/core';
 import {environment} from './environments/environment';
 import {HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {ErrorInterceptor} from './app/model/network/helper/error.interceptor';
@@ -184,6 +184,7 @@ Marker.prototype.options.icon = MarkerFactory.defIcon;
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideZoneChangeDetection(),
     importProvidersFrom(BrowserModule, HammerModule, FormsModule, AppRoutingModule, NgIconsModule.withIcons({
         ionDownloadOutline, ionFunnelOutline,
         ionGitBranchOutline, ionArrowDownOutline, ionArrowUpOutline,

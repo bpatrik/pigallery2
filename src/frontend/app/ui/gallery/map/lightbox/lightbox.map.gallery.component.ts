@@ -260,7 +260,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   }
 
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   async onResize(): Promise<void> {
     this.lightboxDimension = {
       top: 0,
