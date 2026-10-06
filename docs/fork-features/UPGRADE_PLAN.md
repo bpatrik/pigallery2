@@ -391,9 +391,14 @@ future runs must recreate their harnesses.
 
 ### Step 5 – openid-client 5 → 6 (branch `upgrade/openid-client-6`)
 
-- [ ] Before migrating, add a test for `OIDCAuthService.ts` with a mocked
+- [x] Before migrating, add a test for `OIDCAuthService.ts` with a mocked
       issuer covering discovery, the authorization URL, callback/code
       exchange, and userinfo/claims mapping.
+      - Implemented unit tests in `test/backend/unit/middlewares/OIDCAuthService.spec.ts` (14 tests)
+        and route integration tests in `test/backend/integration/routers/OIDCRouter.spec.ts` (4 tests).
+      - Backed by native in-process `MockOIDCServer.ts` (Node crypto RS256 signing, JWKS, token endpoint).
+      - 18 passing tests verified on `openid-client` 5.7.1 baseline.
+      - Added local development IdP setup using Dex container (`test/dex.sample.yaml` -> `test/dex.yaml`).
 - [ ] Rewrite against the v6 API (functional, ESM-only). The backend loads it
       through `require(esm)` (Node ≥ 22.12).
 - [ ] Remove `@types/openid-client`.

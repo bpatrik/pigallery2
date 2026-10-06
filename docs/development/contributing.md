@@ -143,6 +143,49 @@ You can run tests in various ways. If you use VS Code, the built-in test explore
 
   `docker stop pigallery_test && docker rm pigallery_test`
 
+### OpenID Connect (OIDC) tests
 
+PiGallery includes automated unit/router tests and a local development IdP setup:
 
-  
+1. **Automated unit and router tests**:
+   Runs 18 automated tests covering discovery, PKCE parameters, login redirect, callback code exchange, claims mapping, domain allowlists, and user auto-provisioning using an in-process mock server:
+   ```bash
+   npm run test-backend -- --grep OIDC
+   ```
+
+2. **Interactive testing with a local Dex container**:
+   To test the complete browser login flow against a real OpenID Connect provider without external cloud dependencies:
+   - Prepare local `test/dex.yaml` (ignored by `.gitignore` to avoid secret scanner alerts) from `test/dex.sample.yaml`:
+     ```bash
+     node -e "
+     const fs = require('fs');
+     const bcrypt = require('bcrypt');
+     const hash = bcrypt.hashSync('password', 10);
+     const tpl = fs.readFileSync('test/dex.sample.yaml', 'utf8');
+     fs.writeFileSync('test/dex.yaml', tpl.replace(/<CLIENT_SECRET>/g, 'dev-secret-123').replace(/<BCRYPT_HASH>/g, hash));
+     console.log('Created test/dex.yaml');
+     "
+     ```
+   - Start the Dex container:
+     ```bash
+     podman run --name pigallery-dex -d --rm -p 5556:5556 \
+       -v ./test/dex.yaml:/etc/dex/config.docker.yaml:ro \
+       ghcr.io/dexidp/dex:latest
+     ```
+   - Start the PiGallery server with dev OIDC settings:
+     ```bash
+     npm start -- \
+       --Server-port=8081 \
+       --Users-oidc-enabled=true \
+       --Users-oidc-displayName="Dex Dev" \
+       --Users-oidc-issuerUrl="http://localhost:5556/dex" \
+       --Users-oidc-clientId="pigallery-dev" \
+       --Users-oidc-clientSecret="dev-secret-123" \
+       --Users-oidc-redirectUri="http://localhost:8081/pgapi/auth/oidc/callback" \
+       --Users-oidc-autoCreateUser=true
+     ```
+   - Open `http://localhost:8081/`, click "Login with Dex Dev", and log in with `admin@example.com` / `password`.
+   - When finished, stop the container:
+     ```bash
+     podman stop pigallery-dex
+     ```

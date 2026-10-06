@@ -60,3 +60,4 @@ test2.*
 /bm_config.json
 /cypress.env.json
 /wiki/
+/test/dex.yaml

@@ -9,6 +9,10 @@ import {Utils} from '../../../common/Utils';
 export class OIDCAuthService {
   private static clientPromise: Promise<Client> | null = null;
 
+  public static reset(): void {
+    this.clientPromise = null;
+  }
+
   public static async login(req: Request, res: Response): Promise<void> {
     const client = await this.getClient();
     const state = generators.state();
@@ -78,7 +82,10 @@ export class OIDCAuthService {
     // cleanup
     delete (req.session as any).oidc;
     // redirect to root or previously stored path
-    res.redirect(Utils.concatUrls('/' + Config.Server.urlBase) + '/');
+    const redirectUrl = Config.Server.urlBase
+      ? ('/' + Config.Server.urlBase.replace(/^\/+|\/+$/g, '') + '/')
+      : '/';
+    res.redirect(redirectUrl);
   }
 
   private static async getClient(): Promise<Client> {

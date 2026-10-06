@@ -45,6 +45,13 @@
 - Browser checks: build with `npm run build-en`, start the backend on 8081, and drive it with the integrated browser tools. Timeline/Folders client state is in memory, so test Back restore with in-app navigation, not full reloads.
 - If the integrated browser is unavailable, use automated browser smoke checks and record that distinction. For upload checks, copy demo media into an isolated fixture with separate config/database/cache paths and enable uploads there. Timeline Back checks must restore a nonzero scroll position in the same document; lazily rendered gallery items may require repeated scrolling before assertions.
 - If another server already holds 8081, start a second one on 8082 instead of killing it. When the integrated browser tab is not visible (`document.visibilityState === 'hidden'`), `requestAnimationFrame` and animations pause and Playwright clicks/keys never complete; use `page.evaluate(() => el.click())` and verify viewer animations in a visible tab.
+- **OpenID Connect (OIDC) Tests & Local Dev Provider**:
+  - Automated tests: `source ~/.nvm/nvm.sh && nvm use >/dev/null && npm run test-backend -- --grep OIDC` runs both unit tests (`test/backend/unit/middlewares/OIDCAuthService.spec.ts`) and router tests (`test/backend/integration/routers/OIDCRouter.spec.ts`) against the native in-process `MockOIDCServer` (Node RS256 / JWKS) and SQLite.
+  - Interactive local dev testing with Dex container:
+    - Config: `test/dex.yaml` (git-ignored to avoid secret scanning; template in `test/dex.sample.yaml`). Port 5556, static users `admin@example.com` / `guest@example.com`, password `password`.
+    - Run container: `podman run --name pigallery-dex -d --rm -p 5556:5556 -v ./test/dex.yaml:/etc/dex/config.docker.yaml:ro ghcr.io/dexidp/dex:latest`.
+    - Run server: `npm start -- --Server-port=8081 --Users-oidc-enabled=true --Users-oidc-displayName="Dex Dev" --Users-oidc-issuerUrl="http://localhost:5556/dex" --Users-oidc-clientId="pigallery-dev" --Users-oidc-clientSecret="dev-secret-123" --Users-oidc-redirectUri="http://localhost:8081/pgapi/auth/oidc/callback" --Users-oidc-autoCreateUser=true`.
+    - Test login at `http://localhost:8081/` -> "Login with Dex Dev". Stop container with `podman stop pigallery-dex`.
 
 ## Agent Learnings & Gotchas (Framework Upgrades & Core Architecture)
 

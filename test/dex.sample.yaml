@@ -1,0 +1,26 @@
+# Sample configuration for Dex development OIDC provider.
+# Copy this file to test/dex.yaml (which is ignored by .gitignore to prevent scanner alerts).
+issuer: http://localhost:5556/dex
+storage:
+  type: memory
+web:
+  http: 0.0.0.0:5556
+telemetry:
+  http: 0.0.0.0:5558
+staticClients:
+  - id: pigallery-dev
+    redirectURIs:
+      - 'http://localhost:8081/pgapi/auth/oidc/callback'
+    name: 'PiGallery2 Dev'
+    secret: "<CLIENT_SECRET>"
+enablePasswordDB: true
+staticPasswords:
+  - email: "admin@example.com"
+    # Generate bcrypt hash with: node -e "console.log(require('bcrypt').hashSync('password', 10))"
+    hash: "<BCRYPT_HASH>"
+    username: "admin"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+  - email: "guest@example.com"
+    hash: "<BCRYPT_HASH>"
+    username: "guest"
+    userID: "18a8684b-db88-4b73-90a9-3cd1661f5467"

@@ -3,7 +3,9 @@ import {Config} from '../../common/config/private/Config';
 import {OIDCAuthService} from '../middlewares/user/OIDCAuthService';
 
 export class OIDCRouter {
-  private static BASE = Config.Server.apiPath + '/auth/oidc';
+  private static get BASE(): string {
+    return Config.Server.apiPath + '/auth/oidc';
+  }
 
   public static route(app: Express): void {
     this.addLogin(app);
