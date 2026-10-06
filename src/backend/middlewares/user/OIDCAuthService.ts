@@ -1,34 +1,34 @@
 import {Config} from '../../../common/config/private/Config';
 import {Request, Response} from 'express';
-import {Client, generators, Issuer, TokenSet} from 'openid-client';
+import * as client from 'openid-client';
 import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
-import {Utils} from '../../../common/Utils';
 
 export class OIDCAuthService {
-  private static clientPromise: Promise<Client> | null = null;
+  private static configPromise: Promise<client.Configuration> | null = null;
 
   public static reset(): void {
-    this.clientPromise = null;
+    this.configPromise = null;
   }
 
   public static async login(req: Request, res: Response): Promise<void> {
-    const client = await this.getClient();
-    const state = generators.state();
-    const verifier = generators.codeVerifier();
-    const challenge = generators.codeChallenge(verifier);
+    const config = await this.getConfig();
+    const state = client.randomState();
+    const verifier = client.randomPKCECodeVerifier();
+    const challenge = await client.calculatePKCECodeChallenge(verifier);
     req.session.oidc = {
       state,
       verifier
     } as any;
-    const authUrl = client.authorizationUrl({
+    const authUrl = client.buildAuthorizationUrl(config, {
+      redirect_uri: Config.Users.oidc.redirectUri,
       scope: Config.Users.oidc.scopes.join(' '),
       state,
       code_challenge: challenge,
       code_challenge_method: 'S256'
     });
-    res.redirect(authUrl);
+    res.redirect(authUrl.href);
   }
 
   public static async callback(req: Request, res: Response): Promise<void> {
@@ -37,16 +37,30 @@ export class OIDCAuthService {
     if (!storedOidc?.state || params.state !== storedOidc?.state) {
       throw new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Invalid OIDC state');
     }
-    const client = await this.getClient();
-    const tokenSet: TokenSet = await client.callback(
-      Config.Users.oidc.redirectUri,
-      params,
+    const config = await this.getConfig();
+
+    const currentUrl = new URL(Config.Users.oidc.redirectUri);
+    for (const [key, value] of Object.entries(req.query)) {
+      if (typeof value === 'string') {
+        currentUrl.searchParams.set(key, value);
+      } else if (Array.isArray(value)) {
+        for (const v of value) {
+          if (typeof v === 'string') {
+            currentUrl.searchParams.append(key, v);
+          }
+        }
+      }
+    }
+
+    const tokens = await client.authorizationCodeGrant(
+      config,
+      currentUrl,
       {
-        state: storedOidc?.state,
-        code_verifier: storedOidc?.verifier
+        pkceCodeVerifier: storedOidc?.verifier,
+        expectedState: storedOidc?.state
       }
     );
-    const claims = tokenSet.claims();
+    const claims = (tokens.claims?.() || {}) as Record<string, any>;
     const usernameClaim = Config.Users.oidc.usernameClaim || 'preferred_username';
     const emailClaim = Config.Users.oidc.emailClaim || 'email';
     const preferredUserName = claims[usernameClaim] || '';
@@ -88,9 +102,9 @@ export class OIDCAuthService {
     res.redirect(redirectUrl);
   }
 
-  private static async getClient(): Promise<Client> {
-    if (this.clientPromise) {
-      return this.clientPromise;
+  private static async getConfig(): Promise<client.Configuration> {
+    if (this.configPromise) {
+      return this.configPromise;
     }
     if (!Config.Users.oidc.enabled) {
       throw new Error('OIDC is not enabled');
@@ -99,15 +113,22 @@ export class OIDCAuthService {
     if (!issuerUrl) {
       throw new Error('OIDC issuerUrl is not configured');
     }
-    this.clientPromise = (async () => {
-      const issuer = await Issuer.discover(issuerUrl);
-      return new issuer.Client({
-        client_id: Config.Users.oidc.clientId,
-        client_secret: Config.Users.oidc.clientSecret,
-        redirect_uris: [Config.Users.oidc.redirectUri],
-        response_types: ['code']
-      });
+    this.configPromise = (async () => {
+      const serverUrl = new URL(issuerUrl);
+      const execute = serverUrl.protocol === 'http:' ? [client.allowInsecureRequests] : undefined;
+      const clientSecret = Config.Users.oidc.clientSecret;
+      const clientAuth = clientSecret
+        ? client.ClientSecretPost(clientSecret)
+        : client.None();
+
+      return await client.discovery(
+        serverUrl,
+        Config.Users.oidc.clientId,
+        clientSecret ? {client_secret: clientSecret} : undefined,
+        clientAuth,
+        execute ? {execute} : undefined
+      );
     })();
-    return this.clientPromise;
+    return this.configPromise;
   }
 }

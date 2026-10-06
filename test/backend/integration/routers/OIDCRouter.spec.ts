@@ -38,6 +38,8 @@ describe('OIDCRouter', () => {
 
     Config.loadSync();
     Config.Server.urlBase = '';
+    Config.Users.authenticationRequired = true;
+    Config.Users.unAuthenticatedUserRole = UserRoles.Guest;
     Config.Users.oidc.enabled = true;
     Config.Users.oidc.issuerUrl = issuerUrl;
     Config.Users.oidc.clientId = 'test-client-id';

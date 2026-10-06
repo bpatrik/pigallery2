@@ -252,6 +252,30 @@ describe('OIDCAuthService', () => {
         expect(err.message).to.equal('User not found');
       }
     });
+
+    it('should throw when callback query contains error from IdP', async () => {
+      const loginReq = createMockReq();
+      const {res: loginRes} = createMockRes();
+      await OIDCAuthService.login(loginReq, loginRes);
+
+      const cbReq = createMockReq({
+        session: loginReq.session,
+        query: {
+          error: 'access_denied',
+          error_description: 'User denied authorization',
+          state: loginReq.session.oidc.state
+        }
+      });
+      const {res: cbRes} = createMockRes();
+
+      try {
+        await OIDCAuthService.callback(cbReq, cbRes);
+        expect.fail('Should have thrown');
+      } catch (err: any) {
+        expect(err).to.exist;
+        expect(err.error || err.message).to.contain('access_denied');
+      }
+    });
   });
 
   describe('callback - successful authentication flows', () => {
@@ -283,6 +307,13 @@ describe('OIDCAuthService', () => {
 
       expect(getRedirectUrl()).to.equal('/');
       expect(cbReq.session.oidc).to.be.undefined;
+      expect(mockOidc.lastTokenRequestBody).to.be.an('object');
+      expect(mockOidc.lastTokenRequestBody?.grant_type).to.equal('authorization_code');
+      expect(mockOidc.lastTokenRequestBody?.code).to.equal('mock-code-alice');
+      expect(mockOidc.lastTokenRequestBody?.redirect_uri).to.equal(Config.Users.oidc.redirectUri);
+      expect(mockOidc.lastTokenRequestBody?.client_id).to.equal('test-client-id');
+      expect(mockOidc.lastTokenRequestBody?.client_secret).to.equal('test-client-secret');
+      expect(mockOidc.lastTokenRequestBody?.code_verifier).to.be.a('string').and.not.empty;
       expect(cbReq.session.rememberMe).to.be.true;
       expect(cbReq.session.context).to.be.an('object');
       expect(cbReq.session.context.user.name).to.equal('alice_existing');
