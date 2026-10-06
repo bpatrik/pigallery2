@@ -9,7 +9,8 @@
 
 ## Upgrade Handoff
 
-- Steps 0–4 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged into `master` (Step 4 / PR #5 merged at `e1b1b561`). Step 5 (`upgrade/openid-client-6`) will base on `master` at `e1b1b561`.
+- Steps 0–4 of [UPGRADE_PLAN.md](docs/fork-features/UPGRADE_PLAN.md) are merged into `master` (Step 4 / PR #5 merged at `e1b1b561`). Step 5 (`upgrade/openid-client-6`) is implemented and validated on branch `upgrade/openid-client-6`. Step 6 (`upgrade/ffmpeg-wrapper`) will base on `master` once Step 5 PR is merged.
+- Step 5 validation: `openid-client` upgraded to 6.8.8 (pure ESM loaded via Node 24 `require(esm)`), `@types/openid-client` removed. Backend suite: 654 passing tests across SQLite and MariaDB (including 19 OIDC tests with `MockOIDCServer`). End-to-end authentication validated against real local Dex provider (`http://localhost:5556/dex`) with PKCE S256, real JWKS validation, and session user provisioning.
 - Step 4 validation on Node 24.21.0 / npm 11.19.0 passed: backend 635 tests on SQLite and MariaDB, Karma 145 tests, all 16 locale builds, seven Cypress specs (18 passing, 12 intentionally pending documentation tests), and nine automated Brave smoke checks. All three amd64 Dockerfiles build and pass diagnostics; native SQLite/bcrypt and HEIC/AVIF/JPEG/PNG decoding pass. Detailed results are in the upgrade plan and [Techdebt.md](docs/fork-features/Techdebt.md). Temporary `/tmp/pg-node24-*` harnesses and logs are local artifacts; future runs must not assume they exist. Arm64 image builds remain a CI check.
 - Angular 22.2.1 requires TypeScript 6; this project pins 6.0.3. The backend uses NodeNext settings while emitting CommonJS; frontend configs use bundler resolution. ngx-bootstrap is now 22.0.0 with signal APIs and direct module imports; the app retains zone.js. A separate zoneless sub-plan is in the upgrade plan. Hammer integration was removed upstream and replaced with pointer gestures; Angular animations remain follow-up work.
 
@@ -55,6 +56,10 @@
 
 ## Agent Learnings & Gotchas (Framework Upgrades & Core Architecture)
 
+- **`openid-client` v6 ESM in CommonJS Backend**:
+  - `openid-client` 6.x is pure ESM, loaded synchronously into our CommonJS backend via Node 24's native `require(esm)` (`import * as client from 'openid-client'`).
+  - Use `client.allowInsecureRequests(config)` or `options.execute: [client.allowInsecureRequests]` during discovery when testing against HTTP endpoints (e.g. `http://localhost:5556/dex` or test mock servers).
+  - Test suites accessing `/user/me` must explicitly restore `Config.Users.authenticationRequired = true` and `Config.Users.unAuthenticatedUserRole = UserRoles.Guest` in `setUp()` if previous tests modified global unauthenticated user settings.
 - **Root `tsconfig.json` vs CommonJS Backend**:
   - `ng update` attempts to set `"moduleResolution": "bundler"` in root `tsconfig.json`.
   - The backend remains CommonJS, so bundler resolution must not be applied to the root config. Since Step 3 it uses `"module": "NodeNext"` / `"moduleResolution": "NodeNext"`; absence of a package ESM `type` preserves CommonJS output. Do not restore deprecated `node` resolution or `downlevelIteration` under TS 6.

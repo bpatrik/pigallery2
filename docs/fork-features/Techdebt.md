@@ -26,7 +26,7 @@ later, **L** = cleanup.
 | # | Item | Where | Priority | Notes |
 |---|---|---|---|---|
 | B1 | Express 4; `path-to-regexp` v1-style inline regex routes | `src/backend/routes/*` | M | Upgrade step 7 |
-| B2 | `openid-client` 5 (legacy API), stale `@types/openid-client` 3.x | `OIDCAuthService.ts` | M | Upgrade step 5 |
+| B2 | `openid-client` 5 (legacy API), stale `@types/openid-client` 3.x | `OIDCAuthService.ts` | M | Resolved in Step 5: migrated to `openid-client` 6.8.8 functional API, removed `@types/openid-client`; validated with MockOIDCServer and Dex container |
 | B3 | `fluent-ffmpeg` is archived | `FFmpegFactory.ts`, `MetadataLoader.ts`, `PhotoWorker.ts`, `VideoConverterWorker.ts` | M | Upgrade step 6 |
 | B4 | `mysql` 2.18.1 driver is unmaintained | `optionalDependencies` | M | TypeORM supports `mysql2`; needs a driver switch plus MySQL/MariaDB test run |
 | B5 | Node `engines` capped at `<24` | `package.json` | M | Resolved in Step 4: Node >=24.15.0 <25, npm 11.19.0, Node 24 types and better-sqlite3 12.11.1; native runtime and both database engines validated |

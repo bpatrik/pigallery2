@@ -399,11 +399,20 @@ future runs must recreate their harnesses.
       - Backed by native in-process `MockOIDCServer.ts` (Node crypto RS256 signing, JWKS, token endpoint).
       - 18 passing tests verified on `openid-client` 5.7.1 baseline.
       - Added local development IdP setup using Dex container (`test/dex.sample.yaml` -> `test/dex.yaml`).
-- [ ] Rewrite against the v6 API (functional, ESM-only). The backend loads it
+- [x] Rewrite against the v6 API (functional, ESM-only). The backend loads it
       through `require(esm)` (Node ≥ 22.12).
-- [ ] Remove `@types/openid-client`.
-- [ ] Run the test and do a manual login against a real or dev provider if
+      - Migrated `OIDCAuthService.ts` to `openid-client` 6.8.8 functional API:
+        `client.discovery()`, `client.buildAuthorizationUrl()`, `client.authorizationCodeGrant()`,
+        `client.randomState()`, `client.randomPKCECodeVerifier()`, `client.calculatePKCECodeChallenge()`.
+      - Configured automatic HTTP/insecure request allowance for local dev/testing URLs via `allowInsecureRequests`.
+- [x] Remove `@types/openid-client`.
+      - Removed legacy types package; `openid-client` v6 ships bundled TypeScript definitions.
+- [x] Run the test and do a manual login against a real or dev provider if
       one is available.
+      - All 19 automated OIDC tests pass with `MockOIDCServer` (unit and route integration).
+      - Validated full end-to-end authorization code + PKCE flow against local Dex container (`http://localhost:5556/dex`)
+        with real JWKS key verification, token exchange, and automatic user provisioning.
+      - Full backend test suite passing: 654 tests on SQLite and MariaDB with 0 failures.
 
 ### Step 6 – Replace fluent-ffmpeg (branch `upgrade/ffmpeg-wrapper`)
 
@@ -458,6 +467,6 @@ future runs must recreate their harnesses.
 | 2 Angular 21 | `upgrade/angular-21` | Completed, validated and merged |
 | 3 Angular 22 | `upgrade/angular-22` | Completed, validated and merged |
 | 4 Node 24 | `upgrade/node-24` | Completed, validated and merged |
-| 5 openid-client 6 | `upgrade/openid-client-6` | Not started |
+| 5 openid-client 6 | `upgrade/openid-client-6` | Completed, validated |
 | 6 ffmpeg wrapper | `upgrade/ffmpeg-wrapper` | Not started |
 | 7 Express 5 | `upgrade/express-5` | Not started |
