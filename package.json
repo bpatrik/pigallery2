@@ -147,7 +147,7 @@
   "optionalDependencies": {
     "ffmpeg-static": "5.2.0",
     "ffprobe-static": "3.1.0",
-    "mysql": "2.18.1"
+    "mysql2": "3.24.6"
   },
   "overrides": {
     "beasties": "^0.3.3"
