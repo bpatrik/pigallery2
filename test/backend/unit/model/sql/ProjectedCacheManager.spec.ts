@@ -40,9 +40,10 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
     pcm = new ProjectedCacheManager();
   };
 
-  describe('ProjectedCacheManager.invalidateDirectoryCache', () => {
+  after(sqlHelper.clearDB);
+
+  describe('ProjectedCacheManager.invalidateDirectoryCache', async () => {
     beforeEach(setup);
-    after(sqlHelper.clearDB);
 
     it('invalidates the given directory and all of its parents, but not descendants', async () => {
       const repoDir = connection.getRepository(DirectoryEntity);
@@ -109,7 +110,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('ProjectedCacheManager.setAndGetCacheForDirectory', () => {
+  describe('ProjectedCacheManager.setAndGetCacheForDirectory', async () => {
     let dir: ParentDirectoryDTO;
     let subDir: SubDirectoryDTO;
     let subDir2: SubDirectoryDTO;
@@ -169,7 +170,6 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       // match behavior of old CoverManager tests
       Config.Gallery.ignoreTimestampOffset = false;
     });
-    afterEach(sqlHelper.clearDB);
 
     const getCacheRow = async (d: { id: number }) => {
       return await connection.getRepository(ProjectedDirectoryCacheEntity)
