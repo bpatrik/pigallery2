@@ -157,7 +157,7 @@ describe('UserRouter', () => {
       result.should.have.status(401);
       result.body.should.be.a('object');
       result.body.error.should.be.a('object');
-      should.equal(result.body.error.code, ErrorCodes.NOT_AUTHENTICATED);
+      should.equal(result.body.error.code, ErrorCodes.NOT_AUTHENTICATED_SHARING);
     });
 
     it('it should authenticate as guest', async () => {

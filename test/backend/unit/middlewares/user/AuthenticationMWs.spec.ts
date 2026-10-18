@@ -61,7 +61,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const next: any = (err: ErrorDTO) => {
         try {
           expect(err).not.to.be.undefined;
-          expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED);
+          expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED_SHARING, 'Error code should be NOT_AUTHENTICATED_SHARING');
           done();
         } catch (err) {
           done(err);
