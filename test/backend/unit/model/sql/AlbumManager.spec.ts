@@ -38,7 +38,6 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
   const setUpSqlDB = async () => {
     await sqlHelper.initDB();
     await sqlHelper.setUpTestGallery();
-    await ObjectManagers.getInstance().init();
   };
 
   const createProjectionSession = async (query: any): Promise<SessionContext> => {
@@ -73,14 +72,10 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
   };
 
 
-  before(setUpSqlDB);
+  beforeEach(setUpSqlDB);
   after(sqlHelper.clearDB);
 
-  describe('Saved search', () => {
-
-
-    beforeEach(setUpSqlDB);
-    afterEach(sqlHelper.clearDB);
+  describe('Saved search', async() => {
 
     it('should add album', async () => {
       const am = new AlbumManager();
@@ -172,11 +167,7 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
 
   });
 
-  describe('Projection Tests', () => {
-
-    beforeEach(setUpSqlDB);
-
-    afterEach(sqlHelper.clearDB);
+  describe('Projection Tests',async () => {
 
     it('should get albums with projection session filtering by filename', async () => {
       const am = new AlbumManager();

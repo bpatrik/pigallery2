@@ -13,7 +13,7 @@ import {Config} from '../../../../../src/common/config/private/Config';
 declare let describe: any;
 declare const it: any;
 declare const beforeEach: any;
-declare const afterEach: any;
+declare const after: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it so the IDE plays nicely (recognize the test)
 
@@ -26,7 +26,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
       await sqlHelper.initDB();
     });
 
-    afterEach(sqlHelper.clearDB);
+    after(sqlHelper.clearDB);
 
     it('should create a basic context with user and no queries', async () => {
       // Create a basic user with no queries

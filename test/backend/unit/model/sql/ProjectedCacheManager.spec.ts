@@ -42,7 +42,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
 
   describe('ProjectedCacheManager.invalidateDirectoryCache', () => {
     beforeEach(setup);
-    afterEach(sqlHelper.clearDB);
+    after(sqlHelper.clearDB);
 
     it('invalidates the given directory and all of its parents, but not descendants', async () => {
       const repoDir = connection.getRepository(DirectoryEntity);
@@ -160,8 +160,6 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       await buildDeterministicGallery();
       connection = await SQLConnection.getConnection();
       pcm = new ProjectedCacheManager();
-      // Re-init managers as persistTestDir resets ObjectManagers
-      await ObjectManagers.getInstance().init();
       // default sorting
       Config.AlbumCover.Sorting = [
         new ClientSortingConfig(SortByTypes.Rating, false),

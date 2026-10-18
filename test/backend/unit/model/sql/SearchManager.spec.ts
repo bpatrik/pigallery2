@@ -134,7 +134,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   const setUpSqlDB = async () => {
     await sqlHelper.initDB();
     await setUpTestGallery();
-    await ObjectManagers.getInstance().init();
   };
 
 
@@ -143,9 +142,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   });
 
 
-  after(async () => {
-    await sqlHelper.clearDB();
-  });
+  after(sqlHelper.clearDB);
   beforeEach(() => {
     Config.loadSync();
     Config.Search.listDirectories = true;

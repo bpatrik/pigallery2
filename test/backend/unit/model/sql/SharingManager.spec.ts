@@ -37,9 +37,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     await setUpSqlDB();
   });
 
-  after(async () => {
-    await sqlHelper.clearDB();
-  });
+  after(sqlHelper.clearDB);
 
 
   it('should create sharing', async () => {

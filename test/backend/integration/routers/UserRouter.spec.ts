@@ -38,7 +38,6 @@ describe('UserRouter', () => {
 
     server = new Server(false);
     await server.onStarted.wait();
-    await ObjectManagers.getInstance().init();
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));
     await SQLConnection.close();
   };

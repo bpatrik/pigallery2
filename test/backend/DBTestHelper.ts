@@ -82,6 +82,7 @@ export class DBTestHelper {
     p3: null,
     p4: null
   };
+
   public static get defaultSession(): SessionContext {
     return {user: {projectionKey: SessionManager.NO_PROJECTION_KEY}} as any;
   }
@@ -117,7 +118,10 @@ export class DBTestHelper {
   }
 
   public static async persistTestDir(directory: DirectoryBaseDTO): Promise<ParentDirectoryDTO> {
-    await ObjectManagers.getInstance().init();
+    const OMInited = ObjectManagers.isReady();
+    if (!OMInited) {
+      await ObjectManagers.getInstance().init();
+    }
     const connection = await SQLConnection.getConnection();
     ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null);
 
@@ -146,30 +150,37 @@ export class DBTestHelper {
       }
     };
     await populateDir(dir);
-
-    await ObjectManagers.reset();
+    if (!OMInited) {
+      await ObjectManagers.reset();
+    }
     return dir;
   }
 
-  public async initDB(): Promise<void> {
+  public initDB = async (): Promise<void> => {
     await Config.load();
     Config.Extensions.enabled = false; // make all tests clean
+    if (typeof this.dbType === 'undefined') {
+      throw new Error('dbType is undefined');
+    }
     if (this.dbType === DatabaseType.sqlite) {
       await this.initSQLite();
     } else if (this.dbType === DatabaseType.mysql) {
       await this.initMySQL();
     }
-  }
+  };
 
-  public async clearDB(): Promise<void> {
+  public clearDB = async (): Promise<void> => {
+    if (typeof this.dbType === 'undefined') {
+      throw new Error('dbType is undefined');
+    }
     if (this.dbType === DatabaseType.sqlite) {
       await this.clearUpSQLite();
     } else if (this.dbType === DatabaseType.mysql) {
       await this.clearUpMysql();
     }
-  }
+  };
 
-  public async setUpTestGallery(): Promise<void> {
+  public setUpTestGallery = async (): Promise<void> => {
     const directory: ParentDirectoryDTO = TestHelper.getDirectoryEntry(null, '.');
     this.testGalleyEntities.subDir = TestHelper.getDirectoryEntry(directory, 'The Phantom Menace');
     this.testGalleyEntities.subDir2 = TestHelper.getDirectoryEntry(directory, 'Return of the Jedi');
@@ -192,7 +203,7 @@ export class DBTestHelper {
     this.testGalleyEntities.p3.directory = this.testGalleyEntities.dir.directories[0];
     this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media[0] as any);
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir.directories[1];
-  }
+  };
 
   public static async printDB() {
     const conn = await SQLConnection.getConnection();
@@ -207,24 +218,21 @@ export class DBTestHelper {
     await this.resetMySQL();
   }
 
+
   private async resetMySQL(): Promise<void> {
     Logger.debug(LOG_TAG, 'resetting up mysql');
     await this.clearUpMysql();
-    const conn = await SQLConnection.getConnection();
-    await conn.query('CREATE DATABASE IF NOT EXISTS ' + conn.options.database);
-    await SQLConnection.close();
     await ObjectManagers.getInstance().init();
   }
 
   private async clearUpMysql(): Promise<void> {
     Logger.debug(LOG_TAG, 'clearing up mysql');
-    await ObjectManagers.reset();
     Config.Database.type = DatabaseType.mysql;
     Config.Database.mysql.database = 'pigallery2_test';
-    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
     const conn = await SQLConnection.getConnection();
-    await conn.query('DROP DATABASE IF EXISTS ' + conn.options.database);
-    await SQLConnection.close();
+    await conn.dropDatabase();
+    await ObjectManagers.reset();
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
   }
 
   private async initSQLite(): Promise<void> {

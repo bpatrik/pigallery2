@@ -52,16 +52,13 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
   before(async () => {
     await sqlHelper.initDB();
     await sqlHelper.setUpTestGallery();
-    await ObjectManagers.getInstance().init();
     connection = await SQLConnection.getConnection();
     galleryManager = new GalleryManagerTest();
   });
 
-  after(async () => {
-    await sqlHelper.clearDB();
-  });
+  after(sqlHelper.clearDB);
 
-  describe('Projection Query Tests', () => {
+  describe('Projection Query Tests', async () => {
 
     it('should return all media when no projection query is provided', async () => {
       // Setup a session with no projection query
@@ -170,7 +167,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
   });
 
 
-  describe('GalleryManager.listDirectory - reindexing severities and projection behavior', () => {
+  describe('GalleryManager.listDirectory - reindexing severities and projection behavior',async () => {
     const origStatSync = fs.statSync;
 
     let gm: GalleryManagerTest;
@@ -365,23 +362,20 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       expect(calledArgs[1]).to.equal(true);
     });
   });
-  describe('GalleryManager authorisation', () => {
+  describe('GalleryManager authorisation', async () => {
 
     let gm: GalleryManager;
 
     before(async () => {
       await sqlHelper.initDB();
       await sqlHelper.setUpTestGallery();
-      await ObjectManagers.getInstance().init();
       gm = new GalleryManager();
     });
 
-    after(async () => {
-      await sqlHelper.clearDB();
-    });
+    after(sqlHelper.clearDB);
 
 
-    describe('authoriseMedia', () => {
+    describe('authoriseMedia', async () => {
       it('returns true without projection', async () => {
         const session = new SessionContext();
         const root = sqlHelper.testGalleyEntities.dir;
@@ -449,7 +443,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       });
     });
 
-    describe('authoriseMetaFile', () => {
+    describe('authoriseMetaFile', async () => {
       it('returns true without projection', async () => {
         const session = new SessionContext();
         const root = sqlHelper.testGalleyEntities.dir;
@@ -491,16 +485,13 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('Cache optimization tests', () => {
+  describe('Cache optimization tests', async () => {
     before(async () => {
       await sqlHelper.initDB();
       await sqlHelper.setUpTestGallery();
-      await ObjectManagers.getInstance().init();
     });
 
-    after(async () => {
-      await sqlHelper.clearDB();
-    });
+    after(sqlHelper.clearDB);
     it('should not call setAndGetCacheForDirectory when gallery is fully indexed with valid caches', async () => {
 
       // make sure gallery is fully indexed and caches are valid

@@ -13,7 +13,7 @@ import {DBTestHelper} from '../../../DBTestHelper';
 
 declare let describe: any;
 declare const it: any;
-declare const before: any;
+declare const after: any;
 declare const beforeEach: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe();
@@ -21,14 +21,12 @@ describe = DBTestHelper.describe();
 describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
-  before(sqlHelper.clearDB);
 
-  beforeEach(async () => {
-    await sqlHelper.initDB();
-  });
+  beforeEach(sqlHelper.initDB);
+  after(sqlHelper.clearDB);
 
 
-  describe('authenticate', () => {
+  describe('authenticate', async () => {
     it('should call next on authenticated', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -158,7 +156,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('inverseAuthenticate', () => {
+  describe('inverseAuthenticate', async () => {
 
     it('should call next with error on authenticated', (done: (err?: any) => void) => {
       const req: any = {
@@ -198,7 +196,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('authorise', () => {
+  describe('authorise', async () => {
     it('should call next on authorised', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -247,12 +245,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('login', () => {
-    beforeEach(async () => {
-      await sqlHelper.initDB();
-    });
+  describe('login', async () => {
 
-    describe('should call input ErrorDTO next on missing...', () => {
+
+    describe('should call input ErrorDTO next on missing...', async () => {
       it('body', (done: (err?: any) => void) => {
         const req: any = {
           query: {},
@@ -616,8 +612,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-
-  describe('authoriseMedia', () => {
+  describe('authoriseMedia', async () => {
 
     const buildReq = (mediaRelPath: string) => ({
       session: {
@@ -678,7 +673,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('authoriseMetaFiles', () => {
+  describe('authoriseMetaFiles', async () => {
     const buildReq = (metaPath: string) => ({
       session: {
         context: {
@@ -729,7 +724,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('logout', () => {
+  describe('logout', async () => {
     it('should call next on logout', (done: (err?: any) => void) => {
       const req: any = {
         session: {
