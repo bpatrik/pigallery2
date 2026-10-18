@@ -109,16 +109,32 @@ export class ShareService {
     return this.ReadyPR;
   }
 
+  private static validateDefaultViews(
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
+  ): void {
+    if (defaultDirectoryView && defaultSearchView) {
+      throw new Error(
+        'defaultDirectoryView and defaultSearchView cannot be set at the same time'
+      );
+    }
+  }
+
   public createSharing(
     dir: string,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     // Legacy dir-based API: backend will convert to strict directory searchQuery if searchQuery not provided
     return this.networkService.postJson('/share/' + dir, {
       createSharing: {
         valid,
-        ...(!!password && {password: password}) // only add password if present
+        ...(!!password && {password: password}), // only add password if present
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }
@@ -126,13 +142,18 @@ export class ShareService {
   public createSharingByQuery(
     searchQuery: SearchQueryDTO,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     return this.networkService.postJson('/share/', {
       createSharing: {
         valid,
         ...(!!password && {password: password}),
-        searchQuery
+        searchQuery,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }
@@ -141,14 +162,19 @@ export class ShareService {
     dir: string,
     sharingId: number,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     // Legacy dir-based API: backend will convert to strict directory searchQuery if searchQuery not provided
     return this.networkService.putJson('/share/' + dir, {
       updateSharing: {
         id: sharingId,
         valid,
         password,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }
@@ -157,14 +183,19 @@ export class ShareService {
     sharingId: number,
     searchQuery: SearchQueryDTO,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     return this.networkService.putJson('/share/', {
       updateSharing: {
         id: sharingId,
         valid,
         password,
-        searchQuery
+        searchQuery,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }

@@ -72,9 +72,12 @@ export class SharingManager {
       SearchQueryUtils.validateSearchQuery(sharing.searchQuery);
       sharing.searchQuery = SearchQueryUtils.sortQuery(sharing.searchQuery);
     }
-    if(sharing.defaultSearchView){
+    if (sharing.defaultDirectoryView && sharing.defaultSearchView) {
+      throw new Error('defaultDirectoryView and defaultSearchView cannot be set at the same time');
+    }
+    if (sharing.defaultSearchView) {
       SearchQueryUtils.validateSearchQuery(sharing.defaultSearchView);
-      sharing.searchQuery = SearchQueryUtils.sortQuery(sharing.defaultSearchView);
+      sharing.defaultSearchView = SearchQueryUtils.sortQuery(sharing.defaultSearchView);
     }
     return connection.getRepository(SharingEntity).save(sharing);
   }
@@ -96,6 +99,9 @@ export class SharingManager {
     ) {
       throw new Error('Sharing is locked, can\'t update anymore');
     }
+    if (inSharing.defaultDirectoryView && inSharing.defaultSearchView) {
+      throw new Error('defaultDirectoryView and defaultSearchView cannot be set at the same time');
+    }
     if (inSharing.password == null) {
       sharing.password = null;
     } else {
@@ -103,12 +109,18 @@ export class SharingManager {
     }
     // allow updating searchQuery and canonicalize it
     sharing.searchQuery = SearchQueryUtils.sortQuery(inSharing.searchQuery);
-    if(inSharing.defaultSearchView){
+    if (inSharing.defaultSearchView) {
       SearchQueryUtils.validateSearchQuery(inSharing.defaultSearchView);
-      sharing.searchQuery = SearchQueryUtils.sortQuery(inSharing.defaultSearchView);
+      sharing.defaultSearchView = SearchQueryUtils.sortQuery(inSharing.defaultSearchView);
+      sharing.defaultDirectoryView = null;
+    } else if (inSharing.defaultSearchView === null) {
+      sharing.defaultSearchView = null;
     }
-    if(inSharing.defaultDirectoryView){
+    if (inSharing.defaultDirectoryView) {
       sharing.defaultDirectoryView = inSharing.defaultDirectoryView;
+      sharing.defaultSearchView = null;
+    } else if (inSharing.defaultDirectoryView === null) {
+      sharing.defaultDirectoryView = null;
     }
     sharing.expires = inSharing.expires;
 

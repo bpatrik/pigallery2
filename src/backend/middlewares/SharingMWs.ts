@@ -131,6 +131,15 @@ export class SharingMWs {
         timeStamp: Date.now(),
       };
 
+      if (createSharing.defaultDirectoryView && createSharing.defaultSearchView) {
+        return next(
+          new ErrorDTO(
+            ErrorCodes.INPUT_ERROR,
+            'defaultDirectoryView and defaultSearchView cannot be set at the same time'
+          )
+        );
+      }
+
       if (createSharing.defaultDirectoryView) {
         sharing.defaultDirectoryView = createSharing.defaultDirectoryView;
       }
@@ -198,6 +207,15 @@ export class SharingMWs {
         timeStamp: Date.now(),
       };
 
+
+      if (updateSharing.defaultDirectoryView && updateSharing.defaultSearchView) {
+        return next(
+          new ErrorDTO(
+            ErrorCodes.INPUT_ERROR,
+            'defaultDirectoryView and defaultSearchView cannot be set at the same time'
+          )
+        );
+      }
 
       if (updateSharing.defaultDirectoryView) {
         sharing.defaultDirectoryView = updateSharing.defaultDirectoryView;
