@@ -56,7 +56,7 @@
     "nodemailer": "8.0.11",
     "openid-client": "5.7.1",
     "reflect-metadata": "0.2.2",
-    "sharp": "0.34.5",
+    "sharp": "0.34.2",
     "ts-node-iptc": "1.0.11",
     "typeconfig": "2.3.4",
     "typeorm": "0.3.31",
