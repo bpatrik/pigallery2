@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import {CreateSharingDTO, SharingDTOKey, UpdateSharingDTO} from '../../common/entities/SharingDTO';
+import {CreateSharingDTO, PublicSharingDTO, UpdateSharingDTO} from '../../common/entities/SharingDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {Config} from '../../common/config/private/Config';
@@ -37,7 +37,7 @@ export class SharingMWs {
     }
   }
 
-  public static async getSharingKey(
+  public static async getSharingPublicInfo(
     req: Request,
     res: Response,
     next: NextFunction
@@ -48,8 +48,13 @@ export class SharingMWs {
       }
       const sharingKey = req.params[QueryParams.gallery.sharingKey_params];
 
+      const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       req.resultPipe =
-        {sharingKey: (await ObjectManagers.getInstance().SharingManager.findOne(sharingKey)).sharingKey} as SharingDTOKey;
+        {
+          sharingKey: sharing.sharingKey,
+          passwordProtected: Config.Sharing.passwordRequired || (typeof sharing.password === 'string' && sharing.password !== '')
+        } as PublicSharingDTO;
+
       return next();
     } catch (err) {
       return next(

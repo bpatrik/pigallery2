@@ -31,7 +31,7 @@ export class NavigationService {
   public async toLogin(): Promise<boolean> {
     await this.shareService.wait();
     if (this.shareService.isSharing()) {
-      if ((await firstValueFrom(this.shareService.currentSharing)).passwordProtected === true) {
+      if ((await firstValueFrom(this.shareService.publicSharingSubject)).passwordProtected === true) {
         return this.router.navigate(['shareLogin'], {
           queryParams: {sk: this.shareService.getSharingKey()},
         });

@@ -74,7 +74,7 @@ export class AuthenticationMWs {
     if (!user) {
       res.status(401);
       return next(
-        new ErrorDTO(ErrorCodes.NOT_AUTHENTICATED, 'Not authenticated')
+        new ErrorDTO(ErrorCodes.NOT_AUTHENTICATED_SHARING, 'Not authenticated sharing')
       );
     }
 

@@ -12,7 +12,7 @@ export class SharingRouter {
   public static route(app: express.Express): void {
     this.addShareLogin(app);
     this.addGetSharing(app);
-    this.addGetSharingKey(app);
+    this.addGetSharingPublicInfo(app);
     this.addCreateSharing(app);
     this.addUpdateSharing(app);
     this.addListSharing(app);
@@ -35,13 +35,13 @@ export class SharingRouter {
    * @param app
    * @private
    */
-  private static addGetSharingKey(app: express.Express): void {
+  private static addGetSharingPublicInfo(app: express.Express): void {
     app.get(
-      Config.Server.apiPath + '/share/:' + QueryParams.gallery.sharingKey_params + '/key',
-      // its a public path
-      SharingMWs.getSharingKey,
+      Config.Server.apiPath + '/share/:' + QueryParams.gallery.sharingKey_params + '/publicInfo',
+      // it's a public path
+      SharingMWs.getSharingPublicInfo,
       ServerTimingMWs.addServerTiming,
-      RenderingMWs.renderSharing
+      RenderingMWs.renderResult
     );
   }
 

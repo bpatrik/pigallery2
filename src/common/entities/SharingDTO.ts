@@ -1,8 +1,14 @@
 import {UserDTO} from './UserDTO';
 import {SearchQueryDTO} from './SearchQueryDTO';
 
-export interface SharingDTOKey {
+interface SharingDTOKey {
   sharingKey: string;
+}
+
+
+export interface PublicSharingDTO extends SharingDTOKey {
+  sharingKey: string;
+  passwordProtected: boolean;
 }
 
 export interface BaseSharingDTO extends SharingDTOKey {
@@ -17,7 +23,7 @@ export interface BaseSharingDTO extends SharingDTOKey {
 }
 
 
-export interface ResponseSharingDTO extends BaseSharingDTO {
+export interface ResponseSharingDTO extends BaseSharingDTO, PublicSharingDTO {
   id: number;
   defaultSearchView?: SearchQueryDTO;
   defaultDirectoryView?: string;

@@ -1,6 +1,10 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {CreateSharingDTO, ResponseSharingDTO, SharingDTOKey,} from '../../../../common/entities/SharingDTO';
+import {
+  CreateSharingDTO,
+  PublicSharingDTO,
+  ResponseSharingDTO,
+} from '../../../../common/entities/SharingDTO';
 import {Router, RoutesRecognized} from '@angular/router';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
@@ -33,6 +37,9 @@ export class ShareService {
     .pipe(distinctUntilChanged());
 
   private resolve: () => void;
+  public publicSharingSubject: BehaviorSubject<PublicSharingDTO> = new BehaviorSubject(
+    null
+  );
 
   constructor(private networkService: NetworkService, private router: Router) {
     this.ReadyPR = new Promise((resolve: () => void) => {
@@ -65,7 +72,7 @@ export class ShareService {
         }
       }
     });
-    this.currentSharing.subscribe( (sharing) => console.log('sharing', sharing))
+    this.currentSharing.subscribe((sharing) => console.log('sharing', sharing));
   }
 
   public getUrl(share: ResponseSharingDTO): string {
@@ -203,10 +210,16 @@ export class ShareService {
   private async checkSharing(): Promise<void> {
     try {
       this.sharingIsValid.next(null);
-      const sharing = await this.networkService.getJson<SharingDTOKey>(
-        '/share/' + this.getSharingKey() + '/key'
+      const sharing = await this.networkService.getJson<PublicSharingDTO>(
+        '/share/' + this.getSharingKey() + '/publicInfo'
       );
-      this.sharingIsValid.next(sharing.sharingKey === this.getSharingKey());
+      const valid = sharing.sharingKey === this.getSharingKey();
+      this.sharingIsValid.next(valid);
+      if (valid) {
+        this.publicSharingSubject.next(sharing);
+      } else {
+        this.publicSharingSubject.next(null);
+      }
     } catch (e) {
       this.sharingIsValid.next(false);
       console.error(e);

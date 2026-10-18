@@ -2,6 +2,8 @@ import {Request} from 'express';
 
 export enum ErrorCodes {
   NOT_AUTHENTICATED = 1,
+  NOT_AUTHENTICATED_SHARING = 11,
+
   ALREADY_AUTHENTICATED = 2,
   NOT_AUTHORISED = 3,
   PERMISSION_DENIED = 4,

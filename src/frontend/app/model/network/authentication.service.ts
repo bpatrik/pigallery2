@@ -96,12 +96,12 @@ export class AuthenticationService {
     return Config.Search.enabled && this.isAuthorized(UserRoles.Guest);
   }
 
-  public async logout(): Promise<void> {
+  public async logout(reason?: ErrorCodes): Promise<void> {
     await this.userService.logout();
     this.user.next(null);
     // even on logout try to get sharing user if it's a sharing
     await this.shareService.wait();
-    if(this.shareService.isSharing()){
+    if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {
       await this.getSessionUser();
     }
   }
