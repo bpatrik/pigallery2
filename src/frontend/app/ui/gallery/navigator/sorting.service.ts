@@ -148,6 +148,25 @@ export class GallerySortingService {
           }
         );
         break;
+      case SortByTypes.Directory:
+        media.sort((a: PhotoDTO, b: PhotoDTO) => {
+            const aDir = a.directory?.name || a.directory?.path || '';
+            const bDir = b.directory?.name || b.directory?.path || '';
+            const dirCompare = this.collator.compare(aDir, bDir);
+            if (dirCompare !== 0) {
+              return dirCompare;
+            }
+            const aSortable = Utils.sortableFilename(a.name);
+            const bSortable = Utils.sortableFilename(b.name);
+
+            if (aSortable === bSortable) {
+              return this.collator.compare(a.name, b.name);
+            }
+
+            return this.collator.compare(aSortable, bSortable);
+          }
+        );
+        break;
       case SortByTypes.Date:
         media.sort((a: PhotoDTO, b: PhotoDTO): number => {
           return Utils.getTimeMS(a.metadata.creationDate, a.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) - Utils.getTimeMS(b.metadata.creationDate, b.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset);
@@ -199,6 +218,9 @@ export class GallerySortingService {
       case SortByTypes.Name:
         return (m: MediaDTO) => m.name.at(0).toUpperCase();
 
+      case SortByTypes.Directory:
+        return (m: MediaDTO) => m.directory?.name || m.directory?.path || $localize`Home`;
+
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();
 
@@ -245,6 +267,7 @@ export class GallerySortingService {
                           case SortByTypes.FileSize:
                           case SortByTypes.PersonCount:
                           case SortByTypes.Rating: // directories do not have rating
+                          case SortByTypes.Directory:
                           case SortByTypes.Name:
                             c.directories.sort((a, b) =>
                                 this.collator.compare(a.name, b.name)

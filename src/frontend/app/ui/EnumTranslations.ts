@@ -54,6 +54,7 @@ EnumTranslations[ReIndexingSensitivity[ReIndexingSensitivity.medium]] = $localiz
 
 EnumTranslations[SortByTypes[SortByTypes.Date]] = $localize`date`;
 EnumTranslations[SortByTypes[SortByTypes.Name]] = $localize`name`;
+EnumTranslations[SortByTypes[SortByTypes.Directory]] = $localize`directory`;
 EnumTranslations[SortByTypes[SortByTypes.Rating]] = $localize`rating`;
 EnumTranslations[SortByTypes[SortByTypes.Random]] = $localize`random`;
 EnumTranslations[SortByTypes[SortByTypes.PersonCount]] = $localize`faces`;
