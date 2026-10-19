@@ -227,6 +227,14 @@ export class GalleryGridComponent
     this.isAfterViewInit = true;
   }
 
+  private static hasSameLayout(m1: MediaDTO, m2: MediaDTO): boolean {
+    return m1.name === m2.name &&
+      m1.directory?.name === m2.directory?.name &&
+      m1.directory?.path === m2.directory?.path &&
+      m1.metadata?.size?.width === m2.metadata?.size?.width &&
+      m1.metadata?.size?.height === m2.metadata?.size?.height;
+  }
+
   // Merging photos after new sorting and filter was applied
   public mergeNewPhotos(): void {
     if (this.mediaToRender.length === 0) {
@@ -270,10 +278,17 @@ export class GalleryGridComponent
           lastRowId = gridMedia.rowId;
         }
 
-        // we go no further. Found the first bad media
         if (gridMedia.equals(media) === false) {
-          diffFound = true;
-          break;
+          // Same file with the same size: only its metadata changed (e.g. an
+          // extension button edited its keywords). Swap it in place: the rows
+          // and the scroll position are kept, only this tile is re-rendered.
+          if (GalleryGridComponent.hasSameLayout(gridMedia.media, media)) {
+            this.mediaToRender[i].media[j] = new GridMedia(media, gridMedia.renderWidth, gridMedia.renderHeight, gridMedia.rowId);
+          } else {
+            // we go no further. Found the first bad media
+            diffFound = true;
+            break;
+          }
         }
         // save the last media that was checked and was ok
         lastOkIndex.groups = i;

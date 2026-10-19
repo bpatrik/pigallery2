@@ -463,6 +463,23 @@ describe('ContentWrapper', () => {
       const cw2 = ContentWrapperUtils.build(null, sr2);
       expect(ContentWrapperUtils.equals(cw1, cw2)).to.equal(false);
     });
+
+    it('should NOT equal media when a metadata property is removed', () => {
+      const dir = TestHelper.getDirectoryEntry();
+      const p1 = TestHelper.getPhotoEntry(dir);
+      p1.metadata.keywords = ['favorite'];
+      // the directory references its media: clone without it
+      const copy = () => {
+        const {directory, ...rest} = p1;
+        return {...Utils.clone(rest), directory} as PhotoDTO;
+      };
+      const p2 = copy();
+      delete p2.metadata.keywords;
+
+      expect(ContentWrapperUtils.equalsMedia(p1, copy())).to.equal(true);
+      expect(ContentWrapperUtils.equalsMedia(p1, p2)).to.equal(false);
+      expect(ContentWrapperUtils.equalsMedia(p2, p1)).to.equal(false);
+    });
   });
 
 });
