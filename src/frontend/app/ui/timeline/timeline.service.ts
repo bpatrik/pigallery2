@@ -36,11 +36,6 @@ export class TimelineService {
       // private mode or storage disabled: only lost after a reload
     }
   }
-  /**
-   * Url (without query) of the month search a photo was opened in from the
-   * timeline: closing that lightbox goes back to the timeline.
-   */
-  public lightboxUrl: string = null;
 
   private days: Promise<TimelineDTO> = null;
   private daysLoadedAt = 0;

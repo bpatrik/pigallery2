@@ -10,6 +10,12 @@ import {Utils} from '../../../../../common/Utils';
   providedIn: 'root'
 })
 export class LightboxService {
+  /**
+   * Url (without query) of a page shown with the lightbox opened from
+   * elsewhere (e.g. a month search opened from the timeline): closing that
+   * lightbox goes back in history instead of staying on that page.
+   */
+  public backOnCloseUrl: string = null;
   private subscription: Subscription;
 
   constructor(private route: ActivatedRoute,

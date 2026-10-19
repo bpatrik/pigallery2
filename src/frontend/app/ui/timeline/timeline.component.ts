@@ -21,6 +21,7 @@ import {Utils} from '../../../../common/Utils';
 import {QueryParams} from '../../../../common/QueryParams';
 import {PageHelper} from '../../model/page.helper';
 import {PiTitleService} from '../../model/pi-title.service';
+import {LightboxService} from '../gallery/lightbox/lightbox.service';
 
 interface Tile {
   media: MediaDTO;
@@ -111,6 +112,7 @@ export class TimelineComponent implements OnInit, OnDestroy {
     private zone: NgZone,
     private cd: ChangeDetectorRef,
     private piTitleService: PiTitleService,
+    private lightboxService: LightboxService,
     @Inject(LOCALE_ID) locale: string
   ) {
     // Same place as before only when coming back (lightbox closed, browser
@@ -124,7 +126,7 @@ export class TimelineComponent implements OnInit, OnDestroy {
 
   async ngOnInit(): Promise<void> {
     this.piTitleService.setTitle($localize`Timeline`);
-    this.timelineService.lightboxUrl = null;
+    this.lightboxService.backOnCloseUrl = null;
     this.zone.runOutsideAngular(() => window.addEventListener('scroll', this.onScroll, {passive: true}));
     window.addEventListener('pagehide', this.onPageHide);
     try {
@@ -351,7 +353,7 @@ export class TimelineComponent implements OnInit, OnDestroy {
     const media = tile.media;
     this.timelineService.scrollY = PageHelper.ScrollY;
     const query = JSON.stringify(TimelineService.monthQuery(m.month));
-    this.timelineService.lightboxUrl = '/search/' + query;
+    this.lightboxService.backOnCloseUrl = '/search/' + query;
     this.router.navigate(['/search', query], {
       queryParams: {
         [QueryParams.gallery.photo]: Utils.concatUrls(media.directory.path, media.directory.name, media.name),

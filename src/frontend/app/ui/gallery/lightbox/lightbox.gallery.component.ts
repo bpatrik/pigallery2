@@ -22,7 +22,6 @@ import {NgFor, NgIf} from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
-import {TimelineService} from '../../timeline/timeline.service';
 
 export enum LightboxStates {
   Open = 1,
@@ -93,7 +92,6 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     private piTitleService: PiTitleService,
     private wakeLockService: WakeLockService,
     private lightboxService: LightboxService,
-    private timelineService: TimelineService,
     private location: Location,
   ) {
   }
@@ -277,11 +275,11 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   public hide(): void {
-    // Opened from the timeline: back to it (same scroll position) instead
-    // of the month search the photo was shown in.
-    const fromTimeline = this.timelineService.lightboxUrl;
-    if (fromTimeline && decodeURIComponent(this.router.url.split('?')[0]) === fromTimeline) {
-      this.timelineService.lightboxUrl = null;
+    // Opened from another page (the timeline): back to it, at the same
+    // scroll position, instead of staying on the search it was shown in.
+    const backUrl = this.lightboxService.backOnCloseUrl;
+    if (backUrl && decodeURIComponent(this.router.url.split('?')[0]) === backUrl) {
+      this.lightboxService.backOnCloseUrl = null;
       this.location.back();
       return;
     }
