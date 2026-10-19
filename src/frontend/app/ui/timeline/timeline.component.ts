@@ -99,7 +99,11 @@ export class TimelineComponent implements OnInit, OnDestroy {
   private readonly monthFormat: Intl.DateTimeFormat;
   private readonly dayFormat: Intl.DateTimeFormat;
   private readonly onScroll = (): void => this.scheduleUpdate();
+  private readonly onPageHide = (): void => {
+    this.timelineService.scrollY = PageHelper.ScrollY;
+  };
   private updateScheduled = false;
+  private readonly restoreScroll: boolean;
 
   constructor(
     private timelineService: TimelineService,
@@ -109,6 +113,11 @@ export class TimelineComponent implements OnInit, OnDestroy {
     private piTitleService: PiTitleService,
     @Inject(LOCALE_ID) locale: string
   ) {
+    // Same place as before only when coming back (lightbox closed, browser
+    // back) or reloading the page; from a menu link, start from the top.
+    const nav = this.router.getCurrentNavigation();
+    const reload = (performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming)?.type === 'reload';
+    this.restoreScroll = nav?.trigger === 'popstate' || (nav?.id === 1 && reload);
     this.monthFormat = new Intl.DateTimeFormat(locale, {month: 'long', year: 'numeric', timeZone: 'UTC'});
     this.dayFormat = new Intl.DateTimeFormat(locale, {weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC'});
   }
@@ -117,6 +126,7 @@ export class TimelineComponent implements OnInit, OnDestroy {
     this.piTitleService.setTitle($localize`Timeline`);
     this.timelineService.lightboxUrl = null;
     this.zone.runOutsideAngular(() => window.addEventListener('scroll', this.onScroll, {passive: true}));
+    window.addEventListener('pagehide', this.onPageHide);
     try {
       this.dayCounts = (await this.timelineService.getDays()).days;
     } catch (e) {
@@ -127,13 +137,13 @@ export class TimelineComponent implements OnInit, OnDestroy {
     this.loading = false;
     this.layout();
     this.cd.detectChanges();
-    // Back from the lightbox: same place as before.
-    PageHelper.ScrollY = this.timelineService.scrollY;
+    PageHelper.ScrollY = this.restoreScroll ? this.timelineService.scrollY : 0;
     this.update();
   }
 
   ngOnDestroy(): void {
     window.removeEventListener('scroll', this.onScroll);
+    window.removeEventListener('pagehide', this.onPageHide);
     if (this.scrubberTimer) {
       clearTimeout(this.scrubberTimer);
     }

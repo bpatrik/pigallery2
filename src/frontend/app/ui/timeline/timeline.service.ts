@@ -14,8 +14,28 @@ import {Utils} from '../../../../common/Utils';
  */
 @Injectable({providedIn: 'root'})
 export class TimelineService {
-  /** Window scroll position when the timeline was left. */
-  public scrollY = 0;
+  /**
+   * Window scroll position when the timeline was left. Also kept in the
+   * session storage, so a page reload (e.g. after an action on the photos)
+   * comes back to the same place.
+   */
+  private static readonly SCROLL_KEY = 'timeline-scroll-y';
+
+  public get scrollY(): number {
+    try {
+      return parseInt(sessionStorage.getItem(TimelineService.SCROLL_KEY), 10) || 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  public set scrollY(value: number) {
+    try {
+      sessionStorage.setItem(TimelineService.SCROLL_KEY, '' + Math.round(value));
+    } catch (e) {
+      // private mode or storage disabled: only lost after a reload
+    }
+  }
   /**
    * Url (without query) of the month search a photo was opened in from the
    * timeline: closing that lightbox goes back to the timeline.
