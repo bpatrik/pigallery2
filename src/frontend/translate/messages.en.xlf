@@ -7455,6 +7455,18 @@
         </context-group>
         <target>Enter</target>
       </trans-unit>
+      <trans-unit id="6814295386768519176" datatype="html">
+        <source>Timeline</source>
+        <target>Timeline</target>
+      </trans-unit>
+      <trans-unit id="2369742814572661392" datatype="html">
+        <source>Loading…</source>
+        <target>Loading…</target>
+      </trans-unit>
+      <trans-unit id="9122356456219891928" datatype="html">
+        <source>No photos yet.</source>
+        <target>No photos yet.</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

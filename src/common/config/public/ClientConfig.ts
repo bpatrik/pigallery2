@@ -639,7 +639,7 @@ export class ClientMapConfig {
 }
 
 export enum NavigationLinkTypes {
-  gallery = 1, faces, albums, search, url
+  gallery = 1, faces, albums, search, url, timeline
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
@@ -863,6 +863,7 @@ export class NavBarConfig {
   })
   links: NavigationLinkConfig[] = [
     new NavigationLinkConfig(NavigationLinkTypes.gallery),
+    new NavigationLinkConfig(NavigationLinkTypes.timeline),
     new NavigationLinkConfig(NavigationLinkTypes.albums),
     new NavigationLinkConfig(NavigationLinkTypes.faces),
   ];
