@@ -74,7 +74,8 @@ export class TimelineComponent implements OnInit, OnDestroy {
   static readonly GAP = 2;
   static readonly MONTH_HEADER = 56;
   static readonly DAY_HEADER = 36;
-  static readonly MIN_TILE = 100;
+  static readonly MIN_TILE = 100;       // phones: 4 columns or more
+  static readonly MIN_TILE_WIDE = 180;  // tablets and desktops
 
   public months: MonthBlock[] = [];
   public visibleMonths: MonthBlock[] = [];
@@ -175,7 +176,8 @@ export class TimelineComponent implements OnInit, OnDestroy {
   private layout(): void {
     const width = this.container.nativeElement.clientWidth || window.innerWidth;
     const G = TimelineComponent.GAP;
-    this.columns = Math.max(4, Math.floor((width + G) / (TimelineComponent.MIN_TILE + G)));
+    const minTile = width < 768 ? TimelineComponent.MIN_TILE : TimelineComponent.MIN_TILE_WIDE;
+    this.columns = Math.max(4, Math.floor((width + G) / (minTile + G)));
     this.tileSize = Math.floor((width - G * (this.columns - 1)) / this.columns);
     const row = this.tileSize + G;
 
