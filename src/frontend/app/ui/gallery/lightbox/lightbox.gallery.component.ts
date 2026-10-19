@@ -159,6 +159,12 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   ngOnDestroy(): void {
     this.stopSlideShow();
+    // Destroyed while open (e.g. browser back to the timeline): release what
+    // showLigthbox() took, or the next page can no longer be scrolled.
+    if (this.status !== LightboxStates.Closed) {
+      this.fullScreenService.exitFullScreen();
+      this.overlayService.hideOverlay('lightbox');
+    }
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
     }
