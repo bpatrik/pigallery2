@@ -28,6 +28,7 @@ export class GalleryRouter {
 
     this.addSearch(app);
     this.addAutoComplete(app);
+    this.addTimeline(app);
   }
 
   protected static addDirectoryList(app: Express): void {
@@ -281,6 +282,21 @@ export class GalleryRouter {
 
       // specific part
       GalleryMWs.autocomplete,
+      ServerTimingMWs.addServerTiming,
+      RenderingMWs.renderResult
+    );
+  }
+
+  protected static addTimeline(app: Express): void {
+    app.get(
+      Config.Server.apiPath + '/timeline',
+      // common part
+      AuthenticationMWs.authenticate,
+      AuthenticationMWs.authorise(UserRoles.Guest),
+      VersionMWs.injectGalleryVersion,
+
+      // specific part
+      GalleryMWs.getTimeline,
       ServerTimingMWs.addServerTiming,
       RenderingMWs.renderResult
     );

@@ -16,6 +16,7 @@ import {ReIndexingSensitivity} from '../../../common/config/private/PrivateConfi
 import {DiskManager} from '../fileaccess/DiskManager';
 import {SessionContext} from '../SessionContext';
 import {FileEntity} from './enitites/FileEntity';
+import {TimelineDTO} from '../../../common/entities/TimelineDTO';
 
 const LOG_TAG = '[GalleryManager]';
 
@@ -301,6 +302,35 @@ export class GalleryManager {
 
     dir.media = [];
     dir.isPartial = true;
+  }
+
+  /**
+   * Number of media per day, newest first, for the timeline view.
+   * Only the creation dates are read; counting is done here so it works
+   * the same on every database.
+   */
+  async getTimeline(session: SessionContext): Promise<TimelineDTO> {
+    const connection = await SQLConnection.getConnection();
+    const qb = connection
+      .getRepository(MediaEntity)
+      .createQueryBuilder('media')
+      .leftJoin('media.directory', 'directory')
+      .select('media.metadata.creationDate', 'date')
+      .addSelect('media.metadata.creationDateOffset', 'offset');
+    if (session?.projectionQuery) {
+      qb.where(session.projectionQuery);
+    }
+    const rows: { date: number | string, offset: number | string }[] = await qb.getRawMany();
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      let t = Number(r.date);
+      if (Config.Gallery.ignoreTimestampOffset === true) {
+        t += (Number(r.offset) || 0) * 60000;
+      }
+      const day = new Date(t).toISOString().substring(0, 10);
+      counts.set(day, (counts.get(day) || 0) + 1);
+    }
+    return {days: Array.from(counts.entries()).sort((a, b) => a[0] < b[0] ? 1 : -1)};
   }
 
   async getMedia(session: SessionContext, mediaPath: string): Promise<MediaEntity> {

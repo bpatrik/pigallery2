@@ -1,0 +1,140 @@
+.timeline-body {
+  padding: 0 2px; /* the scrubber is drawn over the photos */
+}
+
+.timeline-msg {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.timeline {
+  position: relative;
+  width: 100%;
+}
+
+.month {
+  position: absolute;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.month-header {
+  height: 56px;
+  margin: 0;
+  padding-top: 20px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.day {
+  overflow: hidden;
+}
+
+.day-header {
+  height: 36px;
+  margin: 0;
+  padding-top: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+}
+
+.tiles {
+  display: grid;
+  gap: 2px;
+}
+
+.tile {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bs-secondary-bg);
+}
+
+.tile img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.tile .video {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  color: white;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
+/* --- scrubber ------------------------------------------------------------ */
+
+.scrubber {
+  position: fixed;
+  top: 64px;
+  bottom: 16px;
+  right: 0;
+  width: 44px;
+  z-index: 10;
+}
+
+.track {
+  position: absolute;
+  inset: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.year {
+  position: absolute;
+  right: 6px;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: var(--bs-body-bg);
+  color: var(--bs-secondary-color);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.scrubber.active .year {
+  opacity: 0.9;
+}
+
+.handle {
+  position: absolute;
+  right: 4px;
+  width: 8px;
+  height: 36px;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  background: var(--bs-primary);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.scrubber.active .handle {
+  opacity: 1;
+}
+
+.bubble {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 4px 10px;
+  border-radius: 16px;
+  background: var(--bs-primary);
+  color: white;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  display: none;
+}
+
+.scrubber.dragging .bubble {
+  display: block;
+}

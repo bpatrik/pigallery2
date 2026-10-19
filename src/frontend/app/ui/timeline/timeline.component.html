@@ -1,0 +1,43 @@
+<app-frame>
+  <div body class="timeline-body">
+    <div *ngIf="loading" class="timeline-msg text-secondary" i18n>Loading…</div>
+    <div *ngIf="error" class="timeline-msg text-danger">{{ error }}</div>
+    <div *ngIf="!loading && !error && months.length === 0" class="timeline-msg text-secondary" i18n>No photos yet.</div>
+
+    <div #container class="timeline" [style.height.px]="totalHeight">
+      <section *ngFor="let m of visibleMonths; trackBy: trackMonth" class="month"
+               [style.top.px]="m.top" [style.height.px]="m.height">
+        <h2 class="month-header">{{ m.label }}</h2>
+        <div *ngFor="let d of m.days; trackBy: trackDay" class="day" [style.height.px]="d.height">
+          <ng-container *ngIf="dayVisible(m, d)">
+            <h3 class="day-header">{{ d.label }}</h3>
+            <div class="tiles"
+                 [style.grid-template-columns]="'repeat(' + columns + ', ' + tileSize + 'px)'"
+                 [style.grid-auto-rows.px]="tileSize">
+              <a *ngFor="let t of d.tiles; trackBy: trackTile" class="tile" role="button"
+                 [attr.title]="t.media.name" (click)="open(m, t)">
+                <img [src]="t.src" loading="lazy" decoding="async" alt="">
+                <ng-icon *ngIf="t.video" class="video" name="ionVideocamOutline"></ng-icon>
+              </a>
+              <div *ngFor="let p of placeholders(d)" class="tile placeholder"></div>
+            </div>
+          </ng-container>
+        </div>
+      </section>
+    </div>
+
+    <div class="scrubber" [class.d-none]="!showScrubber"
+         [class.active]="scrubberActive || dragging" [class.dragging]="dragging">
+      <div #track class="track"
+           (pointerdown)="onTrackDown($event)"
+           (pointermove)="onTrackMove($event)"
+           (pointerup)="onTrackUp($event)"
+           (pointercancel)="onTrackUp($event)">
+        <span *ngFor="let y of years" class="year" [style.top.px]="y.y">{{ y.year }}</span>
+        <div class="handle" [style.top.px]="handleY">
+          <span class="bubble">{{ bubble }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</app-frame>

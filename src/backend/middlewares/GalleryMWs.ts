@@ -406,6 +406,22 @@ export class GalleryMWs {
     }
   }
 
+  @ServerTime('1.db', 'Timeline')
+  public static async getTimeline(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      req.resultPipe = await ObjectManagers.getInstance().GalleryManager.getTimeline(req.session.context);
+      return next();
+    } catch (err) {
+      return next(
+        new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Error during building the timeline', err)
+      );
+    }
+  }
+
   @ServerTime('1.db', 'Autocomplete')
   public static async autocomplete(
     req: Request,

@@ -290,6 +290,7 @@ export class PublicRouter {
         '/duplicates',
         '/faces',
         '/albums',
+        '/timeline',
         '/search*',
       ],
       AuthenticationMWs.tryAuthenticate,

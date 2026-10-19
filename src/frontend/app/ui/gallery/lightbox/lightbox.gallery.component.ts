@@ -8,6 +8,7 @@ import {animate, AnimationBuilder, AnimationPlayer, style,} from '@angular/anima
 import {GalleryLightboxMediaComponent} from './media/media.lightbox.gallery.component';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Params, Router} from '@angular/router';
+import {Location} from '@angular/common';
 import {PageHelper} from '../../../model/page.helper';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
@@ -21,6 +22,7 @@ import {NgFor, NgIf} from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
+import {TimelineService} from '../../timeline/timeline.service';
 
 export enum LightboxStates {
   Open = 1,
@@ -91,6 +93,8 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     private piTitleService: PiTitleService,
     private wakeLockService: WakeLockService,
     private lightboxService: LightboxService,
+    private timelineService: TimelineService,
+    private location: Location,
   ) {
   }
 
@@ -273,6 +277,14 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   public hide(): void {
+    // Opened from the timeline: back to it (same scroll position) instead
+    // of the month search the photo was shown in.
+    const fromTimeline = this.timelineService.lightboxUrl;
+    if (fromTimeline && decodeURIComponent(this.router.url.split('?')[0]) === fromTimeline) {
+      this.timelineService.lightboxUrl = null;
+      this.location.back();
+      return;
+    }
     this.router
       .navigate([], {queryParams: this.queryService.getParams()})
       .then(() => {

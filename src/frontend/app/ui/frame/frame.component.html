@@ -16,6 +16,9 @@
             <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.albums && isAlbumsAvailable()">
               <a class="nav-link" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')" i18n>Albums</a>
             </li>
+            <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.gallery && isTimelineAvailable()">
+              <a class="nav-link" [routerLink]="['/timeline']" [class.active]="isLinkActive('/timeline')" i18n>Timeline</a>
+            </li>
             <li class="nav-item" *ngIf="link.type === NavigationLinkTypes.faces && isFacesAvailable()">
               <a class="nav-link" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')" i18n>Faces</a>
             </li>
@@ -124,6 +127,13 @@
                       <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')">
                         <ng-icon name="ionPeopleOutline"></ng-icon>
                         <ng-container i18n>Faces</ng-container>
+                      </a>
+                    </li>
+                    <li class="nav-item d-md-none"
+                        *ngIf="link.type === NavigationLinkTypes.gallery && isTimelineAvailable()">
+                      <a class="dropdown-item" [routerLink]="['/timeline']" [class.active]="isLinkActive('/timeline')">
+                        <ng-icon name="ionTimeOutline"></ng-icon>
+                        <ng-container i18n>Timeline</ng-container>
                       </a>
                     </li>
                     <li class="nav-item d-md-none" *ngIf="link.type === NavigationLinkTypes.gallery  && isGalleryAvailable()">

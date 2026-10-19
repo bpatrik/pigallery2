@@ -143,6 +143,11 @@ export class FrameComponent {
     this.authService.logout();
   }
 
+  isTimelineAvailable(): boolean {
+    // Shared links (LimitedGuest) only see what was shared: no timeline.
+    return this.user.value && this.user.value.role >= UserRoles.Guest;
+  }
+
   isAlbumsAvailable(): boolean {
     return Config.Album.enabled &&
       this.user.value &&
