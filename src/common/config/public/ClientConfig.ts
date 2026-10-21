@@ -290,6 +290,15 @@ export class ClientAlbumConfig {
 
   @ConfigProperty({
     type: UserRoles, tags: {
+      name: $localize`Albums creation right`,
+      priority: ConfigPriority.underTheHood
+    },
+    description: $localize`Required minimum right to create an album.`
+  })
+  writeAccessMinRole: UserRoles = UserRoles.Admin;
+
+  @ConfigProperty({
+    type: UserRoles, tags: {
       name: $localize`Albums listing right`,
       priority: ConfigPriority.underTheHood
     },
