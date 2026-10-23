@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { ClipboardModule } from 'ngx-clipboard';
 import { GallerySearchQueryBuilderComponent } from '../search/query-builder/query-bulder.gallery.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
+import {Utils} from '../../../../../common/Utils';
 
 @Component({
     selector: 'app-gallery-random-query-builder',
@@ -53,7 +54,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
       if (!params[QueryParams.gallery.search.query]) {
         return;
       }
-      const searchQuery = JSON.parse(params[QueryParams.gallery.search.query]);
+      const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
       if (searchQuery) {
         this.searchQueryDTO = searchQuery;
         this.onQueryChange();
@@ -66,8 +67,14 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   }
 
   onQueryChange(): void {
+    const urlBase = (Config.Server.urlBase || '').replace(/^\/+|\/+$/g, '');
+    const publicUrl = (Config.Server.publicUrl || '').replace(/\/+$/, '');
+    const baseUrl = urlBase && !publicUrl.endsWith('/' + urlBase)
+      ? Utils.concatUrls(publicUrl, urlBase)
+      : publicUrl;
+
     this.url = NetworkService.buildUrl(
-        Config.Server.publicUrl + Config.Server.apiPath + '/gallery/random/' + this.HTMLSearchQuery
+        Utils.concatUrls(baseUrl, Config.Server.apiPath, '/gallery/random') + '/' + this.HTMLSearchQuery
     );
   }
 
@@ -78,7 +85,19 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
           if (!this.enabled) {
             return;
           }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
+          const directory = Utils.concatUrls(content.directory.path, content.directory.name);
+          if (directory && directory !== '.' && directory !== './') {
+            this.searchQueryDTO = {
+              type: SearchQueryTypes.directory,
+              value: directory,
+            } as TextSearch;
+          } else {
+            this.searchQueryDTO = {
+              type: SearchQueryTypes.any_text,
+              value: '',
+            } as TextSearch;
+          }
+          this.onQueryChange();
         }
     );
   }
