@@ -215,6 +215,14 @@ export const SearchQueryUtils = {
       return null;
     }
 
+    if (typeof urlQuery === 'string' && (urlQuery.startsWith('%') || urlQuery.includes('%22') || urlQuery.includes('%7B'))) {
+      try {
+        urlQuery = decodeURIComponent(urlQuery);
+      } catch (e) {
+        // ignore decoding errors and continue with raw string
+      }
+    }
+
     const map: Record<string, string> = {};
     Object.keys(SearchQueryUtils.URLMap).forEach(key => {
       map[SearchQueryUtils.URLMap[key]] = key;

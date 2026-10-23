@@ -260,6 +260,27 @@ describe('GalleryMWs', () => {
       });
     });
 
+    it('should parse URL-encoded search query', (done: (err?: any) => void) => {
+      const originalQuery: TextSearch = {
+        type: SearchQueryTypes.any_text,
+        value: '',
+      };
+      const req: any = {
+        params: {
+          searchQueryDTO: encodeURIComponent(SearchQueryUtils.urlify(originalQuery)),
+        },
+      };
+      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
+        try {
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal(originalQuery);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    });
+
     it('should parse full JSON search query', (done: (err?: any) => void) => {
       const originalQuery: TextSearch = {
         type: SearchQueryTypes.keyword,

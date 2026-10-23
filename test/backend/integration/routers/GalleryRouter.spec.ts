@@ -235,9 +235,11 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
     afterEach(tearDown);
 
     it('should return random photo for URLified search query', async () => {
-      // Populate DB by listing orientation directory first
-      await (request.execute(server.Server) as SuperAgentStatic)
-        .get(Config.Server.apiPath + '/gallery/content/orientation');
+      // Ensure orientation directory is indexed and completely saved to DB
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('orientation', true);
+      if (ObjectManagers.getInstance().IndexingManager.IsSavingInProgress) {
+        await ObjectManagers.getInstance().IndexingManager.SavingReady;
+      }
 
       const urlifiedQuery = SearchQueryUtils.urlify({
         type: SearchQueryTypes.any_text,

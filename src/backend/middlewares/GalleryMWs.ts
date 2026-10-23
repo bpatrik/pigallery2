@@ -33,7 +33,12 @@ export class GalleryMWs {
         return next();
       }
 
-      const rawQueryParam = req.params['searchQueryDTO'] as string;
+      let rawQueryParam = req.params['searchQueryDTO'] as string;
+      try {
+        rawQueryParam = decodeURIComponent(rawQueryParam);
+      } catch (e) {
+        // ignore decoding errors and continue with raw string
+      }
 
       let query: SearchQueryDTO;
       try {
