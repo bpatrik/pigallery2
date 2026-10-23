@@ -348,7 +348,11 @@ export class SettingsEntryComponent
       const eClass = state.isEnumType
           ? state.type
           : state.arrayType;
-      if (state.tags?.uiOptions) {
+      if (state.tags?.uiOptions && typeof eClass === 'object') {
+        // enum with a restricted set of options
+        state.optionsView = enumToTranslatedArray(eClass)
+          .filter(o => state.tags.uiOptions.includes(o.key));
+      } else if (state.tags?.uiOptions) {
         state.optionsView = state.tags?.uiOptions.map(o => ({
           key: o,
           value: o + (state.tags?.unit ? state.tags?.unit : '')

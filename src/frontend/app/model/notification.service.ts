@@ -29,7 +29,7 @@ export class NotificationService {
           this.authService.isAuthenticated() &&
           (!this.lastUser ||
               this.lastUser.id !== this.authService.user.value.id) &&
-          this.authService.user.value.role >= UserRoles.Guest
+          this.authService.user.value.role >= UserRoles.User
       ) {
         this.getServerNotifications();
       }

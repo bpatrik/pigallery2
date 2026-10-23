@@ -379,9 +379,27 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       relevant: (c: any) => c.enabled,
       priority: ConfigPriority.advanced
     },
-    description: $localize`If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in.`
+    description: $localize`If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.`
   })
   autoCreateUser: boolean = false;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Auto-created user role`,
+      relevant: (c: any) => c.enabled && c.autoCreateUser,
+      priority: ConfigPriority.advanced,
+      // LimitedGuest is reserved for sharing users
+      uiOptions: [UserRoles.Guest, UserRoles.User, UserRoles.Admin, UserRoles.Developer]
+    } as TAGS,
+    constraint: {
+      assert: (v: UserRoles) => v >= UserRoles.Guest,
+      assertReason: 'Users.oidc.autoCreateUserRole should be at least Guest.',
+      fallBackValue: UserRoles.Guest
+    },
+    description: $localize`Role of the users that are created on their first OIDC login.`
+  })
+  autoCreateUserRole: UserRoles = UserRoles.Guest;
 }
 
 
