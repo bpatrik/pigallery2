@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { ClipboardModule } from 'ngx-clipboard';
 import { GallerySearchQueryBuilderComponent } from '../search/query-builder/query-bulder.gallery.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
+import {Utils} from '../../../../../common/Utils';
 
 @Component({
     selector: 'app-gallery-random-query-builder',
@@ -66,8 +67,14 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   }
 
   onQueryChange(): void {
+    const urlBase = (Config.Server.urlBase || '').replace(/^\/+|\/+$/g, '');
+    const publicUrl = (Config.Server.publicUrl || '').replace(/\/+$/, '');
+    const baseUrl = urlBase && !publicUrl.endsWith('/' + urlBase)
+      ? Utils.concatUrls(publicUrl, urlBase)
+      : publicUrl;
+
     this.url = NetworkService.buildUrl(
-        Config.Server.publicUrl + Config.Server.apiPath + '/gallery/random/' + this.HTMLSearchQuery
+        Utils.concatUrls(baseUrl, Config.Server.apiPath, '/gallery/random') + '/' + this.HTMLSearchQuery
     );
   }
 
