@@ -1,7 +1,7 @@
 import {Config} from '../../../common/config/private/Config';
 import {Request, Response} from 'express';
 import {Client, generators, Issuer, TokenSet} from 'openid-client';
-import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
+import {UserDTO} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 
@@ -65,7 +65,7 @@ export class OIDCAuthService {
     let user = await ObjectManagers.getInstance().UserManager.findOne({name: matchedName});
     if (!user && Config.Users.oidc.autoCreateUser) {
       const rnd = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      const newUser: UserDTO = {name: matchedName, password: rnd, role: UserRoles.Guest} as any;
+      const newUser: UserDTO = {name: matchedName, password: rnd, role: Config.Users.oidc.autoCreateUserRole} as any;
       user = await ObjectManagers.getInstance().UserManager.createUser(newUser);
     }
     if (!user) {
