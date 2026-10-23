@@ -161,7 +161,7 @@ export class GalleryRouter {
 
   protected static addRandom(app: Express): void {
     app.get(
-      [Config.Server.apiPath + '/gallery/random/:searchQueryDTO'],
+      [Config.Server.apiPath + '/gallery/random/:searchQueryDTO(*)'],
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),

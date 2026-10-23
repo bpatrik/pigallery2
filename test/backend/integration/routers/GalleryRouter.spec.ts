@@ -10,6 +10,8 @@ import {ReIndexingSensitivity} from '../../../../src/common/config/private/Priva
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
+import {SearchQueryTypes, TextSearch} from '../../../../src/common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 
 process.env.NODE_ENV = 'test';
 chai.should();
@@ -224,6 +226,29 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
       expect(result.body.error).to.not.be.equal(null);
       expect(result.body.result).to.be.equal(null);
       expect(result.body.error.code).to.be.equal(ErrorCodes.PATH_ERROR);
+    });
+  });
+
+  describe('/GET /api/gallery/random/:searchQueryDTO', async () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    it('should return random photo for URLified search query', async () => {
+      // Populate DB by listing orientation directory first
+      await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/content/orientation');
+
+      const urlifiedQuery = SearchQueryUtils.urlify({
+        type: SearchQueryTypes.any_text,
+        value: '',
+      } as TextSearch);
+
+      const result = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/random/' + encodeURIComponent(urlifiedQuery));
+
+      (result.should as any).have.status(200);
+      expect(result.body).to.be.instanceof(Buffer);
     });
   });
 

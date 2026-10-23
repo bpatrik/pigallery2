@@ -13,6 +13,7 @@ import {VideoDTO} from '../../common/entities/VideoDTO';
 import {QueryParams} from '../../common/QueryParams';
 import {VideoProcessing} from '../model/fileaccess/fileprocessing/VideoProcessing';
 import {SearchQueryDTO, SearchQueryTypes,} from '../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../common/SearchQueryUtils';
 import {LocationLookupException} from '../exceptions/LocationLookupException';
 import {ServerTime} from './ServerTimingMWs';
 import {SortByTypes} from '../../common/entities/SortingMethods';
@@ -32,11 +33,11 @@ export class GalleryMWs {
         return next();
       }
 
-      let rawQueryParam = req.params['searchQueryDTO'] as string;
+      const rawQueryParam = req.params['searchQueryDTO'] as string;
 
       let query: SearchQueryDTO;
       try {
-        query = JSON.parse(rawQueryParam);
+        query = SearchQueryUtils.parseURLifiedQuery(rawQueryParam);
       } catch (parseError) {
         return next(
           new ErrorDTO(
