@@ -1,4 +1,4 @@
-import {SearchQueryDTO} from './SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO} from './SearchQueryDTO';
 
 export enum UserRoles {
   LimitedGuest = 1, // sharing user
@@ -19,4 +19,6 @@ export interface UserDTO {
   overrideAllowBlockList?: boolean;
   allowQuery?: SearchQueryDTO | null;
   blockQuery?: SearchQueryDTO | null;
+  allowDirectoryList?: DirectorySearch[] | null;
+  blockDirectoryList?: DirectorySearch[] | null;
 }

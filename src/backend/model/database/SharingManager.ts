@@ -3,12 +3,28 @@ import {SQLConnection} from './SQLConnection';
 import {SharingEntity} from './enitites/SharingEntity';
 import {Config} from '../../../common/config/private/Config';
 import {PasswordHelper} from '../PasswordHelper';
-import {DeleteResult, SelectQueryBuilder} from 'typeorm';
+import {Brackets, DeleteResult, SelectQueryBuilder} from 'typeorm';
 import {UserDTO} from '../../../common/entities/UserDTO';
-import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 export class SharingManager {
+  /**
+   * A sharing needs at least a media (searchQuery) or a directory (directoryQuery) restriction,
+   * otherwise it would show everything the creator can see.
+   */
+  private static validateQueries(sharing: UpdateSharingDTO): void {
+    if (SearchQueryUtils.isQueryEmpty(sharing.searchQuery) && !sharing.directoryQuery) {
+      throw new Error('Invalid sharing: either searchQuery or directoryQuery needs to be set');
+    }
+    if (sharing.searchQuery) {
+      SearchQueryUtils.validateSearchQuery(sharing.searchQuery);
+    }
+    if (sharing.directoryQuery) {
+      SearchQueryUtils.validateDirectorySearch(sharing.directoryQuery, 'Sharing directoryQuery');
+    }
+  }
+
   private static async removeExpiredLink(): Promise<DeleteResult> {
     const connection = await SQLConnection.getConnection();
     return await connection
@@ -45,9 +61,13 @@ export class SharingManager {
       .getRepository(SharingEntity)
       .createQueryBuilder('share')
       .leftJoinAndSelect('share.creator', 'creator')
-      .where('share.searchQuery = :query', {query: SearchQueryUtils.stringifyForComparison(query)});
+      // a sharing matches if either its media or its directory query is the given query
+      .where(new Brackets(b => {
+        b.where('share.searchQuery = :query', {query: SearchQueryUtils.stringifyForComparison(query)})
+          .orWhere('share.directoryQuery = :query');
+      }));
     if (user) {
-      q.where('share.creator = :user', {user: user.id});
+      q.andWhere('share.creator = :user', {user: user.id});
     }
     return await q.getMany();
   }
@@ -69,11 +89,14 @@ export class SharingManager {
       sharing.password = PasswordHelper.cryptPassword(sharing.password);
     }
     if (sharing.searchQuery) {
-      SearchQueryUtils.validateSearchQuery(sharing.searchQuery);
       sharing.searchQuery = SearchQueryUtils.sortQuery(sharing.searchQuery);
     }
     if (sharing.defaultDirectoryView && sharing.defaultSearchView) {
       throw new Error('defaultDirectoryView and defaultSearchView cannot be set at the same time');
+    }
+    SharingManager.validateQueries(sharing);
+    if (sharing.directoryQuery) {
+      sharing.directoryQuery = SearchQueryUtils.sortQuery(sharing.directoryQuery) as DirectorySearch;
     }
     if (sharing.defaultSearchView) {
       SearchQueryUtils.validateSearchQuery(sharing.defaultSearchView);
@@ -107,8 +130,10 @@ export class SharingManager {
     } else {
       sharing.password = PasswordHelper.cryptPassword(inSharing.password);
     }
-    // allow updating searchQuery and canonicalize it
-    sharing.searchQuery = SearchQueryUtils.sortQuery(inSharing.searchQuery);
+    // allow updating searchQuery and directoryQuery and canonicalize them
+    SharingManager.validateQueries(inSharing);
+    sharing.searchQuery = inSharing.searchQuery ? SearchQueryUtils.sortQuery(inSharing.searchQuery) : null;
+    sharing.directoryQuery = inSharing.directoryQuery ? SearchQueryUtils.sortQuery(inSharing.directoryQuery) as DirectorySearch : null;
     if (inSharing.defaultSearchView) {
       SearchQueryUtils.validateSearchQuery(inSharing.defaultSearchView);
       sharing.defaultSearchView = SearchQueryUtils.sortQuery(inSharing.defaultSearchView);

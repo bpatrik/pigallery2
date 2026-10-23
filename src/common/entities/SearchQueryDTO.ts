@@ -108,6 +108,14 @@ export interface TextSearch extends NegatableSearchQuery {
   value: string;
 }
 
+/**
+ * A text search that always searches for directories.
+ * Directory allow / block lists and the directory query of a sharing are built from these.
+ */
+export interface DirectorySearch extends TextSearch {
+  type: SearchQueryTypes.directory;
+}
+
 export interface DistanceSearch extends NegatableSearchQuery {
   type: SearchQueryTypes.distance;
   from: {

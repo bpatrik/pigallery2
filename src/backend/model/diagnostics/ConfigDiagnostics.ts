@@ -284,6 +284,12 @@ export class ConfigDiagnostics {
     }
   }
 
+  static async testUsersConfig(config: PrivateConfigClass): Promise<void> {
+    Logger.debug(LOG_TAG, 'Testing users config');
+    SearchQueryUtils.validateDirectoryList(config.Users.allowDirectoryList, 'Directory allow list');
+    SearchQueryUtils.validateDirectoryList(config.Users.blockDirectoryList, 'Directory block list');
+  }
+
   static async testAlbumCoverConfig(settings: ServerAlbumCoverConfig): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing cover config');
     SearchQueryUtils.validateSearchQuery(settings.SearchQuery, 'SearchQuery');
@@ -356,6 +362,7 @@ export class ConfigDiagnostics {
     await ConfigDiagnostics.testFacesConfig(config.Faces, config);
     await ConfigDiagnostics.testTasksConfig(config.Jobs, config);
     await ConfigDiagnostics.testSharingConfig(config.Sharing, config);
+    await ConfigDiagnostics.testUsersConfig(config);
     await ConfigDiagnostics.testRandomPhotoConfig(config.Sharing, config);
     await ConfigDiagnostics.testMapConfig(config.Map);
     await ConfigDiagnostics.testJobsConfig(config.Jobs);

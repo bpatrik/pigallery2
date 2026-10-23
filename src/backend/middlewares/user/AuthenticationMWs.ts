@@ -8,7 +8,9 @@ import {Utils} from '../../../common/Utils';
 import {QueryParams} from '../../../common/QueryParams';
 import * as path from 'path';
 import {Logger} from '../../Logger';
-import {ContextUser} from '../../model/SessionContext';
+import {ContextUser, SessionContext} from '../../model/SessionContext';
+import {Brackets} from 'typeorm';
+import {DirectoryAccess, DirectoryAccessTypes} from '../../model/DirectoryAccess';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -51,7 +53,8 @@ export class AuthenticationMWs {
     // if already authenticated, do not try to use sharing authentication
     if (typeof req.session.context !== 'undefined') {
       // fix context. projectionQuery gets lost in the session between calls
-      if (req.session?.context && req.session.context?.user?.projectionKey && (!req.session.context?.projectionQuery || Object.keys(req.session.context?.projectionQuery || {}).length === 0)) {
+      // Brackets do not survive serialization, so rebuild the context if they are not real Brackets anymore (fail closed)
+      if (req.session?.context?.user && AuthenticationMWs.isContextBroken(req.session.context)) {
         req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(req.session.context.user);
       }
       // auto extend session if rememberMe is set
@@ -117,18 +120,57 @@ export class AuthenticationMWs {
         const p: string = req.params[paramName];
 
         if (!await ObjectManagers.getInstance().GalleryManager.authoriseMetaFile(req.session.context, p)) {
-          res.sendStatus(403);
+          res.sendStatus(404); // same as not existing
           return;
         }
 
         return next();
       } catch (e) {
         // On error, fail closed to be safe
-        Logger.warn(LOG_TAG, 'authoriseMedia error:', e);
-        res.sendStatus(403);
+        Logger.warn(LOG_TAG, 'authoriseMetaFiles error:', e);
+        res.sendStatus(404); // same as not existing
         return;
       }
     };
+  }
+
+  /**
+   * Authorises the directory against the directory allow and block lists of the session (see DirectoryAccess).
+   * Not available directories get the same error as not existing ones, so it can't be used to find out if a directory exists.
+   * It sets req.directoryAccess for the next middlewares.
+   */
+  public static authoriseDirectory(
+    paramName: string
+  ): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+    return async function authoriseDirectory(
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ): Promise<void> {
+      try {
+        const dirRelPath: string = req.params[paramName] || path.sep;
+        const access = req.session.context?.directoryAccess
+          ? await req.session.context.directoryAccess.getAccess(dirRelPath)
+          : DirectoryAccessTypes.none;
+        if (access === DirectoryAccessTypes.none) {
+          return AuthenticationMWs.directoryNotFound(res, next);
+        }
+        req.directoryAccess = access;
+        return next();
+      } catch (e) {
+        // On error, fail closed to be safe
+        Logger.warn(LOG_TAG, 'authoriseDirectory error:', e);
+        return AuthenticationMWs.directoryNotFound(res, next);
+      }
+    };
+  }
+
+  /**
+   * The response for not existing and not available directories. They need to be the same.
+   */
+  public static directoryNotFound(res: Response, next: NextFunction): void {
+    res.status(404);
+    return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
   }
 
   public static authoriseMedia(
@@ -143,7 +185,7 @@ export class AuthenticationMWs {
         const mediaRelPath: string = req.params[paramName];
 
         if (!await ObjectManagers.getInstance().GalleryManager.authoriseMedia(req.session.context, mediaRelPath)) {
-          res.sendStatus(403);
+          res.sendStatus(404); // same as a not existing media, so it can't be used to probe paths
           return;
         }
 
@@ -152,7 +194,7 @@ export class AuthenticationMWs {
       } catch (e) {
         // On error, fail closed to be safe
         Logger.warn(LOG_TAG, 'authoriseMedia error:', e);
-        res.sendStatus(403);
+        res.sendStatus(404); // same as a not existing media, so it can't be used to probe paths
         return;
       }
     };
@@ -211,13 +253,7 @@ export class AuthenticationMWs {
         return next(new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND));
       }
 
-      const user = {
-        name: 'Guest',
-        role: UserRoles.LimitedGuest,
-        usedSharingKey: sharing.sharingKey,
-        overrideAllowBlockList: true,
-        allowQuery: ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(sharing)
-      } as ContextUser;
+      const user = ObjectManagers.getInstance().SessionManager.createSharingUser(sharing);
       req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
       return next();
     } catch (err) {
@@ -298,6 +334,21 @@ export class AuthenticationMWs {
     return next();
   }
 
+  /**
+   * Returns true if the prebuilt queries of the context got lost (e.g.: during session serialization)
+   */
+  private static isContextBroken(context: SessionContext): boolean {
+    if (!context.user.projectionKey) {
+      return false; // context was never built
+    }
+    // Rebuild also if there is no projection, so config changes (e.g.: new allow/block lists) are applied
+    if (!(context.projectionQuery instanceof Brackets)) {
+      return true;
+    }
+    // its methods and SQL filters are lost too
+    return !(context.directoryAccess instanceof DirectoryAccess);
+  }
+
   private static getSharingKey(req: Request) {
     return (req.query[QueryParams.gallery.sharingKey_query] as string) ||
       (req.params[QueryParams.gallery.sharingKey_params] as string);
@@ -324,13 +375,7 @@ export class AuthenticationMWs {
       return null;
     }
 
-    return {
-      name: 'Guest',
-      role: UserRoles.LimitedGuest,
-      usedSharingKey: sharing.sharingKey,
-      overrideAllowBlockList: true,
-      allowQuery: ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(sharing)
-    } as ContextUser;
+    return ObjectManagers.getInstance().SessionManager.createSharingUser(sharing);
 
   }
 }

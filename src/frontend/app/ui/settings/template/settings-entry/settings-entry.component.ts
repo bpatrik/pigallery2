@@ -27,6 +27,7 @@ import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-me
 import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
+import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
 
 interface IState {
   shouldHide(): boolean;
@@ -77,6 +78,7 @@ interface IState {
         NgClass,
         PopoverDirective,
         SafeHtmlPipe,
+        DirectorySearchListSettingsComponent,
     ]
 })
 export class SettingsEntryComponent
@@ -96,6 +98,7 @@ export class SettingsEntryComponent
   idName: string;
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
+  readonly newDirectorySearch = () => new this.state.arrayType();
   public type: string | object;
   public arrayType: string;
   public uiType: string;

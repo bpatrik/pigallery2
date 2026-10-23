@@ -149,6 +149,24 @@
               </app-gallery-search-field>
               <small class="text-muted" i18n>Items matching this query will be hidden.</small>
             </div>
+
+            <div class="mb-3">
+              <label class="form-label" i18n>Allowed directories</label>
+              <app-settings-directory-search-list
+                idName="allowDirectoryList"
+                [list]="editSettings.allowDirectoryList">
+              </app-settings-directory-search-list>
+              <div><small class="text-muted" i18n>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</small></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" i18n>Blocked directories</label>
+              <app-settings-directory-search-list
+                idName="blockDirectoryList"
+                [list]="editSettings.blockDirectoryList">
+              </app-settings-directory-search-list>
+              <div><small class="text-muted" i18n>Directories (and their content) matching any of these will be hidden.</small></div>
+            </div>
           </div>
         </div>
         <div class="modal-footer">
