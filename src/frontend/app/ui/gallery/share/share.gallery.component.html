@@ -148,6 +148,7 @@
       <thead>
       <tr>
         <th i18n>Sharing</th>
+        <th i18n>Subfolders</th>
         <th *ngIf="IsAdmin" i18n>Creator</th>
         <th i18n>Expires</th>
         <th></th>
@@ -155,7 +156,17 @@
       </thead>
       <tbody>
       <tr *ngFor="let share of activeShares">
-        <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
+        <td class="ellipsisContainer">
+          <div class="ellipsisText share-key">
+            <a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a>
+            <button type="button" class="btn btn-link p-0 ms-1"
+                    ngxClipboard [cbContent]="sharingService.getUrl(share)" (cbOnSuccess)="onCopy()"
+                    title="Copy link" i18n-title>
+              <ng-icon name="ionCopyOutline"></ng-icon>
+            </button>
+          </div>
+        </td>
+        <td>{{ isRecursive(share) ? text.Yes : text.No }}</td>
         <td *ngIf="IsAdmin">{{share.creator.name}}</td>
         <td>{{share.expires | date}}</td>
         <td>

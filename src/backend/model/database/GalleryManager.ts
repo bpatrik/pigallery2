@@ -6,7 +6,7 @@ import {SQLConnection} from './SQLConnection';
 import {PhotoEntity} from './enitites/PhotoEntity';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
-import {Brackets, Connection} from 'typeorm';
+import {Connection} from 'typeorm';
 import {MediaEntity} from './enitites/MediaEntity';
 import {VideoEntity} from './enitites/VideoEntity';
 import {Logger} from '../../Logger';
@@ -434,16 +434,8 @@ export class GalleryManager {
         ]);
 
       // search does not return a directory if that is recursively having 0 media
-      // gallery listing should otherwise, we won't be able to trigger lazy indexing
-      // this behavior lets us explicitly hid a directory if it is explicitly blocked
-      if (session.projectionQueryForSubDir) {
-        dirQuery.andWhere(new Brackets(q => {
-          q.where(session.projectionQueryForSubDir);
-          // also select directories when they have no child dirs.
-          q.orWhere('directories.id is NULL');
-        }));
-      }
-
+      // gallery listing should otherwise, we won't be able to trigger lazy indexing.
+      // The media allow/block list only filters media, directories are hidden by the directory allow/block list
       dir.directories = await dirQuery.getMany();
 
       if (dir.directories) {

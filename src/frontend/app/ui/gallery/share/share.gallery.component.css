@@ -45,3 +45,19 @@ a.list-shares-button:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* the key is truncated, the copy button right after it stays visible */
+.share-key {
+  display: flex;
+  align-items: center;
+}
+
+.share-key a {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.share-key button {
+  flex-shrink: 0;
+  line-height: 1;
+}

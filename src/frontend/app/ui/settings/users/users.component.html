@@ -152,49 +152,19 @@
 
             <div class="mb-3">
               <label class="form-label" i18n>Allowed directories</label>
-              <div class="input-group mb-1" *ngFor="let d of editSettings.allowDirectoryList; let i = index">
-                <input type="text" class="form-control" [(ngModel)]="d.value" name="allowDirectoryListValue{{i}}"
-                       placeholder="/photos/folder" i18n-placeholder>
-                <select class="form-select flex-grow-0 w-auto" [(ngModel)]="d.matchType" name="allowDirectoryListMatchType{{i}}">
-                  <option *ngFor="let mt of directoryMatchTypes" [ngValue]="mt.value">{{mt.name}}</option>
-                </select>
-                <div class="input-group-text">
-                  <input class="form-check-input mt-0 me-1" type="checkbox" [(ngModel)]="d.negate"
-                         name="allowDirectoryListNegate{{i}}" id="allowDirectoryListNegate{{i}}">
-                  <label class="form-check-label" for="allowDirectoryListNegate{{i}}" i18n>not</label>
-                </div>
-                <button class="btn btn-outline-danger" type="button" (click)="removeDirectorySearch(editSettings.allowDirectoryList, i)"
-                        title="Remove" i18n-title>
-                  <ng-icon name="ionTrashOutline"></ng-icon>
-                </button>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary" type="button" (click)="addDirectorySearch(editSettings.allowDirectoryList)" i18n>
-                Add directory
-              </button>
+              <app-settings-directory-search-list
+                idName="allowDirectoryList"
+                [list]="editSettings.allowDirectoryList">
+              </app-settings-directory-search-list>
               <div><small class="text-muted" i18n>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</small></div>
             </div>
 
             <div class="mb-3">
               <label class="form-label" i18n>Blocked directories</label>
-              <div class="input-group mb-1" *ngFor="let d of editSettings.blockDirectoryList; let i = index">
-                <input type="text" class="form-control" [(ngModel)]="d.value" name="blockDirectoryListValue{{i}}"
-                       placeholder="/photos/folder" i18n-placeholder>
-                <select class="form-select flex-grow-0 w-auto" [(ngModel)]="d.matchType" name="blockDirectoryListMatchType{{i}}">
-                  <option *ngFor="let mt of directoryMatchTypes" [ngValue]="mt.value">{{mt.name}}</option>
-                </select>
-                <div class="input-group-text">
-                  <input class="form-check-input mt-0 me-1" type="checkbox" [(ngModel)]="d.negate"
-                         name="blockDirectoryListNegate{{i}}" id="blockDirectoryListNegate{{i}}">
-                  <label class="form-check-label" for="blockDirectoryListNegate{{i}}" i18n>not</label>
-                </div>
-                <button class="btn btn-outline-danger" type="button" (click)="removeDirectorySearch(editSettings.blockDirectoryList, i)"
-                        title="Remove" i18n-title>
-                  <ng-icon name="ionTrashOutline"></ng-icon>
-                </button>
-              </div>
-              <button class="btn btn-sm btn-outline-secondary" type="button" (click)="addDirectorySearch(editSettings.blockDirectoryList)" i18n>
-                Add directory
-              </button>
+              <app-settings-directory-search-list
+                idName="blockDirectoryList"
+                [list]="editSettings.blockDirectoryList">
+              </app-settings-directory-search-list>
               <div><small class="text-muted" i18n>Directories (and their content) matching any of these will be hidden.</small></div>
             </div>
           </div>

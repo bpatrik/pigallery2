@@ -148,7 +148,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
 
     });
 
-    it('blocks child directory when blockQuery contains normal directory search', async () => {
+    it('does not hide child directory when the media blockQuery contains a directory search', async () => {
       const root = sqlHelper.testGalleyEntities.dir;
       const child = sqlHelper.testGalleyEntities.subDir;
 
@@ -166,10 +166,10 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       const dirInfo = await galleryManager.getDirIdAndTime(connection, root.name, root.path);
       const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo.id);
 
-      expect(((await galleryManager.getParentDirFromId(connection, DBTestHelper.defaultSession, dirInfo.id)).directories || [])
-        .map(d => d.name)).to.include(child.name);
-      expect(((await galleryManager.getParentDirFromId(connection, session, dirInfo.id)).directories || [])
-        .map(d => d.name)).to.not.include(child.name);
+      // the media of the child are blocked, but the directory itself is only hidden by the directory block list
+      expect((directory.directories || []).map(d => d.name)).to.include(child.name);
+      const childInfo = await galleryManager.getDirIdAndTime(connection, child.name, child.path);
+      expect((await galleryManager.getParentDirFromId(connection, session, childInfo.id)).media).to.deep.equal([]);
 
     });
   });

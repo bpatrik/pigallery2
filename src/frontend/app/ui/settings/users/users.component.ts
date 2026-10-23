@@ -13,12 +13,12 @@ import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifyRole} from '../../../pipes/StringifyRolePipe';
 import {UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
+import {DirectorySearchListSettingsComponent} from '../directory-search-list/directory-search-list.settings.component';
 import {
   DirectorySearch,
   SearchQueryDTO,
   SearchQueryTypes,
-  TextSearch,
-  TextSearchQueryMatchTypes
+  TextSearch
 } from '../../../../../common/entities/SearchQueryDTO';
 import {GallerySearchFieldComponent} from '../../gallery/search/search-field/search-field.gallery.component';
 
@@ -26,7 +26,8 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
   selector: 'app-settings-users',
   templateUrl: './users.component.html',
   styleUrls: ['./users.component.css'],
-  imports: [NgIf, NgFor, FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent]
+  imports: [NgIf, NgFor, FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent,
+    DirectorySearchListSettingsComponent]
 })
 export class UsersComponent implements OnInit {
 
@@ -40,11 +41,6 @@ export class UsersComponent implements OnInit {
 
   public editUser: UserDTO = null;
   public editSettings: UserSettingsDTO = {};
-  public readonly directoryMatchTypes = [
-    {value: TextSearchQueryMatchTypes.exact_match, name: $localize`exact match`},
-    {value: TextSearchQueryMatchTypes.like, name: $localize`contains`},
-    {value: TextSearchQueryMatchTypes.globMatch, name: $localize`glob (* and ?)`},
-  ];
   public newPassword = '';
   public editOriginalUser: UserDTO = null;
 
@@ -177,13 +173,6 @@ export class UsersComponent implements OnInit {
   }
 
 
-  addDirectorySearch(list: DirectorySearch[]): void {
-    list.push({type: SearchQueryTypes.directory, value: '', matchType: TextSearchQueryMatchTypes.exact_match, negate: false});
-  }
-
-  removeDirectorySearch(list: DirectorySearch[], i: number): void {
-    list.splice(i, 1);
-  }
 
   private cleanDirectoryList(list: DirectorySearch[]): DirectorySearch[] {
     return (list || []).filter(d => d.value && d.value.trim() !== '');

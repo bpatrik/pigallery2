@@ -8,7 +8,6 @@ export class SessionContext {
   // New structured projection with prebuilt SQL and params
   // It also contains the directory allow/block list, so media in a not available directory is filtered out
   projectionQuery?: Brackets;
-  projectionQueryForSubDir?: Brackets; // only the directory part of the media query, where it filters 'directories' instead of 'directory' aliases
   hasDirectoryProjection: boolean;
   // Which directories the session can open (directory allow / block lists). No restriction by default.
   directoryAccess: DirectoryAccess = new DirectoryAccess(this);

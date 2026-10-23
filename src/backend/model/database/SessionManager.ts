@@ -75,12 +75,6 @@ export class SessionManager {
       // Build the Brackets-based query
       context.projectionQuery = await sm.prepareAndBuildWhereQuery(finalQuery);
       context.hasDirectoryProjection = sm.hasDirectoryQuery(finalQuery);
-      // Only the media allow/block list is used to filter subdirectories here,
-      // the directory allow/block list is handled separately (see directoryAllowQuery and directoryNotBlockedQuery)
-      const mediaQuery = this.getMediaQueryForUser(user);
-      if (mediaQuery && sm.hasDirectoryQuery(mediaQuery)) {
-        context.projectionQueryForSubDir = await sm.prepareAndBuildWhereQuery(mediaQuery, true, {directory: 'directories'});
-      }
       context.user.projectionKey = this.createProjectionKey(finalQuery);
       if (SearchQueryUtils.isQueryEmpty(finalQuery)) {
         Logger.silly(LOG_TAG, 'Empty Projection query.');

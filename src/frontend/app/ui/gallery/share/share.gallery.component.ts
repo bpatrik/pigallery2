@@ -134,8 +134,8 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   /**
    * Directory sharing: exact match for the directory, or the directory and everything below it if recursive
    */
-  private buildDirectoryQuery(): DirectorySearch {
-    return this.input.recursive ? {
+  private buildDirectoryQuery(recursive = this.input.recursive): DirectorySearch {
+    return recursive ? {
       type: SearchQueryTypes.directory,
       value: Utils.concatUrls(this.currentDir, '*'),
       matchType: TextSearchQueryMatchTypes.globMatch
@@ -151,7 +151,6 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
       return;
     }
     this.currentQuery = this.buildDirectoryQuery();
-    await this.updateActiveSharesList();
     if (this.sharing) {
       await this.update();
     }
@@ -175,11 +174,23 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
         this.activeShares = [];
         return;
       }
+      if (this.isDirectorySharing) {
+        // list the shares of this folder with and without subfolders, independently of the switch
+        const lists = await Promise.all([false, true].map(r =>
+          this.sharingService.getSharingListForQuery(this.buildDirectoryQuery(r))));
+        this.activeShares = lists.flat();
+        return;
+      }
       this.activeShares = await this.sharingService.getSharingListForQuery(this.currentQuery);
     } catch (e) {
       this.activeShares = [];
       console.error(e);
     }
+  }
+
+  isRecursive(share: ResponseSharingDTO): boolean {
+    return share.directoryQuery?.matchType === TextSearchQueryMatchTypes.globMatch &&
+      share.directoryQuery.value?.endsWith('*');
   }
 
   calcValidity(): number {
