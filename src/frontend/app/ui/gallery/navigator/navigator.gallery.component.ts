@@ -130,6 +130,14 @@ export class GalleryNavigatorComponent {
 
         const user = this.authService.user.value;
         const arr: NavigatorPath[] = [];
+        // the server tells which parents are available, starting from the root
+        const availableParents = c?.directory?.availableParents;
+        const isParentAvailable = (index: number): boolean => {
+          if (Array.isArray(availableParents)) {
+            return availableParents[index] === true;
+          }
+          return user.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
+        };
 
         // create root link
         if (dirs.length === 0) {
@@ -137,9 +145,7 @@ export class GalleryNavigatorComponent {
         } else {
           arr.push({
             name: this.RootFolderName,
-            route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-              ? '/'
-              : null,
+            route: isParentAvailable(0) ? '/' : null,
           });
         }
 
@@ -151,9 +157,8 @@ export class GalleryNavigatorComponent {
           } else {
             arr.push({
               name,
-              route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                ? route
-                : null,
+              // root is the 0th parent
+              route: isParentAvailable(index + 1) ? route : null,
             });
 
           }

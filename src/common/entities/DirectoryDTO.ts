@@ -48,6 +48,9 @@ export interface ParentDirectoryDTO<S extends FileDTO = MediaDTO>
   media: S[];
   metaFile: FileDTO[];
   cache?: DirectoryCacheDTO;
+  // Which parent directories the user can open, starting from the root. If not set, all parents are available.
+  // It travels as a bitmask over the network, see ContentWrapperUtils.
+  availableParents?: boolean[];
 }
 
 export interface SubDirectoryDTO<S extends FileDTO = MediaDTO>

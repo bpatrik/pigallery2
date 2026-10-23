@@ -37,15 +37,31 @@ export class GalleryManager {
     session: SessionContext,
     relativeDirectoryName: string,
     knownLastModified?: number,
-    knownLastScanned?: number
+    knownLastScanned?: number,
+    options: {
+      allowIndexing?: boolean, // if false, only the DB is used, the directory is never (re)indexed
+      withMetaFiles?: boolean // if false, metafiles are not listed (the directory content is not available)
+    } = {}
   ): Promise<ParentDirectoryDTO> {
     const directoryPath = GalleryManager.parseRelativeDirPath(
       relativeDirectoryName
     );
+    const withMetaFiles = options.withMetaFiles !== false;
 
     const connection = await SQLConnection.getConnection();
     const dir = await this.getDirIdAndTime(connection, directoryPath.name, directoryPath.parent);
+    const getDir = (id: number) => this.getParentDirFromId(connection, session, id, withMetaFiles);
 
+    if (options.allowIndexing === false) {
+      if (!dir) {
+        throw new Error('Directory is not indexed');
+      }
+      if (knownLastModified && knownLastScanned &&
+        dir.lastModified === knownLastModified && dir.lastScanned === knownLastScanned) {
+        return null;
+      }
+      return await getDir(dir.id);
+    }
 
     if (dir && dir.lastScanned != null) {
       // Return as soon as possible without touching the original data source (hdd)
@@ -56,7 +72,7 @@ export class GalleryManager {
         if (knownLastModified && knownLastScanned) {
           return null;
         }
-        return await this.getParentDirFromId(connection, session, dir.id);
+        return await getDir(dir.id);
       }
 
       const stat = fs.statSync(
@@ -87,7 +103,7 @@ export class GalleryManager {
         Logger.silly(LOG_TAG, 'Reindexing reason: lastModified mismatch: known: ' + dir.lastModified + ', current:' + lastModified);
         // Need to wait for save, then return a DB-based result with projection
         await ObjectManagers.getInstance().IndexingManager.indexDirectory(relativeDirectoryName, true);
-        return await this.getParentDirFromId(connection, session, dir.id);
+        return await getDir(dir.id);
 
       }
 
@@ -104,7 +120,7 @@ export class GalleryManager {
           .IndexingManager.indexDirectory(relativeDirectoryName)
           .catch(console.error);
       }
-      return await this.getParentDirFromId(connection, session, dir.id);
+      return await getDir(dir.id);
     }
 
     // never scanned (deep indexed), do it and return with it
@@ -117,9 +133,13 @@ export class GalleryManager {
       );
       const connection = await SQLConnection.getConnection();
       const dir = await this.getDirIdAndTime(connection, directoryPath.name, directoryPath.parent);
-      return await this.getParentDirFromId(connection, session, dir.id);
+      return await getDir(dir.id);
     }
-    return ObjectManagers.getInstance().IndexingManager.indexDirectory(relativeDirectoryName);
+    const indexed = await ObjectManagers.getInstance().IndexingManager.indexDirectory(relativeDirectoryName);
+    if (indexed && !withMetaFiles) {
+      indexed.metaFile = [];
+    }
+    return indexed;
   }
 
   async countDirectories(): Promise<number> {
@@ -349,31 +369,11 @@ export class GalleryManager {
     return count !== 0;
   }
 
-  async authoriseMetaFile(session: SessionContext, p: string) {
-    // If no projection set for session, proceed
-    if (!session?.projectionQuery) {
-      return true;
-    }
-
-    // Authorize metafile if its directory contains any media that matches the projectionQuery
-    const dirRelPath = path.dirname(p);
-    const directoryName = path.basename(dirRelPath);
-    const directoryParent = path.join(path.dirname(dirRelPath), path.sep);
-
-    const connection = await SQLConnection.getConnection();
-    const qb = connection
-      .getRepository(MediaEntity)
-      .createQueryBuilder('media')
-      .innerJoin('media.directory', 'directory')
-      .where('directory.name = :dname AND directory.path = :dpath', {
-        dname: directoryName,
-        dpath: directoryParent,
-      })
-      .andWhere(session.projectionQuery);
-
-    const count = await qb.getCount();
-
-    return count !== 0;
+  /**
+   * Metafiles belong to their directory: they are available if the directory is available (see DirectoryAccess).
+   */
+  async authoriseMetaFile(session: SessionContext, p: string): Promise<boolean> {
+    return session.directoryAccess.isAvailable(path.dirname(p));
   }
 
   protected async getDirIdAndTime(connection: Connection, name: string, path: string): Promise<{
@@ -398,7 +398,8 @@ export class GalleryManager {
   protected async getParentDirFromId(
     connection: Connection,
     session: SessionContext,
-    partialDirId: number
+    partialDirId: number,
+    withMetaFiles = true
   ): Promise<ParentDirectoryDTO> {
 
     const query = connection
@@ -445,13 +446,13 @@ export class GalleryManager {
 
       dir.directories = await dirQuery.getMany();
 
-
-
       if (dir.directories) {
         for (const item of dir.directories) {
           await this.fillCacheForSubDir(connection, session, item);
         }
       }
+      // directory allow/block list, needs the cache to be filled
+      dir.directories = await session.directoryAccess.filterSubDirectories(dir, dir.directories);
 
       const mQuery = connection.getRepository(MediaEntity)
         .createQueryBuilder('media')
@@ -465,10 +466,11 @@ export class GalleryManager {
       dir.media = await mQuery.getMany();
 
       // Separate query for meta files
+      dir.metaFile = [];
       if (
-        Config.MetaFile.gpx === true ||
+        withMetaFiles && (Config.MetaFile.gpx === true ||
         Config.MetaFile.pg2conf === true ||
-        Config.MetaFile.markdown === true
+        Config.MetaFile.markdown === true)
       ) {
         const metaFileQuery = connection
           .getRepository(FileEntity)

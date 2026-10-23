@@ -45,6 +45,8 @@ export interface PackedContentWrapperWithError extends PackedContentWrapper {
 }
 
 export class ContentWrapperUtils {
+  // the list length marker bit also needs to fit into a safe integer (2^53)
+  public static readonly MAX_BITMASK_LENGTH = 52;
 
   static equals(cw1: ContentWrapper, cw2: ContentWrapper): boolean {
     if (cw1 === cw2) {
@@ -186,6 +188,53 @@ export class ContentWrapperUtils {
   }
 
 
+  /**
+   * Encodes a boolean list to a number: bit i is the i-th element, with an extra 1 bit above the last element
+   * to keep the length of the list (e.g.: [true, false] -> 0b101).
+   * Returns null if the list is too long to be stored in a safe integer.
+   */
+  static booleansToBitmask(list: boolean[]): number {
+    if (list.length > ContentWrapperUtils.MAX_BITMASK_LENGTH) {
+      return null;
+    }
+    let mask = Math.pow(2, list.length); // length marker. Bitwise operators are 32 bit only
+    for (let i = 0; i < list.length; ++i) {
+      if (list[i]) {
+        mask += Math.pow(2, i);
+      }
+    }
+    return mask;
+  }
+
+  static bitmaskToBooleans(mask: number): boolean[] {
+    const list: boolean[] = [];
+    while (mask > 1) {
+      list.push(mask % 2 === 1);
+      mask = Math.floor(mask / 2);
+    }
+    return list;
+  }
+
+  /**
+   * availableParents travels as a bitmask over the network
+   */
+  private static packAvailableParents(dir: ParentDirectoryDTO): void {
+    if (!Array.isArray(dir.availableParents)) {
+      return;
+    }
+    const mask = ContentWrapperUtils.booleansToBitmask(dir.availableParents);
+    if (mask !== null) {
+      (dir as unknown as { availableParents: number }).availableParents = mask;
+    }
+  }
+
+  private static unPackAvailableParents(dir: ParentDirectoryDTO): void {
+    const packed = (dir as unknown as { availableParents: number | boolean[] }).availableParents;
+    if (typeof packed === 'number') {
+      dir.availableParents = ContentWrapperUtils.bitmaskToBooleans(packed);
+    }
+  }
+
   static pack(cwIn: ContentWrapper): PackedContentWrapper {
     const cw: PackedContentWrapper = {
       map: {
@@ -201,6 +250,7 @@ export class ContentWrapperUtils {
 
     if (cw?.directory) {
       ContentWrapperUtils.packDirectory(cw, cw.directory);
+      ContentWrapperUtils.packAvailableParents(cw.directory);
     } else if (cw.searchResult) {
       ContentWrapperUtils.packDirectory(cw, cw.searchResult, true);
     }
@@ -226,6 +276,7 @@ export class ContentWrapperUtils {
     }
     if (cw?.directory) {
       ContentWrapperUtils.unPackDirectory(cw, cw.directory);
+      ContentWrapperUtils.unPackAvailableParents(cw.directory);
     } else if (cw.searchResult) {
       ContentWrapperUtils.unPackDirectory(cw, cw.searchResult, true);
     }

@@ -15,7 +15,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import { NgIf, NgFor, DatePipe } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import { SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
+import { DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 
 @Component({
@@ -45,8 +45,10 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
       type: ValidityTypes.Days as ValidityTypes,
     },
     password: null as string,
+    recursive: false, // share the subdirectories too (directory sharing only)
   };
   currentDir = '';
+  currentRecursiveMediaCount = 0;
   currentQuery: SearchQueryDTO = null;
   sharingTarget = '';
   currentMediaCount = 0;
@@ -91,6 +93,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
           this.currentQuery = null;
           this.sharingTarget = '';
           this.currentMediaCount = 0;
+          this.currentRecursiveMediaCount = 0;
           this.currentMediaCountIsLowerBound = false;
 
           if ((content as any)?.searchResult) {
@@ -104,14 +107,11 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
               content?.directory.path,
               content?.directory.name
             );
-            this.currentQuery = {
-              type: SearchQueryTypes.directory,
-              value: this.currentDir,
-              matchType: TextSearchQueryMatchTypes.exact_match
-            } as TextSearch;
+            this.currentQuery = this.buildDirectoryQuery();
             this.sharingTarget = this.currentDir;
             // Prefer mediaCount, fallback to media length if needed
             this.currentMediaCount = (typeof content?.directory.cache?.mediaCount === 'number' ? content.directory.cache?.mediaCount : (content.directory.media ? content.directory.media.length : 0));
+            this.currentRecursiveMediaCount = content?.directory.cache?.recursiveMediaCount ?? this.currentMediaCount;
             this.currentMediaCountIsLowerBound = false;
           }
 
@@ -121,6 +121,40 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
           await this.updateActiveSharesList();
         }
     );
+  }
+
+  get isDirectorySharing(): boolean {
+    return !!this.currentDir;
+  }
+
+  get sharedMediaCount(): number {
+    return this.isDirectorySharing && this.input.recursive ? this.currentRecursiveMediaCount : this.currentMediaCount;
+  }
+
+  /**
+   * Directory sharing: exact match for the directory, or the directory and everything below it if recursive
+   */
+  private buildDirectoryQuery(): DirectorySearch {
+    return this.input.recursive ? {
+      type: SearchQueryTypes.directory,
+      value: Utils.concatUrls(this.currentDir, '*'),
+      matchType: TextSearchQueryMatchTypes.globMatch
+    } as DirectorySearch : {
+      type: SearchQueryTypes.directory,
+      value: this.currentDir,
+      matchType: TextSearchQueryMatchTypes.exact_match
+    } as DirectorySearch;
+  }
+
+  async onRecursiveChange(): Promise<void> {
+    if (!this.isDirectorySharing) {
+      return;
+    }
+    this.currentQuery = this.buildDirectoryQuery();
+    await this.updateActiveSharesList();
+    if (this.sharing) {
+      await this.update();
+    }
   }
 
   ngOnDestroy(): void {
@@ -170,12 +204,20 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     }
     this.urlValid = false;
     this.url = $localize`loading..`;
-    this.sharing = await this.sharingService.updateSharingByQuery(
+    this.sharing = this.isDirectorySharing
+      ? await this.sharingService.updateSharingByDirectory(
+        this.sharing.id,
+        this.currentQuery as DirectorySearch,
+        this.input.password,
+        this.calcValidity(),
+        this.currentDir
+      )
+      : await this.sharingService.updateSharingByQuery(
         this.sharing.id,
         this.currentQuery,
         this.input.password,
         this.calcValidity()
-    );
+      );
     this.urlValid = true;
     this.url = this.sharingService.getUrl(this.sharing);
     await this.updateActiveSharesList();
@@ -192,11 +234,18 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     }
     this.urlValid = false;
     this.url = $localize`loading..`;
-    this.sharing = await this.sharingService.createSharingByQuery(
+    this.sharing = this.isDirectorySharing
+      ? await this.sharingService.createSharingByDirectory(
+        this.currentQuery as DirectorySearch,
+        this.input.password,
+        this.calcValidity(),
+        this.currentDir
+      )
+      : await this.sharingService.createSharingByQuery(
         this.currentQuery,
         this.input.password,
         this.calcValidity()
-    );
+      );
     this.url = this.sharingService.getUrl(this.sharing);
     this.urlValid = true;
     await this.updateActiveSharesList();

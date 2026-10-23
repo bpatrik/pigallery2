@@ -234,8 +234,13 @@ export class GalleryComponent implements OnInit, OnDestroy {
       const qParams: { [key: string]: any } = {};
       qParams[QueryParams.gallery.sharingKey_query] =
         this.shareService.getSharingKey();
+      const route = this.shareService.getDefaultRoute(sharing);
+      if (!route) {
+        console.error('Sharing has nothing to open');
+        return;
+      }
       this.router
-        .navigate(['/search', JSON.stringify(sharing.searchQuery)], {queryParams: qParams})
+        .navigate(route, {queryParams: qParams})
         .catch(console.error);
       return;
     }

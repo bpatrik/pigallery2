@@ -15,7 +15,7 @@ import {TestHelper} from '../TestHelper';
 import {VideoDTO} from '../../src/common/entities/VideoDTO';
 import {PhotoDTO} from '../../src/common/entities/PhotoDTO';
 import {Logger} from '../../src/backend/Logger';
-import {SessionContext} from '../../src/backend/model/SessionContext';
+import {ContextUser, SessionContext} from '../../src/backend/model/SessionContext';
 import {SessionManager} from '../../src/backend/model/database/SessionManager';
 import {DirectoryEntity} from '../../src/backend/model/database/enitites/DirectoryEntity';
 import {MediaEntity} from '../../src/backend/model/database/enitites/MediaEntity';
@@ -84,7 +84,9 @@ export class DBTestHelper {
   };
 
   public static get defaultSession(): SessionContext {
-    return {user: {projectionKey: SessionManager.NO_PROJECTION_KEY}} as any;
+    const session = new SessionContext();
+    session.user = {projectionKey: SessionManager.NO_PROJECTION_KEY} as ContextUser;
+    return session;
   }
 
   constructor(public dbType: DatabaseType) {
@@ -203,6 +205,35 @@ export class DBTestHelper {
     this.testGalleyEntities.p3.directory = this.testGalleyEntities.dir.directories[0];
     this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media[0] as any);
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir.directories[1];
+  };
+
+  /**
+   * Gallery with nested directories, each photo name starts with the given prefix:
+   * ./ (rootPhoto)
+   *  public/ (publicPhoto, publicTrack.gpx)
+   *    sub/ (subPhoto)
+   *  private/ (privatePhoto)
+   *    deep/ (deepPhoto)
+   *  other/ (otherPhoto)
+   */
+  public setUpNestedTestGallery = async (): Promise<void> => {
+    const root = TestHelper.getDirectoryEntry(null, '.');
+    const pub = TestHelper.getDirectoryEntry(root, 'public');
+    const sub = TestHelper.getDirectoryEntry(pub, 'sub');
+    const priv = TestHelper.getDirectoryEntry(root, 'private');
+    const deep = TestHelper.getDirectoryEntry(priv, 'deep');
+    const other = TestHelper.getDirectoryEntry(root, 'other');
+    TestHelper.getRandomizedPhotoEntry(root, 'rootPhoto');
+    TestHelper.getRandomizedPhotoEntry(pub, 'publicPhoto');
+    TestHelper.getRandomizedGPXEntry(pub, 'publicTrack');
+    TestHelper.getRandomizedPhotoEntry(sub, 'subPhoto');
+    TestHelper.getRandomizedPhotoEntry(priv, 'privatePhoto');
+    TestHelper.getRandomizedPhotoEntry(deep, 'deepPhoto');
+    TestHelper.getRandomizedPhotoEntry(other, 'otherPhoto');
+    await DBTestHelper.persistTestDir(root);
+    // grandchildren are only saved with their parents
+    await ObjectManagers.getInstance().IndexingManager.saveToDB(pub as ParentDirectoryDTO);
+    await ObjectManagers.getInstance().IndexingManager.saveToDB(priv as ParentDirectoryDTO);
   };
 
   public static async printDB() {

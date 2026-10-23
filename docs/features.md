@@ -86,7 +86,7 @@ Replace `[ORDER]` with one of the following:
 - `random`
 
 ### Sharing
-You can share your photo folders with your friends. Sharing links can be password protected.
+You can share your photo folders (with or without their subfolders) or search results with your friends. Sharing links can be password protected. See [user rights](user-guide/user-rights.md#sharing) for what a sharing link can see.
 ![Sharing](assets/sharing.png)
 
 ### Video Playback
@@ -118,7 +118,7 @@ Easy setup through a rich settings page.
 ![Settings](assets/settings.png)
 
 ### Per User Filter
-Set up allow and block list filters for each user or the whole gallery.
+Set up allow and block list filters for photos and for directories, for each user or the whole gallery. See [user rights](user-guide/user-rights.md#allow-and-block-lists).
 ![Per User Filter](assets/main_page.png)
 
 ### Photo Frame

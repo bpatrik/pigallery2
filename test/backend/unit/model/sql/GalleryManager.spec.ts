@@ -4,12 +4,20 @@ import {DBTestHelper} from '../../../DBTestHelper';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
 import {ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
 import {Connection} from 'typeorm';
-import {SessionContext} from '../../../../../src/backend/model/SessionContext';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
+import {ContextUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {
+  DirectorySearch,
+  SearchQueryTypes,
+  TextSearch,
+  TextSearchQueryMatchTypes
+} from '../../../../../src/common/entities/SearchQueryDTO';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {ReIndexingSensitivity} from '../../../../../src/common/config/private/PrivateConfig';
+import {DirectorySearchConfig, ReIndexingSensitivity} from '../../../../../src/common/config/private/PrivateConfig';
+import {UserRoles} from '../../../../../src/common/entities/UserDTO';
+import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
+import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
 import {IndexingManager} from '../../../../../src/backend/model/database/IndexingManager';
 import {ProjectedDirectoryCacheEntity} from '../../../../../src/backend/model/database/enitites/ProjectedDirectoryCacheEntity';
 
@@ -38,8 +46,8 @@ class GalleryManagerTest extends GalleryManager {
     return super.getDirIdAndTime(connection, directoryName, directoryParent);
   }
 
-  public async getParentDirFromId(connection: Connection, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
-    return super.getParentDirFromId(connection, session, dir);
+  public async getParentDirFromId(connection: Connection, session: SessionContext, dir: number, withMetaFiles = true): Promise<ParentDirectoryDTO> {
+    return super.getParentDirFromId(connection, session, dir, withMetaFiles);
   }
 }
 
@@ -467,7 +475,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
         expect(await gm.authoriseMetaFile(session, metaPath)).to.equal(true);
       });
 
-      it('denies directory that has no matching media under projection', async () => {
+      it('allows directory without matching media, metafiles belong to the directory', async () => {
         const searchQuery = {
           type: SearchQueryTypes.file_name,
           value: 'photo1',
@@ -480,7 +488,19 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
 
         const subDir = sqlHelper.testGalleyEntities.subDir; // contains Photo3_*.jpg
         const metaPath = path.join(subDir.path, subDir.name, 'info.md');
-        expect(await gm.authoriseMetaFile(session, metaPath)).to.equal(false);
+        expect(await gm.authoriseMetaFile(session, metaPath)).to.equal(true);
+      });
+
+      it('denies directory that is blocked by the directory block list', async () => {
+        const subDir = sqlHelper.testGalleyEntities.subDir;
+        const session = await ObjectManagers.getInstance().SessionManager.buildContext({
+          blockDirectoryList: [{type: SearchQueryTypes.directory, value: subDir.name, matchType: TextSearchQueryMatchTypes.exact_match}],
+          overrideAllowBlockList: true,
+        } as any);
+
+        expect(await gm.authoriseMetaFile(session, path.join(subDir.path, subDir.name, 'info.md'))).to.equal(false);
+        const root = sqlHelper.testGalleyEntities.dir;
+        expect(await gm.authoriseMetaFile(session, path.join(root.path, root.name, 'README.md'))).to.equal(true);
       });
     });
   });
@@ -503,6 +523,194 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       }
       await ObjectManagers.getInstance().GalleryManager.listDirectory(DBTestHelper.defaultSession, './');
       ObjectManagers.getInstance().ProjectedCacheManager.setAndGetCacheForDirectory = fn;
+    });
+  });
+
+  describe('Directory allow/block list', async () => {
+    let conn: Connection;
+    let gm: GalleryManagerTest;
+
+    const dq = (value: string, matchType = TextSearchQueryMatchTypes.exact_match, negate = false): DirectorySearch =>
+      ({type: SearchQueryTypes.directory, value, matchType, negate});
+    const glob = (value: string): DirectorySearch => dq(value, TextSearchQueryMatchTypes.globMatch);
+    const fileName = (value: string): TextSearch =>
+      ({type: SearchQueryTypes.file_name, value, matchType: TextSearchQueryMatchTypes.like});
+
+    const buildSession = (u: Partial<ContextUser>): Promise<SessionContext> =>
+      ObjectManagers.getInstance().SessionManager.buildContext({
+        id: 1,
+        name: 'user',
+        role: UserRoles.User,
+        overrideAllowBlockList: true,
+        ...u
+      } as ContextUser);
+
+    const list = async (session: SessionContext, relDir: string) => {
+      const p = GalleryManager.parseRelativeDirPath(relDir);
+      const d = await gm.getDirIdAndTime(conn, p.name, p.parent);
+      const res = await gm.getParentDirFromId(conn, session, d.id);
+      return {
+        dirs: (res.directories || []).map(x => x.name).sort(),
+        media: (res.media || []).map(x => x.name.split('_')[0]).sort()
+      };
+    };
+
+    before(async () => {
+      await sqlHelper.initDB();
+      await sqlHelper.setUpNestedTestGallery();
+      conn = await SQLConnection.getConnection();
+      gm = new GalleryManagerTest();
+    });
+
+    after(sqlHelper.clearDB);
+
+    it('fixture is set up', async () => {
+      const s = await buildSession({});
+      expect(await list(s, '.')).to.deep.equal({dirs: ['other', 'private', 'public'], media: ['rootPhoto']});
+      expect(await list(s, 'private')).to.deep.equal({dirs: ['deep'], media: ['privatePhoto']});
+      expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: ['publicPhoto']});
+    });
+
+    describe('block list', () => {
+      it('exact block hides only that directory and its media', async () => {
+        const s = await buildSession({blockDirectoryList: [dq('private')]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['other', 'public'], media: ['rootPhoto']});
+        expect(await list(s, 'private')).to.deep.equal({dirs: ['deep'], media: []});
+        // not recursive
+        expect(await list(s, 'private/deep')).to.deep.equal({dirs: [], media: ['deepPhoto']});
+        expect(await gm.authoriseMedia(s, path.join('private', 'x.jpg'))).to.be.false;
+      });
+
+      it('trailing /* blocks the directory and the whole subtree', async () => {
+        const s = await buildSession({blockDirectoryList: [glob('private/*')]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['other', 'public'], media: ['rootPhoto']});
+        expect(await list(s, 'private')).to.deep.equal({dirs: [], media: []});
+        expect(await list(s, 'private/deep')).to.deep.equal({dirs: [], media: []});
+      });
+
+      it('/?* blocks only below the directory', async () => {
+        const s = await buildSession({blockDirectoryList: [glob('private/?*')]});
+        expect(await list(s, 'private')).to.deep.equal({dirs: [], media: ['privatePhoto']});
+      });
+
+      it('matches any entry of the list', async () => {
+        const s = await buildSession({blockDirectoryList: [dq('private'), dq('other')]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: ['rootPhoto']});
+      });
+
+      it('supports negated entries', async () => {
+        // block everything that is not public or below
+        const s = await buildSession({blockDirectoryList: [dq('public/*', TextSearchQueryMatchTypes.globMatch, true)]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+        expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: ['publicPhoto']});
+      });
+
+      it('uses like match by default, as any text search', async () => {
+        const s = await buildSession({blockDirectoryList: [{type: SearchQueryTypes.directory, value: 'privat'}]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['other', 'public'], media: ['rootPhoto']});
+      });
+    });
+
+    describe('allow list', () => {
+      it('shows only the matching directories and their media', async () => {
+        const s = await buildSession({allowDirectoryList: [glob('public/*')]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+        expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: ['publicPhoto']});
+        expect(await list(s, 'public/sub')).to.deep.equal({dirs: [], media: ['subPhoto']});
+      });
+
+      it('parents only show the way to the allowed directories', async () => {
+        const s = await buildSession({allowDirectoryList: [dq('public/sub')]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+        expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: []});
+        expect(await list(s, 'public/sub')).to.deep.equal({dirs: [], media: ['subPhoto']});
+      });
+
+      it('parents of like searches are found in the DB', async () => {
+        const s = await buildSession({allowDirectoryList: [dq('sub', TextSearchQueryMatchTypes.like)]});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+        expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: []});
+      });
+
+      it('block list wins over the allow list', async () => {
+        const s = await buildSession({
+          allowDirectoryList: [glob('public/*')],
+          blockDirectoryList: [dq('public/sub')]
+        });
+        expect(await list(s, 'public')).to.deep.equal({dirs: [], media: ['publicPhoto']});
+        expect(await list(s, 'public/sub')).to.deep.equal({dirs: [], media: []});
+      });
+
+      it('uses the global config if the user does not override it', async () => {
+        Config.Users.allowDirectoryList = [new DirectorySearchConfig('public/*', TextSearchQueryMatchTypes.globMatch)];
+        try {
+          const s = await buildSession({overrideAllowBlockList: false});
+          expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+          expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: ['publicPhoto']});
+        } finally {
+          Config.Users.allowDirectoryList = [];
+        }
+      });
+    });
+
+    describe('sharing', () => {
+      const creator = (u: Partial<UserEntity> = {}): UserEntity => ({
+        id: 1,
+        name: 'creator',
+        role: UserRoles.Admin,
+        overrideAllowBlockList: true,
+        ...u
+      } as UserEntity);
+
+      const sharingSession = (sh: Partial<SharingEntity>) =>
+        ObjectManagers.getInstance().SessionManager.buildContext(
+          ObjectManagers.getInstance().SessionManager.createSharingUser({
+            sharingKey: 'key',
+            creator: creator(),
+            ...sh
+          } as SharingEntity));
+
+      it('directory sharing lists only the shared directories and their media', async () => {
+        const s = await sharingSession({directoryQuery: glob('public/*')});
+        expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: ['publicPhoto']});
+        // root can't be opened, but listing it would not show anything outside the sharing either
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+      });
+
+      it('exact directory sharing does not list subdirectories', async () => {
+        const s = await sharingSession({directoryQuery: dq('public')});
+        expect(await list(s, 'public')).to.deep.equal({dirs: [], media: ['publicPhoto']});
+      });
+
+      it('search sharing lists only directories with visible photos and their parents', async () => {
+        const s = await sharingSession({searchQuery: fileName('subPhoto')});
+        expect(await list(s, '.')).to.deep.equal({dirs: ['public'], media: []});
+        expect(await list(s, 'public')).to.deep.equal({dirs: ['sub'], media: []});
+        expect(await list(s, 'public/sub')).to.deep.equal({dirs: [], media: ['subPhoto']});
+      });
+
+      it('inherits the directory restrictions of the creator', async () => {
+        const s = await sharingSession({
+          directoryQuery: glob('*'),
+          creator: creator({blockDirectoryList: [glob('private/*')]})
+        });
+        expect(await list(s, '.')).to.deep.equal({dirs: ['other', 'public'], media: ['rootPhoto']});
+        expect(await list(s, 'private/deep')).to.deep.equal({dirs: [], media: []});
+      });
+    });
+
+    it('does not list metafiles if not requested', async () => {
+      const s = await buildSession({});
+      const p = GalleryManager.parseRelativeDirPath('public');
+      const d = await gm.getDirIdAndTime(conn, p.name, p.parent);
+      const origGpx = Config.MetaFile.gpx;
+      Config.MetaFile.gpx = true;
+      try {
+        expect((await gm.getParentDirFromId(conn, s, d.id)).metaFile.map(m => m.name.split('_')[0])).to.deep.equal(['publicTrack']);
+        expect((await gm.getParentDirFromId(conn, s, d.id, false)).metaFile).to.deep.equal([]);
+      } finally {
+        Config.MetaFile.gpx = origGpx;
+      }
     });
   });
 });
