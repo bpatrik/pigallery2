@@ -36,7 +36,7 @@ export class GalleryMWs {
       let rawQueryParam = req.params['searchQueryDTO'] as string;
       try {
         rawQueryParam = decodeURIComponent(rawQueryParam);
-      } catch (e) {
+      } catch {
         // ignore decoding errors and continue with raw string
       }
 

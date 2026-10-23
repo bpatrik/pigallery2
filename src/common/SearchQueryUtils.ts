@@ -218,7 +218,7 @@ export const SearchQueryUtils = {
     if (typeof urlQuery === 'string' && (urlQuery.startsWith('%') || urlQuery.includes('%22') || urlQuery.includes('%7B'))) {
       try {
         urlQuery = decodeURIComponent(urlQuery);
-      } catch (e) {
+      } catch {
         // ignore decoding errors and continue with raw string
       }
     }
