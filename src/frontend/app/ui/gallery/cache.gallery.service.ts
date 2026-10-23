@@ -15,6 +15,8 @@ import {
 } from '../../../../common/entities/ContentWrapper';
 import {ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {GridSizes} from '../../../../common/entities/GridSizes';
+import {AuthenticationService} from '../../model/network/authentication.service';
+import {UserDTO} from '../../../../common/entities/UserDTO';
 
 interface CacheItem<T> {
   timestamp: number;
@@ -31,10 +33,12 @@ export class GalleryCacheService {
   private static readonly GROUPING_PREFIX = 'GROUPING:';
   private static readonly GRID_SIZE_PREFIX = 'GRID_SIZE:';
   private static readonly VERSION = 'VERSION';
+  private static readonly USER = 'USER';
   private static readonly SLIDESHOW_SPEED = 'SLIDESHOW_SPEED';
   private static THEME_MODE = 'THEME_MODE';
 
-  constructor(private versionService: VersionService) {
+  constructor(private versionService: VersionService,
+              authService: AuthenticationService) {
     // if it was a forced reload not a navigation, clear cache
     if (GalleryCacheService.wasAReload()) {
       GalleryCacheService.deleteCache();
@@ -51,6 +55,25 @@ export class GalleryCacheService {
     };
     this.versionService.version.subscribe(onNewVersion);
     onNewVersion(this.versionService.version.value);
+
+    // The cached content depends on what the user can see (e.g.: allow/block lists, sharing).
+    // The server can answer 'not modified' to a different user, so the cache should not be reused.
+    authService.user.subscribe((user) => GalleryCacheService.onUser(user));
+  }
+
+  private static onUser(user: UserDTO): void {
+    if (!user) {
+      return;
+    }
+    const userKey = JSON.stringify([user.id ?? null, user.name, user.usedSharingKey ?? null, user.projectionKey ?? null]);
+    try {
+      if (localStorage.getItem(GalleryCacheService.USER) !== userKey) {
+        GalleryCacheService.deleteCache();
+        localStorage.setItem(GalleryCacheService.USER, userKey);
+      }
+    } catch (e) {
+      // ignoring errors
+    }
   }
 
   private static wasAReload(): boolean {

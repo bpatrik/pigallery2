@@ -2242,5 +2242,19 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       const ac = await ObjectManagers.getInstance().SearchManager.autocomplete(s, 'u', SearchQueryTypes.directory);
       expect(ac.map(a => a.value)).to.deep.equal(['sub']);
     });
+
+    // keep it last: it adds a directory to the test gallery
+    it('treats SQL wildcards (_ and %) in directory searches as literal characters', async () => {
+      const underscore = TestHelper.getDirectoryEntry(TestHelper.getDirectoryEntry(null, '.'), 'under_score');
+      TestHelper.getRandomizedPhotoEntry(underscore, 'underscorePhoto');
+      await ObjectManagers.getInstance().IndexingManager.saveToDB(underscore as ParentDirectoryDTO);
+
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('under_score'))).to.deep.equal(['underscorePhoto']);
+      const s = await sharingSession({directoryQuery: dq('under_score')});
+      expect(await searchMediaNames(s, anyPhoto)).to.deep.equal(['underscorePhoto']);
+      // '_' and '%' would match any characters if they were not escaped
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('publi_'))).to.deep.equal([]);
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('pub%'))).to.deep.equal([]);
+    });
   });
 });

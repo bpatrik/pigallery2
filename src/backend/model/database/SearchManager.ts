@@ -963,7 +963,9 @@ export class SearchManager {
 
       const getLikeExpr = (fieldName: string, paramName: string): string => {
         const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
-        return `${fieldName} ${op} :${paramName}${queryId} COLLATE ${SQL_COLLATE}`;
+        // convertGlobToLike escapes with '\', that is the default in MySQL but SQLite has no default escape character
+        const esc = Config.Database.type === DatabaseType.sqlite ? ' ESCAPE \'\\\'' : '';
+        return `${fieldName} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
       };
 
       const textParam: { [key: string]: unknown } = {};
@@ -986,7 +988,8 @@ export class SearchManager {
           if (path.sep === '/') {
             return likeStr;
           }
-          return likeStr.replace(/\//g, Config.Database.type === DatabaseType.mysql ? '\\\\' : '\\');
+          // '\' is the LIKE escape character in both DBs (see getLikeExpr), so it needs to be escaped
+          return likeStr.replace(/\//g, '\\\\');
         };
         const fullDirPath = path.posix.normalize(path.posix.join('./', dirPathStr));
         textParam['fullPath' + queryId] = toDBSeparator(createMatchString(fullDirPath));
