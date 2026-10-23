@@ -85,7 +85,19 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
           if (!this.enabled) {
             return;
           }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
+          const directory = Utils.concatUrls(content.directory.path, content.directory.name);
+          if (directory && directory !== '.' && directory !== './') {
+            this.searchQueryDTO = {
+              type: SearchQueryTypes.directory,
+              value: directory,
+            } as TextSearch;
+          } else {
+            this.searchQueryDTO = {
+              type: SearchQueryTypes.any_text,
+              value: '',
+            } as TextSearch;
+          }
+          this.onQueryChange();
         }
     );
   }
