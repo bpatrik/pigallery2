@@ -126,45 +126,52 @@ export class GallerySortingService {
     }
   }
 
+  private compareByName(a: MediaDTO, b: MediaDTO): number {
+    const aSortable = Utils.sortableFilename(a.name);
+    const bSortable = Utils.sortableFilename(b.name);
+
+    if (aSortable === bSortable) {
+      // If the trimmed filenames match, use the full name as tie breaker
+      // This preserves a consistent final position for files named e.g.,
+      // 10.jpg and 10.png, even if their starting position in the list
+      // changes based on any previous sorting that's happened under different heuristics
+      return this.collator.compare(a.name, b.name);
+    }
+
+    return this.collator.compare(aSortable, bSortable);
+  }
+
+  // Root directory is represented as ['', ''], other directories as [parent path, name],
+  // matching the ORDER BY directory.path, directory.name used by the backend.
+  private directorySortKey(dir: { path: string; name: string }): [string, string] {
+    if (!dir || dir.name === '.') {
+      return ['', ''];
+    }
+    return [dir.path.replace(/^\.[\\/]/, ''), dir.name];
+  }
+
+  private compareByDirectory(a: MediaDTO, b: MediaDTO): number {
+    const [aPath, aName] = this.directorySortKey(a.directory);
+    const [bPath, bName] = this.directorySortKey(b.directory);
+    return this.collator.compare(aPath, bPath) || this.collator.compare(aName, bName);
+  }
+
+  private directoryGroupKey(m: MediaDTO): string {
+    const [path, name] = this.directorySortKey(m.directory);
+    return path + name;
+  }
+
   private sortMedia(sorting: SortingMethod | GroupingMethod, media: MediaDTO[]): void {
     if (!media) {
       return;
     }
     switch (sorting.method) {
       case SortByTypes.Name:
-        media.sort((a: PhotoDTO, b: PhotoDTO) => {
-            const aSortable = Utils.sortableFilename(a.name);
-            const bSortable = Utils.sortableFilename(b.name);
-
-            if (aSortable === bSortable) {
-              // If the trimmed filenames match, use the full name as tie breaker
-              // This preserves a consistent final position for files named e.g.,
-              // 10.jpg and 10.png, even if their starting position in the list
-              // changes based on any previous sorting that's happened under different heuristics
-              return this.collator.compare(a.name, b.name);
-            }
-
-            return this.collator.compare(aSortable, bSortable);
-          }
-        );
+        media.sort((a: PhotoDTO, b: PhotoDTO) => this.compareByName(a, b));
         break;
       case SortByTypes.Directory:
-        media.sort((a: PhotoDTO, b: PhotoDTO) => {
-            const aDir = a.directory?.name || a.directory?.path || '';
-            const bDir = b.directory?.name || b.directory?.path || '';
-            const dirCompare = this.collator.compare(aDir, bDir);
-            if (dirCompare !== 0) {
-              return dirCompare;
-            }
-            const aSortable = Utils.sortableFilename(a.name);
-            const bSortable = Utils.sortableFilename(b.name);
-
-            if (aSortable === bSortable) {
-              return this.collator.compare(a.name, b.name);
-            }
-
-            return this.collator.compare(aSortable, bSortable);
-          }
+        media.sort((a: PhotoDTO, b: PhotoDTO) =>
+          this.compareByDirectory(a, b) || this.compareByName(a, b)
         );
         break;
       case SortByTypes.Date:
@@ -219,7 +226,7 @@ export class GallerySortingService {
         return (m: MediaDTO) => m.name.at(0).toUpperCase();
 
       case SortByTypes.Directory:
-        return (m: MediaDTO) => m.directory?.name || m.directory?.path || $localize`Home`;
+        return (m: MediaDTO) => this.directoryGroupKey(m);
 
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();
@@ -307,11 +314,14 @@ export class GallerySortingService {
                   const groupFN = this.getGroupByNameFn(grouping);
 
                   c.mediaGroups = [];
+                  let lastKey: string = null;
 
                   for (const m of mCopy) {
                     const k = groupFN(m);
-                    if (c.mediaGroups.length == 0 || c.mediaGroups[c.mediaGroups.length - 1].name != k) {
-                      c.mediaGroups.push({name: k, media: []});
+                    if (c.mediaGroups.length == 0 || lastKey !== k) {
+                      lastKey = k;
+                      const name = (grouping.method === SortByTypes.Directory && k === '') ? $localize`Home` : k;
+                      c.mediaGroups.push({name: name, media: []});
                     }
                     c.mediaGroups[c.mediaGroups.length - 1].media.push(m);
                   }
