@@ -39,7 +39,7 @@ import {MediaRendererInput, PhotoWorker, ThumbnailSourceType} from '../fileacces
 const LOG_TAG = '[ConfigDiagnostics]';
 
 export class ConfigDiagnostics {
-  private static adjustConfigWarn = 'Please adjust the config properly: manually edit the confing in the UI OR edit directly the config.json or even fully delete the config.json and let the app create a new one.';
+  private static adjustConfigWarn = 'To fix it, edit the setting on this admin page, or edit config.json directly (or delete config.json to let the app recreate it with default values).';
 
   static testAlbumsConfig(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -310,7 +310,7 @@ export class ConfigDiagnostics {
 
   static async testNavBarConfig(navBar: NavBarConfig): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing navbar config');
-    (navBar.links || []).forEach((l, i) => ConfigDiagnostics.testNavigationLink(l, `NavBar link #${i + 1}`));
+    (navBar.links || []).forEach((l, i) => ConfigDiagnostics.testNavigationLink(l, `NavBar link #${i + 1} (${l.name})`));
   }
 
   /**
@@ -565,7 +565,7 @@ export class ConfigDiagnostics {
       await ConfigDiagnostics.testNavBarConfig(Config.Gallery.NavBar);
     } catch (ex) {
       const err: Error = ex;
-      const errorText = 'NavBar links are not valid, removing the invalid ones temporally. ' + ConfigDiagnostics.adjustConfigWarn;
+      const errorText = 'Some NavBar links are not valid, they are hidden until you fix them. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
         err.toString()
       );

@@ -149,7 +149,7 @@ export const SearchQueryUtils = {
       const normQuery = SearchQueryUtils.stripDefault(query) as SearchQueryDTO;
       if (!Utils.equalsFilter(normParsed, normQuery) || !Utils.equalsFilter(normQuery, normParsed)) {
         throw new Error(
-          `${what} is not valid. Expected: ${JSON.stringify(parsed)} to equal: ${JSON.stringify(query)}`
+          `${what} is set to '${sp.stringify(query)}' and it is not valid. It fails on this validation test: Expected: ${JSON.stringify(parsed)} to equal: ${JSON.stringify(query)}`
         );
       }
     } catch (e) {
