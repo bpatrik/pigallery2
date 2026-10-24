@@ -494,14 +494,18 @@ export class Utils {
   }
 
   public static xmpExifGpsCoordinateToDecimalDegrees(text: string): number {
-    if (!text) {
+    if (!text || typeof text !== 'string') {
       return undefined;
     }
     const parts = text.match(/^([0-9]+),([0-9.]+)([EWNS])$/);
+    if (!parts) {
+      return undefined;
+    }
     const degrees: number = parseInt(parts[1], 10);
     const minutes: number = parseFloat(parts[2]);
     const sign = (parts[3] === 'N' || parts[3] === 'E') ? 1 : -1;
-    return (sign * (degrees + (minutes / 60.0)));
+    const ret = sign * (degrees + (minutes / 60.0));
+    return Number.isFinite(ret) ? ret : undefined;
   }
 
 

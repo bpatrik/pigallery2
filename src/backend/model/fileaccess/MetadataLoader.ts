@@ -484,15 +484,14 @@ export class MetadataLoader {
         metadata.positionData = metadata.positionData || {};
         metadata.positionData.GPSData = metadata.positionData.GPSData || {};
 
-        metadata.positionData.GPSData.longitude = Utils.isFloat32(exif.gps?.longitude) ? exif.gps.longitude : Utils.xmpExifGpsCoordinateToDecimalDegrees(exif.exif.GPSLongitude);
-        metadata.positionData.GPSData.latitude = Utils.isFloat32(exif.gps?.latitude) ? exif.gps.latitude : Utils.xmpExifGpsCoordinateToDecimalDegrees(exif.exif.GPSLatitude);
+        metadata.positionData.GPSData.longitude = Utils.isFloat32(exif.gps?.longitude) ? exif.gps.longitude : Utils.xmpExifGpsCoordinateToDecimalDegrees(exif.exif?.GPSLongitude);
+        metadata.positionData.GPSData.latitude = Utils.isFloat32(exif.gps?.latitude) ? exif.gps.latitude : Utils.xmpExifGpsCoordinateToDecimalDegrees(exif.exif?.GPSLatitude);
 
-        if (metadata.positionData.GPSData.longitude !== undefined) {
-          metadata.positionData.GPSData.longitude = parseFloat(metadata.positionData.GPSData.longitude.toFixed(6));
-        }
-        if (metadata.positionData.GPSData.latitude !== undefined) {
-          metadata.positionData.GPSData.latitude = parseFloat(metadata.positionData.GPSData.latitude.toFixed(6));
-        }
+        // malformed EXIF can produce NaN or out-of-range values; those would break the DB save
+        const lon = metadata.positionData.GPSData.longitude;
+        const lat = metadata.positionData.GPSData.latitude;
+        metadata.positionData.GPSData.longitude = Number.isFinite(lon) && Math.abs(lon) <= 180 ? parseFloat(lon.toFixed(6)) : undefined;
+        metadata.positionData.GPSData.latitude = Number.isFinite(lat) && Math.abs(lat) <= 90 ? parseFloat(lat.toFixed(6)) : undefined;
       }
     } catch (err) {
       Logger.error(LOG_TAG, 'Error during reading of GPS data: ' + err);

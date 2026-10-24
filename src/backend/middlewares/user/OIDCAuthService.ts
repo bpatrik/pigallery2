@@ -79,15 +79,7 @@ export class OIDCAuthService {
     req.session.rememberMe = true;
     // cleanup
     delete (req.session as any).oidc;
-    res.redirect(this.getAppRootUrl());
-  }
-
-  /**
-   * Root of the app, respecting Server.urlBase (e.g.: '/' or '/myGallery/').
-   */
-  public static getAppRootUrl(): string {
-    const base = (Config.Server.urlBase || '').replace(/^\/+|\/+$/g, '');
-    return base ? `/${base}/` : '/';
+    res.redirect(Config.Server.getAppUrl());
   }
 
   /**

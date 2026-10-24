@@ -2,7 +2,7 @@ import {Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn, Tab
 import {DirectoryEntity} from './DirectoryEntity';
 import {LiveVideoInfo, MediaDimension, MediaDTO, MediaMetadata,} from '../../../../common/entities/MediaDTO';
 import {PersonJunctionTable} from './person/PersonJunctionTable';
-import {columnCharsetCS} from './EntityUtils';
+import {columnCharsetCS, columnCharsetCSWith} from './EntityUtils';
 import {CameraMetadata, FaceRegion, GPSMetadata, PositionMetaData,} from '../../../../common/entities/PhotoDTO';
 import {Utils} from '../../../../common/Utils';
 
@@ -18,20 +18,16 @@ export class CameraMetadataEntity implements CameraMetadata {
   @Column('int', {nullable: true, unsigned: true})
   ISO: number;
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   model: string;
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   make: string;
 
   @Column('float', {nullable: true})
@@ -58,28 +54,22 @@ export class PositionMetaDataEntity implements PositionMetaData {
   @Column(() => GPSMetadataEntity)
   GPSData: GPSMetadataEntity;
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   country: string;
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   state: string;
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   city: string;
 }
 
@@ -119,11 +109,9 @@ export class MediaMetadataEntity implements MediaMetadata {
   @Column('bigint', {unsigned: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
   fileSize: number;
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'simple-array',
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   keywords: string[];
 
   @Column(() => CameraMetadataEntity)
@@ -139,24 +127,20 @@ export class MediaMetadataEntity implements MediaMetadata {
   @OneToMany(() => PersonJunctionTable, (junctionTable) => junctionTable.media)
   personJunction: PersonJunctionTable[];
 
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'simple-json',
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation
-  })
+  }))
   faces: FaceRegion[];
 
   /**
    * Caches the list of persons. Only used for searching
    */
-  @Column({
+  @Column(columnCharsetCSWith({
     type: 'simple-array',
     select: false,
     nullable: true,
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  }))
   persons: string[];
 
   /**

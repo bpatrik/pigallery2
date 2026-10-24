@@ -66,9 +66,7 @@ export class MediaIcon {
   }
 
   getIconPath(): string {
-    return Utils.concatUrls(
-      Config.Server.urlBase,
-      Config.Server.apiPath,
+    return Config.Server.getApiUrl(
       '/gallery/content/',
       this.getRelativePath(),
       'icon'
@@ -76,9 +74,7 @@ export class MediaIcon {
   }
 
   getOriginalMediaPath(): string {
-    return Utils.concatUrls(
-      Config.Server.urlBase,
-      Config.Server.apiPath,
+    return Config.Server.getApiUrl(
       '/gallery/content/',
       this.getRelativePath()
     );
@@ -95,9 +91,7 @@ export class MediaIcon {
    */
   getBestSizedMediaPath(renderWidth: number, renderHeight: number): string {
     const size = this.getMediaSize(renderWidth, renderHeight);
-    return Utils.concatUrls(
-      Config.Server.urlBase,
-      Config.Server.apiPath,
+    return Config.Server.getApiUrl(
       '/gallery/content/',
       this.getRelativePath(),
       size.toString()

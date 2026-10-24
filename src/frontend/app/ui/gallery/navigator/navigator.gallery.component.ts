@@ -283,9 +283,7 @@ export class GalleryNavigatorComponent {
       queryParams += e[0] + '=' + e[1];
     });
 
-    return Utils.concatUrls(
-      Config.Server.urlBase,
-      Config.Server.apiPath,
+    return Config.Server.getApiUrl(
       '/gallery/zip/',
       encodeURIComponent(JSON.stringify(searchQuery)) +
       '?' + queryParams
