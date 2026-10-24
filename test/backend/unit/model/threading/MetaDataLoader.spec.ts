@@ -433,4 +433,31 @@ describe('MetadataLoader', () => {
       Config.Media.LivePhoto.enabled = true;
     });
   });
+
+  describe('malformed GPS', () => {
+    const mapGPS = (exif: any): any => {
+      const metadata: any = {};
+      (MetadataLoader as any).mapGPS(metadata, exif);
+      return metadata;
+    };
+
+    it('should drop NaN coordinates', () => {
+      expect(mapGPS({gps: {latitude: NaN, longitude: NaN}})).to.deep.equal({});
+      expect(mapGPS({gps: {latitude: 47.5, longitude: NaN}}))
+        .to.deep.equal({positionData: {GPSData: {latitude: 47.5}}});
+    });
+
+    it('should drop out of range coordinates', () => {
+      expect(mapGPS({gps: {latitude: 91, longitude: 200}})).to.deep.equal({});
+    });
+
+    it('should drop unparsable xmp coordinates', () => {
+      expect(mapGPS({exif: {GPSLatitude: '12,.N', GPSLongitude: [19, 2, 3]}})).to.deep.equal({});
+    });
+
+    it('should keep valid xmp coordinates', () => {
+      expect(mapGPS({exif: {GPSLatitude: '47,30N', GPSLongitude: '19,3W'}}))
+        .to.deep.equal({positionData: {GPSData: {latitude: 47.5, longitude: -19.05}}});
+    });
+  });
 });
