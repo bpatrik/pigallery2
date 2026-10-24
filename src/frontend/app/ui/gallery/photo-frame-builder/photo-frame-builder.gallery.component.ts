@@ -69,16 +69,10 @@ import {Config} from '../../../../../common/config/public/Config';
 
   private buildUrl(): void {
     // Build from current router URL, merging our params without affecting actual navigation
-    let base = Config.Server.publicUrl || window.location.origin;
-    if (Config.Server.urlBase) {
-      const cleanBase = base.replace(/\/+$/, '');
-      const cleanUrlBase = Config.Server.urlBase.replace(/\/+$/, '');
-      if (!cleanBase.endsWith(cleanUrlBase)) {
-        base = Utils.concatUrls(base, Config.Server.urlBase);
-      }
-    }
-    const currentUrl = this.router.url; // includes path + query
-    const u = new URL(Utils.concatUrls(base, currentUrl));
+    const base = Config.Server.publicUrl.replace(/\/+$/, '') + '/';
+    // router.url is relative to <base href>, so it is resolved against publicUrl (which includes urlBase)
+    const currentUrl = this.router.url.replace(/^\/+/, ''); // includes path + query
+    const u = new URL(currentUrl, base);
 
     // Always autoplay for photo frame
     u.searchParams.set(QueryParams.gallery.lightbox.playback, 'true');
