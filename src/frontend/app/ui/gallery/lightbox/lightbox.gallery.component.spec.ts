@@ -100,6 +100,8 @@ class MockAnimationBuilder {
         return {
           play() {
           },
+          destroy() {
+          },
           onDone(callback: () => void) {
             setTimeout(callback, 0);
             return this;
@@ -355,5 +357,28 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
 
     // Act & Assert
     expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia);
+  });
+
+  it('should release the scroll lock and full screen when destroyed while open', () => {
+    const overlayService = TestBed.inject(OverlayService);
+    const fullScreenService = TestBed.inject(FullScreenService);
+    spyOn(overlayService, 'hideOverlay');
+    spyOn(fullScreenService, 'exitFullScreen');
+    component.status = LightboxStates.Open;
+
+    fixture.destroy();
+
+    expect(overlayService.hideOverlay).toHaveBeenCalledWith('lightbox');
+    expect(fullScreenService.exitFullScreen).toHaveBeenCalled();
+  });
+
+  it('should not touch the scroll lock when destroyed while closed', () => {
+    const overlayService = TestBed.inject(OverlayService);
+    spyOn(overlayService, 'hideOverlay');
+    component.status = LightboxStates.Closed;
+
+    fixture.destroy();
+
+    expect(overlayService.hideOverlay).not.toHaveBeenCalled();
   });
 });
