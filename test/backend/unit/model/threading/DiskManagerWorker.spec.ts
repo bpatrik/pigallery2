@@ -95,4 +95,39 @@ describe('DiskMangerWorker', () => {
       expect(dir.media.length).to.be.equals(18);
     });
   });
+
+  describe('excludeFolderList', () => {
+    const savedExcludeFolderList = Config.Indexing.excludeFolderList;
+
+    afterEach(() => {
+      Config.Indexing.excludeFolderList = savedExcludeFolderList;
+    });
+
+    const callExcludeDir = (name: string): Promise<boolean> =>
+      DiskManager.excludeDir({
+        name,
+        parentDirRelativeName: '.',
+        parentDirAbsoluteName: path.join(__dirname, '/../../../assets')
+      });
+
+    it('excludeDir should still match plain folder names exactly', async () => {
+      Config.Indexing.excludeFolderList = ['.dtrash'];
+      expect(await callExcludeDir('.dtrash')).to.be.true;
+      expect(await callExcludeDir('photos')).to.be.false;
+    });
+
+    it('excludeDir should exclude folders using glob pattern "*"', async () => {
+      Config.Indexing.excludeFolderList = ['temp*'];
+      expect(await callExcludeDir('temp')).to.be.true;
+      expect(await callExcludeDir('temp2024')).to.be.true;
+      expect(await callExcludeDir('photos')).to.be.false;
+    });
+
+    it('excludeDir should support "?" wildcard for single character', async () => {
+      Config.Indexing.excludeFolderList = ['202?'];
+      expect(await callExcludeDir('2020')).to.be.true;
+      expect(await callExcludeDir('202')).to.be.false;
+      expect(await callExcludeDir('20200')).to.be.false;
+    });
+  });
 });
