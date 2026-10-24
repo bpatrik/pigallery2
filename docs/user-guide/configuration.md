@@ -192,9 +192,9 @@ App CLI options:
   --Database-mysql-password                                                  (default: '')
   --Indexing-cachedFolderTimeout                                            If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low). (default: 3600000)
   --Indexing-reIndexingSensitivity                                          Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
-  --Indexing-excludeFolderList                                              Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards and is case-sensitive. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
-  --Indexing-excludeFileList                                                Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
-  --Indexing-excludeFilenameList                                            Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
+  --Indexing-excludeFolderList                                              Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
+  --Indexing-excludeFileList                                                Skip folders that contain a file with any of these names. (default: [])
+  --Indexing-excludeFilenameList                                            Photos and videos to skip by file name. Supports * and ?, case-insensitive. E.g.: ._* or *.rm (default: [])
   --AlbumCover-SearchQuery                                                  Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   --AlbumCover-Sorting                                                      If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   --Duplicates-listingLimit                                                 Maximum number of duplicates to list. (default: 1000)
@@ -382,9 +382,9 @@ Environmental variables:
   MYSQL_PASSWORD                                                         same as Database-mysql-password
   Indexing-cachedFolderTimeout                                          If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low). (default: 3600000)
   Indexing-reIndexingSensitivity                                        Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
-  Indexing-excludeFolderList                                            Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards and is case-sensitive. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
-  Indexing-excludeFileList                                              Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
-  Indexing-excludeFilenameList                                          Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
+  Indexing-excludeFolderList                                            Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
+  Indexing-excludeFileList                                              Skip folders that contain a file with any of these names. (default: [])
+  Indexing-excludeFilenameList                                          Photos and videos to skip by file name. Supports * and ?, case-insensitive. E.g.: ._* or *.rm (default: [])
   AlbumCover-SearchQuery                                                Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   AlbumCover-Sorting                                                    If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   Duplicates-listingLimit                                               Maximum number of duplicates to list. (default: 1000)
@@ -1089,15 +1089,15 @@ Environmental variables:
         "cachedFolderTimeout": 3600000,
         "//[reIndexingSensitivity]": "Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job.",
         "reIndexingSensitivity": "low",
-        "//[excludeFolderList]": "Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards and is case-sensitive.",
+        "//[excludeFolderList]": "Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path.",
         "excludeFolderList": [
             ".Trash-1000",
             ".dtrash",
             "$RECYCLE.BIN"
         ],
-        "//[excludeFileList]": "Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing.",
+        "//[excludeFileList]": "Skip folders that contain a file with any of these names.",
         "excludeFileList": [],
-        "//[excludeFilenameList]": "Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files.",
+        "//[excludeFilenameList]": "Photos and videos to skip by file name. Supports * and ?, case-insensitive. E.g.: ._* or *.rm",
         "excludeFilenameList": []
     },
     "//[AlbumCover]": "Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.",
