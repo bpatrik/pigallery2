@@ -324,7 +324,8 @@ export class GalleryGridComponent
       } as GridMediaGroup);
     }
 
-    let maxRowHeight = this.getMaxRowHeight();
+    const baseMaxRowHeight = this.getMaxRowHeight();
+    let maxRowHeight = baseMaxRowHeight;
     const minRowHeight = this.screenHeight / this.MAX_ROW_COUNT;
 
     const photoRowBuilder = new GridRowBuilder(
@@ -342,8 +343,9 @@ export class GalleryGridComponent
       maxRowHeight *= 1.2;
     }
     const noFullRow = photoRowBuilder.calcRowHeight() > maxRowHeight;
-    // if the row is not full, make it average sized
-    const rowHeight = noFullRow ? (minRowHeight + maxRowHeight) / 2 :
+    // if the row is not full, make it average sized.
+    // Use the base max height, so not full rows of different groups that share a line have the same height
+    const rowHeight = noFullRow ? (minRowHeight + baseMaxRowHeight) / 2 :
       Math.min(photoRowBuilder.calcRowHeight(), maxRowHeight);
     const imageHeight = rowHeight - this.IMAGE_MARGIN * 2;
 
