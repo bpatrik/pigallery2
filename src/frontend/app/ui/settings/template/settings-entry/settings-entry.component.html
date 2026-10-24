@@ -537,6 +537,17 @@
         </ng-container>
 
 
+        <ng-container *ngSwitchCase="'DirectorySearchConfig-Array'">
+          <app-settings-directory-search-list
+            class="w-100"
+            [list]="state.value"
+            [idName]="idName"
+            [disabled]="state.readonly"
+            [newItem]="newDirectorySearch"
+            (changed)="onChange(null)">
+          </app-settings-directory-search-list>
+        </ng-container>
+
         <ng-container *ngSwitchCase="'ClientSortingConfig-Array'">
           <ng-container *ngFor="let _ of state.value; let i=index">
             <div class="row col-12 mt-1 m-0 p-0">

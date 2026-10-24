@@ -5,6 +5,7 @@ import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {QueryService} from '../../../model/query.service';
 import {Utils} from '../../../../../common/Utils';
+import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
@@ -130,6 +131,14 @@ export class GalleryNavigatorComponent {
 
         const user = this.authService.user.value;
         const arr: NavigatorPath[] = [];
+        // the server tells which parents are available, starting from the root
+        const availableParents = c?.directory?.availableParents;
+        const isParentAvailable = (index: number): boolean => {
+          if (Array.isArray(availableParents)) {
+            return availableParents[index] === true;
+          }
+          return user.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
+        };
 
         // create root link
         if (dirs.length === 0) {
@@ -137,9 +146,7 @@ export class GalleryNavigatorComponent {
         } else {
           arr.push({
             name: this.RootFolderName,
-            route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-              ? '/'
-              : null,
+            route: isParentAvailable(0) ? '/' : null,
           });
         }
 
@@ -151,9 +158,8 @@ export class GalleryNavigatorComponent {
           } else {
             arr.push({
               name,
-              route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                ? route
-                : null,
+              // root is the 0th parent
+              route: isParentAvailable(index + 1) ? route : null,
             });
 
           }
@@ -282,7 +288,7 @@ export class GalleryNavigatorComponent {
     if (!c.directory) {
       return null;
     }
-    return JSON.stringify({
+    return SearchQueryUtils.urlify({
       type: SearchQueryTypes.directory,
       matchType: TextSearchQueryMatchTypes.globMatch,
       value: Utils.concatUrls('./', c?.directory.path, c?.directory.name) + '*',

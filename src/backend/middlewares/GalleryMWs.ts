@@ -5,6 +5,8 @@ import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {ParentDirectoryDTO,} from '../../common/entities/DirectoryDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
+import {DirectoryAccessTypes} from '../model/DirectoryAccess';
+import {AuthenticationMWs} from './user/AuthenticationMWs';
 import {ContentWrapper, ContentWrapperUtils} from '../../common/entities/ContentWrapper';
 import {ProjectPath} from '../ProjectPath';
 import {Config} from '../../common/config/private/Config';
@@ -74,12 +76,14 @@ export class GalleryMWs {
       ProjectPath.ImageFolder,
       directoryName
     );
+    // set by AuthenticationMWs.authoriseDirectory
+    const access = req.directoryAccess ?? DirectoryAccessTypes.available;
     try {
       if ((await fsp.stat(absoluteDirectoryName)).isDirectory() === false) {
-        return next();
+        return AuthenticationMWs.directoryNotFound(res, next);
       }
     } catch (e) {
-      return next();
+      return AuthenticationMWs.directoryNotFound(res, next);
     }
 
     try {
@@ -94,13 +98,20 @@ export class GalleryMWs {
           parseInt(
             req.query[QueryParams.gallery.knownLastScanned] as string,
             10
-          )
+          ),
+          {
+            // sharing without directory query only sees already indexed directories with visible photos
+            allowIndexing: !req.session.context.directoryAccess.byPhotos,
+            // parents only show the way to the available directories
+            withMetaFiles: access === DirectoryAccessTypes.available
+          }
         );
 
       if (directory == null) {
         req.resultPipe = ContentWrapperUtils.build(null, null, true);
         return next();
       }
+      directory.availableParents = req.session.context.directoryAccess.getAvailableParents(directoryName);
       req.resultPipe = ContentWrapperUtils.build(directory, null);
       return next();
     } catch (err) {

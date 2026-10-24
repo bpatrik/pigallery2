@@ -27,6 +27,7 @@ import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-me
 import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
+import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
 
 interface IState {
   shouldHide(): boolean;
@@ -77,6 +78,7 @@ interface IState {
         NgClass,
         PopoverDirective,
         SafeHtmlPipe,
+        DirectorySearchListSettingsComponent,
     ]
 })
 export class SettingsEntryComponent
@@ -96,6 +98,7 @@ export class SettingsEntryComponent
   idName: string;
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
+  readonly newDirectorySearch = () => new this.state.arrayType();
   public type: string | object;
   public arrayType: string;
   public uiType: string;
@@ -345,7 +348,11 @@ export class SettingsEntryComponent
       const eClass = state.isEnumType
           ? state.type
           : state.arrayType;
-      if (state.tags?.uiOptions) {
+      if (state.tags?.uiOptions && typeof eClass === 'object') {
+        // enum with a restricted set of options
+        state.optionsView = enumToTranslatedArray(eClass)
+          .filter(o => state.tags.uiOptions.includes(o.key));
+      } else if (state.tags?.uiOptions) {
         state.optionsView = state.tags?.uiOptions.map(o => ({
           key: o,
           value: o + (state.tags?.unit ? state.tags?.unit : '')

@@ -20,6 +20,9 @@ class MockQueryService {
 }
 
 class MockOverlayService {
+  getPhantomScrollbarWidth(): number {
+    return 0;
+  }
 }
 
 class MockContentService {
@@ -196,5 +199,20 @@ describe('GalleryGridComponent', () => {
     component.mergeNewPhotos();
     expect(component.mediaToRender).toEqual([{name: '1', media: [gPhs[0], gPhs[1], gPhs[2], gPhs[3]]}]);
 
+  });
+  it('should render not full rows of different groups with the same height', () => {
+    const p = (name: string) => ({
+      name,
+      directory: {name: 'd', path: 'p'},
+      metadata: {size: {width: 3000, height: 2000}}
+    } as PhotoDTO);
+    component.containerWidth = 4000;
+    component.screenHeight = 1000;
+    component.mediaGroups = [{name: '1', media: [p('1.jpg')]}, {name: '2', media: [p('2.jpg'), p('3.jpg')]}];
+    component.mediaToRender = [];
+    component.renderARow();
+    component.renderARow();
+    const heights = component.mediaToRender.map(g => g.media.map(m => m.renderHeight));
+    expect(heights).toEqual([[heights[0][0]], [heights[0][0], heights[0][0]]]);
   });
 });

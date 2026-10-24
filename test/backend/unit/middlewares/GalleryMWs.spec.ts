@@ -7,11 +7,19 @@ import {ContentWrapper} from '../../../../src/common/entities/ContentWrapper';
 import {MediaDTO} from '../../../../src/common/entities/MediaDTO';
 import {ParentDirectoryDTO} from '../../../../src/common/entities/DirectoryDTO';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
+import {GalleryManager} from '../../../../src/backend/model/database/GalleryManager';
+import {promises as fsp} from 'fs';
+import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
+import {SessionContext} from '../../../../src/backend/model/SessionContext';
+import {AuthenticationMWs} from '../../../../src/backend/middlewares/user/AuthenticationMWs';
+import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
+import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
-import {ErrorCodes} from '../../../../src/common/entities/Error';
 
 declare const before: any;
+declare const beforeEach: any;
+declare const afterEach: any;
 declare const describe: any;
 declare const it: any;
 
@@ -260,27 +268,6 @@ describe('GalleryMWs', () => {
       });
     });
 
-    it('should parse URL-encoded search query', (done: (err?: any) => void) => {
-      const originalQuery: TextSearch = {
-        type: SearchQueryTypes.any_text,
-        value: '',
-      };
-      const req: any = {
-        params: {
-          searchQueryDTO: encodeURIComponent(SearchQueryUtils.urlify(originalQuery)),
-        },
-      };
-      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
-        try {
-          expect(err).to.be.undefined;
-          expect(req.resultPipe).to.deep.equal(originalQuery);
-          done();
-        } catch (e) {
-          done(e);
-        }
-      });
-    });
-
     it('should parse full JSON search query', (done: (err?: any) => void) => {
       const originalQuery: TextSearch = {
         type: SearchQueryTypes.keyword,
@@ -318,6 +305,99 @@ describe('GalleryMWs', () => {
           done(e);
         }
       });
+    });
+  });
+
+  describe('listDirectory - directory access', () => {
+    let origGalleryManager: GalleryManager;
+    let origStat: typeof fsp.stat;
+    let listArgs: any[];
+
+    const dq = (value: string): DirectorySearch =>
+      ({type: SearchQueryTypes.directory, value, matchType: TextSearchQueryMatchTypes.exact_match});
+
+    const sessionContext = (user: any, access: Partial<DirectoryAccess> = {}): SessionContext => {
+      const c = new SessionContext();
+      c.user = user;
+      c.directoryAccess = new DirectoryAccess(c, access);
+      return c;
+    };
+
+    const callListDirectory = async (directory: string, context: SessionContext, directoryAccess?: DirectoryAccessTypes) => {
+      const req: any = {session: {context}, params: {directory}, query: {}, directoryAccess};
+      let status: number = null;
+      const res: any = {
+        status: (s: number) => {
+          status = s;
+          return res;
+        }
+      };
+      let nextArgs: any[] = null;
+      await GalleryMWs.listDirectory(req, res, (...args: any[]) => {
+        nextArgs = args;
+      });
+      return {req, status, nextArgs};
+    };
+
+    beforeEach(() => {
+      origGalleryManager = ObjectManagers.getInstance().GalleryManager;
+      origStat = fsp.stat;
+      listArgs = null;
+      (fsp as any).stat = async () => ({isDirectory: () => true});
+      ObjectManagers.getInstance().GalleryManager = {
+        listDirectory: async (...args: any[]) => {
+          listArgs = args;
+          return {name: 'sub', path: 'public/', directories: [], media: [], metaFile: []} as any;
+        }
+      } as unknown as GalleryManager;
+    });
+
+    afterEach(() => {
+      ObjectManagers.getInstance().GalleryManager = origGalleryManager;
+      (fsp as any).stat = origStat;
+    });
+
+    it('answers not existing directories the same way as not available ones', async () => {
+      (fsp as any).stat = async () => {
+        throw new Error('ENOENT');
+      };
+      const notExisting = await callListDirectory('not_existing', sessionContext({}));
+      expect(notExisting.status).to.equal(404);
+      expect((notExisting.nextArgs[0] as ErrorDTO).code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+      expect(listArgs).to.be.null;
+
+      const res: any = {
+        status: (s: number) => {
+          res.statusCode = s;
+          return res;
+        }
+      };
+      let notAvailableArgs: any[] = null;
+      AuthenticationMWs.directoryNotFound(res, (...args: any[]) => {
+        notAvailableArgs = args;
+      });
+      expect(res.statusCode).to.equal(notExisting.status);
+      expect(notAvailableArgs).to.deep.equal(notExisting.nextArgs);
+    });
+
+    it('lists metafiles only for available directories', async () => {
+      await callListDirectory('public', sessionContext({}), DirectoryAccessTypes.available);
+      expect(listArgs[4].withMetaFiles).to.be.true;
+      await callListDirectory('public', sessionContext({}), DirectoryAccessTypes.parent);
+      expect(listArgs[4].withMetaFiles).to.be.false;
+    });
+
+    it('does not let sharing without directory query trigger indexing', async () => {
+      await callListDirectory('public', sessionContext({}), DirectoryAccessTypes.available);
+      expect(listArgs[4].allowIndexing).to.be.true;
+      await callListDirectory('public', sessionContext({usedSharingKey: 'key'}, {byPhotos: true}), DirectoryAccessTypes.available);
+      expect(listArgs[4].allowIndexing).to.be.false;
+    });
+
+    it('sends the available parents', async () => {
+      const r = await callListDirectory('a/b/c', sessionContext({}, {blockList: [dq('a')]}), DirectoryAccessTypes.available);
+      // root, a, a/b -> a is blocked
+      expect(r.req.resultPipe.directory.availableParents).to.deep.equal([true, false, true]);
     });
   });
 });

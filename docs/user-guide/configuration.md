@@ -58,6 +58,8 @@ App CLI options:
   --Users-enforcedUsers                                                     Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   --Users-allowQuery                                                        Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   --Users-blockQuery                                                        Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
+  --Users-allowDirectoryList                                                If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately. (default: [])
+  --Users-blockDirectoryList                                                The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately. (default: [])
   --Users-suppressDefUserWarn                                               if true, the app won't show a warning for using the default user. (default: false)
   --Gallery-enableCache                                                     Caches directory contents and search results for better performance. (default: true)
   --Gallery-enableOnScrollRendering                                         Those thumbnails get higher priority that are visible on the screen. (default: true)
@@ -240,6 +242,8 @@ Environmental variables:
   Users-enforcedUsers                                                   Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   Users-allowQuery                                                      Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   Users-blockQuery                                                      Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
+  Users-allowDirectoryList                                              If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately. (default: [])
+  Users-blockDirectoryList                                              The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately. (default: [])
   Users-suppressDefUserWarn                                             if true, the app won't show a warning for using the default user. (default: false)
   Gallery-enableCache                                                   Caches directory contents and search results for better performance. (default: true)
   Gallery-enableOnScrollRendering                                       Those thumbnails get higher priority that are visible on the screen. (default: true)
@@ -476,6 +480,10 @@ Environmental variables:
             "type": 100,
             "value": ""
         },
+        "//[allowDirectoryList]": "If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately.",
+        "allowDirectoryList": [],
+        "//[blockDirectoryList]": "The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately.",
+        "blockDirectoryList": [],
         "//[suppressDefUserWarn]": "if true, the app won't show a warning for using the default user.",
         "suppressDefUserWarn": false
     },

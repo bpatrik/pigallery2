@@ -16,7 +16,7 @@ export class NotificationRouter {
     app.get(
         Config.Server.apiPath + '/notifications',
         AuthenticationMWs.authenticate,
-        AuthenticationMWs.authorise(UserRoles.Guest),
+        AuthenticationMWs.authorise(UserRoles.User),
         VersionMWs.injectGalleryVersion,
         NotificationMWs.list,
         ServerTimingMWs.addServerTiming,

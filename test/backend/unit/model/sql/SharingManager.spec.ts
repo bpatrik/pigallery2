@@ -5,7 +5,7 @@ import {UpdateSharingDTO} from '../../../../../src/common/entities/SharingDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {DBTestHelper} from '../../../DBTestHelper';
-import {SearchQueryTypes, TextSearch} from '../../../../../src/common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 
 // to help WebStorm to handle the test cases
 declare let describe: any;
@@ -312,4 +312,80 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     }
   });
 
+
+  describe('directory query', () => {
+    const dq = (value: string): DirectorySearch =>
+      ({type: SearchQueryTypes.directory, value, matchType: TextSearchQueryMatchTypes.globMatch});
+
+    const newSharing = (s: Partial<UpdateSharingDTO>): UpdateSharingDTO => ({
+      id: null,
+      sharingKey: 'key_' + Math.random().toString(36).substring(7),
+      searchQuery: null,
+      password: null,
+      creator,
+      expires: Date.now() + 100000,
+      timeStamp: Date.now(),
+      ...s
+    } as UpdateSharingDTO);
+
+    it('should create sharing with only directory query', async () => {
+      const sm = new SharingManager();
+      const saved = await sm.createSharing(newSharing({directoryQuery: dq('/photos/*')}));
+      const found = await sm.findOne(saved.sharingKey);
+      expect(found.searchQuery).to.be.null;
+      expect(found.directoryQuery).to.deep.equal(dq('/photos/*'));
+    });
+
+    it('should not create sharing without search and directory query', async () => {
+      const sm = new SharingManager();
+      let err: Error = null;
+      try {
+        await sm.createSharing(newSharing({}));
+      } catch (e) {
+        err = e;
+      }
+      expect(err).to.not.be.null;
+    });
+
+    it('should not create sharing with non directory directory query', async () => {
+      const sm = new SharingManager();
+      let err: Error = null;
+      try {
+        await sm.createSharing(newSharing({directoryQuery: {type: SearchQueryTypes.keyword, value: 'x'} as unknown as DirectorySearch}));
+      } catch (e) {
+        err = e;
+      }
+      expect(err).to.not.be.null;
+    });
+
+    it('should update directory query and keep the sharing valid', async () => {
+      const sm = new SharingManager();
+      const saved = await sm.createSharing(newSharing({directoryQuery: dq('/photos/*')}));
+      const updated = await sm.updateSharing({...saved, directoryQuery: dq('/other/*')} as UpdateSharingDTO, true);
+      expect(updated.directoryQuery).to.deep.equal(dq('/other/*'));
+
+      let err: Error = null;
+      try {
+        await sm.updateSharing({...saved, searchQuery: null, directoryQuery: null} as UpdateSharingDTO, true);
+      } catch (e) {
+        err = e;
+      }
+      expect(err).to.not.be.null;
+    });
+
+    it('should list sharings by directory query and creator', async () => {
+      const sm = new SharingManager();
+      const byDir = await sm.createSharing(newSharing({directoryQuery: dq('/photos/*')}));
+      await sm.createSharing(newSharing({directoryQuery: dq('/other/*')}));
+      const bySearch = await sm.createSharing(newSharing({searchQuery: dq('/photos/*')}));
+
+      const found = await sm.listAllForQuery(dq('/photos/*'));
+      expect(found.map(s => s.sharingKey).sort()).to.deep.equal([byDir.sharingKey, bySearch.sharingKey].sort());
+
+      // the creator filter does not replace the query filter
+      const foundForCreator = await sm.listAllForQuery(dq('/photos/*'), creator);
+      expect(foundForCreator.map(s => s.sharingKey).sort()).to.deep.equal([byDir.sharingKey, bySearch.sharingKey].sort());
+      expect(await sm.listAllForQuery(dq('/photos/*'), {id: creator.id + 1000} as UserDTO)).to.deep.equal([]);
+    });
+  });
 });

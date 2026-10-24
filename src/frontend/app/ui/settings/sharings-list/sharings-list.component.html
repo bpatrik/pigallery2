@@ -21,7 +21,7 @@
       <tbody>
       <tr *ngFor="let share of shares">
         <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
-        <td>{{share.searchQuery | searchQuery}}</td>
+        <td>{{(share.searchQuery || share.directoryQuery) | searchQuery}}</td>
         <td>{{share.creator.name}}</td>
         <td>{{share.expires | date}}</td>
         <td>

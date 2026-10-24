@@ -6,12 +6,21 @@ import {Config} from '../../common/config/private/Config';
 import {QueryParams} from '../../common/QueryParams';
 import * as path from 'path';
 import {UserRoles} from '../../common/entities/UserDTO';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
 import * as crypto from 'crypto';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
 import {UserEntity} from '../model/database/enitites/UserEntity';
 
 export class SharingMWs {
+  private static exactDirectoryQuery(directoryName: string): DirectorySearch {
+    return {
+      type: SearchQueryTypes.directory,
+      value: directoryName,
+      matchType: TextSearchQueryMatchTypes.exact_match,
+      negate: false
+    } as DirectorySearch;
+  }
+
   public static async getSharing(
     req: Request,
     res: Response,
@@ -108,18 +117,16 @@ export class SharingMWs {
 
       const directoryName = path.normalize(req.params['directory'] || '/');
 
-      // Prefer provided searchQuery; otherwise fallback to strict directory exact-match query for compatibility
-      const searchQuery = createSharing.searchQuery || ({
-        type: SearchQueryTypes.directory,
-        value: directoryName,
-        matchType: TextSearchQueryMatchTypes.exact_match,
-        negate: false
-      } as TextSearch);
+      const searchQuery = createSharing.searchQuery || null;
+      // without any query, the sharing is about the directory (legacy directory sharing)
+      const directoryQuery = createSharing.directoryQuery ||
+        (!searchQuery ? SharingMWs.exactDirectoryQuery(directoryName) : null);
 
       const sharing: SharingEntity = {
         id: null,
         sharingKey,
         searchQuery,
+        directoryQuery,
         password: createSharing.password,
         defaultSearchView: null,
         defaultDirectoryView: null,
@@ -184,16 +191,15 @@ export class SharingMWs {
       const updateSharing: CreateSharingDTO = req.body.updateSharing;
       const directoryName = path.normalize(req.params['directory'] || '/');
 
-      const searchQuery = updateSharing.searchQuery || ({
-        type: SearchQueryTypes.directory,
-        value: directoryName,
-        matchType: TextSearchQueryMatchTypes.exact_match,
-        negate: false
-      } as TextSearch);
+      const searchQuery = updateSharing.searchQuery || null;
+      // without any query, the sharing is about the directory (legacy directory sharing)
+      const directoryQuery = updateSharing.directoryQuery ||
+        (!searchQuery ? SharingMWs.exactDirectoryQuery(directoryName) : null);
 
       const sharing: UpdateSharingDTO = {
         id: updateSharing.id,
         searchQuery,
+        directoryQuery,
         sharingKey: '',
         password:
           updateSharing.password && updateSharing.password !== ''

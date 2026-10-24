@@ -1,9 +1,12 @@
 import {Config} from '../../../common/config/private/Config';
 import {Request, Response} from 'express';
 import {Client, generators, Issuer, TokenSet} from 'openid-client';
-import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
+import {UserDTO} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
+import {Logger} from '../../Logger';
+
+const LOG_TAG = '[OIDCAuthService]';
 
 export class OIDCAuthService {
   private static clientPromise: Promise<Client> | null = null;
@@ -41,9 +44,9 @@ export class OIDCAuthService {
         code_verifier: storedOidc?.verifier
       }
     );
-    const claims = tokenSet.claims();
     const usernameClaim = Config.Users.oidc.usernameClaim || 'preferred_username';
     const emailClaim = Config.Users.oidc.emailClaim || 'email';
+    const claims = await this.getClaims(client, tokenSet, [usernameClaim, emailClaim]);
     const preferredUserName = claims[usernameClaim] || '';
     const email = claims[emailClaim] || '';
 
@@ -65,7 +68,7 @@ export class OIDCAuthService {
     let user = await ObjectManagers.getInstance().UserManager.findOne({name: matchedName});
     if (!user && Config.Users.oidc.autoCreateUser) {
       const rnd = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      const newUser: UserDTO = {name: matchedName, password: rnd, role: UserRoles.Guest} as any;
+      const newUser: UserDTO = {name: matchedName, password: rnd, role: Config.Users.oidc.autoCreateUserRole} as any;
       user = await ObjectManagers.getInstance().UserManager.createUser(newUser);
     }
     if (!user) {
@@ -76,8 +79,50 @@ export class OIDCAuthService {
     req.session.rememberMe = true;
     // cleanup
     delete (req.session as any).oidc;
-    // redirect to root or previously stored path
-    res.redirect('/');
+    res.redirect(this.getAppRootUrl());
+  }
+
+  /**
+   * Root of the app, respecting Server.urlBase (e.g.: '/' or '/myGallery/').
+   */
+  public static getAppRootUrl(): string {
+    const base = (Config.Server.urlBase || '').replace(/^\/+|\/+$/g, '');
+    return base ? `/${base}/` : '/';
+  }
+
+  /**
+   * Prefers RS256 (openid-client default) if the provider supports it,
+   * otherwise the first algorithm the provider advertises (e.g.: PS256, ES256).
+   */
+  public static selectIdTokenAlg(supported?: string[]): string {
+    if (!supported || supported.length === 0 || supported.includes('RS256')) {
+      return 'RS256';
+    }
+    return supported[0];
+  }
+
+  /**
+   * Returns the ID token claims. Some providers only return
+   * some claims (e.g.: preferred_username, email) from the userinfo endpoint,
+   * so if any of the required ones is missing, they are filled from there.
+   * ID token claims always take precedence.
+   */
+  public static async getClaims(client: Client, tokenSet: TokenSet, requiredClaims: string[]): Promise<Record<string, unknown>> {
+    const claims: Record<string, unknown> = {...tokenSet.claims()};
+    if (requiredClaims.every(c => !!claims[c]) || !tokenSet.access_token) {
+      return claims;
+    }
+    try {
+      const userinfo = await client.userinfo(tokenSet.access_token);
+      for (const key of Object.keys(userinfo)) {
+        if (!claims[key]) {
+          claims[key] = userinfo[key];
+        }
+      }
+    } catch (err) {
+      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo: ' + (err?.message || err));
+    }
+    return claims;
   }
 
   private static async getClient(): Promise<Client> {
@@ -97,7 +142,8 @@ export class OIDCAuthService {
         client_id: Config.Users.oidc.clientId,
         client_secret: Config.Users.oidc.clientSecret,
         redirect_uris: [Config.Users.oidc.redirectUri],
-        response_types: ['code']
+        response_types: ['code'],
+        id_token_signed_response_alg: this.selectIdTokenAlg(issuer.metadata.id_token_signing_alg_values_supported as string[])
       });
     })();
     return this.clientPromise;

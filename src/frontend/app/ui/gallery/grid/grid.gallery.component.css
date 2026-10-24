@@ -3,6 +3,11 @@
     width: 100%;
 }
 
+/* groups that share a line should be top aligned, not baseline aligned */
+.media-group {
+    vertical-align: top;
+}
+
 .media-grid {
     line-height: normal;
     font-size: 0;

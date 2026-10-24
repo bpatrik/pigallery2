@@ -27,7 +27,7 @@ import {
 } from '../public/ClientConfig';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {DefaultsJobs} from '../../entities/job/JobDTO';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../entities/SearchQueryDTO';
 import {SortByTypes} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
 import {MediaPickDTO} from '../../entities/MediaPickDTO';
@@ -379,11 +379,78 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       relevant: (c: any) => c.enabled,
       priority: ConfigPriority.advanced
     },
-    description: $localize`If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in.`
+    description: $localize`If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.`
   })
   autoCreateUser: boolean = false;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Auto-created user role`,
+      relevant: (c: any) => c.enabled && c.autoCreateUser,
+      priority: ConfigPriority.advanced,
+      // LimitedGuest is reserved for sharing users
+      uiOptions: [UserRoles.Guest, UserRoles.User, UserRoles.Admin, UserRoles.Developer]
+    } as TAGS,
+    constraint: {
+      assert: (v: UserRoles) => v >= UserRoles.Guest,
+      assertReason: 'Users.oidc.autoCreateUserRole should be at least Guest.',
+      fallBackValue: UserRoles.Guest
+    },
+    description: $localize`Role of the users that are created on their first OIDC login.`
+  })
+  autoCreateUserRole: UserRoles = UserRoles.Guest;
 }
 
+
+@SubConfigClass({softReadonly: true})
+export class DirectorySearchConfig implements DirectorySearch {
+  // It is always a directory search. Kept in the config so the entries are proper search queries.
+  @ConfigProperty({
+    type: SearchQueryTypes,
+    tags: {
+      name: $localize`Type`,
+      priority: ConfigPriority.underTheHood,
+      relevant: () => false
+    },
+  })
+  type: SearchQueryTypes.directory = SearchQueryTypes.directory;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Directory`,
+      priority: ConfigPriority.advanced,
+      uiAllowSpaces: true
+    },
+    description: $localize`Directory path relative to the images folder. E.g.: /photos/private. With glob match, * and ? wildcards can be used: /photos/private/* matches the directory and everything below it, /photos/private/?* matches only below it.`,
+  })
+  value: string = '';
+
+  @ConfigProperty({
+    type: TextSearchQueryMatchTypes,
+    tags: {
+      name: $localize`Match type`,
+      priority: ConfigPriority.advanced
+    },
+    description: $localize`exact_match: only the given directory. like: any directory whose path contains the text. globMatch: the whole path matches the pattern, * matches anything (including /), ? matches one character.`,
+  })
+  matchType: TextSearchQueryMatchTypes = TextSearchQueryMatchTypes.exact_match;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Negate`,
+      priority: ConfigPriority.advanced
+    },
+    description: $localize`Matches directories that do NOT match the search.`,
+  })
+  negate: boolean = false;
+
+  constructor(value = '', matchType = TextSearchQueryMatchTypes.exact_match, negate = false) {
+    this.value = value;
+    this.matchType = matchType;
+    this.negate = negate;
+  }
+}
 
 @SubConfigClass({softReadonly: true})
 export class ServerUserConfig extends ClientUserConfig {
@@ -431,6 +498,28 @@ export class ServerUserConfig extends ClientUserConfig {
     type: SearchQueryTypes.any_text,
     value: '',
   } as TextSearch;
+
+  @ConfigProperty({
+    arrayType: DirectorySearchConfig,
+    tags: {
+      name: $localize`Directory allow list`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 1133
+    },
+    description: $localize`If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately.`,
+  })
+  allowDirectoryList: DirectorySearchConfig[] = [];
+
+  @ConfigProperty({
+    arrayType: DirectorySearchConfig,
+    tags: {
+      name: $localize`Directory block list`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 1133
+    },
+    description: $localize`The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately.`,
+  })
+  blockDirectoryList: DirectorySearchConfig[] = [];
 
   @ConfigProperty({
     tags:
