@@ -2,7 +2,6 @@ import {Media} from '../Media';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {VideoDTO} from '../../../../../common/entities/VideoDTO';
-import {Utils} from '../../../../../common/Utils';
 import {Config} from '../../../../../common/config/public/Config';
 
 export class GridMedia extends Media {
@@ -43,9 +42,7 @@ export class GridMedia extends Media {
       .replace(new RegExp('#', 'g'), '%23')
       .replace(new RegExp('\\$', 'g'), '%24')
       .replace(new RegExp('\\?', 'g'), '%3F');
-    return Utils.concatUrls(
-      Config.Server.urlBase,
-      Config.Server.apiPath,
+    return Config.Server.getApiUrl(
       '/gallery/content/',
       encodedPath,
       '/bestFit'

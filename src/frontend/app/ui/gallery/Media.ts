@@ -1,4 +1,3 @@
-import {Utils} from '../../../../common/Utils';
 import {MediaIcon} from './MediaIcon';
 import {Config} from '../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils} from '../../../../common/entities/MediaDTO';
@@ -65,9 +64,7 @@ export class Media extends MediaIcon {
 
   getReplacementThumbnailPath(): string {
     const size = this.getReplacementThumbnailSize();
-    return Utils.concatUrls(
-        Config.Server.urlBase,
-        Config.Server.apiPath,
+    return Config.Server.getApiUrl(
         '/gallery/content/',
         this.getRelativePath(),
         size.toString()

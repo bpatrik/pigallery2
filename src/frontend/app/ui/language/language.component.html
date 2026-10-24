@@ -13,6 +13,6 @@
 
   </button>
   <div *dropdownMenu class="dropdown-menu" aria-labelledby="language">
-    <a *ngFor="let lang of languages" class="dropdown-item" href="{{urlBase}}/{{lang}}">{{lang}}</a>
+    <a *ngFor="let lang of languages" class="dropdown-item" href="{{getLanguageUrl(lang)}}">{{lang}}</a>
   </div>
 </div>

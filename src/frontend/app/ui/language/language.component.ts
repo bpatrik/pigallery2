@@ -22,7 +22,6 @@ import { NgIconComponent } from '@ng-icons/core';
 export class LanguageComponent {
   languages: string[] = [];
   current: string = null;
-  urlBase = Config.Server.urlBase;
 
   @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
 
@@ -31,6 +30,10 @@ export class LanguageComponent {
     if (this.cookieService.get(CookieNames.lang) != null) {
       this.current = this.cookieService.get(CookieNames.lang);
     }
+  }
+
+  getLanguageUrl(lang: string): string {
+    return Config.Server.getAppUrl(lang);
   }
 }
 

@@ -11,10 +11,7 @@ export class PersonEntry implements PersonDTO {
   @PrimaryGeneratedColumn({unsigned: true})
   id: number;
 
-  @Column({
-    charset: columnCharsetCS.charset,
-    collation: columnCharsetCS.collation,
-  })
+  @Column(columnCharsetCS)
   name: string;
 
   @Column({default: false})

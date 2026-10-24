@@ -2,17 +2,6 @@ import {ClientConfig} from './ClientConfig';
 import {WebConfigClass} from 'typeconfig/src/decorators/class/WebConfigClass';
 import {WebConfigClassBuilder} from 'typeconfig/src/decorators/builders/WebConfigClassBuilder';
 import {IWebConfigClass} from 'typeconfig/common';
-import {Utils} from '../../Utils';
-
-/**
- * Returns the configured publicUrl, or if it is not set, the origin with the urlBase (sub path) appended.
- */
-export function resolvePublicUrl(publicUrl: string, urlBase: string, origin: string): string {
-  if (publicUrl) {
-    return publicUrl;
-  }
-  return Utils.concatUrls(origin, urlBase);
-}
 
 /**
  * These configuration will be available at frontend and backend too
@@ -37,9 +26,7 @@ if (
   Config.load(ServerInject.ConfigInject);
 }
 
-Config.Server.publicUrl = resolvePublicUrl(
-    Config.Server.publicUrl,
-    Config.Server.urlBase,
-    location.origin
-);
+if (Config.Server.publicUrl === '') {
+  Config.Server.publicUrl = location.origin;
+}
 

@@ -72,6 +72,8 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private delayedMediaShow: string = null;
   private activePhotoId: number = null;
   private gridPhotoQL: QueryList<GalleryPhotoComponent>;
+  private photoPlayer: AnimationPlayer = null;
+  private lightboxPlayer: AnimationPlayer = null;
   private subscription: {
     photosChange: Subscription;
     route: Subscription;
@@ -157,6 +159,14 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   ngOnDestroy(): void {
     this.stopSlideShow();
+    // Stop running animations, so their onDone can't fire later and release a newer lightbox's scroll lock.
+    this.photoPlayer?.destroy();
+    this.lightboxPlayer?.destroy();
+    // Destroyed while open (e.g. browser history jump to another page): release what
+    // showLightbox() took, or the next page can no longer be scrolled.
+    if (this.status !== LightboxStates.Closed) {
+      this.releasePage();
+    }
     if (this.subscription.photosChange != null) {
       this.subscription.photosChange.unsubscribe();
     }
@@ -236,7 +246,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
   }
 
-  public showLigthbox(photo: MediaDTO): void {
+  public showLightbox(photo: MediaDTO): void {
     if (this.controls) {
       this.controls.resetZoom();
     }
@@ -290,7 +300,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       ])
       .create(this.mediaElement.elementRef.nativeElement);
     elem.play();
-
+    this.photoPlayer = elem;
     return elem;
   }
 
@@ -310,6 +320,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       ])
       .create(this.lightboxElement.nativeElement);
     elem.play();
+    this.lightboxPlayer = elem;
     return elem;
   }
 
@@ -429,7 +440,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       return;
     }
     if (this.status === LightboxStates.Closed) {
-      this.showLigthbox(photo.gridMedia.media);
+      this.showLightbox(photo.gridMedia.media);
     } else {
       this.showPhoto(this.gridPhotoQL.toArray().indexOf(photo));
     }
@@ -527,10 +538,18 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       this.status = LightboxStates.Closed;
       this.activePhoto = null;
       this.activePhotoId = null;
-      this.overlayService.hideOverlay('lightbox');
+      this.releasePage();
     });
 
     this.hideInfoPanel(false);
+  }
+
+  /**
+   * Releases what showLightbox() took: full screen and the page scroll lock.
+   */
+  private releasePage(): void {
+    this.fullScreenService.exitFullScreen();
+    this.overlayService.hideOverlay('lightbox');
   }
 
   private updateActivePhoto(photoIndex: number, resize = true): void {

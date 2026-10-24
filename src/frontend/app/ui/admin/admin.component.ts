@@ -42,7 +42,6 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
         SharingsListComponent,
         ExtensionInstallerComponent,
         AsyncPipe,
-        JsonPipe,
         DatePipe,
         StringifyEnum,
     ]

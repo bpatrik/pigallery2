@@ -6,6 +6,7 @@ import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {SearchQueryDTO} from '../../entities/SearchQueryDTO';
 import {DefaultsJobs} from '../../entities/job/JobDTO';
 import {GridSizes} from '../../entities/GridSizes';
+import {Utils} from '../../Utils';
 
 declare let $localize: (s: TemplateStringsArray) => string;
 if (typeof $localize === 'undefined') {
@@ -1602,6 +1603,39 @@ export class ClientServiceConfig {
     description: $localize`If set the UI will auto reload when client related config changed or the app was restarted (except when the UI shows the settings page).`,
   })
   reloadClientOnServerUpdate: boolean = true;
+
+  /**
+   * Normalized urlBase: '' or a path with a leading and no trailing '/' (e.g.: '/myGallery').
+   */
+  getUrlBase(): string {
+    const base = (this.urlBase || '').trim().replace(/^\/+|\/+$/g, '');
+    return base ? '/' + base : '';
+  }
+
+  /**
+   * Host relative url of the app, respecting urlBase.
+   * E.g.: getAppUrl() -> '/myGallery/', getAppUrl('/share/', key) -> '/myGallery/share/key'
+   */
+  getAppUrl(...parts: string[]): string {
+    // concatUrls returns '.' for empty input
+    const path = Utils.concatUrls(...parts).replace(/^(\.?\/)+/, '');
+    return this.getUrlBase() + '/' + (path === '.' ? '' : path);
+  }
+
+  /**
+   * Host relative url of the api, respecting urlBase. E.g.: '/myGallery/pgapi/gallery/content'
+   */
+  getApiUrl(...parts: string[]): string {
+    return this.getAppUrl(this.apiPath, ...parts);
+  }
+
+  /**
+   * Url of the app that can be shared with others: publicUrl + urlBase + parts.
+   * If publicUrl is not set (e.g.: on the server side) it is host relative.
+   */
+  getPublicUrl(...parts: string[]): string {
+    return (this.publicUrl || '').trim().replace(/\/+$/, '') + this.getAppUrl(...parts);
+  }
 }
 
 
