@@ -2,6 +2,8 @@ import {Request} from 'express';
 
 export enum ErrorCodes {
   NOT_AUTHENTICATED = 1,
+  NOT_AUTHENTICATED_SHARING = 11,
+
   ALREADY_AUTHENTICATED = 2,
   NOT_AUTHORISED = 3,
   PERMISSION_DENIED = 4,
@@ -19,6 +21,8 @@ export enum ErrorCodes {
 
   INPUT_ERROR = 50,
   PATH_ERROR = 51,
+  // Directory does not exist or the user can't access it. These two cases are intentionally not distinguished.
+  DIRECTORY_NOT_FOUND = 52,
 
   SETTINGS_ERROR = 60,
   TASK_ERROR = 61,

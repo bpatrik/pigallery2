@@ -38,7 +38,6 @@ describe('UserRouter', () => {
 
     server = new Server(false);
     await server.onStarted.wait();
-    await ObjectManagers.getInstance().init();
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));
     await SQLConnection.close();
   };
@@ -158,7 +157,7 @@ describe('UserRouter', () => {
       result.should.have.status(401);
       result.body.should.be.a('object');
       result.body.error.should.be.a('object');
-      should.equal(result.body.error.code, ErrorCodes.NOT_AUTHENTICATED);
+      should.equal(result.body.error.code, ErrorCodes.NOT_AUTHENTICATED_SHARING);
     });
 
     it('it should authenticate as guest', async () => {
@@ -175,6 +174,47 @@ describe('UserRouter', () => {
 
 
       RouteTestingHelper.shouldBeValidUIUser(result, expectedGuestUser);
+    });
+  });
+
+  describe('/POST user/logout', () => {
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    it('it should log out the user', async () => {
+      Config.Users.authenticationRequired = true;
+      const agent = request.agent(server.Server);
+      const loginRes = await agent.post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {password: testUser.password, username: testUser.name, rememberMe: false} as LoginCredential});
+      RouteTestingHelper.shouldBeValidUIUser(loginRes, expectedUser);
+
+      const res = await agent.post(Config.Server.apiPath + '/user/logout');
+      res.should.have.status(200);
+
+      const me = await agent.get(Config.Server.apiPath + '/user/me');
+      me.should.have.status(401);
+      agent.close();
+    });
+
+    it('it should log out the sharing user', async () => {
+      Config.Users.authenticationRequired = true;
+      Config.Sharing.enabled = true;
+      Config.Sharing.passwordRequired = false;
+      const sharing = (await RouteTestingHelper.createSharing(testUser, 'pass_secret'));
+      const agent = request.agent(server.Server);
+
+      const loginRes = await agent.post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharing.sharingKey)
+        .send({password: 'pass_secret'});
+      RouteTestingHelper.shouldBeValidUIUser(loginRes, RouteTestingHelper.getExpectedSharingUserForUI(sharing));
+
+      const res = await agent.post(Config.Server.apiPath + '/user/logout');
+      res.should.have.status(200);
+
+      // password protected sharing needs a new login
+      const me = await agent.get(Config.Server.apiPath + '/user/me?' + QueryParams.gallery.sharingKey_query + '=' + sharing.sharingKey);
+      me.should.have.status(401);
+      should.equal(me.body.error.code, ErrorCodes.NOT_AUTHENTICATED_SHARING);
+      agent.close();
     });
   });
 });

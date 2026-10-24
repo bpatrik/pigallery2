@@ -1,17 +1,26 @@
 import {NextFunction, Request, Response} from 'express';
-import {CreateSharingDTO, SharingDTOKey, UpdateSharingDTO} from '../../common/entities/SharingDTO';
+import {CreateSharingDTO, PublicSharingDTO, UpdateSharingDTO} from '../../common/entities/SharingDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {Config} from '../../common/config/private/Config';
 import {QueryParams} from '../../common/QueryParams';
 import * as path from 'path';
 import {UserRoles} from '../../common/entities/UserDTO';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
 import * as crypto from 'crypto';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
 import {UserEntity} from '../model/database/enitites/UserEntity';
 
 export class SharingMWs {
+  private static exactDirectoryQuery(directoryName: string): DirectorySearch {
+    return {
+      type: SearchQueryTypes.directory,
+      value: directoryName,
+      matchType: TextSearchQueryMatchTypes.exact_match,
+      negate: false
+    } as DirectorySearch;
+  }
+
   public static async getSharing(
     req: Request,
     res: Response,
@@ -37,7 +46,7 @@ export class SharingMWs {
     }
   }
 
-  public static async getSharingKey(
+  public static async getSharingPublicInfo(
     req: Request,
     res: Response,
     next: NextFunction
@@ -48,8 +57,13 @@ export class SharingMWs {
       }
       const sharingKey = req.params[QueryParams.gallery.sharingKey_params];
 
+      const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       req.resultPipe =
-        {sharingKey: (await ObjectManagers.getInstance().SharingManager.findOne(sharingKey)).sharingKey} as SharingDTOKey;
+        {
+          sharingKey: sharing.sharingKey,
+          passwordProtected: Config.Sharing.passwordRequired || (typeof sharing.password === 'string' && sharing.password !== '')
+        } as PublicSharingDTO;
+
       return next();
     } catch (err) {
       return next(
@@ -103,18 +117,16 @@ export class SharingMWs {
 
       const directoryName = path.normalize(req.params['directory'] || '/');
 
-      // Prefer provided searchQuery; otherwise fallback to strict directory exact-match query for compatibility
-      const searchQuery = createSharing.searchQuery || ({
-        type: SearchQueryTypes.directory,
-        value: directoryName,
-        matchType: TextSearchQueryMatchTypes.exact_match,
-        negate: false
-      } as TextSearch);
+      const searchQuery = createSharing.searchQuery || null;
+      // without any query, the sharing is about the directory (legacy directory sharing)
+      const directoryQuery = createSharing.directoryQuery ||
+        (!searchQuery ? SharingMWs.exactDirectoryQuery(directoryName) : null);
 
       const sharing: SharingEntity = {
         id: null,
         sharingKey,
         searchQuery,
+        directoryQuery,
         password: createSharing.password,
         defaultSearchView: null,
         defaultDirectoryView: null,
@@ -125,6 +137,15 @@ export class SharingMWs {
             : new Date(9999, 0, 1).getTime(), // never expire
         timeStamp: Date.now(),
       };
+
+      if (createSharing.defaultDirectoryView && createSharing.defaultSearchView) {
+        return next(
+          new ErrorDTO(
+            ErrorCodes.INPUT_ERROR,
+            'defaultDirectoryView and defaultSearchView cannot be set at the same time'
+          )
+        );
+      }
 
       if (createSharing.defaultDirectoryView) {
         sharing.defaultDirectoryView = createSharing.defaultDirectoryView;
@@ -170,16 +191,15 @@ export class SharingMWs {
       const updateSharing: CreateSharingDTO = req.body.updateSharing;
       const directoryName = path.normalize(req.params['directory'] || '/');
 
-      const searchQuery = updateSharing.searchQuery || ({
-        type: SearchQueryTypes.directory,
-        value: directoryName,
-        matchType: TextSearchQueryMatchTypes.exact_match,
-        negate: false
-      } as TextSearch);
+      const searchQuery = updateSharing.searchQuery || null;
+      // without any query, the sharing is about the directory (legacy directory sharing)
+      const directoryQuery = updateSharing.directoryQuery ||
+        (!searchQuery ? SharingMWs.exactDirectoryQuery(directoryName) : null);
 
       const sharing: UpdateSharingDTO = {
         id: updateSharing.id,
         searchQuery,
+        directoryQuery,
         sharingKey: '',
         password:
           updateSharing.password && updateSharing.password !== ''
@@ -193,6 +213,15 @@ export class SharingMWs {
         timeStamp: Date.now(),
       };
 
+
+      if (updateSharing.defaultDirectoryView && updateSharing.defaultSearchView) {
+        return next(
+          new ErrorDTO(
+            ErrorCodes.INPUT_ERROR,
+            'defaultDirectoryView and defaultSearchView cannot be set at the same time'
+          )
+        );
+      }
 
       if (updateSharing.defaultDirectoryView) {
         sharing.defaultDirectoryView = updateSharing.defaultDirectoryView;

@@ -22,3 +22,10 @@ nav.sticky-top {
 .btn-settings-nav{
   line-height: initial;
 }
+
+.notification-details {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: inherit;
+  font-size: 0.85em;
+}

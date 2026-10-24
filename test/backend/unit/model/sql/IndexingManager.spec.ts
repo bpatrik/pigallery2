@@ -57,11 +57,11 @@ class IndexingManagerTest extends IndexingManager {
 declare let describe: any;
 declare const after: any;
 declare const it: any;
-// eslint-disable-next-line prefer-const
+const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('IndexingManager', (sqlHelper: DBTestHelper) => {
-
+  describe = tmpDescribe;
 
   beforeEach(async () => {
     Config.loadSync();
@@ -70,10 +70,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
   });
 
 
-  afterEach(async () => {
-    await sqlHelper.clearDB();
-  });
-  after(() => {
+  after(async () => {
+      await sqlHelper.clearDB();
       Config.loadSync();
     }
   );
@@ -367,12 +365,12 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry(null, 'parentDir');
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1',2,2);
+    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 2);
 
     const subDir = TestHelper.getRandomizedDirectoryEntry(null, 'subDir');
     subDir.path = DiskManager.pathFromParent(parent);
-    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0,5);
-    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0,3);
+    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0, 5);
+    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0, 3);
     Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
     DirectoryDTOUtils.removeReferences(subDir);
@@ -505,8 +503,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry();
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1',2,3);
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2',2,4);
+    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 3);
+    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 4);
     const gpx = TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
     DirectoryDTOUtils.removeReferences(parent);
     Config.MetaFile.gpx = true;
@@ -543,8 +541,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     DirectoryDTOUtils.removeReferences(parent);
     await im.saveToDB(Utils.clone(parent) as ParentDirectoryDTO);
 
-    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 2,2 );
-    const sp3 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto3', 3,3);
+    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 2, 2);
+    const sp3 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto3', 3, 3);
 
     DirectoryDTOUtils.removeReferences(subDir);
     await im.saveToDB(Utils.clone(subDir) as ParentDirectoryDTO);
@@ -573,12 +571,12 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     Config.MetaFile.markdown = true;
     Config.MetaFile.pg2conf = true;
     const parent = TestHelper.getRandomizedDirectoryEntry();
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1',2,2);
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2',2,3);
+    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 2);
+    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 3);
     const gpx = TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
     const subDir = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir');
-    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 1,5);
-    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 1,3);
+    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 1, 5);
+    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 1, 3);
     Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
     DirectoryDTOUtils.removeReferences(parent);
@@ -679,7 +677,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     ]);
   });
 
-  DBTestHelper.savedDescribe('Test listDirectory', () => {
+  describe('Test listDirectory', async () => {
     const statSync = fs.statSync;
     let dirTime = 0;
     const indexedTime = {
@@ -737,7 +735,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
   });
 
 
-  DBTestHelper.savedDescribe('indexDirectory(waitForSave)', () => {
+  describe('indexDirectory(waitForSave)', async () => {
     beforeEach(async () => {
       await sqlHelper.initDB();
     });
@@ -831,7 +829,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  DBTestHelper.savedDescribe('should index .pg2conf', () => {
+  describe('should index .pg2conf', async () => {
 
 
     it('.saved_searches.pg2conf', async () => {

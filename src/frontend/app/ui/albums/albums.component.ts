@@ -15,6 +15,7 @@ import {GallerySearchQueryBuilderComponent} from '../gallery/search/query-builde
 import {SavedSearchPopupComponent} from './saved-search-popup/saved-search-popup.component';
 import {ShareService} from '../gallery/share.service';
 import {NavigationService} from '../../model/navigation.service';
+import {SearchQueryParserService} from '../gallery/search/search-query-parser.service';
 
 @Component({
   selector: 'app-albums',
@@ -49,12 +50,18 @@ export class AlbumsComponent implements OnInit {
     private shareService: ShareService,
     private authService: AuthenticationService,
     private navigation: NavigationService,
+    private searchQueryParserService: SearchQueryParserService,
   ) {
     this.albumsService.getAlbums().catch(console.error);
   }
 
   get CanCreateAlbum(): boolean {
     return this.authenticationService.user.getValue().role >= UserRoles.Admin;
+  }
+
+  get IsSearchQueryEmpty(): boolean {
+    // checking .value only works for text queries, so rely on the stringified form instead
+    return !this.searchQueryParserService.stringify(this.savedSearch.searchQuery);
   }
 
   async ngOnInit() {

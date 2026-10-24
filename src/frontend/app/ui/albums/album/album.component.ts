@@ -9,6 +9,7 @@ import {Media} from '../../gallery/Media';
 import {SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDTO';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {Config} from '../../../../../common/config/public/Config';
+import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 import { NgIf } from '@angular/common';
 import { IconComponent } from '../../../icon.component';
 import { NgIconComponent } from '@ng-icons/core';
@@ -53,7 +54,7 @@ export class AlbumComponent implements OnInit, OnDestroy {
 
   get RouterLink(): any[] {
     if (this.IsSavedSearch) {
-      return ['/search', JSON.stringify(this.AsSavedSearch.searchQuery)];
+      return ['/search', SearchQueryUtils.urlify(this.AsSavedSearch.searchQuery)];
     }
     // TODO: add "normal" albums here once they are ready, see: https://github.com/bpatrik/pigallery2/issues/301
     return null;

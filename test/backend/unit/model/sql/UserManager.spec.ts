@@ -13,13 +13,13 @@ chai.use(chaiAsPromised);
 declare let describe: any;
 declare const it: any;
 declare const beforeEach: any;
-declare const afterEach: any;
+declare const after: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it so the IDE plays nicely (recognize the test)
 
 describe('UserManager', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
-  describe('buildContext', () => {
+  describe('buildContext',async () => {
 
     const testUser: UserDTO = {
       id: 1,
@@ -33,9 +33,9 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
       await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));
     });
 
-    afterEach(sqlHelper.clearDB);
+    after(sqlHelper.clearDB);
 
-    describe('findOne', () => {
+    describe('findOne',async () => {
       it('should return when passwords and name is also set', async () => {
         // Create a basic user with no queries
         const um = new UserManager();

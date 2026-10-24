@@ -35,8 +35,10 @@ export class GalleryRouter {
       [Config.Server.apiPath + '/gallery/content/:directory(*)', Config.Server.apiPath + '/gallery/', Config.Server.apiPath + '/gallery//'],
       // common part
       AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.Guest), //sharing user can only go through search. They can't just wander through the whole gallery
+      // sharing users can only list the directories of the sharing
+      AuthenticationMWs.authorise(UserRoles.LimitedGuest),
       AuthenticationMWs.normalizePathParam('directory'),
+      AuthenticationMWs.authoriseDirectory('directory'),
       VersionMWs.injectGalleryVersion,
 
       // specific part
@@ -258,6 +260,8 @@ export class GalleryRouter {
       Config.Server.apiPath + '/search/:searchQueryDTO(*)',
       // common part
       AuthenticationMWs.authenticate,
+      // LimitedGuest is allowed, as search based sharings are rendered through this endpoint.
+      // Their results are limited to the sharing by the user's projection.
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
       VersionMWs.injectGalleryVersion,
 
@@ -276,7 +280,8 @@ export class GalleryRouter {
       Config.Server.apiPath + '/autocomplete/:value(*)',
       // common part
       AuthenticationMWs.authenticate,
-      AuthenticationMWs.authorise(UserRoles.LimitedGuest),
+      // sharing users (LimitedGuest) can't search, so they don't need autocomplete either
+      AuthenticationMWs.authorise(UserRoles.Guest),
       VersionMWs.injectGalleryVersion,
 
       // specific part

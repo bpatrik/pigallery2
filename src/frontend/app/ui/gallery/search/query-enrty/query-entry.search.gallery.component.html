@@ -131,9 +131,10 @@
                name="date_min"
                title="start date"
                i18n-title
-               [ngModel]="AsRangeQuery.min | date:'yyyy-MM-dd'"
-               (ngModelChange)="AsRangeQuery.min = $event; onChange() "
-               [value]="AsRangeQuery.min | date:'yyyy-MM-dd'"
+               [ngModel]="AsRangeQuery.min | date:'yyyy-MM-dd':'UTC'"
+               (ngModelChange)="onDateChange('min', $event)"
+               [value]="AsRangeQuery.min | date:'yyyy-MM-dd':'UTC'"
+               [max]="AsRangeQuery.max | date:'yyyy-MM-dd':'UTC'"
                #date_min="ngModel"
                class="form-control input-md rounded-2"
                type="date">
@@ -141,9 +142,10 @@
                name="date_max"
                title="end date"
                i18n-title
-               [ngModel]="AsRangeQuery.max | date:'yyyy-MM-dd'"
-               (ngModelChange)="AsRangeQuery.max = $event; onChange() "
-               [value]="AsRangeQuery.max | date:'yyyy-MM-dd'"
+               [ngModel]="AsRangeQuery.max | date:'yyyy-MM-dd':'UTC'"
+               (ngModelChange)="onDateChange('max', $event)"
+               [value]="AsRangeQuery.max | date:'yyyy-MM-dd':'UTC'"
+               [min]="AsRangeQuery.min | date:'yyyy-MM-dd':'UTC'"
                #date_max="ngModel"
                class="form-control input-md rounded-2"
                type="date">

@@ -59,7 +59,6 @@ describe('UploadRouter', () => {
     await sqlHelper.initDB();
     server = new Server(false);
     await server.onStarted.wait();
-    await ObjectManagers.getInstance().init();
     Config.Upload.enabled = true; // Set it again after init
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(adminUser));
     await SQLConnection.close();

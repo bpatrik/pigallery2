@@ -70,8 +70,23 @@
             <span i18n>Sharing</span>&nbsp;<ng-container *ngIf="currentMediaCountIsLowerBound"><span
             i18n>at least</span>&nbsp;
           </ng-container>
-            <span class="fw-bold">{{ currentMediaCount }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;<span i18n>Folders are not shared.</span>
+            <span class="fw-bold">{{ sharedMediaCount }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;
+            <ng-container *ngIf="isDirectorySharing">
+              <span *ngIf="input.recursive" i18n>Subfolders are shared too.</span>
+              <span *ngIf="!input.recursive" i18n>Subfolders are not shared.</span>
+            </ng-container>
+            <span *ngIf="!isDirectorySharing" i18n>Only folders that contain shared photos can be opened.</span>
           </small>
+        </div>
+      </div>
+
+      <div class="row mt-2" *ngIf="isDirectorySharing">
+        <div class="col-12">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="share-recursive" name="share-recursive"
+                   [(ngModel)]="input.recursive" (ngModelChange)="onRecursiveChange()">
+            <label class="form-check-label" for="share-recursive" i18n>Include subfolders</label>
+          </div>
         </div>
       </div>
 
@@ -133,6 +148,7 @@
       <thead>
       <tr>
         <th i18n>Sharing</th>
+        <th i18n>Subfolders</th>
         <th *ngIf="IsAdmin" i18n>Creator</th>
         <th i18n>Expires</th>
         <th></th>
@@ -140,7 +156,17 @@
       </thead>
       <tbody>
       <tr *ngFor="let share of activeShares">
-        <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
+        <td class="ellipsisContainer">
+          <div class="ellipsisText share-key">
+            <a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a>
+            <button type="button" class="btn btn-link p-0 ms-1"
+                    ngxClipboard [cbContent]="sharingService.getUrl(share)" (cbOnSuccess)="onCopy()"
+                    title="Copy link" i18n-title>
+              <ng-icon name="ionCopyOutline"></ng-icon>
+            </button>
+          </div>
+        </td>
+        <td>{{ isRecursive(share) ? text.Yes : text.No }}</td>
         <td *ngIf="IsAdmin">{{share.creator.name}}</td>
         <td>{{share.expires | date}}</td>
         <td>

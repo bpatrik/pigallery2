@@ -10,6 +10,7 @@ import {ReIndexingSensitivity} from '../../../../src/common/config/private/Priva
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
+import {UserRoles} from '../../../../src/common/entities/UserDTO';
 
 process.env.NODE_ENV = 'test';
 chai.should();
@@ -227,5 +228,40 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
     });
   });
 
+  describe('role based access', async () => {
+
+    beforeEach(setUp);
+    afterEach(async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.Admin;
+      await tearDown();
+    });
+
+    const get = (url: string) => (request.execute(server.Server) as SuperAgentStatic)
+      .get(Config.Server.apiPath + url);
+
+    it('LimitedGuest should not use autocomplete', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.LimitedGuest;
+      const result = await get('/autocomplete/a');
+      (result.should as any).have.status(401);
+    });
+
+    it('Guest should use autocomplete', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.Guest;
+      const result = await get('/autocomplete/a');
+      (result.should as any).have.status(200);
+    });
+
+    it('Guest should not see notifications', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.Guest;
+      const result = await get('/notifications');
+      (result.should as any).have.status(401);
+    });
+
+    it('User should see notifications', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.User;
+      const result = await get('/notifications');
+      (result.should as any).have.status(200);
+    });
+  });
 
 });

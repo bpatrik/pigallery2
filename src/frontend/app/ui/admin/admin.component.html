@@ -8,8 +8,7 @@
 
           <div class="alert alert-{{getCss(notification.type)}}" role="alert">
             ({{notification.count}}) {{notification.message}}
-            <br *ngIf="notification.details"/>
-            {{notification.details | json}}
+            <pre *ngIf="notification.details" class="notification-details mt-2 mb-0">{{formatDetails(notification.details)}}</pre>
             <ng-container *ngIf="notification.request">
               <br/>
               Request: "{{notification.request.method}}", url: "{{notification.request.url}}", status code:

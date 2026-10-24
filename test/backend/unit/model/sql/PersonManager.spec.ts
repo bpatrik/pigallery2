@@ -85,9 +85,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
     await setUpSqlDB();
   });
 
-  after(async () => {
-    await sqlHelper.clearDB();
-  });
+  after(sqlHelper.clearDB);
 
   describe('Basic Operations', () => {
 
