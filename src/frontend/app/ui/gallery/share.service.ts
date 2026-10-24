@@ -13,6 +13,7 @@ import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
 import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 
 @Injectable()
@@ -204,10 +205,10 @@ export class ShareService {
       return ['/gallery', sharing.defaultDirectoryView];
     }
     if (sharing?.defaultSearchView) {
-      return ['/search', JSON.stringify(sharing.defaultSearchView)];
+      return ['/search', SearchQueryUtils.urlify(sharing.defaultSearchView)];
     }
     if (sharing?.searchQuery) {
-      return ['/search', JSON.stringify(sharing.searchQuery)];
+      return ['/search', SearchQueryUtils.urlify(sharing.searchQuery)];
     }
     if (sharing?.directoryQuery) {
       // for recursive sharing ('path/*') open the directory itself

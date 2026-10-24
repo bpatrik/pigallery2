@@ -1,6 +1,8 @@
 import {Subject} from 'rxjs';
 import {ShareService} from './share.service';
 import {PublicSharingDTO, ResponseSharingDTO} from '../../../../common/entities/SharingDTO';
+import {SearchQueryTypes, TextSearch} from '../../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 describe('ShareService', () => {
 
@@ -31,6 +33,19 @@ describe('ShareService', () => {
       const {service} = setUp({sharingKey: 'other_key', passwordProtected: false});
       service.sharingKey = 'key';
       expect(await service.getPublicSharing()).toBeNull();
+    });
+  });
+
+  describe('getDefaultRoute', () => {
+    it('should use the url friendly search query', () => {
+      const {service} = setUp(null);
+      const searchQuery = {type: SearchQueryTypes.any_text, value: 'cat'} as TextSearch;
+      expect(service.getDefaultRoute({searchQuery} as unknown as ResponseSharingDTO))
+        .toEqual(['/search', SearchQueryUtils.urlify(searchQuery)]);
+      expect(service.getDefaultRoute({defaultSearchView: searchQuery} as unknown as ResponseSharingDTO))
+        .toEqual(['/search', SearchQueryUtils.urlify(searchQuery)]);
+      expect(SearchQueryUtils.parseURLifiedQuery(service.getDefaultRoute({searchQuery} as unknown as ResponseSharingDTO)[1]))
+        .toEqual(searchQuery);
     });
   });
 

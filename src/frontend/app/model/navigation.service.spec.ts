@@ -1,5 +1,9 @@
 import {NavigationService} from './navigation.service';
 import {PublicSharingDTO} from '../../../common/entities/SharingDTO';
+import {Config} from '../../../common/config/public/Config';
+import {NavigationLinkConfig, NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
+import {SearchQueryTypes, TextSearch} from '../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 describe('NavigationService', () => {
 
@@ -36,6 +40,31 @@ describe('NavigationService', () => {
       await service.toLogin();
       expect(shareService.getPublicSharing).not.toHaveBeenCalled();
       expect(router.navigate).toHaveBeenCalledWith(['login']);
+    });
+  });
+
+  describe('toDefault', () => {
+    let originalLinks: NavigationLinkConfig[];
+    beforeEach(() => {
+      originalLinks = Config.Gallery.NavBar.links;
+    });
+    afterEach(() => {
+      Config.Gallery.NavBar.links = originalLinks;
+    });
+
+    it('should navigate to the url friendly search of the first link', async () => {
+      const searchQuery = {type: SearchQueryTypes.any_text, value: 'cat'} as TextSearch;
+      Config.Gallery.NavBar.links = [new NavigationLinkConfig(NavigationLinkTypes.search, 'Cats', searchQuery)];
+      const {router, service} = setUp(null, false);
+      await service.toDefault();
+      expect(router.navigate).toHaveBeenCalledWith(['search', SearchQueryUtils.urlify(searchQuery)]);
+    });
+
+    it('should fall back to the gallery for a search link without a query (#1176)', async () => {
+      Config.Gallery.NavBar.links = [new NavigationLinkConfig(NavigationLinkTypes.search)];
+      const {router, service} = setUp(null, false);
+      await service.toDefault();
+      expect(router.navigate).toHaveBeenCalledOnceWith(['gallery', '']);
     });
   });
 });

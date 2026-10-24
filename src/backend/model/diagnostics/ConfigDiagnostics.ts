@@ -16,6 +16,9 @@ import {
   ClientSharingConfig,
   MapLayers,
   MapProviders,
+  NavBarConfig,
+  NavigationLinkConfig,
+  NavigationLinkTypes,
 } from '../../../common/config/public/ClientConfig';
 import {
   DatabaseType,
@@ -290,6 +293,47 @@ export class ConfigDiagnostics {
     SearchQueryUtils.validateDirectoryList(config.Users.blockDirectoryList, 'Directory block list');
   }
 
+  static testNavigationLink(link: NavigationLinkConfig, what = 'NavBar link'): void {
+    if (!link || !NavigationLinkTypes[link.type]) {
+      throw new Error(`${what} has unknown type: ${JSON.stringify(link?.type)}`);
+    }
+    if (link.type === NavigationLinkTypes.search) {
+      if (!link.SearchQuery) {
+        throw new Error(`${what} is a search link without a search query`);
+      }
+      SearchQueryUtils.validateSearchQuery(link.SearchQuery, what + ' SearchQuery');
+    }
+    if (link.type === NavigationLinkTypes.url && (!link.url || link.url.trim().length === 0)) {
+      throw new Error(`${what} is an url link without an url`);
+    }
+  }
+
+  static async testNavBarConfig(navBar: NavBarConfig): Promise<void> {
+    Logger.debug(LOG_TAG, 'Testing navbar config');
+    (navBar.links || []).forEach((l, i) => ConfigDiagnostics.testNavigationLink(l, `NavBar link #${i + 1}`));
+  }
+
+  /**
+   * Drops the links that the client could not navigate to.
+   * Falls back to the default links if nothing is left.
+   */
+  static removeInvalidNavigationLinks(navBar: NavBarConfig): void {
+    const valid = (navBar.links || []).filter((l) => {
+      try {
+        ConfigDiagnostics.testNavigationLink(l);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    if (valid.length === 0) {
+      const pc = ConfigClassBuilder.attachPrivateInterface(new PrivateConfigClass());
+      navBar.links = pc.Gallery.NavBar.links;
+      return;
+    }
+    navBar.links = valid;
+  }
+
   static async testAlbumCoverConfig(settings: ServerAlbumCoverConfig): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing cover config');
     SearchQueryUtils.validateSearchQuery(settings.SearchQuery, 'SearchQuery');
@@ -359,6 +403,7 @@ export class ConfigDiagnostics {
     await ConfigDiagnostics.testPhotoConfig(config.Media.Photo);
     await ConfigDiagnostics.testSearchConfig(config.Search, config);
     await ConfigDiagnostics.testAlbumCoverConfig(config.AlbumCover);
+    await ConfigDiagnostics.testNavBarConfig(config.Gallery.NavBar);
     await ConfigDiagnostics.testFacesConfig(config.Faces, config);
     await ConfigDiagnostics.testTasksConfig(config.Jobs, config);
     await ConfigDiagnostics.testSharingConfig(config.Sharing, config);
@@ -514,6 +559,21 @@ export class ConfigDiagnostics {
         type: SearchQueryTypes.any_text,
         value: '',
       } as TextSearch;
+    }
+
+    try {
+      await ConfigDiagnostics.testNavBarConfig(Config.Gallery.NavBar);
+    } catch (ex) {
+      const err: Error = ex;
+      const errorText = 'NavBar links are not valid, removing the invalid ones temporally. ' + ConfigDiagnostics.adjustConfigWarn;
+      NotificationManager.warning(errorText,
+        err.toString()
+      );
+      Logger.warn(
+        LOG_TAG, errorText,
+        err.toString()
+      );
+      ConfigDiagnostics.removeInvalidNavigationLinks(Config.Gallery.NavBar);
     }
 
     try {
