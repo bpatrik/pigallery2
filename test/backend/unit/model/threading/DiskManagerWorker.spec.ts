@@ -110,9 +110,11 @@ describe('DiskMangerWorker', () => {
         parentDirAbsoluteName: path.join(__dirname, '/../../../assets')
       });
 
-    it('excludeDir should still match plain folder names exactly', async () => {
+    it('excludeDir should match plain folder names exactly and case-sensitively', async () => {
       Config.Indexing.excludeFolderList = ['.dtrash'];
       expect(await callExcludeDir('.dtrash')).to.be.true;
+      expect(await callExcludeDir('.DTrash')).to.be.false;
+      expect(await callExcludeDir('.dtrash2')).to.be.false;
       expect(await callExcludeDir('photos')).to.be.false;
     });
 
@@ -120,6 +122,7 @@ describe('DiskMangerWorker', () => {
       Config.Indexing.excludeFolderList = ['temp*'];
       expect(await callExcludeDir('temp')).to.be.true;
       expect(await callExcludeDir('temp2024')).to.be.true;
+      expect(await callExcludeDir('Temp2024')).to.be.false;
       expect(await callExcludeDir('photos')).to.be.false;
     });
 

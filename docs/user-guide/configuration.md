@@ -54,7 +54,8 @@ App CLI options:
   --Users-oidc-usernameClaim                                                JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty. (default: 'preferred_username')
   --Users-oidc-emailClaim                                                    (default: 'email')
   --Users-oidc-allowedDomains                                               If set, only identities with emails in these domains will be accepted. (default: [])
-  --Users-oidc-autoCreateUser                                               If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in. (default: false)
+  --Users-oidc-autoCreateUser                                               If enabled, unknown users will be created on first login. If disabled, only existing app users can log in. (default: false)
+  --Users-oidc-autoCreateUserRole                                           Role of the users that are created on their first OIDC login. (default: 'Guest')
   --Users-enforcedUsers                                                     Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   --Users-allowQuery                                                        Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   --Users-blockQuery                                                        Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
@@ -191,7 +192,7 @@ App CLI options:
   --Database-mysql-password                                                  (default: '')
   --Indexing-cachedFolderTimeout                                            If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low). (default: 3600000)
   --Indexing-reIndexingSensitivity                                          Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
-  --Indexing-excludeFolderList                                              Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
+  --Indexing-excludeFolderList                                              Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards and is case-sensitive. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
   --Indexing-excludeFileList                                                Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
   --Indexing-excludeFilenameList                                            Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
   --AlbumCover-SearchQuery                                                  Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
@@ -238,7 +239,8 @@ Environmental variables:
   Users-oidc-usernameClaim                                              JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty. (default: 'preferred_username')
   Users-oidc-emailClaim                                                  (default: 'email')
   Users-oidc-allowedDomains                                             If set, only identities with emails in these domains will be accepted. (default: [])
-  Users-oidc-autoCreateUser                                             If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in. (default: false)
+  Users-oidc-autoCreateUser                                             If enabled, unknown users will be created on first login. If disabled, only existing app users can log in. (default: false)
+  Users-oidc-autoCreateUserRole                                         Role of the users that are created on their first OIDC login. (default: 'Guest')
   Users-enforcedUsers                                                   Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   Users-allowQuery                                                      Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   Users-blockQuery                                                      Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
@@ -380,7 +382,7 @@ Environmental variables:
   MYSQL_PASSWORD                                                         same as Database-mysql-password
   Indexing-cachedFolderTimeout                                          If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low). (default: 3600000)
   Indexing-reIndexingSensitivity                                        Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
-  Indexing-excludeFolderList                                            Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
+  Indexing-excludeFolderList                                            Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards and is case-sensitive. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
   Indexing-excludeFileList                                              Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
   Indexing-excludeFilenameList                                          Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
   AlbumCover-SearchQuery                                                Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
@@ -465,8 +467,10 @@ Environmental variables:
             "emailClaim": "email",
             "//[allowedDomains]": "If set, only identities with emails in these domains will be accepted.",
             "allowedDomains": [],
-            "//[autoCreateUser]": "If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in.",
-            "autoCreateUser": false
+            "//[autoCreateUser]": "If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.",
+            "autoCreateUser": false,
+            "//[autoCreateUserRole]": "Role of the users that are created on their first OIDC login.",
+            "autoCreateUserRole": "Guest"
         },
         "//[enforcedUsers]": "Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.",
         "enforcedUsers": [],
@@ -1085,7 +1089,7 @@ Environmental variables:
         "cachedFolderTimeout": 3600000,
         "//[reIndexingSensitivity]": "Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job.",
         "reIndexingSensitivity": "low",
-        "//[excludeFolderList]": "Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded.",
+        "//[excludeFolderList]": "Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder whose name matches will be excluded; this supports '*' (any characters) and '?' (single character) wildcards and is case-sensitive.",
         "excludeFolderList": [
             ".Trash-1000",
             ".dtrash",
