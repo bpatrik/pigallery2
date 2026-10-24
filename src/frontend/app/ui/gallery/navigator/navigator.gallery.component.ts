@@ -5,6 +5,7 @@ import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {QueryService} from '../../../model/query.service';
 import {Utils} from '../../../../../common/Utils';
+import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
@@ -287,7 +288,7 @@ export class GalleryNavigatorComponent {
     if (!c.directory) {
       return null;
     }
-    return JSON.stringify({
+    return SearchQueryUtils.urlify({
       type: SearchQueryTypes.directory,
       matchType: TextSearchQueryMatchTypes.globMatch,
       value: Utils.concatUrls('./', c?.directory.path, c?.directory.name) + '*',
