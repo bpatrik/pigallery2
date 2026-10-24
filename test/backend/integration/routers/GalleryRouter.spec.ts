@@ -11,7 +11,7 @@ import {ReIndexingSensitivity} from '../../../../src/common/config/private/Priva
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
-import {SearchQueryTypes, TextSearch} from '../../../../src/common/entities/SearchQueryDTO';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 
@@ -253,6 +253,29 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
 
       (result.should as any).have.status(200);
       expect(result.body).to.be.instanceof(Buffer);
+    });
+
+    it('should return random photo for directory query containing /', async () => {
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('orientation', true);
+      if (ObjectManagers.getInstance().IndexingManager.IsSavingInProgress) {
+        await ObjectManagers.getInstance().IndexingManager.SavingReady;
+      }
+
+      const urlifiedQuery = SearchQueryUtils.urlify({
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.globMatch,
+        value: 'orientation/*',
+      } as TextSearch);
+
+      const encoded = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/random/' + encodeURIComponent(urlifiedQuery));
+      (encoded.should as any).have.status(200);
+      expect(encoded.body).to.be.instanceof(Buffer);
+
+      const raw = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/random/' + urlifiedQuery);
+      (raw.should as any).have.status(200);
+      expect(raw.body).to.be.instanceof(Buffer);
     });
   });
 

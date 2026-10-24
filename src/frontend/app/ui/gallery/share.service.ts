@@ -77,12 +77,7 @@ export class ShareService {
   }
 
   public getUrl(share: ResponseSharingDTO): string {
-    const urlBase = (Config.Server.urlBase || '').replace(/^\/+|\/+$/g, '');
-    const publicUrl = (Config.Server.publicUrl || '').replace(/\/+$/, '');
-    const baseUrl = urlBase && !publicUrl.endsWith('/' + urlBase)
-      ? Utils.concatUrls(publicUrl, urlBase)
-      : publicUrl;
-    return Utils.concatUrls(baseUrl, '/share/', share.sharingKey);
+    return Utils.concatUrls(Utils.getPublicBaseUrl(Config.Server.publicUrl, Config.Server.urlBase), '/share/', share.sharingKey);
   }
 
 

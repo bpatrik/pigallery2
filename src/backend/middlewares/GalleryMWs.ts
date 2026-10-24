@@ -23,7 +23,7 @@ import {SortByTypes} from '../../common/entities/SortingMethods';
 export class GalleryMWs {
   /**
    * Middleware to safely parse searchQueryDTO from URL parameters
-   * Handles URL decoding and JSON parsing with proper error handling
+   * Accepts URLified or full JSON queries (Express already URL-decodes route params)
    */
   public static parseSearchQuery(
     req: Request,
@@ -35,12 +35,7 @@ export class GalleryMWs {
         return next();
       }
 
-      let rawQueryParam = req.params['searchQueryDTO'] as string;
-      try {
-        rawQueryParam = decodeURIComponent(rawQueryParam);
-      } catch {
-        // ignore decoding errors and continue with raw string
-      }
+      const rawQueryParam = req.params['searchQueryDTO'] as string;
 
       let query: SearchQueryDTO;
       try {

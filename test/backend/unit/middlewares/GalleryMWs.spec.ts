@@ -268,6 +268,28 @@ describe('GalleryMWs', () => {
       });
     });
 
+    it('should keep % sequences in the search text', (done: (err?: any) => void) => {
+      const originalQuery: TextSearch = {
+        type: SearchQueryTypes.keyword,
+        value: 'a%20b',
+        matchType: TextSearchQueryMatchTypes.exact_match,
+      };
+      const req: any = {
+        params: {
+          searchQueryDTO: SearchQueryUtils.urlify(originalQuery),
+        },
+      };
+      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
+        try {
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal(originalQuery);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    });
+
     it('should parse full JSON search query', (done: (err?: any) => void) => {
       const originalQuery: TextSearch = {
         type: SearchQueryTypes.keyword,

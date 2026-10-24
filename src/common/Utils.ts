@@ -341,6 +341,15 @@ export class Utils {
     return url.substring(0, url.length - 1);
   }
 
+  /**
+   * Public base URL of the server, including the urlBase (unless publicUrl already ends with it).
+   */
+  static getPublicBaseUrl(publicUrl: string, urlBase: string): string {
+    const base = (urlBase || '').replace(/^\/+|\/+$/g, '');
+    const pub = (publicUrl || '').replace(/\/+$/, '');
+    return base && !pub.endsWith('/' + base) ? Utils.concatUrls(pub, base) : pub;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static updateKeys(targetObject: any, sourceObject: any): void {
     Object.keys(sourceObject).forEach((key): void => {

@@ -59,6 +59,20 @@ describe('Utils', () => {
     expect(Utils.equalsFilter({a: 0}, {a: 0})).to.be.equal(true);
   });
 
+  describe('getPublicBaseUrl', () => {
+    it('should append urlBase to publicUrl', () => {
+      expect(Utils.getPublicBaseUrl('https://example.com/', '/pigallery2/')).to.be.equal('https://example.com/pigallery2');
+    });
+
+    it('should not append urlBase twice', () => {
+      expect(Utils.getPublicBaseUrl('https://example.com/pigallery2', 'pigallery2')).to.be.equal('https://example.com/pigallery2');
+    });
+
+    it('should return publicUrl without urlBase', () => {
+      expect(Utils.getPublicBaseUrl('https://example.com/', '')).to.be.equal('https://example.com');
+    });
+  });
+
   describe('sortableFilename', () => {
     it('should trim extensions', () => {
       expect(Utils.sortableFilename("10.jpg")).to.be.equal("10")

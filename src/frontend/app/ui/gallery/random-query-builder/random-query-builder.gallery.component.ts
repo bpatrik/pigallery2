@@ -6,7 +6,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
 import {ActivatedRoute, Params} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {SearchQueryParserService} from '../search/search-query-parser.service';
@@ -38,6 +38,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   url = '';
 
   contentSubscription: Subscription = null;
+  private prefilledDirectory: string = null;
 
   modalRef: BsModalRef;
 
@@ -67,14 +68,12 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   }
 
   onQueryChange(): void {
-    const urlBase = (Config.Server.urlBase || '').replace(/^\/+|\/+$/g, '');
-    const publicUrl = (Config.Server.publicUrl || '').replace(/\/+$/, '');
-    const baseUrl = urlBase && !publicUrl.endsWith('/' + urlBase)
-      ? Utils.concatUrls(publicUrl, urlBase)
-      : publicUrl;
-
     this.url = NetworkService.buildUrl(
-        Utils.concatUrls(baseUrl, Config.Server.apiPath, '/gallery/random') + '/' + this.HTMLSearchQuery
+        Utils.concatUrls(
+            Utils.getPublicBaseUrl(Config.Server.publicUrl, Config.Server.urlBase),
+            Config.Server.apiPath,
+            '/gallery/random'
+        ) + '/' + encodeURIComponent(this.HTMLSearchQuery)
     );
   }
 
@@ -85,18 +84,24 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
           if (!this.enabled) {
             return;
           }
-          const directory = Utils.concatUrls(content.directory.path, content.directory.name);
-          if (directory && directory !== '.' && directory !== './') {
-            this.searchQueryDTO = {
-              type: SearchQueryTypes.directory,
-              value: directory,
-            } as TextSearch;
-          } else {
-            this.searchQueryDTO = {
-              type: SearchQueryTypes.any_text,
-              value: '',
-            } as TextSearch;
+          const directory = SearchQueryUtils.normalizeDirectoryPath(
+              Utils.concatUrls(content.directory.path, content.directory.name)
+          );
+          // prefill only when the directory changes, so a query typed by the user is not overwritten
+          if (directory === this.prefilledDirectory) {
+            return;
           }
+          this.prefilledDirectory = directory;
+          this.searchQueryDTO = directory
+              ? {
+                type: SearchQueryTypes.directory,
+                matchType: TextSearchQueryMatchTypes.globMatch,
+                value: directory + '/*',
+              } as TextSearch
+              : {
+                type: SearchQueryTypes.any_text,
+                value: '',
+              } as TextSearch;
           this.onQueryChange();
         }
     );
