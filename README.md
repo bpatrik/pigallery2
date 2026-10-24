@@ -33,6 +33,7 @@ For more detailed information, please see our [Documentation Website](http://bpa
 
 ## 🤝 Contributing
 Contributions are welcome! Please read our [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing) to get started.
+Using an AI coding agent? See [AGENTS.md](AGENTS.md).
 
 ## ⭐ Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=bpatrik/pigallery2&type=date&legend=top-left)](https://www.star-history.com/#bpatrik/pigallery2&type=date&legend=top-left)

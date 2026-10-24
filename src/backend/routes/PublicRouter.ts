@@ -11,7 +11,6 @@ import {UserDTO} from '../../common/entities/UserDTO';
 import {ServerTimeEntry} from '../middlewares/ServerTimingMWs';
 import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
-import {Utils} from '../../common/Utils';
 import {ObjectManagers} from '../model/ObjectManagers';
 
 declare global {
@@ -65,7 +64,7 @@ export class PublicRouter {
         if (Config.Server.languages.indexOf(locale) !== -1) {
           res.cookie(CookieNames.lang, locale);
         }
-        res.redirect(Utils.concatUrls('/' + Config.Server.urlBase) + '/?ln=' + locale);
+        res.redirect(Config.Server.getAppUrl() + '?ln=' + locale);
       };
     };
 
@@ -94,6 +93,7 @@ export class PublicRouter {
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
       res.tpl.Config = confCopy;
+      res.tpl.baseHref = Config.Server.getAppUrl();
       res.tpl.customHTMLHead = Config.Server.customHTMLHead;
       const selectedTheme = Config.Gallery.Themes.availableThemes.find(th => th.name === Config.Gallery.Themes.selectedTheme)?.theme || '';
       res.tpl.usedTheme = selectedTheme;
@@ -135,7 +135,7 @@ export class PublicRouter {
           'photo'
         ],
         start_url:
-          Config.Server.publicUrl === '' ? '.' : Config.Server.publicUrl,
+          Config.Server.getPublicUrl(),
         background_color: '#000000',
         theme_color: '#000000',
       });

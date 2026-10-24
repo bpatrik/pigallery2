@@ -341,15 +341,6 @@ export class Utils {
     return url.substring(0, url.length - 1);
   }
 
-  /**
-   * Public base URL of the server, including the urlBase (unless publicUrl already ends with it).
-   */
-  static getPublicBaseUrl(publicUrl: string, urlBase: string): string {
-    const base = (urlBase || '').replace(/^\/+|\/+$/g, '');
-    const pub = (publicUrl || '').replace(/\/+$/, '');
-    return base && !pub.endsWith('/' + base) ? Utils.concatUrls(pub, base) : pub;
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static updateKeys(targetObject: any, sourceObject: any): void {
     Object.keys(sourceObject).forEach((key): void => {
@@ -503,14 +494,18 @@ export class Utils {
   }
 
   public static xmpExifGpsCoordinateToDecimalDegrees(text: string): number {
-    if (!text) {
+    if (!text || typeof text !== 'string') {
       return undefined;
     }
     const parts = text.match(/^([0-9]+),([0-9.]+)([EWNS])$/);
+    if (!parts) {
+      return undefined;
+    }
     const degrees: number = parseInt(parts[1], 10);
     const minutes: number = parseFloat(parts[2]);
     const sign = (parts[3] === 'N' || parts[3] === 'E') ? 1 : -1;
-    return (sign * (degrees + (minutes / 60.0)));
+    const ret = sign * (degrees + (minutes / 60.0));
+    return Number.isFinite(ret) ? ret : undefined;
   }
 
 

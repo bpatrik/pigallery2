@@ -28,6 +28,12 @@ To keep development organized, please follow our feature workflow and rule of th
    * Note: you can skip this test if you use and IDE that supports typescript (e.g.: webstorm, vscode)
 5. Run the server `npm start`
 
+## Developing with AI agents
+
+The repository contains an [`AGENTS.md`](https://github.com/bpatrik/pigallery2/blob/master/AGENTS.md) file with project context, commands and rules for AI coding agents.
+Most agents (Claude Code, Junie, Codex, Cursor, Copilot, etc.) pick it up automatically; for others, point them to it.
+It is also a short summary of the project's priorities, so it is worth a read for human contributors too.
+
 ## Developer docs
 
 ### Project structure
@@ -56,18 +62,18 @@ Backend structure:
   |-- backend -- nodejs backend code
     |-- middlewares -- contains the middlewares. These make minimal input validation and transforamtion
     |-- model -- contains the business logic
-	  |-- database -- these return with the gallery related data
-	    |-- interfaces -- common, database independent inerfaces
-		|-- memory -- business logic for memory "database"
-		|-- sql  -- business logic for sql database
-	  |-- diagnostics -- contains the checks for the startup diagnostics (checks if all the settings are valid, all packeges are avaiale, image folder exists, etc.)
-      |-- fileprocessing -- photo and video converting code
-      |-- jobs -- code about job scheduling (crontab like feature)	  
-	  |-- threading -- code that runs on a separate threading
-	    |-- DiskManagerWorker.ts -- scans a direcory
-		|-- Metadataloader.ts -- parses a photo / video for metadata
-		|-- *Worker.ts -- queues and helper classes to convert video / photo, parse a directory
-	|-- routers -- contains the declarations of the HTTP Api endpoints
+      |-- database -- SQL (TypeORM) based business logic, these return with the gallery related data
+        |-- enitites -- TypeORM entities
+      |-- diagnostics -- contains the checks for the startup diagnostics (checks if all the settings are valid, all packeges are avaiale, image folder exists, etc.)
+      |-- extension -- extension runtime and the public extension interface
+      |-- fileaccess -- disk and file related code
+        |-- DiskManager.ts -- scans a direcory
+        |-- MetadataLoader.ts -- parses a photo / video for metadata
+        |-- *Worker.ts -- queues and helper classes to convert video / photo
+        |-- fileprocessing -- photo and video converting code
+      |-- jobs -- code about job scheduling (crontab like feature)
+      |-- messenger -- notification messengers (e.g.: email)
+    |-- routes -- contains the declarations of the HTTP Api endpoints
 	|-- index.ts -- here starts the Server up (callst server.ts)
 	|-- server.ts -- this is HTTP server startup code
 	|-- ProjectPath.ts -- singleton, contains the project related paths
@@ -115,6 +121,8 @@ Client side:
 ## Running the tests locally
 You can run tests in various ways. If you use VS Code, the built-in test explorer is a good way to visualize and run the tests. You can also run tests from the command line.
 
+Note: mocha runs the transpiled `.js` files, so run `npm run build-backend` (or `tsc -w`) first.
+
 - Run all tests:
 
   `npx mocha`
@@ -131,6 +139,10 @@ You can run tests in various ways. If you use VS Code, the built-in test explore
   `docker run --name pigallery_test -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=pigallery_test -e MYSQL_USER=user -e MYSQL_PASSWORD=password -p3306:3306 -d mariadb:10.3 --log-bin --binlog-format=MIXED`
 
   Start this betfore running the tests in text explorer or the command line, if you want to include the MySQL tests.
+
+  To skip the MySQL tests (SQLite only, good enough for quick development), set `TEST_MYSQL=false`:
+  `TEST_MYSQL=false npx mocha` (bash) or `$env:TEST_MYSQL="false"; npx mocha` (PowerShell).
+  Before submitting a PR, run the full suite including MySQL.
 
   Once you're finished with the testing, you can shut down the container again:
 

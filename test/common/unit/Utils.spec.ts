@@ -59,20 +59,6 @@ describe('Utils', () => {
     expect(Utils.equalsFilter({a: 0}, {a: 0})).to.be.equal(true);
   });
 
-  describe('getPublicBaseUrl', () => {
-    it('should append urlBase to publicUrl', () => {
-      expect(Utils.getPublicBaseUrl('https://example.com/', '/pigallery2/')).to.be.equal('https://example.com/pigallery2');
-    });
-
-    it('should not append urlBase twice', () => {
-      expect(Utils.getPublicBaseUrl('https://example.com/pigallery2', 'pigallery2')).to.be.equal('https://example.com/pigallery2');
-    });
-
-    it('should return publicUrl without urlBase', () => {
-      expect(Utils.getPublicBaseUrl('https://example.com/', '')).to.be.equal('https://example.com');
-    });
-  });
-
   describe('sortableFilename', () => {
     it('should trim extensions', () => {
       expect(Utils.sortableFilename("10.jpg")).to.be.equal("10")
@@ -90,4 +76,18 @@ describe('Utils', () => {
       expect(Utils.sortableFilename("hello_world")).to.be.equal("hello_world")
     })
   })
+
+  describe('xmpExifGpsCoordinateToDecimalDegrees', () => {
+    it('should parse coordinates', () => {
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees('47,30N')).to.be.equal(47.5);
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees('19,3W')).to.be.closeTo(-19.05, 0.000001);
+    });
+
+    it('should return undefined for malformed input', () => {
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees(undefined)).to.be.equal(undefined);
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees('garbage')).to.be.equal(undefined);
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees('12,.N')).to.be.equal(undefined);
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees([12, 3, 4] as any)).to.be.equal(undefined);
+    });
+  });
 });
