@@ -755,7 +755,7 @@ export class ServerIndexingConfig {
         uiOptional: true,
         hint: $localize`.*;*.rm`
       } as TAGS,
-    description: $localize`Photos and videos to skip by file name. Supports * and ?, case-insensitive. E.g.: ._* or *.rm`,
+    description: $localize`Photos and videos to skip by file name. Supports * and ?, case-sensitive. E.g.: ._* or *.rm`,
   })
   excludeFilenameList: string[] = [];
 }

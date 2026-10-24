@@ -58,13 +58,13 @@ export class DiskManager {
     return path.basename(dirPath);
   }
 
-  private static globToRegex(glob: string, caseSensitive = false): RegExp {
+  private static globToRegex(glob: string): RegExp {
     const regexStr = '^' + glob
       .replace(/[.+^${}()|[\]\\]/g, '\\$&') // escape regex special chars (except * and ?)
       .replace(/\*/g, '.*')                   // * matches any number of any chars
       .replace(/\?/g, '.') +                  // ? matches exactly one char
       '$';
-    return new RegExp(regexStr, caseSensitive ? '' : 'i');
+    return new RegExp(regexStr);
   }
 
   public static excludeFile(filename: string): boolean {
@@ -104,7 +104,7 @@ export class DiskManager {
           return true;
         }
       } else {
-        if (DiskManager.globToRegex(exclude, true).test(dir.name)) {
+        if (DiskManager.globToRegex(exclude).test(dir.name)) {
           return true;
         }
       }

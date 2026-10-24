@@ -55,7 +55,7 @@ describe('DiskMangerWorker', () => {
     it('excludeFile should exclude files by extension using glob pattern "*.rm"', () => {
       Config.Indexing.excludeFilenameList = ['*.rm'];
       expect(DiskManager.excludeFile('video.rm')).to.be.true;
-      expect(DiskManager.excludeFile('VIDEO.RM')).to.be.true; // case insensitive
+      expect(DiskManager.excludeFile('VIDEO.RM')).to.be.false; // case-sensitive
       expect(DiskManager.excludeFile('video.mp4')).to.be.false;
       expect(DiskManager.excludeFile('video.rm.bak')).to.be.false;
     });
