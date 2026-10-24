@@ -465,4 +465,39 @@ describe('ContentWrapper', () => {
     });
   });
 
+
+  describe('availableParents', () => {
+    it('should encode boolean lists to a bitmask that keeps the length', () => {
+      expect(ContentWrapperUtils.booleansToBitmask([])).to.equal(0b1);
+      expect(ContentWrapperUtils.booleansToBitmask([true, false])).to.equal(0b101);
+      expect(ContentWrapperUtils.booleansToBitmask([false, false, false])).to.equal(0b1000);
+      for (const list of [[], [true], [false], [true, false, true], [false, false, true, true],
+        new Array(ContentWrapperUtils.MAX_BITMASK_LENGTH).fill(true),
+        new Array(ContentWrapperUtils.MAX_BITMASK_LENGTH).fill(false)]) {
+        expect(ContentWrapperUtils.bitmaskToBooleans(ContentWrapperUtils.booleansToBitmask(list)), JSON.stringify(list))
+          .to.deep.equal(list);
+      }
+    });
+
+    it('should not encode too long lists', () => {
+      expect(ContentWrapperUtils.booleansToBitmask(new Array(ContentWrapperUtils.MAX_BITMASK_LENGTH + 1).fill(true))).to.be.null;
+    });
+
+    it('should travel as a bitmask and unpack to a boolean list', () => {
+      const dir = TestHelper.getDirectoryEntry(null, 'a') as unknown as ParentDirectoryDTO;
+      dir.availableParents = [true, false, true];
+      const packed = ContentWrapperUtils.pack(ContentWrapperUtils.build(Utils.clone(dir)));
+      expect(packed.directory.availableParents as unknown).to.equal(0b1101);
+      expect(ContentWrapperUtils.unpack(packed).directory.availableParents).to.deep.equal([true, false, true]);
+    });
+
+    it('should keep too long lists as boolean list', () => {
+      const dir = TestHelper.getDirectoryEntry(null, 'a') as unknown as ParentDirectoryDTO;
+      const list = new Array(60).fill(true);
+      dir.availableParents = list;
+      const packed = ContentWrapperUtils.pack(ContentWrapperUtils.build(Utils.clone(dir)));
+      expect(packed.directory.availableParents).to.deep.equal(list);
+      expect(ContentWrapperUtils.unpack(packed).directory.availableParents).to.deep.equal(list);
+    });
+  });
 });

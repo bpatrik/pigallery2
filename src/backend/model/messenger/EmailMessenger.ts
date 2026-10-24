@@ -13,7 +13,7 @@ export class EmailMessenger extends Messenger<{
   emailText: string,
 }> {
   public readonly Name = DefaultMessengers[DefaultMessengers.Email];
-  public readonly ConfigTemplate: DynamicConfig[]  = [{
+  public readonly ConfigTemplate: DynamicConfig[] = [{
     id: 'emailTo',
     type: 'string-array',
     name: backendTexts.emailTo.name,
@@ -53,7 +53,7 @@ export class EmailMessenger extends Messenger<{
     emailTo: string,
     emailSubject: string,
     emailText: string
-  }, media: MediaDTOWithThPath[]) {
+  }, media: MediaDTOWithThPath[]): Promise<void> {
 
     const attachments = [];
     const htmlStart = '<h1 style="text-align: center; margin-bottom: 2em">' + Config.Server.applicationTitle + '</h1>\n' +
@@ -89,12 +89,13 @@ export class EmailMessenger extends Messenger<{
       }
     }
 
-    return await this.transporter.sendMail({
+    await this.transporter.sendMail({
       from: Config.Messaging.Email.emailFrom,
       to: mailSettings.emailTo,
       subject: mailSettings.emailSubject,
       html: htmlStart + htmlMiddle + htmlEnd,
       attachments: attachments
     });
+    return;
   }
 }

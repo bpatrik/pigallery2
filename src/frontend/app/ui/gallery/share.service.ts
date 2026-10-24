@@ -1,6 +1,10 @@
 import {Injectable} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {CreateSharingDTO, ResponseSharingDTO, SharingDTOKey,} from '../../../../common/entities/SharingDTO';
+import {
+  CreateSharingDTO,
+  PublicSharingDTO,
+  ResponseSharingDTO,
+} from '../../../../common/entities/SharingDTO';
 import {Router, RoutesRecognized} from '@angular/router';
 import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
@@ -8,7 +12,8 @@ import {QueryParams} from '../../../../common/QueryParams';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
-import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 
 @Injectable()
@@ -33,6 +38,9 @@ export class ShareService {
     .pipe(distinctUntilChanged());
 
   private resolve: () => void;
+  public publicSharingSubject: BehaviorSubject<PublicSharingDTO> = new BehaviorSubject(
+    null
+  );
 
   constructor(private networkService: NetworkService, private router: Router) {
     this.ReadyPR = new Promise((resolve: () => void) => {
@@ -65,7 +73,7 @@ export class ShareService {
         }
       }
     });
-    this.currentSharing.subscribe( (sharing) => console.log('sharing', sharing))
+    this.currentSharing.subscribe((sharing) => console.log('sharing', sharing));
   }
 
   public getUrl(share: ResponseSharingDTO): string {
@@ -102,16 +110,32 @@ export class ShareService {
     return this.ReadyPR;
   }
 
+  private static validateDefaultViews(
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
+  ): void {
+    if (defaultDirectoryView && defaultSearchView) {
+      throw new Error(
+        'defaultDirectoryView and defaultSearchView cannot be set at the same time'
+      );
+    }
+  }
+
   public createSharing(
     dir: string,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     // Legacy dir-based API: backend will convert to strict directory searchQuery if searchQuery not provided
     return this.networkService.postJson('/share/' + dir, {
       createSharing: {
         valid,
-        ...(!!password && {password: password}) // only add password if present
+        ...(!!password && {password: password}), // only add password if present
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }
@@ -119,29 +143,97 @@ export class ShareService {
   public createSharingByQuery(
     searchQuery: SearchQueryDTO,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
+  ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
+    return this.networkService.postJson('/share/', {
+      createSharing: {
+        valid,
+        ...(!!password && {password: password}),
+        searchQuery,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
+      } as CreateSharingDTO,
+    });
+  }
+
+  /**
+   * Shares a directory (and its photos). The directory query is an exact match or a 'path/*' glob for recursive sharing.
+   */
+  public createSharingByDirectory(
+    directoryQuery: DirectorySearch,
+    password: string,
+    valid: number,
+    defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
     return this.networkService.postJson('/share/', {
       createSharing: {
         valid,
         ...(!!password && {password: password}),
-        searchQuery
+        directoryQuery,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
       } as CreateSharingDTO,
     });
+  }
+
+  public updateSharingByDirectory(
+    sharingId: number,
+    directoryQuery: DirectorySearch,
+    password: string,
+    valid: number,
+    defaultDirectoryView?: string
+  ): Promise<ResponseSharingDTO> {
+    return this.networkService.putJson('/share/', {
+      updateSharing: {
+        id: sharingId,
+        valid,
+        password,
+        directoryQuery,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+      } as CreateSharingDTO,
+    });
+  }
+
+  /**
+   * Where the sharing should be opened: its default view, otherwise its search query or its directory.
+   * Returns the router commands.
+   */
+  public getDefaultRoute(sharing: ResponseSharingDTO): string[] {
+    if (sharing?.defaultDirectoryView) {
+      return ['/gallery', sharing.defaultDirectoryView];
+    }
+    if (sharing?.defaultSearchView) {
+      return ['/search', SearchQueryUtils.urlify(sharing.defaultSearchView)];
+    }
+    if (sharing?.searchQuery) {
+      return ['/search', SearchQueryUtils.urlify(sharing.searchQuery)];
+    }
+    if (sharing?.directoryQuery) {
+      // for recursive sharing ('path/*') open the directory itself
+      return ['/gallery', Utils.canonizePath(sharing.directoryQuery.value).replace(/\/?\*$/, '')];
+    }
+    return null;
   }
 
   public updateSharing(
     dir: string,
     sharingId: number,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     // Legacy dir-based API: backend will convert to strict directory searchQuery if searchQuery not provided
     return this.networkService.putJson('/share/' + dir, {
       updateSharing: {
         id: sharingId,
         valid,
         password,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }
@@ -150,14 +242,19 @@ export class ShareService {
     sharingId: number,
     searchQuery: SearchQueryDTO,
     password: string,
-    valid: number
+    valid: number,
+    defaultDirectoryView?: string,
+    defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
+    ShareService.validateDefaultViews(defaultDirectoryView, defaultSearchView);
     return this.networkService.putJson('/share/', {
       updateSharing: {
         id: sharingId,
         valid,
         password,
-        searchQuery
+        searchQuery,
+        ...(!!defaultDirectoryView && {defaultDirectoryView}),
+        ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
     });
   }
@@ -200,13 +297,43 @@ export class ShareService {
     }
   }
 
+  /**
+   * Leaves the current sharing (e.g.: on logout). The app behaves as if it was opened without a sharing link.
+   */
+  public dropSharing(): void {
+    this.sharingKey = null;
+    this.param = null;
+    this.queryParam = null;
+    this.sharingSubject.next(null);
+    this.publicSharingSubject.next(null);
+    this.sharingIsValid.next(null);
+  }
+
+  /**
+   * Returns the public info of the current sharing (null if the sharing is not valid).
+   * It is only loaded on navigation when the sharing key changes, so it might not be loaded yet
+   * (e.g.: the sharing key comes from the session user after a page reload).
+   */
+  public async getPublicSharing(): Promise<PublicSharingDTO> {
+    if (this.publicSharingSubject.value === null) {
+      await this.checkSharing();
+    }
+    return this.publicSharingSubject.value;
+  }
+
   private async checkSharing(): Promise<void> {
     try {
       this.sharingIsValid.next(null);
-      const sharing = await this.networkService.getJson<SharingDTOKey>(
-        '/share/' + this.getSharingKey() + '/key'
+      const sharing = await this.networkService.getJson<PublicSharingDTO>(
+        '/share/' + this.getSharingKey() + '/publicInfo'
       );
-      this.sharingIsValid.next(sharing.sharingKey === this.getSharingKey());
+      const valid = sharing.sharingKey === this.getSharingKey();
+      this.sharingIsValid.next(valid);
+      if (valid) {
+        this.publicSharingSubject.next(sharing);
+      } else {
+        this.publicSharingSubject.next(null);
+      }
     } catch (e) {
       this.sharingIsValid.next(false);
       console.error(e);

@@ -96,12 +96,22 @@ export class AuthenticationService {
     return Config.Search.enabled && this.isAuthorized(UserRoles.Guest);
   }
 
-  public async logout(): Promise<void> {
+  public async logout(reason?: ErrorCodes): Promise<void> {
     await this.userService.logout();
+    await this.shareService.wait();
+    if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {
+      const publicSharing = await this.shareService.getPublicSharing();
+      if (publicSharing && !publicSharing.passwordProtected) {
+        // There is no login for this sharing (anyone with the link is logged in),
+        // so logging out leaves the sharing and goes to the normal login.
+        this.shareService.dropSharing();
+        this.user.next(null);
+        return;
+      }
+    }
     this.user.next(null);
     // even on logout try to get sharing user if it's a sharing
-    await this.shareService.wait();
-    if(this.shareService.isSharing()){
+    if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {
       await this.getSessionUser();
     }
   }

@@ -21,7 +21,7 @@ export class ErrorInterceptor implements HttpInterceptor {
       catchError((err) => {
         if (err.status === 401) {
           // auto logout if 401 response returned from server
-          this.authenticationService.logout();
+          this.authenticationService.logout(err.error.error.code);
         }
         if (err.status === 500 && err.error.error.code === ErrorCodes.INTERNAL) {
           // Unknown server error

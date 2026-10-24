@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
+import {Brackets} from 'typeorm';
 import {expect} from 'chai';
 import {AuthenticationMWs} from '../../../../../src/backend/middlewares/user/AuthenticationMWs';
 import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
@@ -7,13 +8,15 @@ import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Config} from '../../../../../src/common/config/private/Config';
 import * as path from 'path';
 import {UserManager} from '../../../../../src/backend/model/database/UserManager';
-import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
+import {SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {DirectoryAccess, DirectoryAccessTypes} from '../../../../../src/backend/model/DirectoryAccess';
 import {DBTestHelper} from '../../../DBTestHelper';
 
 
 declare let describe: any;
 declare const it: any;
-declare const before: any;
+declare const after: any;
 declare const beforeEach: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe();
@@ -21,14 +24,12 @@ describe = DBTestHelper.describe();
 describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
-  before(sqlHelper.clearDB);
 
-  beforeEach(async () => {
-    await sqlHelper.initDB();
-  });
+  beforeEach(sqlHelper.initDB);
+  after(sqlHelper.clearDB);
 
 
-  describe('authenticate', () => {
+  describe('authenticate', async () => {
     it('should call next on authenticated', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -63,7 +64,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const next: any = (err: ErrorDTO) => {
         try {
           expect(err).not.to.be.undefined;
-          expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED);
+          expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED_SHARING, 'Error code should be NOT_AUTHENTICATED_SHARING');
           done();
         } catch (err) {
           done(err);
@@ -134,10 +135,8 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       expect(req.session.context.projectionQuery).to.deep.equal({restored: true});
     });
 
-    it('should NOT rebuild context if projectionQuery is present', async () => {
+    const countRebuilds = async (originalContext: any): Promise<number> => {
       Config.Users.authenticationRequired = true;
-      const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k2'};
-      const originalContext: any = {user, projectionQuery: {ok: true}};
       const req: any = {session: {context: originalContext}, query: {}, params: {}};
 
       let called = 0;
@@ -153,12 +152,27 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       (ObjectManagers.getInstance().SessionManager as any).buildContext = orig;
 
       expect(nextErr).to.be.undefined;
-      expect(called).to.eql(0);
       expect(req.session.context).to.eql(originalContext);
+      return called;
+    };
+
+    it('should NOT rebuild context if projectionQuery and directoryAccess are present', async () => {
+      const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k2'};
+      const originalContext: any = {user, projectionQuery: new Brackets(q => q.where('1=1'))};
+      originalContext.directoryAccess = new DirectoryAccess(originalContext);
+      expect(await countRebuilds(originalContext)).to.eql(0);
+    });
+
+    it('should rebuild context if directoryAccess got lost during serialization', async () => {
+      const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k2'};
+      const originalContext: any = {user, projectionQuery: new Brackets(q => q.where('1=1'))};
+      // a deserialized session only has the plain data
+      originalContext.directoryAccess = JSON.parse(JSON.stringify(new DirectoryAccess(originalContext, {blockList: []})));
+      expect(await countRebuilds(originalContext)).to.eql(1);
     });
   });
 
-  describe('inverseAuthenticate', () => {
+  describe('inverseAuthenticate', async () => {
 
     it('should call next with error on authenticated', (done: (err?: any) => void) => {
       const req: any = {
@@ -198,7 +212,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('authorise', () => {
+  describe('authorise', async () => {
     it('should call next on authorised', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -247,12 +261,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('login', () => {
-    beforeEach(async () => {
-      await sqlHelper.initDB();
-    });
+  describe('login', async () => {
 
-    describe('should call input ErrorDTO next on missing...', () => {
+
+    describe('should call input ErrorDTO next on missing...', async () => {
       it('body', (done: (err?: any) => void) => {
         const req: any = {
           query: {},
@@ -616,8 +628,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-
-  describe('authoriseMedia', () => {
+  describe('authoriseMedia', async () => {
 
     const buildReq = (mediaRelPath: string) => ({
       session: {
@@ -652,7 +663,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       expect(result).to.eql('ok');
     });
 
-    it('should deny if GalleryManager.authoriseMedia denies', async () => {
+    it('should deny (404) if GalleryManager.authoriseMedia denies', async () => {
       const req = buildReq('/allowed/dir/photo.jpg');
 
       // Mock GalleryManager to deny
@@ -661,10 +672,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       } as any;
 
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404);
     });
 
-    it('should deny (403) on error thrown by GalleryManager.authoriseMedia', async () => {
+    it('should deny (404) on error thrown by GalleryManager.authoriseMedia', async () => {
       const req = buildReq('/allowed/dir/photo.jpg');
 
       (ObjectManagers.getInstance() as any).GalleryManager = {
@@ -674,11 +685,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       } as any;
 
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404);
     });
   });
 
-  describe('authoriseMetaFiles', () => {
+  describe('authoriseMetaFiles', async () => {
     const buildReq = (metaPath: string) => ({
       session: {
         context: {
@@ -714,10 +725,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         authoriseMetaFile: async (_session: any, _path: string) => false
       } as any;
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404); // same as not existing
     });
 
-    it('should deny (403) on error thrown by GalleryManager.authoriseMetaFile', async () => {
+    it('should deny (404) on error thrown by GalleryManager.authoriseMetaFile', async () => {
       const req = buildReq('/some/dir/notes.md');
       (ObjectManagers.getInstance() as any).GalleryManager = {
         authoriseMetaFile: async () => {
@@ -725,11 +736,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         }
       } as any;
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404); // same as not existing
     });
   });
 
-  describe('logout', () => {
+  describe('logout', async () => {
     it('should call next on logout', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -755,4 +766,89 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
   });
 
+
+  describe('authoriseDirectory', async () => {
+    const dq = (value: string, matchType = TextSearchQueryMatchTypes.exact_match): DirectorySearch =>
+      ({type: SearchQueryTypes.directory, value, matchType});
+
+    const userContext = (u: any) => ObjectManagers.getInstance().SessionManager.buildContext({
+      id: 1, name: 'user', role: UserRoles.User, overrideAllowBlockList: true, ...u
+    });
+
+    const authorise = async (context: SessionContext, directory: string) => {
+      const req: any = {session: {context}, params: {directory: path.normalize(directory)}, query: {}};
+      let status: number = null;
+      const res: any = {
+        status: (s: number) => {
+          status = s;
+          return res;
+        }
+      };
+      let nextArgs: any[] = null;
+      await AuthenticationMWs.authoriseDirectory('directory')(req, res, (...args: any[]) => {
+        nextArgs = args;
+      });
+      return {req, status, nextArgs};
+    };
+
+    it('lets available directories through', async () => {
+      const ctx = await userContext({allowDirectoryList: [dq('public/*', TextSearchQueryMatchTypes.globMatch)]});
+      const r = await authorise(ctx, 'public/sub');
+      expect(r.nextArgs).to.deep.equal([]);
+      expect(r.status).to.be.null;
+      expect(r.req.directoryAccess).to.equal(DirectoryAccessTypes.available);
+    });
+
+    it('lets parents of available directories through', async () => {
+      const ctx = await userContext({allowDirectoryList: [dq('public/sub')]});
+      const r = await authorise(ctx, 'public');
+      expect(r.nextArgs).to.deep.equal([]);
+      expect(r.req.directoryAccess).to.equal(DirectoryAccessTypes.parent);
+    });
+
+    it('stops with not found for not available directories', async () => {
+      const ctx = await userContext({
+        allowDirectoryList: [dq('public/*', TextSearchQueryMatchTypes.globMatch)],
+        blockDirectoryList: [dq('public/private')]
+      });
+      for (const d of ['other', 'public/private', 'publicity']) {
+        const r = await authorise(ctx, d);
+        expect(r.status, d).to.equal(404);
+        expect(r.nextArgs[0], d).to.be.instanceOf(ErrorDTO);
+        expect((r.nextArgs[0] as ErrorDTO).code, d).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+        expect(r.req.directoryAccess, d).to.be.undefined;
+      }
+    });
+
+    it('answers the same for not available and not existing directories', async () => {
+      const ctx = await userContext({blockDirectoryList: [dq('private/*', TextSearchQueryMatchTypes.globMatch)]});
+      const existing = await authorise(ctx, 'private');
+      const notExisting = await authorise(ctx, 'private/not_existing_' + Date.now());
+      expect(notExisting.status).to.equal(existing.status);
+      expect(notExisting.nextArgs).to.deep.equal(existing.nextArgs);
+    });
+
+    it('sharing users can not open parents', async () => {
+      const sm = ObjectManagers.getInstance().SessionManager;
+      const ctx = await sm.buildContext(sm.createSharingUser({
+        sharingKey: 'key',
+        directoryQuery: dq('public/*', TextSearchQueryMatchTypes.globMatch),
+        defaultSearchView: {type: SearchQueryTypes.any_text, value: 'x'},
+        creator: {id: 1, name: 'creator', role: UserRoles.Admin}
+      } as any));
+      expect((await authorise(ctx, 'public')).req.directoryAccess).to.equal(DirectoryAccessTypes.available);
+      expect((await authorise(ctx, 'public/sub')).req.directoryAccess).to.equal(DirectoryAccessTypes.available);
+      expect((await authorise(ctx, '/')).status).to.equal(404);
+      expect((await authorise(ctx, 'other')).status).to.equal(404);
+    });
+
+    it('fails closed', async () => {
+      const r = await authorise(undefined, 'public');
+      expect(r.status).to.equal(404);
+      const ctx = await userContext({});
+      (ctx.directoryAccess as any).blockList = {}; // broken context
+      const r2 = await authorise(ctx, 'public');
+      expect(r2.status).to.equal(404);
+    });
+  });
 });

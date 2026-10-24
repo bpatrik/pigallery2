@@ -13,7 +13,7 @@ import {DBTestHelper} from '../../../DBTestHelper';
 
 declare let describe: any;
 declare const it: any;
-declare const before: any;
+declare const after: any;
 declare const beforeEach: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe();
@@ -21,11 +21,8 @@ describe = DBTestHelper.describe();
 describe('Settings middleware', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
-  before(sqlHelper.clearDB);
-  beforeEach(async () => {
-    await sqlHelper.initDB();
-    await ObjectManagers.getInstance().init();
-  });
+  beforeEach(sqlHelper.initDB);
+  after(sqlHelper.clearDB);
 
   it('should save empty enforced users settings', (done: (err?: any) => void) => {
     const req: any = {

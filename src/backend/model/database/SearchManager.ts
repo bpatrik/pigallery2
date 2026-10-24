@@ -25,7 +25,6 @@ import {
   TextSearchQueryMatchTypes,
   TextSearchQueryTypes,
 } from '../../../common/entities/SearchQueryDTO';
-import {GalleryManager} from './GalleryManager';
 import {ObjectManagers} from '../ObjectManagers';
 import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {Utils} from '../../../common/Utils';
@@ -33,7 +32,8 @@ import {FileEntity} from './enitites/FileEntity';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {GroupSortByTypes, SortByTypes, SortingMethod} from '../../../common/entities/SortingMethods';
 import {SessionContext} from '../SessionContext';
-import {DiskManager} from '../fileaccess/DiskManager';
+import {GalleryManager} from './GalleryManager';
+import * as path from 'path';
 
 export class SearchManager {
   private DIRECTORY_SELECT = [
@@ -320,13 +320,15 @@ export class SearchManager {
       type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.directory
     ) {
-      const dirs = await directoryRepository
+      const dirQ = directoryRepository
         .createQueryBuilder('directory')
         .leftJoinAndSelect('directory.cache', 'cache', 'cache.projectionKey = :pk AND cache.valid = 1', {pk: session.user.projectionKey})
         .where('directory.name LIKE :value COLLATE ' + SQL_COLLATE, {
           value: '%' + value + '%',
         })
-        .andWhere('(cache.recursiveMediaCount > 0 OR cache.id is NULL)')
+        .andWhere('(cache.recursiveMediaCount > 0 OR cache.id is NULL)');
+      session.directoryAccess.filterDirectoryQuery(dirQ, 'directory');
+      const dirs = await dirQ
         .limit(
           Config.Search.AutoComplete.ItemsPerCategory.directory
         )
@@ -339,7 +341,7 @@ export class SearchManager {
       }
       partialResult.push(
         this.encapsulateAutoComplete(
-          dirs.filter(d => d.cache.valid && d.cache.recursiveMediaCount > 0).map((r) => r.name),
+          dirs.filter(d => d.cache.valid && session.directoryAccess.isListedInSearch(d.cache)).map((r) => r.name),
           SearchQueryTypes.directory
         )
       );
@@ -413,10 +415,12 @@ export class SearchManager {
     if (Config.Search.listDirectories === true) {
       const dirQuery = this.filterDirectoryQuery(query);
       if (dirQuery !== null) {
-        result.directories = await connection
+        const dirSQLQuery = connection
           .getRepository(DirectoryEntity)
           .createQueryBuilder('directory')
-          .where(this.buildWhereQuery(dirQuery, true))
+          .where(this.buildWhereQuery(dirQuery, true));
+        session.directoryAccess.filterDirectoryQuery(dirSQLQuery, 'directory');
+        result.directories = await dirSQLQuery
           .leftJoin('directory.cache', 'cache', 'cache.projectionKey = :pk AND cache.valid = 1', {pk: session.user.projectionKey})
           .leftJoin('cache.cover', 'cover')
           .leftJoin('cover.directory', 'coverDirectory')
@@ -441,7 +445,7 @@ export class SearchManager {
           }
         }
         // do not show empty directories in search results
-        result.directories = result.directories.filter(d => d.cache.recursiveMediaCount > 0);
+        result.directories = result.directories.filter(d => session.directoryAccess.isListedInSearch(d.cache));
         if (
           result.directories.length > Config.Search.maxDirectoryResult
         ) {
@@ -499,7 +503,8 @@ export class SearchManager {
   }
 
   public async prepareQuery(queryIN: SearchQueryDTO): Promise<SearchQueryDTO> {
-    let query: SearchQueryDTO = this.assignQueryIDs(Utils.clone(queryIN)); // assign local ids before flattening SOME_OF queries
+    let query: SearchQueryDTO = this.expandDirectoryGlobs(Utils.clone(queryIN));
+    query = this.assignQueryIDs(query); // assign local ids before flattening SOME_OF queries
     query = this.flattenSameOfQueries(query);
     query = await this.getGPSData(query);
     query = this.convertMatchTypeToGlob(query);
@@ -523,7 +528,7 @@ export class SearchManager {
       case SearchQueryTypes.AND:
         return new Brackets((q): unknown => {
           (query as ANDSearchQuery).list.forEach((sq) => {
-              q.andWhere(this.buildWhereQuery(sq, directoryOnly));
+              q.andWhere(this.buildWhereQuery(sq, directoryOnly, aliases));
             }
           );
           return q;
@@ -531,7 +536,7 @@ export class SearchManager {
       case SearchQueryTypes.OR:
         return new Brackets((q): unknown => {
           (query as ANDSearchQuery).list.forEach((sq) => {
-              q.orWhere(this.buildWhereQuery(sq, directoryOnly));
+              q.orWhere(this.buildWhereQuery(sq, directoryOnly, aliases));
             }
           );
           return q;
@@ -963,7 +968,9 @@ export class SearchManager {
 
       const getLikeExpr = (fieldName: string, paramName: string): string => {
         const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
-        return `${fieldName} ${op} :${paramName}${queryId} COLLATE ${SQL_COLLATE}`;
+        // convertGlobToLike escapes with '\', that is the default in MySQL but SQLite has no default escape character
+        const esc = Config.Database.type === DatabaseType.sqlite ? ' ESCAPE \'\\\'' : '';
+        return `${fieldName} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
       };
 
       const textParam: { [key: string]: unknown } = {};
@@ -980,13 +987,26 @@ export class SearchManager {
           '/'
         );
         const alias = aliases['directory'] ?? 'directory';
-        textParam['fullPath' + queryId] = createMatchString(DiskManager.normalizeDirPath(dirPathStr));
+        // Glob conversion uses '\' as escape character, so the path is processed with '/' separators,
+        // and only the final LIKE pattern is converted to the OS specific separator that is stored in the DB.
+        const toDBSeparator = (likeStr: string): string => {
+          if (path.sep === '/') {
+            return likeStr;
+          }
+          // '\' is the LIKE escape character in both DBs (see getLikeExpr), so it needs to be escaped
+          return likeStr.replace(/\//g, '\\\\');
+        };
+        const fullDirPath = path.posix.normalize(path.posix.join('./', dirPathStr));
+        textParam['fullPath' + queryId] = toDBSeparator(createMatchString(fullDirPath));
         q[whereFN](
           getLikeExpr(`${alias}.path`, 'fullPath'),
           textParam
         );
 
-        const directoryPath = GalleryManager.parseRelativeDirPath(dirPathStr);
+        const directoryPath = {
+          name: path.posix.basename(fullDirPath),
+          parent: path.posix.join(path.posix.dirname(fullDirPath), '/'),
+        };
         q[whereFN](
           new Brackets((dq): unknown => {
             textParam['dirName' + queryId] = createMatchString(
@@ -997,9 +1017,9 @@ export class SearchManager {
               textParam
             );
             if (dirPathStr.includes('/')) {
-              textParam['parentName' + queryId] = createMatchString(
+              textParam['parentName' + queryId] = toDBSeparator(createMatchString(
                 directoryPath.parent
-              );
+              ));
               dq[whereFNRev](
                 getLikeExpr(`${alias}.path`, 'parentName'),
                 textParam
@@ -1054,7 +1074,7 @@ export class SearchManager {
             qbr[whereFN](
               new Brackets((qb): void => {
                 const globPattern = convertGlobToLike((query as TextSearch).value);
-                const esc = ' ESCAPE \'\\\'';
+                const esc = Config.Database.type === DatabaseType.sqlite ? " ESCAPE '\\'" : '';
                 const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
 
                 textParam['CtextC' + queryId] = `%,${globPattern},%`;
@@ -1206,6 +1226,44 @@ export class SearchManager {
     return query;
   }
 
+
+  /**
+   * A directory glob with a trailing '/*' means the directory itself and everything below it.
+   * The SQL glob only matches below the directory, so the directory itself is added as an exact match.
+   * See SearchQueryUtils.matchDirectorySearch for the same logic without DB.
+   */
+  protected expandDirectoryGlobs(query: SearchQueryDTO): SearchQueryDTO {
+    if ((query as SearchListQuery).list) {
+      (query as SearchListQuery).list = (query as SearchListQuery).list.map(q => this.expandDirectoryGlobs(q));
+      return query;
+    }
+    const tq = query as TextSearch;
+    if (query.type !== SearchQueryTypes.directory ||
+      tq.matchType !== TextSearchQueryMatchTypes.globMatch ||
+      typeof tq.value !== 'string') {
+      return query;
+    }
+    const value = tq.value.replace(/\\/g, '/');
+    if (!value.endsWith('/*')) {
+      return query;
+    }
+    const dir = value.slice(0, -2);
+    if (path.posix.normalize(path.posix.join('./', dir)) === '.') {
+      return query; // root and below is everything, the glob already matches it
+    }
+    return {
+      type: tq.negate ? SearchQueryTypes.AND : SearchQueryTypes.OR,
+      list: [
+        {
+          type: SearchQueryTypes.directory,
+          value: dir,
+          matchType: TextSearchQueryMatchTypes.exact_match,
+          ...(tq.negate && {negate: true})
+        } as TextSearch,
+        query
+      ]
+    } as SearchListQuery;
+  }
 
   protected convertMatchTypeToGlob(query: SearchQueryDTO): SearchQueryDTO {
     if ((query as ANDSearchQuery | ORSearchQuery).list) {

@@ -7,7 +7,8 @@ import {BehaviorSubject, EMPTY, from, Observable, Subject, Subscription, timer} 
 import {Config} from '../../../../common/config/public/Config';
 import {ShareService} from './share.service';
 import {QueryParams} from '../../../../common/QueryParams';
-import {ErrorCodes} from '../../../../common/entities/Error';
+import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
+import {Router} from '@angular/router';
 import {filter, map, startWith, switchMap} from 'rxjs/operators';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
 import {FileDTO} from '../../../../common/entities/FileDTO';
@@ -19,6 +20,8 @@ export class ContentLoaderService implements OnDestroy {
   public content: BehaviorSubject<ContentWrapperWithError>;
   public originalContent: Observable<DirectoryContent>;
   private ongoingContentRequest: string = null;
+  // directories that answered 'not found' since the last successfully loaded directory (avoids redirect loops)
+  private readonly notFoundDirectories = new Set<string>();
   private lastContentRequest: { type: 'directory' | 'search', value: string } = null;
   private pollingTimerRestart = new Subject<void>();
   private pollingSub: Subscription;
@@ -27,7 +30,8 @@ export class ContentLoaderService implements OnDestroy {
     private networkService: NetworkService,
     private galleryCacheService: GalleryCacheService,
     private shareService: ShareService,
-    private galleryService: GalleryService
+    private galleryService: GalleryService,
+    private router: Router
   ) {
     this.content = new BehaviorSubject<ContentWrapperWithError>(
       {} as ContentWrapperWithError
@@ -113,6 +117,13 @@ export class ContentLoaderService implements OnDestroy {
         params
       );
     } catch (e) {
+      if ((e as ErrorDTO)?.code === ErrorCodes.DIRECTORY_NOT_FOUND) {
+        if (this.ongoingContentRequest === directoryName) {
+          this.ongoingContentRequest = null;
+          await this.onDirectoryNotFound(directoryName);
+        }
+        return;
+      }
       console.error(e);
     }
     if (this.ongoingContentRequest !== directoryName) {
@@ -126,10 +137,37 @@ export class ContentLoaderService implements OnDestroy {
     }
 
     if (!!cw?.directory) {
+      this.notFoundDirectories.clear();
       this.galleryCacheService.setDirectory(cw); // save it before adding references
     }
     this.setContent(ContentWrapperUtils.unpack(cw));
 
+  }
+
+  /**
+   * The directory does not exist or the user can't access it.
+   * Navigates to the default view, unless that was not found either (avoids redirect loops).
+   */
+  private async onDirectoryNotFound(directoryName: string): Promise<void> {
+    const normalize = (d: string) => (d || '').replace(/\\/g, '/').split('/').filter(s => s !== '' && s !== '.').join('/');
+    this.notFoundDirectories.add(normalize(directoryName));
+
+    let route: string[];
+    if (this.shareService.isSharing()) {
+      route = this.shareService.getDefaultRoute(this.shareService.sharingSubject.value);
+    } else {
+      route = ['/gallery', ''];
+    }
+    const isNotFoundDirectory = route && route[0] === '/gallery' && this.notFoundDirectories.has(normalize(route[1]));
+    if (!route || isNotFoundDirectory) {
+      this.setContent({error: $localize`Directory not found`} as ContentWrapperWithError);
+      return;
+    }
+    const queryParams: { [key: string]: string } = {};
+    if (this.shareService.isSharing()) {
+      queryParams[QueryParams.gallery.sharingKey_query] = this.shareService.getSharingKey();
+    }
+    await this.router.navigate(route, {queryParams});
   }
 
   public async search(query: SearchQueryDTO, forceReload = false): Promise<void> {

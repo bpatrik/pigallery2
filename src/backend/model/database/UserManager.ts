@@ -37,6 +37,8 @@ export class UserManager {
     if (user.blockQuery) {
       SearchQueryUtils.validateSearchQuery(user.blockQuery, 'User blockQuery');
     }
+    SearchQueryUtils.validateDirectoryList(user.allowDirectoryList, 'User allowDirectoryList');
+    SearchQueryUtils.validateDirectoryList(user.blockDirectoryList, 'User blockDirectoryList');
     user.password = PasswordHelper.cryptPassword(user.password);
     return connection.getRepository(UserEntity).save(user);
   }
@@ -80,6 +82,16 @@ export class UserManager {
         SearchQueryUtils.validateSearchQuery(settings.blockQuery, 'User blockQuery');
       }
       user.blockQuery = settings.blockQuery ?? null;
+    }
+
+    if (typeof settings.allowDirectoryList !== 'undefined') {
+      SearchQueryUtils.validateDirectoryList(settings.allowDirectoryList, 'User allowDirectoryList');
+      user.allowDirectoryList = settings.allowDirectoryList ?? null;
+    }
+
+    if (typeof settings.blockDirectoryList !== 'undefined') {
+      SearchQueryUtils.validateDirectoryList(settings.blockDirectoryList, 'User blockDirectoryList');
+      user.blockDirectoryList = settings.blockDirectoryList ?? null;
     }
 
     if (settings.newPassword && settings.newPassword.length > 0) {

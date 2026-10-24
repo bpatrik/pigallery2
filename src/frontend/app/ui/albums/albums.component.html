@@ -60,12 +60,12 @@
 
       <div class="input-group-btn float-end" style="display: block">
         <app-saved-search-popup-btn
-          [disabled]="savedSearch.searchQuery.value == ''"
+          [disabled]="IsSearchQueryEmpty"
           class="me-2"
           [savedSearchDTO]="savedSearch">
         </app-saved-search-popup-btn>
         <button class="btn btn-primary" type="button"
-                [disabled]="savedSearch.searchQuery.value == ''"
+                [disabled]="IsSearchQueryEmpty"
                 (click)="saveSearch()">
           <ng-icon name="ionSaveOutline" class="me-1"></ng-icon><span i18n>Save</span>
         </button>
