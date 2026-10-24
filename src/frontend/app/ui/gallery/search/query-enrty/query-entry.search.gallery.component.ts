@@ -177,6 +177,9 @@ export class GallerySearchQueryEntryComponent
     } else {
       delete this.AsListQuery.list;
     }
+    if (!this.IsTextQuery) {
+      delete this.AsTextQuery.value;
+    }
     if (this.queryEntry.type === SearchQueryTypes.distance) {
       this.AsDistanceQuery.distance = 1;
       // Initialize location input text
@@ -214,6 +217,28 @@ export class GallerySearchQueryEntryComponent
       delete this.AsDatePatternQuery.daysLength;
       delete this.AsDatePatternQuery.frequency;
       delete this.AsDatePatternQuery.agoNumber;
+    }
+    this.onChange();
+  }
+
+  /**
+   * Date inputs emit 'yyyy-MM-dd' strings, but RangeSearch expects UTC timestamps
+   */
+  onDateChange(field: 'min' | 'max', value: string): void {
+    const parts = (value || '').split('-').map((t) => parseInt(t, 10));
+    if (parts.length === 3 && parts.every((p) => !isNaN(p))) {
+      this.AsRangeQuery[field] = Date.UTC(parts[0], parts[1] - 1, parts[2]);
+    } else {
+      delete this.AsRangeQuery[field];
+    }
+    // keep the range valid: moving one end past the other drags the other end along
+    const q = this.AsRangeQuery;
+    if (q.min !== undefined && q.max !== undefined && q.min > q.max) {
+      if (field === 'min') {
+        q.max = q.min;
+      } else {
+        q.min = q.max;
+      }
     }
     this.onChange();
   }
