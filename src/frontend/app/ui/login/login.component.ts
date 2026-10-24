@@ -9,6 +9,7 @@ import {IconComponent} from '../../icon.component';
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
 import {NgIf} from '@angular/common';
+import {Utils} from '../../../../common/Utils';
 
 @Component({
   selector: 'app-login',
@@ -65,7 +66,11 @@ export class LoginComponent implements OnInit {
     if (!this.oidcEnabled) {
       return;
     }
-    window.location.href = `${Config.Server.apiPath}/auth/oidc/login`;
+    window.location.href = this.oidcLoginUrl;
+  }
+
+  get oidcLoginUrl(): string {
+    return Utils.concatUrls(Config.Server.urlBase, Config.Server.apiPath, '/auth/oidc/login');
   }
 }
 
