@@ -77,7 +77,7 @@ export class ShareService {
   }
 
   public getUrl(share: ResponseSharingDTO): string {
-    return Utils.concatUrls(Config.Server.publicUrl, Config.Server.urlBase, '/share/', share.sharingKey);
+    return Config.Server.getPublicUrl('/share/', share.sharingKey);
   }
 
 

@@ -85,6 +85,8 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - Keep TypeORM queries portable between SQLite and MySQL.
 - Changed any TypeORM entity? Bump `DataStructureVersion` in `src/common/DataStructureVersion.ts`.
 - Never expose private config values or another user's data to the client.
+- Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
+  don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
 - Add or adjust tests under `test/` for behaviour changes.
 - New UI strings must use Angular i18n (`i18n` attributes / `$localize`); `npm run merge-new-translation` updates the `.xlf` files.
 - Prefer implementing new features as extensions when feasible (see contribution guide).

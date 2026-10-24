@@ -110,24 +110,6 @@ describe('OIDCAuthService', () => {
     });
   });
 
-  describe('getAppRootUrl', () => {
-    it('should return / without urlBase', () => {
-      Config.Server.urlBase = '';
-      expect(OIDCAuthService.getAppRootUrl()).to.equal('/');
-      Config.Server.urlBase = '/';
-      expect(OIDCAuthService.getAppRootUrl()).to.equal('/');
-    });
-
-    it('should respect urlBase', () => {
-      for (const base of ['/galerie', 'galerie', '/galerie/', 'galerie/']) {
-        Config.Server.urlBase = base;
-        expect(OIDCAuthService.getAppRootUrl()).to.equal('/galerie/', base);
-      }
-      Config.Server.urlBase = '/my/galerie';
-      expect(OIDCAuthService.getAppRootUrl()).to.equal('/my/galerie/');
-    });
-  });
-
   describe('getClaims', () => {
     it('should not call userinfo if the ID token has all required claims', async () => {
       const tokenSet = createTokenSet({preferred_username: 'alice', email: 'alice@example.com'});

@@ -4,14 +4,13 @@ import {Message} from '../../../../common/entities/Message';
 import {LoadingBarService} from '@ngx-loading-bar/core';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
-import {Utils} from '../../../../common/Utils';
 import {CustomHeaders} from '../../../../common/CustomHeaders';
 import {VersionService} from '../version.service';
 import {lastValueFrom, Observable, tap} from 'rxjs';
 
 @Injectable()
 export class NetworkService {
-  readonly apiBaseUrl = Utils.concatUrls(Config.Server.urlBase, Config.Server.apiPath);
+  readonly apiBaseUrl = Config.Server.getApiUrl();
   private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
 
   constructor(

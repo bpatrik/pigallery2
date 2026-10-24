@@ -14,6 +14,7 @@ import { NgFor, NgIf } from '@angular/common';
 import { StringifyEnum } from '../../../pipes/StringifyEnum';
 import { LightBoxTitleTexts } from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
+import {Config} from '../../../../../common/config/public/Config';
 
 @Component({
     selector: 'app-gallery-photo-frame-builder',
@@ -68,9 +69,8 @@ import {Utils} from '../../../../../common/Utils';
 
   private buildUrl(): void {
     // Build from current router URL, merging our params without affecting actual navigation
-    const base = window.location.origin;
-    const currentUrl = this.router.url; // includes path + query
-    const u = new URL(base + currentUrl);
+    // router.url is relative to the app root (includes path + query)
+    const u = new URL(Config.Server.getPublicUrl() + this.router.url.replace(/^\/+/, ''));
 
     // Always autoplay for photo frame
     u.searchParams.set(QueryParams.gallery.lightbox.playback, 'true');
