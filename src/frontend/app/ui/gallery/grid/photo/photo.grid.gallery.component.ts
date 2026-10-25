@@ -15,7 +15,7 @@ import {GalleryPhotoLoadingComponent} from './loading/loading.photo.grid.gallery
 import {NgIconComponent} from '@ng-icons/core';
 import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
-import {IClientMediaButtonConfig} from '../../../../../../common/entities/extension/IClientUIConfig';
+import {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
@@ -123,7 +123,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     this.mediaButtons = [...this.mediaButtons.filter(b => b.alwaysVisible), ...this.mediaButtons.filter(b => !b.alwaysVisible)];
   }
 
-  matchesMetadataFilter(filters: { field: string, comparator: '>=' | '<=' | '==', value: string | number }[]): boolean {
+  matchesMetadataFilter(filters: IMetadataFilter[]): boolean {
     const metadata = this.gridMedia.media.metadata;
 
     // All filters must match (AND logic)
@@ -134,13 +134,14 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
       for (const part of fieldParts) {
         if (fieldValue === undefined || fieldValue === null) {
-          return false;
+          break;
         }
         fieldValue = fieldValue[part];
       }
 
       if (fieldValue === undefined || fieldValue === null) {
-        return false;
+        // A missing field (e.g. a photo without keywords) does not contain anything
+        return filter.comparator === '!contains';
       }
 
       // Compare based on comparator
@@ -151,10 +152,27 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
           return fieldValue <= filter.value;
         case '==':
           return fieldValue == filter.value; // Use == for loose equality
+        case 'contains':
+          return GalleryPhotoComponent.contains(fieldValue, filter.value);
+        case '!contains':
+          return !GalleryPhotoComponent.contains(fieldValue, filter.value);
         default:
           return false;
       }
     });
+  }
+
+  /**
+   * Arrays (e.g. keywords): exact item match. Strings (e.g. caption): substring match.
+   */
+  private static contains(fieldValue: unknown, value: string | number): boolean {
+    if (Array.isArray(fieldValue)) {
+      return fieldValue.some(item => item == value); // Use == for loose equality
+    }
+    if (typeof fieldValue === 'string') {
+      return fieldValue.includes(String(value));
+    }
+    return false;
   }
 
   ngOnInit(): void {
