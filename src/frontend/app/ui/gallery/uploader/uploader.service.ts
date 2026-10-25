@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
 import {NetworkService} from '../../../model/network/network.service';
-import {SupportedFormats} from '../../../../../common/SupportedFormats';
+import {UploadUtils} from '../../../../../common/UploadUtils';
 import {Utils} from '../../../../../common/Utils';
 import {ContentLoaderService} from '../contentLoader.service';
 import {Config} from '../../../../../common/config/public/Config';
@@ -75,12 +75,8 @@ export class UploaderService {
     }
     const dirDto = this.contentLoaderService.content.value.directory;
     const directory = Utils.concatUrls(dirDto.path, dirDto.name);
-    const supportedFiles = files.filter(f => {
-      const ext = f.name.split('.').pop().toLowerCase();
-      return SupportedFormats.Photos.includes(ext) ||
-        SupportedFormats.Videos.includes(ext) ||
-        SupportedFormats.MetaFiles.includes(ext);
-    });
+    const supportedFiles = files.filter(f =>
+      UploadUtils.isUploadableExtension(UploadUtils.getExtension(f.name), Config.Upload.blockedExtensions));
 
     if (supportedFiles.length < files.length) {
       this.notificationService.warning($localize`Some files were skipped due to unsupported format.`);

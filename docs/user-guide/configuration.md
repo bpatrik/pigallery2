@@ -182,6 +182,7 @@ App CLI options:
   --Upload-enabled                                                           (default: false)
   --Upload-minimumRole                                                      Minimum user role to enable file upload. (default: 'Admin')
   --Upload-enforcedDirectoryConfig                                          Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
+  --Upload-blockedExtensions                                                Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts. (default: ["pg2conf","svg"])
   --Database-type                                                           SQLite is recommended. (default: 'sqlite')
   --Database-dbFolder                                                       All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   --Database-sqlite-DBFileName                                              Sqlite will save the db with this filename. (default: 'sqlite.db')
@@ -367,6 +368,7 @@ Environmental variables:
   Upload-enabled                                                         (default: false)
   Upload-minimumRole                                                    Minimum user role to enable file upload. (default: 'Admin')
   Upload-enforcedDirectoryConfig                                        Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
+  Upload-blockedExtensions                                              Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts. (default: ["pg2conf","svg"])
   Database-type                                                         SQLite is recommended. (default: 'sqlite')
   Database-dbFolder                                                     All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   Database-sqlite-DBFileName                                            Sqlite will save the db with this filename. (default: 'sqlite.db')
@@ -1065,7 +1067,12 @@ Environmental variables:
         "//[minimumRole]": "Minimum user role to enable file upload.",
         "minimumRole": "Admin",
         "//[enforcedDirectoryConfig]": "Only enable upload in folder where an \".uploader.pg2conf\" is present in the folder.",
-        "enforcedDirectoryConfig": false
+        "enforcedDirectoryConfig": false,
+        "//[blockedExtensions]": "Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.",
+        "blockedExtensions": [
+            "pg2conf",
+            "svg"
+        ]
     },
     "Database": {
         "//[type]": "SQLite is recommended.",

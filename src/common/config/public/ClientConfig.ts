@@ -1741,6 +1741,16 @@ export class ClientUploadConfig {
     description: $localize`Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.`
   })
   enforcedDirectoryConfig: boolean = false;
+
+  @ConfigProperty({
+    arrayType: 'string',
+    tags: {
+      name: $localize`Blocked extensions`,
+      priority: ConfigPriority.underTheHood,
+    },
+    description: $localize`Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.`
+  })
+  blockedExtensions: string[] = ['pg2conf', 'svg'];
 }
 
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
