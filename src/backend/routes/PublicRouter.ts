@@ -249,7 +249,7 @@ export class PublicRouter {
         const p = path.join(ProjectPath.TempFolder, '/icon.png');
         const outP = await PhotoProcessing.renderSVG(Config.Server.svgIcon, p);
         res.sendFile(outP, {
-          maxAge: 31536000,
+          maxAge: '7d', // in milliseconds otherwise (8.7 hours)
           dotfiles: 'allow',
         });
       } catch (e) {
@@ -262,7 +262,7 @@ export class PublicRouter {
         const p = path.join(ProjectPath.TempFolder, '/icon_inv.png');
         const outP = await PhotoProcessing.renderSVG(Config.Server.svgIcon, p, 'white');
         res.sendFile(outP, {
-          maxAge: 31536000,
+          maxAge: '7d', // in milliseconds otherwise (8.7 hours)
           dotfiles: 'allow',
         });
       } catch (e) {
@@ -323,8 +323,13 @@ export class PublicRouter {
         if (!fs.existsSync(file)) {
           return res.sendStatus(404);
         }
+        // Build outputs carry a content hash in their name (main.<hash>.js):
+        // cache them for good. Others (assets/, robots.txt) for a day.
+        // (Express takes maxAge in milliseconds.)
+        const hashed = /\.[0-9a-f]{16}\.[a-z0-9]+$/.test(req.params.file);
         res.sendFile(file, {
-          maxAge: 31536000,
+          maxAge: hashed ? '365d' : '1d',
+          immutable: hashed,
           dotfiles: 'allow',
         });
       };

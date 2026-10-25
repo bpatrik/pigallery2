@@ -92,8 +92,11 @@ export class RenderingMWs {
     if (!req.resultPipe) {
       return next();
     }
+    // Express takes maxAge in milliseconds: 31536000 meant one year but gave
+    // 8.7 hours. Media keep their URL when the file changes (e.g. a rotated
+    // or replaced photo), so a week rather than a year.
     return res.sendFile(req.resultPipe as string, {
-      maxAge: 31536000,
+      maxAge: '7d',
       dotfiles: 'allow',
     });
   }
