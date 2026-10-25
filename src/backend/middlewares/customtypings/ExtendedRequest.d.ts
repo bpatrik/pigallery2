@@ -19,6 +19,8 @@ declare global {
         context?: SessionContext;
         rememberMe?: boolean;
         expires: number;
+        // see SessionManager.getSessionStamp
+        stamp?: string;
         oidc?: {
           state: string;
           verifier: string;

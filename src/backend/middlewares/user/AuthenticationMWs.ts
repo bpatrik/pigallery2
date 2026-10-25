@@ -8,9 +8,10 @@ import {Utils} from '../../../common/Utils';
 import {QueryParams} from '../../../common/QueryParams';
 import * as path from 'path';
 import {Logger} from '../../Logger';
-import {ContextUser, SessionContext} from '../../model/SessionContext';
+import {SessionUser, SessionContext} from '../../model/SessionContext';
 import {Brackets} from 'typeorm';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../model/DirectoryAccess';
+import {OIDCAuthService} from './OIDCAuthService';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -27,10 +28,11 @@ export class AuthenticationMWs {
       return next();
     }
     try {
+      // the page rendering uses the session user too
+      await AuthenticationMWs.restoreSession(req);
       const user = await AuthenticationMWs.getSharingUser(req);
       if (user) {
-        req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
-        return next();
+        await AuthenticationMWs.startSession(req, user);
       }
       // eslint-disable-next-line no-empty
     } catch (err) {
@@ -50,21 +52,14 @@ export class AuthenticationMWs {
       return next();
     }
 
-    // if already authenticated, do not try to use sharing authentication
-    if (typeof req.session.context !== 'undefined') {
-      // fix context. projectionQuery gets lost in the session between calls
-      // Brackets do not survive serialization, so rebuild the context if they are not real Brackets anymore (fail closed)
-      if (req.session?.context?.user && AuthenticationMWs.isContextBroken(req.session.context)) {
-        req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(req.session.context.user);
+    try {
+      // if already authenticated, do not try to use sharing authentication
+      if (await AuthenticationMWs.restoreSession(req)) {
+        return next();
       }
-      // auto extend session if rememberMe is set
-      if (req.session.rememberMe) {
-        req.sessionOptions.expires = new Date(
-          Date.now() + Config.Server.sessionTimeout
-        );
-        req.session.expires = req.sessionOptions.expires.getTime();
-      }
-      return next();
+    } catch (err) {
+      res.status(500);
+      return next(new ErrorDTO(ErrorCodes.INTERNAL, null, err));
     }
 
     let user;
@@ -83,7 +78,7 @@ export class AuthenticationMWs {
 
 
     try {
-      req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
+      await AuthenticationMWs.startSession(req, user);
     } catch (err) {
       res.status(500);
       return next(new ErrorDTO(ErrorCodes.INTERNAL, null, err));
@@ -255,8 +250,7 @@ export class AuthenticationMWs {
         return next(new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND));
       }
 
-      const user = ObjectManagers.getInstance().SessionManager.createSharingUser(sharing);
-      req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
+      await AuthenticationMWs.startSession(req, ObjectManagers.getInstance().SessionManager.createSharingUser(sharing));
       return next();
     } catch (err) {
       return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
@@ -302,21 +296,11 @@ export class AuthenticationMWs {
     }
     try {
       // let's find the user
-      const user = Utils.clone(
-        await ObjectManagers.getInstance().UserManager.findOne({
-          name: req.body.loginCredential.username,
-          password: req.body.loginCredential.password,
-        })
-      );
-      delete user.password;
-      req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
-      req.session.rememberMe = req.body.loginCredential.rememberMe;
-      if (req.session.rememberMe) {
-        req.sessionOptions.expires = new Date(
-          Date.now() + Config.Server.sessionTimeout
-        );
-        req.session.expires = req.sessionOptions.expires.getTime();
-      }
+      const user = await ObjectManagers.getInstance().UserManager.findOne({
+        name: req.body.loginCredential.username,
+        password: req.body.loginCredential.password,
+      });
+      await AuthenticationMWs.startSession(req, user, req.body.loginCredential.rememberMe);
       return next();
     } catch (err) {
       Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` for user:' + req.body.loginCredential.username
@@ -331,9 +315,97 @@ export class AuthenticationMWs {
     }
   }
 
+  public static async oidcLogin(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const user = await OIDCAuthService.getUserFromAuthenticationResponse(req);
+      await AuthenticationMWs.startSession(req, user, true);
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  /**
+   * Starts the session again from the current DB row of its user,
+   * so changing the own user (e.g.: the password) does not end the session. Use it after user changes.
+   */
+  public static async refreshSession(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const id = req.session.context?.user?.id;
+    if (typeof id !== 'number') {
+      return next();
+    }
+    try {
+      const user = await ObjectManagers.getInstance().UserManager.findOne({id});
+      if (user) {
+        await AuthenticationMWs.startSession(req, user, req.session.rememberMe);
+      }
+      return next();
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
+    }
+  }
+
   public static logout(req: Request, res: Response, next: NextFunction): void {
     delete req.session.context;
     return next();
+  }
+
+  /**
+   * Logs in the user (or sharing guest) for this session.
+   * Only "remember me" sessions survive closing the browser.
+   */
+  private static async startSession(req: Request, user: SessionUser, rememberMe = false): Promise<void> {
+    const sm = ObjectManagers.getInstance().SessionManager;
+    const sessionUser = Utils.clone(user);
+    delete sessionUser.password;
+    req.session.context = await sm.buildContext(sessionUser);
+    req.session.stamp = await sm.getSessionStamp(sessionUser);
+    req.session.rememberMe = rememberMe;
+    AuthenticationMWs.extendSession(req);
+  }
+
+  /**
+   * The session is stored in the cookie. It ends if it timed out or its user or sharing got deleted or changed
+   * (see SessionManager.getSessionStamp).
+   * Returns false if there is no session (anymore).
+   */
+  private static async restoreSession(req: Request): Promise<boolean> {
+    const context = req.session.context;
+    if (typeof context === 'undefined') {
+      return false;
+    }
+    if (!context?.user || !(req.session.expires > Date.now()) || !req.session.stamp ||
+      req.session.stamp !== await ObjectManagers.getInstance().SessionManager.getSessionStamp(context.user)) {
+      delete req.session.context;
+      delete req.session.stamp;
+      delete req.session.rememberMe;
+      return false;
+    }
+    // fix context. projectionQuery gets lost in the session between calls
+    // Brackets do not survive serialization, so rebuild the context if they are not real Brackets anymore (fail closed)
+    if (AuthenticationMWs.isContextBroken(context)) {
+      req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(context.user);
+    }
+    AuthenticationMWs.extendSession(req);
+    return true;
+  }
+
+  /**
+   * Sessions expire after Server.sessionTimeout of inactivity.
+   */
+  private static extendSession(req: Request): void {
+    req.session.expires = Date.now() + Config.Server.sessionTimeout;
+    if (req.session.rememberMe) {
+      req.sessionOptions.expires = new Date(req.session.expires);
+    }
   }
 
   /**
@@ -356,7 +428,7 @@ export class AuthenticationMWs {
       (req.params[QueryParams.gallery.sharingKey_params] as string);
   }
 
-  private static async getSharingUser(req: Request): Promise<ContextUser> {
+  private static async getSharingUser(req: Request): Promise<SessionUser> {
     if (
       Config.Sharing.enabled === false || !(typeof this.getSharingKey(req) === 'string' && this.getSharingKey(req) !== '')
     ) {

@@ -32,7 +32,7 @@ import {Config} from '../../../../../src/common/config/private/Config';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
-import {ContextUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {SessionUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
@@ -2161,14 +2161,14 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       ({type: SearchQueryTypes.file_name, value, matchType: TextSearchQueryMatchTypes.like});
     const anyPhoto = fileName('Photo');
 
-    const buildSession = (u: Partial<ContextUser>): Promise<SessionContext> =>
+    const buildSession = (u: Partial<SessionUser>): Promise<SessionContext> =>
       ObjectManagers.getInstance().SessionManager.buildContext({
         id: 1,
         name: 'user',
         role: UserRoles.User,
         overrideAllowBlockList: true,
         ...u
-      } as ContextUser);
+      } as SessionUser);
 
     const sharingSession = (s: Partial<SharingEntity>): Promise<SessionContext> => {
       const sm = ObjectManagers.getInstance().SessionManager;

@@ -4,7 +4,7 @@ import {DBTestHelper} from '../../../DBTestHelper';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
 import {ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
 import {Connection} from 'typeorm';
-import {ContextUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {SessionUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {
   DirectorySearch,
   SearchQueryTypes,
@@ -536,14 +536,14 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
     const fileName = (value: string): TextSearch =>
       ({type: SearchQueryTypes.file_name, value, matchType: TextSearchQueryMatchTypes.like});
 
-    const buildSession = (u: Partial<ContextUser>): Promise<SessionContext> =>
+    const buildSession = (u: Partial<SessionUser>): Promise<SessionContext> =>
       ObjectManagers.getInstance().SessionManager.buildContext({
         id: 1,
         name: 'user',
         role: UserRoles.User,
         overrideAllowBlockList: true,
         ...u
-      } as ContextUser);
+      } as SessionUser);
 
     const list = async (session: SessionContext, relDir: string) => {
       const p = GalleryManager.parseRelativeDirPath(relDir);

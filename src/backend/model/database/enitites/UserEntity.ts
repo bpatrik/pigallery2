@@ -1,11 +1,11 @@
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {Column, Entity, PrimaryGeneratedColumn, Unique} from 'typeorm';
 import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
-import {ContextUser} from '../../SessionContext';
+import {SessionUser} from '../../SessionContext';
 
 @Entity()
 @Unique(['name'])
-export class UserEntity implements UserDTO,ContextUser {
+export class UserEntity implements UserDTO,SessionUser {
   @PrimaryGeneratedColumn()
   id: number;
 

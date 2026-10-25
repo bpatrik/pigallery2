@@ -90,6 +90,7 @@ export class UserRouter {
         AuthenticationMWs.authorise(UserRoles.Admin),
         UserRequestConstrainsMWs.notSelfRequestOr2Admins,
         UserMWs.changeRole,
+        AuthenticationMWs.refreshSession,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderOK
     );
@@ -101,6 +102,7 @@ export class UserRouter {
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
         UserMWs.updateSettings,
+        AuthenticationMWs.refreshSession,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderOK
     );
@@ -112,6 +114,7 @@ export class UserRouter {
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
         UserMWs.unlinkOidc,
+        AuthenticationMWs.refreshSession,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderOK
     );

@@ -4,7 +4,7 @@ import * as path from 'path';
 import {DBTestHelper} from '../../DBTestHelper';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
-import {ContextUser, SessionContext} from '../../../../src/backend/model/SessionContext';
+import {SessionUser, SessionContext} from '../../../../src/backend/model/SessionContext';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {SharingEntity} from '../../../../src/backend/model/database/enitites/SharingEntity';
@@ -28,14 +28,14 @@ describe('DirectoryAccess', (sqlHelper: DBTestHelper) => {
   const fileName = (value: string): TextSearch =>
     ({type: SearchQueryTypes.file_name, value, matchType: TextSearchQueryMatchTypes.like});
 
-  const userSession = (u: Partial<ContextUser>): Promise<SessionContext> =>
+  const userSession = (u: Partial<SessionUser>): Promise<SessionContext> =>
     ObjectManagers.getInstance().SessionManager.buildContext({
       id: 1,
       name: 'user',
       role: UserRoles.User,
       overrideAllowBlockList: true,
       ...u
-    } as ContextUser);
+    } as SessionUser);
 
   const sharingSession = (s: Partial<SharingEntity>, creator: Partial<UserEntity> = {}): Promise<SessionContext> => {
     const sm = ObjectManagers.getInstance().SessionManager;
@@ -72,7 +72,7 @@ describe('DirectoryAccess', (sqlHelper: DBTestHelper) => {
   describe('session context', () => {
     it('a new session context has no directory restriction', async () => {
       const s = new SessionContext();
-      s.user = {} as ContextUser;
+      s.user = {} as SessionUser;
       expect(s.directoryAccess).to.be.instanceOf(DirectoryAccess);
       expect(await accessOf(s, ['/', 'public/sub'])).to.deep.equal({'/': available, 'public/sub': available});
     });
