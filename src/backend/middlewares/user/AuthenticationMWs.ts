@@ -99,10 +99,12 @@ export class AuthenticationMWs {
       res: Response,
       next: NextFunction
     ): void {
-      req.params[paramName] = path
-        .normalize(req.params[paramName] || path.sep)
-        // eslint-disable-next-line no-useless-escape
-        .replace(/^(\.\.[\/\\])+/, '');
+      const p = path.normalize(req.params[paramName] || path.sep);
+      // normalize() resolves inner '..' segments, only a leading one can escape the base folder
+      if (p === '..' || p.startsWith('..' + path.sep)) {
+        return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'Invalid path'));
+      }
+      req.params[paramName] = p;
       return next();
     };
   }

@@ -628,6 +628,33 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
+  describe('normalizePathParam', async () => {
+    const run = (p: string): { err: ErrorDTO, value: string } => {
+      const req: any = {params: {directory: p}};
+      let err: ErrorDTO;
+      AuthenticationMWs.normalizePathParam('directory')(req, {} as any, (e?: unknown) => {
+        err = e as ErrorDTO;
+      });
+      return {err, value: req.params.directory};
+    };
+
+    it('should reject paths escaping the base folder', () => {
+      for (const p of ['..', '../', '../..', 'a/../..', '../x.jpg', 'a/../../x.jpg', '..\\x.jpg'.replace('\\', path.sep)]) {
+        const ret = run(p);
+        expect(ret.err, p).to.be.instanceOf(ErrorDTO);
+        expect(ret.err.code, p).to.equal(ErrorCodes.INPUT_ERROR);
+      }
+    });
+
+    it('should normalize paths inside the base folder', () => {
+      expect(run(undefined)).to.deep.equal({err: undefined, value: path.sep});
+      expect(run('a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('a/b.jpg')});
+      expect(run('a/../b.jpg')).to.deep.equal({err: undefined, value: 'b.jpg'});
+      expect(run('/a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('/a/b.jpg')});
+      expect(run('..foo.jpg')).to.deep.equal({err: undefined, value: '..foo.jpg'});
+    });
+  });
+
   describe('authoriseMedia', async () => {
 
     const buildReq = (mediaRelPath: string) => ({

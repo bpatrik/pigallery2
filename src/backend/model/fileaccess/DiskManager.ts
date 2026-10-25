@@ -140,6 +140,9 @@ export class DiskManager {
   ): Promise<ParentDirectoryDTO> {
     Logger.silly(LOG_TAG, 'scanning directory:', relativeDirectoryName);
     relativeDirectoryName = this.normalizeDirPath(relativeDirectoryName);
+    if (!ProjectPath.isInsideImageFolder(relativeDirectoryName)) {
+      throw new Error('Directory is outside of the image folder: ' + relativeDirectoryName);
+    }
     const dto = this.getDTOFromPath(relativeDirectoryName);
 
     const absoluteDirectoryName = path.join(
