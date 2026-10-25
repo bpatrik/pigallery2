@@ -7,6 +7,9 @@ import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../../src/common/Utils';
 import {UserManager} from '../../../../../src/backend/model/database/UserManager';
 import chaiAsPromised from 'chai-as-promised';
+import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
+import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
+import {VersionEntity} from '../../../../../src/backend/model/database/enitites/VersionEntity';
 
 chai.use(chaiAsPromised);
 
@@ -60,6 +63,32 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
         await expect(um.findOne({name: 'test', password: ''})).to.be.rejectedWith(Error);
       });
 
+    });
+
+    describe('oidc', async () => {
+      it('should set and unset the OIDC subject', async () => {
+        const um = new UserManager();
+        const u = await um.findOne({name: 'test'});
+
+        await um.setOidcSubject(u.id, 'https://idp|123');
+        expect((await um.findOne({oidcSubject: 'https://idp|123'})).id).to.eql(u.id);
+
+        await um.setOidcSubject(u.id, null);
+        expect(await um.findOne({oidcSubject: 'https://idp|123'})).to.be.null;
+      });
+
+      it('should keep users on scheme update if the old scheme misses a column', async () => {
+        const connection = await SQLConnection.getConnection();
+        const tableName = connection.getMetadata(UserEntity).tableName;
+        await connection.query(`ALTER TABLE ${tableName} DROP COLUMN oidcSubject`);
+        await connection.query(`UPDATE ${connection.getMetadata(VersionEntity).tableName} SET version = 0`);
+
+        await (SQLConnection as any).schemeSync(connection);
+
+        const u = await new UserManager().findOne({name: 'test', password: 'testp'});
+        expect(u.role).to.eql(UserRoles.User);
+        expect(u.oidcSubject).to.be.null;
+      });
     });
   });
 });

@@ -400,6 +400,28 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     description: $localize`Role of the users that are created on their first OIDC login.`
   })
   autoCreateUserRole: UserRoles = UserRoles.Guest;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Strict security`,
+      relevant: (c: any) => c.enabled,
+      priority: ConfigPriority.advanced
+    },
+    description: $localize`Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider.`
+  })
+  strictSecurity: boolean = false;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Max role for linking`,
+      relevant: (c: any) => c.enabled && c.strictSecurity,
+      priority: ConfigPriority.advanced,
+      uiOptions: [UserRoles.Guest, UserRoles.User, UserRoles.Admin, UserRoles.Developer]
+    } as TAGS,
+    description: $localize`Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back.`
+  })
+  strictLinkMaxRole: UserRoles = UserRoles.User;
 }
 
 

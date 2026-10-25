@@ -57,6 +57,17 @@ export class UserManager {
     return userRepository.save(user);
   }
 
+  public async setOidcSubject(id: number, oidcSubject: string | null): Promise<UserEntity> {
+    const connection = await SQLConnection.getConnection();
+    const userRepository = connection.getRepository(UserEntity);
+    const user = await userRepository.findOneBy({id});
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.oidcSubject = oidcSubject;
+    return userRepository.save(user);
+  }
+
   public async updateSettings(id: number, settings: UserSettingsDTO): Promise<UserEntity> {
     const connection = await SQLConnection.getConnection();
     const userRepository = connection.getRepository(UserEntity);

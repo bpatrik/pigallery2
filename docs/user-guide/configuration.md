@@ -56,6 +56,8 @@ App CLI options:
   --Users-oidc-allowedDomains                                               If set, only identities with emails in these domains will be accepted. (default: [])
   --Users-oidc-autoCreateUser                                               If enabled, unknown users will be created on first login. If disabled, only existing app users can log in. (default: false)
   --Users-oidc-autoCreateUserRole                                           Role of the users that are created on their first OIDC login. (default: 'Guest')
+  --Users-oidc-strictSecurity                                               Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider. (default: false)
+  --Users-oidc-strictLinkMaxRole                                            Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back. (default: 'User')
   --Users-enforcedUsers                                                     Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   --Users-allowQuery                                                        Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   --Users-blockQuery                                                        Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
@@ -242,6 +244,8 @@ Environmental variables:
   Users-oidc-allowedDomains                                             If set, only identities with emails in these domains will be accepted. (default: [])
   Users-oidc-autoCreateUser                                             If enabled, unknown users will be created on first login. If disabled, only existing app users can log in. (default: false)
   Users-oidc-autoCreateUserRole                                         Role of the users that are created on their first OIDC login. (default: 'Guest')
+  Users-oidc-strictSecurity                                             Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider. (default: false)
+  Users-oidc-strictLinkMaxRole                                          Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back. (default: 'User')
   Users-enforcedUsers                                                   Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   Users-allowQuery                                                      Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   Users-blockQuery                                                      Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
@@ -472,7 +476,11 @@ Environmental variables:
             "//[autoCreateUser]": "If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.",
             "autoCreateUser": false,
             "//[autoCreateUserRole]": "Role of the users that are created on their first OIDC login.",
-            "autoCreateUserRole": "Guest"
+            "autoCreateUserRole": "Guest",
+            "//[strictSecurity]": "Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to \"Max role for linking\" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider.",
+            "strictSecurity": false,
+            "//[strictLinkMaxRole]": "Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back.",
+            "strictLinkMaxRole": "User"
         },
         "//[enforcedUsers]": "Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.",
         "enforcedUsers": [],

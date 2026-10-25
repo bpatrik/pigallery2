@@ -18,6 +18,7 @@ export class UserRouter {
     this.addListUsers(app);
     this.addChangeRole(app);
     this.addChangeSettings(app);
+    this.addUnlinkOidc(app);
   }
 
   private static addLogin(app: Express): void {
@@ -100,6 +101,17 @@ export class UserRouter {
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
         UserMWs.updateSettings,
+        ServerTimingMWs.addServerTiming,
+        RenderingMWs.renderOK
+    );
+  }
+
+  private static addUnlinkOidc(app: Express): void {
+    app.delete(
+        Config.Server.apiPath + '/user/:id/oidc',
+        AuthenticationMWs.authenticate,
+        AuthenticationMWs.authorise(UserRoles.Admin),
+        UserMWs.unlinkOidc,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderOK
     );

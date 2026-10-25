@@ -154,6 +154,11 @@ export class UsersComponent implements OnInit {
     this.childModal.hide();
   }
 
+  async unlinkOidc(user: UserDTO): Promise<void> {
+    await this.userSettings.unlinkOidc(user);
+    await this.getUsersList();
+  }
+
   async openEditUser(user: UserDTO): Promise<void> {
     await this.getUsersList();
     const fresh = this.users.find(u => u.id === user.id) || user;

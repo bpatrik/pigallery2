@@ -139,6 +139,32 @@ export class UserMWs {
     }
   }
 
+  public static async unlinkOidc(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    if (Config.Users.authenticationRequired === false) {
+      return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
+    }
+    if (
+      typeof req.params === 'undefined' ||
+      typeof req.params.id === 'undefined'
+    ) {
+      return next();
+    }
+
+    try {
+      await ObjectManagers.getInstance().UserManager.setOidcSubject(
+        parseInt(req.params.id, 10),
+        null
+      );
+      return next();
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
+    }
+  }
+
   public static async listUsers(
     req: Request,
     res: Response,

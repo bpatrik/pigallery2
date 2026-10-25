@@ -242,9 +242,18 @@ export class SQLConnection {
 
     let users: UserEntity[] = [];
     try {
+      // only select the columns that exist in the old scheme, so adding a column to the user does not lose the users
+      const metadata = connection.getMetadata(UserEntity);
+      const queryRunner = connection.createQueryRunner();
+      const table = await queryRunner.getTable(metadata.tableName);
+      await queryRunner.release();
+      const existingColumns = new Set((table?.columns || []).map(c => c.name));
       users = await connection
         .getRepository(UserEntity)
         .createQueryBuilder('user')
+        .select(metadata.columns
+          .filter(c => existingColumns.has(c.databaseName))
+          .map(c => 'user.' + c.propertyName))
         .getMany();
       // eslint-disable-next-line no-empty
     } catch (ex) {

@@ -35,6 +35,10 @@
                 class="btn float-end ms-2">
           <ng-icon name="ionPencil" title="Edit" i18n-title></ng-icon>
         </button>
+        <button *ngIf="user.oidcSubject" (click)="unlinkOidc(user)"
+                class="btn btn-warning float-end ms-2">
+          <ng-icon name="ionUnlinkOutline" title="Unlink OIDC account" i18n-title></ng-icon>
+        </button>
       </td>
     </tr>
     </tbody>

@@ -13,6 +13,7 @@ export interface UserDTO {
   name: string;
   password?: string;
   role: UserRoles;
+  oidcSubject?: string | null; // set if the user is linked to an OIDC account (strict security mode)
   usedSharingKey?: string;
   projectionKey?: string; // allow- and blocklist projection hash. if null, no projection
   // Optional per-user query overrides

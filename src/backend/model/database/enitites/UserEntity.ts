@@ -18,6 +18,10 @@ export class UserEntity implements UserDTO,ContextUser {
   @Column('smallint')
   role: UserRoles;
 
+  // OIDC issuer and subject ('<iss>|<sub>'), only set in OIDC strict security mode
+  @Column({type: 'text', nullable: true})
+  oidcSubject?: string;
+
   // only if this set to true, will the per-user allow/blocklist be considered
   @Column({type: 'boolean', default: false})
   overrideAllowBlockList?: boolean;
