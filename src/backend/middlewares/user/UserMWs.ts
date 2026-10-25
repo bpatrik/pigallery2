@@ -3,6 +3,7 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {Utils} from '../../../common/Utils';
 import {Config} from '../../../common/config/private/Config';
+import {AuthenticationMWs} from './AuthenticationMWs';
 
 export class UserMWs {
   public static async createUser(
@@ -46,13 +47,10 @@ export class UserMWs {
     }
 
     try {
-      const deleted = await ObjectManagers.getInstance().UserManager.deleteUser(
+      // the sessions of the deleted user end on their next request (see AuthenticationMWs.restoreSession)
+      await ObjectManagers.getInstance().UserManager.deleteUser(
         parseInt(req.params.id, 10)
       );
-      // If current session user was deleted, clear the session context
-      if (req.session?.context?.user?.id === deleted.id) {
-        delete req.session.context;
-      }
       return next();
     } catch (err) {
       return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
@@ -83,16 +81,7 @@ export class UserMWs {
       );
       // If the current session user was changed, recreate the session context
       if (req.session?.context?.user?.id === updatedUser.id) {
-        const newUser: any = Utils.clone(updatedUser);
-        // Do not keep password in session
-        if (newUser && typeof newUser.password !== 'undefined') {
-          newUser.password = '';
-        }
-        // Preserve usedSharingKey if any
-        if (req.session.context.user && (req.session.context.user as any).usedSharingKey) {
-          newUser.usedSharingKey = (req.session.context.user as any).usedSharingKey;
-        }
-        req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(newUser);
+        await AuthenticationMWs.startSession(req, updatedUser, req.session.rememberMe);
       }
       return next();
     } catch (err) {
@@ -124,12 +113,8 @@ export class UserMWs {
       );
       // If the current session user was changed, recreate the session context
       if (req.session?.context?.user?.id === updatedUser.id) {
-        const user = Utils.clone(
-          await ObjectManagers.getInstance().UserManager.findOne({
-            id: updatedUser.id
-          })
-        );
-        req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
+        // keeps the user logged in, also after a password change
+        await AuthenticationMWs.startSession(req, updatedUser, req.session.rememberMe);
         //clean up after a change
         await ObjectManagers.getInstance().ProjectedCacheManager.cleanupNonExistingProjections();
       }

@@ -1,5 +1,5 @@
 import * as crypto from 'crypto';
-import {ContextUser, SessionContext} from '../SessionContext';
+import {SessionUser, SessionContext} from '../SessionContext';
 import {DirectoryAccess, DirectoryFilter} from '../DirectoryAccess';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {Config} from '../../../common/config/private/Config';
@@ -8,12 +8,18 @@ import {SharingEntity} from './enitites/SharingEntity';
 import {ObjectManagers} from '../ObjectManagers';
 import {Logger} from '../../Logger';
 import {UserRoles} from '../../../common/entities/UserDTO';
+import {UserEntity} from './enitites/UserEntity';
+import {SQLConnection} from './SQLConnection';
 
 const LOG_TAG = '[SessionManager]';
 
 export class SessionManager {
 
   public static readonly NO_PROJECTION_KEY = crypto.createHash('md5').update('No Key').digest('hex');
+
+  // Session stamps by user id or sharing key (see getSessionStamp), so they do not need a DB query per request.
+  private stamps = new Map<string, { stamp: string, expires?: number }>();
+  private stampGeneration = 0;
 
   private static andQueries(...queries: SearchQueryDTO[]): SearchQueryDTO {
     const list = queries.filter(q => !SearchQueryUtils.isQueryEmpty(q));
@@ -33,7 +39,7 @@ export class SessionManager {
    * Creates the user that is used during a sharing session.
    * It inherits the restrictions of the sharing creator.
    */
-  public createSharingUser(sharing: SharingEntity): ContextUser {
+  public createSharingUser(sharing: SharingEntity): SessionUser {
     // without any of these, the sharing would show everything the creator can see
     if (SearchQueryUtils.isQueryEmpty(sharing.searchQuery) && !sharing.directoryQuery) {
       throw new Error('Invalid sharing: either searchQuery or directoryQuery needs to be set');
@@ -49,7 +55,55 @@ export class SessionManager {
       blockDirectoryList: creatorLists.block,
       // directories that are available through the sharing, see getDirectoryAccessForUser
       sharingDirectoryQuery: sharing.directoryQuery ?? null
-    } as ContextUser;
+    } as SessionUser;
+  }
+
+  /**
+   * Signature of the DB row a session is based on: the user, or the sharing (with its creator).
+   * Sessions are stored in the cookie, a session is only valid while its stamp is unchanged,
+   * so deleting or changing the user or sharing ends it. Null if the row does not exist or the sharing expired.
+   */
+  public async getSessionStamp(user: SessionUser): Promise<string> {
+    const key = user.usedSharingKey ? 'sharing:' + user.usedSharingKey : 'user:' + user.id;
+    let entry = this.stamps.get(key);
+    if (!entry) {
+      const generation = this.stampGeneration;
+      const row = await this.loadSessionRow(user);
+      entry = {
+        stamp: row ? crypto.createHmac('sha256', Config.Server.sessionSecret.join(''))
+          .update(JSON.stringify(row)).digest('hex') : null,
+        expires: (row as SharingEntity)?.expires
+      };
+      // do not cache it if the row changed during the query
+      if (generation === this.stampGeneration) {
+        this.stamps.set(key, entry);
+      }
+    }
+    return entry.expires < Date.now() ? null : entry.stamp;
+  }
+
+  /**
+   * Needs to be called after every user or sharing change.
+   */
+  public invalidateSessionCache(): void {
+    this.stampGeneration++;
+    this.stamps.clear();
+  }
+
+  private async loadSessionRow(user: SessionUser): Promise<UserEntity | SharingEntity> {
+    const connection = await SQLConnection.getConnection();
+    if (user.usedSharingKey) {
+      // not using SharingManager.findOne, that also deletes the expired sharings
+      return connection.getRepository(SharingEntity)
+        .createQueryBuilder('share')
+        .leftJoinAndSelect('share.creator', 'creator')
+        .where('share.sharingKey = :sharingKey', {sharingKey: user.usedSharingKey})
+        .getOne();
+    }
+    if (typeof user.id !== 'number') {
+      return null;
+    }
+    return connection.getRepository(UserEntity).findOneBy({id: user.id});
   }
 
   /**
@@ -64,7 +118,7 @@ export class SessionManager {
     return crypto.createHash('md5').update(canonical).digest('hex');
   }
 
-  public async buildContext(user: ContextUser): Promise<SessionContext> {
+  public async buildContext(user: SessionUser): Promise<SessionContext> {
     const context = new SessionContext();
     context.user = user;
     context.user.projectionKey = SessionManager.NO_PROJECTION_KEY;
@@ -106,14 +160,14 @@ export class SessionManager {
     // If authentication is not required, expose the unauthenticated session only
     if (Config.Users.authenticationRequired === false) {
       const user = ObjectManagers.getInstance().UserManager.getUnAuthenticatedUser();
-      const ctx = await this.buildContext(user as unknown as ContextUser);
+      const ctx = await this.buildContext(user as unknown as SessionUser);
       return [ctx];
     }
 
     // List all users and build a session context for each
     const users = await ObjectManagers.getInstance().UserManager.find({} as any);
     const sessions: SessionContext[] = [];
-    for (const u of users as unknown as ContextUser[]) {
+    for (const u of users as unknown as SessionUser[]) {
       try {
         const ctx = await this.buildContext(u);
         sessions.push(ctx);
@@ -137,7 +191,7 @@ export class SessionManager {
    * Returns the media and the directory allow/block lists combined.
    * Media that is in a not available directory is also not available.
    */
-  private getQueryForUser(user: ContextUser): SearchQueryDTO {
+  private getQueryForUser(user: SessionUser): SearchQueryDTO {
     const lists = this.getDirectoryListsForUser(user);
     // directoryListToQuery throws on invalid entries.
     // Fail closed: a misconfigured directory list should not silently expose everything
@@ -150,7 +204,7 @@ export class SessionManager {
     );
   }
 
-  private getMediaQueryForUser(user: ContextUser): SearchQueryDTO {
+  private getMediaQueryForUser(user: SessionUser): SearchQueryDTO {
     const blockQuery = user.overrideAllowBlockList ? user.blockQuery : Config.Users.blockQuery;
     const allowQuery = user.overrideAllowBlockList ? user.allowQuery : Config.Users.allowQuery;
 
@@ -163,7 +217,7 @@ export class SessionManager {
   /**
    * Returns the user's own lists if they are overridden, otherwise the global ones from the config.
    */
-  private getDirectoryListsForUser(user: ContextUser): { allow: DirectorySearch[], block: DirectorySearch[] } {
+  private getDirectoryListsForUser(user: SessionUser): { allow: DirectorySearch[], block: DirectorySearch[] } {
     // plain copies, so config objects do not end up in the session
     const copy = (list: DirectorySearch[]): DirectorySearch[] =>
       (list || []).map(d => ({type: d.type, value: d.value, matchType: d.matchType, negate: d.negate}));
@@ -177,7 +231,7 @@ export class SessionManager {
    * A directory is available if it matches every allow list and none of the block list entries.
    * The directory query of a sharing works as an extra allow list (on top of the creator's lists).
    */
-  private getDirectoryAccessForUser(user: ContextUser): { allowLists: DirectorySearch[][], blockList: DirectorySearch[] } {
+  private getDirectoryAccessForUser(user: SessionUser): { allowLists: DirectorySearch[][], blockList: DirectorySearch[] } {
     const lists = this.getDirectoryListsForUser(user);
     SearchQueryUtils.validateDirectoryList(lists.allow, 'Directory allow list');
     SearchQueryUtils.validateDirectoryList(lists.block, 'Directory block list');

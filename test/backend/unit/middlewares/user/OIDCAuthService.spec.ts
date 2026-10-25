@@ -203,7 +203,8 @@ describe('OIDCAuthService', () => {
           }
         },
         SessionManager: {
-          buildContext: async (user: any) => ({user})
+          buildContext: async (user: any) => ({user}),
+          getSessionStamp: async (): Promise<string> => 'stamp'
         }
       };
     });
@@ -218,6 +219,7 @@ describe('OIDCAuthService', () => {
       (OIDCAuthService as any).clientPromise = Promise.resolve(client);
       const req: any = {
         session: {oidc: {state: 'state', verifier: 'verifier'}},
+        sessionOptions: {},
         query: {code: 'code', state: 'state'}
       };
       let redirectedTo: string = null;
@@ -326,7 +328,8 @@ describe('OIDCAuthService', () => {
             }
           },
           SessionManager: {
-            buildContext: async (user: any) => ({user})
+            buildContext: async (user: any) => ({user}),
+            getSessionStamp: async (): Promise<string> => 'stamp'
           }
         };
       });

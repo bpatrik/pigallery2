@@ -5,6 +5,7 @@ import {UserDTO} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {Logger} from '../../Logger';
+import {AuthenticationMWs} from './AuthenticationMWs';
 
 const LOG_TAG = '[OIDCAuthService]';
 
@@ -77,8 +78,7 @@ export class OIDCAuthService {
       await this.findStrictUser(claims, matchedName) :
       await this.findUser(matchedName);
 
-    req.session.context = await ObjectManagers.getInstance().SessionManager.buildContext(user);
-    req.session.rememberMe = true;
+    await AuthenticationMWs.startSession(req, user, true);
     // cleanup
     delete (req.session as any).oidc;
     res.redirect(Config.Server.getAppUrl());
