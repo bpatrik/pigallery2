@@ -2,7 +2,7 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 import {GalleryPhotoComponent} from './photo.grid.gallery.component';
 import {GridMedia} from '../GridMedia';
-import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {PhotoDTO, PhotoMetadata} from '../../../../../../common/entities/PhotoDTO';
 import {ThumbnailManagerService} from '../../thumbnailManager.service';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {ExtensionService} from '../../../../model/extension.service';
@@ -114,7 +114,7 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
     component = fixture.componentInstance;
   });
 
-  const withMetadata = (metadata: any) => {
+  const withMetadata = (metadata: Partial<PhotoMetadata>): void => {
     component.gridMedia = makeGridMedia({metadata: {size: {width: 4032, height: 3024}, ...metadata}} as any);
     fixture.detectChanges();
   };

@@ -132,6 +132,7 @@ export interface IClientMediaButtonConfig {
    *   {field: 'keywords', comparator: '!contains', value: 'favorite'} // matches if they don't (or if there are no keywords)
    * ]
    * 'contains' and '!contains' work on arrays (exact item match) and on strings (substring match).
+   * Matching is case-sensitive. On other field types (e.g. numbers) 'contains' never matches, so '!contains' always does.
    */
   metadataFilter?: IMetadataFilter[];
   /**
