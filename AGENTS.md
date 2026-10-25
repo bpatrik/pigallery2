@@ -75,12 +75,18 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
   `SessionContext` carries the projection and its `projectionKey` hash. Changes that affect what a user may see must keep these caches correct.
 - **Indexing**: filesystem scanning and reindexing (`IndexingManager`, `DiskManager`, `ReIndexingSensitivity` config) are
   performance-critical on slow disks.
+- **Sessions**: the session lives in the signed `cookie-session` cookie. `req.session.stamp` (see `SessionManager.getSessionStamp`)
+  ties it to its user or sharing DB row, and `AuthenticationMWs` ends the session once that row changes. Only `AuthenticationMWs`
+  starts, restores or ends sessions. Call `SessionManager.invalidateSessionCache()` after every write to users or sharings.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
 
 ## Rules for changes
 
+- Routers contain no logic: they only list the middlewares of each path. Put the logic in `*MWs` classes.
+- Middlewares are only called from routers. Helpers shared inside a middleware class are private;
+  services and managers return values instead of using `res`.
 - Avoid heavy queries, N+1 queries and loading full tables on the server; prefer projections and pagination.
 - Keep TypeORM queries portable between SQLite and MySQL.
 - Changed any TypeORM entity? Bump `DataStructureVersion` in `src/common/DataStructureVersion.ts`.
