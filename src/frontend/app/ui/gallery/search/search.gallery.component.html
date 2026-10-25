@@ -1,4 +1,7 @@
-<form class="navbar-form" role="search" #SearchForm="ngForm">
+<!-- Submitting the form searches: the Enter key of phone keyboards often
+     comes as an unidentified key (229) that keydown.enter does not see, but
+     it still submits the form. -->
+<form class="navbar-form" role="search" #SearchForm="ngForm" (ngSubmit)="Search()">
   <div class="input-group flex-nowrap" style="place-content: flex-end;">
 
     <app-gallery-search-field-base [(ngModel)]="rawSearchText"
@@ -9,8 +12,7 @@
 
     </app-gallery-search-field-base>
 
-    <button class="btn btn-tertiary lh-0" type="button"
-            [routerLink]="['/search', HTMLSearchQuery]">
+    <button class="btn btn-tertiary lh-0" type="submit">
       <ng-icon name="ionSearchOutline"></ng-icon>
     </button>
     <button class="btn btn-tertiary lh-0"  type="button" (click)="openSearchModal(searchModal)">
