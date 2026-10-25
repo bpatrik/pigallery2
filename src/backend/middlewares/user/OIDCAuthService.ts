@@ -1,18 +1,21 @@
 import {Config} from '../../../common/config/private/Config';
-import {Request, Response} from 'express';
+import {Request} from 'express';
 import {Client, generators, Issuer, TokenSet} from 'openid-client';
 import {UserDTO} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {Logger} from '../../Logger';
-import {AuthenticationMWs} from './AuthenticationMWs';
 
 const LOG_TAG = '[OIDCAuthService]';
 
 export class OIDCAuthService {
   private static clientPromise: Promise<Client> | null = null;
 
-  public static async login(req: Request, res: Response): Promise<void> {
+  /**
+   * Step 1 of the OIDC authorization code flow: the URL of the authentication request at the provider.
+   * The provider sends the authentication response back to Users.oidc.redirectUri.
+   */
+  public static async getAuthenticationRequestUrl(req: Request): Promise<string> {
     const client = await this.getClient();
     const state = generators.state();
     const verifier = generators.codeVerifier();
@@ -21,16 +24,19 @@ export class OIDCAuthService {
       state,
       verifier
     } as any;
-    const authUrl = client.authorizationUrl({
+    return client.authorizationUrl({
       scope: Config.Users.oidc.scopes.join(' '),
       state,
       code_challenge: challenge,
       code_challenge_method: 'S256'
     });
-    res.redirect(authUrl);
   }
 
-  public static async callback(req: Request, res: Response): Promise<void> {
+  /**
+   * Step 2 of the OIDC authorization code flow: validates the authentication response,
+   * exchanges its code for the tokens and returns with the user of their claims.
+   */
+  public static async getUserFromAuthenticationResponse(req: Request): Promise<UserDTO> {
     const storedOidc = req.session.oidc;
     const params = req.query; // code, state
     if (!storedOidc?.state || params.state !== storedOidc?.state) {
@@ -78,10 +84,9 @@ export class OIDCAuthService {
       await this.findStrictUser(claims, matchedName) :
       await this.findUser(matchedName);
 
-    await AuthenticationMWs.startSession(req, user, true);
     // cleanup
     delete (req.session as any).oidc;
-    res.redirect(Config.Server.getAppUrl());
+    return user;
   }
 
   private static async findUser(name: string): Promise<UserDTO> {

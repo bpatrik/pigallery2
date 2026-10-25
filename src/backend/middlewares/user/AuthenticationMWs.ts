@@ -11,6 +11,7 @@ import {Logger} from '../../Logger';
 import {SessionUser, SessionContext} from '../../model/SessionContext';
 import {Brackets} from 'typeorm';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../model/DirectoryAccess';
+import {OIDCAuthService} from './OIDCAuthService';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -314,6 +315,44 @@ export class AuthenticationMWs {
     }
   }
 
+  public static async oidcLogin(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const user = await OIDCAuthService.getUserFromAuthenticationResponse(req);
+      await AuthenticationMWs.startSession(req, user, true);
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  }
+
+  /**
+   * Starts the session again from the current DB row of its user,
+   * so changing the own user (e.g.: the password) does not end the session. Use it after user changes.
+   */
+  public static async refreshSession(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    const id = req.session.context?.user?.id;
+    if (typeof id !== 'number') {
+      return next();
+    }
+    try {
+      const user = await ObjectManagers.getInstance().UserManager.findOne({id});
+      if (user) {
+        await AuthenticationMWs.startSession(req, user, req.session.rememberMe);
+      }
+      return next();
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
+    }
+  }
+
   public static logout(req: Request, res: Response, next: NextFunction): void {
     delete req.session.context;
     return next();
@@ -323,7 +362,7 @@ export class AuthenticationMWs {
    * Logs in the user (or sharing guest) for this session.
    * Only "remember me" sessions survive closing the browser.
    */
-  public static async startSession(req: Request, user: SessionUser, rememberMe = false): Promise<void> {
+  private static async startSession(req: Request, user: SessionUser, rememberMe = false): Promise<void> {
     const sm = ObjectManagers.getInstance().SessionManager;
     const sessionUser = Utils.clone(user);
     delete sessionUser.password;

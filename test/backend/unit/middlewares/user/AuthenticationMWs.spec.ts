@@ -14,6 +14,7 @@ import {DirectoryAccess, DirectoryAccessTypes} from '../../../../../src/backend/
 import {DBTestHelper} from '../../../DBTestHelper';
 import {QueryParams} from '../../../../../src/common/QueryParams';
 import {UserMWs} from '../../../../../src/backend/middlewares/user/UserMWs';
+import {OIDCAuthService} from '../../../../../src/backend/middlewares/user/OIDCAuthService';
 
 
 declare let describe: any;
@@ -312,18 +313,64 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       await expectEnded(toCookie(session2));
     });
 
+    // mimics the router: the user change is followed by refreshSession
+    const changeOwnUser = async (session: any, mw: (req: any, res: any, next: any) => Promise<void>, body: any) => {
+      const req: any = {session, sessionOptions: {}, params: {id: '' + session.context.user.id}, body};
+      for (const m of [mw, AuthenticationMWs.refreshSession]) {
+        let err: any = 'not-called';
+        await m(req, null, (e?: any) => {
+          err = e;
+        });
+        expect(err).to.be.undefined;
+      }
+      return toCookie(req.session);
+    };
+
     it('keeps the own session after changing the own role', async () => {
-      const frank = await createUser('frank', UserRoles.Admin);
-      const session = await login('frank');
-      const req: any = {session, params: {id: '' + frank.id}, body: {newRole: UserRoles.Developer}};
-      let err: any = 'not-called';
-      await UserMWs.changeRole(req, null, (e?: any) => {
-        err = e;
-      });
-      expect(err).to.be.undefined;
-      const s = await expectAlive(toCookie(req.session));
+      await createUser('frank', UserRoles.Admin);
+      const session = await changeOwnUser(await login('frank', true), UserMWs.changeRole, {newRole: UserRoles.Developer});
+      const s = await expectAlive(session);
       expect(s.context.user.role).to.equal(UserRoles.Developer);
       expect(s.context.user.password).to.be.undefined;
+      expect(s.rememberMe).to.be.true;
+    });
+
+    it('keeps the own session after changing the own password', async () => {
+      await createUser('fred');
+      const other = await login('fred');
+      const session = await changeOwnUser(await login('fred'), UserMWs.updateSettings, {settings: {newPassword: 'new'}});
+      await expectAlive(session);
+      await expectEnded(other);
+    });
+
+    it('keeps the session after changing an other user', async () => {
+      await createUser('admin2', UserRoles.Admin);
+      const target = await createUser('target');
+      const session = await login('admin2');
+      const req: any = {session, sessionOptions: {}, params: {id: '' + target.id}, body: {newRole: UserRoles.Admin}};
+      await UserMWs.changeRole(req, null, (): void => undefined);
+      await AuthenticationMWs.refreshSession(req, null, (): void => undefined);
+      expect(req.session.stamp).to.equal(session.stamp);
+      expect(req.session.context.user.name).to.equal('admin2');
+    });
+
+    it('starts a remembered session on OIDC login', async () => {
+      const olga = await createUser('olga');
+      const origGetUser = OIDCAuthService.getUserFromAuthenticationResponse;
+      OIDCAuthService.getUserFromAuthenticationResponse = async () => ObjectManagers.getInstance().UserManager.findOne({id: olga.id});
+      const req: any = {session: {}, sessionOptions: {}, query: {}, params: {}};
+      let err: any = 'not-called';
+      try {
+        await AuthenticationMWs.oidcLogin(req, null, (e?: any) => {
+          err = e;
+        });
+      } finally {
+        OIDCAuthService.getUserFromAuthenticationResponse = origGetUser;
+      }
+      expect(err).to.be.undefined;
+      expect(req.session.rememberMe).to.be.true;
+      expect(req.session.context.user).to.not.have.property('password');
+      await expectAlive(toCookie(req.session));
     });
 
     it('ends timed out sessions', async () => {

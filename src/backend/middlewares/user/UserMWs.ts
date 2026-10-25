@@ -3,7 +3,6 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {Utils} from '../../../common/Utils';
 import {Config} from '../../../common/config/private/Config';
-import {AuthenticationMWs} from './AuthenticationMWs';
 
 export class UserMWs {
   public static async createUser(
@@ -47,7 +46,7 @@ export class UserMWs {
     }
 
     try {
-      // the sessions of the deleted user end on their next request (see AuthenticationMWs.restoreSession)
+      // the sessions of the deleted user end on their next request (see AuthenticationMWs.authenticate)
       await ObjectManagers.getInstance().UserManager.deleteUser(
         parseInt(req.params.id, 10)
       );
@@ -75,14 +74,10 @@ export class UserMWs {
     }
 
     try {
-      const updatedUser = await ObjectManagers.getInstance().UserManager.changeRole(
+      await ObjectManagers.getInstance().UserManager.changeRole(
         parseInt(req.params.id, 10),
         req.body.newRole
       );
-      // If the current session user was changed, recreate the session context
-      if (req.session?.context?.user?.id === updatedUser.id) {
-        await AuthenticationMWs.startSession(req, updatedUser, req.session.rememberMe);
-      }
       return next();
     } catch (err) {
       return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
@@ -111,10 +106,7 @@ export class UserMWs {
         parseInt(req.params.id, 10),
         req.body.settings
       );
-      // If the current session user was changed, recreate the session context
       if (req.session?.context?.user?.id === updatedUser.id) {
-        // keeps the user logged in, also after a password change
-        await AuthenticationMWs.startSession(req, updatedUser, req.session.rememberMe);
         //clean up after a change
         await ObjectManagers.getInstance().ProjectedCacheManager.cleanupNonExistingProjections();
       }
