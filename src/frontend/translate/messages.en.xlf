@@ -4069,6 +4069,14 @@
         </context-group>
         <target>name</target>
       </trans-unit>
+      <trans-unit id="1119709745302159117" datatype="html">
+        <source>directory</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
+          <context context-type="linenumber">57</context>
+        </context-group>
+        <target>directory</target>
+      </trans-unit>
       <trans-unit id="8415080222848862490" datatype="html">
         <source>rating</source>
         <context-group purpose="location">

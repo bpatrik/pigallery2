@@ -69,6 +69,11 @@ export class SearchManager {
         case SortByTypes.Name:
           query.addOrderBy('media.name', sort.ascending ? 'ASC' : 'DESC');
           break;
+        case SortByTypes.Directory:
+          query.addOrderBy('directory.path', sort.ascending ? 'ASC' : 'DESC');
+          query.addOrderBy('directory.name', sort.ascending ? 'ASC' : 'DESC');
+          query.addOrderBy('media.name', sort.ascending ? 'ASC' : 'DESC');
+          break;
         case SortByTypes.PersonCount:
           query.addOrderBy('media.metadata.personsLength', sort.ascending ? 'ASC' : 'DESC');
           break;

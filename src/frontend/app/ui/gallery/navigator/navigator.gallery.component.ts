@@ -195,6 +195,15 @@ export class GalleryNavigatorComponent {
         : 0;
   }
 
+  // Sorting and grouping by directory only makes sense if media from several directories is shown
+  get visibleSortingByTypes(): { key: number; value: string }[] {
+    return this.sortingByTypes.filter((t) => t.key !== SortByTypes.Directory || this.isSearch);
+  }
+
+  get visibleGroupingByTypes(): { key: number; value: string }[] {
+    return this.groupingByTypes.filter((t) => t.key !== GroupByTypes.Directory || this.isSearch);
+  }
+
   isDefaultSortingAndGrouping(): boolean {
     return this.sortingService.isDefaultSortingAndGrouping(
       this.contentLoaderService.content.value

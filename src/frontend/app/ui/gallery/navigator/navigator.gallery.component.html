@@ -94,7 +94,7 @@
                             <div class="row">
                                 <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
                                      [class.active]="sortingService.sorting.value.method == type.key"
-                                     *ngFor="let type of sortingByTypes"
+                                     *ngFor="let type of visibleSortingByTypes"
                                      (click)="setSortingBy(type.key)">
                                     <div class="me-2 d-inline-block">
                                         <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
@@ -129,7 +129,7 @@
                             <div class="row">
                                 <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
                                      [class.active]="sortingService.grouping.value.method == type.key"
-                                     *ngFor="let type of groupingByTypes"
+                                     *ngFor="let type of visibleGroupingByTypes"
                                      (click)="setGroupingBy(type.key)">
                                     <div class="me-2 d-inline-block">
                                         <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>

@@ -16,6 +16,11 @@
                 <ng-icon class="ms-1" name="ionPeopleOutline"></ng-icon>
               </h6>
             </div>
+            <div *ngSwitchCase="GroupByTypes.Directory" class="mt-4 mb-3">
+              <h6 class="ms-2">
+                <ng-icon class="me-1" name="ionFolderOutline"></ng-icon>{{ group.name }}
+              </h6>
+            </div>
             <div *ngSwitchDefault class="mt-4 mb-3"><h6 class="ms-2">{{ group.name }}</h6></div>
           </ng-container>
         </ng-container>
