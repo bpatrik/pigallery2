@@ -154,7 +154,9 @@ if (environment.production) {
 export class MyHammerConfig extends HammerGestureConfig {
   events: string[] = ['pinch'];
   overrides = {
-    pan: {threshold: 1},
+    // all directions: Hammer's default preset only pans horizontally, so a
+    // zoomed photo could not be dragged up or down on a touch screen
+    pan: {threshold: 1, direction: 31},
     swipe: {direction: 31}, // enable swipe up
     pinch: {enable: true},
   };
