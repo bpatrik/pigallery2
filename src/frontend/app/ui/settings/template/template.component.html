@@ -102,7 +102,7 @@
                 <h5>{{ rStates?.value.__state[ck].tags?.name || ck }}</h5>
               </div>
               <div class="col mt-2">
-                @for (entry of rStates.value.__state[ck].value; track entry; let i = $index) {
+                @for (entry of rStates.value.__state[ck].value; track $index; let i = $index) {
                   <div class="row mt-2">
                     <hr/>
                     <ng-container

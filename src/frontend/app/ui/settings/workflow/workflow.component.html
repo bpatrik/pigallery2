@@ -1,6 +1,6 @@
 <div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error }}</div>
 @let sortedList = sortedSchedules();
-@for (schedule of sortedList; track schedule; let i = $index) {
+@for (schedule of sortedList; track $index; let i = $index) {
   <div>
     <div
       class="card bg-body-tertiary mt-2 mb-2  no-changed-settings {{shouldIdent(schedule,sortedList[i-1])? 'ms-4' : ''}}">
@@ -105,7 +105,7 @@
                     (ngModelChange)="onChange($event)"
                     [name]="'triggerAfter'+i"
                     [id]="'triggerAfter'+i" required>
-                    @for (sch of sortedList; track sch) {
+                    @for (sch of sortedList; track $index) {
                       @if (sch.name !== schedule.name) {
                         <option
                           [ngValue]="sch.name">{{ sch.name }}
@@ -190,7 +190,7 @@
         </div>
         @if (jobsService.getConfigTemplate(schedule.jobName)) {
           <hr/>
-          @for (configEntry of  jobsService.getConfigTemplate(schedule.jobName); track configEntry) {
+          @for (configEntry of jobsService.getConfigTemplate(schedule.jobName); track configEntry.id) {
             <div>
               @if (!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue) {
                 <div class="mb-1 row"
@@ -283,7 +283,7 @@
                               [for]="configEntry.id+'_'+i" i18n>Sort by</label>
                               <div class="col-md-10">
                                 <div class="input-group">
-                                  @for (_ of mp.sortBy; track _; let k = $index) {
+                                  @for (_ of mp.sortBy; track $index; let k = $index) {
                                     <div
                                       class="row col-12 mt-1 m-0 p-0">
                                       <div class="col p-0">
@@ -421,7 +421,7 @@
             (change)="jobTypeChanged(newSchedule)"
             [(ngModel)]="newSchedule.jobName"
             name="newJobName" required>
-            @for (availableJob of jobsService.availableJobs | async; track availableJob) {
+            @for (availableJob of jobsService.availableJobs | async; track availableJob.Name) {
               <option
                 [ngValue]="availableJob.Name">{{ backendTextService.getJobName(availableJob.Name) }}
               </option>

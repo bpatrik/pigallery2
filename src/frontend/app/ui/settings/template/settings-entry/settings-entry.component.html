@@ -55,7 +55,7 @@
               (ngModelChange)="onChange($event)"
               [disabled]="state.readonly || Disabled"
               class="form-select" [(ngModel)]="state.value">
-              @for (opt of getOptionsView(state); track opt) {
+              @for (opt of getOptionsView(state); track opt.key) {
                 <option [ngValue]="opt.key">{{opt.value}}
                 </option>
               }
@@ -85,7 +85,7 @@
                 (ngModelChange)="onChange($event)"
                 [disabled]="state.readonly || Disabled"
                 class="form-select" [(ngModel)]="state.value">
-                @for (th of AvailableThemes; track th) {
+                @for (th of AvailableThemes; track th.key) {
                   <option [ngValue]="th.key">{{th.value}}
                   </option>
                 }
@@ -258,7 +258,7 @@
                     <th scope="col"></th>
                   </tr>
                 </thead>
-                @for (layer of state.value; track layer; let i = $index) {
+                @for (layer of state.value; track $index; let i = $index) {
                   <tr>
                     <td><input type="text" class="form-control" placeholder="Street"
                       [(ngModel)]="layer.name"
@@ -293,7 +293,7 @@
           }
           @case ('MapPathGroupThemeConfig-Array') {
             <div class="container">
-              @for (val of state.value; track val; let i = $index; let isLast = $last) {
+              @for (val of state.value; track $index; let i = $index; let isLast = $last) {
                 <div class="row  mt-1 mb-1 bg-body-tertiary">
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
                     <div class="col ps-0">
@@ -355,7 +355,7 @@
           }
           @case ('MapPathGroupConfig-Array') {
             <div class="container">
-              @for (arr of state.value; track arr; let i = $index) {
+              @for (arr of state.value; track $index; let i = $index) {
                 <div class="bg-body-tertiary row mt-1 mb-1">
                   <div class="row  mt-1 mb-1 me-0 ms-0 pe-0 ps-0">
                     <div class="col ps-0">
@@ -400,7 +400,7 @@
           }
           @case ('NavigationLinkConfig-Array') {
             <div class="container">
-              @for (link of state.value; track link; let i = $index) {
+              @for (link of state.value; track $index; let i = $index) {
                 <div class="row  mt-1 mb-1 bg-body-tertiary">
                   <div class="col ps-0">
                     <select
@@ -409,7 +409,7 @@
                       (ngModelChange)="onChange($event)"
                       class="form-select"
                       [(ngModel)]="link.type">
-                      @for (opt of getOptionsView(link.__state.type); track opt) {
+                      @for (opt of getOptionsView(link.__state.type); track opt.key) {
                         <option [ngValue]="opt.key">{{opt.value}}
                         </option>
                       }
@@ -472,7 +472,7 @@
           }
           @case ('UserConfig-Array') {
             <div class="container ps-0 pe-0">
-              @for (item of state.value; track item; let i = $index) {
+              @for (item of state.value; track $index; let i = $index) {
                 <div class="row ms-0 me-0 mt-1 mb-1 bg-body-tertiary">
                   <div class="col ps-0">
                     <input type="text" class="form-control"
@@ -491,7 +491,7 @@
                       (ngModelChange)="onChange($event)"
                       class="form-select"
                       [(ngModel)]="item.role">
-                      @for (opt of getOptionsView(item.__state.role); track opt) {
+                      @for (opt of getOptionsView(item.__state.role); track opt.key) {
                         <option [ngValue]="opt.key">{{opt.value}}
                         </option>
                       }
@@ -552,7 +552,7 @@
             </app-settings-directory-search-list>
           }
           @case ('ClientSortingConfig-Array') {
-            @for (_ of state.value; track _; let i = $index) {
+            @for (_ of state.value; track $index; let i = $index) {
               <div class="row col-12 mt-1 m-0 p-0">
                 <div class="col p-0">
                   <app-settings-entry-sorting-method
@@ -590,7 +590,7 @@
             </ng-container>
           }
           @case ('EnumArray') {
-            @for (_ of state.value; track _; let i = $index) {
+            @for (_ of state.value; track $index; let i = $index) {
               <div class="row col-12 mt-1 m-0 p-0">
                 <div class="col p-0">
                   <select
@@ -600,7 +600,7 @@
                     (ngModelChange)="onChange($event)"
                     [disabled]="state.readonly || Disabled"
                     class="form-select" [(ngModel)]="state.value[i]">
-                    @for (opt of getOptionsView(state); track opt) {
+                    @for (opt of getOptionsView(state); track opt.key) {
                       <option [ngValue]="opt.key">{{opt.value}}
                       </option>
                     }

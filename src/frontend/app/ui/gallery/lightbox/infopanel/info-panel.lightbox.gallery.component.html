@@ -203,10 +203,10 @@
       </div>
       <div class="col-11">
         <div class="details-main" [title]="Rating + ' stars'">
-          @for (stars of [].constructor(Rating); track stars) {
+          @for (stars of [].constructor(Rating); track $index) {
             <ng-icon class="text-body me-1" name="ionStar"></ng-icon>
           }
-          @for (stars of [].constructor(5-Rating); track stars) {
+          @for (stars of [].constructor(5-Rating); track $index) {
             <ng-icon class="text-body-tertiary me-1"
             name="ionStarOutline"></ng-icon>
           }
@@ -254,7 +254,7 @@
                 <div class="details-main clickable" title="Click location parts to search for media from the same area"
                   i18n-title>
                   @if (searchEnabled && hasTextPositionData()) {
-                    @for (item of getPositionParts(); track item; let i = $index; let isLast = $last) {
+                    @for (item of getPositionParts(); track $index; let i = $index; let isLast = $last) {
                       <a [routerLink]="['/search', getTextSearchQuery(item, SearchQueryTypes.position)]">{{ item }}</a><!--
                       -->
                       @if (!isLast) {,}
