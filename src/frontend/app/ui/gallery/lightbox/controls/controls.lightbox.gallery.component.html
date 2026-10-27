@@ -52,6 +52,12 @@
               <small>(shift + D)</small>
             </a>
           </li>
+          <li role="menuitem" *ngIf="canShare && activePhoto && !activePhoto.gridMedia.isVideo()">
+            <a class="dropdown-item" href="#" (click)="$event.preventDefault(); share()">
+              <ng-icon class="me-2" name="ionShareSocialOutline"></ng-icon>
+              <span i18n>Share</span>
+            </a>
+          </li>
           <li role="menuitem"
               dropdown>
             <div class="dropdown-item">
@@ -264,6 +270,13 @@
            [(ngModel)]="mediaElement.VideoVolume" min="0" max="1" step="0.1"
            value="1" class="col-2 col-md-1 volume rounded">
   </div>
+
+  <!-- the phone refused to open its share sheet without a new tap -->
+  <button *ngIf="shareFile" type="button" class="btn btn-light share-button"
+          (click)="shareNow()">
+    <ng-icon class="me-2" name="ionShareSocialOutline"></ng-icon>
+    <span i18n>Share</span>
+  </button>
 
 
 </div>
