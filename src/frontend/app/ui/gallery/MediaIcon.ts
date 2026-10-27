@@ -80,9 +80,17 @@ export class MediaIcon {
     );
   }
 
+  /**
+   * @param renderWidth,renderHeight size on screen, in CSS pixels: the
+   * thumbnail sizes are in device pixels (2-3 of them per CSS pixel on phones)
+   */
   getMediaSize(renderWidth: number, renderHeight: number): number {
-    const longerEdge = Math.max(renderWidth, renderHeight);
+    const longerEdge = Math.max(renderWidth, renderHeight) * MediaIcon.pixelRatio();
     return Utils.findClosestinSorted(longerEdge, MediaIcon.sortedThumbnailSizes);
+  }
+
+  static pixelRatio(): number {
+    return (typeof window !== 'undefined' && window.devicePixelRatio) || 1;
   }
 
   /**

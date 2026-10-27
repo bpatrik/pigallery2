@@ -1,5 +1,6 @@
 import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild,} from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
+import {MediaIcon} from '../../MediaIcon';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {SupportedFormats} from '../../../../../../common/SupportedFormats';
@@ -318,7 +319,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
 
     const selectedSize = this.gridMedia.getMediaSize(window.innerWidth, window.innerHeight);
-    const minDisplaySize = Math.min(window.innerWidth, window.innerHeight);
+    // in device pixels, like the preview sizes
+    const minDisplaySize = Math.min(window.innerWidth, window.innerHeight) * MediaIcon.pixelRatio();
 
     // If the selected preview size is less than 50% of the minimum display dimension,
     // consider it inadequate for lightbox display (e.g., 240px on a 1080p screen)
