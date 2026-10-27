@@ -77,6 +77,25 @@ describe('BlogService', () => {
       expect(result[0].textShort).toBe(markdown.substring(0, 200));
     });
 
+    it('should remove date tags and comments when no date groups exist', async () => {
+      const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
+      const markdown = '<!-- comment -->\n# Intro\n\n<!-- @pg-date 2025-02-01 -->\n## Day 1\n\nContent.';
+      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+
+      const result = await (service as any).splitMarkDown(file, [], 0);
+
+      expect(result.length).toBe(1);
+      expect(result[0].text).toBe('# Intro\n\n\n## Day 1\n\nContent.');
+    });
+
+    it('should return empty array for comment-only markdown', async () => {
+      const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
+      mockNetworkService.getText.and.returnValue(Promise.resolve('<!-- only a comment -->'));
+
+      expect(await (service as any).splitMarkDown(file, [], 0)).toEqual([]);
+      expect(await (service as any).splitMarkDown(file, [Date.UTC(2025, 1, 1)], 0)).toEqual([]);
+    });
+
     it('should place undated markdown at top (date=null) when not a search result', async () => {
       const firstMedia = Date.UTC(2025, 1, 1);
       const file = createMockMDFile('test.md', firstMedia);
@@ -341,6 +360,16 @@ This is dated.`;
       expect(sections.length).toBe(1);
       expect(sections[0].date).toBeNull();
       expect(sections[0].text).toContain('Content');
+    });
+
+    it('should remove standalone comments but keep comments inside text', () => {
+      const markdown = '<!-- comment -->\n# Intro\n<!-- multi\nline -->\nUse `<!-- @pg-date <ISO_DATE> -->` tags.\n' +
+        '<!-- @pg-date 2025-02-01 -->\n<!-- another -->  \n## Day 1';
+      const sections = (service as any).parseMarkdownSections(markdown);
+
+      expect(sections.length).toBe(2);
+      expect(sections[0].text).toBe('# Intro\n\nUse `<!-- @pg-date <ISO_DATE> -->` tags.');
+      expect(sections[1].text).toBe('## Day 1');
     });
   });
 
