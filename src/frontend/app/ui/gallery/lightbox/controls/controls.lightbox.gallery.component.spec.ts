@@ -93,4 +93,77 @@ describe('ControlsLightboxComponent - cursor visibility', () => {
     expect(swipeable).toBeTruthy();
     expect(swipeable.classList.contains('hide-cursor')).toBe(false);
   });
+
+  describe('share', () => {
+    let shared: ShareData[];
+    let shareError: DOMException;
+    let canShare: boolean;
+    let saved: PropertyDescriptor[];
+
+    beforeEach(() => {
+      shared = [];
+      shareError = null;
+      canShare = true;
+      saved = ['share', 'canShare'].map((k) => Object.getOwnPropertyDescriptor(navigator, k));
+      Object.defineProperty(navigator, 'share', {
+        configurable: true,
+        value: async (data: ShareData) => {
+          if (shareError) {
+            throw shareError;
+          }
+          shared.push(data);
+        },
+      });
+      Object.defineProperty(navigator, 'canShare', {configurable: true, value: () => canShare});
+      spyOn(ControlsLightboxComponent as any, 'toJpeg').and.resolveTo(new Blob(['x'], {type: 'image/jpeg'}));
+      component.activePhoto = {
+        gridMedia: {
+          isVideo: () => false,
+          media: {name: 'IMG_1234.HEIC'},
+          getBestSizedMediaPath: () => '/pgapi/gallery/content/a/IMG_1234.HEIC/1080',
+        },
+      } as any;
+    });
+
+    afterEach(() => {
+      ['share', 'canShare'].forEach((k, i) => {
+        if (saved[i]) {
+          Object.defineProperty(navigator, k, saved[i]);
+        } else {
+          delete (navigator as any)[k];
+        }
+      });
+    });
+
+    it('should share the large preview as a JPEG', async () => {
+      await component.share();
+      expect((ControlsLightboxComponent as any).toJpeg).toHaveBeenCalledWith('/pgapi/gallery/content/a/IMG_1234.HEIC/1080');
+      expect(shared.length).toBe(1);
+      expect(shared[0].files[0].name).toBe('IMG_1234.jpg');
+      expect(shared[0].files[0].type).toBe('image/jpeg');
+      expect(component.shareFile).toBeNull();
+    });
+
+    it('should offer a share button when the phone wants a tap first', async () => {
+      shareError = new DOMException('no gesture', 'NotAllowedError');
+      await component.share();
+      expect(component.shareFile.name).toBe('IMG_1234.jpg');
+      shareError = null;
+      await component.shareNow();
+      expect(shared.length).toBe(1);
+      expect(component.shareFile).toBeNull();
+    });
+
+    it('should do nothing more when the share sheet is closed', async () => {
+      shareError = new DOMException('closed', 'AbortError');
+      await component.share();
+      expect(component.shareFile).toBeNull();
+    });
+
+    it('should not share a video', async () => {
+      (component.activePhoto.gridMedia as any).isVideo = () => true;
+      await component.share();
+      expect((ControlsLightboxComponent as any).toJpeg).not.toHaveBeenCalled();
+    });
+  });
 });

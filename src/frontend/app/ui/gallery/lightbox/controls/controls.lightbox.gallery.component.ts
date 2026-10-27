@@ -59,6 +59,12 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   public SearchQueryTypes = SearchQueryTypes;
   public faceContainerDim = {width: 0, height: 0};
   public searchEnabled: boolean;
+  // Share (menu): when the phone refuses to open its share sheet once the
+  // JPEG is ready (too late after the tap), a button offers it again.
+  public shareFile: File = null;
+  // the phone's share sheet (Web Share API): phones, some desktop browsers
+  public readonly canShare = typeof navigator !== 'undefined' && !!navigator.share;
+  private sharing = false;
   private ctx: CanvasRenderingContext2D;
   private visibilityTimer: number = null;
   private timerSub: Subscription;
@@ -340,6 +346,66 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
 
   onResize(): void {
     this.checkZoomAndDrag();
+  }
+
+  /**
+   * Share (menu): opens the phone's share sheet with the photo, as a JPEG
+   * made from the large preview the lightbox shows (already loaded, readable
+   * everywhere, HEIC included, and light). Without a share sheet (computer)
+   * the JPEG is downloaded.
+   */
+  public async share(): Promise<void> {
+    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo() || this.sharing) {
+      return;
+    }
+    const gridMedia = this.activePhoto.gridMedia;
+    this.sharing = true;
+    this.shareFile = null;
+    try {
+      const blob = await ControlsLightboxComponent.toJpeg(
+        gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight));
+      const name = gridMedia.media.name.replace(/\.[^.]*$/, '') + '.jpg';
+      const file = new File([blob], name, {type: 'image/jpeg'});
+      if (!navigator.canShare?.({files: [file]})) {
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = name;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+        return;
+      }
+      await this.shareNow(file);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this.sharing = false;
+    }
+  }
+
+  /** Opens the share sheet; if refused (no user gesture any more), shows the share button. */
+  public async shareNow(file: File = this.shareFile): Promise<void> {
+    this.shareFile = null;
+    try {
+      await navigator.share({files: [file]});
+    } catch (e) {
+      if ((e as DOMException)?.name === 'NotAllowedError') {
+        this.shareFile = file;
+      } else if ((e as DOMException)?.name !== 'AbortError') { // AbortError: the user closed the sheet
+        throw e;
+      }
+    }
+  }
+
+  private static async toJpeg(url: string): Promise<Blob> {
+    const img = new Image();
+    img.src = url;
+    await img.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    canvas.getContext('2d').drawImage(img, 0, 0);
+    return new Promise((resolve, reject) => canvas.toBlob(
+      (b) => b ? resolve(b) : reject(new Error('cannot make a JPEG of ' + url)), 'image/jpeg', 0.9));
   }
 
   public closeLightbox(): void {

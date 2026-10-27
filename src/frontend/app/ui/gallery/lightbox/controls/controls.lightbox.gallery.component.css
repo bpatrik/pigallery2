@@ -325,3 +325,11 @@ canvas {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.share-button {
+  position: absolute;
+  bottom: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+}
