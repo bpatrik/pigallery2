@@ -22,7 +22,7 @@ import {
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
   UntypedFormControl,
-  ValidationErrors,
+  type ValidationErrors,
   Validator
 } from '@angular/forms';
 import {DatePipe, NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';

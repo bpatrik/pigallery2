@@ -8,9 +8,9 @@ import {QueryService} from '../../../../model/query.service';
 import {MapService} from '../../map/map.service';
 import {
   ANDSearchQuery,
-  DistanceSearch, DateSearch,
+  type DistanceSearch, type DateSearch,
   SearchQueryTypes,
-  TextSearch,
+  type TextSearch,
   TextSearchQueryMatchTypes,
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';

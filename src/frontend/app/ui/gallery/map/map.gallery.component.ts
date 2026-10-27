@@ -1,6 +1,6 @@
 import {Component, ElementRef, Input, OnChanges, ViewChild,} from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {Dimension, IRenderable} from '../../../model/IRenderable';
+import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {MapService} from './map.service';
