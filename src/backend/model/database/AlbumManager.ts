@@ -125,7 +125,7 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
         await new Promise(setImmediate);
       } catch (e) {
         Logger.error(LOG_TAG, `Could not update album data for album '${a.name}', query: ${JSON.stringify(a.searchQuery)}`, e);
-        NotificationManager.warning(`Could not update album data`, {
+        NotificationManager.warning(`Could not update album data for album '${a.name}'. Is its search query valid?`, {
           id: a.id,
           searchQuery: a.searchQuery,
           name: a.name,

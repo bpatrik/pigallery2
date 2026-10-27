@@ -1277,7 +1277,12 @@ export class SearchManager {
       TextSearchQueryTypes.includes(query.type) &&
       (query as TextSearch).matchType !== TextSearchQueryMatchTypes.globMatch
     ) {
-      (query as TextSearch).value = (query as TextSearch).value.replace(/([*?])/g, '\\$1');
+      if (typeof (query as TextSearch).value !== 'string') {
+        throw new Error(
+          `Invalid search query: ${SearchQueryTypes[query.type]}(type: ${query.type}) query should contain 'value' property. Query got: ${JSON.stringify(query)}`
+        );
+      }
+      (query as TextSearch).value =(query as TextSearch).value.replace(/([*?])/g, '\\$1');
       if ((query as TextSearch).matchType != TextSearchQueryMatchTypes.exact_match) {
         (query as TextSearch).value = `*${(query as TextSearch).value}*`;
       }

@@ -1258,6 +1258,20 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     });
 
     describe('should search text', () => {
+      it('should reject query without value', async () => {
+        const sm = new SearchManager();
+        // e.g. legacy saved search with 'text' instead of 'value'
+        const query = {text: 'Landscape', type: SearchQueryTypes.keyword} as unknown as TextSearch;
+        let error: Error = null;
+        try {
+          await sm.search(DBTestHelper.defaultSession, query);
+        } catch (e) {
+          error = e;
+        }
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.contain('Invalid search query');
+      });
+
       it('as any', async () => {
         const sm = new SearchManager();
 
