@@ -7,6 +7,7 @@ import 'hammerjs';
 import {Subscription} from 'rxjs';
 import {NavigationService} from './model/navigation.service';
 import {ThemeService} from './model/theme.service';
+import {GalleryBackService} from './ui/gallery/gallery-back.service';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -23,9 +24,11 @@ export class AppComponent implements OnInit, OnDestroy {
     private shareService: ShareService,
     private navigation: NavigationService,
     private title: Title,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    galleryBack: GalleryBackService
   ) {
     themeService.init();
+    galleryBack.start();
   }
 
   async ngOnInit(): Promise<void> {

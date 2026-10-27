@@ -8,6 +8,7 @@ import {animate, AnimationBuilder, AnimationPlayer, style,} from '@angular/anima
 import {GalleryLightboxMediaComponent} from './media/media.lightbox.gallery.component';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Params, Router} from '@angular/router';
+import {GalleryBackService} from '../gallery-back.service';
 import {PageHelper} from '../../../model/page.helper';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
@@ -17,7 +18,7 @@ import {ControlsLightboxComponent} from './controls/controls.lightbox.gallery.co
 import {SupportedFormats} from '../../../../../common/SupportedFormats';
 import {GridMedia} from '../grid/GridMedia';
 import {PiTitleService} from '../../../model/pi-title.service';
-import {NgFor, NgIf} from '@angular/common';
+import {Location, NgFor, NgIf} from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
@@ -93,6 +94,8 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     private piTitleService: PiTitleService,
     private wakeLockService: WakeLockService,
     private lightboxService: LightboxService,
+    private location: Location,
+    private galleryBack: GalleryBackService,
   ) {
   }
 
@@ -283,6 +286,12 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   public hide(): void {
+    // The folder is just before the photo in the history: back to it, so the
+    // back key does not open the photo again.
+    if (this.galleryBack.photoOverDir()) {
+      this.location.back();
+      return;
+    }
     this.router
       .navigate([], {queryParams: this.queryService.getParams()})
       .then(() => {
