@@ -3,7 +3,7 @@
     <div class="blog h-100">
       <div class="card h-100">
         <div class="card-body" style="min-height: 77px" [style.height]="!open ? '77px':''">
-          @for (md of markdowns; track md; let last = $last; let first = $first) {
+          @for (md of markdowns; track $index; let last = $last; let first = $first) {
             @if (open) {
               @if (markdowns.length > 1) {
                 <div class="row">
