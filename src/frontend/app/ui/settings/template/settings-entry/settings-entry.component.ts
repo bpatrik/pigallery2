@@ -1,5 +1,5 @@
 import {Component, forwardRef, Input, OnChanges, TemplateRef} from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
 import {SearchQueryParserService} from '../../../gallery/search/search-query-parser.service';
@@ -20,7 +20,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
-import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { GallerySearchFieldComponent } from '../../../gallery/search/search-field/search-field.gallery.component';
 import { NgIconComponent } from '@ng-icons/core';
 import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-method.settings-entry.component';
@@ -66,20 +66,16 @@ interface IState {
         },
     ],
     imports: [
-        NgIf,
-        NgSwitch,
-        NgSwitchCase,
-        GallerySearchFieldComponent,
-        FormsModule,
-        NgFor,
-        NgIconComponent,
-        SortingMethodSettingsEntryComponent,
-        WorkflowComponent,
-        NgClass,
-        PopoverDirective,
-        SafeHtmlPipe,
-        DirectorySearchListSettingsComponent,
-    ]
+    GallerySearchFieldComponent,
+    FormsModule,
+    NgIconComponent,
+    SortingMethodSettingsEntryComponent,
+    WorkflowComponent,
+    NgClass,
+    PopoverDirective,
+    SafeHtmlPipe,
+    DirectorySearchListSettingsComponent
+]
 })
 export class SettingsEntryComponent
     implements ControlValueAccessor, Validator, OnChanges {

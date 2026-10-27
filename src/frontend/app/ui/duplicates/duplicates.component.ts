@@ -10,7 +10,7 @@ import {PageHelper} from '../../model/page.helper';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DuplicatesPhotoComponent } from './photo/photo.duplicates.component';
 import { FileSizePipe } from '../../pipes/FileSizePipe';
@@ -25,14 +25,12 @@ interface GroupedDuplicate {
     templateUrl: './duplicates.component.html',
     styleUrls: ['./duplicates.component.css'],
     imports: [
-        FrameComponent,
-        NgIf,
-        NgFor,
-        RouterLink,
-        DuplicatesPhotoComponent,
-        DatePipe,
-        FileSizePipe,
-    ]
+    FrameComponent,
+    RouterLink,
+    DuplicatesPhotoComponent,
+    DatePipe,
+    FileSizePipe
+]
 })
 export class DuplicateComponent implements OnDestroy, OnInit {
   directoryGroups: GroupedDuplicate[] = null;

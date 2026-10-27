@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {NgFor, NgIf, NgStyle} from '@angular/common';
+import { NgStyle } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';
 
@@ -8,11 +8,9 @@ import {UploaderService} from './uploader.service';
   templateUrl: './uploader.gallery.component.html',
   styleUrls: ['./uploader.gallery.component.css'],
   imports: [
-    NgIf,
-    NgFor,
     NgIconComponent,
-    NgStyle,
-  ]
+    NgStyle
+]
 })
 export class UploaderComponent {
   public readonly Date = Date;

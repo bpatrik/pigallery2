@@ -1,17 +1,20 @@
 <a class="button btn btn-secondary"
-   [routerLink]="['/gallery', getDirectoryPath()]"
-   [queryParams]="queryService.getParams()"
-   style="display: inline-block;">
+  [routerLink]="['/gallery', getDirectoryPath()]"
+  [queryParams]="queryService.getParams()"
+  style="display: inline-block;">
 
 
   <div class="photo-container rounded overflow-hidden"
-       [style.width.px]="size"
-       [style.height.px]="size">
-    <div class="photo"
-         *ngIf="thumbnail && thumbnail.Available"
-         [style.background-image]="getSanitizedThUrl()"></div>
+    [style.width.px]="size"
+    [style.height.px]="size">
+    @if (thumbnail && thumbnail.Available) {
+      <div class="photo"
+      [style.background-image]="getSanitizedThUrl()"></div>
+    }
 
-    <app-icon *ngIf="!thumbnail || !thumbnail.Available"  class="no-image"></app-icon>
+    @if (!thumbnail || !thumbnail.Available) {
+      <app-icon  class="no-image"></app-icon>
+    }
   </div>
   <!--Info box -->
   <div class="info rounded-bottom">

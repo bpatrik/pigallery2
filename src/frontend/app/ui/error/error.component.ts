@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {IconComponent} from '../../icon.component';
-import {NgIf} from '@angular/common';
+
 import {Router} from '@angular/router';
 import {NavigationService} from '../../model/navigation.service';
 
@@ -10,9 +10,8 @@ import {NavigationService} from '../../model/navigation.service';
   templateUrl: './error.component.html',
   styleUrls: ['./error.component.css'],
   imports: [
-    NgIf,
     IconComponent
-  ]
+]
 })
 export class ErrorComponent {
   title: string;

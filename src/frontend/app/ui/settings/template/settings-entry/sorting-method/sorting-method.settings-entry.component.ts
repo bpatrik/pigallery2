@@ -1,11 +1,11 @@
 import {Component, forwardRef, Input, OnInit} from '@angular/core';
-import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
+import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {SortByDirectionalTypes, SortingMethod} from '../../../../../../../common/entities/SortingMethods';
 import {enumToTranslatedArray} from '../../../../EnumTranslations';
 import {AutoCompleteService} from '../../../../gallery/search/autocomplete.service';
 import {Utils} from '../../../../../../../common/Utils';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
-import {NgFor, NgIf} from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../../../utils/sorting-method-icon/sorting-method-icon.component';
 import {StringifySortingMethod} from '../../../../../pipes/StringifySortingMethod';
@@ -31,13 +31,11 @@ import {NotificationService} from '../../../../../model/notification.service';
   imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,
-    NgIf,
     NgIconComponent,
     SortingMethodIconComponent,
     BsDropdownMenuDirective,
-    NgFor,
-    StringifySortingMethod,
-  ]
+    StringifySortingMethod
+]
 })
 export class SortingMethodSettingsEntryComponent
   implements ControlValueAccessor, Validator, OnInit {

@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild,} from '@angular/core';
-import {Dimension, IRenderable} from '../../../../model/IRenderable';
+import {type Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
 import {Thumbnail, ThumbnailManagerService,} from '../../thumbnailManager.service';
@@ -10,12 +10,12 @@ import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../..
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {ExtensionService} from '../../../../model/extension.service';
 import {MediaButtonModalService} from './media-button-modal/media-button-modal.service';
-import {NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+
 import {GalleryPhotoLoadingComponent} from './loading/loading.photo.grid.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
-import {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
+import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
@@ -28,16 +28,12 @@ export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaBut
   templateUrl: './photo.grid.gallery.component.html',
   styleUrls: ['./photo.grid.gallery.component.css'],
   imports: [
-    NgIf,
     GalleryPhotoLoadingComponent,
     NgIconComponent,
     RouterLink,
-    NgFor,
-    NgSwitch,
-    NgSwitchCase,
     DurationPipe,
-    SafeHtmlPipe,
-  ]
+    SafeHtmlPipe
+]
 })
 export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   @Input() gridMedia: GridMedia;

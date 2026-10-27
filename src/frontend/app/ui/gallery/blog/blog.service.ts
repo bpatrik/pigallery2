@@ -108,11 +108,15 @@ export class BlogService {
 
     // No date groups exist - return entire markdown with no date
     if (dates.length === 0) {
+      const text = this.removeComments(markdown);
+      if (!text) {
+        return [];
+      }
       return [{
-        text: markdown,
+        text,
         file: file,
         date: null,
-        textShort: markdown.substring(0, 200)
+        textShort: text.substring(0, 200)
       }];
     }
 
@@ -120,6 +124,10 @@ export class BlogService {
 
     // Parse markdown for date-tagged sections
     const sections = this.parseMarkdownSections(markdown);
+
+    if (sections.length === 0) {
+      return [];
+    }
 
     // No date tags found - treat entire markdown as one section
     if (sections.length === 1 && sections[0].date === null) {
@@ -151,13 +159,14 @@ export class BlogService {
 
     if (matches.length === 0) {
       // No date tags - return entire markdown as one undated section
-      return [{date: null, text: markdown.trim()}];
+      const text = this.removeComments(markdown);
+      return text ? [{date: null, text}] : [];
     }
 
     const sections: Array<{ date: Date | null; text: string }> = [];
 
     // Extract the section before the first date tag (if any)
-    const preFirstTagText = markdown.substring(0, matches[0].index).trim();
+    const preFirstTagText = this.removeComments(markdown.substring(0, matches[0].index));
     if (preFirstTagText) {
       sections.push({date: null, text: preFirstTagText});
     }
@@ -171,7 +180,7 @@ export class BlogService {
       // Get text from after the date tag to next match (or end of markdown)
       const startIdx = match.index! + match[0].length; // Start after the date tag
       const endIdx = i + 1 < matches.length ? matches[i + 1].index! : markdown.length;
-      const sectionText = markdown.substring(startIdx, endIdx).trim();
+      const sectionText = this.removeComments(markdown.substring(startIdx, endIdx));
 
       // Only add section if it has actual content (not just whitespace)
       if (sectionText) {
@@ -180,6 +189,18 @@ export class BlogService {
     }
 
     return sections;
+  }
+
+  /**
+   * Removes HTML comments that stand on their own line(s), like the @pg-date tags.
+   * Angular's HTML sanitizer would strip them anyway (and warn about it).
+   * Comments inside text (e.g. in inline code) are kept.
+   *
+   * @param markdown The markdown text
+   * @private
+   */
+  private removeComments(markdown: string): string {
+    return markdown.replace(/^[ \t]*<!--(?:(?!-->)[\s\S])*-->[ \t]*$/gm, '').trim();
   }
 
   /**

@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild,} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, type SimpleChanges, ViewChild,} from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -32,12 +32,13 @@ import {
   tileLayer,
   TileLayer
 } from 'leaflet';
+import 'leaflet.markercluster';
 import {ThemeService} from '../../../../model/theme.service';
 import {Subscription} from 'rxjs';
 import {MarkerFactory} from '../MarkerFactory';
 import {ionImageOutline, ionSpeedometerOutline, ionTimeOutline, ionTrailSignOutline, ionWarningOutline} from '@ng-icons/ionicons';
 import {LeafletControlLayersConfig, LeafletModule} from '@bluehalo/ngx-leaflet';
-import {NgIf} from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {ActivatedRoute, Params, Router} from '@angular/router';
@@ -51,9 +52,8 @@ import {QueryService} from '../../../../model/query.service';
   templateUrl: './lightbox.map.gallery.component.html',
   imports: [
     LeafletModule,
-    NgIf,
-    NgIconComponent,
-  ]
+    NgIconComponent
+]
 })
 export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   @Input() photos: PhotoDTO[];

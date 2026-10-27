@@ -5,13 +5,13 @@ import { NotificationService } from '../../../model/notification.service';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import {SettingsService} from '../settings.service';
 import { NgIconComponent } from '@ng-icons/core';
-import { NgIf, NgFor } from '@angular/common';
+
 
 @Component({
     selector: 'app-extension-installer',
     templateUrl: './extension-installer.component.html',
     styleUrls: ['./extension-installer.component.css'],
-    imports: [NgIconComponent, ModalDirective, NgIf, NgFor]
+    imports: [NgIconComponent, ModalDirective]
 })
 export class ExtensionInstallerComponent {
   @ViewChild('extensionsModal', { static: false }) public extensionsModal: ModalDirective;
