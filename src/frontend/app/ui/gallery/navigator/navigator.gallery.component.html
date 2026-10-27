@@ -3,7 +3,7 @@
     <div class="col-auto">
       @if (isDirectory) {
         <ol id="directory-path" class="mb-0 mt-1 breadcrumb">
-          @for (path of routes | async; track path) {
+          @for (path of routes | async; track $index) {
             <li class="breadcrumb-item">
               @if (path.route) {
                 <a [routerLink]="['/gallery',path.route]"
