@@ -6,7 +6,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
 import {ActivatedRoute, Params} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {SearchQueryParserService} from '../search/search-query-parser.service';
@@ -93,7 +93,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
                 type: SearchQueryTypes.directory,
                 matchType: TextSearchQueryMatchTypes.globMatch,
                 value: directory + '/*',
-              } as TextSearch
+              } as DirectorySearch
               : {
                 type: SearchQueryTypes.any_text,
                 value: '',
