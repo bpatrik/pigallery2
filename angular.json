@@ -118,9 +118,7 @@
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
               "src/frontend/styles.css"
             ],
-            "scripts": [
-              "node_modules/marked/marked.min.js"
-            ],
+            "scripts": [],
             "i18nMissingTranslation": "warning",
             "customWebpackConfig": {
               "path": "./angular.webpack.js",

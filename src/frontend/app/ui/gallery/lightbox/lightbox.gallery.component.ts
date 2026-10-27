@@ -220,7 +220,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     this.updatePhotoFrameDim();
     if (this.activePhoto) {

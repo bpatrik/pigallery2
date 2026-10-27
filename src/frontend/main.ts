@@ -1,4 +1,4 @@
-import {enableProdMode, importProvidersFrom, Injectable} from '@angular/core';
+import {enableProdMode, importProvidersFrom, Injectable, provideZoneChangeDetection} from '@angular/core';
 import {environment} from './environments/environment';
 import {HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
 import {ErrorInterceptor} from './app/model/network/helper/error.interceptor';
@@ -184,6 +184,7 @@ Marker.prototype.options.icon = MarkerFactory.defIcon;
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideZoneChangeDetection(),
     importProvidersFrom(BrowserModule, HammerModule, FormsModule, AppRoutingModule, NgIconsModule.withIcons({
         ionDownloadOutline, ionFunnelOutline,
         ionGitBranchOutline, ionArrowDownOutline, ionArrowUpOutline,
@@ -209,9 +210,9 @@ bootstrapApplication(AppComponent, {
         ionAppsOutline, ionOpenOutline, ionRefresh, ionExtensionPuzzleOutline, ionList, ionPencil, ionReload,
         ionCaretForward, ionCaretDown,
         ionFingerPrint, ionCloudUploadOutline
-      }), ClipboardModule, TooltipModule.forRoot(), ToastrModule.forRoot(),
-      ModalModule.forRoot(), CollapseModule.forRoot(), PopoverModule.forRoot(),
-      BsDropdownModule.forRoot(), BsDatepickerModule.forRoot(), TimepickerModule.forRoot(),
+      }), ClipboardModule, TooltipModule, ToastrModule.forRoot(),
+      ModalModule, CollapseModule, PopoverModule,
+      BsDropdownModule, BsDatepickerModule, TimepickerModule,
       LoadingBarModule, LeafletModule, LeafletMarkerClusterModule,
       MarkdownModule.forRoot({loader: HttpClient})),
     {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},

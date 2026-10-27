@@ -184,22 +184,23 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
+  // pinch events come from HammerJS, Angular only types them as Event
   @HostListener('pinch', ['$event'])
-  pinch($event: { scale: number }): void {
+  pinch($event: Event): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
     this.showControls();
-    this.Zoom = this.prevZoom * $event.scale;
+    this.Zoom = this.prevZoom * ($event as Event & { scale: number }).scale;
   }
 
   @HostListener('pinchend', ['$event'])
-  pinchend($event: { scale: number }): void {
+  pinchend($event: Event): void {
     if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
       return;
     }
     this.showControls();
-    this.Zoom = this.prevZoom * $event.scale;
+    this.Zoom = this.prevZoom * ($event as Event & { scale: number }).scale;
     this.prevZoom = this.zoom;
   }
 
