@@ -5,7 +5,7 @@
 
 <!-- Modal -->
 <div bsModal #extensionsModal="bs-modal" class="modal fade" id="extensionsModal" tabindex="-1" role="dialog"
-     aria-labelledby="extensionsModalLabel">
+  aria-labelledby="extensionsModalLabel">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -14,63 +14,80 @@
         </button>
       </div>
       <div class="modal-body">
-        <div *ngIf="loading" class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="visually-hidden" i18n>Loading...</span>
+        @if (loading) {
+          <div class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden" i18n>Loading...</span>
+            </div>
           </div>
-        </div>
+        }
 
-        <div *ngIf="error" class="alert alert-danger" role="alert">
-          {{ error }}
-          <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="loadExtensions()" i18n>Retry</button>
-        </div>
+        @if (error) {
+          <div class="alert alert-danger" role="alert">
+            {{ error }}
+            <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="loadExtensions()" i18n>Retry</button>
+          </div>
+        }
 
-        <div *ngIf="!loading && !error">
-          <div *ngIf="extensions.length === 0" class="alert alert-info" i18n>
+        @if (!loading && !error) {
+          <div>
+            @if (extensions.length === 0) {
+              <div class="alert alert-info" i18n>
             No extensions available.
           </div>
-
-          <table *ngIf="extensions.length > 0" class="table table-striped">
-            <thead>
-              <tr>
-                <th i18n>Name</th>
-                <th i18n>Description</th>
-                <th i18n>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let extension of extensions">
-                <td>
-                  {{ extension.name }}
-                  <a *ngIf="extension.url" [href]="extension.url" target="_blank" class="ms-2">
-                    <ng-icon name="ionOpenOutline" class="me-1"></ng-icon>
-                  </a>
-                </td>
-                <td>{{ extension.readme || 'No description available' }}</td>
-                <td>
-                  <button
-                    *ngIf="!extension.installed && extension.zipUrl"
-                    class="btn btn-sm btn-primary"
-                    (click)="installExtension(extension)"
-                    [disabled]="loading"
-                    i18n>
+            }
+            @if (extensions.length > 0) {
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th i18n>Name</th>
+                    <th i18n>Description</th>
+                    <th i18n>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (extension of extensions; track extension) {
+                    <tr>
+                      <td>
+                        {{ extension.name }}
+                        @if (extension.url) {
+                          <a [href]="extension.url" target="_blank" class="ms-2">
+                            <ng-icon name="ionOpenOutline" class="me-1"></ng-icon>
+                          </a>
+                        }
+                      </td>
+                      <td>{{ extension.readme || 'No description available' }}</td>
+                      <td>
+                        @if (!extension.installed && extension.zipUrl) {
+                          <button
+                            class="btn btn-sm btn-primary"
+                            (click)="installExtension(extension)"
+                            [disabled]="loading"
+                            i18n>
                     Install
                   </button>
-                  <a
-                    *ngIf="!extension.installed && !extension.zipUrl && extension.url"
-                    class="btn btn-sm btn-outline-primary"
-                    [href]="extension.url"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    i18n>
+                        }
+                        @if (!extension.installed && !extension.zipUrl && extension.url) {
+                          <a
+                            class="btn btn-sm btn-outline-primary"
+                            [href]="extension.url"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            i18n>
                     Manual installation
                   </a>
-                  <span *ngIf="extension.installed" class="badge bg-success" i18n>Installed</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                        }
+                        @if (extension.installed) {
+                          <span class="badge bg-success" i18n>Installed</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </div>
+        }
       </div>
       <div class="modal-footer">
         <div class="d-flex justify-content-between w-100">

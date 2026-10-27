@@ -7,7 +7,7 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {FrameComponent} from '../frame/frame.component';
-import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {AlbumComponent} from './album/album.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {FormsModule} from '@angular/forms';
@@ -23,15 +23,13 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
   styleUrls: ['./albums.component.css'],
   imports: [
     FrameComponent,
-    NgFor,
     AlbumComponent,
-    NgIf,
     NgIconComponent,
     FormsModule,
     GallerySearchQueryBuilderComponent,
     SavedSearchPopupComponent,
-    AsyncPipe,
-  ]
+    AsyncPipe
+]
 })
 export class AlbumsComponent implements OnInit {
   @ViewChild('container', {static: true}) container: ElementRef;

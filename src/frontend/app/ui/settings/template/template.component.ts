@@ -18,7 +18,7 @@ import {ErrorDTO} from '../../../../../common/entities/Error';
 import {ISettingsComponent} from './ISettingsComponent';
 import {CustomSettingsEntries} from './CustomSettingsEntries';
 import {NgIconComponent} from '@ng-icons/core';
-import {AsyncPipe, NgFor, NgIf, NgTemplateOutlet} from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import {SettingsEntryComponent} from './settings-entry/settings-entry.component';
 import {JobButtonComponent} from '../workflow/button/job-button.settings.component';
 import {JobProgressComponent} from '../workflow/progress/job-progress.settings.component';
@@ -61,7 +61,7 @@ export interface RecursiveState extends ConfigState {
   selector: 'app-settings-template',
   templateUrl: './template.component.html',
   styleUrls: ['./template.component.css'],
-  imports: [FormsModule, NgIconComponent, NgIf, NgTemplateOutlet, NgFor, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
+  imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {
 

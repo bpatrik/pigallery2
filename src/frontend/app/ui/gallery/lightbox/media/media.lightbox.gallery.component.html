@@ -1,57 +1,65 @@
 <div class="imgContainer" #imgContainer>
-  <img *ngIf="showThumbnail()"
-       [style.width.%]="imageSize.width"
-       [style.height.%]="imageSize.height"
-       [style.transform]="ImageTransform"
-       [src]="thumbnailSrc"/>
+  @if (showThumbnail()) {
+    <img
+      [style.width.%]="imageSize.width"
+      [style.height.%]="imageSize.height"
+      [style.transform]="ImageTransform"
+      [src]="thumbnailSrc"/>
+  }
 
-  <img *ngIf="gridMedia !== null && gridMedia.isPhoto() && photo.src"
-       [style.width.%]="imageSize.width"
-       [style.height.%]="imageSize.height"
-       [style.transform]="ImageTransform"
-       [src]="photo.src"
-       [alt]="gridMedia.media.name"
-       (load)="onImageLoad()"
-       (error)="onImageError()"
-       #image/>
+  @if (gridMedia !== null && gridMedia.isPhoto() && photo.src) {
+    <img
+      [style.width.%]="imageSize.width"
+      [style.height.%]="imageSize.height"
+      [style.transform]="ImageTransform"
+      [src]="photo.src"
+      [alt]="gridMedia.media.name"
+      (load)="onImageLoad()"
+      (error)="onImageError()"
+      #image/>
+  }
 
-  <div *ngIf="gridMedia !== null && gridMedia.isLivePhoto() && loadMedia && liveVideoSrc"
-       class="live-photo-container"
-       [class.playing]="liveVideoPlaying">
-    <video [style.width.%]="imageSize.width"
-           [style.height.%]="imageSize.height"
-           [style.transform]="ImageTransform"
-           [loop]="true"
-           [muted]="true"
-           playsinline
-           (error)="onImageError()"
-           #liveVideo>
-      <source [src]="liveVideoSrc" (error)="onSourceError()">
-    </video>
-    <div class="live-photo-badge"
-         [class.active]="liveVideoPlaying"
-         (mouseenter)="startLiveVideo()"
-         (mouseleave)="stopLiveVideo()"
-         (touchstart)="startLiveVideoTouch()"
-         (touchend)="stopLiveVideo()"
-         (touchcancel)="stopLiveVideo()"
-         (click)="toggleLiveVideo()">
-      LIVE
+  @if (gridMedia !== null && gridMedia.isLivePhoto() && loadMedia && liveVideoSrc) {
+    <div
+      class="live-photo-container"
+      [class.playing]="liveVideoPlaying">
+      <video [style.width.%]="imageSize.width"
+        [style.height.%]="imageSize.height"
+        [style.transform]="ImageTransform"
+        [loop]="true"
+        [muted]="true"
+        playsinline
+        (error)="onImageError()"
+        #liveVideo>
+        <source [src]="liveVideoSrc" (error)="onSourceError()">
+      </video>
+      <div class="live-photo-badge"
+        [class.active]="liveVideoPlaying"
+        (mouseenter)="startLiveVideo()"
+        (mouseleave)="stopLiveVideo()"
+        (touchstart)="startLiveVideoTouch()"
+        (touchend)="stopLiveVideo()"
+        (touchcancel)="stopLiveVideo()"
+        (click)="toggleLiveVideo()">
+        LIVE
+      </div>
     </div>
-  </div>
+  }
 
-  <video *ngIf="gridMedia !== null && gridMedia.isVideo() && loadMedia"
-         [style.width.%]="imageSize.width"
-         [style.height.%]="imageSize.height"
-         (loadstart)="onImageLoad()"
-         [loop]="lightboxService.loopVideos"
-         autoplay
-         (error)="onImageError()"
-         (timeupdate)="onVideoProgress()"
-         #video>
-    <source [src]="gridMedia.getBestFitVideoPath()" (error)="onSourceError()">
-    Something went wrong.
-  </video>
+  @if (gridMedia !== null && gridMedia.isVideo() && loadMedia) {
+    <video
+      [style.width.%]="imageSize.width"
+      [style.height.%]="imageSize.height"
+      (loadstart)="onImageLoad()"
+      [loop]="lightboxService.loopVideos"
+      autoplay
+      (error)="onImageError()"
+      (timeupdate)="onVideoProgress()"
+      #video>
+      <source [src]="gridMedia.getBestFitVideoPath()" (error)="onSourceError()">
+      Something went wrong.
+    </video>
+  }
 
 
 </div>

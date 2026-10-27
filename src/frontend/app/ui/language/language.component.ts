@@ -3,7 +3,7 @@ import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
 import { BsDropdownDirective, BsDropdownToggleDirective, BsDropdownMenuDirective } from 'ngx-bootstrap/dropdown';
-import { NgIf, NgFor } from '@angular/common';
+
 import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
@@ -11,13 +11,11 @@ import { NgIconComponent } from '@ng-icons/core';
     templateUrl: './language.component.html',
     styleUrls: ['./language.component.css'],
     imports: [
-        BsDropdownDirective,
-        BsDropdownToggleDirective,
-        NgIf,
-        NgIconComponent,
-        BsDropdownMenuDirective,
-        NgFor,
-    ]
+    BsDropdownDirective,
+    BsDropdownToggleDirective,
+    NgIconComponent,
+    BsDropdownMenuDirective
+]
 })
 export class LanguageComponent {
   languages: string[] = [];

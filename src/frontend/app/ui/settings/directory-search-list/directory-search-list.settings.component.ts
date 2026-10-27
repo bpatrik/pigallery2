@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
-import {NgFor} from '@angular/common';
+
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
 import {DirectorySearch, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
@@ -13,7 +13,7 @@ import {TextSearchMatchingTypes} from '../../gallery/search/query-enrty/TextSear
 @Component({
   selector: 'app-settings-directory-search-list',
   templateUrl: './directory-search-list.settings.component.html',
-  imports: [NgFor, FormsModule, NgIconComponent, StringifySearchType]
+  imports: [FormsModule, NgIconComponent, StringifySearchType]
 })
 export class DirectorySearchListSettingsComponent {
   @Input() list: DirectorySearch[] = [];

@@ -25,7 +25,7 @@ import {
   type ValidationErrors,
   Validator
 } from '@angular/forms';
-import {DatePipe, NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
 import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
@@ -47,16 +47,12 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
     },
   ],
   imports: [
-    NgIf,
     FormsModule,
-    NgFor,
     NgClass,
     NgIconComponent,
-    NgSwitch,
-    NgSwitchCase,
     DatePipe,
-    StringifySearchType,
-  ]
+    StringifySearchType
+]
 })
 export class GallerySearchQueryEntryComponent
   implements ControlValueAccessor, Validator {

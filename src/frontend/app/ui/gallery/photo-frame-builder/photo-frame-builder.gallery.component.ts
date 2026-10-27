@@ -10,7 +10,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { ClipboardModule } from 'ngx-clipboard';
-import { NgFor, NgIf } from '@angular/common';
+
 import { StringifyEnum } from '../../../pipes/StringifyEnum';
 import { LightBoxTitleTexts } from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
@@ -21,13 +21,11 @@ import {Config} from '../../../../../common/config/public/Config';
     templateUrl: './photo-frame-builder.gallery.component.html',
     styleUrls: ['./photo-frame-builder.gallery.component.css'],
     imports: [
-        NgIconComponent,
-        FormsModule,
-        ClipboardModule,
-        NgFor,
-        NgIf,
-        StringifyEnum,
-    ]
+    NgIconComponent,
+    FormsModule,
+    ClipboardModule,
+    StringifyEnum
+]
   })
   export class PhotoFrameBuilderGalleryComponent implements OnInit, OnDestroy {
     enabled = true;
@@ -143,9 +141,6 @@ import {Config} from '../../../../../common/config/public/Config';
 
   onOptionsChange(): void {
     this.buildUrl();
-  }
-  trackByIndex(index: number): number {
-    return index;
   }
 
   toggleSettings(): void {

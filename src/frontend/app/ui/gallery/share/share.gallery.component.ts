@@ -12,7 +12,7 @@ import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import { ClipboardService, ClipboardModule } from 'ngx-clipboard';
 import {ContentLoaderService} from '../contentLoader.service';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
@@ -23,14 +23,12 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     templateUrl: './share.gallery.component.html',
     styleUrls: ['./share.gallery.component.css'],
     imports: [
-        NgIf,
-        NgIconComponent,
-        FormsModule,
-        ClipboardModule,
-        NgFor,
-        DatePipe,
-        StringifySearchQuery,
-    ]
+    NgIconComponent,
+    FormsModule,
+    ClipboardModule,
+    DatePipe,
+    StringifySearchQuery
+]
 })
 export class GalleryShareComponent implements OnInit, OnDestroy {
   enabled = true;

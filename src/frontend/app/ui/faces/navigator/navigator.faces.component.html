@@ -1,63 +1,64 @@
 <div class="container-fluid pt-1 pb-1 pe-0 ps-0 bg-body-secondary">
-    <nav class="d-md-flex row" aria-label="breadcrumb">
-        <div class="col-auto">
-            <ol class="mb-0 mt-1 breadcrumb">
-                <li class="breadcrumb-item">
-                    <ng-container i18n>Faces</ng-container>
-                </li>
-            </ol>
-        </div>
-        <div class="ms-auto text-end col-auto">
-            <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
-                 [insideClick]="true"
-                 title="Sort" i18n-title>
-                <button id="button-alignment" dropdownToggle type="button"
-                        class="btn dropdown-toggle  btn-outline-secondary btn-navigator"
-                        [class.btn-secondary]="!isDefaultSorting()"
-                        [class.btn-outline-secondary]="isDefaultSorting()"
-                        aria-controls="sorting-dropdown">
-                    <ng-icon [name]="!facesService.sorting.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
-                    <app-sorting-method-icon [method]="facesService.sorting.value.method"></app-sorting-method-icon>
-                </button>
-                <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
-                     role="menu" aria-labelledby="button-alignment">
-                    <div class="row flex-nowrap">
-                        <div class="col p-1">
-                            <h6 class="ps-2"><ng-container i18n>Sorting</ng-container></h6>
-                            <div class="row">
-                                <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                                     [class.active]="facesService.sorting.value.method == type.key"
-                                     *ngFor="let type of sortingByTypes"
-                                     (click)="setSortingBy(type.key)">
-                                    <div class="me-2 d-inline-block">
-                                        <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
-                                    </div>
-                                    <div class="d-inline-block">{{type.key | stringifySorting}}</div>
-                                </div>
-
-                                <hr>
-                                <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                                     [class.active]="facesService.sorting.value.ascending == true"
-                                     (click)="setSortingAscending(true)">
-                                    <div class="me-2 d-inline-block">
-                                        <ng-icon name="ionArrowUpOutline"></ng-icon>
-                                    </div>
-                                    <div class="d-inline-block" i18n>ascending</div>
-                                </div>
-
-                                <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                                     [class.active]="facesService.sorting.value.ascending == false"
-                                     (click)="setSortingAscending(false)">
-                                    <div class="me-2 d-inline-block">
-                                        <ng-icon name="ionArrowDownOutline"></ng-icon>
-                                    </div>
-                                    <div class="d-inline-block" i18n>descending</div>
-                                </div>
-                            </div>
-                        </div>
+  <nav class="d-md-flex row" aria-label="breadcrumb">
+    <div class="col-auto">
+      <ol class="mb-0 mt-1 breadcrumb">
+        <li class="breadcrumb-item">
+          <ng-container i18n>Faces</ng-container>
+        </li>
+      </ol>
+    </div>
+    <div class="ms-auto text-end col-auto">
+      <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
+        [insideClick]="true"
+        title="Sort" i18n-title>
+        <button id="button-alignment" dropdownToggle type="button"
+          class="btn dropdown-toggle  btn-outline-secondary btn-navigator"
+          [class.btn-secondary]="!isDefaultSorting()"
+          [class.btn-outline-secondary]="isDefaultSorting()"
+          aria-controls="sorting-dropdown">
+          <ng-icon [name]="!facesService.sorting.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
+          <app-sorting-method-icon [method]="facesService.sorting.value.method"></app-sorting-method-icon>
+        </button>
+        <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+          role="menu" aria-labelledby="button-alignment">
+          <div class="row flex-nowrap">
+            <div class="col p-1">
+              <h6 class="ps-2"><ng-container i18n>Sorting</ng-container></h6>
+              <div class="row">
+                @for (type of sortingByTypes; track type) {
+                  <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
+                    [class.active]="facesService.sorting.value.method == type.key"
+                    (click)="setSortingBy(type.key)">
+                    <div class="me-2 d-inline-block">
+                      <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
                     </div>
+                    <div class="d-inline-block">{{type.key | stringifySorting}}</div>
+                  </div>
+                }
+
+                <hr>
+                  <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
+                    [class.active]="facesService.sorting.value.ascending == true"
+                    (click)="setSortingAscending(true)">
+                    <div class="me-2 d-inline-block">
+                      <ng-icon name="ionArrowUpOutline"></ng-icon>
+                    </div>
+                    <div class="d-inline-block" i18n>ascending</div>
+                  </div>
+
+                  <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
+                    [class.active]="facesService.sorting.value.ascending == false"
+                    (click)="setSortingAscending(false)">
+                    <div class="me-2 d-inline-block">
+                      <ng-icon name="ionArrowDownOutline"></ng-icon>
+                    </div>
+                    <div class="d-inline-block" i18n>descending</div>
+                  </div>
                 </div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </nav>
-</div>
+  </div>

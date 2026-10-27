@@ -18,7 +18,7 @@ import {FilterService} from '../filter/filter.service';
 import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 import {GalleryNavigatorService} from './navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../utils/sorting-method-icon/sorting-method-icon.component';
 import {GridSizeIconComponent} from '../../utils/grid-size-icon/grid-size-icon.component';
@@ -33,8 +33,6 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
   styleUrls: ['./navigator.gallery.component.css'],
   templateUrl: './navigator.gallery.component.html',
   imports: [
-    NgIf,
-    NgFor,
     RouterLink,
     NgIconComponent,
     BsDropdownDirective,
@@ -46,8 +44,8 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
     AsyncPipe,
     StringifySortingMethod,
     StringifySearchQuery,
-    StringifyGridSize,
-  ]
+    StringifyGridSize
+]
 })
 export class GalleryNavigatorComponent {
   public readonly sortingByTypes: { key: number; value: string }[] = [];
