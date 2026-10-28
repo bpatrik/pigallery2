@@ -56,6 +56,17 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; run the server: `npm start`.
 
+### Running the app
+
+To try a change in the real app, run the server against a throwaway config and DB (like `start-e2e-server` in `package.json`)
+so the maintainer's own `config.json` and DB are not touched:
+
+- `node ./src/backend/index --config-path=<tmp>/config.json --Database-dbFolder=<tmp> --Server-port=8080`
+- An empty DB gets the default user `admin` / `admin`.
+- For a different admin, enforce one on the CLI:
+  `'--Users-enforcedUsers=[{"name":"tester","role":"Admin","password":"tester"}]'`.
+- `npm run run-dev` builds the frontend continuously (English only, into `dist/en`), so frontend edits show up on reload.
+
 ### SQLite vs MySQL tests
 
 DB tests (`test/backend/DBTestHelper.ts`) run every suite on both SQLite and MySQL.
