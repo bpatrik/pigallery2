@@ -106,6 +106,12 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
 - Add or adjust tests under `test/` for behaviour changes.
 - New UI strings must use Angular i18n (`i18n` attributes / `$localize`); `npm run merge-new-translation` updates the `.xlf` files.
+- Support non-ASCII text everywhere: accented and other Unicode characters in file/folder names, paths, URLs,
+  metadata (keywords, captions, person names) and search, on both SQLite and MySQL.
+  Search and sorting should handle accents sensibly (e.g. locale-aware `localeCompare`).
+- Translation-friendly UI: translate whole sentences with placeholders instead of concatenating pieces
+  (word order and suffixes differ between languages), expect much longer words than in English without breaking the layout,
+  format dates and numbers by locale, and don't assume a "first name last name" order.
 - Prefer implementing new features as extensions when feasible (see contribution guide).
 
 ## Code style
