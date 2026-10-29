@@ -95,13 +95,13 @@
                     <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
                       (click)="viewportScroller.scrollToAnchor(s.ConfigPath)"
                       >
-                      <ng-icon [name]="s.icon"></ng-icon> {{s.Name}}
+                      <ng-icon [name]="s.icon" /> {{s.Name}}
                     </button>
                     @for (n of s.nestedConfigs; track n) {
                       <button class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"
                         [hidden]="!n.visible()"
                         (click)="viewportScroller.scrollToAnchor(n.id)">
-                        <ng-icon [name]="n.icon"></ng-icon> {{n.name}}
+                        <ng-icon [name]="n.icon" /> {{n.name}}
                       </button>
                     }
                   </div>
@@ -121,16 +121,16 @@
               @if (cp=='Indexing') {
                 <br/>
                 <hr class="mt-2"/>
-                <app-settings-gallery-statistic></app-settings-gallery-statistic>
+                <app-settings-gallery-statistic />
               }
               @if (cp=='Users') {
-                <app-settings-users></app-settings-users>
+                <app-settings-users />
               }
               @if (cp=='Sharing') {
-                <app-settigns-sharings-list></app-settigns-sharings-list>
+                <app-settigns-sharings-list />
               }
               @if (cp=='Extensions') {
-                <app-extension-installer></app-extension-installer>
+                <app-extension-installer />
               }
             </app-settings-template>
           }

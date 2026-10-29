@@ -1,5 +1,5 @@
 <button class="btn btn-primary float-end mt-2" (click)="openExtensionsModal()">
-  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+  <ng-icon name="ionAddOutline" class="me-1" />
   <span i18n>Install extensions</span>
 </button>
 
@@ -52,7 +52,7 @@
                         {{ extension.name }}
                         @if (extension.url) {
                           <a [href]="extension.url" target="_blank" class="ms-2">
-                            <ng-icon name="ionOpenOutline" class="me-1"></ng-icon>
+                            <ng-icon name="ionOpenOutline" class="me-1" />
                           </a>
                         }
                       </td>
@@ -93,7 +93,7 @@
         <div class="d-flex justify-content-between w-100">
           <button class="btn btn-secondary" (click)="extensionsModal.hide()" i18n>Close</button>
           <button class="btn btn-outline-secondary" (click)="loadExtensions()" [disabled]="loading">
-            <ng-icon name="ionRefresh" class="me-1"></ng-icon><ng-container i18n>Refresh</ng-container>
+            <ng-icon name="ionRefresh" class="me-1" /><ng-container i18n>Refresh</ng-container>
           </button>
         </div>
       </div>

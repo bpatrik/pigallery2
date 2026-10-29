@@ -9,18 +9,16 @@
   }
 
   @if (!thumbnail.Available) {
-    <app-gallery-grid-photo-loading
-      [error]="thumbnail.Error"
+    <app-gallery-grid-photo-loading [error]="thumbnail.Error"
       [animate]="thumbnail.loading"
-      >
-    </app-gallery-grid-photo-loading>
+       />
   }
 
 
   @if (gridMedia.isVideo()) {
     <div class="video-indicator">
       {{gridMedia.Video.metadata.duration  | duration}}
-      <ng-icon name="ionVideocamOutline"></ng-icon>
+      <ng-icon name="ionVideocamOutline" />
     </div>
   }
 
@@ -59,7 +57,7 @@
       <div class="photo-name">{{Title}}</div>
       @if (gridMedia.hasPositionData()) {
         <div class="photo-position">
-          <ng-icon name="ionLocationOutline"></ng-icon>
+          <ng-icon name="ionLocationOutline" />
           @if (getPositionText()) {
             @if (searchEnabled) {
               <a [routerLink]="['/search', getPositionSearchQuery()]"
@@ -78,14 +76,14 @@
               <a [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]">
                 @switch (keyword.type) {
                   @case (SearchQueryTypes.keyword) {#}
-                  @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline"></ng-icon>}
+                  @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}
                 }<!--
              -->{{keyword.value}}</a>
             } @else {
               <span>
                 @switch (keyword.type) {
                   @case (SearchQueryTypes.keyword) {#}
-                  @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline"></ng-icon>}
+                  @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}
                 }<!--
              -->{{keyword.value}}</span>
             }<!--

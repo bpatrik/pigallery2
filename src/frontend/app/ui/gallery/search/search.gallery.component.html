@@ -5,17 +5,15 @@
       (ngModelChange)="validateRawSearchText()"
       class="search-field form-control p-0"
       (search)="Search()"
-      name="search-field">
-
-    </app-gallery-search-field-base>
+      name="search-field" />
 
     <button class="btn btn-tertiary lh-0" type="button"
       [routerLink]="['/search', HTMLSearchQuery]">
-      <ng-icon name="ionSearchOutline"></ng-icon>
+      <ng-icon name="ionSearchOutline" />
     </button>
     <button class="btn btn-tertiary lh-0"  type="button" (click)="openSearchModal(searchModal)">
       <ng-icon size="1.2em" style="margin-left: -0.1em; margin-right: -0.1em;"
-      name="ionChevronDownOutline"></ng-icon>
+      name="ionChevronDownOutline" />
     </button>
   </div>
 </form>
@@ -31,12 +29,10 @@
   <div class="modal-body">
     <form #searchPanelForm="ngForm" class="form-horizontal">
 
-      <app-gallery-search-query-builder
-        name="search-query-builder"
+      <app-gallery-search-query-builder name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
         (ngModelChange)="onQueryChange()"
-        (search)="Search()">
-      </app-gallery-search-query-builder>
+        (search)="Search()" />
 
     </form>
   </div>
@@ -48,14 +44,14 @@
             class="btn btn-secondary me-2" type="button"
             [disabled]="rawSearchText == ''"
             (click)="openSaveSearchModal(saveSearchModal)">
-            <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
+            <ng-icon name="ionSaveOutline" class="me-1" />
             <ng-container i18n>Save</ng-container>
           </button>
         }
         <button class="btn btn-primary" type="button"
           [routerLink]="['/search', HTMLSearchQuery]"
           (click)="hideSearchModal()">
-          <ng-icon name="ionSearchOutline" class="me-1"></ng-icon>
+          <ng-icon name="ionSearchOutline" class="me-1" />
           <ng-container i18n>Search</ng-container>
         </button>
       </div>
@@ -88,15 +84,13 @@
         </div>
         <div class="btn-group float-end row mt-2" role="group" style="display: block">
           <div class="pe-0">
-            <app-saved-search-popup-btn
-              [disabled]="saveSearchName == ''"
+            <app-saved-search-popup-btn [disabled]="saveSearchName == ''"
               class="me-2"
-              [savedSearchDTO]="{name:saveSearchName, searchQuery:searchQueryDTO}">
-            </app-saved-search-popup-btn>
+              [savedSearchDTO]="{name:saveSearchName, searchQuery:searchQueryDTO}" />
             <button class="btn btn-primary" type="button"
               [disabled]="saveSearchName == ''"
               (click)="saveSearch()">
-              <ng-icon name="ionSaveOutline" class="me-1"></ng-icon>
+              <ng-icon name="ionSaveOutline" class="me-1" />
               <ng-container i18n>Save as album</ng-container>
             </button>
           </div>

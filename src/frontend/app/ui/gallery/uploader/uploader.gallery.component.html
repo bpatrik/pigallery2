@@ -2,7 +2,7 @@
   <div class="upload-overlay" [class.active]="isUploadOver">
     <div class="upload-overlay-content">
       <div class="upload-overlay-icon">
-        <ng-icon name="ionCloudUploadOutline" size="4em"></ng-icon>
+        <ng-icon name="ionCloudUploadOutline" size="4em" />
       </div>
       <div class="upload-overlay-text" i18n>Drop files to upload</div>
     </div>
@@ -17,7 +17,7 @@
           <div class="card-body p-2">
             <div class="d-flex justify-content-between align-items-center mb-1">
               <small class="text-truncate me-2 fw-bold" ><ng-container i18n>Uploading files</ng-container>: {{ uploaderService.uploadProgress.length }}</small>
-              <ng-icon name="ionChevronUpOutline"></ng-icon>
+              <ng-icon name="ionChevronUpOutline" />
             </div>
             <div class="progress" style="height: 8px;">
               <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
@@ -32,7 +32,7 @@
             <div class="card-body p-2">
               <div class="d-flex justify-content-between align-items-center">
                 <small class="text-truncate me-2 fw-bold" ><ng-container i18n>Hide details</ng-container> ({{ uploaderService.uploadProgress.length }} <ng-container i18n>files</ng-container>)</small>
-                <ng-icon name="ionChevronDownOutline"></ng-icon>
+                <ng-icon name="ionChevronDownOutline" />
               </div>
             </div>
           </div>
@@ -53,10 +53,10 @@
                       <small class="text-muted" i18n>Queued</small>
                     }
                     @if (item.done && !item.error) {
-                      <ng-icon name="ionCheckmarkCircle" class="text-success"></ng-icon>
+                      <ng-icon name="ionCheckmarkCircle" class="text-success" />
                     }
                     @if (item.error) {
-                      <ng-icon name="ionAlertCircle" class="text-danger"></ng-icon>
+                      <ng-icon name="ionAlertCircle" class="text-danger" />
                     }
                     @if (item.error) {
                       <small class="text-danger ms-1" [title]="item.error">

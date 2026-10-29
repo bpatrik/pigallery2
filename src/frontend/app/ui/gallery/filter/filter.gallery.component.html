@@ -40,11 +40,10 @@
       @if (filterService.statistic.length>1) {
         <div class="position-absolute w-auto start-50">
           <div class="text-md-center">
-            <ng-icon
-              [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
+            <ng-icon [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
               style="top: -2px; cursor: pointer"
               class="position-relative"
-            (click)="showStatistic = !showStatistic"></ng-icon>
+            (click)="showStatistic = !showStatistic" />
           </div>
         </div>
       }
@@ -122,7 +121,7 @@
                             (click)="toggleSelectOnly(filter, option, $event)"
                             title="Select only this"
                             [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
-                          i18n-title></ng-icon>
+                          i18n-title />
                           {{option.name === undefined ? unknownText : option.name}}
                         </div>
                         <span class="badge"

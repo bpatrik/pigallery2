@@ -37,24 +37,21 @@
         <button [ngClass]="'btn-danger'"
           class="btn float-end col-1 align-self-center"
           (click)="deleteItem()">
-          <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+          <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
         </button>
         <div class="container query-list">
           @for (sq of AsListQuery.list; track sq; let i = $index) {
-            <app-gallery-search-query-entry
-              [id]="id+'_'+i"
+            <app-gallery-search-query-entry [id]="id+'_'+i"
               [(ngModel)]="AsListQuery.list[i]"
-              (delete)="itemDeleted(i)">
-            </app-gallery-search-query-entry>
+              (delete)="itemDeleted(i)" />
           }
         </div>
         <div class="col query-list d-flex justify-content-start">
           <button class="btn btn-primary" (click)="addQuery()">
-            <ng-icon
-              class="me-1"
+            <ng-icon class="me-1"
               style="margin-left: -0.1em; margin-right: -0.1em"
               [name]="'ionAddOutline'+id"
-            title="Add" i18n-title></ng-icon>
+            title="Add" i18n-title />
             <span i18n>Add</span>
           </button>
         </div>
@@ -316,7 +313,7 @@
                                       <button [ngClass]="'btn-danger'"
                                         class="btn  w-auto float-end"
                                         (click)="deleteItem()">
-                                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                                       </button>
                                     </div>
                                   }

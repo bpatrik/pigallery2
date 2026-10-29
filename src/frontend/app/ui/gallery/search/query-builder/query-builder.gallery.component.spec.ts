@@ -15,7 +15,7 @@ import {RangeSearch, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../.
 @Component({
   template: `
     <form>
-      <app-gallery-search-query-builder name="query" [(ngModel)]="query"></app-gallery-search-query-builder>
+      <app-gallery-search-query-builder name="query" [(ngModel)]="query" />
     </form>`,
   imports: [FormsModule, GallerySearchQueryBuilderComponent]
 })

@@ -11,23 +11,19 @@
                   <div class="col-auto small fst-italic">{{md.file | toRelativePath}}</div>
                 </div>
               }
-              <markdown
-                [data]="md.text">
-              </markdown>
+              <markdown [data]="md.text" />
             }
             @if (!open && first) {
               <span class="text-preview">
-                <markdown
-                  [inline]="true"
-                  [data]="md.textShort">
-                </markdown>
+                <markdown [inline]="true"
+                  [data]="md.textShort" />
               </span>
             }
           }
         </div>
       </div>
       <button class="btn btn-blog-details text-body" (click)="toggleCollapsed()">
-        <ng-icon [name]="open ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"></ng-icon>
+        <ng-icon [name]="open ? 'ionChevronUpOutline' : 'ionChevronDownOutline'" />
       </button>
     </div>
   }

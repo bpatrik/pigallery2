@@ -1,4 +1,4 @@
-<app-gallery-lightbox #lightbox></app-gallery-lightbox>
+<app-gallery-lightbox #lightbox />
 <app-frame [showSearch]="showSearchBar" [showShare]="showShare">
 
   <ng-container navbar>
@@ -19,21 +19,21 @@
   <ng-container navbar-menu>
     @if (showRandomPhotoBuilder) {
       <li role="menuitem">
-        <app-gallery-random-query-builder></app-gallery-random-query-builder>
+        <app-gallery-random-query-builder />
       </li>
     }
     @if (showRandomPhotoBuilder) {
       <li role="menuitem">
-        <app-gallery-photo-frame-builder></app-gallery-photo-frame-builder>
+        <app-gallery-photo-frame-builder />
       </li>
     }
   </ng-container>
 
 
-  <app-gallery-navbar navbar-appendix></app-gallery-navbar>
+  <app-gallery-navbar navbar-appendix />
   @if (ContentWrapper) {
     <div body class="container-fluid app-gallery-body">
-      <app-gallery-uploader [isUploadOver]="isUploadOver"></app-gallery-uploader>
+      <app-gallery-uploader [isUploadOver]="isUploadOver" />
       @if (ContentWrapper.error) {
         <div class="alert alert-danger" role="alert">
           {{ ContentWrapper.error }}
@@ -48,25 +48,23 @@
       </div>
         }
         <app-gallery-directories class="directories"
-        [directories]="directoryContent?.directories || []"></app-gallery-directories>
+        [directories]="directoryContent?.directories || []" />
         @if (ShowMarkDown || ShowMap) {
           <div class="blog-map-row">
             @if (ShowMarkDown) {
-              <app-gallery-blog
-                [style.width]="blogOpen ?  '100%' : 'calc(100% - 100px)'"
-              [(open)]="blogOpen"></app-gallery-blog>
+              <app-gallery-blog [style.width]="blogOpen ?  '100%' : 'calc(100% - 100px)'"
+              [(open)]="blogOpen" />
             }
             @if (ShowMap) {
-              <app-gallery-map
-                class="rounded"
+              <app-gallery-map class="rounded"
                 [class.rounded-start-0]="ShowMarkDown"
                 [photos]="directoryContent?.mediaGroups | photosOnly"
-              [gpxFiles]="directoryContent?.metaFile | gpxFiles"></app-gallery-map>
+              [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
             }
           </div>
         }
         <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
-        [lightbox]="lightbox"></app-gallery-grid>
+        [lightbox]="lightbox" />
       }
     </div>
   }
@@ -84,4 +82,4 @@
 </app-frame>
 
 <!-- Media button modal (gallery-wide) -->
-<app-media-button-modal></app-media-button-modal>
+<app-media-button-modal />

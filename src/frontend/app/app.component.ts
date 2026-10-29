@@ -12,7 +12,7 @@ import { RouterOutlet } from '@angular/router';
 @Component({
     selector: 'app-pi-gallery2',
     template: `
-    <router-outlet></router-outlet>`,
+    <router-outlet />`,
     imports: [RouterOutlet]
 })
 export class AppComponent implements OnInit, OnDestroy {

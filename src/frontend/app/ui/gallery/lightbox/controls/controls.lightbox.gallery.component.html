@@ -18,7 +18,7 @@
     <div class="controls-background rounded-start-bottom">
       <div class="highlight control-button" (click)="toggleInfoPanel.emit()"
         title="info key: i" i18n-title>
-        <ng-icon name="ionInformationOutline"></ng-icon>
+        <ng-icon name="ionInformationOutline" />
       </div>
 
       @if (fullScreenService.isFullScreenEnabled()) {
@@ -27,7 +27,7 @@
           (click)="toggleFullScreen.emit()"
           title="toggle fullscreen, key: f" i18n-title>
           <ng-icon size="0.85em"
-          name="ionContractOutline"></ng-icon>
+          name="ionContractOutline" />
         </div>
       }
 
@@ -37,7 +37,7 @@
           (click)="toggleFullScreen.emit(true)"
           title="toggle fullscreen, key: f" i18n-title>
           <ng-icon size="0.85em"
-          name="ionExpandOutline"></ng-icon>
+          name="ionExpandOutline" />
         </div>
       }
 
@@ -46,7 +46,7 @@
           class="border-0 highlight control-button"
           data-bs-auto-close="outside"
           aria-controls="dropdown-basic">
-          <ng-icon size="1.2em" name="ionMenuOutline"></ng-icon>
+          <ng-icon size="1.2em" name="ionMenuOutline" />
         </button>
         <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu dropdown-menu-right"
           role="menu" aria-labelledby="button-basic">
@@ -57,7 +57,7 @@
                 [download]="activePhoto.gridMedia.media.name"
                 class="dropdown-item">
                 <ng-icon class="me-2"
-                name="ionDownloadOutline" title="Download" i18n-title></ng-icon>
+                name="ionDownloadOutline" title="Download" i18n-title />
                 <span i18n>Download</span>
                 <small>(shift + D)</small>
               </a>
@@ -67,7 +67,7 @@
             dropdown>
             <div class="dropdown-item">
               <ng-icon class="me-2"
-              name="ionTimerOutline" title="Download" i18n-title></ng-icon>
+              name="ionTimerOutline" title="Download" i18n-title />
               <span class="pe-2" i18n-title title="Slideshow playback speed" i18n>Slideshow speed:</span>
               <select
                 class="form-select d-inline-block w-auto"
@@ -143,7 +143,7 @@
               <div class="highlight control-button"
                 (click)="closeLightbox()"
                 title="close, key: Escape" i18n-title>
-                <ng-icon size="1.2em" name="ionCloseOutline"></ng-icon>
+                <ng-icon size="1.2em" name="ionCloseOutline" />
               </div>
             </div>
           </div>
@@ -210,14 +210,14 @@
             <div [class.dim-controls]="controllersDimmed" class="navigation-arrow navigation-arrow-left highlight rounded-end"
               title="key: left arrow" id="leftArrow" i18n-title
               (click)="previousPhoto.emit()">
-              <ng-icon name="ionChevronBackOutline"></ng-icon>
+              <ng-icon name="ionChevronBackOutline" />
             </div>
           }
           @if (navigation.hasNext && zoom == 1) {
             <div [class.dim-controls]="controllersDimmed" class="navigation-arrow navigation-arrow-right highlight rounded-start"
               title="key: right arrow" id="rightArrow" i18n-title
               (click)="nextMediaManuallyTriggered()">
-              <ng-icon name="ionChevronForwardOutline"></ng-icon>
+              <ng-icon name="ionChevronForwardOutline" />
               @if (slideShowRunning) {
                 <canvas
                 #canvas width="55px" height="55px"></canvas>
@@ -242,14 +242,14 @@
             <div [class.dim-controls]="controllersDimmed" class="controls controls-zoom row mb-3">
               <div class="col-1 col-md-4">
                 <ng-icon name="ionRemoveOutline" class="float-end highlight"
-                (click)="zoomOut()" i18n-title title="Zoom out, key: '-'"></ng-icon>
+                (click)="zoomOut()" i18n-title title="Zoom out, key: '-'" />
               </div>
               <input type="range"
                 [(ngModel)]="Zoom" min="1" [max]="MAX_ZOOM" step="0.1"
                 value="1" class="col-10 col-md-4 zoom-progress rounded ">
                 <div class="col-1 col-md-4">
                   <ng-icon name="ionAddOutline" class="float-start highlight"
-                  (click)="zoomIn()" i18n-title title="Zoom in, key: '+'"></ng-icon>
+                  (click)="zoomIn()" i18n-title title="Zoom in, key: '+'" />
                 </div>
               </div>
             }
@@ -259,18 +259,16 @@
                 >
                 <div class="controls-background rounded-start-top pe-1 pb-1">
                   @if (slideShowRunning) {
-                    <ng-icon
-                      name="ionPauseOutline"
+                    <ng-icon name="ionPauseOutline"
                       class=" highlight control-button button-active me-2 mb-2"
                       (click)="pauseClicked()"
-                    title="Pause" i18n-title></ng-icon>
+                    title="Pause" i18n-title />
                   }
                   @if (!slideShowRunning) {
-                    <ng-icon
-                      name="ionPlayOutline"
+                    <ng-icon name="ionPlayOutline"
                       class="highlight control-button me-2 mb-2"
                       (click)="playClicked()"
-                    title="Auto play" i18n-title></ng-icon>
+                    title="Auto play" i18n-title />
                   }
                 </div>
               </div>
@@ -279,7 +277,7 @@
             @if (activePhoto && activePhoto.gridMedia.isVideo() && mediaElement.Paused) {
               <div [class.dim-controls]="controllersDimmed" class="controls controls-big-play mb-3"
                 >
-                <ng-icon name="ionPlayOutline"></ng-icon>
+                <ng-icon name="ionPlayOutline" />
               </div>
             }
 
@@ -287,13 +285,13 @@
               <div class="controls controls-video row mb-3">
                 <div class="col-1">
                   <ng-icon [name]="!mediaElement.Paused ? 'ionPauseOutline' :'ionPlayOutline'"
-                  (click)="mediaElement.playPause()"></ng-icon>
+                  (click)="mediaElement.playPause()" />
                 </div>
                 <input type="range" [(ngModel)]="mediaElement.VideoProgress"
                   min="0" max="100" step="0.1" class="col video-progress rounded">
                   <div class="col-1">
                     <ng-icon [name]="mediaElement.Muted ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
-                    (click)="mediaElement.mute()"></ng-icon>
+                    (click)="mediaElement.mute()" />
                   </div>
                   <input type="range"
                     [(ngModel)]="mediaElement.VideoVolume" min="0" max="1" step="0.1"

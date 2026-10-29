@@ -27,17 +27,17 @@
             <button [disabled]="!canDeleteUser(user)" (click)="deleteUser(user)"
               [ngClass]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
               class="btn float-end ms-2">
-              <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+              <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
             <button [disabled]="!canModifyUser(user)" (click)="openEditUser(user)"
               [ngClass]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
               class="btn float-end ms-2">
-              <ng-icon name="ionPencil" title="Edit" i18n-title></ng-icon>
+              <ng-icon name="ionPencil" title="Edit" i18n-title />
             </button>
             @if (user.oidcSubject) {
               <button (click)="unlinkOidc(user)"
                 class="btn btn-warning float-end ms-2">
-                <ng-icon name="ionUnlinkOutline" title="Unlink OIDC account" i18n-title></ng-icon>
+                <ng-icon name="ionUnlinkOutline" title="Unlink OIDC account" i18n-title />
               </button>
             }
           </td>
@@ -47,7 +47,7 @@
   </table>
   <button class="btn btn-primary float-end"
     (click)="initNewUser()">
-    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+    <ng-icon name="ionAddOutline" class="me-1" />
     <span i18n>Add user</span>
   </button>
 }
@@ -142,38 +142,30 @@
               <div>
                 <div class="mb-3">
                   <label class="form-label" i18n>Allowed query</label>
-                  <app-gallery-search-field
-                    name="allowQuery"
+                  <app-gallery-search-field name="allowQuery"
                     [(ngModel)]="editSettings.allowQuery"
                     i18n-placeholder
-                    placeholder="Allowed query">
-                  </app-gallery-search-field>
+                    placeholder="Allowed query" />
                   <small class="text-muted" i18n>Only items matching this query will be visible.</small>
                 </div>
                 <div class="mb-3">
                   <label class="form-label" i18n>Blocked query</label>
-                  <app-gallery-search-field
-                    name="blockQuery"
+                  <app-gallery-search-field name="blockQuery"
                     [(ngModel)]="editSettings.blockQuery"
                     placeholder="Blocked query"
-                    i18n-placeholder>
-                  </app-gallery-search-field>
+                    i18n-placeholder />
                   <small class="text-muted" i18n>Items matching this query will be hidden.</small>
                 </div>
                 <div class="mb-3">
                   <label class="form-label" i18n>Allowed directories</label>
-                  <app-settings-directory-search-list
-                    idName="allowDirectoryList"
-                    [list]="editSettings.allowDirectoryList">
-                  </app-settings-directory-search-list>
+                  <app-settings-directory-search-list idName="allowDirectoryList"
+                    [list]="editSettings.allowDirectoryList" />
                   <div><small class="text-muted" i18n>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</small></div>
                 </div>
                 <div class="mb-3">
                   <label class="form-label" i18n>Blocked directories</label>
-                  <app-settings-directory-search-list
-                    idName="blockDirectoryList"
-                    [list]="editSettings.blockDirectoryList">
-                  </app-settings-directory-search-list>
+                  <app-settings-directory-search-list idName="blockDirectoryList"
+                    [list]="editSettings.blockDirectoryList" />
                   <div><small class="text-muted" i18n>Directories (and their content) matching any of these will be hidden.</small></div>
                 </div>
               </div>

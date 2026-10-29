@@ -2,14 +2,14 @@
   <button id="shareButton" class="nav-link btn  btn-link"
     style="white-space:nowrap"
     type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
-    <ng-icon name="ionShareSocialOutline" class="me-1"></ng-icon>
+    <ng-icon name="ionShareSocialOutline" class="me-1" />
     <ng-container i18n>Share</ng-container>
   </button>
 }
 
 @if (dropDownItem) {
   <a class="dropdown-item" (click)="openModal(shareModal)">
-    <ng-icon name="ionShareSocialOutline"></ng-icon>
+    <ng-icon name="ionShareSocialOutline" />
     <ng-container i18n>Share</ng-container>
   </a>
 }
@@ -158,7 +158,7 @@
         <span class="badge text-bg-secondary me-1">{{ activeShares.length }}</span>
         <ng-container i18n>active share(s) for this folder.
       </ng-container>
-        <ng-icon name="ionChevronForwardOutline" class="ms-1"></ng-icon>
+        <ng-icon name="ionChevronForwardOutline" class="ms-1" />
       </a>
     }
     @if (showSharingList) {
@@ -183,7 +183,7 @@
                   <button type="button" class="btn btn-link p-0 ms-1"
                     ngxClipboard [cbContent]="sharingService.getUrl(share)" (cbOnSuccess)="onCopy()"
                     title="Copy link" i18n-title>
-                    <ng-icon name="ionCopyOutline"></ng-icon>
+                    <ng-icon name="ionCopyOutline" />
                   </button>
                 </div>
               </td>
@@ -196,7 +196,7 @@
                 <button (click)="deleteSharing(share)"
                   [disabled]="share.sharingKey == sharing?.sharingKey"
                   class="btn btn-danger float-end">
-                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>
               </td>
             </tr>

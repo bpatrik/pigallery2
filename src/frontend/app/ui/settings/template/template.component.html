@@ -2,7 +2,7 @@
   <div class="card mb-4">
     <div class="card-header">
       <h5 class="d-inline-block mb-0">
-        <ng-icon [name]="icon"></ng-icon>
+        <ng-icon [name]="icon" />
         {{ Name }}
       </h5>
       @if (states.value.enabled !== undefined) {
@@ -24,9 +24,8 @@
       <div class="card-body">
         <div [hidden]="!error" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error }}</div>
         @if (states.value.enabled !== false) {
-          <ng-container
-            *ngTemplateOutlet="Recursion; context:{ rStates: states,topLevel:true,confPath:ConfigPath,skipJobs:true }"
-          ></ng-container>
+          <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: states,topLevel:true,confPath:ConfigPath,skipJobs:true }"
+           />
         }
 
         @if (states.value.enabled === false) {
@@ -38,9 +37,8 @@
         <div class="row mt-2">
           @if (states.tags?.uiJob && !states.tags?.uiJob[0].description) {
             <div class="col-auto">
-              <ng-container
-                *ngTemplateOutlet="JobTemplate; context:{ uiJob: states.tags?.uiJob }"
-              ></ng-container>
+              <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: states.tags?.uiJob }"
+               />
             </div>
           }
           <div class="col">
@@ -58,23 +56,20 @@
         </div>
         @if (states.tags?.uiJob && !states.tags?.uiJob[0].description) {
           <div>
-            <ng-container
-              *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states.tags?.uiJob }"
-            ></ng-container>
+            <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states.tags?.uiJob }"
+             />
           </div>
         }
         @if (states.tags?.uiJob && states.tags?.uiJob[0].description) {
           <div>
             <hr/>
-            <ng-container
-              *ngTemplateOutlet="JobTemplate; context:{ uiJob: states.tags?.uiJob }"
-            ></ng-container>
-            <ng-container
-              *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states.tags?.uiJob }"
-            ></ng-container>
+            <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: states.tags?.uiJob }"
+             />
+            <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states.tags?.uiJob }"
+             />
           </div>
         }
-        <ng-content></ng-content>
+        <ng-content />
       </div>
     </div>
 
@@ -83,7 +78,7 @@
       @if (rStates.description && settingsService.configStyle == ConfigStyle.full) {
         <div class="alert alert-secondary" role="alert"
           >
-          <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+          <ng-icon size="1.3em" name="ionInformationCircleOutline" />
           {{ rStates.description }}
           @if (rStates.tags?.githubIssue) {
             <a
@@ -105,9 +100,8 @@
                 @for (entry of rStates.value.__state[ck].value; track $index; let i = $index) {
                   <div class="row mt-2">
                     <hr/>
-                    <ng-container
-                      *ngTemplateOutlet="Recursion; context:{ rStates: {value: rStates.value.__state[ck].value[i]}, confPath:confPath+'.'+ck+'.'+i }"
-                    ></ng-container>
+                    <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: {value: rStates.value.__state[ck].value[i]}, confPath:confPath+'.'+ck+'.'+i }"
+                     />
                   </div>
                 }
               </div>
@@ -116,10 +110,8 @@
           @if (!rStates.value.__state[ck].isConfigArrayType || !isExpandableArrayConfig(rStates.value.__state[ck])) {
             <!-- simple entries or complex once's but with custom UI--->
             @if ((ck!=='enabled' || !topLevel) && !isExpandableConfig(rStates.value.__state[ck])) {
-              <app-settings-entry
-                [name]="confPath+'_'+ck"
-                [ngModel]="rStates?.value.__state[ck]">
-              </app-settings-entry>
+              <app-settings-entry [name]="confPath+'_'+ck"
+                [ngModel]="rStates?.value.__state[ck]" />
             }
             <!-- Config entries --->
             @if (isExpandableConfig(rStates.value.__state[ck]) && rStates.value.__state[ck].value) {
@@ -129,12 +121,11 @@
                   [id]="ConfigPath+'.'+ck">
                   <div class="card-body">
                     <h5 class="card-title">
-                      <ng-icon [name]="rStates?.value.__state[ck].tags?.uiIcon"></ng-icon>
+                      <ng-icon [name]="rStates?.value.__state[ck].tags?.uiIcon" />
                       {{ rStates?.value.__state[ck].tags?.name || ck }}
                     </h5>
-                    <ng-container
-                      *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
-                    ></ng-container>
+                    <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
+                     />
                   </div>
                 </div>
               }
@@ -153,18 +144,17 @@
                   @if (isExtension(rStates?.value.__state[ck])) {
                     <div class="col-auto">
                       <button (click)="removeExtension(rStates?.value.__state[ck])" class="btn float-end btn-danger ">
-                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                       </button>
                       <button (click)="reloadExtension(rStates?.value.__state[ck])" class="btn float-end btn-primary ">
-                        <ng-icon name="ionReload" title="Restart" i18n-title></ng-icon>
+                        <ng-icon name="ionReload" title="Restart" i18n-title />
                       </button>
                     </div>
                   }
                 </div>
                 <div class="mt-2  headerless-sub-category-content">
-                  <ng-container
-                    *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
-                  ></ng-container>
+                  <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: rStates.value.__state[ck], confPath:confPath+'.'+ck }"
+                   />
                 </div>
               }
             }
@@ -173,12 +163,10 @@
       }
       @if (rStates.tags?.uiJob && !skipJobs) {
         <div>
-          <ng-container
-            *ngTemplateOutlet="JobTemplate; context:{ uiJob: rStates.tags?.uiJob }"
-          ></ng-container>
-          <ng-container
-            *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: rStates.tags?.uiJob }"
-          ></ng-container>
+          <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: rStates.tags?.uiJob }"
+           />
+          <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: rStates.tags?.uiJob }"
+           />
         </div>
       }
     </ng-template>
@@ -189,18 +177,17 @@
           @if (job.description  && settingsService.configStyle == ConfigStyle.full) {
             <div class="alert alert-secondary" role="alert"
               >
-              <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+              <ng-icon size="1.3em" name="ionInformationCircleOutline" />
               {{ job.description }}
             </div>
           }
           @if (!job.relevant || job.relevant(settingsService.settings | async)) {
-            <app-settings-job-button
-              class="mt-2 mb-1 mb-md-0 mt-md-0 float-left me-2"
+            <app-settings-job-button class="mt-2 mb-1 mb-md-0 mt-md-0 float-left me-2"
               [soloRun]="true"
               (jobError)="error=$event"
               [allowParallelRun]="false"
               [danger]="job.job.includes('Reset') || job.job.includes('Delete')"
-            [jobName]="job.job"></app-settings-job-button>
+            [jobName]="job.job" />
           }
         }
 
@@ -212,9 +199,8 @@
         @for (job of uiJob; track job) {
           @if (getProgress(job) && !job.hideProgress && (!job.relevant || job.relevant(settingsService.settings | async))) {
             <hr class="mt-1"/>
-            <app-settings-job-progress
-              class="d-block mb-2"
-            [progress]="getProgress(job)"></app-settings-job-progress>
+            <app-settings-job-progress class="d-block mb-2"
+            [progress]="getProgress(job)" />
           }
         }
       </div>

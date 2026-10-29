@@ -1,5 +1,5 @@
 <button class="dropdown-item {{enabled? '' : 'disabled'}}" (click)="openModal(randomModal)">
-  <ng-icon name="ionShuffleOutline"></ng-icon>
+  <ng-icon name="ionShuffleOutline" />
   <ng-container i18n>Random link</ng-container>
 </button>
 
@@ -31,12 +31,10 @@
     </div>
     <hr/>
     <form #searchPanelForm="ngForm" class="form-horizontal">
-      <app-gallery-search-query-builder
-        id="album-search-query-builder"
+      <app-gallery-search-query-builder id="album-search-query-builder"
         name="album-search-query-builder"
         [(ngModel)]="searchQueryDTO"
-        (change)="onQueryChange()">
-      </app-gallery-search-query-builder>
+        (change)="onQueryChange()" />
 
 
     </form>

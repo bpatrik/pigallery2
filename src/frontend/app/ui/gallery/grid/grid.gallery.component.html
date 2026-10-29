@@ -9,8 +9,7 @@
               <div class="mt-4 mb-3">
                 <h6 class="ms-2">
                   @for (i of [0,1,2,3,4]; track i) {
-                    <ng-icon
-                    [name]="(i < (group.name | parseInt)) ? 'ionStar' : 'ionStarOutline'"></ng-icon>
+                    <ng-icon [name]="(i < (group.name | parseInt)) ? 'ionStar' : 'ionStarOutline'" />
                   }
                 </h6>
               </div>
@@ -18,7 +17,7 @@
             @case (GroupByTypes.PersonCount) {
               <div class="mt-4 mb-3">
                 <h6 class="ms-2">{{ group.name }}
-                  <ng-icon class="ms-1" name="ionPeopleOutline"></ng-icon>
+                  <ng-icon class="ms-1" name="ionPeopleOutline" />
                 </h6>
               </div>
             }
@@ -28,20 +27,16 @@
           }
         }
         @if (group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0) {
-          <app-gallery-blog
-            [date]="group.date"
-            [open]="blogOpen">
-          </app-gallery-blog>
+          <app-gallery-blog [date]="group.date"
+            [open]="blogOpen" />
         }
         <div class="media-grid">
           @for (gridPhoto of group.media; track gridPhoto) {
-            <app-gallery-grid-photo
-              (click)="photoClicked(gridPhoto.media)"
+            <app-gallery-grid-photo (click)="photoClicked(gridPhoto.media)"
               [gridMedia]="gridPhoto"
               [style.width.px]="gridPhoto.renderWidth"
               [style.height.px]="gridPhoto.renderHeight"
-              [style.margin.px]="IMAGE_MARGIN">
-            </app-gallery-grid-photo>
+              [style.margin.px]="IMAGE_MARGIN" />
           }
         </div>
       </div>

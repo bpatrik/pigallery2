@@ -25,19 +25,19 @@
           @if (fullScreenService.isFullScreenEnabled()) {
             <div class="highlight control-button"
               (click)="fullScreenService.exitFullScreen()" title="toggle fullscreen, key: f" i18n-title>
-              <ng-icon  size="0.9em"
-              name="ionContractOutline"></ng-icon>
+              <ng-icon size="0.9em"
+              name="ionContractOutline" />
             </div>
           }
           @if (!fullScreenService.isFullScreenEnabled()) {
             <div class="highlight control-button"
               (click)="fullScreenService.showFullScreen(root)" title="toggle fullscreen, key: f" i18n-title>
-              <ng-icon  size="0.9em"
-              name="ionExpandOutline"></ng-icon>
+              <ng-icon size="0.9em"
+              name="ionExpandOutline" />
             </div>
           }
           <div class="highlight control-button" (click)="close()" title="close, key: Escape" i18n-title>
-            <ng-icon size="1.2em" name="ionCloseOutline"></ng-icon>
+            <ng-icon size="1.2em" name="ionCloseOutline" />
           </div>
         </div>
       </div>

@@ -12,8 +12,7 @@
     }
 
     @if (!thumbnail || !thumbnail.Available) {
-      <ng-icon
-      class="no-image" name="ionPersonOutline"></ng-icon>
+      <ng-icon class="no-image" name="ionPersonOutline" />
     }
   </div>
 
@@ -25,7 +24,7 @@
       [class.favourite]="person.isFavourite"
       [class.clickable]="CanUpdate"
       (click)="CanUpdate && toggleFavourite($event)"
-    ></ng-icon>
+     />
     {{person.name}} ({{person.cache?.count}})
 
   </div>
