@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, LOCALE_ID, OnChanges, OnDestroy, inject, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, LOCALE_ID, OnChanges, OnDestroy, inject, input, output, viewChild } from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -23,6 +23,12 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-lightbox-controls',
+  host: {
+    '(pinch)': 'pinch($event)',
+    '(pinchend)': 'pinchend($event)',
+    '(window:keydown)': 'onKeyPress($event)',
+    '(mousemove)': 'onMouseMove()'
+  },
   styleUrls: ['./controls.lightbox.gallery.component.css', './inputrange.css'],
   templateUrl: './controls.lightbox.gallery.component.html',
   imports: [
@@ -134,6 +140,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
+  // Side effect: resizes the face overlay and restarts the slideshow timer.
   ngOnChanges(): void {
     this.updateFaceContainerDim();
     if (this.slideShowRunning()) {
@@ -186,7 +193,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   // pinch events come from HammerJS, Angular only types them as Event
-  @HostListener('pinch', ['$event'])
   pinch($event: Event): void {
     const activePhoto = this.activePhoto();
     if (!activePhoto || activePhoto.gridMedia().isVideo()) {
@@ -196,7 +202,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.Zoom = this.prevZoom * ($event as Event & { scale: number }).scale;
   }
 
-  @HostListener('pinchend', ['$event'])
   pinchend($event: Event): void {
     const activePhoto = this.activePhoto();
     if (!activePhoto || activePhoto.gridMedia().isVideo()) {
@@ -238,7 +243,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.Zoom = this.zoom - this.zoom / 10;
   }
 
-  @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
     const activePhoto = this.activePhoto();
     switch (event.key) {
@@ -317,7 +321,6 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       .subscribe(this.showNextMedia);
   }
 
-  @HostListener('mousemove')
   onMouseMove(): void {
     this.showControls();
   }

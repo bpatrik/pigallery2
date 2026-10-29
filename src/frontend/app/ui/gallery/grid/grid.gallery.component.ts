@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild, input } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild, input } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -23,6 +23,10 @@ import {BlogService} from '../blog/blog.service';
 
 @Component({
   selector: 'app-gallery-grid',
+  host: {
+    '(window:resize)': 'onResize()',
+    '(window:scroll)': 'onScroll()'
+  },
   templateUrl: './grid.gallery.component.html',
   styleUrl: './grid.gallery.component.css',
   imports: [
@@ -75,6 +79,7 @@ export class GalleryGridComponent
   private onScrollFired = false;
   private helperTime: number = null;
 
+  // Side effect: merges the new media into the rendered grid after the view settled.
   ngOnChanges(): void {
     if (this.isAfterViewInit === false) {
       return;
@@ -164,7 +169,6 @@ export class GalleryGridComponent
     }
   }
 
-  @HostListener('window:resize')
   onResize(): void {
     if (this.isAfterViewInit === false) {
       return;
@@ -359,7 +363,6 @@ export class GalleryGridComponent
     return rowHeight;
   }
 
-  @HostListener('window:scroll')
   onScroll(): void {
     if (
       !this.onScrollFired &&

@@ -114,6 +114,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     return $localize`Click to save.`;
   }
 
+  // Side effect: subscribes to the settings slice of the new config path.
   ngOnChanges(): void {
     const ConfigPath = this.ConfigPath();
     if (!ConfigPath) {

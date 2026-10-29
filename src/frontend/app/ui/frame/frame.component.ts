@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewEncapsulation, inject, input, viewChild } from '@angular/core';
+import { Component, ElementRef, ViewEncapsulation, inject, input, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -28,6 +28,9 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-frame',
+  host: {
+    '(window:scroll)': 'onScroll()'
+  },
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.css',
   encapsulation: ViewEncapsulation.Emulated,
@@ -146,7 +149,6 @@ export class FrameComponent {
   }
 
 
-  @HostListener('window:scroll')
   onScroll(): void {
     const scrollPosition = PageHelper.ScrollY;
     const up = this.lastScroll.any > scrollPosition;

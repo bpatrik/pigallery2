@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
 import {Subscription} from 'rxjs';
 
@@ -7,6 +7,9 @@ import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../co
 
 @Component({
   selector: 'app-media-button-modal',
+  host: {
+    '(document:keydown)': 'onKeyDown($event)'
+  },
   templateUrl: './media-button-modal.component.html',
   styleUrl: './media-button-modal.component.css',
   imports: [FormsModule]
@@ -86,7 +89,6 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
     this.modalService.hideModal();
   }
 
-  @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape' && this.modalData?.visible) {
       this.closeModal();

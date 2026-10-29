@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -37,6 +37,11 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
 
 @Component({
   selector: 'app-gallery',
+  host: {
+    '(dragover)': 'onDragOver($event)',
+    '(dragleave)': 'onDragLeave($event)',
+    '(drop)': 'onDrop($event)'
+  },
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
   imports: [
@@ -181,7 +186,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('dragover', ['$event'])
   onDragOver(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();
@@ -190,7 +194,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('dragleave', ['$event'])
   onDragLeave(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();
@@ -199,7 +202,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('drop', ['$event'])
   onDrop(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();

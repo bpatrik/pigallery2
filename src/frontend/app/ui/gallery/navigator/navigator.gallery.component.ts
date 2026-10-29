@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
@@ -30,6 +30,10 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 
 @Component({
   selector: 'app-gallery-navbar',
+  host: {
+    '(window:keydown)': 'onKeyPress($event)',
+    '(window:scroll)': 'onScroll()'
+  },
   styleUrl: './navigator.gallery.component.css',
   templateUrl: './navigator.gallery.component.html',
   imports: [
@@ -301,7 +305,6 @@ export class GalleryNavigatorComponent {
       .catch(console.error);
   }
 
-  @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowUp':
@@ -313,7 +316,6 @@ export class GalleryNavigatorComponent {
   }
 
 
-  @HostListener('window:scroll')
   onScroll(): void {
     const scrollPosition = PageHelper.ScrollY;
     if (this.lastScroll.any < scrollPosition) { // scroll down

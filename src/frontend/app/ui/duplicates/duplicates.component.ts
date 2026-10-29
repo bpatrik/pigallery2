@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {DuplicateService} from './duplicates.service';
 import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
@@ -22,6 +22,9 @@ interface GroupedDuplicate {
 
 @Component({
     selector: 'app-duplicate',
+    host: {
+      '(window:scroll)': 'onScroll()'
+    },
     templateUrl: './duplicates.component.html',
     styleUrl: './duplicates.component.css',
     imports: [
@@ -181,7 +184,6 @@ export class DuplicateComponent implements OnDestroy, OnInit {
     }
   };
 
-  @HostListener('window:scroll')
   onScroll(): void {
     this.renderMore();
   }

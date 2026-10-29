@@ -7,7 +7,7 @@
     style="border-radius: inherit"
     leaflet
     [leafletOptions]="options"
-    [leafletLayers]="markerLayer"
+    [leafletLayers]="markerLayer()"
     (leafletMapReady)="onMapReady($event)">
   </div>
   <div class="overlay" (click)="click()">

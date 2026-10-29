@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, inject, input, viewChild } from '@angular/core';
+import { Component, ElementRef, OnChanges, computed, inject, input, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
@@ -43,7 +43,23 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     zoom: 0,
     center: [0, 0],
   };
-  markerLayer: Marker[] = [];
+  readonly markerLayer = computed((): Marker[] => this.photos()
+    .filter((p): number => {
+      return (
+        p.metadata &&
+        p.metadata.positionData &&
+        p.metadata.positionData.GPSData &&
+        p.metadata.positionData.GPSData.latitude &&
+        p.metadata.positionData.GPSData.longitude
+      );
+    })
+    .slice(0, Config.Map.maxPreviewMarkers)
+    .map((p): Marker => {
+      return marker({
+        lat: p.metadata.positionData.GPSData.latitude,
+        lng: p.metadata.positionData.GPSData.longitude,
+      } as LatLngLiteral).setIcon(MarkerFactory.defIconSmall);
+    }));
   darkModeSubscription: Subscription;
 
   constructor() {
@@ -96,10 +112,10 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     if (!this.leafletMap) {
       return;
     }
-    if (this.markerLayer.length > 0) {
-      this.leafletMap.setView(this.markerLayer[0].getLatLng(), 99);
+    if (this.markerLayer().length > 0) {
+      this.leafletMap.setView(this.markerLayer()[0].getLatLng(), 99);
       this.leafletMap.fitBounds(
-        this.markerLayer.map(
+        this.markerLayer().map(
           (mp): [number, number] =>
             [mp.getLatLng().lat, mp.getLatLng().lng] as [number, number]
         )
@@ -108,30 +124,14 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     this.leafletMap.setZoom(0);
   }
 
+  // Side effect: moves the Leaflet map to the new markers.
   ngOnChanges(): void {
-    this.markerLayer = this.photos()
-      .filter((p): number => {
-        return (
-          p.metadata &&
-          p.metadata.positionData &&
-          p.metadata.positionData.GPSData &&
-          p.metadata.positionData.GPSData.latitude &&
-          p.metadata.positionData.GPSData.longitude
-        );
-      })
-      .slice(0, Config.Map.maxPreviewMarkers)
-      .map((p): Marker => {
-        return marker({
-          lat: p.metadata.positionData.GPSData.latitude,
-          lng: p.metadata.positionData.GPSData.longitude,
-        } as LatLngLiteral).setIcon(MarkerFactory.defIconSmall);
-      });
-
-    if (this.leafletMap && this.markerLayer.length > 0) {
-      this.options.center = this.markerLayer[0].getLatLng();
-      this.leafletMap.setView(this.markerLayer[0].getLatLng(), 99);
+    const markerLayer = this.markerLayer();
+    if (this.leafletMap && markerLayer.length > 0) {
+      this.options.center = markerLayer[0].getLatLng();
+      this.leafletMap.setView(markerLayer[0].getLatLng(), 99);
       this.leafletMap.fitBounds(
-        this.markerLayer.map(
+        markerLayer.map(
           (mp): [number, number] =>
             [mp.getLatLng().lat, mp.getLatLng().lng] as [number, number]
         )

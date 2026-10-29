@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, inject, output, input } from '@angular/core';
+import { Component, OnInit, computed, inject, output, input } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -38,7 +38,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
     FileSizePipe
 ]
 })
-export class InfoPanelLightboxComponent implements OnInit, OnChanges {
+export class InfoPanelLightboxComponent implements OnInit {
   queryService = inject(QueryService);
   contentLoaderService = inject(ContentLoaderService);
   mapService = inject(MapService);
@@ -54,7 +54,17 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   public readonly SearchQueryTypes: typeof SearchQueryTypes = SearchQueryTypes;
 
   public baseLayer: TileLayer;
-  public markerLayer: Marker[] = [];
+  public readonly markerLayer = computed((): Marker[] => {
+    if (!this.hasGPS()) {
+      return [];
+    }
+    return [
+      marker({
+        lat: this.PositionData.GPSData.latitude,
+        lng: this.PositionData.GPSData.longitude,
+      } as LatLngLiteral),
+    ];
+  });
 
   constructor() {
     this.mapEnabled = Config.Map.enabled;
@@ -113,17 +123,6 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   get CameraData(): CameraMetadata {
     return (this.media() as PhotoDTO).metadata.cameraData;
-  }
-
-  ngOnChanges(): void {
-    if (this.hasGPS()) {
-      this.markerLayer = [
-        marker({
-          lat: this.PositionData.GPSData.latitude,
-          lng: this.PositionData.GPSData.longitude,
-        } as LatLngLiteral),
-      ];
-    }
   }
 
   ngOnInit(): void {

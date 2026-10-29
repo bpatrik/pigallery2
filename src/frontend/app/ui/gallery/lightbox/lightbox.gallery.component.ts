@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, inject, viewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, QueryList, inject, viewChild } from '@angular/core';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
 import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
@@ -31,6 +31,9 @@ export enum LightboxStates {
 
 @Component({
   selector: 'app-gallery-lightbox',
+  host: {
+    '(window:resize)': 'onResize()'
+  },
   styleUrl: './lightbox.gallery.component.css',
   templateUrl: './lightbox.gallery.component.html',
   imports: [
@@ -216,7 +219,6 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
   }
 
-  @HostListener('window:resize')
   onResize(): void {
     this.updatePhotoFrameDim();
     if (this.activePhoto) {

@@ -134,6 +134,7 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
   }
 
+  // Side effect: starts the timer that counts the elapsed job time.
   ngOnChanges(): void {
     const progress = this.progress();
     if (!progress) {

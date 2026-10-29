@@ -231,6 +231,7 @@ export class SettingsEntryComponent
     return this.state.tags.uiDisabled(this.state.rootConfig, this.settingsService.settings.value);
   }
 
+  // Derives the editor from this.state, which is set by writeValue, not by an input.
   ngOnChanges(): void {
     if (!this.state) {
       return;

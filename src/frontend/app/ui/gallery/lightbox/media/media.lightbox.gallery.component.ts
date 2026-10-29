@@ -154,6 +154,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     return this.imageLoadFinished.next || this.nextImage.complete;
   }
 
+  // Side effect: resets and starts loading the image or video of the new media.
   ngOnChanges(): void {
     // media changed
     const gridMedia = this.gridMedia();

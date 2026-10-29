@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnChanges, OnDestroy, type SimpleChanges, inject, input, viewChild } from '@angular/core';
+import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, inject, input, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -48,6 +48,10 @@ import {QueryService} from '../../../../model/query.service';
 
 @Component({
   selector: 'app-gallery-map-lightbox',
+  host: {
+    '(window:resize)': 'onResize()',
+    '(window:keydown)': 'onKeyPress($event)'
+  },
   styleUrl: './lightbox.map.gallery.component.css',
   templateUrl: './lightbox.map.gallery.component.html',
   imports: [
@@ -248,6 +252,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     this.subscription.route?.unsubscribe();
   }
 
+  // Side effect: redraws the Leaflet layers.
   ngOnChanges(changes: SimpleChanges): void {
     if (this.visible === false) {
       return;
@@ -258,7 +263,6 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   }
 
 
-  @HostListener('window:resize')
   async onResize(): Promise<void> {
     this.lightboxDimension = {
       top: 0,
@@ -431,7 +435,6 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
   }
 
-  @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
     if (this.visible !== true) {
       return;
