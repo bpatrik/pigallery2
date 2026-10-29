@@ -32,7 +32,7 @@ export class JobButtonComponent {
   JobProgressStates = JobProgressStates;
   readonly jobError = output<string>();
   private modalRef: BsModalRef;
-  private defaultConfig: any = null;
+  private defaultConfig: any;
 
   /**
    * The config input, or the job's default config if the input is not set.
@@ -42,7 +42,11 @@ export class JobButtonComponent {
       return this.config();
     }
     if (!this.defaultConfig) {
-      this.defaultConfig = this.jobsService.getDefaultConfig(this.jobName()); // can return with null
+      // can return with null, keep undefined then, so JobDTOUtils.getHashName uses its default config
+      const c = this.jobsService.getDefaultConfig(this.jobName());
+      if (c) {
+        this.defaultConfig = c;
+      }
     }
     return this.defaultConfig;
   }
