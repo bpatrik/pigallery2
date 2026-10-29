@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Output, input} from '@angular/core';
+import {Component, forwardRef, input, output} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -61,7 +61,7 @@ export class GallerySearchQueryEntryComponent
   public SearchQueryTypes = SearchQueryTypes;
   public DatePatternFrequency = DatePatternFrequency;
   public TextSearchQueryMatchTypes = TextSearchQueryMatchTypes;
-  @Output() delete = new EventEmitter<void>();
+  readonly delete = output<void>();
   readonly id = input('NA');
 
   public locationInputText: string = '';

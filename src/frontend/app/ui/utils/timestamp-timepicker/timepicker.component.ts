@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, input} from '@angular/core';
+import {Component, Input, input, output} from '@angular/core';
 import { TimepickerComponent } from 'ngx-bootstrap/timepicker';
 import { FormsModule } from '@angular/forms';
 
@@ -9,7 +9,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class TimeStampTimePickerComponent {
   timestampValue = 0;
-  @Output() timestampChange = new EventEmitter<number>();
+  readonly timestampChange = output<number>();
 
   date: Date = new Date();
   readonly name = input<string>(undefined);

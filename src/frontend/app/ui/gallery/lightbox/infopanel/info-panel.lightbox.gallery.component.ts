@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, inject, output } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -48,7 +48,7 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input() media: MediaDTO;
-  @Output() closed = new EventEmitter();
+  readonly closed = output();
 
   public readonly mapEnabled: boolean;
   public readonly searchEnabled: boolean;

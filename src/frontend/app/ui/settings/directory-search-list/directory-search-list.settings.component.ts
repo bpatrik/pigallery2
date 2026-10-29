@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output, input} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
@@ -25,7 +25,7 @@ export class DirectorySearchListSettingsComponent {
     matchType: TextSearchQueryMatchTypes.exact_match,
     negate: false
 }));
-  @Output() changed = new EventEmitter<void>();
+  readonly changed = output<void>();
 
   readonly SearchQueryTypes = SearchQueryTypes;
   readonly MatchingTypes = TextSearchMatchingTypes.values;

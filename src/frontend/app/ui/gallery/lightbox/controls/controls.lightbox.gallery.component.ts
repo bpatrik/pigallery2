@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, Output, ViewChild, inject, input } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, ViewChild, inject, input, output } from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -44,11 +44,11 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
   @ViewChild('root', {static: false}) root: ElementRef;
-  @Output() closed = new EventEmitter();
-  @Output() toggleInfoPanel = new EventEmitter();
-  @Output() toggleFullScreen = new EventEmitter();
-  @Output() nextPhoto = new EventEmitter();
-  @Output() previousPhoto = new EventEmitter();
+  readonly closed = output();
+  readonly toggleInfoPanel = output();
+  readonly toggleFullScreen = output();
+  readonly nextPhoto = output();
+  readonly previousPhoto = output();
   readonly navigation = input({ hasPrev: true, hasNext: true });
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)

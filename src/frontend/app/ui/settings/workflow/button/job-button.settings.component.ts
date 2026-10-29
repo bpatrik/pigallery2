@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, TemplateRef, inject, input } from '@angular/core';
+import { Component, Input, TemplateRef, inject, input, output } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -32,7 +32,7 @@ export class JobButtonComponent {
   readonly allowParallelRun = input(false);
   readonly danger = input(false);
   JobProgressStates = JobProgressStates;
-  @Output() jobError = new EventEmitter<string>();
+  readonly jobError = output<string>();
   private modalRef: BsModalRef;
 
   private populateConfig() {

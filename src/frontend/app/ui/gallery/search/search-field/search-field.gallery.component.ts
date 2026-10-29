@@ -1,4 +1,4 @@
-import { Component, EventEmitter, forwardRef, Output, TemplateRef, inject, input } from '@angular/core';
+import { Component, forwardRef, TemplateRef, inject, input, output } from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
@@ -41,7 +41,7 @@ export class GallerySearchFieldComponent
   private modalService = inject(BsModalService);
   router = inject(Router);
 
-  @Output() search = new EventEmitter<void>();
+  readonly search = output<void>();
   readonly placeholder = input<string>(undefined);
   public rawSearchText = '';
   public searchQueryDTO: SearchQueryDTO;

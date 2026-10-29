@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild, inject, input } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, ViewChild, inject, input, output } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -28,7 +28,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   readonly windowAspect = input(1);
   readonly zoom = input(1);
   readonly drag = input({ x: 0, y: 0 });
-  @Output() videoSourceError = new EventEmitter();
+  readonly videoSourceError = output();
 
   @ViewChild('video', {static: false}) video: ElementRef<HTMLVideoElement>;
   @ViewChild('liveVideo', {static: false}) liveVideo: ElementRef<HTMLVideoElement>;
