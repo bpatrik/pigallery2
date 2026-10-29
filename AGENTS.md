@@ -66,6 +66,18 @@ so the maintainer's own `config.json` and DB are not touched:
 - For a different admin, enforce one on the CLI:
   `'--Users-enforcedUsers=[{"name":"tester","role":"Admin","password":"tester"}]'`.
 - `npm run run-dev` builds the frontend continuously (English only, into `dist/en`), so frontend edits show up on reload.
+- Start it in the background and stop it by PID (`node ... & echo $! > <tmp>/pid`, later `kill $(cat <tmp>/pid)`).
+  Don't `pkill -f` a pattern that also matches your own shell command.
+
+### Cloud / container sessions
+
+- Dependencies come from the environment's setup script (`npm ci`). If `node_modules` is missing, run `npm ci`
+  without `--ignore-scripts`: tests need the native `better-sqlite3` build and the `ffmpeg-static`/`ffprobe-static` downloads.
+- `npm run test-frontend` works as is: `karma.conf.js` uses Playwright's Chromium when `CHROME_BIN` is unset,
+  `--no-sandbox` when running as root, and the `dots` reporter when stdout is not a terminal.
+- Test output is long (server logs, browser console warnings). Save it to a file and read only the summary, e.g.:
+  - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
+  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; grep -aE "FAILED|Executed .* secs /" <tmp>/fe.log`
 
 ### SQLite vs MySQL tests
 
