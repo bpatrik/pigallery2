@@ -3,7 +3,7 @@ import {BehaviorSubject} from 'rxjs';
 import {Router} from '@angular/router';
 import {Config} from '../../../common/config/public/Config';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class VersionService {
   public version: BehaviorSubject<string>;
   public appVersion: BehaviorSubject<string>;

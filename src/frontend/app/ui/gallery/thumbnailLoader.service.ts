@@ -13,7 +13,7 @@ export enum ThumbnailLoadingPriority {
   low = 1,
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ThumbnailLoaderService {
   que: Array<ThumbnailTask> = [];
   runningRequests = 0;

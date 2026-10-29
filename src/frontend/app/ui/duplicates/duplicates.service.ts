@@ -3,7 +3,7 @@ import {NetworkService} from '../../model/network/network.service';
 import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
 import {BehaviorSubject} from 'rxjs';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class DuplicateService {
   public duplicates: BehaviorSubject<DuplicatesDTO[]>;
 

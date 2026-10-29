@@ -40,7 +40,7 @@ import {ionImageOutline, ionSpeedometerOutline, ionTimeOutline, ionTrailSignOutl
 import {LeafletControlLayersConfig, LeafletModule} from '@bluehalo/ngx-leaflet';
 
 import {NgIconComponent} from '@ng-icons/core';
-import {DurationPipe} from '../../../../pipes/DurationPipe';
+import {formatDuration} from '../../../../pipes/DurationPipe';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../../common/QueryParams';
 import {QueryService} from '../../../../model/query.service';
@@ -149,8 +149,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     private themeService: ThemeService,
     private route: ActivatedRoute,
     private queryService: QueryService,
-    private router: Router,
-    private durationPipe: DurationPipe
+    private router: Router
   ) {
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
@@ -713,7 +712,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
             stats.push(`<span title="Distance"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionTrailSignOutline}</svg> ${this.formatDistance(parsedGPX.stats.distance)}</span>`);
           }
           if (parsedGPX.stats.duration > 0) {
-            stats.push(`<span title="Duration"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionTimeOutline}</svg> ${this.durationPipe.transform(parsedGPX.stats.duration)}</span>`);
+            stats.push(`<span title="Duration"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionTimeOutline}</svg> ${formatDuration(parsedGPX.stats.duration)}</span>`);
           }
           if (parsedGPX.stats.averageSpeed > 0) {
             stats.push(`<span title="Average Speed"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionSpeedometerOutline}</svg> ${parsedGPX.stats.averageSpeed.toFixed(1)} km/h</span>`);

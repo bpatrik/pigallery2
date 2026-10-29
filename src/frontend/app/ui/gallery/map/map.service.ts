@@ -12,7 +12,7 @@ interface GpxStats {
   averageSpeed: number; // in km/h
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class MapService {
   private static readonly OSMLAYERS: MapLayers[] = [
     {

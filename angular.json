@@ -100,7 +100,10 @@
             "progress": true,
             "main": "src/frontend/main.ts",
             "tsConfig": "src/frontend/tsconfig.app.json",
-            "polyfills": "src/frontend/polyfills.ts",
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
             "assets": [
               "src/frontend/robots.txt",
               {
@@ -145,12 +148,6 @@
               "extractLicenses": true,
               "vendorChunk": false,
               "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/frontend/environments/environment.ts",
-                  "with": "src/frontend/environments/environment.prod.ts"
-                }
-              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -188,8 +185,9 @@
           "options": {
             "karmaConfig": "./karma.conf.js",
             "polyfills": [
-              "src/frontend/polyfills.ts",
-              "zone.js/testing"
+              "zone.js",
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "src/frontend/tsconfig.spec.json",
             "scripts": [],

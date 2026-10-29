@@ -7,7 +7,7 @@ import {Config} from '../../../common/config/public/Config';
 import {ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import {ContentLoaderService} from '../ui/gallery/contentLoader.service';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class QueryService {
   constructor(
     private shareService: ShareService,

@@ -6,7 +6,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {Utils} from '../../../../../common/Utils';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class GalleryNavigatorService {
   public girdSize: BehaviorSubject<GridSizes>;
 

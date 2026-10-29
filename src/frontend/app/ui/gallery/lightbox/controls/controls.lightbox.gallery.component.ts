@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, HostListener, Input, OnChanges, OnDestroy, Output, ViewChild,} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostListener, Inject, Input, LOCALE_ID, OnChanges, OnDestroy, Output, ViewChild,} from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -11,8 +11,8 @@ import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../..
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {LightboxService} from '../lightbox.service';
 import {Utils} from '../../../../../../common/Utils';
-import {FileSizePipe} from '../../../../pipes/FileSizePipe';
-import { DatePipe } from '@angular/common';
+import {formatFileSize} from '../../../../pipes/FileSizePipe';
+import {formatDate} from '@angular/common';
 import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 import {NgIconComponent} from '@ng-icons/core';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
@@ -67,8 +67,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     public lightboxService: LightboxService,
     public fullScreenService: FullScreenService,
     private authService: AuthenticationService,
-    private fileSizePipe: FileSizePipe,
-    private datePipe: DatePipe
+    @Inject(LOCALE_ID) private locale: string
   ) {
     this.controllersDimmed = this.lightboxService.controllersDimmed;
     this.searchEnabled = this.authService.canSearch();
@@ -391,7 +390,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
           retTexts.push(`${m.metadata.size.width}x${m.metadata.size.height}`);
           break;
         case LightBoxTitleTexts.size:
-          retTexts.push(this.fileSizePipe.transform(m.metadata.fileSize));
+          retTexts.push(formatFileSize(m.metadata.fileSize));
           break;
         case LightBoxTitleTexts.title:
           retTexts.push(m.metadata.title);
@@ -407,7 +406,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
           break;
         case LightBoxTitleTexts.date:
           const isThisYear = MediaDTOUtils.createdThisYear(m);
-          retTexts.push(this.datePipe.transform(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), isThisYear ? 'MMMM d' : 'longDate', 'UTC'));
+          retTexts.push(formatDate(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), isThisYear ? 'MMMM d' : 'longDate', this.locale, 'UTC'));
           break;
         case LightBoxTitleTexts.location:
           if (!m.metadata?.positionData) {

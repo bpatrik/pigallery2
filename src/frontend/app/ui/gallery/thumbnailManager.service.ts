@@ -5,7 +5,7 @@ import {MediaIcon} from './MediaIcon';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
 import {Person} from '../faces/Person';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ThumbnailManagerService {
   constructor(private thumbnailLoader: ThumbnailLoaderService) {
   }

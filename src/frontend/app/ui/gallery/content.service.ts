@@ -4,7 +4,7 @@ import {GallerySortingService, GroupedDirectoryContent} from './navigator/sortin
 import {FilterService} from './filter/filter.service';
 import {ContentLoaderService} from './contentLoader.service';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ContentService {
   public sortedFilteredContent: Observable<GroupedDirectoryContent>;
 

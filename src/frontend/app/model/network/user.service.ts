@@ -6,7 +6,7 @@ import {Config} from '../../../../common/config/public/Config';
 import {ShareService} from '../../ui/gallery/share.service';
 import {QueryParams} from '../../../../common/QueryParams';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class UserService {
   constructor(
       private networkService: NetworkService,

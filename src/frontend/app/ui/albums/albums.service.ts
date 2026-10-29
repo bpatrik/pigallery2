@@ -4,7 +4,7 @@ import {BehaviorSubject} from 'rxjs';
 import {AlbumBaseDTO} from '../../../../common/entities/album/AlbumBaseDTO';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class AlbumsService {
   public albums: BehaviorSubject<AlbumBaseDTO[]>;
 

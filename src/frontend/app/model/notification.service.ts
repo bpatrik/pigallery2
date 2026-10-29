@@ -9,7 +9,7 @@ export interface CountedNotificationDTO extends NotificationDTO {
   count: number;
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class NotificationService {
   options = {
     positionClass: 'toast-top-center',

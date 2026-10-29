@@ -18,8 +18,6 @@ import {ControlsLightboxComponent} from './controls.lightbox.gallery.component';
 import {LightboxService} from '../lightbox.service';
 import {FullScreenService} from '../../fullscreen.service';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
-import {FileSizePipe} from '../../../../pipes/FileSizePipe';
-import {DatePipe} from '@angular/common';
 
 class MockLightboxService {
   controllersDimmed = false;
@@ -64,8 +62,6 @@ describe('ControlsLightboxComponent - cursor visibility', () => {
         {provide: LightboxService, useClass: MockLightboxService},
         {provide: FullScreenService, useClass: MockFullScreenService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
-        {provide: FileSizePipe, useValue: {}},
-        {provide: DatePipe, useValue: {}},
         provideNoopAnimations(),
         provideRouter([]),
       ],

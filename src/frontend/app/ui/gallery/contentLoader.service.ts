@@ -15,7 +15,7 @@ import {FileDTO} from '../../../../common/entities/FileDTO';
 import {GalleryService} from './gallery.service';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ContentLoaderService implements OnDestroy {
   public content: BehaviorSubject<ContentWrapperWithError>;
   public originalContent: Observable<DirectoryContent>;

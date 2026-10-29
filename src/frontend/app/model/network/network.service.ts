@@ -8,7 +8,7 @@ import {CustomHeaders} from '../../../../common/CustomHeaders';
 import {VersionService} from '../version.service';
 import {lastValueFrom, Observable, tap} from 'rxjs';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class NetworkService {
   readonly apiBaseUrl = Config.Server.getApiUrl();
   private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];

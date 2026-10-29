@@ -8,7 +8,7 @@ import {BackendtextService} from '../../model/backendtext.service';
 import {NotificationService} from '../../model/notification.service';
 import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ScheduledJobsService {
   public progress: BehaviorSubject<Record<string, OnTimerJobProgressDTO>>;
   public onJobFinish: EventEmitter<string> = new EventEmitter<string>();

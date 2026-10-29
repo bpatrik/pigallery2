@@ -8,7 +8,7 @@ import {SearchQueryTypes, TextSearchQueryTypes,} from '../../../../../common/ent
 import {QueryParams} from '../../../../../common/QueryParams';
 import {defaultQueryKeywords, SearchQueryParser} from '../../../../../common/SearchQueryParser';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class AutoCompleteService {
   private keywords: string[] = [];
   private textSearchKeywordsMap: { [key: string]: SearchQueryTypes } = {};

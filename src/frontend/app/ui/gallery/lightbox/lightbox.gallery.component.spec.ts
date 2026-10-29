@@ -17,8 +17,6 @@ import {GridMedia} from '../grid/GridMedia';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {GalleryCacheService} from '../cache.gallery.service';
-import {FileSizePipe} from '../../../pipes/FileSizePipe';
-import {DatePipe} from '@angular/common';
 import {Utils} from '../../../../../common/Utils';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 
@@ -79,9 +77,6 @@ class MockGalleryCacheService {
   getSlideshowSpeed() {
     return 1000;
   }
-}
-
-class MockFileSizePipe {
 }
 
 class MockPiTitleService {
@@ -186,8 +181,6 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
         {provide: PiTitleService, useClass: MockPiTitleService},
         {provide: AuthenticationService, useValue: mockAuthenticationService},
         {provide: GalleryCacheService, useValue: mockGalleryCacheService},
-        {provide: FileSizePipe, useValue: MockFileSizePipe},
-        {provide: DatePipe, useValue: MockFileSizePipe},
       ]
     }).compileComponents();
 

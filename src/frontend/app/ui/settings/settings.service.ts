@@ -18,7 +18,7 @@ export enum ConfigStyle {
 }
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SettingsService {
   public configPriority = ConfigPriority.basic;
   public configStyle = ConfigStyle.full;

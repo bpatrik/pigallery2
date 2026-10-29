@@ -15,8 +15,8 @@ import {take} from 'rxjs/operators';
 import {GallerySortingService, GroupedDirectoryContent} from './navigator/sorting.service';
 import {FilterService} from './filter/filter.service';
 import {PiTitleService} from '../../model/pi-title.service';
-import {GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
-import {MDFilesFilterPipe} from '../../pipes/MDFilesFilterPipe';
+import {filterGPXFiles, GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
+import {filterMDFiles} from '../../pipes/MDFilesFilterPipe';
 import {ContentLoaderService} from './contentLoader.service';
 import {GalleryLightboxComponent} from './lightbox/lightbox.gallery.component';
 import {FrameComponent} from '../frame/frame.component';
@@ -95,8 +95,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     private filterService: FilterService,
     private sortingService: GallerySortingService,
     private piTitleService: PiTitleService,
-    private gpxFilesFilterPipe: GPXFilesFilterPipe,
-    private mdFilesFilterPipe: MDFilesFilterPipe,
     public uploaderService: UploaderService,
   ) {
     this.mapEnabled = Config.Map.enabled;
@@ -108,11 +106,11 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   get ShowMarkDown(): boolean {
-    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && this.mdFilesFilterPipe.transform(this.directoryContent.metaFile).length > 0;
+    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && filterMDFiles(this.directoryContent.metaFile).length > 0;
   }
 
   get ShowMap(): boolean {
-    return (this.isPhotoWithLocation || this.gpxFilesFilterPipe.transform(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
+    return (this.isPhotoWithLocation || filterGPXFiles(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
   }
 
   updateTimer(t: number): void {

@@ -6,7 +6,7 @@ import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class NavigationService {
   constructor(private router: Router, private shareService: ShareService) {
   }

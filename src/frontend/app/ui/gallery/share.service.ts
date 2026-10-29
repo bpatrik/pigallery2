@@ -16,7 +16,7 @@ import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/Searc
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ShareService {
   public readonly UnknownSharingKey = {
     sharingKey: 'UnknownSharingKey'

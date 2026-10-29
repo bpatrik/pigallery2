@@ -5,7 +5,7 @@ import {PersonDTO} from '../../../../common/entities/PersonDTO';
 import {SortByDirectionalTypes, type SortingMethod} from '../../../../common/entities/SortingMethods';
 import {Config} from '../../../../common/config/public/Config';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class FacesService {
   public persons: BehaviorSubject<PersonDTO[]>;
   public sorting: BehaviorSubject<SortingMethod>;

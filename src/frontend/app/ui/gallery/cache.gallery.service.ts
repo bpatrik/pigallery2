@@ -23,7 +23,7 @@ interface CacheItem<T> {
   item: T;
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class GalleryCacheService {
   private static readonly CONTENT_PREFIX = 'CONTENT:';
   private static readonly AUTO_COMPLETE_PREFIX = 'AUTOCOMPLETE:';
