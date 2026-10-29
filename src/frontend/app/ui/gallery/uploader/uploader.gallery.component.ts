@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
-import { NgStyle } from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';
 
@@ -8,8 +8,7 @@ import {UploaderService} from './uploader.service';
   templateUrl: './uploader.gallery.component.html',
   styleUrl: './uploader.gallery.component.css',
   imports: [
-    NgIconComponent,
-    NgStyle
+    NgIconComponent
 ]
 })
 export class UploaderComponent {

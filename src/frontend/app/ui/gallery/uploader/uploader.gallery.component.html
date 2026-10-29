@@ -21,7 +21,7 @@
             </div>
             <div class="progress" style="height: 8px;">
               <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-              [ngStyle]="{'width': getOverallProgress() + '%'}"></div>
+              [style.width]="getOverallProgress() + '%'"></div>
             </div>
           </div>
         </div>
@@ -81,7 +81,7 @@
                     [class.bg-success]="item.done && !item.error"
                     [class.progress-bar-animated]="item.status === 'uploading'"
                     [class.progress-bar-striped]="item.status === 'uploading'"
-                  [ngStyle]="{'width': item.progress + '%'}"></div>
+                  [style.width]="item.progress + '%'"></div>
                 </div>
               </div>
             </div>

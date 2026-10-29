@@ -6,7 +6,7 @@ import {MetadataSearchQueryTypes, SearchQueryTypes,} from '../../../../../../com
 import {Config} from '../../../../../../common/config/public/Config';
 import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {AutoCompleteRenderItem} from '../AutoCompleteRenderItem';
-import { NgClass } from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 
 @Component({
@@ -28,7 +28,6 @@ import {NgIconComponent} from '@ng-icons/core';
   ],
   imports: [
     FormsModule,
-    NgClass,
     NgIconComponent
 ]
 })
