@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FilterOption, FilterService, SelectedFilter} from './filter.service';
-import { NgClass, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +14,6 @@ import { FormsModule } from '@angular/forms';
     PopoverDirective,
     NgIconComponent,
     FormsModule,
-    NgClass,
     DatePipe
 ]
 })

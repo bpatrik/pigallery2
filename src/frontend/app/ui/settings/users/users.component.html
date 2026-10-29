@@ -25,12 +25,12 @@
           </td>
           <td>
             <button [disabled]="!canDeleteUser(user)" (click)="deleteUser(user)"
-              [ngClass]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
+              [class]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
             <button [disabled]="!canModifyUser(user)" (click)="openEditUser(user)"
-              [ngClass]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
+              [class]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionPencil" title="Edit" i18n-title />
             </button>

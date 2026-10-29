@@ -34,8 +34,8 @@
         @if (queryEntry.type != SearchQueryTypes.SOME_OF) {
           <div class="col"></div>
         }
-        <button [ngClass]="'btn-danger'"
-          class="btn float-end col-1 align-self-center"
+        <button
+          class="btn btn-danger float-end col-1 align-self-center"
           (click)="deleteItem()">
           <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
         </button>
@@ -310,8 +310,8 @@
                                       }
                                     }
                                     <div class="col-2 col-lg-1 align-self-center">
-                                      <button [ngClass]="'btn-danger'"
-                                        class="btn  w-auto float-end"
+                                      <button
+                                        class="btn btn-danger w-auto float-end"
                                         (click)="deleteItem()">
                                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                                       </button>

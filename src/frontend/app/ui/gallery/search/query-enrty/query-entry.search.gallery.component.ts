@@ -25,7 +25,7 @@ import {
   type ValidationErrors,
   Validator
 } from '@angular/forms';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
 import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
@@ -48,7 +48,6 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
   ],
   imports: [
     FormsModule,
-    NgClass,
     NgIconComponent,
     DatePipe,
     StringifySearchType
