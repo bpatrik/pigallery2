@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, inject, viewChild } from '@angular/core';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
 import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
@@ -52,11 +52,14 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private wakeLockService = inject(WakeLockService);
   private lightboxService = inject(LightboxService);
 
-  @ViewChild('photo', {static: true})
-  mediaElement: GalleryLightboxMediaComponent;
+  readonly mediaElement = viewChild<GalleryLightboxMediaComponent>('photo');
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the query. This prevents migration.
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the query. This prevents migration.
   @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
-  @ViewChild('lightbox', {static: false}) lightboxElement: ElementRef;
-  @ViewChild('root', {static: false}) root: ElementRef;
+  readonly lightboxElement = viewChild<ElementRef>('lightbox');
+  readonly root = viewChild<ElementRef>('root');
 
   public navigation = {hasPrev: true, hasNext: true};
   public blackCanvasOpacity = 0;
@@ -116,7 +119,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     if (this.fullScreenService.isFullScreenEnabled()) {
       this.fullScreenService.exitFullScreen();
     } else {
-      this.fullScreenService.showFullScreen(this.root.nativeElement);
+      this.fullScreenService.showFullScreen(this.root().nativeElement);
     }
   }
 
@@ -293,7 +296,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
         style(DimensionUtils.toString(from)),
         animate('0.2s ease-in-out', style(DimensionUtils.toString(to))),
       ])
-      .create(this.mediaElement.elementRef.nativeElement);
+      .create(this.mediaElement().elementRef.nativeElement);
     elem.play();
     this.photoPlayer = elem;
     return elem;
@@ -313,7 +316,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
         style(DimensionUtils.toString(from)),
         animate('0.2s ease-in-out', style(DimensionUtils.toString(to))),
       ])
-      .create(this.lightboxElement.nativeElement);
+      .create(this.lightboxElement().nativeElement);
     elem.play();
     this.lightboxPlayer = elem;
     return elem;

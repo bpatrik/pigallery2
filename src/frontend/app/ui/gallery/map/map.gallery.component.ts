@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, ViewChild, inject, input } from '@angular/core';
+import { Component, ElementRef, OnChanges, inject, input, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
@@ -27,9 +27,8 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
 
   readonly photos = input<PhotoDTO[]>(undefined);
   readonly gpxFiles = input<FileDTO[]>(undefined);
-  @ViewChild(GalleryMapLightboxComponent, {static: false})
-  mapLightbox: GalleryMapLightboxComponent;
-  @ViewChild('map', {static: false}) mapElement: ElementRef;
+  readonly mapLightbox = viewChild(GalleryMapLightboxComponent);
+  readonly mapElement = viewChild<ElementRef>('map');
 
   leafletMap: Map;
   layers: { light: TileLayer, dark: TileLayer };
@@ -148,14 +147,15 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   }
 
   public getDimension(): Dimension {
-    if (isNaN(this.mapElement?.nativeElement?.parentElement?.offsetParent.offsetTop)) {
+    const mapElement = this.mapElement();
+    if (isNaN(mapElement?.nativeElement?.parentElement?.offsetParent.offsetTop)) {
       return {top: 0, left: 0, width: 0, height: 0};
     }
     return {
-      top: this.mapElement.nativeElement?.parentElement?.offsetParent?.offsetTop,
-      left: this.mapElement.nativeElement?.parentElement?.offsetLeft,
-      width: this.mapElement.nativeElement?.offsetWidth,
-      height: this.mapElement.nativeElement?.offsetHeight,
+      top: mapElement.nativeElement?.parentElement?.offsetParent?.offsetTop,
+      left: mapElement.nativeElement?.parentElement?.offsetLeft,
+      width: mapElement.nativeElement?.offsetWidth,
+      height: mapElement.nativeElement?.offsetHeight,
     } as Dimension;
   }
 }

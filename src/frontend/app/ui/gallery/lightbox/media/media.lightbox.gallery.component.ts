@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild, inject, input, output } from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, ViewChild, inject, input, output, viewChild } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -30,9 +30,13 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   readonly drag = input({ x: 0, y: 0 });
   readonly videoSourceError = output();
 
-  @ViewChild('video', {static: false}) video: ElementRef<HTMLVideoElement>;
+  readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the query. This prevents migration.
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the query. This prevents migration.
   @ViewChild('liveVideo', {static: false}) liveVideo: ElementRef<HTMLVideoElement>;
-  @ViewChild('image', {static: false}) imageElement: ElementRef<HTMLImageElement>;
+  readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   prevGirdPhoto: GridMedia = null;
 
@@ -78,43 +82,48 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public set VideoProgress(value: number) {
-    if (!this.video && value === null && typeof value === 'undefined') {
+    const video = this.video();
+    if (!video && value === null && typeof value === 'undefined') {
       return;
     }
-    this.video.nativeElement.currentTime =
-      this.video.nativeElement.duration * (value / 100);
-    if (this.video.nativeElement.paused) {
-      this.video.nativeElement.play().catch(console.error);
+    video.nativeElement.currentTime =
+      video.nativeElement.duration * (value / 100);
+    if (video.nativeElement.paused) {
+      video.nativeElement.play().catch(console.error);
     }
   }
 
   public get VideoVolume(): number {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return 1;
     }
-    return this.video.nativeElement.volume;
+    return video.nativeElement.volume;
   }
 
   public set VideoVolume(value: number) {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return;
     }
-    this.video.nativeElement.muted = false;
-    this.video.nativeElement.volume = value;
+    video.nativeElement.muted = false;
+    video.nativeElement.volume = value;
   }
 
   public get Muted(): boolean {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return false;
     }
-    return this.video.nativeElement.muted;
+    return video.nativeElement.muted;
   }
 
   public get Paused(): boolean {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return true;
     }
-    return this.video.nativeElement.paused;
+    return video.nativeElement.paused;
   }
 
   private get ThumbnailUrl(): string {
@@ -133,10 +142,12 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       return false;
     }
     if (this.gridMedia.isVideo()) {
-      return !!this.video && this.video.nativeElement.readyState >= 3; // HAVE_FUTURE_DATA
+      const video = this.video();
+      return !!video && video.nativeElement.readyState >= 3; // HAVE_FUTURE_DATA
     }
     if (this.gridMedia.isPhoto()) {
-      return this.imageLoadFinished.this || (this.imageElement && this.imageElement.nativeElement.complete);
+      const imageElement = this.imageElement();
+      return this.imageLoadFinished.this || (imageElement && imageElement.nativeElement.complete);
     }
     return false;
   }
@@ -187,21 +198,23 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public mute(): void {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return;
     }
 
-    this.video.nativeElement.muted = !this.video.nativeElement.muted;
+    video.nativeElement.muted = !video.nativeElement.muted;
   }
 
   public playPause(): void {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return;
     }
-    if (this.video.nativeElement.paused) {
-      this.video.nativeElement.play().catch(console.error);
+    if (video.nativeElement.paused) {
+      video.nativeElement.play().catch(console.error);
     } else {
-      this.video.nativeElement.pause();
+      video.nativeElement.pause();
     }
   }
 
@@ -281,8 +294,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   public onVideoProgress(): void {
     this.videoProgress =
-      (100 / this.video.nativeElement.duration) *
-      this.video.nativeElement.currentTime;
+      (100 / this.video().nativeElement.duration) *
+      this.video().nativeElement.currentTime;
   }
 
   /**

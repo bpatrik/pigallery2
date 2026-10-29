@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, ViewChild, inject, input, output } from '@angular/core';
+import { Component, ElementRef, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, inject, input, output, viewChild } from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -41,9 +41,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   private locale = inject(LOCALE_ID);
 
   readonly MAX_ZOOM = 10;
-  @ViewChild('canvas')
-  canvas: ElementRef<HTMLCanvasElement>;
-  @ViewChild('root', {static: false}) root: ElementRef;
+  readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
+  readonly root = viewChild<ElementRef>('root');
   readonly closed = output();
   readonly toggleInfoPanel = output();
   readonly toggleFullScreen = output();
@@ -127,7 +126,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   public containerWidth(): void {
-    return this.root.nativeElement.width;
+    return this.root().nativeElement.width;
   }
 
   ngOnDestroy(): void {
@@ -489,19 +488,20 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       p = (t % (this.lightboxService.slideshowSpeed * 10)) / this.lightboxService.slideshowSpeed / 10;  // ticks every 100 ms
 
     }
-    if (!this.canvas) {
+    const canvas = this.canvas();
+    if (!canvas) {
       return;
     }
     if (!this.ctx) {
-      this.ctx = this.canvas.nativeElement.getContext('2d');
+      this.ctx = canvas.nativeElement.getContext('2d');
     }
 
     this.ctx.lineWidth = 5;
     this.ctx.strokeStyle = 'white';
     this.ctx.lineCap = 'round';
-    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
+    this.ctx.clearRect(0, 0, canvas.nativeElement.width, canvas.nativeElement.height);
     this.ctx.beginPath();
-    this.ctx.arc(this.canvas.nativeElement.width / 2, this.canvas.nativeElement.height / 2, this.canvas.nativeElement.width / 2 - this.ctx.lineWidth, 0, p * 2 * Math.PI);
+    this.ctx.arc(canvas.nativeElement.width / 2, canvas.nativeElement.height / 2, canvas.nativeElement.width / 2 - this.ctx.lineWidth, 0, p * 2 * Math.PI);
 
     this.ctx.stroke();
   }

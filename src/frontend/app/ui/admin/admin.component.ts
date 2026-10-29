@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, viewChildren } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {NotificationService} from '../../model/notification.service';
@@ -52,9 +52,8 @@ export class AdminComponent implements OnInit, AfterViewInit {
   settingsService = inject(SettingsService);
   private piTitleService = inject(PiTitleService);
 
-  @ViewChildren('setting') settingsComponents: QueryList<ISettingsComponent>;
-  @ViewChildren('setting', {read: ElementRef})
-  settingsComponentsElemRef: QueryList<ElementRef>;
+  readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
+  readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
   contents: ISettingsComponent[] = [];
   configPriorities: { key: number; value: string; }[];
   configStyles: { key: number; value: string; }[];
@@ -71,7 +70,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => (this.contents = this.settingsComponents.toArray()), 0);
+    setTimeout(() => (this.contents = this.settingsComponents), 0);
   }
 
   ngOnInit(): void {

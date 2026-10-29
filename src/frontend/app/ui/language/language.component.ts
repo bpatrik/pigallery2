@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
@@ -23,7 +23,7 @@ export class LanguageComponent {
   languages: string[] = [];
   current: string = null;
 
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
 
   constructor() {
     this.languages = Config.Server.languages.sort();

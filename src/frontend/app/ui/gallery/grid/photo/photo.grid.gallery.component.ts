@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {type Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -44,8 +44,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input() gridMedia: GridMedia;
-  @ViewChild('img', {static: false}) imageRef: ElementRef;
-  @ViewChild('photoContainer', {static: true}) container: ElementRef;
+  readonly imageRef = viewChild<ElementRef>('img');
+  readonly container = viewChild<ElementRef>('photoContainer');
 
   thumbnail: Thumbnail;
   keywords: { value: string; type: SearchQueryTypes }[] = null;
@@ -216,10 +216,10 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   isInView(): boolean {
     return (
       PageHelper.ScrollY <
-      this.container.nativeElement.offsetTop +
-      this.container.nativeElement.clientHeight &&
+      this.container().nativeElement.offsetTop +
+      this.container().nativeElement.clientHeight &&
       PageHelper.ScrollY + window.innerHeight >
-      this.container.nativeElement.offsetTop
+      this.container().nativeElement.offsetTop
     );
   }
 
@@ -295,7 +295,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   }
 
   public getDimension(): Dimension {
-    if (!this.imageRef?.nativeElement?.offsetParent) {
+    const imageRef = this.imageRef();
+    if (!imageRef?.nativeElement?.offsetParent) {
       return {
         top: 0,
         left: 0,
@@ -304,10 +305,10 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
       };
     }
     return {
-      top: this.imageRef.nativeElement.offsetParent.offsetTop,
-      left: this.imageRef.nativeElement.offsetParent.offsetLeft,
-      width: this.imageRef.nativeElement.width,
-      height: this.imageRef.nativeElement.height,
+      top: imageRef.nativeElement.offsetParent.offsetTop,
+      left: imageRef.nativeElement.offsetParent.offsetLeft,
+      width: imageRef.nativeElement.width,
+      height: imageRef.nativeElement.height,
     };
   }
 }

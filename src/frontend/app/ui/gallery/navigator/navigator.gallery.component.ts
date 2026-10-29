@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, inject, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
@@ -67,8 +67,8 @@ export class GalleryNavigatorComponent {
   public directoryContent: Observable<DirectoryContent>;
   public routes: Observable<NavigatorPath[]>;
   public showFilters = false;
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
-  @ViewChild('navigator', {read: ElementRef}) navigatorElement: ElementRef<HTMLInputElement>;
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
+  readonly navigatorElement = viewChild('navigator', { read: ElementRef });
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
   protected readonly GroupByTypes = GroupByTypes;
   private readonly RootFolderName: string;
@@ -320,7 +320,7 @@ export class GalleryNavigatorComponent {
       //hide delay
       if (this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay) {
         this.showFilters = false;
-        this.dropdown.hide();
+        this.dropdown().hide();
       }
       this.lastScroll.down = scrollPosition;
     } else if (this.lastScroll.any > scrollPosition) {

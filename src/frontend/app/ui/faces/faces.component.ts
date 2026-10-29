@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, viewChild } from '@angular/core';
 import {FacesService} from './faces.service';
 import {QueryService} from '../../model/query.service';
 import {combineLatest, Observable} from 'rxjs';
@@ -27,7 +27,7 @@ export class FacesComponent implements OnInit {
   queryService = inject(QueryService);
   private piTitleService = inject(PiTitleService);
 
-  @ViewChild('container', {static: true}) container: ElementRef;
+  readonly container = viewChild<ElementRef>('container');
   public size: number;
   favourites: Observable<PersonDTO[]>;
   nonFavourites: Observable<PersonDTO[]>;
@@ -65,7 +65,7 @@ export class FacesComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container.nativeElement.clientWidth - 30;
+    const containerWidth = this.container().nativeElement.clientWidth - 30;
     this.size = containerWidth / Math.round(containerWidth / size) - 5;
   }
 }

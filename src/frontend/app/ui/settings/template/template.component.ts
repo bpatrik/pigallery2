@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -79,8 +79,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   @Input() ConfigPath: string;
   nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
 
-  @ViewChild('settingsForm', {static: true})
-  form: UntypedFormControl;
+  readonly form = viewChild<UntypedFormControl>('settingsForm');
 
 
   public inProgress = false;
@@ -152,7 +151,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     this.getSettings();
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
-    this.subscription = this.form.valueChanges.subscribe(() => {
+    this.subscription = this.form().valueChanges.subscribe(() => {
       this.onOptionChange();
     });
 

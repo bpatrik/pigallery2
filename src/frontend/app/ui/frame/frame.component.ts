@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, ViewChild, ViewEncapsulation, inject, input } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewEncapsulation, inject, input, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -71,10 +71,10 @@ export class FrameComponent {
   public navbarKeepTop = true;
   public animateNavbar = false;
   public fixNavbarOnTop = false;
-  @ViewChild('dropdownMenu', {static: true}) dropdownMenu: ElementRef;
-  @ViewChild('navContainer', {static: true}) navContainer: ElementRef;
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
-  @ViewChild('languageSelector', {static: true}) languageSelector: LanguageComponent;
+  readonly dropdownMenu = viewChild<ElementRef>('dropdownMenu');
+  readonly navContainer = viewChild<ElementRef>('navContainer');
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
+  readonly languageSelector = viewChild<LanguageComponent>('languageSelector');
   ThemeModes = ThemeModes;
   public readonly enableScrollUpButton: boolean;
   /* sticky top navbar */
@@ -154,7 +154,7 @@ export class FrameComponent {
     const upDelay = up && this.lastScroll.down > scrollPosition + window.innerHeight * Config.Gallery.NavBar.NavbarShowDelay;
     const downDelay = down && this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay;
     // We are the top where the navbar by default lives
-    if (this.navContainer.nativeElement.offsetHeight > scrollPosition) {
+    if (this.navContainer().nativeElement.offsetHeight > scrollPosition) {
       // do not force move navbar up when we are scrolling up from bottom
       if (this.shouldHideNavbar != false || scrollPosition <= 0) {
         this.navbarKeepTop = true;
@@ -169,8 +169,8 @@ export class FrameComponent {
       this.navbarKeepTop = false;
 
       if (downDelay) { // scroll down
-        this.dropdown.hide();
-        this.languageSelector.dropdown.hide();
+        this.dropdown().hide();
+        this.languageSelector().dropdown().hide();
       }
     }
 

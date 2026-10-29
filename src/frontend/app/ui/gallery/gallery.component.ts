@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -69,8 +69,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   private piTitleService = inject(PiTitleService);
   uploaderService = inject(UploaderService);
 
-  @ViewChild(GalleryGridComponent, {static: false})
-  grid: GalleryGridComponent;
+  readonly grid = viewChild(GalleryGridComponent);
 
   public showSearchBar = false;
   public showShare = false;

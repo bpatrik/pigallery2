@@ -1,4 +1,4 @@
-import { Component, ViewChild, inject } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { ExtensionInstallerService } from './extension-installer.service';
 import { ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
 import { NotificationService } from '../../../model/notification.service';
@@ -18,14 +18,14 @@ export class ExtensionInstallerComponent {
   private extensionService = inject(ExtensionInstallerService);
   private notificationService = inject(NotificationService);
 
-  @ViewChild('extensionsModal', { static: false }) public extensionsModal: ModalDirective;
+  public readonly extensionsModal = viewChild<ModalDirective>('extensionsModal');
 
   public extensions: ExtensionListItem[] = [];
   public loading = false;
   public error: string | null = null;
 
   public openExtensionsModal(): void {
-    this.extensionsModal.show();
+    this.extensionsModal().show();
     this.loadExtensions();
   }
 

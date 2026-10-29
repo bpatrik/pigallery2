@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -44,7 +44,11 @@ export class GalleryGridComponent
   private route = inject(ActivatedRoute);
   blogService = inject(BlogService);
 
-  @ViewChild('gridContainer', {static: false}) gridContainer: ElementRef;
+  readonly gridContainer = viewChild<ElementRef>('gridContainer');
+  // TODO: Skipped for migration because:
+  //  There are references to this query that cannot be migrated automatically.
+  // TODO: Skipped for migration because:
+  //  There are references to this query that cannot be migrated automatically.
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
   // TODO: Skipped for migration because:
@@ -82,7 +86,7 @@ export class GalleryGridComponent
       return;
     }
 
-    this.containerMinHeight = Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer.nativeElement.clientHeight); // reduce flickering
+    this.containerMinHeight = Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer().nativeElement.clientHeight); // reduce flickering
     setTimeout(() => {
       this.updateContainerDimensions();
       this.mergeNewPhotos();
@@ -497,7 +501,8 @@ export class GalleryGridComponent
   }
 
   private updateContainerDimensions(): boolean {
-    if (!this.gridContainer) {
+    const gridContainer = this.gridContainer();
+    if (!gridContainer) {
       return false;
     }
 
@@ -505,12 +510,12 @@ export class GalleryGridComponent
     PageHelper.showScrollY('grid');
     // if the width changed a bit or the height changed a lot
     if (
-      this.containerWidth !== this.gridContainer.nativeElement.parentElement.clientWidth ||
+      this.containerWidth !== gridContainer.nativeElement.parentElement.clientWidth ||
       this.screenHeight < window.innerHeight * 0.75 ||
       this.screenHeight > window.innerHeight * 1.25
     ) {
       this.screenHeight = window.innerHeight;
-      this.containerWidth = this.gridContainer.nativeElement.parentElement.clientWidth;
+      this.containerWidth = gridContainer.nativeElement.parentElement.clientWidth;
       this.clearRenderedPhotos();
       PageHelper.OverflowY = scrollY;
       return true;

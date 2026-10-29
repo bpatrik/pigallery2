@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -41,7 +41,7 @@ export class AlbumsComponent implements OnInit {
   private navigation = inject(NavigationService);
   private searchQueryParserService = inject(SearchQueryParserService);
 
-  @ViewChild('container', {static: true}) container: ElementRef;
+  readonly container = viewChild<ElementRef>('container');
   public size: number;
   public savedSearch = {
     name: '',
@@ -92,7 +92,7 @@ export class AlbumsComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container.nativeElement.clientWidth - 30;
+    const containerWidth = this.container().nativeElement.clientWidth - 30;
     this.size = containerWidth / Math.round(containerWidth / size) - 5;
   }
 }

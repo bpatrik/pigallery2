@@ -1,4 +1,4 @@
-import { Component, ElementRef, forwardRef, OnDestroy, ViewChild, inject, input, output } from '@angular/core';
+import { Component, ElementRef, forwardRef, OnDestroy, inject, input, output, viewChild } from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
@@ -40,8 +40,8 @@ export class GallerySearchFieldBaseComponent
   readonly placeholder = input($localize `Search`);
   readonly search = output<void>();
 
-  @ViewChild('SearchField', {static: false}) searchField: ElementRef;
-  @ViewChild('SearchHintField', {static: false}) searchHintField: ElementRef;
+  readonly searchField = viewChild<ElementRef>('SearchField');
+  readonly searchHintField = viewChild<ElementRef>('SearchHintField');
 
   autoCompleteRenders: AutoCompleteRenderItem[] = [];
   public rawSearchText = '';
@@ -245,8 +245,8 @@ export class GallerySearchFieldBaseComponent
   }
 
   Scrolled(): void {
-    this.searchHintField.nativeElement.scrollLeft =
-      this.searchField.nativeElement.scrollLeft;
+    this.searchHintField().nativeElement.scrollLeft =
+      this.searchField().nativeElement.scrollLeft;
   }
 
   private emptyAutoComplete(): void {

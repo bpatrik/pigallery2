@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnChanges, OnDestroy, type SimpleChanges, ViewChild, inject, input } from '@angular/core';
+import { Component, ElementRef, HostListener, OnChanges, OnDestroy, type SimpleChanges, inject, input, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -82,7 +82,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   public visible = false;
   public controllersVisible = false;
   public opacity = 1.0;
-  @ViewChild('root', {static: true}) elementRef: ElementRef;
+  readonly elementRef = viewChild<ElementRef>('root');
   public mapOptions: MapOptions = {
     zoom: 2,
     // setting max zoom is needed to MarkerCluster https://github.com/Leaflet/Leaflet.markercluster/issues/611
@@ -442,7 +442,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         if (this.fullScreenService.isFullScreenEnabled()) {
           this.fullScreenService.exitFullScreen();
         } else {
-          this.fullScreenService.showFullScreen(this.elementRef.nativeElement);
+          this.fullScreenService.showFullScreen(this.elementRef().nativeElement);
         }
         break;
       case 'Escape':
