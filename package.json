@@ -58,6 +58,7 @@
     "reflect-metadata": "0.2.2",
     "sharp": "0.34.2",
     "ts-node-iptc": "1.0.11",
+    "tslib": "2.8.1",
     "typeconfig": "2.3.4",
     "typeorm": "0.3.31",
     "xml2js": "0.6.2"
@@ -137,7 +138,6 @@
     "ngx-toastr": "20.0.5",
     "nyc": "17.1.0",
     "rxjs": "7.8.2",
-    "ts-helpers": "1.1.2",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
@@ -149,12 +149,6 @@
     "ffmpeg-static": "5.2.0",
     "ffprobe-static": "3.1.0",
     "mysql2": "3.24.6"
-  },
-  "overrides": {
-    "beasties": "^0.3.3"
-  },
-  "notes": {
-    "remove besties": "after angular v20: https://stackoverflow.com/questions/76798190/i-get-error-form-floatinglabel-in-ng-build"
   },
   "engines": {
     "node": ">=22.12 <24.0"

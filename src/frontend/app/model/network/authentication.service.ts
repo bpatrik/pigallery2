@@ -9,12 +9,7 @@ import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
 import {CookieNames} from '../../../../common/CookieNames';
 import {ShareService} from '../../ui/gallery/share.service';
 import {CookieService} from 'ngx-cookie-service';
-
-/* Injected config / user from server side */
-// eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword, @typescript-eslint/no-namespace
-declare module ServerInject {
-  export let user: UserDTO;
-}
+import {getInjectedUser} from '../server-inject';
 
 @Injectable({providedIn: 'root'})
 export class AuthenticationService {
@@ -33,11 +28,9 @@ export class AuthenticationService {
       this.isAuthenticated() === false &&
       this.cookieService.get(CookieNames.session) != null
     ) {
-      if (
-        typeof ServerInject !== 'undefined' &&
-        typeof ServerInject.user !== 'undefined'
-      ) {
-        this.user.next(ServerInject.user);
+      const injectedUser = getInjectedUser();
+      if (typeof injectedUser !== 'undefined') {
+        this.user.next(injectedUser);
       }
       this.getSessionUser().catch(console.error);
     } else {
