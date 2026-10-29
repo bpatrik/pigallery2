@@ -1,10 +1,10 @@
 import {importProvidersFrom, Injectable, provideZoneChangeDetection} from '@angular/core';
-import {HTTP_INTERCEPTORS, HttpClient, provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
-import {ErrorInterceptor} from './app/model/network/helper/error.interceptor';
-import {DefaultUrlSerializer, UrlSerializer, UrlTree} from '@angular/router';
+import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
+import {errorInterceptor} from './app/model/network/helper/error.interceptor';
+import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree} from '@angular/router';
 import {bootstrapApplication, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule} from '@angular/platform-browser';
 import {provideAnimations} from '@angular/platform-browser/animations';
-import {AppRoutingModule} from './app/app.routing';
+import {routes} from './app/app.routing';
 import {provideIcons} from '@ng-icons/core';
 import {provideToastr} from 'ngx-toastr';
 import {provideMarkdown} from 'ngx-markdown';
@@ -48,14 +48,15 @@ Marker.prototype.options.icon = MarkerFactory.defIcon;
 bootstrapApplication(AppComponent, {
   providers: [
     provideZoneChangeDetection(),
-    importProvidersFrom(HammerModule, AppRoutingModule),
+    importProvidersFrom(HammerModule),
+    provideRouter(routes),
     provideIcons(appIcons),
     provideToastr(),
     provideMarkdown({loader: HttpClient}),
-    {provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true},
     {provide: UrlSerializer, useClass: CustomUrlSerializer},
     {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
-    provideHttpClient(withInterceptorsFromDi()),
+    // No withFetch(): the fetch backend does not emit upload progress events, which the uploader needs.
+    provideHttpClient(withInterceptors([errorInterceptor])),
     provideAnimations()
   ]
 })
