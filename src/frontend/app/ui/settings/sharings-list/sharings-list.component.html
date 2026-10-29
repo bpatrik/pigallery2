@@ -19,7 +19,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (share of shares; track share) {
+        @for (share of shares; track share.id) {
           <tr>
             <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
             <td>{{(share.searchQuery || share.directoryQuery) | searchQuery}}</td>

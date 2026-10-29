@@ -1,7 +1,7 @@
 <app-frame>
 
   <div body #container class="container-fluid">
-    @for (album of albumsService.albums | async; track album) {
+    @for (album of albumsService.albums | async; track album.id) {
       <app-album [album]="album"
       [size]="size" />
     }
