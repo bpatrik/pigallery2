@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {GroupSortByTypes} from '../../../../../common/entities/SortingMethods';
 
 import { NgIconComponent } from '@ng-icons/core';
@@ -10,6 +10,6 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class SortingMethodIconComponent {
-  @Input() method: number;
+  readonly method = input<number>(undefined);
   public readonly GroupSortByTypes = GroupSortByTypes;
 }

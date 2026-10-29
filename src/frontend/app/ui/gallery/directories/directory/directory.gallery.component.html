@@ -5,8 +5,8 @@
 
 
   <div class="photo-container rounded overflow-hidden"
-    [style.width.px]="size"
-    [style.height.px]="size">
+    [style.width.px]="size()"
+    [style.height.px]="size()">
     @if (thumbnail && thumbnail.Available) {
       <div class="photo"
       [style.background-image]="getSanitizedThUrl()"></div>
@@ -18,7 +18,7 @@
   </div>
   <!--Info box -->
   <div class="info rounded-bottom">
-    <div class="directory-name">{{directory.name}}</div>
+    <div class="directory-name">{{directory().name}}</div>
 
   </div>
 </a>

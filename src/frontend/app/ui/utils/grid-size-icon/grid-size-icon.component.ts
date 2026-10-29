@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 
 import { NgIconComponent } from '@ng-icons/core';
@@ -10,6 +10,6 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class GridSizeIconComponent {
-  @Input() method: number;
+  readonly method = input<number>(undefined);
   public readonly GridSizes = GridSizes;
 }

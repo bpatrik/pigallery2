@@ -73,6 +73,9 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
 
 
   public icon: string;
+  // TODO: Skipped for migration because:
+  //  This input overrides a field from a superclass, while the superclass field
+  //  is not migrated.
   @Input() ConfigPath: string;
   nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
 

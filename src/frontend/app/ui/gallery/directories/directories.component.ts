@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnChanges, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, OnChanges, inject, input } from '@angular/core';
 import {DeviceDetectorService} from 'ngx-device-detector';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
@@ -14,7 +14,7 @@ export class DirectoriesComponent implements OnChanges {
   private container = inject(ElementRef);
   private deviceService = inject(DeviceDetectorService);
 
-  @Input() directories: SubDirectoryDTO[];
+  readonly directories = input<SubDirectoryDTO[]>(undefined);
   size: number;
   isDesktop: boolean;
 

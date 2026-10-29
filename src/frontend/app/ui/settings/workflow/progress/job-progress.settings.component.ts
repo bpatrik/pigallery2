@@ -24,6 +24,9 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
   private modalService = inject(BsModalService);
   backendTextService = inject(BackendtextService);
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() progress: JobProgressDTO;
   JobProgressStates = JobProgressStates;
   timeCurrentCopy: number;

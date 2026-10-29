@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, Output, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, Output, ViewChild, inject, input } from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -49,11 +49,16 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   @Output() toggleFullScreen = new EventEmitter();
   @Output() nextPhoto = new EventEmitter();
   @Output() previousPhoto = new EventEmitter();
-  @Input() navigation = {hasPrev: true, hasNext: true};
+  readonly navigation = input({ hasPrev: true, hasNext: true });
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() activePhoto: GalleryPhotoComponent;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() mediaElement: GalleryLightboxMediaComponent;
-  @Input() photoFrameDim = {width: 1, height: 1, aspect: 1};
-  @Input() slideShowRunning: boolean;
+  readonly photoFrameDim = input({ width: 1, height: 1, aspect: 1 });
+  readonly slideShowRunning = input<boolean>(undefined);
   public readonly facesEnabled = Config.Faces.enabled;
   public zoom = 1;
   public playBackDurations = [1, 2, 5, 10, 15, 20, 30, 60];
@@ -136,7 +141,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
 
   ngOnChanges(): void {
     this.updateFaceContainerDim();
-    if (this.slideShowRunning) {
+    if (this.slideShowRunning()) {
       this.runSlideShow();
     }
   }
@@ -165,11 +170,11 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       return;
     }
     if ($event.deltaX < 0) {
-      if (this.navigation.hasPrev) {
+      if (this.navigation().hasPrev) {
         this.previousPhoto.emit();
       }
     } else if ($event.deltaX > 0) {
-      if (this.navigation.hasNext) {
+      if (this.navigation().hasNext) {
         this.nextMediaManuallyTriggered();
       }
     }
@@ -237,12 +242,12 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   onKeyPress(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowLeft':
-        if (this.navigation.hasPrev) {
+        if (this.navigation().hasPrev) {
           this.previousPhoto.emit();
         }
         break;
       case 'ArrowRight':
-        if (this.navigation.hasNext) {
+        if (this.navigation().hasNext) {
           this.nextMediaManuallyTriggered();
         }
         break;
@@ -455,7 +460,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   private showNextMedia = () => {
-    if (!this.navigation.hasNext) {
+    if (!this.navigation().hasNext) {
       this.pauseClicked();
       return;
     }
@@ -502,7 +507,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   private resetSlideshowTimer(): void {
-    if (this.slideShowRunning === true) {
+    if (this.slideShowRunning() === true) {
       this.stopSlideShow();
       this.runSlideShow();
     }
@@ -522,9 +527,9 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       const photoAspect = MediaDTOUtils.calcAspectRatio(
         this.activePhoto.gridMedia.media
       );
-      const widthFilled = photoAspect > this.photoFrameDim.aspect;
-      const divWidth = this.photoFrameDim.width;
-      const divHeight = this.photoFrameDim.height;
+      const widthFilled = photoAspect > this.photoFrameDim().aspect;
+      const divWidth = this.photoFrameDim().width;
+      const divHeight = this.photoFrameDim().height;
       const size = {
         width: (widthFilled ? divWidth : divHeight * photoAspect) * this.zoom,
         height: (widthFilled ? divWidth / photoAspect : divHeight) * this.zoom,
@@ -584,12 +589,12 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       this.activePhoto.gridMedia.media
     );
 
-    if (photoAspect < this.photoFrameDim.aspect) {
-      this.faceContainerDim.height = this.photoFrameDim.height;
-      this.faceContainerDim.width = this.photoFrameDim.height * photoAspect;
+    if (photoAspect < this.photoFrameDim().aspect) {
+      this.faceContainerDim.height = this.photoFrameDim().height;
+      this.faceContainerDim.width = this.photoFrameDim().height * photoAspect;
     } else {
-      this.faceContainerDim.height = this.photoFrameDim.width / photoAspect;
-      this.faceContainerDim.width = this.photoFrameDim.width;
+      this.faceContainerDim.height = this.photoFrameDim().width / photoAspect;
+      this.faceContainerDim.width = this.photoFrameDim().width;
     }
   }
 

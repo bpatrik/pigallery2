@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild, inject, input } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -18,12 +18,16 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   lightboxService = inject(LightboxService);
   private sanitizer = inject(DomSanitizer);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() gridMedia: GridMedia;
-  @Input() nextGridMedia: GridMedia;
+  readonly nextGridMedia = input<GridMedia>(undefined);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() loadMedia = false; // prevents loading media
-  @Input() windowAspect = 1;
-  @Input() zoom = 1;
-  @Input() drag = {x: 0, y: 0};
+  readonly windowAspect = input(1);
+  readonly zoom = input(1);
+  readonly drag = input({ x: 0, y: 0 });
   @Output() videoSourceError = new EventEmitter();
 
   @ViewChild('video', {static: false}) video: ElementRef<HTMLVideoElement>;
@@ -56,15 +60,15 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   get ImageTransform(): SafeStyle {
     return this.sanitizer.bypassSecurityTrustStyle(
       'scale(' +
-      this.zoom +
+      this.zoom() +
       ') translate(calc(' +
-      -50 / this.zoom +
+      -50 / this.zoom() +
       '% + ' +
-      this.drag.x / this.zoom +
+      this.drag().x / this.zoom() +
       'px), calc(' +
-      -50 / this.zoom +
+      -50 / this.zoom() +
       '% + ' +
-      this.drag.y / this.zoom +
+      this.drag().y / this.zoom() +
       'px))'
     );
   }
@@ -138,7 +142,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public isNextMediaLoaded(): boolean {
-    if (!this.nextGridMedia || !this.nextGridMedia.isPhoto()) {
+    const nextGridMedia = this.nextGridMedia();
+    if (!nextGridMedia || !nextGridMedia.isPhoto()) {
       return true;
     }
     return this.imageLoadFinished.next || this.nextImage.complete;
@@ -286,15 +291,16 @@ export class GalleryLightboxMediaComponent implements OnChanges {
    * @private
    */
   private loadNextPhoto(): void {
-    if (!this.nextGridMedia || !this.loadMedia) {
+    const nextGridMedia = this.nextGridMedia();
+    if (!nextGridMedia || !this.loadMedia) {
       return;
     }
     // Videos do not support preloading
-    if (!this.nextGridMedia.isPhoto()) {
+    if (!nextGridMedia.isPhoto()) {
       this.imageLoadFinished.next = true;
       return;
     }
-    this.nextImage.src = this.nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
+    this.nextImage.src = nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
 
     this.nextImage.onload = () => this.imageLoadFinished.next = true;
     this.nextImage.onerror = () => {
@@ -330,7 +336,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
 
     if (
-      this.zoom === 1 ||
+      this.zoom() === 1 ||
       Config.Gallery.Lightbox.loadFullImageOnZoom === false
     ) {
       if (this.photo.src == null) {
@@ -358,7 +364,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
     const photoAspect = MediaDTOUtils.calcAspectRatio(this.gridMedia.media);
 
-    if (photoAspect < this.windowAspect) {
+    if (photoAspect < this.windowAspect()) {
       this.imageSize.height = '100';
       this.imageSize.width = null;
     } else {

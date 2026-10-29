@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, TemplateRef, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, TemplateRef, inject, input } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -22,13 +22,15 @@ export class JobButtonComponent {
   private modalService = inject(BsModalService);
   backendTextService = inject(BackendtextService);
 
-  @Input() jobName: string;
+  readonly jobName = input<string>(undefined);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() config: any;
-  @Input() shortName = false;
-  @Input() disabled = false;
-  @Input() soloRun = false;
-  @Input() allowParallelRun = false;
-  @Input() danger = false;
+  readonly shortName = input(false);
+  readonly disabled = input(false);
+  readonly soloRun = input(false);
+  readonly allowParallelRun = input(false);
+  readonly danger = input(false);
   JobProgressStates = JobProgressStates;
   @Output() jobError = new EventEmitter<string>();
   private modalRef: BsModalRef;
@@ -37,7 +39,7 @@ export class JobButtonComponent {
     if (this.config) {
       return;
     }
-    const c = this.jobsService.getDefaultConfig(this.jobName); // can return with null
+    const c = this.jobsService.getDefaultConfig(this.jobName()); // can return with null
     if (c) {
       this.config = c;
     }
@@ -54,7 +56,7 @@ export class JobButtonComponent {
   get Progress(): OnTimerJobProgressDTO {
     this.populateConfig();
     return this.jobsService.progress.value[
-      JobDTOUtils.getHashName(this.jobName, this.config)
+      JobDTOUtils.getHashName(this.jobName(), this.config)
       ];
   }
 
@@ -68,7 +70,7 @@ export class JobButtonComponent {
     // if we show the button in short form (at the jobs settings),
     // we assume users know what they are doing,
     // so we do not show a confirm window.
-    if(this.shortName){
+    if(this.shortName()){
       await this.start();
       return;
     }
@@ -85,15 +87,15 @@ export class JobButtonComponent {
     this.populateConfig();
     try {
       await this.jobsService.start(
-        this.jobName,
+        this.jobName(),
         this.config,
-        this.soloRun,
-        this.allowParallelRun
+        this.soloRun(),
+        this.allowParallelRun()
       );
       this.notification.success(
         $localize`Job started` +
         ': ' +
-        this.backendTextService.getJobName(this.jobName)
+        this.backendTextService.getJobName(this.jobName())
       );
       return true;
     } catch (err) {
@@ -109,11 +111,11 @@ export class JobButtonComponent {
   public async stop(): Promise<boolean> {
     this.jobError.emit('');
     try {
-      await this.jobsService.stop(this.jobName);
+      await this.jobsService.stop(this.jobName());
       this.notification.info(
         $localize`Stopping job` +
         ': ' +
-        this.backendTextService.getJobName(this.jobName)
+        this.backendTextService.getJobName(this.jobName())
       );
       return true;
     } catch (err) {

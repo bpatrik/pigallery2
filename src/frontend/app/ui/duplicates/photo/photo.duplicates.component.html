@@ -1,7 +1,7 @@
 <div class="photo-container">
   <ng-template #popTemplate>
     @if (thumbnail.Available) {
-      <img alt="{{media.name}}"
+      <img alt="{{media().name}}"
         class="big-icon"
         [src]="thumbnail.Src"
         >
@@ -9,7 +9,7 @@
   </ng-template>
 
   @if (thumbnail.Available) {
-    <img alt="{{media.name}}"
+    <img alt="{{media().name}}"
       class="icon"
       [popover]="popTemplate"
       container="body"

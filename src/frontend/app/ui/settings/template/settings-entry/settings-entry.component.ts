@@ -1,4 +1,4 @@
-import { Component, forwardRef, Input, OnChanges, TemplateRef, inject } from '@angular/core';
+import { Component, forwardRef, OnChanges, TemplateRef, inject, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
@@ -107,13 +107,13 @@ export class SettingsEntryComponent
     ref?: any,
     error?: string
   };
-  @Input() noChangeDetection = false;
+  readonly noChangeDetection = input(false);
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
 
   get changed(): boolean {
-    if (this.Disabled || this.noChangeDetection) {
+    if (this.Disabled || this.noChangeDetection()) {
       return false;
     }
 

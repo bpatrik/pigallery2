@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnChanges, inject } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, inject, input } from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {map, Observable} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
@@ -20,17 +20,19 @@ import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathP
 export class GalleryBlogComponent implements OnChanges {
   blogService = inject(BlogService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() open: boolean;
   /**
    * Blog is inserted to the top (when date is null) and to all date groups, when date is set
    */
-  @Input() date: Date;
+  readonly date = input<Date>(undefined);
   @Output() openChange = new EventEmitter<boolean>();
   mkObservable: Observable<GroupedMarkdown[]>;
 
 
   ngOnChanges(): void {
-    this.mkObservable = this.blogService.getMarkDowns(this.date);
+    this.mkObservable = this.blogService.getMarkDowns(this.date());
   }
 
 

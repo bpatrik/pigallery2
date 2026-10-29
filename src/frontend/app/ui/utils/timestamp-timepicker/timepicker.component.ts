@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, input} from '@angular/core';
 import { TimepickerComponent } from 'ngx-bootstrap/timepicker';
 import { FormsModule } from '@angular/forms';
 
@@ -12,13 +12,15 @@ export class TimeStampTimePickerComponent {
   @Output() timestampChange = new EventEmitter<number>();
 
   date: Date = new Date();
-  @Input() name: string;
+  readonly name = input<string>(undefined);
 
   constructor() {
     this.date.setUTCSeconds(0);
     this.date.setUTCMilliseconds(0);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   public get timestamp(): number {
     return this.timestampValue;

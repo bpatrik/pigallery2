@@ -1,7 +1,7 @@
 <div class="input-group" style="border-radius: inherit">
   <input type="text"
     class="form-control search-text"
-    [placeholder]="placeholder"
+    [placeholder]="placeholder()"
     (keyup)="onSearchChange()"
     (blur)="onFocusLost()"
     (focus)="onFocus()"

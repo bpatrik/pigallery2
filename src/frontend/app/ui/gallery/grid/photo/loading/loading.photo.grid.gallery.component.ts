@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input} from '@angular/core';
 
 import { NgIconComponent } from '@ng-icons/core';
 
@@ -9,7 +9,7 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class GalleryPhotoLoadingComponent {
-  @Input() animate: boolean;
-  @Input() error: boolean;
+  readonly animate = input<boolean>(undefined);
+  readonly error = input<boolean>(undefined);
 }
 

@@ -160,8 +160,8 @@
 
             @if (facesEnabled && activePhoto && activePhoto.gridMedia.Photo.metadata.faces && activePhoto.gridMedia.Photo.metadata.faces.length > 0) {
               <div class="faces-container"
-                [style.top.px]="photoFrameDim.height/2 + drag.y"
-                [style.left.px]="photoFrameDim.width/2 + drag.x"
+                [style.top.px]="photoFrameDim().height/2 + drag.y"
+                [style.left.px]="photoFrameDim().width/2 + drag.x"
                 [style.width.px]="faceContainerDim.width* zoom"
                 [style.height.px]="faceContainerDim.height* zoom"
                 >
@@ -206,19 +206,19 @@
 
           </div>
 
-          @if (navigation.hasPrev && zoom == 1) {
+          @if (navigation().hasPrev && zoom == 1) {
             <div [class.dim-controls]="controllersDimmed" class="navigation-arrow navigation-arrow-left highlight rounded-end"
               title="key: left arrow" id="leftArrow" i18n-title
               (click)="previousPhoto.emit()">
               <ng-icon name="ionChevronBackOutline" />
             </div>
           }
-          @if (navigation.hasNext && zoom == 1) {
+          @if (navigation().hasNext && zoom == 1) {
             <div [class.dim-controls]="controllersDimmed" class="navigation-arrow navigation-arrow-right highlight rounded-start"
               title="key: right arrow" id="rightArrow" i18n-title
               (click)="nextMediaManuallyTriggered()">
               <ng-icon name="ionChevronForwardOutline" />
-              @if (slideShowRunning) {
+              @if (slideShowRunning()) {
                 <canvas
                 #canvas width="55px" height="55px"></canvas>
               }
@@ -258,13 +258,13 @@
               <div [class.dim-controls]="controllersDimmed" class="controls controls-playback"
                 >
                 <div class="controls-background rounded-start-top pe-1 pb-1">
-                  @if (slideShowRunning) {
+                  @if (slideShowRunning()) {
                     <ng-icon name="ionPauseOutline"
                       class=" highlight control-button button-active me-2 mb-2"
                       (click)="pauseClicked()"
                     title="Pause" i18n-title />
                   }
-                  @if (!slideShowRunning) {
+                  @if (!slideShowRunning()) {
                     <ng-icon name="ionPlayOutline"
                       class="highlight control-button me-2 mb-2"
                       (click)="playClicked()"

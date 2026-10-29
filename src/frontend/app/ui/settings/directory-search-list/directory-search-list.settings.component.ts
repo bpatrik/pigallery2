@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Output, input} from '@angular/core';
 
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
@@ -16,15 +16,15 @@ import {TextSearchMatchingTypes} from '../../gallery/search/query-enrty/TextSear
   imports: [FormsModule, NgIconComponent, StringifySearchType]
 })
 export class DirectorySearchListSettingsComponent {
-  @Input() list: DirectorySearch[] = [];
-  @Input() idName = '';
-  @Input() disabled = false;
-  @Input() newItem: () => DirectorySearch = () => ({
+  readonly list = input<DirectorySearch[]>([]);
+  readonly idName = input('');
+  readonly disabled = input(false);
+  readonly newItem = input<() => DirectorySearch>(() => ({
     type: SearchQueryTypes.directory,
     value: '',
     matchType: TextSearchQueryMatchTypes.exact_match,
     negate: false
-  });
+}));
   @Output() changed = new EventEmitter<void>();
 
   readonly SearchQueryTypes = SearchQueryTypes;
@@ -44,12 +44,12 @@ export class DirectorySearchListSettingsComponent {
   }
 
   add(): void {
-    this.list.push(this.newItem());
+    this.list().push(this.newItem()());
     this.changed.emit();
   }
 
   remove(i: number): void {
-    this.list.splice(i, 1);
+    this.list().splice(i, 1);
     this.changed.emit();
   }
 }

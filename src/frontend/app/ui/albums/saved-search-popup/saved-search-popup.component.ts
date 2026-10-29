@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, inject } from '@angular/core';
+import { Component, TemplateRef, inject, input } from '@angular/core';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
@@ -14,8 +14,11 @@ import { JsonPipe } from '@angular/common';
 export class SavedSearchPopupComponent {
   private modalService = inject(BsModalService);
 
-  @Input() disabled: boolean;
-  @Input() savedSearchDTO: { name: string; searchQuery: SearchQueryDTO };
+  readonly disabled = input<boolean>(undefined);
+  readonly savedSearchDTO = input<{
+    name: string;
+    searchQuery: SearchQueryDTO;
+}>(undefined);
   private modalRef: BsModalRef;
 
   public async openModal(template: TemplateRef<any>): Promise<void> {

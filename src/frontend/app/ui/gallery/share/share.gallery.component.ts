@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, TemplateRef, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, input } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -39,7 +39,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   private clipboardService = inject(ClipboardService);
 
   enabled = true;
-  @Input() dropDownItem = false;
+  readonly dropDownItem = input(false);
   url = '';
   urlValid = false;
   showSharingList = false;

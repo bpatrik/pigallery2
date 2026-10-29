@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, type SimpleChanges, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, OnChanges, OnDestroy, type SimpleChanges, ViewChild, inject, input } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -64,9 +64,9 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private queryService = inject(QueryService);
   private router = inject(Router);
 
-  @Input() photos: PhotoDTO[];
-  @Input() gpxFiles: FileDTO[];
-  @Input() parentDimension: Dimension;
+  readonly photos = input<PhotoDTO[]>(undefined);
+  readonly gpxFiles = input<FileDTO[]>(undefined);
+  readonly parentDimension = input<Dimension>(undefined);
   public lightboxDimension: Dimension = {
     top: 0,
     left: 0,
@@ -287,7 +287,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       this.leafletMap.addLayer(this.mapLayersControlOption.overlays.Photos);
     }
     this.thumbnailsOnLoad = [];
-    this.photos
+    this.photos()
       .filter((p): number => {
         return (
           p.metadata &&
@@ -396,7 +396,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
           });
         }
       });
-    if (this.gpxFiles) {
+    if (this.gpxFiles()) {
       this.loadGPXFiles().catch(console.error);
     }
   }
@@ -498,7 +498,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     this.clearMap();
     this.visible = true;
     this.opacity = 1.0;
-    this.lightboxDimension = Utils.clone(this.parentDimension);
+    this.lightboxDimension = Utils.clone(this.parentDimension());
     this.lightboxDimension.top -= PageHelper.ScrollY;
     this.mapDimension = {
       top: 0,
@@ -529,7 +529,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     }
     this.fullScreenService.exitFullScreen();
     this.controllersVisible = false;
-    const to = this.parentDimension;
+    const to = this.parentDimension();
 
     // if target image out of screen -> scroll to there
     if (
@@ -540,7 +540,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       PageHelper.ScrollY = to?.top;
     }
 
-    this.lightboxDimension = this.parentDimension;
+    this.lightboxDimension = this.parentDimension();
     this.lightboxDimension.top -= PageHelper.ScrollY;
     PageHelper.showScrollY('map-lightbox');
     this.opacity = 0.0;
@@ -662,7 +662,8 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
   private async loadGPXFiles(): Promise<void> {
     this.clearPath();
-    if (this.gpxFiles.length === 0) {
+    const gpxFiles = this.gpxFiles();
+    if (gpxFiles.length === 0) {
       this.pathLayersConfigOrdered.forEach(p => {
         // remove from controls
         this.mapLayerControl.removeLayer(p.layer);
@@ -761,7 +762,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       });
     };
 
-    await Promise.all(this.gpxFiles.map(f => loadAFile(f)));
+    await Promise.all(gpxFiles.map(f => loadAFile(f)));
 
     // Add layer to the map
     this.pathLayersConfigOrdered.filter(pl => pl.layer.getLayers().length > 0).forEach((pl) => {
@@ -777,7 +778,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       }
     });
     // center map on paths if no photos to center map on
-    if (!this.photos?.length) {
+    if (!this.photos()?.length) {
       this.centerMap();
     }
   }

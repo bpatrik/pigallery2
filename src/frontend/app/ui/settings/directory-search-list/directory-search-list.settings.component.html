@@ -1,21 +1,21 @@
-@for (d of list; track d; let i = $index) {
+@for (d of list(); track d; let i = $index) {
   <div class="row mt-1 mb-1">
     <div class="col-auto">
       <div class="input-group">
         <select
-          [id]="'dirSearchType'+idName+i"
-          [name]="'dirSearchType'+idName+i"
+          [id]="'dirSearchType'+idName()+i"
+          [name]="'dirSearchType'+idName()+i"
           class="form-select"
           disabled>
           <option selected>{{ SearchQueryTypes.directory | stringifySearchType }}</option>
         </select>
         <select
-          [id]="'dirMatchType'+idName+i"
-          [name]="'dirMatchType'+idName+i"
+          [id]="'dirMatchType'+idName()+i"
+          [name]="'dirMatchType'+idName()+i"
           class="form-select w-auto flex-grow-0"
           title="Matching type"
           i18n-title
-          [disabled]="disabled"
+          [disabled]="disabled()"
           [ngModel]="getMatchingType(d)"
           (ngModelChange)="setMatchingType(d, $event)">
           @for (mt of MatchingTypes; track mt) {
@@ -26,12 +26,12 @@
     </div>
     <div class="col">
       <input
-        [id]="'dirSearchField'+idName+i"
-        [name]="'dirSearchField'+idName+i"
+        [id]="'dirSearchField'+idName()+i"
+        [name]="'dirSearchField'+idName()+i"
         placeholder="/path/to/folder"
         i18n-placeholder
         class="form-control rounded-2"
-        [disabled]="disabled"
+        [disabled]="disabled()"
         [(ngModel)]="d.value"
         (ngModelChange)="changed.emit()"
         type="text"/>
@@ -39,7 +39,7 @@
     <div class="col-auto align-self-center">
       <button type="button"
         class="btn btn-danger w-auto float-end"
-        [disabled]="disabled"
+        [disabled]="disabled()"
         (click)="remove(i)">
         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
       </button>
@@ -47,7 +47,7 @@
   </div>
 }
 <div class="d-flex justify-content-start mt-1">
-  <button type="button" class="btn btn-primary" [disabled]="disabled" (click)="add()">
+  <button type="button" class="btn btn-primary" [disabled]="disabled()" (click)="add()">
     <ng-icon class="me-1" name="ionAddOutline" title="Add" i18n-title />
     <span i18n>Add</span>
   </button>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, ViewEncapsulation, inject, input } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -56,8 +56,8 @@ export class FrameComponent {
   galleryService = inject(GalleryService);
   uploadService = inject(UploaderService);
 
-  @Input() showSearch = false;
-  @Input() showShare = false;
+  readonly showSearch = input(false);
+  readonly showShare = input(false);
   public readonly user: BehaviorSubject<UserDTO>;
   public readonly authenticationRequired = Config.Users.authenticationRequired;
   public readonly title = Config.Server.applicationTitle;

@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnChanges, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, OnChanges, ViewChild, inject, input } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
@@ -25,8 +25,8 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   private router = inject(Router);
   private themeService = inject(ThemeService);
 
-  @Input() photos: PhotoDTO[];
-  @Input() gpxFiles: FileDTO[];
+  readonly photos = input<PhotoDTO[]>(undefined);
+  readonly gpxFiles = input<FileDTO[]>(undefined);
   @ViewChild(GalleryMapLightboxComponent, {static: false})
   mapLightbox: GalleryMapLightboxComponent;
   @ViewChild('map', {static: false}) mapElement: ElementRef;
@@ -110,7 +110,7 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   }
 
   ngOnChanges(): void {
-    this.markerLayer = this.photos
+    this.markerLayer = this.photos()
       .filter((p): number => {
         return (
           p.metadata &&

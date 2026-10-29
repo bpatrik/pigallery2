@@ -41,6 +41,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private extensionService = inject(ExtensionService);
   private modalService = inject(MediaButtonModalService);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() gridMedia: GridMedia;
   @ViewChild('img', {static: false}) imageRef: ElementRef;
   @ViewChild('photoContainer', {static: true}) container: ElementRef;

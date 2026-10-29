@@ -47,7 +47,11 @@ export class GalleryGridComponent
   @ViewChild('gridContainer', {static: false}) gridContainer: ElementRef;
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() lightbox: GalleryLightboxComponent;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() mediaGroups: MediaGroup[];
   mediaToRender: GridMediaGroup[] = [];
   containerWidth = 0;

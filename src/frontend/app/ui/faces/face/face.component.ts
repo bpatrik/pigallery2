@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {PersonDTO} from '../../../../../common/entities/PersonDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -26,8 +26,8 @@ export class FaceComponent implements OnInit, OnDestroy {
   private faceService = inject(FacesService);
   authenticationService = inject(AuthenticationService);
 
-  @Input() person: PersonDTO;
-  @Input() size: number;
+  readonly person = input<PersonDTO>(undefined);
+  readonly size = input<number>(undefined);
 
   public thumbnail: PersonThumbnail = null;
   public searchQueryDTOstr: string;
@@ -40,10 +40,10 @@ export class FaceComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.thumbnail = this.thumbnailService.getPersonThumbnail(this.person);
+    this.thumbnail = this.thumbnailService.getPersonThumbnail(this.person());
     this.searchQueryDTOstr = SearchQueryUtils.urlify({
       type: SearchQueryTypes.person,
-      value: this.person.name,
+      value: this.person().name,
       matchType: TextSearchQueryMatchTypes.exact_match,
     } as TextSearch);
   }
@@ -68,7 +68,7 @@ export class FaceComponent implements OnInit, OnDestroy {
     $event.preventDefault();
     $event.stopPropagation();
     await this.faceService
-        .setFavourite(this.person, !this.person.isFavourite)
+        .setFavourite(this.person(), !this.person().isFavourite)
         .catch(console.error);
   }
 }

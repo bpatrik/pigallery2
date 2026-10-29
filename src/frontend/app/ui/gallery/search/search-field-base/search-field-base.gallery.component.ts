@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, EventEmitter, forwardRef, OnDestroy, Output, ViewChild, inject, input } from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
@@ -37,7 +37,7 @@ export class GallerySearchFieldBaseComponent
   private autoCompleteService = inject(AutoCompleteService);
   router = inject(Router);
 
-  @Input() placeholder = $localize`Search`;
+  readonly placeholder = input($localize `Search`);
   @Output() search = new EventEmitter<void>();
 
   @ViewChild('SearchField', {static: false}) searchField: ElementRef;

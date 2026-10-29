@@ -3,8 +3,8 @@
 
 
   <div class="photo-container rounded overflow-hidden"
-    [style.width.px]="size"
-    [style.height.px]="size">
+    [style.width.px]="size()"
+    [style.height.px]="size()">
 
     @if (thumbnail && thumbnail.Available) {
       <div class="photo"
@@ -20,12 +20,12 @@
   <!--Info box -->
   <div class="info rounded-bottom">
     <ng-icon class="star"
-      [name]="person.isFavourite ? 'ionStar' : 'ionStarOutline'"
-      [class.favourite]="person.isFavourite"
+      [name]="person().isFavourite ? 'ionStar' : 'ionStarOutline'"
+      [class.favourite]="person().isFavourite"
       [class.clickable]="CanUpdate"
       (click)="CanUpdate && toggleFavourite($event)"
      />
-    {{person.name}} ({{person.cache?.count}})
+    {{person().name}} ({{person().cache?.count}})
 
   </div>
 </a>
