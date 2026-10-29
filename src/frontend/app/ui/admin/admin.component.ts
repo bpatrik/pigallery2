@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren,} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, viewChildren } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {NotificationService} from '../../model/notification.service';
@@ -45,24 +45,23 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
 ]
 })
 export class AdminComponent implements OnInit, AfterViewInit {
-  @ViewChildren('setting') settingsComponents: QueryList<ISettingsComponent>;
-  @ViewChildren('setting', {read: ElementRef})
-  settingsComponentsElemRef: QueryList<ElementRef>;
-  contents: ISettingsComponent[] = [];
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  viewportScroller = inject(ViewportScroller);
+  notificationService = inject(NotificationService);
+  settingsService = inject(SettingsService);
+  private piTitleService = inject(PiTitleService);
+
+  readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
+  readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
+  contents: readonly ISettingsComponent[] = [];
   configPriorities: { key: number; value: string; }[];
   configStyles: { key: number; value: string; }[];
   public readonly ConfigPriority = ConfigPriority;
   public readonly ConfigStyle = ConfigStyle;
   public readonly configPaths: string[] = [];
 
-  constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    public viewportScroller: ViewportScroller,
-    public notificationService: NotificationService,
-    public settingsService: SettingsService,
-    private piTitleService: PiTitleService
-  ) {
+  constructor() {
     this.configPriorities = enumToTranslatedArray(ConfigPriority);
     this.configStyles = enumToTranslatedArray(ConfigStyle);
     const wc = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
@@ -71,7 +70,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => (this.contents = this.settingsComponents.toArray()), 0);
+    setTimeout(() => (this.contents = this.settingsComponents()), 0);
   }
 
   ngOnInit(): void {

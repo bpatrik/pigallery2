@@ -73,9 +73,9 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
   });
 
   it('should render the LIVE badge for paired Live Photos', () => {
-    component.gridMedia = makeGridMedia({
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
-    } as any);
+    } as any));
 
     fixture.detectChanges();
 
@@ -85,7 +85,7 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
   });
 
   it('should not render the LIVE badge for regular photos', () => {
-    component.gridMedia = makeGridMedia();
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
 
     fixture.detectChanges();
 
@@ -115,7 +115,7 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
   });
 
   const withMetadata = (metadata: Partial<PhotoMetadata>): void => {
-    component.gridMedia = makeGridMedia({metadata: {size: {width: 4032, height: 3024}, ...metadata}} as any);
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({metadata: {size: {width: 4032, height: 3024}, ...metadata}} as any));
     fixture.detectChanges();
   };
 

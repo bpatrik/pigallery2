@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { Component, OnChanges, OnDestroy, OnInit, inject, viewChild, input } from '@angular/core';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -64,13 +64,19 @@ export interface RecursiveState extends ConfigState {
   imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {
+  protected authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  protected notification = inject(NotificationService);
+  settingsService = inject(SettingsService);
+  jobsService = inject(ScheduledJobsService);
+  private extensionService = inject(ExtensionInstallerService);
+
 
   public icon: string;
-  @Input() ConfigPath: string;
+  readonly ConfigPath = input<string>(undefined);
   nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
 
-  @ViewChild('settingsForm', {static: true})
-  form: UntypedFormControl;
+  readonly form = viewChild<UntypedFormControl>('settingsForm');
 
 
   public inProgress = false;
@@ -82,16 +88,6 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   protected sliceFN?: (s: IWebConfigClassPrivate<TAGS> & WebConfig) => ConfigState;
   private subscription: Subscription = null;
   private settingsSubscription: Subscription = null;
-
-  constructor(
-    protected authService: AuthenticationService,
-    private navigation: NavigationService,
-    protected notification: NotificationService,
-    public settingsService: SettingsService,
-    public jobsService: ScheduledJobsService,
-    private extensionService: ExtensionInstallerService,
-  ) {
-  }
 
   get Name(): string {
     return this.changed ? this.name + '*' : this.name;
@@ -118,19 +114,21 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     return $localize`Click to save.`;
   }
 
+  // Side effect: subscribes to the settings slice of the new config path.
   ngOnChanges(): void {
-    if (!this.ConfigPath) {
+    const ConfigPath = this.ConfigPath();
+    if (!ConfigPath) {
       this.setSliceFN(c => ({value: c as any, isConfigType: true, type: WebConfig} as any));
     } else {
-      this.setSliceFN(c => c.__state[this.ConfigPath]);
+      this.setSliceFN(c => c.__state[this.ConfigPath()]);
     }
-    this.name = this.states.tags?.name || this.ConfigPath;
+    this.name = this.states.tags?.name || ConfigPath;
     this.nestedConfigs = [];
     for (const key of this.getKeys(this.states)) {
       if (this.states.value.__state[key].isConfigType &&
         this.states?.value.__state[key].tags?.uiIcon) {
         this.nestedConfigs.push({
-          id: this.ConfigPath + '.' + key,
+          id: ConfigPath + '.' + key,
           name: this.states?.value.__state[key].tags?.name,
           icon: this.states?.value.__state[key].tags?.uiIcon,
           visible: () => !(this.states.value.__state[key].shouldHide && this.states.value.__state[key].shouldHide())
@@ -152,7 +150,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     this.getSettings();
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
-    this.subscription = this.form.valueChanges.subscribe(() => {
+    this.subscription = this.form().valueChanges.subscribe(() => {
       this.onOptionChange();
     });
 
@@ -305,7 +303,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     this.error = '';
     try {
       const state = WebConfigClassBuilder.attachInterface(this.states.value).toJSON();
-      await this.settingsService.updateSettings(state, this.ConfigPath);
+      await this.settingsService.updateSettings(state, this.ConfigPath());
       await this.getSettings();
       this.notification.success(
         this.Name + ' ' + $localize`settings saved`,

@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, computed, input, model} from '@angular/core';
 import { TimepickerComponent } from 'ngx-bootstrap/timepicker';
 import { FormsModule } from '@angular/forms';
 
@@ -8,40 +8,23 @@ import { FormsModule } from '@angular/forms';
     imports: [TimepickerComponent, FormsModule]
 })
 export class TimeStampTimePickerComponent {
-  timestampValue = 0;
-  @Output() timestampChange = new EventEmitter<number>();
-
-  date: Date = new Date();
-  @Input() name: string;
-
-  constructor() {
-    this.date.setUTCSeconds(0);
-    this.date.setUTCMilliseconds(0);
-  }
-
-  @Input()
-  public get timestamp(): number {
-    return this.timestampValue;
-  }
-
-  public set timestamp(val: number) {
-    const h = Math.min(23, Math.floor(val / 60));
-    const m = val % 60;
-    this.date.setUTCHours(h);
-    this.date.setUTCMinutes(m);
-
-    if (this.timestampValue === val) {
-      return;
-    }
-    this.timestampValue = val;
-    this.timestampChange.emit(this.timestampValue);
-  }
+  /**
+   * Minutes since midnight (UTC)
+   */
+  readonly timestamp = model<number>(0);
+  readonly date = computed((): Date => {
+    const val = this.timestamp();
+    const date = new Date();
+    date.setUTCSeconds(0);
+    date.setUTCMilliseconds(0);
+    date.setUTCHours(Math.min(23, Math.floor(val / 60)));
+    date.setUTCMinutes(val % 60);
+    return date;
+  });
+  readonly name = input<string>(undefined);
 
   onChange(date: Date | string): void {
     const d = new Date(date);
-    this.timestamp = d.getUTCHours() * 60 + d.getUTCMinutes();
+    this.timestamp.set(d.getUTCHours() * 60 + d.getUTCMinutes());
   }
 }
-
-
-

@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {IconThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {MediaIcon} from '../../gallery/MediaIcon';
@@ -12,15 +12,14 @@ import { PopoverDirective } from 'ngx-bootstrap/popover';
     imports: [PopoverDirective]
 })
 export class DuplicatesPhotoComponent implements OnInit, OnDestroy {
-  @Input() media: MediaDTO;
+  private thumbnailService = inject(ThumbnailManagerService);
+
+  readonly media = input<MediaDTO>(undefined);
 
   thumbnail: IconThumbnail;
 
-  constructor(private thumbnailService: ThumbnailManagerService) {
-  }
-
   ngOnInit(): void {
-    this.thumbnail = this.thumbnailService.getIcon(new MediaIcon(this.media));
+    this.thumbnail = this.thumbnailService.getIcon(new MediaIcon(this.media()));
   }
 
   ngOnDestroy(): void {

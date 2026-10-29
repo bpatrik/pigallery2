@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {FacesService} from '../faces.service';
 import {SortByDirectionalTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
@@ -22,12 +22,12 @@ import {StringifySortingMethod} from '../../../pipes/StringifySortingMethod';
 ]
 })
 export class FacesNavigatorComponent {
+  facesService = inject(FacesService);
+
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly config = Config;
 
-  constructor(
-    public facesService: FacesService,
-  ) {
+  constructor() {
     this.sortingByTypes = [
       {key: SortByDirectionalTypes.Name, value: SortByDirectionalTypes[SortByDirectionalTypes.Name]},
       {key: SortByDirectionalTypes.PersonCount, value: SortByDirectionalTypes[SortByDirectionalTypes.PersonCount]}

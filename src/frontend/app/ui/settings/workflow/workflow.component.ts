@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -64,11 +64,15 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
 ]
 })
 export class WorkflowComponent implements ControlValueAccessor, Validator, OnInit, OnDestroy {
+  settingsService = inject(SettingsService);
+  jobsService = inject(ScheduledJobsService);
+  backendTextService = inject(BackendtextService);
+
 
 
   public schedules: JobScheduleConfig[] = [];
 
-  @ViewChildren('jobModal') public jobModalQL: QueryList<ModalDirective>;
+  public readonly jobModalQL = viewChildren<ModalDirective>('jobModal');
 
   public disableButtons = false;
   public JobTriggerTypeMap: { key: number; value: string }[];
@@ -91,11 +95,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
   error: string;
 
-  constructor(
-    public settingsService: SettingsService,
-    public jobsService: ScheduledJobsService,
-    public backendTextService: BackendtextService,
-  ) {
+  constructor() {
     this.JobTriggerTypeMap = [
       {key: JobTriggerType.after, value: $localize`after`},
       {key: JobTriggerType.never, value: $localize`never`},
@@ -242,7 +242,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
         (ct) => (this.newSchedule.config[ct.id] = ct.defaultValue as never)
       );
     }
-    this.jobModalQL.first.show();
+    this.jobModalQL().at(0)!.show();
   }
 
   addNewJob(): void {
@@ -257,7 +257,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
         : this.backendTextService.getJobName(jobName) + ' ' + (count + 1);
     this.schedules.push(this.newSchedule);
 
-    this.jobModalQL.first.hide();
+    this.jobModalQL().at(0)!.hide();
     this.onChange(null); // trigger change detection after adding new job
   }
 

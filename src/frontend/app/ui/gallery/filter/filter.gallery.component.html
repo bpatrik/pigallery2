@@ -110,7 +110,7 @@
               <div class="filter-column">
                 @if (filter.options.length > 0) {
                   <ul class="list-group">
-                    @for (option of filter.options; track option) {
+                    @for (option of filter.options; track option.name) {
                       <li
                         [class.unselected]="!option.selected"
                         (click)="option.selected = !option.selected; filterService.onFilterChange()"
@@ -120,7 +120,7 @@
                             class="pin"
                             (click)="toggleSelectOnly(filter, option, $event)"
                             title="Select only this"
-                            [ngClass]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
+                            [class]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
                           i18n-title />
                           {{option.name === undefined ? unknownText : option.name}}
                         </div>

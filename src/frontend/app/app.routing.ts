@@ -1,6 +1,4 @@
-import { NgModule } from '@angular/core';
 import {
-  RouterModule,
   Routes,
   UrlMatchResult,
   UrlSegment,
@@ -12,7 +10,7 @@ import { ShareLoginComponent } from './ui/sharelogin/share-login.component';
 import { QueryParams } from '../../common/QueryParams';
 import { DuplicateComponent } from './ui/duplicates/duplicates.component';
 import { FacesComponent } from './ui/faces/faces.component';
-import { AuthGuard } from './model/network/helper/auth.guard';
+import { authGuard } from './model/network/helper/auth.guard';
 import { AlbumsComponent } from './ui/albums/albums.component';
 import { ErrorComponent } from './ui/error/error.component';
 
@@ -55,7 +53,7 @@ export function galleryMatcherFunction(
   return null;
 }
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
@@ -67,22 +65,22 @@ const routes: Routes = [
   {
     path: 'admin',
     component: AdminComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   {
     path: 'duplicates',
     component: DuplicateComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   {
     path: 'albums',
     component: AlbumsComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   {
     path: 'faces',
     component: FacesComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   {
     path: 'error',
@@ -91,14 +89,8 @@ const routes: Routes = [
   {
     matcher: galleryMatcherFunction,
     component: GalleryComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/error', pathMatch: 'full' },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

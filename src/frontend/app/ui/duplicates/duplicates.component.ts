@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {DuplicateService} from './duplicates.service';
 import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
@@ -22,6 +22,9 @@ interface GroupedDuplicate {
 
 @Component({
     selector: 'app-duplicate',
+    host: {
+      '(window:scroll)': 'onScroll()'
+    },
     templateUrl: './duplicates.component.html',
     styleUrl: './duplicates.component.css',
     imports: [
@@ -33,6 +36,10 @@ interface GroupedDuplicate {
 ]
 })
 export class DuplicateComponent implements OnDestroy, OnInit {
+  duplicateService = inject(DuplicateService);
+  queryService = inject(QueryService);
+  private piTitleService = inject(PiTitleService);
+
   directoryGroups: GroupedDuplicate[] = null;
   renderedDirGroups: GroupedDuplicate[] = null;
   renderedIndex = {
@@ -46,11 +53,7 @@ export class DuplicateComponent implements OnDestroy, OnInit {
     photos: 0,
   };
 
-  constructor(
-      public duplicateService: DuplicateService,
-      public queryService: QueryService,
-      private piTitleService: PiTitleService
-  ) {
+  constructor() {
     this.duplicateService.getDuplicates().catch(console.error);
     this.subscription = this.duplicateService.duplicates.subscribe(
         (duplicates: DuplicatesDTO[]): void => {
@@ -181,7 +184,6 @@ export class DuplicateComponent implements OnDestroy, OnInit {
     }
   };
 
-  @HostListener('window:scroll')
   onScroll(): void {
     this.renderMore();
   }

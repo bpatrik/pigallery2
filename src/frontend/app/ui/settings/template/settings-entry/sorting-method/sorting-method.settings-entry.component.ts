@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnInit} from '@angular/core';
+import { Component, forwardRef, OnInit, inject, input } from '@angular/core';
 import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {SortByDirectionalTypes, SortingMethod} from '../../../../../../../common/entities/SortingMethods';
 import {enumToTranslatedArray} from '../../../../EnumTranslations';
@@ -39,16 +39,17 @@ import {NotificationService} from '../../../../../model/notification.service';
 })
 export class SortingMethodSettingsEntryComponent
   implements ControlValueAccessor, Validator, OnInit {
-  @Input() sortingByEnum: Record<string, number | string> & { [k: number]: string };
+  private notificationService = inject(NotificationService);
+
+  readonly sortingByEnum = input<Record<string, number | string> & {
+    [k: number]: string;
+}>(undefined);
 
   public sortingMethod: SortingMethod;
   public sortingByTypes: { key: number; value: string }[] = [];
 
-  constructor(private notificationService: NotificationService) {
-  }
-
   ngOnInit(): void {
-    this.sortingByTypes = enumToTranslatedArray(this.sortingByEnum);
+    this.sortingByTypes = enumToTranslatedArray(this.sortingByEnum());
   }
 
   public onTouched(): void {

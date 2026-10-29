@@ -263,7 +263,7 @@
                     </td>
                     <td>
                       <button [disabled]="state.value.length == 1"
-                        [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                        [class]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         (click)="removeLayer(layer)"
                         class="btn float-end">
                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -295,7 +295,7 @@
                     </div>
                     <div class="col-1 pe-0">
                       <button [disabled]="state.value.length == 1" (click)="remove(i)"
-                        [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                        [class]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                       </button>
@@ -353,7 +353,7 @@
                     </div>
                     <div class="col-1 pe-0">
                       <button [disabled]="state.value.length == 1" (click)="remove(i)"
-                        [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                        [class]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                       </button>
@@ -433,7 +433,7 @@
                   }
                   <div class="col-1 pe-0">
                     <button [disabled]="state.value.length == 1" (click)="remove(i)"
-                      [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                      [class]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                       class="btn float-end">
                       <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                     </button>
@@ -503,7 +503,7 @@
                   <div class="col-1 pe-0">
                     <button [disabled]="(state.value.length == 1 && !state.tags.uiOptional) || state.readonly"
                       (click)="remove(i)"
-                      [ngClass]="(state.value.length > 1  || state.tags.uiOptional)? 'btn-danger':'btn-secondary'"
+                      [class]="(state.value.length > 1  || state.tags.uiOptional)? 'btn-danger':'btn-secondary'"
                       class="btn float-end">
                       <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                     </button>
@@ -545,7 +545,7 @@
                   <div class="col-auto pe-0">
                     <button class="btn float-end"
                       [disabled]="state.value.length == 1"
-                      [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                      [class]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                       [id]="'list_btn_'+idName+i"
                       [name]="'list_btn_'+idName+i" (click)="remove(i)">
                       <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -587,7 +587,7 @@
                   <div class="col-auto pe-0">
                     <button class="btn float-end"
                       [disabled]="state.value.length == 1"
-                      [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
+                      [class]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                       [id]="'list_btn_'+idName+i"
                       [name]="'list_btn_'+idName+i" (click)="remove(i)">
                       <ng-icon name="ionTrashOutline" title="Delete" i18n-title />

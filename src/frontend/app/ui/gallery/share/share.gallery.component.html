@@ -1,4 +1,4 @@
-@if (!dropDownItem) {
+@if (!dropDownItem()) {
   <button id="shareButton" class="nav-link btn  btn-link"
     style="white-space:nowrap"
     type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
@@ -7,7 +7,7 @@
   </button>
 }
 
-@if (dropDownItem) {
+@if (dropDownItem()) {
   <a class="dropdown-item" (click)="openModal(shareModal)">
     <ng-icon name="ionShareSocialOutline" />
     <ng-container i18n>Share</ng-container>
@@ -175,7 +175,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (share of activeShares; track share) {
+          @for (share of activeShares; track share.id) {
             <tr>
               <td class="ellipsisContainer">
                 <div class="ellipsisText share-key">

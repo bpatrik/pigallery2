@@ -17,8 +17,6 @@ import {GridMedia} from '../grid/GridMedia';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {GalleryCacheService} from '../cache.gallery.service';
-import {FileSizePipe} from '../../../pipes/FileSizePipe';
-import {DatePipe} from '@angular/common';
 import {Utils} from '../../../../../common/Utils';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 
@@ -81,9 +79,6 @@ class MockGalleryCacheService {
   }
 }
 
-class MockFileSizePipe {
-}
-
 class MockPiTitleService {
   setMediaTitle() {
   }
@@ -136,10 +131,11 @@ class MockActivatedRoute {
 
 // Mock photo components
 function createMockPhotoComponent(media: PhotoDTO, index: number): GalleryPhotoComponent {
+  const gridMedia = new GridMedia(media, 1, 1, index);
   const mockComponent = {
-    gridMedia: new GridMedia(media, 1, 1, index),
+    gridMedia: () => gridMedia,
     getDimension: () => ({top: 0, left: 0, width: 100, height: 100})
-  } as GalleryPhotoComponent;
+  } as unknown as GalleryPhotoComponent;
   return mockComponent;
 }
 
@@ -186,8 +182,6 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
         {provide: PiTitleService, useClass: MockPiTitleService},
         {provide: AuthenticationService, useValue: mockAuthenticationService},
         {provide: GalleryCacheService, useValue: mockGalleryCacheService},
-        {provide: FileSizePipe, useValue: MockFileSizePipe},
-        {provide: DatePipe, useValue: MockFileSizePipe},
       ]
     }).compileComponents();
 
@@ -215,12 +209,13 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
 
     component.setGridPhotoQL(mockQueryList);
 
-    // Mock controls component
-    component.controls = {
+    // Mock controls component (replaces the view query)
+    const controls = {
       resetZoom: jasmine.createSpy('resetZoom'),
       runSlideShow: jasmine.createSpy('runSlideShow'),
       stopSlideShow: jasmine.createSpy('stopSlideShow')
-    } as any;
+    };
+    (component as any).controls = () => controls;
 
     fixture.detectChanges();
   });
@@ -282,13 +277,13 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     lightboxService.loopSlideshow = true;
     component.slideShowRunning = true;
 
-    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia) // Should return first media when looping
+    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia()) // Should return first media when looping
     // Act - go to next image from last photo
     component.nextImage();
     tick();
 
     // Assert - should wrap to first photo and continue slideshow
-    expect(component.NexGridMedia).toBe(photoComponents[1].gridMedia); // Should return first media when looping
+    expect(component.NexGridMedia).toBe(photoComponents[1].gridMedia()); // Should return first media when looping
   }));
 
   it('should stop slideshow when pause button is clicked', fakeAsync(() => {
@@ -356,7 +351,7 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     (component as any).navigateToPhoto(2); // Navigate to last photo
 
     // Act & Assert
-    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia);
+    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia());
   });
 
   it('should release the scroll lock and full screen when destroyed while open', () => {

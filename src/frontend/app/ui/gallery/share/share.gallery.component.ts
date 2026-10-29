@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, input } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -31,8 +31,15 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 ]
 })
 export class GalleryShareComponent implements OnInit, OnDestroy {
+  sharingService = inject(ShareService);
+  galleryService = inject(ContentLoaderService);
+  private notification = inject(NotificationService);
+  private modalService = inject(BsModalService);
+  authService = inject(AuthenticationService);
+  private clipboardService = inject(ClipboardService);
+
   enabled = true;
-  @Input() dropDownItem = false;
+  readonly dropDownItem = input(false);
   url = '';
   urlValid = false;
   showSharingList = false;
@@ -66,14 +73,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     No: 'No',
   };
 
-  constructor(
-      public sharingService: ShareService,
-      public galleryService: ContentLoaderService,
-      private notification: NotificationService,
-      private modalService: BsModalService,
-      public authService: AuthenticationService,
-      private clipboardService: ClipboardService
-  ) {
+  constructor() {
     this.text.Yes = $localize`Yes`;
     this.text.No = $localize`No`;
   }

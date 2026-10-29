@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {SettingsService} from '../settings.service';
 import {ShareService} from '../../gallery/share.service';
@@ -13,13 +13,11 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     imports: [NgIconComponent, DatePipe, StringifySearchQuery]
 })
 export class SharingsListComponent implements OnInit {
+  sharingService = inject(ShareService);
+  settingsService = inject(SettingsService);
+
 
   public shares: ResponseSharingDTO[] = [];
-
-
-  constructor(public sharingService: ShareService,
-              public settingsService: SettingsService) {
-  }
 
 
   ngOnInit(): void {

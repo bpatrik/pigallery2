@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SeededRandomService {
   private static readonly baseSeed = Math.random() * 2147483647;
   private seed: number;

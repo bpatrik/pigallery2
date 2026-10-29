@@ -1,21 +1,22 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
 import {ContentService} from '../content.service';
 import {map, mergeMap, Observable, shareReplay} from 'rxjs';
-import {MDFilesFilterPipe} from '../../../pipes/MDFilesFilterPipe';
+import {filterMDFiles} from '../../../pipes/MDFilesFilterPipe';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {Config} from '../../../../../common/config/public/Config';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BlogService {
+  private networkService = inject(NetworkService);
+  private galleryService = inject(ContentService);
+
   public groupedMarkdowns: Observable<GroupedMarkdown[]>;
   private cache: { [key: string]: string } = {};
 
-  constructor(private networkService: NetworkService,
-              private galleryService: ContentService,
-              private mdFilesFilterPipe: MDFilesFilterPipe) {
+  constructor() {
 
     this.groupedMarkdowns = this.galleryService.sortedFilteredContent.pipe(
       mergeMap(async content => {
@@ -32,7 +33,7 @@ export class BlogService {
             Math.min(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), p), Number.MAX_SAFE_INTEGER);
         }
 
-        const files = (this.mdFilesFilterPipe.transform(content.metaFile) || [])
+        const files = (filterMDFiles(content.metaFile) || [])
           .map(f => this.splitMarkDown(f, dates, firstMedia));
 
         return (await Promise.all(files)).flat();

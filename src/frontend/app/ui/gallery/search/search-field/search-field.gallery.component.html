@@ -4,7 +4,7 @@
                                  (ngModelChange)="validateRawSearchText()"
                                  class="search-field col p-0 rounded-start-2"
                                  (search)="search.emit()"
-                                 [placeholder]="placeholder"
+                                 [placeholder]="placeholder()"
                                  name="search-field" />
 
   <button class="btn btn-tertiary" type="button" (click)="openSearchModal(searchModal)">
@@ -16,7 +16,7 @@
 <ng-template #searchModal>
   <!-- sharing Modal-->
   <div class="modal-header">
-    <h5 class="modal-title">{{placeholder}}</h5>
+    <h5 class="modal-title">{{placeholder()}}</h5>
     <button type="button" class="btn-close" (click)="hideSearchModal()" data-dismiss="modal" aria-label="Close">
     </button>
   </div>
@@ -25,7 +25,7 @@
 
       <app-gallery-search-query-builder name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
-        [placeholder]="placeholder"
+        [placeholder]="placeholder()"
         (ngModelChange)="onQueryChange()"
         (search)="search.emit()" />
 

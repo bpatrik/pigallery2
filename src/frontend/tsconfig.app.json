@@ -3,14 +3,15 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "../../out-tsc/app",
-    "types": [],
+    "types": [
+      "@angular/localize"
+    ],
     "target": "ES2022",
     "module": "ES2022",
     "moduleResolution": "bundler",
   },
   "files": [
-    "./main.ts",
-    "./polyfills.ts"
+    "./main.ts"
   ],
   "include": [
     "./**/*.d.ts"

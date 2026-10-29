@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {BehaviorSubject} from 'rxjs';
 import {UserService} from './user.service';
@@ -13,14 +13,15 @@ import {getInjectedUser} from '../server-inject';
 
 @Injectable({providedIn: 'root'})
 export class AuthenticationService {
+  private userService = inject(UserService);
+  private shareService = inject(ShareService);
+  private cookieService = inject(CookieService);
+
   public readonly user: BehaviorSubject<UserDTO>;
 
-  constructor(
-    private userService: UserService,
-    networkService: NetworkService,
-    private shareService: ShareService,
-    private cookieService: CookieService
-  ) {
+  constructor() {
+    const networkService = inject(NetworkService);
+
     this.user = new BehaviorSubject(null);
 
     // picking up session..

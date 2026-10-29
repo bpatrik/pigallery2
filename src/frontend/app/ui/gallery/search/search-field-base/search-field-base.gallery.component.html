@@ -1,7 +1,7 @@
 <div class="input-group" style="border-radius: inherit">
   <input type="text"
     class="form-control search-text"
-    [placeholder]="placeholder"
+    [placeholder]="placeholder()"
     (keyup)="onSearchChange()"
     (blur)="onFocusLost()"
     (focus)="onFocus()"
@@ -31,7 +31,7 @@
           (mouseover)="setMouseOverAutoComplete(true)" (mouseout)="setMouseOverAutoComplete(false)">
           @for (item of autoCompleteRenders; track item; let i = $index) {
             <div class="autocomplete-item text-start"
-              [ngClass]="{'autocomplete-item-selected': highlightedAutoCompleteItem === i}"
+              [class.autocomplete-item-selected]="highlightedAutoCompleteItem === i"
               (mouseover)="setMouseOverAutoCompleteItem(i)"
               (click)="searchAutoComplete(item)"
               >

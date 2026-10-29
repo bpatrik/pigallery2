@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
@@ -18,12 +18,14 @@ import { NgIconComponent } from '@ng-icons/core';
 ]
 })
 export class LanguageComponent {
+  private cookieService = inject(CookieService);
+
   languages: string[] = [];
   current: string = null;
 
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
 
-  constructor(private cookieService: CookieService) {
+  constructor() {
     this.languages = Config.Server.languages.sort();
     if (this.cookieService.get(CookieNames.lang) != null) {
       this.current = this.cookieService.get(CookieNames.lang);

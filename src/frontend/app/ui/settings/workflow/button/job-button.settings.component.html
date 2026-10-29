@@ -1,25 +1,25 @@
 @if (!Running) {
-  <button class="btn {{danger ? 'btn-danger': 'btn-success'}}"
+  <button class="btn {{danger() ? 'btn-danger': 'btn-success'}}"
     [class.progress-bar-striped]="Progress?.onTimer"
     title="Trigger job run manually"
     i18n-title
-    [disabled]="disabled || jobsService.jobStartingStopping[jobName]"
+    [disabled]="disabled() || jobsService.jobStartingStopping[jobName()]"
     (click)="openModal(jobRunModal);">
-    @if (!shortName) {
+    @if (!shortName()) {
       <span class="me-2"><ng-container
-      i18n>Run now</ng-container>: {{ backendTextService.getJobName(jobName) }}</span>
+      i18n>Run now</ng-container>: {{ backendTextService.getJobName(jobName()) }}</span>
     }
     <ng-icon name="ionPlayOutline" />
   </button>
 }
 @if (Running) {
   <button class="btn btn-secondary"
-    [disabled]="disabled || jobsService.jobStartingStopping[jobName] || Progress.state !== JobProgressStates.running"
+    [disabled]="disabled() || jobsService.jobStartingStopping[jobName()] || Progress.state !== JobProgressStates.running"
     (click)="stop();">
     <ng-icon name="ionStopOutline" />
-    @if (!shortName) {
+    @if (!shortName()) {
       <span class="ms-2"><ng-container
-      i18n>Cancel</ng-container>: {{ backendTextService.getJobName(jobName) }}</span>
+      i18n>Cancel</ng-container>: {{ backendTextService.getJobName(jobName()) }}</span>
     }
   </button>
 }
@@ -28,14 +28,14 @@
 <ng-template #jobRunModal>
   <!-- job running Modal-->
   <div class="modal-header">
-    <h5 class="modal-title"><ng-container i18n>Do you want to run</ng-container> {{ backendTextService.getJobName(jobName) }}?</h5>
+    <h5 class="modal-title"><ng-container i18n>Do you want to run</ng-container> {{ backendTextService.getJobName(jobName()) }}?</h5>
     <button type="button" class="btn-close" (click)="hideModal()" data-dismiss="modal" aria-label="Close">
     </button>
   </div>
   <div class="modal-body">
     <span i18n>Are you sure you want to run this job? This will have the following effect:</span>
     <div class="alert alert-secondary" role="alert">
-      {{ backendTextService.getJobDescription(jobName) }}
+      {{ backendTextService.getJobDescription(jobName()) }}
     </div>
   </div>
   <div class="modal-footer">
@@ -45,7 +45,7 @@
           (click)="hideModal()">
           <ng-container i18n>Cancel</ng-container>
         </button>
-        <button class="btn {{danger ? 'btn-danger': 'btn-success'}}" type="button"
+        <button class="btn {{danger() ? 'btn-danger': 'btn-success'}}" type="button"
           (click)="start(); hideModal();">
           <ng-container i18n>Run now</ng-container>
           <ng-icon name="ionPlayOutline" class="ms-1" />

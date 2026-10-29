@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild,} from '@angular/core';
+import { Component, ElementRef, forwardRef, OnDestroy, inject, input, output, viewChild } from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
@@ -6,7 +6,7 @@ import {MetadataSearchQueryTypes, SearchQueryTypes,} from '../../../../../../com
 import {Config} from '../../../../../../common/config/public/Config';
 import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {AutoCompleteRenderItem} from '../AutoCompleteRenderItem';
-import { NgClass } from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 
 @Component({
@@ -28,17 +28,19 @@ import {NgIconComponent} from '@ng-icons/core';
   ],
   imports: [
     FormsModule,
-    NgClass,
     NgIconComponent
 ]
 })
 export class GallerySearchFieldBaseComponent
   implements ControlValueAccessor, Validator, OnDestroy {
-  @Input() placeholder = $localize`Search`;
-  @Output() search = new EventEmitter<void>();
+  private autoCompleteService = inject(AutoCompleteService);
+  router = inject(Router);
 
-  @ViewChild('SearchField', {static: false}) searchField: ElementRef;
-  @ViewChild('SearchHintField', {static: false}) searchHintField: ElementRef;
+  readonly placeholder = input($localize `Search`);
+  readonly search = output<void>();
+
+  readonly searchField = viewChild<ElementRef>('SearchField');
+  readonly searchHintField = viewChild<ElementRef>('SearchHintField');
 
   autoCompleteRenders: AutoCompleteRenderItem[] = [];
   public rawSearchText = '';
@@ -57,10 +59,7 @@ export class GallerySearchFieldBaseComponent
   private autoCompleteItemsSubscription: Subscription = null;
   private autoCompleteItems: BehaviorSubject<RenderableAutoCompleteItem[]>;
 
-  constructor(
-    private autoCompleteService: AutoCompleteService,
-    public router: Router
-  ) {
+  constructor() {
     this.SearchQueryTypes = SearchQueryTypes;
     this.MetadataSearchQueryTypes = MetadataSearchQueryTypes.map(
       (v): { value: string; key: SearchQueryTypes } => ({
@@ -245,8 +244,8 @@ export class GallerySearchFieldBaseComponent
   }
 
   Scrolled(): void {
-    this.searchHintField.nativeElement.scrollLeft =
-      this.searchField.nativeElement.scrollLeft;
+    this.searchHintField().nativeElement.scrollLeft =
+      this.searchField().nativeElement.scrollLeft;
   }
 
   private emptyAutoComplete(): void {

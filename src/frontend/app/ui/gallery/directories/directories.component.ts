@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, OnChanges} from '@angular/core';
+import { Component, ElementRef, OnChanges, inject, input } from '@angular/core';
 import {DeviceDetectorService} from 'ngx-device-detector';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
@@ -6,27 +6,30 @@ import { GalleryDirectoryComponent } from './directory/directory.gallery.compone
 
 @Component({
     selector: 'app-gallery-directories',
+    host: {
+      '(window:resize)': 'onResize()'
+    },
     templateUrl: './directories.component.html',
     styleUrl: './directories.component.css',
     imports: [GalleryDirectoryComponent]
 })
 export class DirectoriesComponent implements OnChanges {
-  @Input() directories: SubDirectoryDTO[];
+  private container = inject(ElementRef);
+  private deviceService = inject(DeviceDetectorService);
+
+  readonly directories = input<SubDirectoryDTO[]>(undefined);
   size: number;
   isDesktop: boolean;
 
-  constructor(
-      private container: ElementRef,
-      private deviceService: DeviceDetectorService
-  ) {
+  constructor() {
     this.isDesktop = this.deviceService.isDesktop();
   }
 
+  // Side effect: recalculates the tile size from the window and the container.
   ngOnChanges(): void {
     this.updateSize();
   }
 
-  @HostListener('window:resize')
   onResize(): void {
     this.updateSize();
   }

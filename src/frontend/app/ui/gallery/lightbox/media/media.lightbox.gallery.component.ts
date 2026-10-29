@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild,} from '@angular/core';
+import { Component, ElementRef, OnChanges, inject, input, output, viewChild } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -14,17 +14,21 @@ import {LightboxService} from '../lightbox.service';
   imports: []
 })
 export class GalleryLightboxMediaComponent implements OnChanges {
-  @Input() gridMedia: GridMedia;
-  @Input() nextGridMedia: GridMedia;
-  @Input() loadMedia = false; // prevents loading media
-  @Input() windowAspect = 1;
-  @Input() zoom = 1;
-  @Input() drag = {x: 0, y: 0};
-  @Output() videoSourceError = new EventEmitter();
+  elementRef = inject(ElementRef);
+  lightboxService = inject(LightboxService);
+  private sanitizer = inject(DomSanitizer);
 
-  @ViewChild('video', {static: false}) video: ElementRef<HTMLVideoElement>;
-  @ViewChild('liveVideo', {static: false}) liveVideo: ElementRef<HTMLVideoElement>;
-  @ViewChild('image', {static: false}) imageElement: ElementRef<HTMLImageElement>;
+  readonly gridMedia = input<GridMedia>(undefined);
+  readonly nextGridMedia = input<GridMedia>(undefined);
+  readonly loadMedia = input(false); // prevents loading media
+  readonly windowAspect = input(1);
+  readonly zoom = input(1);
+  readonly drag = input({ x: 0, y: 0 });
+  readonly videoSourceError = output();
+
+  readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
+  readonly liveVideo = viewChild<ElementRef<HTMLVideoElement>>('liveVideo');
+  readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   prevGirdPhoto: GridMedia = null;
 
@@ -49,23 +53,18 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   private mediaLoaded = false;
   private videoProgress = 0;
 
-  constructor(public elementRef: ElementRef,
-              public lightboxService: LightboxService,
-              private sanitizer: DomSanitizer) {
-  }
-
   get ImageTransform(): SafeStyle {
     return this.sanitizer.bypassSecurityTrustStyle(
       'scale(' +
-      this.zoom +
+      this.zoom() +
       ') translate(calc(' +
-      -50 / this.zoom +
+      -50 / this.zoom() +
       '% + ' +
-      this.drag.x / this.zoom +
+      this.drag().x / this.zoom() +
       'px), calc(' +
-      -50 / this.zoom +
+      -50 / this.zoom() +
       '% + ' +
-      this.drag.y / this.zoom +
+      this.drag().y / this.zoom() +
       'px))'
     );
   }
@@ -75,80 +74,92 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public set VideoProgress(value: number) {
-    if (!this.video && value === null && typeof value === 'undefined') {
+    const video = this.video();
+    if (!video && value === null && typeof value === 'undefined') {
       return;
     }
-    this.video.nativeElement.currentTime =
-      this.video.nativeElement.duration * (value / 100);
-    if (this.video.nativeElement.paused) {
-      this.video.nativeElement.play().catch(console.error);
+    video.nativeElement.currentTime =
+      video.nativeElement.duration * (value / 100);
+    if (video.nativeElement.paused) {
+      video.nativeElement.play().catch(console.error);
     }
   }
 
   public get VideoVolume(): number {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return 1;
     }
-    return this.video.nativeElement.volume;
+    return video.nativeElement.volume;
   }
 
   public set VideoVolume(value: number) {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return;
     }
-    this.video.nativeElement.muted = false;
-    this.video.nativeElement.volume = value;
+    video.nativeElement.muted = false;
+    video.nativeElement.volume = value;
   }
 
   public get Muted(): boolean {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return false;
     }
-    return this.video.nativeElement.muted;
+    return video.nativeElement.muted;
   }
 
   public get Paused(): boolean {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return true;
     }
-    return this.video.nativeElement.paused;
+    return video.nativeElement.paused;
   }
 
   private get ThumbnailUrl(): string {
-    if (this.gridMedia.isThumbnailAvailable() === true) {
-      return this.gridMedia.getThumbnailPath();
+    const gridMedia = this.gridMedia();
+    if (gridMedia.isThumbnailAvailable() === true) {
+      return gridMedia.getThumbnailPath();
     }
 
-    if (this.gridMedia.isReplacementThumbnailAvailable() === true) {
-      return this.gridMedia.getReplacementThumbnailPath();
+    if (gridMedia.isReplacementThumbnailAvailable() === true) {
+      return gridMedia.getReplacementThumbnailPath();
     }
     return null;
   }
 
   public isRenderedMediaLoaded(): boolean {
-    if (!this.gridMedia) {
+    const gridMedia = this.gridMedia();
+    if (!gridMedia) {
       return false;
     }
-    if (this.gridMedia.isVideo()) {
-      return !!this.video && this.video.nativeElement.readyState >= 3; // HAVE_FUTURE_DATA
+    if (gridMedia.isVideo()) {
+      const video = this.video();
+      return !!video && video.nativeElement.readyState >= 3; // HAVE_FUTURE_DATA
     }
-    if (this.gridMedia.isPhoto()) {
-      return this.imageLoadFinished.this || (this.imageElement && this.imageElement.nativeElement.complete);
+    if (gridMedia.isPhoto()) {
+      const imageElement = this.imageElement();
+      return this.imageLoadFinished.this || (imageElement && imageElement.nativeElement.complete);
     }
     return false;
   }
 
   public isNextMediaLoaded(): boolean {
-    if (!this.nextGridMedia || !this.nextGridMedia.isPhoto()) {
+    const nextGridMedia = this.nextGridMedia();
+    if (!nextGridMedia || !nextGridMedia.isPhoto()) {
       return true;
     }
     return this.imageLoadFinished.next || this.nextImage.complete;
   }
 
+  // Side effect: resets and starts loading the image or video of the new media.
   ngOnChanges(): void {
     // media changed
-    if (this.prevGirdPhoto !== this.gridMedia) {
-      this.prevGirdPhoto = this.gridMedia;
+    const gridMedia = this.gridMedia();
+    if (this.prevGirdPhoto !== gridMedia) {
+      this.prevGirdPhoto = gridMedia;
       this.thumbnailSrc = null;
       this.liveVideoSrc = null;
       this.liveVideoClickLocked = false;
@@ -165,7 +176,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     this.setImageSize();
     if (
       this.thumbnailSrc == null &&
-      this.gridMedia &&
+      gridMedia &&
       this.ThumbnailUrl !== null
     ) {
       this.thumbnailSrc = this.ThumbnailUrl;
@@ -173,41 +184,44 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
     if (
       this.liveVideoSrc == null &&
-      this.gridMedia &&
-      this.gridMedia.isLivePhoto()
+      gridMedia &&
+      gridMedia.isLivePhoto()
     ) {
-      this.liveVideoSrc = this.gridMedia.getLiveVideoPath();
+      this.liveVideoSrc = gridMedia.getLiveVideoPath();
     }
 
     this.loadPhoto();
   }
 
   public mute(): void {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return;
     }
 
-    this.video.nativeElement.muted = !this.video.nativeElement.muted;
+    video.nativeElement.muted = !video.nativeElement.muted;
   }
 
   public playPause(): void {
-    if (!this.video) {
+    const video = this.video();
+    if (!video) {
       return;
     }
-    if (this.video.nativeElement.paused) {
-      this.video.nativeElement.play().catch(console.error);
+    if (video.nativeElement.paused) {
+      video.nativeElement.play().catch(console.error);
     } else {
-      this.video.nativeElement.pause();
+      video.nativeElement.pause();
     }
   }
 
   public startLiveVideo(): void {
-    if (!this.liveVideo || this.liveVideoClickLocked) {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo || this.liveVideoClickLocked) {
       return;
     }
     this.liveVideoPlaying = true;
-    this.liveVideo.nativeElement.currentTime = 0;
-    this.liveVideo.nativeElement.play().catch(console.error);
+    liveVideo.nativeElement.currentTime = 0;
+    liveVideo.nativeElement.play().catch(console.error);
   }
 
   public startLiveVideoTouch(): void {
@@ -216,11 +230,12 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public stopLiveVideo(): void {
-    if (!this.liveVideo || this.liveVideoClickLocked) {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo || this.liveVideoClickLocked) {
       return;
     }
     this.liveVideoPlaying = false;
-    this.liveVideo.nativeElement.pause();
+    liveVideo.nativeElement.pause();
   }
 
   public toggleLiveVideo(): void {
@@ -229,18 +244,19 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       this.liveVideoTouchActive = false;
       return;
     }
-    if (!this.liveVideo) {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo) {
       return;
     }
     if (this.liveVideoClickLocked) {
       this.liveVideoClickLocked = false;
       this.liveVideoPlaying = false;
-      this.liveVideo.nativeElement.pause();
+      liveVideo.nativeElement.pause();
     } else {
       this.liveVideoClickLocked = true;
       this.liveVideoPlaying = true;
-      this.liveVideo.nativeElement.currentTime = 0;
-      this.liveVideo.nativeElement.play().catch(console.error);
+      liveVideo.nativeElement.currentTime = 0;
+      liveVideo.nativeElement.play().catch(console.error);
     }
   }
 
@@ -249,7 +265,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     this.imageLoadFinished.this = true;
     console.error(
       'Error: cannot load media for lightbox url: ' +
-      this.gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight)
+      this.gridMedia().getBestSizedMediaPath(window.innerWidth, window.innerHeight)
     );
     this.loadNextPhoto();
   }
@@ -261,12 +277,13 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public showThumbnail(): boolean {
+    const gridMedia = this.gridMedia();
     return (
-      this.gridMedia &&
+      gridMedia &&
       !this.mediaLoaded &&
       this.thumbnailSrc !== null &&
-      (this.gridMedia.isThumbnailAvailable() ||
-        this.gridMedia.isReplacementThumbnailAvailable())
+      (gridMedia.isThumbnailAvailable() ||
+        gridMedia.isReplacementThumbnailAvailable())
     );
   }
 
@@ -277,8 +294,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   public onVideoProgress(): void {
     this.videoProgress =
-      (100 / this.video.nativeElement.duration) *
-      this.video.nativeElement.currentTime;
+      (100 / this.video().nativeElement.duration) *
+      this.video().nativeElement.currentTime;
   }
 
   /**
@@ -287,15 +304,16 @@ export class GalleryLightboxMediaComponent implements OnChanges {
    * @private
    */
   private loadNextPhoto(): void {
-    if (!this.nextGridMedia || !this.loadMedia) {
+    const nextGridMedia = this.nextGridMedia();
+    if (!nextGridMedia || !this.loadMedia()) {
       return;
     }
     // Videos do not support preloading
-    if (!this.nextGridMedia.isPhoto()) {
+    if (!nextGridMedia.isPhoto()) {
       this.imageLoadFinished.next = true;
       return;
     }
-    this.nextImage.src = this.nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
+    this.nextImage.src = nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
 
     this.nextImage.onload = () => this.imageLoadFinished.next = true;
     this.nextImage.onerror = () => {
@@ -317,7 +335,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       return true;
     }
 
-    const selectedSize = this.gridMedia.getMediaSize(window.innerWidth, window.innerHeight);
+    const selectedSize = this.gridMedia().getMediaSize(window.innerWidth, window.innerHeight);
     const minDisplaySize = Math.min(window.innerWidth, window.innerHeight);
 
     // If the selected preview size is less than 50% of the minimum display dimension,
@@ -326,40 +344,42 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   private loadPhoto(): void {
-    if (!this.gridMedia || !this.loadMedia || !this.gridMedia.isPhoto()) {
+    const gridMedia = this.gridMedia();
+    if (!gridMedia || !this.loadMedia() || !gridMedia.isPhoto()) {
       return;
     }
 
     if (
-      this.zoom === 1 ||
+      this.zoom() === 1 ||
       Config.Gallery.Lightbox.loadFullImageOnZoom === false
     ) {
       if (this.photo.src == null) {
         // Check if the preview size is adequate for lightbox display
         // If not, load the original instead of a tiny preview
         if (this.isPreviewAdequateForLightbox()) {
-          this.photo.src = this.gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
+          this.photo.src = gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
           this.photo.isBestFit = true;
         } else {
-          this.photo.src = this.gridMedia.getOriginalMediaPath();
+          this.photo.src = gridMedia.getOriginalMediaPath();
           this.photo.isBestFit = false;
         }
       }
       // on zoom load high res photo
     } else if (this.photo.isBestFit === true || this.photo.src == null) {
-      this.photo.src = this.gridMedia.getOriginalMediaPath();
+      this.photo.src = gridMedia.getOriginalMediaPath();
       this.photo.isBestFit = false;
     }
   }
 
   private setImageSize(): void {
-    if (!this.gridMedia) {
+    const gridMedia = this.gridMedia();
+    if (!gridMedia) {
       return;
     }
 
-    const photoAspect = MediaDTOUtils.calcAspectRatio(this.gridMedia.media);
+    const photoAspect = MediaDTOUtils.calcAspectRatio(gridMedia.media);
 
-    if (photoAspect < this.windowAspect) {
+    if (photoAspect < this.windowAspect()) {
       this.imageSize.height = '100';
       this.imageSize.width = null;
     } else {

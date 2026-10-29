@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {BehaviorSubject} from 'rxjs';
 import {Config} from '../../../../../common/config/public/Config';
@@ -6,14 +6,14 @@ import {ContentLoaderService} from '../contentLoader.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {Utils} from '../../../../../common/Utils';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class GalleryNavigatorService {
+  private galleryCacheService = inject(GalleryCacheService);
+  private galleryService = inject(ContentLoaderService);
+
   public girdSize: BehaviorSubject<GridSizes>;
 
-  constructor(
-    private galleryCacheService: GalleryCacheService,
-    private galleryService: ContentLoaderService,
-  ) {
+  constructor() {
 
     // TODO load def instead
     this.girdSize = new BehaviorSubject(this.getDefaultGridSize());

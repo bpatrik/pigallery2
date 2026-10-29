@@ -2,7 +2,7 @@
 
 
   @if (thumbnail.Available) {
-    <img alt="{{gridMedia.media.name}}" #img [src]="thumbnail.Src"
+    <img alt="{{gridMedia().media.name}}" #img [src]="thumbnail.Src"
       (load)="loaded=true"
       [class.loading]="!loaded"
       >
@@ -15,14 +15,14 @@
   }
 
 
-  @if (gridMedia.isVideo()) {
+  @if (gridMedia().isVideo()) {
     <div class="video-indicator">
-      {{gridMedia.Video.metadata.duration  | duration}}
+      {{gridMedia().Video.metadata.duration  | duration}}
       <ng-icon name="ionVideocamOutline" />
     </div>
   }
 
-  @if (gridMedia.isLivePhoto()) {
+  @if (gridMedia().isLivePhoto()) {
     <div class="live-photo-indicator">
       LIVE
     </div>
@@ -55,7 +55,7 @@
     <div class="info rounded-bottom"
       >
       <div class="photo-name">{{Title}}</div>
-      @if (gridMedia.hasPositionData()) {
+      @if (gridMedia().hasPositionData()) {
         <div class="photo-position">
           <ng-icon name="ionLocationOutline" />
           @if (getPositionText()) {

@@ -1,6 +1,11 @@
+import {TestBed} from '@angular/core/testing';
+import {BsModalService} from 'ngx-bootstrap/modal';
 import {AlbumsComponent} from './albums.component';
 import {AlbumsService} from './albums.service';
-import {SearchQueryParserService} from '../gallery/search/search-query-parser.service';
+import {AuthenticationService} from '../../model/network/authentication.service';
+import {PiTitleService} from '../../model/pi-title.service';
+import {ShareService} from '../gallery/share.service';
+import {NavigationService} from '../../model/navigation.service';
 import {RangeSearch, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../common/entities/SearchQueryDTO';
 
 describe('AlbumsComponent - IsSearchQueryEmpty', () => {
@@ -8,10 +13,17 @@ describe('AlbumsComponent - IsSearchQueryEmpty', () => {
 
   beforeEach(() => {
     const albumsService = {getAlbums: () => Promise.resolve()} as unknown as AlbumsService;
-    component = new AlbumsComponent(
-      albumsService, null, null, null, null, null, null,
-      new SearchQueryParserService()
-    );
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: AlbumsService, useValue: albumsService},
+        {provide: BsModalService, useValue: null},
+        {provide: AuthenticationService, useValue: null},
+        {provide: PiTitleService, useValue: null},
+        {provide: ShareService, useValue: null},
+        {provide: NavigationService, useValue: null},
+      ]
+    });
+    component = TestBed.runInInjectionContext(() => new AlbumsComponent());
   });
 
   const withQuery = (q: SearchQueryDTO): boolean => {

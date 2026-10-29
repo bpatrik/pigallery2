@@ -3,8 +3,8 @@
 
 
   <div class="photo-container  rounded overflow-hidden"
-    [style.width.px]="size"
-    [style.height.px]="size">
+    [style.width.px]="size()"
+    [style.height.px]="size()">
 
     @if (thumbnail && thumbnail.Available) {
       <div class="photo "
@@ -19,15 +19,15 @@
 
   <!--Info box -->
   <div class="info rounded-bottom">
-    {{album.name}} ({{album.cache?.itemCount}})
-    @if (CanUpdate && !album.locked) {
+    {{album().name}} ({{album().cache?.itemCount}})
+    @if (CanUpdate && !album().locked) {
       <ng-icon (click)="deleteAlbum($event)"
         class="info-button delete float-end"
         name="ionTrashOutline"
       title="Delete" i18n-title />
     }
 
-    @if (album.locked) {
+    @if (album().locked) {
       <ng-icon class="info-button float-end"
         name="ionLockClosedOutline"
         title="Album is locked, cannot be deleted from the webpage."

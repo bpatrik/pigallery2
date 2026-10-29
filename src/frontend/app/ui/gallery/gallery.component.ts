@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -15,8 +15,8 @@ import {take} from 'rxjs/operators';
 import {GallerySortingService, GroupedDirectoryContent} from './navigator/sorting.service';
 import {FilterService} from './filter/filter.service';
 import {PiTitleService} from '../../model/pi-title.service';
-import {GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
-import {MDFilesFilterPipe} from '../../pipes/MDFilesFilterPipe';
+import {filterGPXFiles, GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
+import {filterMDFiles} from '../../pipes/MDFilesFilterPipe';
 import {ContentLoaderService} from './contentLoader.service';
 import {GalleryLightboxComponent} from './lightbox/lightbox.gallery.component';
 import {FrameComponent} from '../frame/frame.component';
@@ -37,6 +37,11 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
 
 @Component({
   selector: 'app-gallery',
+  host: {
+    '(dragover)': 'onDragOver($event)',
+    '(dragleave)': 'onDragLeave($event)',
+    '(drop)': 'onDrop($event)'
+  },
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
   imports: [
@@ -56,8 +61,20 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
 ]
 })
 export class GalleryComponent implements OnInit, OnDestroy {
-  @ViewChild(GalleryGridComponent, {static: false})
-  grid: GalleryGridComponent;
+  contentLoader = inject(ContentLoaderService);
+  contentService = inject(ContentService);
+  galleryService = inject(GalleryService);
+  private authService = inject(AuthenticationService);
+  private router = inject(Router);
+  private shareService = inject(ShareService);
+  private route = inject(ActivatedRoute);
+  private navigation = inject(NavigationService);
+  private filterService = inject(FilterService);
+  private sortingService = inject(GallerySortingService);
+  private piTitleService = inject(PiTitleService);
+  uploaderService = inject(UploaderService);
+
+  readonly grid = viewChild(GalleryGridComponent);
 
   public showSearchBar = false;
   public showShare = false;
@@ -83,22 +100,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     sorting: null,
   };
 
-  constructor(
-    public contentLoader: ContentLoaderService,
-    public contentService: ContentService,
-    public galleryService: GalleryService,
-    private authService: AuthenticationService,
-    private router: Router,
-    private shareService: ShareService,
-    private route: ActivatedRoute,
-    private navigation: NavigationService,
-    private filterService: FilterService,
-    private sortingService: GallerySortingService,
-    private piTitleService: PiTitleService,
-    private gpxFilesFilterPipe: GPXFilesFilterPipe,
-    private mdFilesFilterPipe: MDFilesFilterPipe,
-    public uploaderService: UploaderService,
-  ) {
+  constructor() {
     this.mapEnabled = Config.Map.enabled;
     PageHelper.showScrollY('gallery');
   }
@@ -108,11 +110,11 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   get ShowMarkDown(): boolean {
-    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && this.mdFilesFilterPipe.transform(this.directoryContent.metaFile).length > 0;
+    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && filterMDFiles(this.directoryContent.metaFile).length > 0;
   }
 
   get ShowMap(): boolean {
-    return (this.isPhotoWithLocation || this.gpxFilesFilterPipe.transform(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
+    return (this.isPhotoWithLocation || filterGPXFiles(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
   }
 
   updateTimer(t: number): void {
@@ -184,7 +186,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('dragover', ['$event'])
   onDragOver(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();
@@ -193,7 +194,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('dragleave', ['$event'])
   onDragLeave(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();
@@ -202,7 +202,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  @HostListener('drop', ['$event'])
   onDrop(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();

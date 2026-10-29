@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {Config} from '../../common/config/public/Config';
 import { SafeHtmlPipe } from './pipes/SafeHTMLPipe';
 
@@ -8,8 +8,8 @@ import { SafeHtmlPipe } from './pipes/SafeHTMLPipe';
     template: `
       <svg xmlns="http://www.w3.org/2000/svg"
            style="vertical-align: baseline"
-           [attr.width]="width"
-           [attr.height]="height"
+           [attr.width]="width()"
+           [attr.height]="height()"
            fill="currentcolor"
            [attr.viewBox]="Config.Server.svgIcon.viewBox || '0 0 512 512'"
            [innerHtml]="Config.Server.svgIcon.items | safeHtml">
@@ -18,8 +18,8 @@ import { SafeHtmlPipe } from './pipes/SafeHTMLPipe';
 })
 export class IconComponent {
 
-  @Input() width: number;
-  @Input() height: number;
+  readonly width = input<number>(undefined);
+  readonly height = input<number>(undefined);
 
   protected readonly Config = Config;
 

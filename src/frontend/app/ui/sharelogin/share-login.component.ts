@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
@@ -23,16 +23,16 @@ import { NgIconComponent } from '@ng-icons/core';
 ]
 })
 export class ShareLoginComponent implements OnInit {
+  shareService = inject(ShareService);
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+
   password: string;
   loginError = false;
   inProgress = false;
   title: string;
 
-  constructor(
-      public shareService: ShareService,
-      private authService: AuthenticationService,
-      private navigation: NavigationService
-  ) {
+  constructor() {
     this.title = Config.Server.applicationTitle;
   }
 

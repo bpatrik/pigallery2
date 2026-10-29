@@ -204,6 +204,6 @@
   </div>
   @if (showFilters && ItemCount> 0) {
     <app-gallery-filter #filterComponent
-      [style.max-height]="sanitizer.bypassSecurityTrustStyle('calc(100dvh - '+(navigatorElement?.nativeElement?.getBoundingClientRect().top+navigatorElement?.nativeElement?.getBoundingClientRect().height)+'px)')"
+      [style.max-height]="sanitizer.bypassSecurityTrustStyle('calc(100dvh - '+(navigatorElement()?.nativeElement?.getBoundingClientRect().top+navigatorElement()?.nativeElement?.getBoundingClientRect().height)+'px)')"
     class="position-absolute w-100" />
   }

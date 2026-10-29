@@ -2,7 +2,6 @@ import {TestBed} from '@angular/core/testing';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {ContentService} from '../content.service';
-import {MDFilesFilterPipe} from '../../../pipes/MDFilesFilterPipe';
 import {of} from 'rxjs';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {DirectoryPathDTO} from '../../../../../common/entities/DirectoryDTO';
@@ -11,7 +10,6 @@ describe('BlogService', () => {
   let service: BlogService;
   let mockNetworkService: jasmine.SpyObj<NetworkService>;
   let mockGalleryService: jasmine.SpyObj<ContentService>;
-  let mockMdFilesFilterPipe: jasmine.SpyObj<MDFilesFilterPipe>;
 
   const createMockDirectory = (path: string, name: string): DirectoryPathDTO => ({
     path: path,
@@ -30,14 +28,12 @@ describe('BlogService', () => {
     mockGalleryService = jasmine.createSpyObj('ContentService', [], {
       sortedFilteredContent: of(null)
     });
-    mockMdFilesFilterPipe = jasmine.createSpyObj('MDFilesFilterPipe', ['transform']);
 
     TestBed.configureTestingModule({
       providers: [
         BlogService,
         {provide: NetworkService, useValue: mockNetworkService},
-        {provide: ContentService, useValue: mockGalleryService},
-        {provide: MDFilesFilterPipe, useValue: mockMdFilesFilterPipe}
+        {provide: ContentService, useValue: mockGalleryService}
       ]
     });
 

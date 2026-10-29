@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
+import { Component, TemplateRef, inject, input, output } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -17,33 +17,38 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class JobButtonComponent {
-  @Input() jobName: string;
-  @Input() config: any;
-  @Input() shortName = false;
-  @Input() disabled = false;
-  @Input() soloRun = false;
-  @Input() allowParallelRun = false;
-  @Input() danger = false;
+  private notification = inject(NotificationService);
+  jobsService = inject(ScheduledJobsService);
+  private modalService = inject(BsModalService);
+  backendTextService = inject(BackendtextService);
+
+  readonly jobName = input<string>(undefined);
+  readonly config = input<any>(undefined);
+  readonly shortName = input(false);
+  readonly disabled = input(false);
+  readonly soloRun = input(false);
+  readonly allowParallelRun = input(false);
+  readonly danger = input(false);
   JobProgressStates = JobProgressStates;
-  @Output() jobError = new EventEmitter<string>();
+  readonly jobError = output<string>();
   private modalRef: BsModalRef;
+  private defaultConfig: any;
 
-  constructor(
-    private notification: NotificationService,
-    public jobsService: ScheduledJobsService,
-    private modalService: BsModalService,
-    public backendTextService: BackendtextService
-  ) {
-  }
-
-  private populateConfig() {
-    if (this.config) {
-      return;
+  /**
+   * The config input, or the job's default config if the input is not set.
+   */
+  private get Config(): any {
+    if (this.config()) {
+      return this.config();
     }
-    const c = this.jobsService.getDefaultConfig(this.jobName); // can return with null
-    if (c) {
-      this.config = c;
+    if (!this.defaultConfig) {
+      // can return with null, keep undefined then, so JobDTOUtils.getHashName uses its default config
+      const c = this.jobsService.getDefaultConfig(this.jobName());
+      if (c) {
+        this.defaultConfig = c;
+      }
     }
+    return this.defaultConfig;
   }
 
   public get Running(): boolean {
@@ -55,9 +60,8 @@ export class JobButtonComponent {
   }
 
   get Progress(): OnTimerJobProgressDTO {
-    this.populateConfig();
     return this.jobsService.progress.value[
-      JobDTOUtils.getHashName(this.jobName, this.config)
+      JobDTOUtils.getHashName(this.jobName(), this.Config)
       ];
   }
 
@@ -71,7 +75,7 @@ export class JobButtonComponent {
     // if we show the button in short form (at the jobs settings),
     // we assume users know what they are doing,
     // so we do not show a confirm window.
-    if(this.shortName){
+    if(this.shortName()){
       await this.start();
       return;
     }
@@ -85,18 +89,17 @@ export class JobButtonComponent {
 
   public async start(): Promise<boolean> {
     this.jobError.emit('');
-    this.populateConfig();
     try {
       await this.jobsService.start(
-        this.jobName,
-        this.config,
-        this.soloRun,
-        this.allowParallelRun
+        this.jobName(),
+        this.Config,
+        this.soloRun(),
+        this.allowParallelRun()
       );
       this.notification.success(
         $localize`Job started` +
         ': ' +
-        this.backendTextService.getJobName(this.jobName)
+        this.backendTextService.getJobName(this.jobName())
       );
       return true;
     } catch (err) {
@@ -112,11 +115,11 @@ export class JobButtonComponent {
   public async stop(): Promise<boolean> {
     this.jobError.emit('');
     try {
-      await this.jobsService.stop(this.jobName);
+      await this.jobsService.stop(this.jobName());
       this.notification.info(
         $localize`Stopping job` +
         ': ' +
-        this.backendTextService.getJobName(this.jobName)
+        this.backendTextService.getJobName(this.jobName())
       );
       return true;
     } catch (err) {

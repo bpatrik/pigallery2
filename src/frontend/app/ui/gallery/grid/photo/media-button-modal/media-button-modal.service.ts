@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {GridMedia} from '../../GridMedia';
 import {IClientMediaButtonConfigWithBaseApiPath} from '../photo.grid.gallery.component';
@@ -17,15 +17,12 @@ export interface MediaButtonModalData {
   providedIn: 'root'
 })
 export class MediaButtonModalService {
+  private notificationService = inject(NotificationService);
+  private networkService = inject(NetworkService);
+  private contentLoader = inject(ContentLoaderService);
+
   private modalData$ = new BehaviorSubject<MediaButtonModalData | null>(null);
   private savedModalValues: Record<string, string | number | boolean> = {};
-
-  constructor(
-    private notificationService: NotificationService,
-    private networkService: NetworkService,
-    private contentLoader: ContentLoaderService
-  ) {
-  }
 
   get modalData() {
     return this.modalData$.asObservable();

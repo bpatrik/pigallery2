@@ -1,4 +1,4 @@
-import {Injectable, OnDestroy} from '@angular/core';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {ContentWrapperUtils, ContentWrapperWithError, PackedContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {SubDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
@@ -15,8 +15,14 @@ import {FileDTO} from '../../../../common/entities/FileDTO';
 import {GalleryService} from './gallery.service';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ContentLoaderService implements OnDestroy {
+  private networkService = inject(NetworkService);
+  private galleryCacheService = inject(GalleryCacheService);
+  private shareService = inject(ShareService);
+  private galleryService = inject(GalleryService);
+  private router = inject(Router);
+
   public content: BehaviorSubject<ContentWrapperWithError>;
   public originalContent: Observable<DirectoryContent>;
   private ongoingContentRequest: string = null;
@@ -26,13 +32,7 @@ export class ContentLoaderService implements OnDestroy {
   private pollingTimerRestart = new Subject<void>();
   private pollingSub: Subscription;
 
-  constructor(
-    private networkService: NetworkService,
-    private galleryCacheService: GalleryCacheService,
-    private shareService: ShareService,
-    private galleryService: GalleryService,
-    private router: Router
-  ) {
+  constructor() {
     this.content = new BehaviorSubject<ContentWrapperWithError>(
       {} as ContentWrapperWithError
     );

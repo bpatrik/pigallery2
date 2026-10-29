@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import { Component, ElementRef, inject, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
@@ -30,6 +30,10 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 
 @Component({
   selector: 'app-gallery-navbar',
+  host: {
+    '(window:keydown)': 'onKeyPress($event)',
+    '(window:scroll)': 'onScroll()'
+  },
   styleUrl: './navigator.gallery.component.css',
   templateUrl: './navigator.gallery.component.html',
   imports: [
@@ -48,6 +52,15 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 ]
 })
 export class GalleryNavigatorComponent {
+  authService = inject(AuthenticationService);
+  queryService = inject(QueryService);
+  contentLoaderService = inject(ContentLoaderService);
+  filterService = inject(FilterService);
+  sortingService = inject(GallerySortingService);
+  navigatorService = inject(GalleryNavigatorService);
+  private router = inject(Router);
+  sanitizer = inject(DomSanitizer);
+
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly groupingByTypes: { key: number; value: string }[] = [];
   public readonly gridSizes: { key: number; value: string }[] = [];
@@ -58,8 +71,8 @@ export class GalleryNavigatorComponent {
   public directoryContent: Observable<DirectoryContent>;
   public routes: Observable<NavigatorPath[]>;
   public showFilters = false;
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
-  @ViewChild('navigator', {read: ElementRef}) navigatorElement: ElementRef<HTMLInputElement>;
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
+  readonly navigatorElement = viewChild('navigator', { read: ElementRef });
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
   protected readonly GroupByTypes = GroupByTypes;
   private readonly RootFolderName: string;
@@ -70,16 +83,7 @@ export class GalleryNavigatorComponent {
     down: 0
   };
 
-  constructor(
-    public authService: AuthenticationService,
-    public queryService: QueryService,
-    public contentLoaderService: ContentLoaderService,
-    public filterService: FilterService,
-    public sortingService: GallerySortingService,
-    public navigatorService: GalleryNavigatorService,
-    private router: Router,
-    public sanitizer: DomSanitizer
-  ) {
+  constructor() {
     this.sortingByTypes = Utils.enumToArray(SortByTypes);
     // can't group by random
     this.groupingByTypes = Utils.enumToArray(GroupByTypes);
@@ -301,7 +305,6 @@ export class GalleryNavigatorComponent {
       .catch(console.error);
   }
 
-  @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowUp':
@@ -313,14 +316,13 @@ export class GalleryNavigatorComponent {
   }
 
 
-  @HostListener('window:scroll')
   onScroll(): void {
     const scrollPosition = PageHelper.ScrollY;
     if (this.lastScroll.any < scrollPosition) { // scroll down
       //hide delay
       if (this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay) {
         this.showFilters = false;
-        this.dropdown.hide();
+        this.dropdown().hide();
       }
       this.lastScroll.down = scrollPosition;
     } else if (this.lastScroll.any > scrollPosition) {

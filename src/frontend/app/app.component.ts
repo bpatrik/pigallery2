@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
@@ -16,17 +16,14 @@ import { RouterOutlet } from '@angular/router';
     imports: [RouterOutlet]
 })
 export class AppComponent implements OnInit, OnDestroy {
-  private subscription: Subscription = null;
+  private authenticationService = inject(AuthenticationService);
+  private shareService = inject(ShareService);
+  private navigation = inject(NavigationService);
+  private title = inject(Title);
+  // ThemeService applies the theme when it is created
+  private themeService = inject(ThemeService);
 
-  constructor(
-    private authenticationService: AuthenticationService,
-    private shareService: ShareService,
-    private navigation: NavigationService,
-    private title: Title,
-    private themeService: ThemeService
-  ) {
-    themeService.init();
-  }
+  private subscription: Subscription = null;
 
   async ngOnInit(): Promise<void> {
     this.title.setTitle(Config.Server.applicationTitle);

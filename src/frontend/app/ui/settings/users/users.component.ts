@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, inject, viewChild } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -8,7 +8,7 @@ import {Utils} from '../../../../../common/Utils';
 import {ErrorCodes, ErrorDTO} from '../../../../../common/entities/Error';
 import {UsersSettingsService} from './users.service';
 import {SettingsService} from '../settings.service';
-import { NgClass } from '@angular/common';
+
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifyRole} from '../../../pipes/StringifyRolePipe';
@@ -26,12 +26,18 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
   selector: 'app-settings-users',
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
-  imports: [FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
+  imports: [FormsModule, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
 })
 export class UsersComponent implements OnInit {
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  private userSettings = inject(UsersSettingsService);
+  private settingsService = inject(SettingsService);
+  private notification = inject(NotificationService);
 
-  @ViewChild('userModal', {static: false}) public childModal: ModalDirective;
-  @ViewChild('editUserModal', {static: false}) public editModal: ModalDirective;
+
+  public readonly childModal = viewChild<ModalDirective>('userModal');
+  public readonly editModal = viewChild<ModalDirective>('editUserModal');
   public newUser = {} as UserDTO;
   public userRoles: { key: number; value: string }[] = [];
   public users: UserDTO[] = [];
@@ -57,15 +63,6 @@ export class UsersComponent implements OnInit {
       return false;
     }
     return this.newPassword !== this.confirmNewPassword;
-  }
-
-  constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    private userSettings: UsersSettingsService,
-    private settingsService: SettingsService,
-    private notification: NotificationService
-  ) {
   }
 
   ngOnInit(): void {
@@ -119,7 +116,7 @@ export class UsersComponent implements OnInit {
   initNewUser(): void {
     this.newUser = {role: UserRoles.User} as UserDTO;
     this.newUserPasswordConfirm = '';
-    this.childModal.show();
+    this.childModal().show();
   }
 
   async addNewUser(): Promise<void> {
@@ -131,7 +128,7 @@ export class UsersComponent implements OnInit {
       }
       await this.userSettings.createUser(this.newUser);
       await this.getUsersList();
-      this.childModal.hide();
+      this.childModal().hide();
     } catch (e) {
       const err: ErrorDTO = e;
       this.notification.error(
@@ -144,13 +141,13 @@ export class UsersComponent implements OnInit {
   async updateRole(user: UserDTO): Promise<void> {
     await this.userSettings.updateRole(user);
     await this.getUsersList();
-    this.childModal.hide();
+    this.childModal().hide();
   }
 
   async deleteUser(user: UserDTO): Promise<void> {
     await this.userSettings.deleteUser(user);
     await this.getUsersList();
-    this.childModal.hide();
+    this.childModal().hide();
   }
 
   async unlinkOidc(user: UserDTO): Promise<void> {
@@ -173,7 +170,7 @@ export class UsersComponent implements OnInit {
     } as UserSettingsDTO;
     this.newPassword = '';
     this.confirmNewPassword = '';
-    this.editModal.show();
+    this.editModal().show();
   }
 
 
@@ -214,7 +211,7 @@ export class UsersComponent implements OnInit {
       await this.userSettings.updateSettings(this.editUser.id, settings);
       this.notification.success($localize`User settings saved successfully`);
       await this.getUsersList();
-      this.editModal.hide();
+      this.editModal().hide();
     } catch (e) {
       const err: ErrorDTO = e;
       this.notification.error(

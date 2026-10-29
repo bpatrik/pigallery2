@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
 import {NetworkService} from '../../../model/network/network.service';
 import {UploadUtils} from '../../../../../common/UploadUtils';
@@ -29,6 +29,11 @@ interface QueuedUpload {
   providedIn: 'root'
 })
 export class UploaderService {
+  private networkService = inject(NetworkService);
+  private notificationService = inject(NotificationService);
+  private authService = inject(AuthenticationService);
+  private contentLoaderService = inject(ContentLoaderService);
+
   public uploadProgress: UploadProgress[] = [];
   private uploadQueue: QueuedUpload[] = [];
   private activeUploads = 0;
@@ -38,12 +43,6 @@ export class UploaderService {
   private speedTimer: any = null;
   private lastProgressSum = 0;
   private lastUpdateTimestamp = 0;
-
-  constructor(private networkService: NetworkService,
-              private notificationService: NotificationService,
-              private authService: AuthenticationService,
-              private contentLoaderService: ContentLoaderService) {
-  }
 
   public canUpload(): boolean {
     const dir = this.contentLoaderService.content.value.directory;

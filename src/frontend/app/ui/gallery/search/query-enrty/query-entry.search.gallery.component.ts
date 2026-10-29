@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
+import {Component, forwardRef, input, output} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -25,7 +25,7 @@ import {
   type ValidationErrors,
   Validator
 } from '@angular/forms';
-import { DatePipe, NgClass } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
 import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
@@ -48,7 +48,6 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
   ],
   imports: [
     FormsModule,
-    NgClass,
     NgIconComponent,
     DatePipe,
     StringifySearchType
@@ -61,8 +60,8 @@ export class GallerySearchQueryEntryComponent
   public SearchQueryTypes = SearchQueryTypes;
   public DatePatternFrequency = DatePatternFrequency;
   public TextSearchQueryMatchTypes = TextSearchQueryMatchTypes;
-  @Output() delete = new EventEmitter<void>();
-  @Input() id = 'NA';
+  readonly delete = output<void>();
+  readonly id = input('NA');
 
   public locationInputText: string = '';
 
