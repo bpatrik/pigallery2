@@ -65,8 +65,8 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
   });
 
   const renderLivePhoto = () => {
-    component.gridMedia = makeGridMedia();
-    component.loadMedia = true;
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
     fixture.detectChanges();
     return fixture.nativeElement.querySelector('.live-photo-badge') as HTMLElement;

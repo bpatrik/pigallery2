@@ -51,10 +51,10 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should render live-photo-container when media is a Live Photo', () => {
-    component.gridMedia = makeGridMedia({
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
-    } as any);
-    component.loadMedia = true;
+    } as any));
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
     fixture.detectChanges();
 
@@ -64,8 +64,8 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should not render live-photo-container for a regular photo', () => {
-    component.gridMedia = makeGridMedia();
-    component.loadMedia = true;
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
     fixture.detectChanges();
 
@@ -75,10 +75,10 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should set liveVideoSrc from gridMedia on change', () => {
-    component.gridMedia = makeGridMedia({
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
-    } as any);
-    component.loadMedia = true;
+    } as any));
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
 
     expect(component.liveVideoSrc).toBeTruthy();
@@ -86,8 +86,8 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should not set liveVideoSrc for a regular photo', () => {
-    component.gridMedia = makeGridMedia();
-    component.loadMedia = true;
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
 
     expect(component.liveVideoSrc).toBeNull();
@@ -107,10 +107,10 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should have pointer-events:none on live-photo-container', () => {
-    component.gridMedia = makeGridMedia({
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
-    } as any);
-    component.loadMedia = true;
+    } as any));
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
     fixture.detectChanges();
 
@@ -121,10 +121,10 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should have event handlers on badge, not on container', () => {
-    component.gridMedia = makeGridMedia({
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
-    } as any);
-    component.loadMedia = true;
+    } as any));
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
     fixture.detectChanges();
 

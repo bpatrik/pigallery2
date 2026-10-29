@@ -5,7 +5,7 @@
   </div>
 
   <div class="lightbox" #lightbox>
-    <app-gallery-lightbox-media [gridMedia]="activePhoto ? activePhoto.gridMedia : null"
+    <app-gallery-lightbox-media [gridMedia]="activePhoto ? activePhoto.gridMedia() : null"
       [nextGridMedia]="NexGridMedia"
       [loadMedia]="!animating"
       [zoom]="controls?.Zoom ?? 1"
@@ -20,7 +20,7 @@
           <div class="col-md-8 text-white text-center">
             <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom" /><span class="h2" i18n>Error during loading the video.</span>
             <br/>
-            @if (activePhoto.gridMedia.isVideoTranscodingNeeded()) {
+            @if (activePhoto.gridMedia().isVideoTranscodingNeeded()) {
               <ng-container i18n>
             Most likely the video is not transcoded.
             It can be done in the settings.
@@ -51,7 +51,7 @@
   @if (activePhoto && infoPanelVisible) {
     <app-info-panel id="info-panel"
       [style.width.px]="infoPanelWidth"
-      [media]="activePhoto.gridMedia.media"
+      [media]="activePhoto.gridMedia().media"
       (closed)="hideInfoPanel()" />
   }
 </div>

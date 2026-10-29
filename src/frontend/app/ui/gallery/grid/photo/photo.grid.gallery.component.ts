@@ -1,4 +1,4 @@
-import { Component, ElementRef, Input, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, inject, viewChild, input } from '@angular/core';
 import {type Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -43,7 +43,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
-  @Input() gridMedia: GridMedia;
+  readonly gridMedia = input<GridMedia>(undefined);
   readonly imageRef = viewChild<ElementRef>('img');
   readonly container = viewChild<ElementRef>('photoContainer');
 
@@ -69,18 +69,18 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   get Title(): string {
     if (Config.Gallery.captionFirstNaming === false) {
-      return this.gridMedia.media.name;
+      return this.gridMedia().media.name;
     }
-    if ((this.gridMedia.media as PhotoDTO).metadata.caption) {
-      if ((this.gridMedia.media as PhotoDTO).metadata.caption.length > 20) {
+    if ((this.gridMedia().media as PhotoDTO).metadata.caption) {
+      if ((this.gridMedia().media as PhotoDTO).metadata.caption.length > 20) {
         return (
-          (this.gridMedia.media as PhotoDTO).metadata.caption.substring(0, 17) +
+          (this.gridMedia().media as PhotoDTO).metadata.caption.substring(0, 17) +
           '...'
         );
       }
-      return (this.gridMedia.media as PhotoDTO).metadata.caption;
+      return (this.gridMedia().media as PhotoDTO).metadata.caption;
     }
-    return this.gridMedia.media.name;
+    return this.gridMedia().media.name;
   }
 
   updateMediaButtons(): void {
@@ -102,10 +102,11 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     });
 
     this.mediaButtons = allButtons.filter(button => {
-      if (this.gridMedia.isVideo() && button.skipVideos) {
+      const gridMedia = this.gridMedia();
+      if (gridMedia.isVideo() && button.skipVideos) {
         return false;
       }
-      if (this.gridMedia.isPhoto() && button.skipPhotos) {
+      if (gridMedia.isPhoto() && button.skipPhotos) {
         return false;
       }
 
@@ -122,7 +123,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   }
 
   matchesMetadataFilter(filters: IMetadataFilter[]): boolean {
-    const metadata = this.gridMedia.media.metadata;
+    const metadata = this.gridMedia().media.metadata;
 
     // All filters must match (AND logic)
     return filters.every(filter => {
@@ -174,8 +175,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia);
-    const metadata = this.gridMedia.media.metadata as PhotoMetadata;
+    this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
+    const metadata = this.gridMedia().media.metadata as PhotoMetadata;
     if (
       (metadata.keywords && metadata.keywords.length > 0) ||
       (metadata.faces && metadata.faces.length > 0)
@@ -251,13 +252,14 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   }
 
   getPositionText(): string {
-    if (!this.gridMedia || !this.gridMedia.isPhoto() || !(this.gridMedia.media as PhotoDTO).metadata.positionData) {
+    const gridMedia = this.gridMedia();
+    if (!gridMedia || !gridMedia.isPhoto() || !(gridMedia.media as PhotoDTO).metadata.positionData) {
       return '';
     }
     return ( //not much space in the gridview, so we only deliver city, or state or country
-      (this.gridMedia.media as PhotoDTO).metadata.positionData.city ||
-      (this.gridMedia.media as PhotoDTO).metadata.positionData.state ||
-      (this.gridMedia.media as PhotoDTO).metadata.positionData.country || ''
+      (gridMedia.media as PhotoDTO).metadata.positionData.city ||
+      (gridMedia.media as PhotoDTO).metadata.positionData.state ||
+      (gridMedia.media as PhotoDTO).metadata.positionData.country || ''
     ).trim();
   }
 
@@ -288,9 +290,9 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     }
 
     if (button.popup) {
-      this.modalService.showModal(button, this.gridMedia);
+      this.modalService.showModal(button, this.gridMedia());
     } else {
-      this.modalService.executeButtonAction(button, this.gridMedia);
+      this.modalService.executeButtonAction(button, this.gridMedia());
     }
   }
 

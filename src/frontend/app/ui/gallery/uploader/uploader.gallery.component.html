@@ -1,5 +1,5 @@
-@if (isUploadOver) {
-  <div class="upload-overlay" [class.active]="isUploadOver">
+@if (isUploadOver()) {
+  <div class="upload-overlay" [class.active]="isUploadOver()">
     <div class="upload-overlay-content">
       <div class="upload-overlay-icon">
         <ng-icon name="ionCloudUploadOutline" size="4em" />

@@ -1,10 +1,10 @@
-@if (mkObservable | async; as markdowns) {
+@if (mkObservable() | async; as markdowns) {
   @if (markdowns.length > 0) {
     <div class="blog h-100">
       <div class="card h-100">
-        <div class="card-body" style="min-height: 77px" [style.height]="!open ? '77px':''">
+        <div class="card-body" style="min-height: 77px" [style.height]="!open() ? '77px':''">
           @for (md of markdowns; track $index; let last = $last; let first = $first) {
-            @if (open) {
+            @if (open()) {
               @if (markdowns.length > 1) {
                 <div class="row">
                   <hr class="col">
@@ -13,7 +13,7 @@
               }
               <markdown [data]="md.text" />
             }
-            @if (!open && first) {
+            @if (!open() && first) {
               <span class="text-preview">
                 <markdown [inline]="true"
                   [data]="md.textShort" />
@@ -23,7 +23,7 @@
         </div>
       </div>
       <button class="btn btn-blog-details text-body" (click)="toggleCollapsed()">
-        <ng-icon [name]="open ? 'ionChevronUpOutline' : 'ionChevronDownOutline'" />
+        <ng-icon [name]="open() ? 'ionChevronUpOutline' : 'ionChevronDownOutline'" />
       </button>
     </div>
   }

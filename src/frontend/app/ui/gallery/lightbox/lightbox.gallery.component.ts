@@ -98,7 +98,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     if (!this.activePhoto) {
       return null;
     }
-    return (this.activePhoto.gridMedia.media as PhotoDTO).metadata.caption;
+    return (this.activePhoto.gridMedia().media as PhotoDTO).metadata.caption;
   }
 
   get NexGridMedia(): GridMedia {
@@ -106,10 +106,10 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       return null;
     }
     if (this.activePhotoId + 1 < this.gridPhotoQL?.length) {
-      return this.gridPhotoQL.get(this.activePhotoId + 1)?.gridMedia;
+      return this.gridPhotoQL.get(this.activePhotoId + 1)?.gridMedia();
     }
     if (this.lightboxService.loopSlideshow) {
-      return this.gridPhotoQL.get(0)?.gridMedia;
+      return this.gridPhotoQL.get(0)?.gridMedia();
     }
 
     return null;
@@ -188,9 +188,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.subscription.photosChange = this.gridPhotoQL.changes.subscribe(
       (): void => {
         if (this.activePhoto) {
-          const id = this.queryService.getMediaStringId(this.activePhoto.gridMedia.media);
+          const id = this.queryService.getMediaStringId(this.activePhoto.gridMedia().media);
           const index = this.gridPhotoQL.toArray().findIndex(p =>
-            this.queryService.getMediaStringId(p.gridMedia.media) === id
+            this.queryService.getMediaStringId(p.gridMedia().media) === id
           );
           // make sure that currently shown media has uses the right index.
           if (index !== -1) {
@@ -259,7 +259,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.animating = true;
     this.animatePhoto(
       selectedPhoto.getDimension(),
-      this.calcLightBoxPhotoDimension(selectedPhoto.gridMedia.media)
+      this.calcLightBoxPhotoDimension(selectedPhoto.gridMedia().media)
     ).onDone((): void => {
       this.animating = false;
       this.status = LightboxStates.Open;
@@ -277,7 +277,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.overlayService.showOverlay('lightbox');
     this.blackCanvasOpacity = 1.0;
     this.showPhoto(this.gridPhotoQL.toArray().indexOf(selectedPhoto), false);
-    this.piTitleService.setMediaTitle(selectedPhoto.gridMedia);
+    this.piTitleService.setMediaTitle(selectedPhoto.gridMedia());
   }
 
   public hide(): void {
@@ -337,12 +337,12 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }, 1000);
 
     const starPhotoPos = this.calcLightBoxPhotoDimension(
-      this.activePhoto.gridMedia.media
+      this.activePhoto.gridMedia().media
     );
     this.infoPanelWidth = 0;
     this.updatePhotoFrameDim();
     const endPhotoPos = this.calcLightBoxPhotoDimension(
-      this.activePhoto.gridMedia.media
+      this.activePhoto.gridMedia().media
     );
     if (enableAnimate) {
       this.animatePhoto(starPhotoPos, endPhotoPos);
@@ -374,12 +374,12 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.infoPanelVisible = true;
 
     const starPhotoPos = this.calcLightBoxPhotoDimension(
-      this.activePhoto.gridMedia.media
+      this.activePhoto.gridMedia().media
     );
     this.infoPanelWidth = this.infoPanelMaxWidth;
     this.updatePhotoFrameDim();
     const endPhotoPos = this.calcLightBoxPhotoDimension(
-      this.activePhoto.gridMedia.media
+      this.activePhoto.gridMedia().media
     );
     this.animatePhoto(starPhotoPos, endPhotoPos);
     this.animateLightbox(
@@ -420,7 +420,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private onNavigateTo(photoStringId: string): void {
     if (
       this.activePhoto &&
-      this.queryService.getMediaStringId(this.activePhoto.gridMedia.media) ===
+      this.queryService.getMediaStringId(this.activePhoto.gridMedia().media) ===
       photoStringId
     ) {
       return;
@@ -431,14 +431,14 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     }
     const photo = this.gridPhotoQL.find(
       (i): boolean =>
-        this.queryService.getMediaStringId(i.gridMedia.media) === photoStringId
+        this.queryService.getMediaStringId(i.gridMedia().media) === photoStringId
     );
     if (!photo) {
       this.delayedMediaShow = photoStringId;
       return;
     }
     if (this.status === LightboxStates.Closed) {
-      this.showLightbox(photo.gridMedia.media);
+      this.showLightbox(photo.gridMedia().media);
     } else {
       this.showPhoto(this.gridPhotoQL.toArray().indexOf(photo));
     }
@@ -487,13 +487,13 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.router
       .navigate([], {
         queryParams: this.queryService.getParams(
-          {media: this.gridPhotoQL.get(photoIndex).gridMedia.media}
+          {media: this.gridPhotoQL.get(photoIndex).gridMedia().media}
         ),
         queryParamsHandling: 'merge', // keep existing params
         replaceUrl: true,
       })
       .then(() => {
-        this.piTitleService.setMediaTitle(this.gridPhotoQL.get(photoIndex).gridMedia);
+        this.piTitleService.setMediaTitle(this.gridPhotoQL.get(photoIndex).gridMedia());
       })
       .catch((err) => {
         console.error(`Can't navigate to photo ${photoIndex}`, err);
@@ -521,7 +521,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.blackCanvasOpacity = 0;
 
     this.animatePhoto(
-      this.calcLightBoxPhotoDimension(this.activePhoto.gridMedia.media),
+      this.calcLightBoxPhotoDimension(this.activePhoto.gridMedia().media),
       this.activePhoto.getDimension()
     );
     this.animateLightbox(
@@ -560,7 +560,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
     if (resize) {
       this.animatePhoto(
-        this.calcLightBoxPhotoDimension(this.activePhoto.gridMedia.media)
+        this.calcLightBoxPhotoDimension(this.activePhoto.gridMedia().media)
       );
     }
     this.navigation.hasPrev = photoIndex > 0;
@@ -580,7 +580,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private findPhotoComponent(media: MediaDTO): GalleryPhotoComponent {
     const galleryPhotoComponents = this.gridPhotoQL.toArray();
     for (const item of galleryPhotoComponents) {
-      if (item.gridMedia.media === media) {
+      if (item.gridMedia().media === media) {
         return item;
       }
     }

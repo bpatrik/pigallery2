@@ -93,7 +93,7 @@
                   <div class="py-md-1 px-md-0"
                     [hidden]="!s.HasAvailableSettings">
                     <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
-                      (click)="viewportScroller.scrollToAnchor(s.ConfigPath)"
+                      (click)="viewportScroller.scrollToAnchor(s.ConfigPath())"
                       >
                       <ng-icon [name]="s.icon" /> {{s.Name}}
                     </button>

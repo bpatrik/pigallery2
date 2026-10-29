@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';
@@ -20,7 +20,7 @@ export class UploaderComponent {
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
-  @Input() isUploadOver: boolean;
+  readonly isUploadOver = input<boolean>(undefined);
   public showDetails = false;
   private timer: any;
 

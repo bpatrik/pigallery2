@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
+import { Component, OnChanges, OnDestroy, OnInit, inject, viewChild, input } from '@angular/core';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -73,10 +73,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
 
 
   public icon: string;
-  // TODO: Skipped for migration because:
-  //  This input overrides a field from a superclass, while the superclass field
-  //  is not migrated.
-  @Input() ConfigPath: string;
+  readonly ConfigPath = input<string>(undefined);
   nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
 
   readonly form = viewChild<UntypedFormControl>('settingsForm');
@@ -118,18 +115,19 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   }
 
   ngOnChanges(): void {
-    if (!this.ConfigPath) {
+    const ConfigPath = this.ConfigPath();
+    if (!ConfigPath) {
       this.setSliceFN(c => ({value: c as any, isConfigType: true, type: WebConfig} as any));
     } else {
-      this.setSliceFN(c => c.__state[this.ConfigPath]);
+      this.setSliceFN(c => c.__state[this.ConfigPath()]);
     }
-    this.name = this.states.tags?.name || this.ConfigPath;
+    this.name = this.states.tags?.name || ConfigPath;
     this.nestedConfigs = [];
     for (const key of this.getKeys(this.states)) {
       if (this.states.value.__state[key].isConfigType &&
         this.states?.value.__state[key].tags?.uiIcon) {
         this.nestedConfigs.push({
-          id: this.ConfigPath + '.' + key,
+          id: ConfigPath + '.' + key,
           name: this.states?.value.__state[key].tags?.name,
           icon: this.states?.value.__state[key].tags?.uiIcon,
           visible: () => !(this.states.value.__state[key].shouldHide && this.states.value.__state[key].shouldHide())
@@ -304,7 +302,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     this.error = '';
     try {
       const state = WebConfigClassBuilder.attachInterface(this.states.value).toJSON();
-      await this.settingsService.updateSettings(state, this.ConfigPath);
+      await this.settingsService.updateSettings(state, this.ConfigPath());
       await this.getSettings();
       this.notification.success(
         this.Name + ' ' + $localize`settings saved`,

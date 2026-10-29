@@ -7,19 +7,19 @@
       [src]="thumbnailSrc"/>
   }
 
-  @if (gridMedia !== null && gridMedia.isPhoto() && photo.src) {
+  @if (gridMedia() !== null && gridMedia().isPhoto() && photo.src) {
     <img
       [style.width.%]="imageSize.width"
       [style.height.%]="imageSize.height"
       [style.transform]="ImageTransform"
       [src]="photo.src"
-      [alt]="gridMedia.media.name"
+      [alt]="gridMedia().media.name"
       (load)="onImageLoad()"
       (error)="onImageError()"
       #image/>
   }
 
-  @if (gridMedia !== null && gridMedia.isLivePhoto() && loadMedia && liveVideoSrc) {
+  @if (gridMedia() !== null && gridMedia().isLivePhoto() && loadMedia() && liveVideoSrc) {
     <div
       class="live-photo-container"
       [class.playing]="liveVideoPlaying">
@@ -46,7 +46,7 @@
     </div>
   }
 
-  @if (gridMedia !== null && gridMedia.isVideo() && loadMedia) {
+  @if (gridMedia() !== null && gridMedia().isVideo() && loadMedia()) {
     <video
       [style.width.%]="imageSize.width"
       [style.height.%]="imageSize.height"
@@ -56,7 +56,7 @@
       (error)="onImageError()"
       (timeupdate)="onVideoProgress()"
       #video>
-      <source [src]="gridMedia.getBestFitVideoPath()" (error)="onSourceError()">
+      <source [src]="gridMedia().getBestFitVideoPath()" (error)="onSourceError()">
       Something went wrong.
     </video>
   }

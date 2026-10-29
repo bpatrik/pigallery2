@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, inject, output } from '@angular/core';
+import { Component, OnChanges, OnInit, inject, output, input } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -47,7 +47,7 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
-  @Input() media: MediaDTO;
+  readonly media = input<MediaDTO>(undefined);
   readonly closed = output();
 
   public readonly mapEnabled: boolean;
@@ -74,16 +74,16 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   get FullPath(): string {
     return Utils.concatUrls(
-      this.media.directory.path,
-      this.media.directory.name,
-      this.media.name
+      this.media().directory.path,
+      this.media().directory.name,
+      this.media().name
     );
   }
 
   get DirectoryPath(): string {
     return Utils.concatUrls(
-      this.media.directory.path,
-      this.media.directory.name
+      this.media().directory.path,
+      this.media().directory.name
     );
   }
 
@@ -99,22 +99,22 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   }
 
   get VideoData(): VideoMetadata {
-    if (typeof (this.media as VideoDTO).metadata.bitRate === 'undefined') {
+    if (typeof (this.media() as VideoDTO).metadata.bitRate === 'undefined') {
       return null;
     }
-    return (this.media as VideoDTO).metadata;
+    return (this.media() as VideoDTO).metadata;
   }
 
   get Rating(): number {
-    return (this.media as PhotoDTO).metadata.rating;
+    return (this.media() as PhotoDTO).metadata.rating;
   }
 
   get PositionData(): PositionMetaData {
-    return (this.media as PhotoDTO).metadata.positionData;
+    return (this.media() as PhotoDTO).metadata.positionData;
   }
 
   get CameraData(): CameraMetadata {
-    return (this.media as PhotoDTO).metadata.cameraData;
+    return (this.media() as PhotoDTO).metadata.cameraData;
   }
 
   ngOnChanges(): void {
@@ -129,7 +129,7 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   }
 
   ngOnInit(): void {
-    const metadata = this.media.metadata as PhotoMetadata;
+    const metadata = this.media().metadata as PhotoMetadata;
     if (
       (metadata.keywords && metadata.keywords.length > 0) ||
       (metadata.faces && metadata.faces.length > 0)
@@ -158,22 +158,23 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   }
 
   isPhoto(): boolean {
-    return this.media && MediaDTOUtils.isPhoto(this.media);
+    const media = this.media();
+    return media && MediaDTOUtils.isPhoto(media);
   }
 
   isLivePhoto(): boolean {
-    return !!this.media?.liveVideoPath;
+    return !!this.media()?.liveVideoPath;
   }
 
   calcMpx(): string {
     return (
-      (this.media.metadata.size.width * this.media.metadata.size.height) /
+      (this.media().metadata.size.width * this.media().metadata.size.height) /
       1000000
     ).toFixed(2);
   }
 
   isThisYear(): boolean {
-    return MediaDTOUtils.createdThisYear(this.media);
+    return MediaDTOUtils.createdThisYear(this.media());
   }
 
   toFraction(f: number): string | number {
@@ -189,10 +190,10 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   hasGPS(): boolean {
     return !!(
-      (this.media as PhotoDTO).metadata.positionData &&
-      (this.media as PhotoDTO).metadata.positionData.GPSData &&
-      (this.media as PhotoDTO).metadata.positionData.GPSData.latitude &&
-      (this.media as PhotoDTO).metadata.positionData.GPSData.longitude
+      (this.media() as PhotoDTO).metadata.positionData &&
+      (this.media() as PhotoDTO).metadata.positionData.GPSData &&
+      (this.media() as PhotoDTO).metadata.positionData.GPSData.latitude &&
+      (this.media() as PhotoDTO).metadata.positionData.GPSData.longitude
     );
   }
 
@@ -238,7 +239,7 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   getDateSearchQuery(): string {
     // Search for photos taken on the same date (within 24 hours)
-    const creationDate = new Date(this.media.metadata.creationDate);
+    const creationDate = new Date(this.media().metadata.creationDate);
     const startOfDay = new Date(creationDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(creationDate);

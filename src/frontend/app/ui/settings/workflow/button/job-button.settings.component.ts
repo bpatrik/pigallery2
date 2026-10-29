@@ -1,4 +1,4 @@
-import { Component, Input, TemplateRef, inject, input, output } from '@angular/core';
+import { Component, TemplateRef, inject, input, output } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -23,9 +23,7 @@ export class JobButtonComponent {
   backendTextService = inject(BackendtextService);
 
   readonly jobName = input<string>(undefined);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
-  @Input() config: any;
+  readonly config = input<any>(undefined);
   readonly shortName = input(false);
   readonly disabled = input(false);
   readonly soloRun = input(false);
@@ -34,15 +32,19 @@ export class JobButtonComponent {
   JobProgressStates = JobProgressStates;
   readonly jobError = output<string>();
   private modalRef: BsModalRef;
+  private defaultConfig: any = null;
 
-  private populateConfig() {
-    if (this.config) {
-      return;
+  /**
+   * The config input, or the job's default config if the input is not set.
+   */
+  private get Config(): any {
+    if (this.config()) {
+      return this.config();
     }
-    const c = this.jobsService.getDefaultConfig(this.jobName()); // can return with null
-    if (c) {
-      this.config = c;
+    if (!this.defaultConfig) {
+      this.defaultConfig = this.jobsService.getDefaultConfig(this.jobName()); // can return with null
     }
+    return this.defaultConfig;
   }
 
   public get Running(): boolean {
@@ -54,9 +56,8 @@ export class JobButtonComponent {
   }
 
   get Progress(): OnTimerJobProgressDTO {
-    this.populateConfig();
     return this.jobsService.progress.value[
-      JobDTOUtils.getHashName(this.jobName(), this.config)
+      JobDTOUtils.getHashName(this.jobName(), this.Config)
       ];
   }
 
@@ -84,11 +85,10 @@ export class JobButtonComponent {
 
   public async start(): Promise<boolean> {
     this.jobError.emit('');
-    this.populateConfig();
     try {
       await this.jobsService.start(
         this.jobName(),
-        this.config,
+        this.Config,
         this.soloRun(),
         this.allowParallelRun()
       );

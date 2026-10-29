@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnDestroy, TemplateRef, inject } from '@angular/core';
+import { Component, OnChanges, OnDestroy, TemplateRef, inject, input } from '@angular/core';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {Subscription, timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
@@ -27,87 +27,95 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
-  @Input() progress: JobProgressDTO;
+  readonly progress = input<JobProgressDTO>(undefined);
   JobProgressStates = JobProgressStates;
   timeCurrentCopy: number;
   modalRef: BsModalRef;
   private timerSub: Subscription;
 
   get ProgressTitle(): string {
-    if (!this.progress) {
+    const progress = this.progress();
+    if (!progress) {
       return '';
     }
     return (
         $localize`processed` +
         ':' +
-        this.progress.steps.processed +
+        progress.steps.processed +
         ' + ' +
         $localize`skipped` +
         ':' +
-        this.progress.steps.skipped +
+        progress.steps.skipped +
         ' / ' +
         $localize`all` +
         ':' +
-        this.progress.steps.all
+        progress.steps.all
     );
   }
 
   get Name(): string {
-    if (!this.progress) {
+    const progress = this.progress();
+    if (!progress) {
       return '';
     }
-    return this.backendTextService.getJobName(this.progress.jobName);
+    return this.backendTextService.getJobName(progress.jobName);
   }
 
   get TimeAll(): number {
-    if (!this.progress || this.progress.steps.processed === 0) {
+    const progress = this.progress();
+    if (!progress || progress.steps.processed === 0) {
       return 0;
     }
     return (
-        ((this.progress.time.end - this.progress.time.start) /
-            this.progress.steps.processed) *
-        (this.progress.steps.all - this.progress.steps.skipped)
+        ((progress.time.end - progress.time.start) /
+            progress.steps.processed) *
+        (progress.steps.all - progress.steps.skipped)
     );
   }
 
   get Running(): boolean {
+    const progress = this.progress();
     return (
-        this.progress &&
-        (this.progress.state === JobProgressStates.running ||
-            this.progress.state === JobProgressStates.cancelling)
+        progress &&
+        (progress.state === JobProgressStates.running ||
+            progress.state === JobProgressStates.cancelling)
     );
   }
 
   get Stopped(): boolean {
+    const progress = this.progress();
     return (
-        this.progress &&
-        this.progress.state !== JobProgressStates.running &&
-        this.progress.state !== JobProgressStates.cancelling
+        progress &&
+        progress.state !== JobProgressStates.running &&
+        progress.state !== JobProgressStates.cancelling
     );
   }
 
   get TimeLeft(): number {
-    if (!this.progress) {
+    const progress = this.progress();
+    if (!progress) {
       return 0;
     }
     return (
-        (this.progress.time.end - this.progress.time.start) /
-        this.progress.steps.all
+        (progress.time.end - progress.time.start) /
+        progress.steps.all
     );
   }
 
   get TimeElapsed(): number {
-    if (!this.progress) {
+    const progress = this.progress();
+    if (!progress) {
       return 0;
     }
-    return this.timeCurrentCopy - this.progress.time.start;
+    return this.timeCurrentCopy - progress.time.start;
   }
 
   get State(): string {
-    if (!this.progress) {
+    const progress = this.progress();
+    if (!progress) {
       return '';
     }
-    switch (this.progress.state) {
+    switch (progress.state) {
       case JobProgressStates.running:
         return $localize`running`;
       case JobProgressStates.cancelling:
@@ -130,13 +138,14 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
   }
 
   ngOnChanges(): void {
-    if (!this.progress) {
+    const progress = this.progress();
+    if (!progress) {
       return;
     }
-    this.timeCurrentCopy = this.progress.time.end;
+    this.timeCurrentCopy = progress.time.end;
     if (!this.timerSub) {
       this.timerSub = timer(0, 1000).subscribe(() => {
-        if (this.progress) {
+        if (this.progress()) {
           this.timeCurrentCopy += 1000;
         }
       });

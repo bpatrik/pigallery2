@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, inject, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, LOCALE_ID, OnChanges, OnDestroy, inject, input, output, viewChild } from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -52,10 +52,10 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
-  @Input() activePhoto: GalleryPhotoComponent;
+  readonly activePhoto = input<GalleryPhotoComponent>(undefined);
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
-  @Input() mediaElement: GalleryLightboxMediaComponent;
+  readonly mediaElement = input<GalleryLightboxMediaComponent>(undefined);
   readonly photoFrameDim = input({ width: 1, height: 1, aspect: 1 });
   readonly slideShowRunning = input<boolean>(undefined);
   public readonly facesEnabled = Config.Faces.enabled;
@@ -87,7 +87,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   public set Zoom(zoom: number) {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
     }
     if (zoom < 1) {
@@ -146,7 +147,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   pan($event: { deltaY: number; deltaX: number; isFinal: boolean }): void {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
     }
     if (this.zoom === 1) {
@@ -165,7 +167,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   wheel($event: { deltaX: number, deltaY: number }): void {
-    if (!this.activePhoto) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto) {
       return;
     }
     if ($event.deltaX < 0) {
@@ -177,7 +180,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         this.nextMediaManuallyTriggered();
       }
     }
-    if (this.activePhoto.gridMedia.isVideo()) {
+    if (activePhoto.gridMedia().isVideo()) {
       return;
     }
     if ($event.deltaY < 0) {
@@ -190,7 +193,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   // pinch events come from HammerJS, Angular only types them as Event
   @HostListener('pinch', ['$event'])
   pinch($event: Event): void {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
     }
     this.showControls();
@@ -199,7 +203,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
 
   @HostListener('pinchend', ['$event'])
   pinchend($event: Event): void {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
     }
     this.showControls();
@@ -208,7 +213,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   tap($event: Event): void {
-    if (!this.activePhoto || this.activePhoto.gridMedia.isVideo()) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
     }
     if (($event as unknown as { tapCount: number }).tapCount < 2) {
@@ -239,6 +245,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
 
   @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
+    const activePhoto = this.activePhoto();
     switch (event.key) {
       case 'ArrowLeft':
         if (this.navigation().hasPrev) {
@@ -281,8 +288,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         if (event.shiftKey) {
           const link = document.createElement('a');
           link.setAttribute('type', 'hidden');
-          link.href = this.activePhoto.gridMedia.getOriginalMediaPath();
-          link.download = this.activePhoto.gridMedia.media.name;
+          link.href = this.activePhoto().gridMedia().getOriginalMediaPath();
+          link.download = this.activePhoto().gridMedia().media.name;
           document.body.appendChild(link);
           link.click();
           link.remove();
@@ -292,8 +299,8 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         this.closed.emit();
         break;
       case ' ': // space
-        if (this.activePhoto && this.activePhoto.gridMedia.isVideo()) {
-          this.mediaElement.playPause();
+        if (activePhoto && activePhoto.gridMedia().isVideo()) {
+          this.mediaElement().playPause();
         }
         break;
     }
@@ -363,10 +370,11 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   getText(type: LightBoxTitleTexts[]): string {
-    if (!this.activePhoto?.gridMedia?.media) {
+    const gridMedia = this.activePhoto()?.gridMedia();
+    if (!gridMedia?.media) {
       return null;
     }
-    const m = this.activePhoto.gridMedia.media as PhotoDTO;
+    const m = gridMedia.media as PhotoDTO;
     let retTexts = [];
     const getDir = () => {
       const p = Utils.concatUrls(
@@ -463,15 +471,17 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       this.pauseClicked();
       return;
     }
-    if (!this.mediaElement.isRenderedMediaLoaded() ||
-      !this.mediaElement.isNextMediaLoaded()) {
+    const mediaElement = this.mediaElement();
+    if (!mediaElement.isRenderedMediaLoaded() ||
+      !mediaElement.isNextMediaLoaded()) {
       return;
     }
     // do not skip video if its playing
+    const activePhoto = this.activePhoto();
     if (
-      this.activePhoto &&
-      this.activePhoto.gridMedia.isVideo() &&
-      !this.mediaElement.Paused
+      activePhoto &&
+      activePhoto.gridMedia().isVideo() &&
+      !mediaElement.Paused
     ) {
       return;
     }
@@ -482,9 +492,10 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     let p = 0;
 
     // Video is a special snowflake. It won't go to next media if a video is playing
-    if (!(this.activePhoto &&
-      this.activePhoto.gridMedia.isVideo() &&
-      !this.mediaElement.Paused)) {
+    const activePhoto = this.activePhoto();
+    if (!(activePhoto &&
+      activePhoto.gridMedia().isVideo() &&
+      !this.mediaElement().Paused)) {
       p = (t % (this.lightboxService.slideshowSpeed * 10)) / this.lightboxService.slideshowSpeed / 10;  // ticks every 100 ms
 
     }
@@ -520,12 +531,13 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         drag.x = 0;
         return;
       }
-      if (!this.activePhoto) {
+      const activePhoto = this.activePhoto();
+      if (!activePhoto) {
         return;
       }
 
       const photoAspect = MediaDTOUtils.calcAspectRatio(
-        this.activePhoto.gridMedia.media
+        activePhoto.gridMedia().media
       );
       const widthFilled = photoAspect > this.photoFrameDim().aspect;
       const divWidth = this.photoFrameDim().width;
@@ -581,12 +593,13 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   };
 
   private updateFaceContainerDim(): void {
-    if (!this.activePhoto) {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto) {
       return;
     }
 
     const photoAspect = MediaDTOUtils.calcAspectRatio(
-      this.activePhoto.gridMedia.media
+      activePhoto.gridMedia().media
     );
 
     if (photoAspect < this.photoFrameDim().aspect) {

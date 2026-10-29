@@ -5,21 +5,21 @@
     </button>
   </div>
 
-  @if (media.metadata.caption || media.metadata.title) {
+  @if (media().metadata.caption || media().metadata.title) {
     <div class="row" title="Title and description of the media"
       i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionDocumentTextOutline" title="Title and caption" i18n-title />
       </div>
       <div class="col-11">
-        @if (media.metadata.title) {
+        @if (media().metadata.title) {
           <h4>
-            {{ media.metadata.title }}
+            {{ media().metadata.title }}
           </h4>
         }
-        @if (media.metadata.caption) {
+        @if (media().metadata.caption) {
           <div class="details-main">
-            <div class="caption-body">{{ media.metadata.caption }}</div>
+            <div class="caption-body">{{ media().metadata.caption }}</div>
           </div>
         }
       </div>
@@ -47,18 +47,18 @@
     </div>
     <div class="col-11">
       <div class="details-main" title="Filename" i18n-title>
-        {{ media.name }}
+        {{ media().name }}
       </div>
       <div class="details-sub text-secondary row">
-        <div class="col-4" title="Image dimensions in pixels" i18n-title>{{ media.metadata.size.width }}
-          x {{ media.metadata.size.height }}
+        <div class="col-4" title="Image dimensions in pixels" i18n-title>{{ media().metadata.size.width }}
+          x {{ media().metadata.size.height }}
         </div>
         @if (isPhoto()) {
           <div class="col-4" title="Megapixels" i18n-title>{{ calcMpx() }}MP</div>
         }
-        @if (media.metadata.fileSize) {
+        @if (media().metadata.fileSize) {
           <div class="col-4" title="File size on disk"
-            i18n-title>{{ media.metadata.fileSize | fileSize }}
+            i18n-title>{{ media().metadata.fileSize | fileSize }}
           </div>
         }
       </div>
@@ -71,22 +71,22 @@
       </div>
       <div class="col-11">
         <div class="details-main" title="Video filename" i18n-title>
-          {{ media.liveVideoInfo?.name }}
+          {{ media().liveVideoInfo?.name }}
         </div>
         <div class="details-sub text-secondary row">
-          @if (media.liveVideoInfo?.size) {
+          @if (media().liveVideoInfo?.size) {
             <div class="col-4" title="Video dimensions in pixels"
-              i18n-title>{{ media.liveVideoInfo.size.width }} x {{ media.liveVideoInfo.size.height }}
+              i18n-title>{{ media().liveVideoInfo.size.width }} x {{ media().liveVideoInfo.size.height }}
             </div>
           }
-          @if (media.liveVideoInfo?.fileSize) {
+          @if (media().liveVideoInfo?.fileSize) {
             <div class="col-4" title="Video file size on disk"
-              i18n-title>{{ media.liveVideoInfo.fileSize | fileSize }}
+              i18n-title>{{ media().liveVideoInfo.fileSize | fileSize }}
             </div>
           }
-          @if (media.liveVideoInfo?.duration) {
+          @if (media().liveVideoInfo?.duration) {
             <div class="col-4" title="Video duration"
-              i18n-title>{{ media.liveVideoInfo.duration | duration }}
+              i18n-title>{{ media().liveVideoInfo.duration | duration }}
             </div>
           }
         </div>
@@ -94,7 +94,7 @@
     </div>
   }
 
-  @if (media.metadata.creationDate) {
+  @if (media().metadata.creationDate) {
     <div class="row" title="When this photo or video was taken" i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionCalendarOutline" title="Creation date and time" i18n-title />
@@ -103,18 +103,18 @@
         <div class="details-main clickable" title="Click to search for media from the same date" i18n-title>
           @if (searchEnabled) {
             <a [routerLink]="['/search', getDateSearchQuery()]">
-              {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+              {{ media().metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media().metadata.creationDateOffset ? media().metadata.creationDateOffset : 'UTC') }}
             </a>
           }
           @if (!searchEnabled) {
             <span>
-              {{ media.metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+              {{ media().metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media().metadata.creationDateOffset ? media().metadata.creationDateOffset : 'UTC') }}
             </span>
           }
         </div>
         <div class="details-sub  text-secondary row">
           <div class="col-12" title="Detailed time information"
-            i18n-title>{{ media.metadata.creationDate | date : (media.metadata.creationDateOffset ? 'EEEE, HH:mm:ss ZZZZZ' : 'EEEE, HH:mm:ss') : (media.metadata.creationDateOffset ? media.metadata.creationDateOffset : 'UTC') }}
+            i18n-title>{{ media().metadata.creationDate | date : (media().metadata.creationDateOffset ? 'EEEE, HH:mm:ss ZZZZZ' : 'EEEE, HH:mm:ss') : (media().metadata.creationDateOffset ? media().metadata.creationDateOffset : 'UTC') }}
           </div>
         </div>
       </div>
