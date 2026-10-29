@@ -54,7 +54,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
   readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
-  contents: ISettingsComponent[] = [];
+  contents: readonly ISettingsComponent[] = [];
   configPriorities: { key: number; value: string; }[];
   configStyles: { key: number; value: string; }[];
   public readonly ConfigPriority = ConfigPriority;
@@ -70,7 +70,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => (this.contents = this.settingsComponents), 0);
+    setTimeout(() => (this.contents = this.settingsComponents()), 0);
   }
 
   ngOnInit(): void {
