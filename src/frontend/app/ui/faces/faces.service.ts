@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {BehaviorSubject} from 'rxjs';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
@@ -7,10 +7,12 @@ import {Config} from '../../../../common/config/public/Config';
 
 @Injectable({providedIn: 'root'})
 export class FacesService {
+  private networkService = inject(NetworkService);
+
   public persons: BehaviorSubject<PersonDTO[]>;
   public sorting: BehaviorSubject<SortingMethod>;
 
-  constructor(private networkService: NetworkService) {
+  constructor() {
     this.persons = new BehaviorSubject<PersonDTO[]>([]);
     this.sorting = new BehaviorSubject<SortingMethod>({
       method: Config.Faces.sorting.method,

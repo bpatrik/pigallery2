@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Config} from '../../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
 import {GridMedia} from '../ui/gallery/grid/GridMedia';
@@ -9,13 +9,11 @@ import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
   providedIn: 'root'
 })
 export class PiTitleService {
+  private titleService = inject(Title);
+  private searchQueryParserService = inject(SearchQueryParserService);
+
 
   private lastNonMedia: string = null;
-
-  constructor(
-      private titleService: Title,
-      private searchQueryParserService: SearchQueryParserService) {
-  }
 
   setTitle(title: string) {
     if (title) {

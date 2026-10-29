@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject } from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -28,6 +28,12 @@ import {Config} from '../../../../../common/config/public/Config';
 ]
   })
   export class PhotoFrameBuilderGalleryComponent implements OnInit, OnDestroy {
+    contentLoaderService = inject(ContentLoaderService);
+    private notification = inject(NotificationService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private modalService = inject(BsModalService);
+
     enabled = true;
     url = '';
     showSettings = false;
@@ -52,13 +58,7 @@ import {Config} from '../../../../../common/config/public/Config';
 
   private readonly subscription: Subscription = null;
 
-  constructor(
-      public contentLoaderService: ContentLoaderService,
-      private notification: NotificationService,
-      private route: ActivatedRoute,
-      private router: Router,
-      private modalService: BsModalService
-  ) {
+  constructor() {
     // keep for potential future route driven defaults
     this.subscription = this.route.queryParams.subscribe(() => {
       // no-op, we only need router.url at open/build time

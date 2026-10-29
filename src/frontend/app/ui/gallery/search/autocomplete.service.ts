@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {IAutoCompleteItem} from '../../../../../common/entities/AutoCompleteItem';
 import {GalleryCacheService} from '../cache.gallery.service';
@@ -10,15 +10,15 @@ import {defaultQueryKeywords, SearchQueryParser} from '../../../../../common/Sea
 
 @Injectable({providedIn: 'root'})
 export class AutoCompleteService {
+  private networkService = inject(NetworkService);
+  private searchQueryParserService = inject(SearchQueryParserService);
+  private galleryCacheService = inject(GalleryCacheService);
+
   private keywords: string[] = [];
   private textSearchKeywordsMap: { [key: string]: SearchQueryTypes } = {};
   private noACKeywordsMap: { [key: string]: SearchQueryTypes } = {}; // these commands do not have autocompete
 
-  constructor(
-    private networkService: NetworkService,
-    private searchQueryParserService: SearchQueryParserService,
-    private galleryCacheService: GalleryCacheService
-  ) {
+  constructor() {
     this.keywords = Object.values(defaultQueryKeywords)
       .filter(
         (k) =>

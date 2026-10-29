@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {ExtensionListItem} from '../../../../../common/entities/extension/ExtensionListItem';
 
@@ -6,9 +6,8 @@ import {ExtensionListItem} from '../../../../../common/entities/extension/Extens
   providedIn: 'root'
 })
 export class ExtensionInstallerService {
+  private networkService = inject(NetworkService);
 
-  constructor(private networkService: NetworkService) {
-  }
 
   public getExtensions(): Promise<Array<ExtensionListItem>> {
     return this.networkService.getJson('/extension/list');

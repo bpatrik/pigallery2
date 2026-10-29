@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output,} from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, inject } from '@angular/core';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../../common/entities/SearchQueryDTO';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
@@ -31,6 +31,8 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
 })
 export class GallerySearchQueryBuilderComponent
     implements ControlValueAccessor, Validator {
+  private searchQueryParserService = inject(SearchQueryParserService);
+
   public searchQueryDTO: SearchQueryDTO = {
     type: SearchQueryTypes.any_text,
     value: '',
@@ -38,9 +40,6 @@ export class GallerySearchQueryBuilderComponent
   @Output() search = new EventEmitter<void>();
   @Input() placeholder = $localize`Search`;
   public rawSearchText = '';
-
-  constructor(private searchQueryParserService: SearchQueryParserService) {
-  }
 
   /**
    * Utils.equalsFilter only checks the keys of its second argument,

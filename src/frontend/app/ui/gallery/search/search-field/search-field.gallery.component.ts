@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output, TemplateRef} from '@angular/core';
+import { Component, EventEmitter, forwardRef, Input, Output, TemplateRef, inject } from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
@@ -36,19 +36,16 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
 })
 export class GallerySearchFieldComponent
   implements ControlValueAccessor, Validator {
+  private autoCompleteService = inject(AutoCompleteService);
+  private searchQueryParserService = inject(SearchQueryParserService);
+  private modalService = inject(BsModalService);
+  router = inject(Router);
+
   @Output() search = new EventEmitter<void>();
   @Input() placeholder: string;
   public rawSearchText = '';
   public searchQueryDTO: SearchQueryDTO;
   private searchModalRef: BsModalRef;
-
-  constructor(
-    private autoCompleteService: AutoCompleteService,
-    private searchQueryParserService: SearchQueryParserService,
-    private modalService: BsModalService,
-    public router: Router
-  ) {
-  }
 
   public async openSearchModal(template: TemplateRef<unknown>): Promise<void> {
     this.searchModalRef = this.modalService.show(template, {

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
@@ -22,6 +22,9 @@ import {NgIconComponent} from '@ng-icons/core';
 ]
 })
 export class LoginComponent implements OnInit {
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+
   loginCredential: LoginCredential;
   loginError = false;
   title: string;
@@ -29,10 +32,7 @@ export class LoginComponent implements OnInit {
   oidcEnabled = false;
   oidcDisplayName = 'OpenID login';
 
-  constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService
-  ) {
+  constructor() {
     this.loginCredential = new LoginCredential();
     this.title = Config.Server.applicationTitle;
     this.oidcEnabled = !!Config.Users.oidc?.enabled;

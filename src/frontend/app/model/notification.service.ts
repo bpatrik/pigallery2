@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ToastrService} from 'ngx-toastr';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
@@ -11,6 +11,10 @@ export interface CountedNotificationDTO extends NotificationDTO {
 
 @Injectable({providedIn: 'root'})
 export class NotificationService {
+  private toastr = inject(ToastrService);
+  private networkService = inject(NetworkService);
+  private authService = inject(AuthenticationService);
+
   options = {
     positionClass: 'toast-top-center',
     animate: 'flyLeft',
@@ -19,11 +23,7 @@ export class NotificationService {
   numberOfNotifications = 0;
   lastUser: UserDTO = null;
 
-  constructor(
-      private toastr: ToastrService,
-      private networkService: NetworkService,
-      private authService: AuthenticationService
-  ) {
+  constructor() {
     this.authService.user.subscribe(() => {
       if (
           this.authService.isAuthenticated() &&

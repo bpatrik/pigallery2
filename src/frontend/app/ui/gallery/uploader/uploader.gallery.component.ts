@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import { NgStyle } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';
@@ -13,14 +13,13 @@ import {UploaderService} from './uploader.service';
 ]
 })
 export class UploaderComponent {
+  uploaderService = inject(UploaderService);
+  private cdr = inject(ChangeDetectorRef);
+
   public readonly Date = Date;
   @Input() isUploadOver: boolean;
   public showDetails = false;
   private timer: any;
-
-  constructor(public uploaderService: UploaderService,
-              private cdr: ChangeDetectorRef) {
-  }
 
   ngOnInit(): void {
     this.timer = setInterval(() => {

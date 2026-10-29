@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ShareService} from '../ui/gallery/share.service';
 import {MediaDTO} from '../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../common/QueryParams';
@@ -9,11 +9,9 @@ import {ContentLoaderService} from '../ui/gallery/contentLoader.service';
 
 @Injectable({providedIn: 'root'})
 export class QueryService {
-  constructor(
-    private shareService: ShareService,
-    private galleryService: ContentLoaderService
-  ) {
-  }
+  private shareService = inject(ShareService);
+  private galleryService = inject(ContentLoaderService);
+
 
   getMediaStringId(media: MediaDTO): string {
     if (this.galleryService.isSearchResult()) {

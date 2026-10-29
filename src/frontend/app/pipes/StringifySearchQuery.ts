@@ -1,4 +1,4 @@
-import {Pipe, PipeTransform} from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryParserService} from '../ui/gallery/search/search-query-parser.service';
 
@@ -6,8 +6,8 @@ import {SearchQueryParserService} from '../ui/gallery/search/search-query-parser
     name: 'searchQuery'
 })
 export class StringifySearchQuery implements PipeTransform {
-  constructor(private searchQueryParserService: SearchQueryParserService) {
-  }
+  private searchQueryParserService = inject(SearchQueryParserService);
+
 
   transform(query: SearchQueryDTO): string {
     if (!query) {

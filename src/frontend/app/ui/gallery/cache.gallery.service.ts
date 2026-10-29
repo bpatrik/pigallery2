@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
@@ -25,6 +25,8 @@ interface CacheItem<T> {
 
 @Injectable({providedIn: 'root'})
 export class GalleryCacheService {
+  private versionService = inject(VersionService);
+
   private static readonly CONTENT_PREFIX = 'CONTENT:';
   private static readonly AUTO_COMPLETE_PREFIX = 'AUTOCOMPLETE:';
   private static readonly INSTANT_SEARCH_PREFIX = 'INSTANT_SEARCH:';
@@ -37,8 +39,9 @@ export class GalleryCacheService {
   private static readonly SLIDESHOW_SPEED = 'SLIDESHOW_SPEED';
   private static THEME_MODE = 'THEME_MODE';
 
-  constructor(private versionService: VersionService,
-              authService: AuthenticationService) {
+  constructor() {
+    const authService = inject(AuthenticationService);
+
     // if it was a forced reload not a navigation, clear cache
     if (GalleryCacheService.wasAReload()) {
       GalleryCacheService.deleteCache();

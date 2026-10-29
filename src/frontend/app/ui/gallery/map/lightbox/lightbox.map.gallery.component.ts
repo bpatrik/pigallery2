@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, type SimpleChanges, ViewChild,} from '@angular/core';
+import { Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, type SimpleChanges, ViewChild, inject } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -56,6 +56,14 @@ import {QueryService} from '../../../../model/query.service';
 ]
 })
 export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
+  fullScreenService = inject(FullScreenService);
+  private thumbnailService = inject(ThumbnailManagerService);
+  mapService = inject(MapService);
+  private themeService = inject(ThemeService);
+  private route = inject(ActivatedRoute);
+  private queryService = inject(QueryService);
+  private router = inject(Router);
+
   @Input() photos: PhotoDTO[];
   @Input() gpxFiles: FileDTO[];
   @Input() parentDimension: Dimension;
@@ -142,15 +150,9 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private leafletMap: Map;
   private longPathSEPairs: { [key: string]: number } = {}; // stores how often a long distance path pair comes up
 
-  constructor(
-    public fullScreenService: FullScreenService,
-    private thumbnailService: ThumbnailManagerService,
-    public mapService: MapService,
-    private themeService: ThemeService,
-    private route: ActivatedRoute,
-    private queryService: QueryService,
-    private router: Router
-  ) {
+  constructor() {
+    const mapService = this.mapService;
+
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
     this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));

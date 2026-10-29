@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, TemplateRef, ViewChild,} from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, ViewChild, inject } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -32,6 +32,15 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
 ]
 })
 export class AlbumsComponent implements OnInit {
+  albumsService = inject(AlbumsService);
+  private modalService = inject(BsModalService);
+  authenticationService = inject(AuthenticationService);
+  private piTitleService = inject(PiTitleService);
+  private shareService = inject(ShareService);
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  private searchQueryParserService = inject(SearchQueryParserService);
+
   @ViewChild('container', {static: true}) container: ElementRef;
   public size: number;
   public savedSearch = {
@@ -40,16 +49,7 @@ export class AlbumsComponent implements OnInit {
   };
   private modalRef: BsModalRef;
 
-  constructor(
-    public albumsService: AlbumsService,
-    private modalService: BsModalService,
-    public authenticationService: AuthenticationService,
-    private piTitleService: PiTitleService,
-    private shareService: ShareService,
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    private searchQueryParserService: SearchQueryParserService,
-  ) {
+  constructor() {
     this.albumsService.getAlbums().catch(console.error);
   }
 

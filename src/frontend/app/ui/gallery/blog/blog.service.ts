@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
@@ -10,11 +10,13 @@ import {Config} from '../../../../../common/config/public/Config';
 
 @Injectable({providedIn: 'root'})
 export class BlogService {
+  private networkService = inject(NetworkService);
+  private galleryService = inject(ContentService);
+
   public groupedMarkdowns: Observable<GroupedMarkdown[]>;
   private cache: { [key: string]: string } = {};
 
-  constructor(private networkService: NetworkService,
-              private galleryService: ContentService) {
+  constructor() {
 
     this.groupedMarkdowns = this.galleryService.sortedFilteredContent.pipe(
       mergeMap(async content => {

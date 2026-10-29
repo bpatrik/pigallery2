@@ -1,4 +1,4 @@
-import {Component, OnDestroy, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, TemplateRef, inject } from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
 import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
@@ -35,6 +35,13 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 ]
 })
 export class GallerySearchComponent implements OnDestroy {
+  private searchQueryParserService = inject(SearchQueryParserService);
+  private albumService = inject(AlbumsService);
+  private route = inject(ActivatedRoute);
+  router = inject(Router);
+  private modalService = inject(BsModalService);
+  authenticationService = inject(AuthenticationService);
+
   public searchQueryDTO: SearchQueryDTO = {
     type: SearchQueryTypes.any_text,
     value: '',
@@ -51,14 +58,7 @@ export class GallerySearchComponent implements OnDestroy {
   private readonly subscription: Subscription = null;
   private saveSearchModalRef: BsModalRef;
 
-  constructor(
-    private searchQueryParserService: SearchQueryParserService,
-    private albumService: AlbumsService,
-    private route: ActivatedRoute,
-    public router: Router,
-    private modalService: BsModalService,
-    public authenticationService: AuthenticationService
-  ) {
+  constructor() {
     this.SearchQueryTypes = SearchQueryTypes;
     this.MetadataSearchQueryTypes = MetadataSearchQueryTypes.map((v) => ({
       key: v,

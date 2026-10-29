@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
@@ -16,15 +16,17 @@ import { RouterOutlet } from '@angular/router';
     imports: [RouterOutlet]
 })
 export class AppComponent implements OnInit, OnDestroy {
+  private authenticationService = inject(AuthenticationService);
+  private shareService = inject(ShareService);
+  private navigation = inject(NavigationService);
+  private title = inject(Title);
+  private themeService = inject(ThemeService);
+
   private subscription: Subscription = null;
 
-  constructor(
-    private authenticationService: AuthenticationService,
-    private shareService: ShareService,
-    private navigation: NavigationService,
-    private title: Title,
-    private themeService: ThemeService
-  ) {
+  constructor() {
+    const themeService = this.themeService;
+
     themeService.init();
   }
 

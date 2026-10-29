@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, inject } from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
 import {Subscription} from 'rxjs';
 
@@ -12,12 +12,11 @@ import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../co
   imports: [FormsModule]
 })
 export class MediaButtonModalComponent implements OnInit, OnDestroy {
+  private modalService = inject(MediaButtonModalService);
+
   modalData: MediaButtonModalData | null = null;
   formData: IMediaRequestBodyData = {};
   private subscription: Subscription;
-
-  constructor(private modalService: MediaButtonModalService) {
-  }
 
   ngOnInit(): void {
     this.subscription = this.modalService.modalData.subscribe(data => {

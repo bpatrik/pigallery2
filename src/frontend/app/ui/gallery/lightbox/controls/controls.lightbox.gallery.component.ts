@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, HostListener, Inject, Input, LOCALE_ID, OnChanges, OnDestroy, Output, ViewChild,} from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, LOCALE_ID, OnChanges, OnDestroy, Output, ViewChild, inject } from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
@@ -35,6 +35,11 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 ]
 })
 export class ControlsLightboxComponent implements OnDestroy, OnChanges {
+  lightboxService = inject(LightboxService);
+  fullScreenService = inject(FullScreenService);
+  private authService = inject(AuthenticationService);
+  private locale = inject(LOCALE_ID);
+
   readonly MAX_ZOOM = 10;
   @ViewChild('canvas')
   canvas: ElementRef<HTMLCanvasElement>;
@@ -63,12 +68,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   private prevDrag = {x: 0, y: 0};
   private prevZoom = 1;
 
-  constructor(
-    public lightboxService: LightboxService,
-    public fullScreenService: FullScreenService,
-    private authService: AuthenticationService,
-    @Inject(LOCALE_ID) private locale: string
-  ) {
+  constructor() {
     this.controllersDimmed = this.lightboxService.controllersDimmed;
     this.searchEnabled = this.authService.canSearch();
     if(this.playBackDurations.indexOf(this.lightboxService.slideshowSpeed) === -1) {

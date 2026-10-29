@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
@@ -25,19 +25,16 @@ import { NgIconComponent } from '@ng-icons/core';
 ]
 })
 export class AlbumComponent implements OnInit, OnDestroy {
+  private thumbnailService = inject(ThumbnailManagerService);
+  private sanitizer = inject(DomSanitizer);
+  private albumService = inject(AlbumsService);
+  authenticationService = inject(AuthenticationService);
+
   @Input() album: AlbumBaseDTO;
   @Input() size: number;
   public readonly svgIcon = Config.Server.svgIcon;
 
   public thumbnail: Thumbnail = null;
-
-  constructor(
-      private thumbnailService: ThumbnailManagerService,
-      private sanitizer: DomSanitizer,
-      private albumService: AlbumsService,
-      public authenticationService: AuthenticationService
-  ) {
-  }
 
   get IsSavedSearch(): boolean {
     return this.album && !!this.AsSavedSearch.searchQuery;

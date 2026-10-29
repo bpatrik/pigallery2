@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output,OnChanges} from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnChanges, inject } from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {map, Observable} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
@@ -18,6 +18,8 @@ import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathP
 ]
 })
 export class GalleryBlogComponent implements OnChanges {
+  blogService = inject(BlogService);
+
   @Input() open: boolean;
   /**
    * Blog is inserted to the top (when date is null) and to all date groups, when date is set
@@ -25,9 +27,6 @@ export class GalleryBlogComponent implements OnChanges {
   @Input() date: Date;
   @Output() openChange = new EventEmitter<boolean>();
   mkObservable: Observable<GroupedMarkdown[]>;
-
-  constructor(public blogService: BlogService) {
-  }
 
 
   ngOnChanges(): void {

@@ -1,4 +1,4 @@
-import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import {FacesService} from './faces.service';
 import {QueryService} from '../../model/query.service';
 import {combineLatest, Observable} from 'rxjs';
@@ -23,16 +23,16 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
 ]
 })
 export class FacesComponent implements OnInit {
+  facesService = inject(FacesService);
+  queryService = inject(QueryService);
+  private piTitleService = inject(PiTitleService);
+
   @ViewChild('container', {static: true}) container: ElementRef;
   public size: number;
   favourites: Observable<PersonDTO[]>;
   nonFavourites: Observable<PersonDTO[]>;
 
-  constructor(
-      public facesService: FacesService,
-      public queryService: QueryService,
-      private piTitleService: PiTitleService
-  ) {
+  constructor() {
     this.facesService.getPersons().catch(console.error);
 
     const sortedPersons = combineLatest([this.facesService.persons, this.facesService.sorting]).pipe(

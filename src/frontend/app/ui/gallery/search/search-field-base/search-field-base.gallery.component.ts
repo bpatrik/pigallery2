@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild,} from '@angular/core';
+import { Component, ElementRef, EventEmitter, forwardRef, Input, OnDestroy, Output, ViewChild, inject } from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
@@ -34,6 +34,9 @@ import {NgIconComponent} from '@ng-icons/core';
 })
 export class GallerySearchFieldBaseComponent
   implements ControlValueAccessor, Validator, OnDestroy {
+  private autoCompleteService = inject(AutoCompleteService);
+  router = inject(Router);
+
   @Input() placeholder = $localize`Search`;
   @Output() search = new EventEmitter<void>();
 
@@ -57,10 +60,7 @@ export class GallerySearchFieldBaseComponent
   private autoCompleteItemsSubscription: Subscription = null;
   private autoCompleteItems: BehaviorSubject<RenderableAutoCompleteItem[]>;
 
-  constructor(
-    private autoCompleteService: AutoCompleteService,
-    public router: Router
-  ) {
+  constructor() {
     this.SearchQueryTypes = SearchQueryTypes;
     this.MetadataSearchQueryTypes = MetadataSearchQueryTypes.map(
       (v): { value: string; key: SearchQueryTypes } => ({

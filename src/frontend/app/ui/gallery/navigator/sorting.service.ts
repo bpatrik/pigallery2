@@ -1,4 +1,4 @@
-import {Inject, Injectable, LOCALE_ID} from '@angular/core';
+import { Injectable, LOCALE_ID, inject } from '@angular/core';
 import {formatDate} from '@angular/common';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {BehaviorSubject, Observable} from 'rxjs';
@@ -17,16 +17,16 @@ import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 
 @Injectable({providedIn: 'root'})
 export class GallerySortingService {
+  private galleryCacheService = inject(GalleryCacheService);
+  private galleryService = inject(ContentLoaderService);
+  private rndService = inject(SeededRandomService);
+  private locale = inject(LOCALE_ID);
+
   public sorting: BehaviorSubject<SortingMethod>;
   public grouping: BehaviorSubject<GroupingMethod>;
   private collator = new Intl.Collator(undefined, {numeric: true});
 
-  constructor(
-    private galleryCacheService: GalleryCacheService,
-    private galleryService: ContentLoaderService,
-    private rndService: SeededRandomService,
-    @Inject(LOCALE_ID) private locale: string
-  ) {
+  constructor() {
     this.sorting = new BehaviorSubject(
       {
         method: Config.Gallery.NavBar.SortingGrouping.defaultPhotoSortingMethod.method,

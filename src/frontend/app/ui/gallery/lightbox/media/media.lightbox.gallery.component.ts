@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild,} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild, inject } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -14,6 +14,10 @@ import {LightboxService} from '../lightbox.service';
   imports: []
 })
 export class GalleryLightboxMediaComponent implements OnChanges {
+  elementRef = inject(ElementRef);
+  lightboxService = inject(LightboxService);
+  private sanitizer = inject(DomSanitizer);
+
   @Input() gridMedia: GridMedia;
   @Input() nextGridMedia: GridMedia;
   @Input() loadMedia = false; // prevents loading media
@@ -48,11 +52,6 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   // if media not loaded, show thumbnail
   private mediaLoaded = false;
   private videoProgress = 0;
-
-  constructor(public elementRef: ElementRef,
-              public lightboxService: LightboxService,
-              private sanitizer: DomSanitizer) {
-  }
 
   get ImageTransform(): SafeStyle {
     return this.sanitizer.bypassSecurityTrustStyle(

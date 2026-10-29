@@ -1,13 +1,15 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
 import {BehaviorSubject} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class DuplicateService {
+  private networkService = inject(NetworkService);
+
   public duplicates: BehaviorSubject<DuplicatesDTO[]>;
 
-  constructor(private networkService: NetworkService) {
+  constructor() {
     this.duplicates = new BehaviorSubject<DuplicatesDTO[]>(null);
   }
 

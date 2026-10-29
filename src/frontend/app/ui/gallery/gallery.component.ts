@@ -1,4 +1,4 @@
-import {Component, HostListener, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -56,6 +56,19 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
 ]
 })
 export class GalleryComponent implements OnInit, OnDestroy {
+  contentLoader = inject(ContentLoaderService);
+  contentService = inject(ContentService);
+  galleryService = inject(GalleryService);
+  private authService = inject(AuthenticationService);
+  private router = inject(Router);
+  private shareService = inject(ShareService);
+  private route = inject(ActivatedRoute);
+  private navigation = inject(NavigationService);
+  private filterService = inject(FilterService);
+  private sortingService = inject(GallerySortingService);
+  private piTitleService = inject(PiTitleService);
+  uploaderService = inject(UploaderService);
+
   @ViewChild(GalleryGridComponent, {static: false})
   grid: GalleryGridComponent;
 
@@ -83,20 +96,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     sorting: null,
   };
 
-  constructor(
-    public contentLoader: ContentLoaderService,
-    public contentService: ContentService,
-    public galleryService: GalleryService,
-    private authService: AuthenticationService,
-    private router: Router,
-    private shareService: ShareService,
-    private route: ActivatedRoute,
-    private navigation: NavigationService,
-    private filterService: FilterService,
-    private sortingService: GallerySortingService,
-    private piTitleService: PiTitleService,
-    public uploaderService: UploaderService,
-  ) {
+  constructor() {
     this.mapEnabled = Config.Map.enabled;
     PageHelper.showScrollY('gallery');
   }

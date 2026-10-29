@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import { Component, ElementRef, HostListener, ViewChild, inject } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
@@ -48,6 +48,15 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 ]
 })
 export class GalleryNavigatorComponent {
+  authService = inject(AuthenticationService);
+  queryService = inject(QueryService);
+  contentLoaderService = inject(ContentLoaderService);
+  filterService = inject(FilterService);
+  sortingService = inject(GallerySortingService);
+  navigatorService = inject(GalleryNavigatorService);
+  private router = inject(Router);
+  sanitizer = inject(DomSanitizer);
+
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly groupingByTypes: { key: number; value: string }[] = [];
   public readonly gridSizes: { key: number; value: string }[] = [];
@@ -70,16 +79,7 @@ export class GalleryNavigatorComponent {
     down: 0
   };
 
-  constructor(
-    public authService: AuthenticationService,
-    public queryService: QueryService,
-    public contentLoaderService: ContentLoaderService,
-    public filterService: FilterService,
-    public sortingService: GallerySortingService,
-    public navigatorService: GalleryNavigatorService,
-    private router: Router,
-    public sanitizer: DomSanitizer
-  ) {
+  constructor() {
     this.sortingByTypes = Utils.enumToArray(SortByTypes);
     // can't group by random
     this.groupingByTypes = Utils.enumToArray(GroupByTypes);

@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message} from '../../../../common/entities/Message';
 import {LoadingBarService} from '@ngx-loading-bar/core';
@@ -10,15 +10,12 @@ import {lastValueFrom, Observable, tap} from 'rxjs';
 
 @Injectable({providedIn: 'root'})
 export class NetworkService {
+  private http = inject(HttpClient);
+  private loadingBarService = inject(LoadingBarService);
+  private versionService = inject(VersionService);
+
   readonly apiBaseUrl = Config.Server.getApiUrl();
   private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
-
-  constructor(
-    private http: HttpClient,
-    private loadingBarService: LoadingBarService,
-    private versionService: VersionService
-  ) {
-  }
 
   public static buildUrl(url: string, data?: { [key: string]: unknown }): string {
     if (data) {

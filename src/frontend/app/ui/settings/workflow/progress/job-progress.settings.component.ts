@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnDestroy, TemplateRef,} from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, TemplateRef, inject } from '@angular/core';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {Subscription, timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
@@ -21,17 +21,14 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
 ]
 })
 export class JobProgressComponent implements OnDestroy, OnChanges {
+  private modalService = inject(BsModalService);
+  backendTextService = inject(BackendtextService);
+
   @Input() progress: JobProgressDTO;
   JobProgressStates = JobProgressStates;
   timeCurrentCopy: number;
   modalRef: BsModalRef;
   private timerSub: Subscription;
-
-  constructor(
-      private modalService: BsModalService,
-      public backendTextService: BackendtextService
-  ) {
-  }
 
   get ProgressTitle(): string {
     if (!this.progress) {

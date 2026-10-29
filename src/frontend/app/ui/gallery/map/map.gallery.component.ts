@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnChanges, ViewChild,} from '@angular/core';
+import { Component, ElementRef, Input, OnChanges, ViewChild, inject } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
@@ -20,6 +20,11 @@ import {Router} from '@angular/router';
   imports: [GalleryMapLightboxComponent, LeafletModule]
 })
 export class GalleryMapComponent implements OnChanges, IRenderable {
+  mapService = inject(MapService);
+  private queryService = inject(QueryService);
+  private router = inject(Router);
+  private themeService = inject(ThemeService);
+
   @Input() photos: PhotoDTO[];
   @Input() gpxFiles: FileDTO[];
   @ViewChild(GalleryMapLightboxComponent, {static: false})
@@ -42,10 +47,7 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   markerLayer: Marker[] = [];
   darkModeSubscription: Subscription;
 
-  constructor(public mapService: MapService,
-              private queryService: QueryService,
-              private router: Router,
-              private themeService: ThemeService) {
+  constructor() {
     this.initThemeModes();
   }
 

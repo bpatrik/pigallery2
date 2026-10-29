@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {PersonDTO} from '../../../../../common/entities/PersonDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -21,19 +21,16 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 ]
 })
 export class FaceComponent implements OnInit, OnDestroy {
+  private thumbnailService = inject(ThumbnailManagerService);
+  private sanitizer = inject(DomSanitizer);
+  private faceService = inject(FacesService);
+  authenticationService = inject(AuthenticationService);
+
   @Input() person: PersonDTO;
   @Input() size: number;
 
   public thumbnail: PersonThumbnail = null;
   public searchQueryDTOstr: string;
-
-  constructor(
-      private thumbnailService: ThumbnailManagerService,
-      private sanitizer: DomSanitizer,
-      private faceService: FacesService,
-      public authenticationService: AuthenticationService
-  ) {
-  }
 
   get CanUpdate(): boolean {
     return (

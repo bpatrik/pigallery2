@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
@@ -14,6 +14,8 @@ interface GpxStats {
 
 @Injectable({providedIn: 'root'})
 export class MapService {
+  private networkService = inject(NetworkService);
+
   private static readonly OSMLAYERS: MapLayers[] = [
     {
       name: 'street',
@@ -23,7 +25,7 @@ export class MapService {
   ];
   private static MAPBOXLAYERS: MapLayers[] = [];
 
-  constructor(private networkService: NetworkService) {
+  constructor() {
     MapService.MAPBOXLAYERS = [
       {
         name: $localize`street`,

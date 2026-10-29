@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {NetworkService} from './network.service';
 import {UserDTO} from '../../../../common/entities/UserDTO';
@@ -8,11 +8,9 @@ import {QueryParams} from '../../../../common/QueryParams';
 
 @Injectable({providedIn: 'root'})
 export class UserService {
-  constructor(
-      private networkService: NetworkService,
-      private shareService: ShareService
-  ) {
-  }
+  private networkService = inject(NetworkService);
+  private shareService = inject(ShareService);
+
 
   public async logout(): Promise<string> {
     return this.networkService.postJson('/user/logout');

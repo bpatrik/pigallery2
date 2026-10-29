@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {BehaviorSubject} from 'rxjs';
 import {AlbumBaseDTO} from '../../../../common/entities/album/AlbumBaseDTO';
@@ -6,9 +6,11 @@ import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 @Injectable({providedIn: 'root'})
 export class AlbumsService {
+  private networkService = inject(NetworkService);
+
   public albums: BehaviorSubject<AlbumBaseDTO[]>;
 
-  constructor(private networkService: NetworkService) {
+  constructor() {
     this.albums = new BehaviorSubject<AlbumBaseDTO[]>(null);
   }
 

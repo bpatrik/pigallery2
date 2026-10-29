@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, ViewChild, inject } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -29,6 +29,12 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
   imports: [FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
 })
 export class UsersComponent implements OnInit {
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  private userSettings = inject(UsersSettingsService);
+  private settingsService = inject(SettingsService);
+  private notification = inject(NotificationService);
+
 
   @ViewChild('userModal', {static: false}) public childModal: ModalDirective;
   @ViewChild('editUserModal', {static: false}) public editModal: ModalDirective;
@@ -57,15 +63,6 @@ export class UsersComponent implements OnInit {
       return false;
     }
     return this.newPassword !== this.confirmNewPassword;
-  }
-
-  constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    private userSettings: UsersSettingsService,
-    private settingsService: SettingsService,
-    private notification: NotificationService
-  ) {
   }
 
   ngOnInit(): void {

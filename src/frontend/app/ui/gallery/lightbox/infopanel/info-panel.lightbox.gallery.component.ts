@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output,} from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, inject } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -39,6 +39,12 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 ]
 })
 export class InfoPanelLightboxComponent implements OnInit, OnChanges {
+  queryService = inject(QueryService);
+  contentLoaderService = inject(ContentLoaderService);
+  mapService = inject(MapService);
+  private authService = inject(AuthenticationService);
+  private themeService = inject(ThemeService);
+
   @Input() media: MediaDTO;
   @Output() closed = new EventEmitter();
 
@@ -50,13 +56,9 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   public baseLayer: TileLayer;
   public markerLayer: Marker[] = [];
 
-  constructor(
-    public queryService: QueryService,
-    public contentLoaderService: ContentLoaderService,
-    public mapService: MapService,
-    private authService: AuthenticationService,
-    private themeService: ThemeService
-  ) {
+  constructor() {
+    const mapService = this.mapService;
+
     this.mapEnabled = Config.Map.enabled;
     this.searchEnabled = this.authService.canSearch();
     if (this.themeService.darkMode.value) {

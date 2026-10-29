@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, inject } from '@angular/core';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
 import {RouterLink} from '@angular/router';
@@ -20,16 +20,13 @@ import { IconComponent } from '../../../../icon.component';
 ]
 })
 export class GalleryDirectoryComponent implements OnInit, OnDestroy {
+  private thumbnailService = inject(ThumbnailManagerService);
+  private sanitizer = inject(DomSanitizer);
+  queryService = inject(QueryService);
+
   @Input() directory: SubDirectoryDTO;
   @Input() size: number;
   thumbnail: Thumbnail = null;
-
-  constructor(
-      private thumbnailService: ThumbnailManagerService,
-      private sanitizer: DomSanitizer,
-      public queryService: QueryService
-  ) {
-  }
 
   public get SamplePhoto(): CoverPhotoDTO {
     return this.directory.cache?.cover;

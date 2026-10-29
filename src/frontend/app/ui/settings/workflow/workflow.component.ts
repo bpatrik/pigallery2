@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import { Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -64,6 +64,10 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
 ]
 })
 export class WorkflowComponent implements ControlValueAccessor, Validator, OnInit, OnDestroy {
+  settingsService = inject(SettingsService);
+  jobsService = inject(ScheduledJobsService);
+  backendTextService = inject(BackendtextService);
+
 
 
   public schedules: JobScheduleConfig[] = [];
@@ -91,11 +95,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
   error: string;
 
-  constructor(
-    public settingsService: SettingsService,
-    public jobsService: ScheduledJobsService,
-    public backendTextService: BackendtextService,
-  ) {
+  constructor() {
     this.JobTriggerTypeMap = [
       {key: JobTriggerType.after, value: $localize`after`},
       {key: JobTriggerType.never, value: $localize`never`},

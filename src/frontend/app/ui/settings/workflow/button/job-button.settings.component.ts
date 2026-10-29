@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, TemplateRef} from '@angular/core';
+import { Component, EventEmitter, Input, Output, TemplateRef, inject } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -17,6 +17,11 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class JobButtonComponent {
+  private notification = inject(NotificationService);
+  jobsService = inject(ScheduledJobsService);
+  private modalService = inject(BsModalService);
+  backendTextService = inject(BackendtextService);
+
   @Input() jobName: string;
   @Input() config: any;
   @Input() shortName = false;
@@ -27,14 +32,6 @@ export class JobButtonComponent {
   JobProgressStates = JobProgressStates;
   @Output() jobError = new EventEmitter<string>();
   private modalRef: BsModalRef;
-
-  constructor(
-    private notification: NotificationService,
-    public jobsService: ScheduledJobsService,
-    private modalService: BsModalService,
-    public backendTextService: BackendtextService
-  ) {
-  }
 
   private populateConfig() {
     if (this.config) {

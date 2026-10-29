@@ -1,4 +1,4 @@
-import {Component, Input, OnChanges, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -64,6 +64,13 @@ export interface RecursiveState extends ConfigState {
   imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {
+  protected authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  protected notification = inject(NotificationService);
+  settingsService = inject(SettingsService);
+  jobsService = inject(ScheduledJobsService);
+  private extensionService = inject(ExtensionInstallerService);
+
 
   public icon: string;
   @Input() ConfigPath: string;
@@ -82,16 +89,6 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   protected sliceFN?: (s: IWebConfigClassPrivate<TAGS> & WebConfig) => ConfigState;
   private subscription: Subscription = null;
   private settingsSubscription: Subscription = null;
-
-  constructor(
-    protected authService: AuthenticationService,
-    private navigation: NavigationService,
-    protected notification: NotificationService,
-    public settingsService: SettingsService,
-    public jobsService: ScheduledJobsService,
-    private extensionService: ExtensionInstallerService,
-  ) {
-  }
 
   get Name(): string {
     return this.changed ? this.name + '*' : this.name;

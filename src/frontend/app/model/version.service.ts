@@ -1,14 +1,16 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {Router} from '@angular/router';
 import {Config} from '../../../common/config/public/Config';
 
 @Injectable({providedIn: 'root'})
 export class VersionService {
+  private router = inject(Router);
+
   public version: BehaviorSubject<string>;
   public appVersion: BehaviorSubject<string>;
 
-  constructor(private router: Router) {
+  constructor() {
     this.version = new BehaviorSubject<string>(null);
     this.appVersion = new BehaviorSubject<string>(null);
   }

@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild,} from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, inject } from '@angular/core';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
 import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
@@ -41,6 +41,17 @@ export enum LightboxStates {
 ]
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {
+  fullScreenService = inject(FullScreenService);
+  private changeDetector = inject(ChangeDetectorRef);
+  private overlayService = inject(OverlayService);
+  private builder = inject(AnimationBuilder);
+  private router = inject(Router);
+  private queryService = inject(QueryService);
+  private route = inject(ActivatedRoute);
+  private piTitleService = inject(PiTitleService);
+  private wakeLockService = inject(WakeLockService);
+  private lightboxService = inject(LightboxService);
+
   @ViewChild('photo', {static: true})
   mediaElement: GalleryLightboxMediaComponent;
   @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
@@ -79,20 +90,6 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     photosChange: null,
     route: null,
   };
-
-  constructor(
-    public fullScreenService: FullScreenService,
-    private changeDetector: ChangeDetectorRef,
-    private overlayService: OverlayService,
-    private builder: AnimationBuilder,
-    private router: Router,
-    private queryService: QueryService,
-    private route: ActivatedRoute,
-    private piTitleService: PiTitleService,
-    private wakeLockService: WakeLockService,
-    private lightboxService: LightboxService,
-  ) {
-  }
 
   get Title(): string {
     if (!this.activePhoto) {

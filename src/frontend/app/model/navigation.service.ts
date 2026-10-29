@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import {IsActiveMatchOptions, Router} from '@angular/router';
 import {ShareService} from '../ui/gallery/share.service';
@@ -8,8 +8,9 @@ import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 @Injectable({providedIn: 'root'})
 export class NavigationService {
-  constructor(private router: Router, private shareService: ShareService) {
-  }
+  private router = inject(Router);
+  private shareService = inject(ShareService);
+
 
   public isLoginPage(): boolean {
     return (

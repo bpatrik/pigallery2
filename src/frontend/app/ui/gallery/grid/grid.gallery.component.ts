@@ -1,17 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  HostListener,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, OnInit, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -48,6 +35,15 @@ import {BlogService} from '../blog/blog.service';
 })
 export class GalleryGridComponent
   implements OnInit, OnChanges, AfterViewInit, OnDestroy {
+  private overlayService = inject(OverlayService);
+  private changeDetector = inject(ChangeDetectorRef);
+  queryService = inject(QueryService);
+  private router = inject(Router);
+  sortingService = inject(GallerySortingService);
+  navigatorService = inject(GalleryNavigatorService);
+  private route = inject(ActivatedRoute);
+  blogService = inject(BlogService);
+
   @ViewChild('gridContainer', {static: false}) gridContainer: ElementRef;
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
@@ -76,18 +72,6 @@ export class GalleryGridComponent
   private MAX_ROW_COUNT = 5;
   private onScrollFired = false;
   private helperTime: number = null;
-
-  constructor(
-    private overlayService: OverlayService,
-    private changeDetector: ChangeDetectorRef,
-    public queryService: QueryService,
-    private router: Router,
-    public sortingService: GallerySortingService,
-    public navigatorService: GalleryNavigatorService,
-    private route: ActivatedRoute,
-    public blogService: BlogService
-  ) {
-  }
 
   ngOnChanges(): void {
     if (this.isAfterViewInit === false) {

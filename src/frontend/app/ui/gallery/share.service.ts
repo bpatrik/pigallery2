@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {
   CreateSharingDTO,
@@ -18,6 +18,9 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 @Injectable({providedIn: 'root'})
 export class ShareService {
+  private networkService = inject(NetworkService);
+  private router = inject(Router);
+
   public readonly UnknownSharingKey = {
     sharingKey: 'UnknownSharingKey'
   } as ResponseSharingDTO;
@@ -42,7 +45,7 @@ export class ShareService {
     null
   );
 
-  constructor(private networkService: NetworkService, private router: Router) {
+  constructor() {
     this.ReadyPR = new Promise((resolve: () => void) => {
       if (this.inited === true) {
         return resolve();

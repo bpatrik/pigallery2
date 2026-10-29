@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnDestroy, OnInit, ViewChild,} from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import {type Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -36,6 +36,11 @@ export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaBut
 ]
 })
 export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
+  private thumbnailService = inject(ThumbnailManagerService);
+  private authService = inject(AuthenticationService);
+  private extensionService = inject(ExtensionService);
+  private modalService = inject(MediaButtonModalService);
+
   @Input() gridMedia: GridMedia;
   @ViewChild('img', {static: false}) imageRef: ElementRef;
   @ViewChild('photoContainer', {static: true}) container: ElementRef;
@@ -52,12 +57,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   loaded = false;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[];
 
-  constructor(
-    private thumbnailService: ThumbnailManagerService,
-    private authService: AuthenticationService,
-    private extensionService: ExtensionService,
-    private modalService: MediaButtonModalService
-  ) {
+  constructor() {
     this.searchEnabled = this.authService.canSearch();
   }
 

@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, inject } from '@angular/core';
 import { ExtensionInstallerService } from './extension-installer.service';
 import { ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
 import { NotificationService } from '../../../model/notification.service';
@@ -14,17 +14,15 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent, ModalDirective]
 })
 export class ExtensionInstallerComponent {
+  settingsService = inject(SettingsService);
+  private extensionService = inject(ExtensionInstallerService);
+  private notificationService = inject(NotificationService);
+
   @ViewChild('extensionsModal', { static: false }) public extensionsModal: ModalDirective;
 
   public extensions: ExtensionListItem[] = [];
   public loading = false;
   public error: string | null = null;
-
-  constructor(
-    public settingsService: SettingsService,
-    private extensionService: ExtensionInstallerService,
-    private notificationService: NotificationService
-  ) {}
 
   public openExtensionsModal(): void {
     this.extensionsModal.show();

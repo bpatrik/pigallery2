@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, ViewChild, ViewEncapsulation} from '@angular/core';
+import { Component, ElementRef, HostListener, Input, ViewChild, ViewEncapsulation, inject } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -47,6 +47,15 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 ],
 })
 export class FrameComponent {
+  private authService = inject(AuthenticationService);
+  notificationService = inject(NotificationService);
+  queryService = inject(QueryService);
+  private router = inject(Router);
+  themeService = inject(ThemeService);
+  private deviceService = inject(DeviceDetectorService);
+  galleryService = inject(GalleryService);
+  uploadService = inject(UploaderService);
+
   @Input() showSearch = false;
   @Input() showShare = false;
   public readonly user: BehaviorSubject<UserDTO>;
@@ -75,16 +84,7 @@ export class FrameComponent {
     down: 0
   };
 
-  constructor(
-    private authService: AuthenticationService,
-    public notificationService: NotificationService,
-    public queryService: QueryService,
-    private router: Router,
-    public themeService: ThemeService,
-    private deviceService: DeviceDetectorService,
-    public galleryService: GalleryService,
-    public uploadService: UploaderService
-  ) {
+  constructor() {
     this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && !this.deviceService.isDesktop());
     this.user = this.authService.user;
   }

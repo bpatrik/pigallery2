@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren,} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, QueryList, ViewChildren, inject } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {NotificationService} from '../../model/notification.service';
@@ -45,6 +45,13 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
 ]
 })
 export class AdminComponent implements OnInit, AfterViewInit {
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  viewportScroller = inject(ViewportScroller);
+  notificationService = inject(NotificationService);
+  settingsService = inject(SettingsService);
+  private piTitleService = inject(PiTitleService);
+
   @ViewChildren('setting') settingsComponents: QueryList<ISettingsComponent>;
   @ViewChildren('setting', {read: ElementRef})
   settingsComponentsElemRef: QueryList<ElementRef>;
@@ -55,14 +62,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
   public readonly ConfigStyle = ConfigStyle;
   public readonly configPaths: string[] = [];
 
-  constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    public viewportScroller: ViewportScroller,
-    public notificationService: NotificationService,
-    public settingsService: SettingsService,
-    private piTitleService: PiTitleService
-  ) {
+  constructor() {
     this.configPriorities = enumToTranslatedArray(ConfigPriority);
     this.configStyles = enumToTranslatedArray(ConfigStyle);
     const wc = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());

@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {ThemeModes} from '../../../common/config/public/ClientConfig';
 import {Config} from '../../../common/config/public/Config';
@@ -9,6 +9,8 @@ import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
   providedIn: 'root'
 })
 export class ThemeService {
+  private cachingService = inject(GalleryCacheService);
+
   mode: ThemeModes = ThemeModes.light;
   public readonly darkMode: BehaviorSubject<boolean> = new BehaviorSubject(false);
   public readonly matcher = window.matchMedia('(prefers-color-scheme: dark)');
@@ -16,7 +18,7 @@ export class ThemeService {
     this.darkMode.next(event.matches);
   };
 
-  constructor(private cachingService: GalleryCacheService) {
+  constructor() {
     this.init();
   }
 

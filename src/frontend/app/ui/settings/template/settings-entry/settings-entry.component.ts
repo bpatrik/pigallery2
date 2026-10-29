@@ -1,4 +1,4 @@
-import {Component, forwardRef, Input, OnChanges, TemplateRef} from '@angular/core';
+import { Component, forwardRef, Input, OnChanges, TemplateRef, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
@@ -79,6 +79,10 @@ interface IState {
 })
 export class SettingsEntryComponent
     implements ControlValueAccessor, Validator, OnChanges {
+  private searchQueryParserService = inject(SearchQueryParserService);
+  settingsService = inject(SettingsService);
+  private modalService = inject(BsModalService);
+
   name: string;
   required: boolean;
   dockerWarning: boolean;
@@ -107,13 +111,6 @@ export class SettingsEntryComponent
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
-
-
-  constructor(private searchQueryParserService: SearchQueryParserService,
-              public settingsService: SettingsService,
-              private modalService: BsModalService,
-  ) {
-  }
 
   get changed(): boolean {
     if (this.Disabled || this.noChangeDetection) {

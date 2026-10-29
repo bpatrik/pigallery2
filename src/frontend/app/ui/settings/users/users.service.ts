@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {UserDTO} from '../../../../../common/entities/UserDTO';
 import {NetworkService} from '../../../model/network/network.service';
 import {UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
@@ -7,9 +7,8 @@ import {UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
   providedIn: 'root'
 })
 export class UsersSettingsService {
+  private networkService = inject(NetworkService);
 
-  constructor(private networkService: NetworkService) {
-  }
 
   public createUser(user: UserDTO): Promise<string> {
     return this.networkService.putJson('/user', {newUser: user});
