@@ -6,7 +6,7 @@ import {getInjectedUIExtensionConfigs} from './server-inject';
   providedIn: 'root'
 })
 export class ExtensionService {
-  public readonly UIExtensionConfig: UIExtensionDTO[];
+  public readonly UIExtensionConfig: UIExtensionDTO[] | undefined;
 
   constructor() {
     this.UIExtensionConfig = getInjectedUIExtensionConfigs();
