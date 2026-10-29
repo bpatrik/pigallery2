@@ -5,11 +5,14 @@ import * as chai from 'chai';
 import {expect} from 'chai';
 import {SuperAgentStatic} from 'superagent';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
+import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {DBTestHelper} from '../../DBTestHelper';
 import {ReIndexingSensitivity} from '../../../../src/common/config/private/PrivateConfig';
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
+import {ANDSearchQuery, DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 
 process.env.NODE_ENV = 'test';
@@ -225,6 +228,87 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
       expect(result.body.error).to.not.be.equal(null);
       expect(result.body.result).to.be.equal(null);
       expect(result.body.error.code).to.be.equal(ErrorCodes.PATH_ERROR);
+    });
+  });
+
+  describe('/GET /api/gallery/random/:searchQueryDTO', async () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    it('should return random photo for URLified search query', async () => {
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('orientation', true);
+
+      const urlifiedQuery = SearchQueryUtils.urlify({
+        type: SearchQueryTypes.file_name,
+        matchType: TextSearchQueryMatchTypes.exact_match,
+        value: 'Landscape_0.jpg',
+      } as TextSearch);
+
+      const result = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/random/' + encodeURIComponent(urlifiedQuery));
+
+      (result.should as any).have.status(200);
+      (result.should as any).have.header('content-type', /^image\/jpeg/);
+      expect(result.body).to.be.instanceof(Buffer);
+    });
+
+    it('should return random photo for directory query containing /', async () => {
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('orientation', true);
+
+      const query: ANDSearchQuery = {
+        type: SearchQueryTypes.AND,
+        list: [
+          {
+            type: SearchQueryTypes.directory,
+            matchType: TextSearchQueryMatchTypes.globMatch,
+            value: 'orientation/*',
+          } as DirectorySearch,
+          {
+            type: SearchQueryTypes.file_name,
+            matchType: TextSearchQueryMatchTypes.exact_match,
+            value: 'Landscape_0.jpg',
+          } as TextSearch,
+        ],
+      };
+
+      const urlifiedQuery = SearchQueryUtils.urlify(query);
+
+      const encoded = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/random/' + encodeURIComponent(urlifiedQuery));
+      (encoded.should as any).have.status(200);
+      (encoded.should as any).have.header('content-type', /^image\/jpeg/);
+      expect(encoded.body).to.be.instanceof(Buffer);
+
+      const raw = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/random/' + urlifiedQuery);
+      (raw.should as any).have.status(200);
+      (raw.should as any).have.header('content-type', /^image\/jpeg/);
+      expect(raw.body).to.be.instanceof(Buffer);
+    });
+
+    it('should keep % sequences in search text through Express routing', async () => {
+      let receivedQuery: SearchQueryDTO = null;
+      const origGetNMedia = ObjectManagers.getInstance().SearchManager.getNMedia;
+      ObjectManagers.getInstance().SearchManager.getNMedia = async (context: any, query: SearchQueryDTO, ...args: any[]) => {
+        receivedQuery = query;
+        return origGetNMedia.call(ObjectManagers.getInstance().SearchManager, context, query, ...args);
+      };
+      try {
+        const originalQuery: TextSearch = {
+          type: SearchQueryTypes.keyword,
+          value: 'a%20b',
+          matchType: TextSearchQueryMatchTypes.exact_match,
+        };
+        const urlifiedQuery = SearchQueryUtils.urlify(originalQuery);
+
+        await (request.execute(server.Server) as SuperAgentStatic)
+          .get(Config.Server.apiPath + '/gallery/random/' + encodeURIComponent(urlifiedQuery));
+
+        expect(receivedQuery).to.deep.equal(originalQuery);
+      } finally {
+        ObjectManagers.getInstance().SearchManager.getNMedia = origGetNMedia;
+      }
     });
   });
 

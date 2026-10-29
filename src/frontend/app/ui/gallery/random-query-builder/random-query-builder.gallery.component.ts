@@ -6,7 +6,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
 import {ActivatedRoute, Params} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {SearchQueryParserService} from '../search/search-query-parser.service';
@@ -16,6 +16,7 @@ import { FormsModule } from '@angular/forms';
 import { ClipboardModule } from 'ngx-clipboard';
 import { GallerySearchQueryBuilderComponent } from '../search/query-builder/query-bulder.gallery.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
+import {Utils} from '../../../../../common/Utils';
 
 @Component({
     selector: 'app-gallery-random-query-builder',
@@ -37,6 +38,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   url = '';
 
   contentSubscription: Subscription = null;
+  private prefilledDirectory: string = null;
 
   modalRef: BsModalRef;
 
@@ -53,7 +55,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
       if (!params[QueryParams.gallery.search.query]) {
         return;
       }
-      const searchQuery = JSON.parse(params[QueryParams.gallery.search.query]);
+      const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
       if (searchQuery) {
         this.searchQueryDTO = searchQuery;
         this.onQueryChange();
@@ -67,7 +69,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
 
   onQueryChange(): void {
     this.url = NetworkService.buildUrl(
-        Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random/') + '/' + this.HTMLSearchQuery
+        Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random') + '/' + encodeURIComponent(this.HTMLSearchQuery)
     );
   }
 
@@ -78,7 +80,25 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
           if (!this.enabled) {
             return;
           }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
+          const directory = SearchQueryUtils.normalizeDirectoryPath(
+              Utils.concatUrls(content.directory.path, content.directory.name)
+          );
+          // prefill only when the directory changes, so a query typed by the user is not overwritten
+          if (directory === this.prefilledDirectory) {
+            return;
+          }
+          this.prefilledDirectory = directory;
+          this.searchQueryDTO = directory
+              ? {
+                type: SearchQueryTypes.directory,
+                matchType: TextSearchQueryMatchTypes.globMatch,
+                value: directory + '/*',
+              } as DirectorySearch
+              : {
+                type: SearchQueryTypes.any_text,
+                value: '',
+              } as TextSearch;
+          this.onQueryChange();
         }
     );
   }
