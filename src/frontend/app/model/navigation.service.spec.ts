@@ -1,4 +1,7 @@
+import {TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
 import {NavigationService} from './navigation.service';
+import {ShareService} from '../ui/gallery/share.service';
 import {PublicSharingDTO} from '../../../common/entities/SharingDTO';
 import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkConfig, NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
@@ -16,7 +19,13 @@ describe('NavigationService', () => {
       getSharingKey: () => 'key',
       getPublicSharing: jasmine.createSpy('getPublicSharing').and.returnValue(Promise.resolve(publicSharing))
     };
-    const service = new NavigationService(router, shareService as any);
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: Router, useValue: router},
+        {provide: ShareService, useValue: shareService},
+      ]
+    });
+    const service = TestBed.inject(NavigationService);
     return {router, shareService, service};
   };
 

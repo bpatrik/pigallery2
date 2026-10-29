@@ -57,17 +57,15 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   public markerLayer: Marker[] = [];
 
   constructor() {
-    const mapService = this.mapService;
-
     this.mapEnabled = Config.Map.enabled;
     this.searchEnabled = this.authService.canSearch();
     if (this.themeService.darkMode.value) {
-      this.baseLayer = tileLayer(mapService.DarkMapLayer.url, {
-        attribution: mapService.ShortAttributions,
+      this.baseLayer = tileLayer(this.mapService.DarkMapLayer.url, {
+        attribution: this.mapService.ShortAttributions,
       });
     } else {
-      this.baseLayer = tileLayer(mapService.MapLayer.url, {
-        attribution: mapService.ShortAttributions,
+      this.baseLayer = tileLayer(this.mapService.MapLayer.url, {
+        attribution: this.mapService.ShortAttributions,
       });
     }
   }

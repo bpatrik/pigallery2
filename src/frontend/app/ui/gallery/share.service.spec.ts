@@ -1,5 +1,8 @@
 import {Subject} from 'rxjs';
+import {TestBed} from '@angular/core/testing';
+import {Router} from '@angular/router';
 import {ShareService} from './share.service';
+import {NetworkService} from '../../model/network/network.service';
 import {PublicSharingDTO, ResponseSharingDTO} from '../../../../common/entities/SharingDTO';
 import {SearchQueryTypes, TextSearch} from '../../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
@@ -12,7 +15,13 @@ describe('ShareService', () => {
         url.endsWith('/publicInfo') ? Promise.resolve(publicSharing) : Promise.resolve(null))
     };
     const router = {events: new Subject()};
-    const service = new ShareService(networkService as any, router as any);
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: NetworkService, useValue: networkService},
+        {provide: Router, useValue: router},
+      ]
+    });
+    const service = TestBed.inject(ShareService);
     return {networkService, service};
   };
 

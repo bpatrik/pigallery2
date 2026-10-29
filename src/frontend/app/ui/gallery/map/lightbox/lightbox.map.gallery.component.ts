@@ -151,18 +151,16 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private longPathSEPairs: { [key: string]: number } = {}; // stores how often a long distance path pair comes up
 
   constructor() {
-    const mapService = this.mapService;
-
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
     this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));
-    for (let i = 0; i < mapService.Layers.length; ++i) {
-      const l = mapService.Layers[i];
-      const tl = tileLayer(l.url, {attribution: mapService.Attributions});
-      if (l.url === mapService.MapLayer.url) {
+    for (let i = 0; i < this.mapService.Layers.length; ++i) {
+      const l = this.mapService.Layers[i];
+      const tl = tileLayer(l.url, {attribution: this.mapService.Attributions});
+      if (l.url === this.mapService.MapLayer.url) {
         this.defLayer = tl;
       }
-      if (l.url === mapService.DarkMapLayer.url) {
+      if (l.url === this.mapService.DarkMapLayer.url) {
         this.darkLayer = tl;
       }
       this.mapLayersControlOption.baseLayers[l.name] = tl;
