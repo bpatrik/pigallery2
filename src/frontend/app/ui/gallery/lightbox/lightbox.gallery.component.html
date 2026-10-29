@@ -8,8 +8,8 @@
     <app-gallery-lightbox-media [gridMedia]="activePhoto ? activePhoto.gridMedia() : null"
       [nextGridMedia]="NexGridMedia"
       [loadMedia]="!animating"
-      [zoom]="controls?.Zoom ?? 1"
-      [drag]="controls?.drag ?? {x:0,y:0}"
+      [zoom]="controls()?.Zoom ?? 1"
+      [drag]="controls()?.drag ?? {x:0,y:0}"
       [windowAspect]="photoFrameDim.aspect"
       (videoSourceError)="onVideoSourceError()"
       #photo />

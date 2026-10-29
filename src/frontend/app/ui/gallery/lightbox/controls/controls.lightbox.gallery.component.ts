@@ -49,12 +49,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   readonly nextPhoto = output();
   readonly previousPhoto = output();
   readonly navigation = input({ hasPrev: true, hasNext: true });
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   readonly activePhoto = input<GalleryPhotoComponent>(undefined);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   readonly mediaElement = input<GalleryLightboxMediaComponent>(undefined);
   readonly photoFrameDim = input({ width: 1, height: 1, aspect: 1 });
   readonly slideShowRunning = input<boolean>(undefined);

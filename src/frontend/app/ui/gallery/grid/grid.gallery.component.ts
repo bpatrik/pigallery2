@@ -45,17 +45,11 @@ export class GalleryGridComponent
   blogService = inject(BlogService);
 
   readonly gridContainer = viewChild<ElementRef>('gridContainer');
-  // TODO: Skipped for migration because:
-  //  There are references to this query that cannot be migrated automatically.
-  // TODO: Skipped for migration because:
-  //  There are references to this query that cannot be migrated automatically.
+  // Kept as a QueryList: the lightbox navigates on its changes (setGridPhotoQL).
+  // Moving that to signals is part of the gallery content pipeline rework (E2, #1243).
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   readonly lightbox = input<GalleryLightboxComponent>(undefined);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   readonly mediaGroups = input<MediaGroup[]>(undefined);
   mediaToRender: GridMediaGroup[] = [];
   containerWidth = 0;

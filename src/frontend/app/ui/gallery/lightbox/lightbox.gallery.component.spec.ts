@@ -209,12 +209,13 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
 
     component.setGridPhotoQL(mockQueryList);
 
-    // Mock controls component
-    component.controls = {
+    // Mock controls component (replaces the view query)
+    const controls = {
       resetZoom: jasmine.createSpy('resetZoom'),
       runSlideShow: jasmine.createSpy('runSlideShow'),
       stopSlideShow: jasmine.createSpy('stopSlideShow')
-    } as any;
+    };
+    (component as any).controls = () => controls;
 
     fixture.detectChanges();
   });

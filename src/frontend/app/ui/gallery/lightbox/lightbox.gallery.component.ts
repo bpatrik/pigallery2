@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, ViewChild, inject, viewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, QueryList, inject, viewChild } from '@angular/core';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
 import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
@@ -53,11 +53,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private lightboxService = inject(LightboxService);
 
   readonly mediaElement = viewChild<GalleryLightboxMediaComponent>('photo');
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the query. This prevents migration.
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the query. This prevents migration.
-  @ViewChild('controls', {static: false}) controls: ControlsLightboxComponent;
+  readonly controls = viewChild<ControlsLightboxComponent>('controls');
   readonly lightboxElement = viewChild<ElementRef>('lightbox');
   readonly root = viewChild<ElementRef>('root');
 
@@ -245,8 +241,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   public showLightbox(photo: MediaDTO): void {
-    if (this.controls) {
-      this.controls.resetZoom();
+    const controls = this.controls();
+    if (controls) {
+      controls.resetZoom();
     }
     this.status = LightboxStates.Opening;
     const selectedPhoto = this.findPhotoComponent(photo);
@@ -400,8 +397,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       clearTimeout(this.iPvisibilityTimer);
     }
 
-    if (this.controls) {
-      this.controls.resetZoom();
+    const controls = this.controls();
+    if (controls) {
+      controls.resetZoom();
     }
   }
 
@@ -426,8 +424,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       return;
     }
 
-    if (this.controls) {
-      this.controls.resetZoom();
+    const controls = this.controls();
+    if (controls) {
+      controls.resetZoom();
     }
     const photo = this.gridPhotoQL.find(
       (i): boolean =>
@@ -457,14 +456,14 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       this.navigateToPhoto(0);
     }
     this.slideShowRunning = true;
-    this.controls?.runSlideShow();
+    this.controls()?.runSlideShow();
     // Request wake lock to prevent screen dimming during slideshow
     this.wakeLockService.requestWakeLock().catch(console.error);
   }
 
   private stopSlideShow() {
     this.slideShowRunning = false;
-    this.controls?.stopSlideShow();
+    this.controls()?.stopSlideShow();
     // Release wake lock when slideshow stops
     this.wakeLockService.releaseWakeLock().catch(console.error);
   }
@@ -507,8 +506,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   }
 
   private hideLightbox(): void {
-    if (this.controls) {
-      this.controls.resetZoom();
+    const controls = this.controls();
+    if (controls) {
+      controls.resetZoom();
     }
     this.status = LightboxStates.Closing;
     this.fullScreenService.exitFullScreen();

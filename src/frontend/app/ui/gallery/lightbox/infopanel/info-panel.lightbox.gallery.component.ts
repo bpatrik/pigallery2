@@ -45,8 +45,6 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   private authService = inject(AuthenticationService);
   private themeService = inject(ThemeService);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   readonly media = input<MediaDTO>(undefined);
   readonly closed = output();
 

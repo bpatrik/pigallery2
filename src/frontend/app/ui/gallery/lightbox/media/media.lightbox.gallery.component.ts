@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, ViewChild, inject, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, OnChanges, inject, input, output, viewChild } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -18,12 +18,8 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   lightboxService = inject(LightboxService);
   private sanitizer = inject(DomSanitizer);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   readonly gridMedia = input<GridMedia>(undefined);
   readonly nextGridMedia = input<GridMedia>(undefined);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   readonly loadMedia = input(false); // prevents loading media
   readonly windowAspect = input(1);
   readonly zoom = input(1);
@@ -31,11 +27,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   readonly videoSourceError = output();
 
   readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the query. This prevents migration.
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the query. This prevents migration.
-  @ViewChild('liveVideo', {static: false}) liveVideo: ElementRef<HTMLVideoElement>;
+  readonly liveVideo = viewChild<ElementRef<HTMLVideoElement>>('liveVideo');
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   prevGirdPhoto: GridMedia = null;
@@ -222,12 +214,13 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public startLiveVideo(): void {
-    if (!this.liveVideo || this.liveVideoClickLocked) {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo || this.liveVideoClickLocked) {
       return;
     }
     this.liveVideoPlaying = true;
-    this.liveVideo.nativeElement.currentTime = 0;
-    this.liveVideo.nativeElement.play().catch(console.error);
+    liveVideo.nativeElement.currentTime = 0;
+    liveVideo.nativeElement.play().catch(console.error);
   }
 
   public startLiveVideoTouch(): void {
@@ -236,11 +229,12 @@ export class GalleryLightboxMediaComponent implements OnChanges {
   }
 
   public stopLiveVideo(): void {
-    if (!this.liveVideo || this.liveVideoClickLocked) {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo || this.liveVideoClickLocked) {
       return;
     }
     this.liveVideoPlaying = false;
-    this.liveVideo.nativeElement.pause();
+    liveVideo.nativeElement.pause();
   }
 
   public toggleLiveVideo(): void {
@@ -249,18 +243,19 @@ export class GalleryLightboxMediaComponent implements OnChanges {
       this.liveVideoTouchActive = false;
       return;
     }
-    if (!this.liveVideo) {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo) {
       return;
     }
     if (this.liveVideoClickLocked) {
       this.liveVideoClickLocked = false;
       this.liveVideoPlaying = false;
-      this.liveVideo.nativeElement.pause();
+      liveVideo.nativeElement.pause();
     } else {
       this.liveVideoClickLocked = true;
       this.liveVideoPlaying = true;
-      this.liveVideo.nativeElement.currentTime = 0;
-      this.liveVideo.nativeElement.play().catch(console.error);
+      liveVideo.nativeElement.currentTime = 0;
+      liveVideo.nativeElement.play().catch(console.error);
     }
   }
 

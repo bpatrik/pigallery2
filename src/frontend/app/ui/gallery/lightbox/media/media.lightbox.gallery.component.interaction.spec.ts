@@ -75,7 +75,7 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
   it('should start and stop the companion video from badge hover events', () => {
     const badge = renderLivePhoto();
     const video = createMockVideoElement();
-    component.liveVideo = {nativeElement: video as any} as any;
+    (component as any).liveVideo = () => ({nativeElement: video});
 
     badge.dispatchEvent(new Event('mouseenter'));
     fixture.detectChanges();
@@ -94,7 +94,7 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
   it('should start and stop the companion video from badge touch events', () => {
     const badge = renderLivePhoto();
     const video = createMockVideoElement();
-    component.liveVideo = {nativeElement: video as any} as any;
+    (component as any).liveVideo = () => ({nativeElement: video});
 
     badge.dispatchEvent(new Event('touchstart'));
     fixture.detectChanges();
