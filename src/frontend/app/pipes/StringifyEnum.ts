@@ -2,8 +2,7 @@ import {Pipe, PipeTransform} from '@angular/core';
 import {EnumTranslations} from '../ui/EnumTranslations';
 
 @Pipe({
-    name: 'stringifyEnum',
-    standalone: true
+    name: 'stringifyEnum'
 })
 export class StringifyEnum implements PipeTransform {
 

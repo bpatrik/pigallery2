@@ -8,7 +8,7 @@ import { JsonPipe } from '@angular/common';
 @Component({
     selector: 'app-saved-search-popup-btn',
     templateUrl: './saved-search-popup.component.html',
-    styleUrls: ['./saved-search-popup.component.css'],
+    styleUrl: './saved-search-popup.component.css',
     imports: [NgIconComponent, JsonPipe]
 })
 export class SavedSearchPopupComponent {

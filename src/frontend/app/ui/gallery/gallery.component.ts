@@ -38,7 +38,7 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
 @Component({
   selector: 'app-gallery',
   templateUrl: './gallery.component.html',
-  styleUrls: ['./gallery.component.css'],
+  styleUrl: './gallery.component.css',
   imports: [
     GalleryLightboxComponent,
     FrameComponent,

@@ -8,7 +8,7 @@ import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-gallery-filter',
-    styleUrls: ['./filter.gallery.component.css'],
+    styleUrl: './filter.gallery.component.css',
     templateUrl: './filter.gallery.component.html',
     imports: [
     PopoverDirective,

@@ -9,14 +9,14 @@
       <span class="me-2"><ng-container
       i18n>Run now</ng-container>: {{ backendTextService.getJobName(jobName) }}</span>
     }
-    <ng-icon name="ionPlayOutline"></ng-icon>
+    <ng-icon name="ionPlayOutline" />
   </button>
 }
 @if (Running) {
   <button class="btn btn-secondary"
     [disabled]="disabled || jobsService.jobStartingStopping[jobName] || Progress.state !== JobProgressStates.running"
     (click)="stop();">
-    <ng-icon name="ionStopOutline"></ng-icon>
+    <ng-icon name="ionStopOutline" />
     @if (!shortName) {
       <span class="ms-2"><ng-container
       i18n>Cancel</ng-container>: {{ backendTextService.getJobName(jobName) }}</span>
@@ -48,7 +48,7 @@
         <button class="btn {{danger ? 'btn-danger': 'btn-success'}}" type="button"
           (click)="start(); hideModal();">
           <ng-container i18n>Run now</ng-container>
-          <ng-icon name="ionPlayOutline" class="ms-1"></ng-icon>
+          <ng-icon name="ionPlayOutline" class="ms-1" />
         </button>
       </div>
     </div>

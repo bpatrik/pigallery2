@@ -21,7 +21,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 @Component({
     selector: 'app-gallery-share',
     templateUrl: './share.gallery.component.html',
-    styleUrls: ['./share.gallery.component.css'],
+    styleUrl: './share.gallery.component.css',
     imports: [
     NgIconComponent,
     FormsModule,

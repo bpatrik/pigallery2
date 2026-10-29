@@ -9,7 +9,7 @@
     <div class="row" title="Title and description of the media"
       i18n-title>
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionDocumentTextOutline" title="Title and caption" i18n-title></ng-icon>
+        <ng-icon class="details-icon" name="ionDocumentTextOutline" title="Title and caption" i18n-title />
       </div>
       <div class="col-11">
         @if (media.metadata.title) {
@@ -29,7 +29,7 @@
   @if (contentLoaderService.isSearchResult()) {
     <div class="row">
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionFolderOutline"></ng-icon>
+        <ng-icon class="details-icon" name="ionFolderOutline" />
       </div>
       <div class="col-11">
         <a class="details-main dir-link"
@@ -43,7 +43,7 @@
   }
   <div class="row" title="File information and properties" i18n-title>
     <div class="col-1 ps-0">
-      <ng-icon class="details-icon" name="ionImageOutline" title="File information" i18n-title></ng-icon>
+      <ng-icon class="details-icon" name="ionImageOutline" title="File information" i18n-title />
     </div>
     <div class="col-11">
       <div class="details-main" title="Filename" i18n-title>
@@ -67,7 +67,7 @@
   @if (isLivePhoto()) {
     <div class="row pt-0" title="Companion video" i18n-title>
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title></ng-icon>
+        <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main" title="Video filename" i18n-title>
@@ -97,7 +97,7 @@
   @if (media.metadata.creationDate) {
     <div class="row" title="When this photo or video was taken" i18n-title>
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionCalendarOutline" title="Creation date and time" i18n-title></ng-icon>
+        <ng-icon class="details-icon" name="ionCalendarOutline" title="Creation date and time" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main clickable" title="Click to search for media from the same date" i18n-title>
@@ -126,7 +126,7 @@
     <div class="row" title="Video technical information"
       i18n-title>
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionVideocamOutline" title="Video properties" i18n-title></ng-icon>
+        <ng-icon class="details-icon" name="ionVideocamOutline" title="Video properties" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main">
@@ -159,7 +159,7 @@
   @if (CameraData) {
     <div class="row" title="Camera and lens information used to take this photo" i18n-title>
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionCameraOutline" title="Camera information" i18n-title></ng-icon>
+        <ng-icon class="details-icon" name="ionCameraOutline" title="Camera information" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main">
@@ -199,16 +199,16 @@
   @if (Rating) {
     <div class="row">
       <div class="col-1 ps-0" title="rating" p18n-rating>
-        <ng-icon class="details-icon" name="ionStarOutline"></ng-icon>
+        <ng-icon class="details-icon" name="ionStarOutline" />
       </div>
       <div class="col-11">
         <div class="details-main" [title]="Rating + ' stars'">
           @for (stars of [].constructor(Rating); track $index) {
-            <ng-icon class="text-body me-1" name="ionStar"></ng-icon>
+            <ng-icon class="text-body me-1" name="ionStar" />
           }
           @for (stars of [].constructor(5-Rating); track $index) {
             <ng-icon class="text-body-tertiary me-1"
-            name="ionStarOutline"></ng-icon>
+            name="ionStarOutline" />
           }
         </div>
       </div>
@@ -218,7 +218,7 @@
   @if (keywords) {
     <div class="row" title="Keywords and people tags associated with this media" i18n-title>
       <div class="col-1 ps-0">
-        <ng-icon class="details-icon" name="ionPricetagOutline" title="Keywords and people" i18n-title></ng-icon>
+        <ng-icon class="details-icon" name="ionPricetagOutline" title="Keywords and people" i18n-title />
       </div>
       <div class="col-11 keywords clickable">
         @for (keyword of keywords; track keyword; let last = $last) {
@@ -226,14 +226,14 @@
             <a [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]">
               @switch (keyword.type) {
                 @case (SearchQueryTypes.keyword) {#}
-                @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline"></ng-icon>}
+                @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}
               }<!--
            -->{{ keyword.value }}</a>
           } @else {
             <span>
               @switch (keyword.type) {
                 @case (SearchQueryTypes.keyword) {#}
-                @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline"></ng-icon>}
+                @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}
               }<!--
            -->{{ keyword.value }}</span>
           }<!--
@@ -248,7 +248,7 @@
             <div class="row" title="Location information where this media was captured"
               i18n-title>
               <div class="col-1 ps-0">
-                <ng-icon class="details-icon" name="ionLocationOutline" title="Location information" i18n-title></ng-icon>
+                <ng-icon class="details-icon" name="ionLocationOutline" title="Location information" i18n-title />
               </div>
               <div class="col-11">
                 <div class="details-main clickable" title="Click location parts to search for media from the same area"

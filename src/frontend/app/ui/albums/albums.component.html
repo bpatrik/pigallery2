@@ -2,9 +2,8 @@
 
   <div body #container class="container-fluid">
     @for (album of albumsService.albums | async; track album) {
-      <app-album
-        [album]="album"
-      [size]="size"></app-album>
+      <app-album [album]="album"
+      [size]="size" />
     }
 
     @if (CanCreateAlbum) {
@@ -13,7 +12,7 @@
         [style.height.px]="size"
         (click)="openModal(modal)">
         <div class="text">
-          <ng-icon name="ionAddOutline" class="mb-2"></ng-icon>
+          <ng-icon name="ionAddOutline" class="mb-2" />
           <span i18n>Add saved search</span>
         </div>
       </div>
@@ -55,24 +54,20 @@
       </div>
       <div class="mb-1">
         <label for="album-search-query-builder">Search query</label>
-        <app-gallery-search-query-builder
-          id="album-search-query-builder"
+        <app-gallery-search-query-builder id="album-search-query-builder"
           name="album-search-query-builder"
-          [(ngModel)]="savedSearch.searchQuery">
-        </app-gallery-search-query-builder>
+          [(ngModel)]="savedSearch.searchQuery" />
       </div>
 
 
       <div class="input-group-btn float-end" style="display: block">
-        <app-saved-search-popup-btn
-          [disabled]="IsSearchQueryEmpty"
+        <app-saved-search-popup-btn [disabled]="IsSearchQueryEmpty"
           class="me-2"
-          [savedSearchDTO]="savedSearch">
-        </app-saved-search-popup-btn>
+          [savedSearchDTO]="savedSearch" />
         <button class="btn btn-primary" type="button"
           [disabled]="IsSearchQueryEmpty"
           (click)="saveSearch()">
-          <ng-icon name="ionSaveOutline" class="me-1"></ng-icon><span i18n>Save</span>
+          <ng-icon name="ionSaveOutline" class="me-1" /><span i18n>Save</span>
         </button>
       </div>
     </form>

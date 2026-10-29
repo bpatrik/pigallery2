@@ -17,7 +17,7 @@ import { NgIconComponent } from '@ng-icons/core';
 @Component({
     selector: 'app-album',
     templateUrl: './album.component.html',
-    styleUrls: ['./album.component.css'],
+    styleUrl: './album.component.css',
     imports: [
     RouterLink,
     IconComponent,

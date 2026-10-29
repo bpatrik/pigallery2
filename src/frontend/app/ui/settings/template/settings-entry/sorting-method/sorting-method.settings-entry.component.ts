@@ -14,7 +14,7 @@ import {NotificationService} from '../../../../../model/notification.service';
 @Component({
   selector: 'app-settings-entry-sorting-method',
   templateUrl: './sorting-method.settings-entry.component.html',
-  styleUrls: ['./sorting-method.settings-entry.component.css'],
+  styleUrl: './sorting-method.settings-entry.component.css',
   providers: [
     AutoCompleteService,
     {

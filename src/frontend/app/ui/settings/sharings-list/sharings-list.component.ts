@@ -9,7 +9,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 @Component({
     selector: 'app-settigns-sharings-list',
     templateUrl: './sharings-list.component.html',
-    styleUrls: ['./sharings-list.component.css'],
+    styleUrl: './sharings-list.component.css',
     imports: [NgIconComponent, DatePipe, StringifySearchQuery]
 })
 export class SharingsListComponent implements OnInit {

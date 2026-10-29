@@ -1,10 +1,10 @@
 <div class="container d-flex  flex-column justify-content-center">
   <div class="row align-self-end">
-    <app-language></app-language>
+    <app-language />
   </div>
   <div class="row title  align-self-center">
     <h1>
-      <app-icon [width]="80"></app-icon>
+      <app-icon [width]="80" />
     {{title}}</h1>
   </div>
   <div class="row card align-self-center">
@@ -19,7 +19,7 @@
         @if (oidcEnabled) {
           <div class="d-grid gap-2 mb-3">
             <button type="button" class="btn btn-primary btn-lg" (click)="onLoginWithOIDC()">
-              <ng-icon name="ionLogInOutline" class="me-1"></ng-icon>
+              <ng-icon name="ionLogInOutline" class="me-1" />
               <span i18n>Login with</span> {{oidcDisplayName}}
             </button>
             <div class="text-center text-muted" i18n>or</div>
@@ -27,7 +27,7 @@
         }
 
         <div class="input-group mb-3">
-          <div class="input-group-text"><ng-icon name="ionPersonOutline"></ng-icon></div>
+          <div class="input-group-text"><ng-icon name="ionPersonOutline" /></div>
           <input type="text"
             i18n-placeholder
             class="form-control"
@@ -40,7 +40,7 @@
           </div>
 
           <div class="input-group mb-3">
-            <div class="input-group-text"><ng-icon name="ionLockClosedOutline"></ng-icon></div>
+            <div class="input-group-text"><ng-icon name="ionLockClosedOutline" /></div>
             <input type="password"
               i18n-placeholder
               class="form-control"

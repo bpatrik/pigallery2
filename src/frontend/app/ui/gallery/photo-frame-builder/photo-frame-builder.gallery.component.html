@@ -1,5 +1,5 @@
 <button class="dropdown-item {{enabled? '' : 'disabled'}}" (click)="openModal(photoFrameModal)">
-  <ng-icon name="ionImagesOutline"></ng-icon>
+  <ng-icon name="ionImagesOutline" />
   <ng-container i18n>Photo frame link</ng-container>
 </button>
 
@@ -33,10 +33,10 @@
         <button type="button" class="btn btn-link p-0 me-2 text-body" (click)="toggleSettings()">
           <ng-container >settings</ng-container>
           @if (!showSettings) {
-            <ng-icon name="ionCaretForward" class="mb-2" ></ng-icon>
+            <ng-icon name="ionCaretForward" class="mb-2"  />
           }
           @if (showSettings) {
-            <ng-icon name="ionCaretDown" class="mb-2" ></ng-icon>
+            <ng-icon name="ionCaretDown" class="mb-2"  />
           }
         </button>
         @if (!showSettings) {

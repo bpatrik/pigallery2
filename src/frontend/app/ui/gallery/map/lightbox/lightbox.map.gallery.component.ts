@@ -48,7 +48,7 @@ import {QueryService} from '../../../../model/query.service';
 
 @Component({
   selector: 'app-gallery-map-lightbox',
-  styleUrls: ['./lightbox.map.gallery.component.css'],
+  styleUrl: './lightbox.map.gallery.component.css',
   templateUrl: './lightbox.map.gallery.component.html',
   imports: [
     LeafletModule,

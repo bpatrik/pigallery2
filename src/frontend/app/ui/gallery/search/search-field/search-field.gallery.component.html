@@ -5,12 +5,10 @@
                                  class="search-field col p-0 rounded-start-2"
                                  (search)="search.emit()"
                                  [placeholder]="placeholder"
-                                 name="search-field">
-
-  </app-gallery-search-field-base>
+                                 name="search-field" />
 
   <button class="btn btn-tertiary" type="button" (click)="openSearchModal(searchModal)">
-    <ng-icon name="ionChevronDownOutline"></ng-icon>
+    <ng-icon name="ionChevronDownOutline" />
   </button>
 </div>
 
@@ -25,13 +23,11 @@
   <div class="modal-body">
     <form #searchPanelForm="ngForm" class="form-horizontal">
 
-      <app-gallery-search-query-builder
-        name="search-query-builder"
+      <app-gallery-search-query-builder name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
         [placeholder]="placeholder"
         (ngModelChange)="onQueryChange()"
-        (search)="search.emit()">
-      </app-gallery-search-query-builder>
+        (search)="search.emit()" />
 
 
     </form>

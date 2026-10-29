@@ -27,7 +27,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-info-panel',
-  styleUrls: ['./info-panel.lightbox.gallery.component.css'],
+  styleUrl: './info-panel.lightbox.gallery.component.css',
   templateUrl: './info-panel.lightbox.gallery.component.html',
   imports: [
     NgIconComponent,

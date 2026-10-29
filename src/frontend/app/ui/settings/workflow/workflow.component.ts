@@ -35,7 +35,7 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
 @Component({
     selector: 'app-settings-workflow',
     templateUrl: './workflow.component.html',
-    styleUrls: ['./workflow.component.css'],
+    styleUrl: './workflow.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

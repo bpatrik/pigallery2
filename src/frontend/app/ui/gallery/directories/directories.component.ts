@@ -7,7 +7,7 @@ import { GalleryDirectoryComponent } from './directory/directory.gallery.compone
 @Component({
     selector: 'app-gallery-directories',
     templateUrl: './directories.component.html',
-    styleUrls: ['./directories.component.css'],
+    styleUrl: './directories.component.css',
     imports: [GalleryDirectoryComponent]
 })
 export class DirectoriesComponent implements OnChanges {

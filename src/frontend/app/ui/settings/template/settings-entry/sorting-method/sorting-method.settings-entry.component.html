@@ -5,10 +5,9 @@
     class="btn dropdown-toggle btn-outline-primary btn-navigator"
     aria-controls="sorting-dropdown">
     @if (sortingMethod?.ascending !== null) {
-      <ng-icon
-      [name]="!sortingMethod?.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
+      <ng-icon [name]="!sortingMethod?.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'" />
     }
-    <app-sorting-method-icon [method]="sortingMethod?.method"></app-sorting-method-icon>
+    <app-sorting-method-icon [method]="sortingMethod?.method" />
 
   </button>
   <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
@@ -18,7 +17,7 @@
         [class.active]="sortingMethod?.method == type.key"
         (click)="setSortingBy(type.key)">
         <div class="me-2 d-inline-block">
-          <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
+          <app-sorting-method-icon [method]="type.key" />
         </div>
         <div class="d-inline-block">{{type.key | stringifySorting}}</div>
       </div>
@@ -30,7 +29,7 @@
           [class.active]="sortingMethod?.ascending == true"
           (click)="setSortingAscending(true)">
           <div class="me-2 d-inline-block">
-            <ng-icon name="ionArrowUpOutline"></ng-icon>
+            <ng-icon name="ionArrowUpOutline" />
           </div>
           <div class="d-inline-block" i18n>ascending</div>
         </div>
@@ -38,7 +37,7 @@
           [class.active]="sortingMethod?.ascending == false"
           (click)="setSortingAscending(false)">
           <div class="me-2 d-inline-block">
-            <ng-icon name="ionArrowDownOutline"></ng-icon>
+            <ng-icon name="ionArrowDownOutline" />
           </div>
           <div class="d-inline-block" i18n>descending</div>
         </div>

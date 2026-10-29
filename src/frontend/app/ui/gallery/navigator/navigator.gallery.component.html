@@ -37,7 +37,7 @@
       @if (config.Gallery.NavBar.enableDownloadZip  && ItemCount > 0) {
         <a [href]="getDownloadZipLink()"
           class="btn  btn-outline-secondary btn-navigator">
-          <ng-icon name="ionDownloadOutline" title="Download" i18n-title></ng-icon>
+          <ng-icon name="ionDownloadOutline" title="Download" i18n-title />
         </a>
         <div class="divider">&nbsp;</div>
       }
@@ -47,7 +47,7 @@
           [routerLink]="['/search', getDirectoryFlattenSearchQuery()]"
           class="btn btn-outline-secondary btn-navigator">
           <ng-icon name="ionGitBranchOutline"
-          title="Show all subdirectories" i18n-title></ng-icon>
+          title="Show all subdirectories" i18n-title />
         </a>
         <div class="divider">&nbsp;</div>
       }
@@ -57,7 +57,7 @@
           [class.btn-outline-secondary]="!filterService.activeFilters.value.areFiltersActive"
           (click)="showFilters = ! showFilters">
           <ng-icon name="ionFunnelOutline"
-          title="Filters" i18n-title></ng-icon>
+          title="Filters" i18n-title />
         </a>
         <div class="divider">&nbsp;</div>
       }
@@ -70,17 +70,14 @@
           [class.btn-outline-secondary]="isDefaultSortingAndGrouping()"
           aria-controls="sorting-dropdown">
           @if (sortingService.sorting.value.ascending !== null) {
-            <ng-icon
-            [name]="!sortingService.sorting.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
+            <ng-icon [name]="!sortingService.sorting.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'" />
           }
-          <app-sorting-method-icon [method]="sortingService.sorting.value.method"></app-sorting-method-icon>
+          <app-sorting-method-icon [method]="sortingService.sorting.value.method" />
           @if (sortingService.grouping.value.method !== GroupByTypes.NoGrouping) {
             <div class="grouping-icon">
               <div>
-                <ng-icon
-                [name]="!sortingService.grouping.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'"></ng-icon>
-                <app-sorting-method-icon
-                [method]="sortingService.grouping.value.method"></app-sorting-method-icon>
+                <ng-icon [name]="!sortingService.grouping.value.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'" />
+                <app-sorting-method-icon [method]="sortingService.grouping.value.method" />
               </div>
               <div class="ps-1" i18n>
                             group
@@ -98,7 +95,7 @@
                 [class.btn-outline-secondary]="!groupingFollowSorting"
                 (click)="groupingFollowSorting=!groupingFollowSorting"
                 title="Grouping follows sorting" i18n-title>
-                <ng-icon class="" name="ionLinkOutline"></ng-icon>
+                <ng-icon class="" name="ionLinkOutline" />
               </button>
 
             </h6>
@@ -109,7 +106,7 @@
                   [class.active]="sortingService.sorting.value.method == type.key"
                   (click)="setSortingBy(type.key)">
                   <div class="me-2 d-inline-block">
-                    <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
+                    <app-sorting-method-icon [method]="type.key" />
                   </div>
                   <div class="d-inline-block">{{type.key | stringifySorting}}</div>
                 </div>
@@ -121,7 +118,7 @@
                     [class.active]="sortingService.sorting.value.ascending == true"
                     (click)="setSortingAscending(true)">
                     <div class="me-2 d-inline-block">
-                      <ng-icon name="ionArrowUpOutline"></ng-icon>
+                      <ng-icon name="ionArrowUpOutline" />
                     </div>
                     <div class="d-inline-block" i18n>ascending</div>
                   </div>
@@ -129,7 +126,7 @@
                     [class.active]="sortingService.sorting.value.ascending == false"
                     (click)="setSortingAscending(false)">
                     <div class="me-2 d-inline-block">
-                      <ng-icon name="ionArrowDownOutline"></ng-icon>
+                      <ng-icon name="ionArrowDownOutline" />
                     </div>
                     <div class="d-inline-block" i18n>descending</div>
                   </div>
@@ -144,7 +141,7 @@
                     [class.active]="sortingService.grouping.value.method == type.key"
                     (click)="setGroupingBy(type.key)">
                     <div class="me-2 d-inline-block">
-                      <app-sorting-method-icon [method]="type.key"></app-sorting-method-icon>
+                      <app-sorting-method-icon [method]="type.key" />
                     </div>
                     <div class="d-inline-block">{{type.key | stringifySorting}}</div>
                   </div>
@@ -155,7 +152,7 @@
                       [class.active]="sortingService.grouping.value.ascending == true"
                       (click)="setGroupingAscending(true)">
                       <div class="me-2 d-inline-block">
-                        <ng-icon name="ionArrowUpOutline"></ng-icon>
+                        <ng-icon name="ionArrowUpOutline" />
                       </div>
                       <div class="d-inline-block" i18n>ascending</div>
                     </div>
@@ -163,7 +160,7 @@
                       [class.active]="sortingService.grouping.value.ascending == false"
                       (click)="setGroupingAscending(false)">
                       <div class="me-2 d-inline-block">
-                        <ng-icon name="ionArrowDownOutline"></ng-icon>
+                        <ng-icon name="ionArrowDownOutline" />
                       </div>
                       <div class="d-inline-block" i18n>descending</div>
                     </div>
@@ -181,7 +178,7 @@
             [class.btn-secondary]="!navigatorService.isDefaultGridSize()"
             [class.btn-outline-secondary]="navigatorService.isDefaultGridSize()"
             aria-controls="grid-size-dropdown">
-            <app-grid-size-icon [method]="navigatorService.girdSize.value"></app-grid-size-icon>
+            <app-grid-size-icon [method]="navigatorService.girdSize.value" />
           </button>
           <div id="grid-size-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
             role="menu" aria-labelledby="button-alignment">
@@ -191,7 +188,7 @@
                 [class.active]="navigatorService.girdSize.value == type.key"
                 (click)="navigatorService.setGridSize(type.key)">
                 <div class="me-2 d-inline-block">
-                  <app-grid-size-icon [method]="type.key"></app-grid-size-icon>
+                  <app-grid-size-icon [method]="type.key" />
                 </div>
                 <div class="d-inline-block">{{type.key | stringifyGridSize}}</div>
               </div>
@@ -208,5 +205,5 @@
   @if (showFilters && ItemCount> 0) {
     <app-gallery-filter #filterComponent
       [style.max-height]="sanitizer.bypassSecurityTrustStyle('calc(100dvh - '+(navigatorElement?.nativeElement?.getBoundingClientRect().top+navigatorElement?.nativeElement?.getBoundingClientRect().height)+'px)')"
-    class="position-absolute w-100"></app-gallery-filter>
+    class="position-absolute w-100" />
   }

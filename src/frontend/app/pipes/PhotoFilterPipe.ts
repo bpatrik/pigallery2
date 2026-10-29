@@ -4,8 +4,7 @@ import {PhotoDTO} from '../../../common/entities/PhotoDTO';
 import {MediaGroup} from '../ui/gallery/navigator/sorting.service';
 
 @Pipe({
-    name: 'photosOnly',
-    standalone: true
+    name: 'photosOnly'
 })
 export class PhotoFilterPipe implements PipeTransform {
   transform(mediaGroups: MediaGroup[]): PhotoDTO[] | null {

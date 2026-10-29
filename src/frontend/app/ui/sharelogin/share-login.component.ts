@@ -13,7 +13,7 @@ import { NgIconComponent } from '@ng-icons/core';
 @Component({
     selector: 'app-share-login',
     templateUrl: './share-login.component.html',
-    styleUrls: ['./share-login.component.css'],
+    styleUrl: './share-login.component.css',
     imports: [
     LanguageComponent,
     IconComponent,

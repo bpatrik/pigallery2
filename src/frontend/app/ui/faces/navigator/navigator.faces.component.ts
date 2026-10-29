@@ -10,7 +10,7 @@ import {StringifySortingMethod} from '../../../pipes/StringifySortingMethod';
 
 @Component({
   selector: 'app-faces-navbar',
-  styleUrls: ['./navigator.faces.component.css'],
+  styleUrl: './navigator.faces.component.css',
   templateUrl: './navigator.faces.component.html',
   imports: [
     NgIconComponent,

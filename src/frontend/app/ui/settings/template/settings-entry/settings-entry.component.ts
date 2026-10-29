@@ -52,7 +52,7 @@ interface IState {
 @Component({
     selector: 'app-settings-entry',
     templateUrl: './settings-entry.component.html',
-    styleUrls: ['./settings-entry.settings.component.css'],
+    styleUrl: './settings-entry.settings.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

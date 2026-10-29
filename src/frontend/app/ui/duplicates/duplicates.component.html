@@ -23,7 +23,7 @@
                     class="row text-body rounded-2 p-2"
                     [routerLink]="['/gallery', getDirectoryPath(media.directory)]"
                     [queryParams]="queryService.getParams()">
-                    <app-duplicates-photo class="col-1 align-self-center" [media]="media"></app-duplicates-photo>
+                    <app-duplicates-photo class="col-1 align-self-center" [media]="media" />
                     <div class="col-6 align-self-center">
                       /{{getDirectoryPath(media.directory)}}/<strong>{{media.name}}</strong>
                     </div>

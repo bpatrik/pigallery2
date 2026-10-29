@@ -6,7 +6,7 @@ import { NgIconComponent } from '@ng-icons/core';
 @Component({
     selector: 'app-grid-size-icon',
     templateUrl: './grid-size-icon.component.html',
-    styleUrls: ['./grid-size-icon.component.css'],
+    styleUrl: './grid-size-icon.component.css',
     imports: [NgIconComponent]
 })
 export class GridSizeIconComponent {

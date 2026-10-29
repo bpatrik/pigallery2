@@ -13,7 +13,7 @@ import { NgIconComponent } from '@ng-icons/core';
 @Component({
     selector: 'app-settings-job-button',
     templateUrl: './job-button.settings.component.html',
-    styleUrls: ['./job-button.settings.component.css'],
+    styleUrl: './job-button.settings.component.css',
     imports: [NgIconComponent]
 })
 export class JobButtonComponent {

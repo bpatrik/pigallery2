@@ -12,14 +12,13 @@
       [drag]="controls?.drag ?? {x:0,y:0}"
       [windowAspect]="photoFrameDim.aspect"
       (videoSourceError)="onVideoSourceError()"
-      #photo>
-    </app-gallery-lightbox-media>
+      #photo />
 
     @if (videoSourceError && activePhoto) {
       <div class="container h-100 flex-column">
         <div class="row justify-content-center align-items-center h-100">
           <div class="col-md-8 text-white text-center">
-            <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom"></ng-icon><span class="h2" i18n>Error during loading the video.</span>
+            <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom" /><span class="h2" i18n>Error during loading the video.</span>
             <br/>
             @if (activePhoto.gridMedia.isVideoTranscodingNeeded()) {
               <ng-container i18n>
@@ -35,8 +34,7 @@
     }
 
     @if (isOpen()) {
-      <app-lightbox-controls
-        #controls
+      <app-lightbox-controls #controls
         [activePhoto]="activePhoto"
         [slideShowRunning]="slideShowRunning"
         (closed)="hide()"
@@ -46,17 +44,14 @@
         (toggleInfoPanel)="toggleInfoPanel()"
         (toggleFullScreen)="toggleFullscreen()"
         [photoFrameDim]="photoFrameDim"
-        [mediaElement]="mediaElement">
-      </app-lightbox-controls>
+        [mediaElement]="mediaElement" />
     }
   </div>
 
   @if (activePhoto && infoPanelVisible) {
-    <app-info-panel
-      id="info-panel"
+    <app-info-panel id="info-panel"
       [style.width.px]="infoPanelWidth"
       [media]="activePhoto.gridMedia.media"
-      (closed)="hideInfoPanel()">
-    </app-info-panel>
+      (closed)="hideInfoPanel()" />
   }
 </div>

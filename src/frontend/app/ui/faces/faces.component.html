@@ -1,20 +1,18 @@
 <app-frame>
 
-  <app-faces-navbar navbar-appendix></app-faces-navbar>
+  <app-faces-navbar navbar-appendix />
 
   <div body #container class="container-fluid">
     @for (person of favourites | async; track person) {
-      <app-face
-        [person]="person"
-      [size]="size"></app-face>
+      <app-face [person]="person"
+      [size]="size" />
     }
     @if ((nonFavourites | async).length > 0) {
       <hr/>
     }
     @for (person of nonFavourites | async; track person) {
-      <app-face
-        [person]="person"
-      [size]="size"></app-face>
+      <app-face [person]="person"
+      [size]="size" />
     }
 
     @if ((nonFavourites | async).length == 0 && (favourites | async).length == 0) {

@@ -37,7 +37,7 @@ import {BlogService} from '../blog/blog.service';
 @Component({
   selector: 'app-gallery-grid',
   templateUrl: './grid.gallery.component.html',
-  styleUrls: ['./grid.gallery.component.css'],
+  styleUrl: './grid.gallery.component.css',
   imports: [
     NgIconComponent,
     GalleryBlogComponent,

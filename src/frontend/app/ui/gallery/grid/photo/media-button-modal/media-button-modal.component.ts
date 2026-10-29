@@ -8,9 +8,8 @@ import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../co
 @Component({
   selector: 'app-media-button-modal',
   templateUrl: './media-button-modal.component.html',
-  styleUrls: ['./media-button-modal.component.css'],
-  imports: [FormsModule],
-  standalone: true
+  styleUrl: './media-button-modal.component.css',
+  imports: [FormsModule]
 })
 export class MediaButtonModalComponent implements OnInit, OnDestroy {
   modalData: MediaButtonModalData | null = null;

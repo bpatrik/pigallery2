@@ -8,7 +8,7 @@ import {NavigationService} from '../../model/navigation.service';
 @Component({
   selector: 'app-error',
   templateUrl: './error.component.html',
-  styleUrls: ['./error.component.css'],
+  styleUrl: './error.component.css',
   imports: [
     IconComponent
 ]

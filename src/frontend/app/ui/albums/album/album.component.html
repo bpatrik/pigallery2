@@ -12,7 +12,7 @@
     }
 
     @if (!thumbnail || !thumbnail.Available) {
-      <app-icon class="no-image"></app-icon>
+      <app-icon class="no-image" />
     }
   </div>
 
@@ -21,19 +21,17 @@
   <div class="info rounded-bottom">
     {{album.name}} ({{album.cache?.itemCount}})
     @if (CanUpdate && !album.locked) {
-      <ng-icon
-        (click)="deleteAlbum($event)"
+      <ng-icon (click)="deleteAlbum($event)"
         class="info-button delete float-end"
         name="ionTrashOutline"
-      title="Delete" i18n-title></ng-icon>
+      title="Delete" i18n-title />
     }
 
     @if (album.locked) {
-      <ng-icon
-        class="info-button float-end"
+      <ng-icon class="info-button float-end"
         name="ionLockClosedOutline"
         title="Album is locked, cannot be deleted from the webpage."
-      i18n-title></ng-icon>
+      i18n-title />
     }
 
   </div>

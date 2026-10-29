@@ -14,11 +14,11 @@
                 container="body"
                 [popover]="'Unknown job type: ' + schedule.jobName"
                 class="text-danger me-2">
-                <ng-icon name="ionWarningOutline"></ng-icon>
+                <ng-icon name="ionWarningOutline" />
               </span>
             }
             <ng-icon style="font-size: 1.3em; margin-left: -4px"
-            [name]="showDetails[schedule.name] ? 'ionChevronDownOutline' : 'ionChevronForwardOutline'"></ng-icon>
+            [name]="showDetails[schedule.name] ? 'ionChevronDownOutline' : 'ionChevronForwardOutline'" />
             {{ schedule.name }}
             @switch (schedule.trigger.type) {
               @case (JobTriggerType.periodic) {
@@ -37,14 +37,14 @@
           </div>
           <div>
             <button class="btn btn-danger ms-0" (click)="remove(schedule)">
-              <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+              <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
             @if (jobsService.isValidJob(schedule.jobName)) {
               <app-settings-job-button class="ms-md-2 mt-2 mt-md-0"
                 (jobError)="error=$event"
                 [allowParallelRun]="schedule.allowParallelRun"
                 [jobName]="schedule.jobName" [config]="schedule.config"
-              [shortName]="true"></app-settings-job-button>
+              [shortName]="true" />
             }
           </div>
         </div>
@@ -55,7 +55,7 @@
             @if (settingsService.configStyle == ConfigStyle.full) {
               <div class="alert alert-secondary" role="alert"
                 >
-                <ng-icon size="1.3em" name="ionInformationCircleOutline"></ng-icon>
+                <ng-icon size="1.3em" name="ionInformationCircleOutline" />
                 {{ getJobDescription(schedule.jobName) }}
               </div>
             }
@@ -70,7 +70,7 @@
                   [jobName]="schedule.jobName"
                   [allowParallelRun]="schedule.allowParallelRun"
                   (jobError)="error=$event"
-                [config]="schedule.config"></app-settings-job-button>
+                [config]="schedule.config" />
               </div>
             </div>
             <div class="mb-1 row">
@@ -127,11 +127,10 @@
                 >
                 <label class="col-md-2 control-label" [for]="'triggerTime'+i" i18n>At:</label>
                 <div class="col-md-10">
-                  <app-timestamp-datepicker
-                    [name]="'triggerTime'+i"
+                  <app-timestamp-datepicker [name]="'triggerTime'+i"
                     [id]="'triggerTime'+i"
                     (timestampChange)="onChange($event)"
-                  [(timestamp)]="schedule.trigger.time"></app-timestamp-datepicker>
+                  [(timestamp)]="schedule.trigger.time" />
                 </div>
               </div>
             }
@@ -156,10 +155,9 @@
                       </option>
                     }
                   </select>
-                  <app-timestamp-timepicker
-                    [name]="'atTime'+i"
+                  <app-timestamp-timepicker [name]="'atTime'+i"
                     (timestampChange)="onChange($event)"
-                  [(timestamp)]="schedule.trigger.atTime"></app-timestamp-timepicker>
+                  [(timestamp)]="schedule.trigger.atTime" />
                 </div>
               </div>
             }
@@ -261,13 +259,11 @@
                               - {{ (j + 1) }}</label>
                               <div class="col-md-10">
                                 <div class="input-group">
-                                  <app-gallery-search-field
-                                    [(ngModel)]="mp.searchQuery"
+                                  <app-gallery-search-field [(ngModel)]="mp.searchQuery"
                                     [id]="'sq_'+configEntry.id+'_'+i+'_'+j"
                                     [name]="'sq_'+configEntry.id+'_'+i+'_'+j"
                                     (change)="onChange($event)"
-                                    placeholder="Search Query">
-                                  </app-gallery-search-field>
+                                    placeholder="Search Query" />
                                 </div>
                                 @if (settingsService.configStyle == ConfigStyle.full) {
                                   <small class="form-text text-muted"
@@ -287,13 +283,11 @@
                                     <div
                                       class="row col-12 mt-1 m-0 p-0">
                                       <div class="col p-0">
-                                        <app-settings-entry-sorting-method
-                                          [(ngModel)]="mp.sortBy[k]"
+                                        <app-settings-entry-sorting-method [(ngModel)]="mp.sortBy[k]"
                                           [id]="configEntry.id+'_'+i+'_'+j+'_'+k"
                                           [name]="configEntry.id+'_'+i+'_'+j+'_'+k"
                                           [sortingByEnum]="SortByTypes"
-                                          (change)="onChange($event)">
-                                        </app-settings-entry-sorting-method>
+                                          (change)="onChange($event)" />
                                       </div>
                                       <div class="col-auto pe-0">
                                         <button class="btn btn-danger float-end"
@@ -303,7 +297,7 @@
                                           [id]="'list_btn_'+configEntry.id+'_'+i+'_'+j+'_'+k"
                                           [name]="'list_btn_'+configEntry.id+'_'+i+'_'+j+'_'+k"
                                           (click)="removeFromArray(mp.sortBy,k)">
-                                          <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                                          <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                                         </button>
                                       </div>
                                     </div>
@@ -313,7 +307,7 @@
                                       [id]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
                                       [name]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
                                       (click)="AddNewSorting(mp.sortBy)">
-                                      <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                                      <ng-icon name="ionAddOutline" class="me-1" />
                                       <span i18n>Add</span>
                                     </button>
                                   </div>
@@ -353,7 +347,7 @@
                                 [id]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
                                 [name]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
                                 (click)="removeFromArray(AsMediaPickDTOArray(schedule.config[configEntry.id]),j)">
-                                <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                                <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                               </button>
                             </div>
                             <hr/>
@@ -364,7 +358,7 @@
                                 [id]="'btn_add_'+configEntry.id+'_'+i"
                                 [name]="'btn_add_'+configEntry.id+'_'+i"
                                 (click)="AddNewMediaPickDTO(schedule.config[configEntry.id])">
-                                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                                <ng-icon name="ionAddOutline" class="me-1" />
                                 <span i18n>Add</span>
                               </button>
                             </div>
@@ -389,10 +383,8 @@
         }
       </div>
       @if (getProgress(schedule)) {
-        <app-settings-job-progress
-          class="card-footer bg-transparent"
-          [progress]="getProgress(schedule)">
-        </app-settings-job-progress>
+        <app-settings-job-progress class="card-footer bg-transparent"
+          [progress]="getProgress(schedule)" />
       }
     </div>
   </div>
@@ -400,7 +392,7 @@
 
 <button class="btn btn-primary float-end mt-2"
   (click)="prepareNewJob()">
-  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+  <ng-icon name="ionAddOutline" class="me-1" />
   <span i18n>Add Job</span>
 </button>
 

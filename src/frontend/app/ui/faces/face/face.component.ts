@@ -14,7 +14,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 @Component({
     selector: 'app-face',
     templateUrl: './face.component.html',
-    styleUrls: ['./face.component.css'],
+    styleUrl: './face.component.css',
     imports: [
     RouterLink,
     NgIconComponent

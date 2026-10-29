@@ -14,7 +14,7 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
 @Component({
     selector: 'app-faces',
     templateUrl: './faces.component.html',
-    styleUrls: ['./faces.component.css'],
+    styleUrl: './faces.component.css',
     imports: [
     FrameComponent,
     FaceComponent,

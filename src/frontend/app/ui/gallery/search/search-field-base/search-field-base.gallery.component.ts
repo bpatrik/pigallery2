@@ -12,7 +12,7 @@ import {NgIconComponent} from '@ng-icons/core';
 @Component({
   selector: 'app-gallery-search-field-base',
   templateUrl: './search-field-base.gallery.component.html',
-  styleUrls: ['./search-field-base.gallery.component.css'],
+  styleUrl: './search-field-base.gallery.component.css',
   providers: [
     AutoCompleteService,
     {

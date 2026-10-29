@@ -9,7 +9,7 @@ import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathP
 @Component({
     selector: 'app-gallery-blog',
     templateUrl: './blog.gallery.component.html',
-    styleUrls: ['./blog.gallery.component.css'],
+    styleUrl: './blog.gallery.component.css',
     imports: [
     MarkdownComponent,
     NgIconComponent,

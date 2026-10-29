@@ -33,7 +33,7 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 @Component({
   selector: 'app-gallery-search-query-entry',
   templateUrl: './query-entry.search.gallery.component.html',
-  styleUrls: ['./query-entry.search.gallery.component.css'],
+  styleUrl: './query-entry.search.gallery.component.css',
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,

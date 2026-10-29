@@ -15,15 +15,13 @@
       <div class="input-group">
         @switch (uiType) {
           @case ('SearchQuery') {
-            <app-gallery-search-field
-              [(ngModel)]="state.value"
+            <app-gallery-search-field [(ngModel)]="state.value"
               [id]="idName"
               [name]="idName"
               [title]="title"
               [disabled]="state.readonly || Disabled"
               (change)="onChange($event)"
-              placeholder="Search Query">
-            </app-gallery-search-field>
+              placeholder="Search Query" />
           }
           @case ('StringInput') {
             <div class="input-group"
@@ -92,13 +90,13 @@
               </select>
               <button class="btn btn-primary"
                 (click)="showNewThemeModal(newThemeModal)">
-                <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                <ng-icon name="ionAddOutline" class="me-1" />
                 <ng-container i18n>Add new</ng-container>
               </button>
               @if (state.value !== 'default') {
                 <button class="btn btn-danger"
                   (click)="removeTheme()">
-                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                  <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>
               }
               <ng-template #newThemeModal>
@@ -127,7 +125,7 @@
                     <div class="pe-0">
                       <button class="btn btn-primary" type="button"
                         (click)="addNewTheme()">
-                        <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                        <ng-icon name="ionAddOutline" class="me-1" />
                         <ng-container i18n>Add new theme</ng-container>
                       </button>
                     </div>
@@ -151,33 +149,27 @@
             </textarea>
           }
           @case ('ClientSortingConfig') {
-            <app-settings-entry-sorting-method
-              class="w-100"
+            <app-settings-entry-sorting-method class="w-100"
               [(ngModel)]="state.value"
               [sortingByEnum]="SortByTypes"
               [id]="idName"
               [name]="idName"
-              (ngModelChange)="onChange($event)">
-            </app-settings-entry-sorting-method>
+              (ngModelChange)="onChange($event)" />
           }
           @case ('ClientGroupingConfig') {
-            <app-settings-entry-sorting-method
-              class="w-100"
+            <app-settings-entry-sorting-method class="w-100"
               [(ngModel)]="state.value"
               [sortingByEnum]="GroupByTypes"
               [id]="idName"
               [name]="idName"
-              (ngModelChange)="onChange($event)">
-            </app-settings-entry-sorting-method>
+              (ngModelChange)="onChange($event)" />
           }
           @case ('JobScheduleConfig-Array') {
-            <app-settings-workflow
-              class="w-100"
+            <app-settings-workflow class="w-100"
               [(ngModel)]="state.value"
               [id]="idName"
               [name]="idName"
-              (ngModelChange)="onChange($event)">
-            </app-settings-workflow>
+              (ngModelChange)="onChange($event)" />
           }
           @case ('SVGIconConfig') {
             <button class="btn btn-outline-primary"
@@ -223,18 +215,16 @@
                   </div>
                 </div>
                 <hr/>
-                <app-settings-entry
-                  [ngModel]="state.value.__state.viewBox"
+                <app-settings-entry [ngModel]="state.value.__state.viewBox"
                   [noChangeDetection]="true"
                   [name]="'icon_w_'+idName"
                   [id]="'icon_w_'+idName"
-                (change)="onChange($event)"></app-settings-entry>
-                <app-settings-entry
-                  [ngModel]="state.value.__state.items"
+                (change)="onChange($event)" />
+                <app-settings-entry [ngModel]="state.value.__state.items"
                   [noChangeDetection]="true"
                   [name]="'icon_i_'+idName"
                   [id]="'icon_i_'+idName"
-                (change)="onChange($event)"></app-settings-entry>
+                (change)="onChange($event)" />
               </div>
               <div class="modal-footer">
                 <div class="btn-group float-end row mt-2" role="group" style="display: block">
@@ -276,7 +266,7 @@
                         [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         (click)="removeLayer(layer)"
                         class="btn float-end">
-                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                       </button>
                     </td>
                   </tr>
@@ -285,7 +275,7 @@
               <div class="row justify-content-end">
                 <button class="btn btn-primary"
                   (click)="addNewLayer()">
-                  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                  <ng-icon name="ionAddOutline" class="me-1" />
                   <span i18n>Add Layer</span>
                 </button>
               </div>
@@ -297,45 +287,40 @@
                 <div class="row  mt-1 mb-1 bg-body-tertiary">
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
                     <div class="col ps-0">
-                      <app-settings-entry
-                        [ngModel]="val.__state.matchers"
+                      <app-settings-entry [ngModel]="val.__state.matchers"
                         [noChangeDetection]="true"
                         [name]="'val_m_'+idName+i"
                         [id]="'val_m_'+idName+i"
-                      (change)="onChange($event)"></app-settings-entry>
+                      (change)="onChange($event)" />
                     </div>
                     <div class="col-1 pe-0">
                       <button [disabled]="state.value.length == 1" (click)="remove(i)"
                         [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
-                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                       </button>
                     </div>
                   </div>
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
-                    <app-settings-entry
-                      [ngModel]="val.theme.__state.color"
+                    <app-settings-entry [ngModel]="val.theme.__state.color"
                       [noChangeDetection]="true"
                       [name]="'color_m_'+idName+i"
                       [id]="'color_m_'+idName+i"
-                    (change)="onChange($event)"></app-settings-entry>
+                    (change)="onChange($event)" />
                   </div>
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
-                    <app-settings-entry
-                      [ngModel]="val.theme.__state.dashArray"
+                    <app-settings-entry [ngModel]="val.theme.__state.dashArray"
                       [noChangeDetection]="true"
                       [name]="'dashArray_n_'+idName+i"
                       [id]="'dashArray_n_'+idName+i"
-                    (change)="onChange($event)"></app-settings-entry>
+                    (change)="onChange($event)" />
                   </div>
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
-                    <app-settings-entry
-                      [ngModel]="val.theme.__state.svgIcon"
+                    <app-settings-entry [ngModel]="val.theme.__state.svgIcon"
                       [noChangeDetection]="true"
                       [name]="'svgIcon_'+idName+i"
                       [id]="'svgIcon_'+idName+i"
-                      (ngModelChange)="onChange($event)">
-                    </app-settings-entry>
+                      (ngModelChange)="onChange($event)" />
                   </div>
                   @if (!isLast) {
                     <hr/>
@@ -346,7 +331,7 @@
                 <div class="col pe-0">
                   <button class="btn btn-primary float-end"
                     (click)="AddNew()">
-                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add matcher</span>
                   </button>
                 </div>
@@ -370,19 +355,17 @@
                       <button [disabled]="state.value.length == 1" (click)="remove(i)"
                         [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
-                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                        <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                       </button>
                     </div>
                   </div>
                   <div class="row  mt-1 mb-1 me-0 ms-0">
                     <div class="col">
-                      <app-settings-entry
-                        [noChangeDetection]="true"
+                      <app-settings-entry [noChangeDetection]="true"
                         [ngModel]="arr.__state.matchers"
                         [name]="'arr_m_'+idName+i"
                         [id]="'arr_m_'+idName+i"
-                        (ngModelChange)="onChange($event)">
-                      </app-settings-entry>
+                        (ngModelChange)="onChange($event)" />
                     </div>
                   </div>
                 </div>
@@ -391,7 +374,7 @@
                 <div class="col pe-0">
                   <button class="btn btn-primary float-end"
                     (click)="AddNew()">
-                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add path theme group</span>
                   </button>
                 </div>
@@ -439,14 +422,12 @@
                           required>
                       }
                       @if (link.type === NavigationLinkTypes.search) {
-                        <app-gallery-search-field
-                          class="d-inline-block"
+                        <app-gallery-search-field class="d-inline-block"
                           [(ngModel)]="link.SearchQuery"
                           [name]="'link_s_'+idName+i"
                           [id]="'link_s_'+idName+i"
                           (change)="onChange($event)"
-                          placeholder="Search Query">
-                        </app-gallery-search-field>
+                          placeholder="Search Query" />
                       }
                     </div>
                   }
@@ -454,7 +435,7 @@
                     <button [disabled]="state.value.length == 1" (click)="remove(i)"
                       [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                       class="btn float-end">
-                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                     </button>
                   </div>
                 </div>
@@ -463,7 +444,7 @@
                 <div class="col pe-0">
                   <button class="btn btn-primary float-end"
                     (click)="AddNew()">
-                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add Link</span>
                   </button>
                 </div>
@@ -524,7 +505,7 @@
                       (click)="remove(i)"
                       [ngClass]="(state.value.length > 1  || state.tags.uiOptional)? 'btn-danger':'btn-secondary'"
                       class="btn float-end">
-                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                     </button>
                   </div>
                 </div>
@@ -534,7 +515,7 @@
                   <button class="btn btn-primary float-end"
                     [disabled]="state.readonly"
                     (click)="AddNew()">
-                    <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                    <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add</span>
                   </button>
                 </div>
@@ -542,27 +523,23 @@
             </div>
           }
           @case ('DirectorySearchConfig-Array') {
-            <app-settings-directory-search-list
-              class="w-100"
+            <app-settings-directory-search-list class="w-100"
               [list]="state.value"
               [idName]="idName"
               [disabled]="state.readonly"
               [newItem]="newDirectorySearch"
-              (changed)="onChange(null)">
-            </app-settings-directory-search-list>
+              (changed)="onChange(null)" />
           }
           @case ('ClientSortingConfig-Array') {
             @for (_ of state.value; track $index; let i = $index) {
               <div class="row col-12 mt-1 m-0 p-0">
                 <div class="col p-0">
-                  <app-settings-entry-sorting-method
-                    class="w-100"
+                  <app-settings-entry-sorting-method class="w-100"
                     [(ngModel)]="state.value[i]"
                     [sortingByEnum]="SortByTypes"
                     [id]="'list_'+idName+i"
                     [name]="'list_'+idName+i"
-                    (ngModelChange)="onChange($event)">
-                  </app-settings-entry-sorting-method>
+                    (ngModelChange)="onChange($event)" />
                 </div>
                 <ng-container>
                   <div class="col-auto pe-0">
@@ -571,7 +548,7 @@
                       [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                       [id]="'list_btn_'+idName+i"
                       [name]="'list_btn_'+idName+i" (click)="remove(i)">
-                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                     </button>
                   </div>
                 </ng-container>
@@ -583,7 +560,7 @@
                   [id]="'btn_add_'+idName"
                   [name]="'btn_add_'+idName"
                   (click)="AddNew()">
-                  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                  <ng-icon name="ionAddOutline" class="me-1" />
                   <span i18n>Add</span>
                 </button>
               </div>
@@ -613,7 +590,7 @@
                       [ngClass]="state.value.length > 1? 'btn-danger':'btn-secondary'"
                       [id]="'list_btn_'+idName+i"
                       [name]="'list_btn_'+idName+i" (click)="remove(i)">
-                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title></ng-icon>
+                      <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                     </button>
                   </div>
                 </ng-container>
@@ -625,7 +602,7 @@
                   [id]="'btn_add_'+idName"
                   [name]="'btn_add_'+idName"
                   (click)="AddNew()">
-                  <ng-icon name="ionAddOutline" class="me-1"></ng-icon>
+                  <ng-icon name="ionAddOutline" class="me-1" />
                   <span i18n>Add</span>
                 </button>
               </div>
@@ -640,7 +617,7 @@
               container="body"
               [popover]="popTemplate"
               class="text-warning warning-icon ms-2">
-              <ng-icon name="ionWarningOutline"></ng-icon>
+              <ng-icon name="ionWarningOutline" />
             </span>
           </div>
         }
@@ -648,7 +625,7 @@
       @if (settingsService.configStyle == ConfigStyle.full) {
         <small class="form-text text-muted">
           @if (experimental) {
-            <ng-icon name="ionWarningOutline"></ng-icon>
+            <ng-icon name="ionWarningOutline" />
             [<span i18n>Experimental</span>]
           }
           @if (description) {<ng-container>{{description}} </ng-container>}
@@ -663,12 +640,12 @@
           }
           @if (state.tags?.uiResetNeeded?.db && !isOriginal) {
             <br/>
-            <ng-icon name="ionWarningOutline"></ng-icon>
+            <ng-icon name="ionWarningOutline" />
             <span i18n>Reset database after changing this settings!</span>
           }
           @if (state.tags?.uiResetNeeded?.server && !isOriginal) {
             <br/>
-            <ng-icon name="ionWarningOutline"></ng-icon>
+            <ng-icon name="ionWarningOutline" />
             <span i18n>Restart server after changing this settings!</span>
           }
         </small>

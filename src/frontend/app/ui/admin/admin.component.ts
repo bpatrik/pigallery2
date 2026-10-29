@@ -26,7 +26,7 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
 @Component({
     selector: 'app-admin',
     templateUrl: './admin.component.html',
-    styleUrls: ['./admin.component.css'],
+    styleUrl: './admin.component.css',
     imports: [
     FrameComponent,
     PopoverDirective,

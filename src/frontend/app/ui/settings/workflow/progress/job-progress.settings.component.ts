@@ -11,7 +11,7 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
 @Component({
     selector: 'app-settings-job-progress',
     templateUrl: './job-progress.settings.component.html',
-    styleUrls: ['./job-progress.settings.component.css'],
+    styleUrl: './job-progress.settings.component.css',
     imports: [
     NgIconComponent,
     FormsModule,
