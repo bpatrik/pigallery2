@@ -10,7 +10,7 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
 @Component({
     selector: 'app-gallery-search-query-builder',
     templateUrl: './query-builder.gallery.component.html',
-    styleUrls: ['./query-builder.gallery.component.css'],
+    styleUrl: './query-builder.gallery.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,

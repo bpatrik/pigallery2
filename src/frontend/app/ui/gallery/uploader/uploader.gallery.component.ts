@@ -6,7 +6,7 @@ import {UploaderService} from './uploader.service';
 @Component({
   selector: 'app-gallery-uploader',
   templateUrl: './uploader.gallery.component.html',
-  styleUrls: ['./uploader.gallery.component.css'],
+  styleUrl: './uploader.gallery.component.css',
   imports: [
     NgIconComponent,
     NgStyle

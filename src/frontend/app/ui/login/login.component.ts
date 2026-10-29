@@ -13,7 +13,7 @@ import {NgIconComponent} from '@ng-icons/core';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+  styleUrl: './login.component.css',
   imports: [
     LanguageComponent,
     IconComponent,

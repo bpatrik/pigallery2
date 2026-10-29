@@ -23,7 +23,7 @@ interface GroupedDuplicate {
 @Component({
     selector: 'app-duplicate',
     templateUrl: './duplicates.component.html',
-    styleUrls: ['./duplicates.component.css'],
+    styleUrl: './duplicates.component.css',
     imports: [
     FrameComponent,
     RouterLink,

@@ -20,7 +20,7 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
 @Component({
   selector: 'app-albums',
   templateUrl: './albums.component.html',
-  styleUrls: ['./albums.component.css'],
+  styleUrl: './albums.component.css',
   imports: [
     FrameComponent,
     AlbumComponent,

@@ -25,7 +25,7 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
 @Component({
   selector: 'app-settings-users',
   templateUrl: './users.component.html',
-  styleUrls: ['./users.component.css'],
+  styleUrl: './users.component.css',
   imports: [FormsModule, NgClass, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
 })
 export class UsersComponent implements OnInit {

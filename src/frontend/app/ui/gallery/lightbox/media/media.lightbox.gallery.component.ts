@@ -9,7 +9,7 @@ import {LightboxService} from '../lightbox.service';
 
 @Component({
   selector: 'app-gallery-lightbox-media',
-  styleUrls: ['./media.lightbox.gallery.component.css'],
+  styleUrl: './media.lightbox.gallery.component.css',
   templateUrl: './media.lightbox.gallery.component.html',
   imports: []
 })

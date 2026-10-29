@@ -19,7 +19,7 @@ import {Config} from '../../../../../common/config/public/Config';
 @Component({
     selector: 'app-gallery-photo-frame-builder',
     templateUrl: './photo-frame-builder.gallery.component.html',
-    styleUrls: ['./photo-frame-builder.gallery.component.css'],
+    styleUrl: './photo-frame-builder.gallery.component.css',
     imports: [
     NgIconComponent,
     FormsModule,

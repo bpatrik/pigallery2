@@ -16,7 +16,7 @@ import {Router} from '@angular/router';
 @Component({
   selector: 'app-gallery-map',
   templateUrl: './map.gallery.component.html',
-  styleUrls: ['./map.gallery.component.css'],
+  styleUrl: './map.gallery.component.css',
   imports: [GalleryMapLightboxComponent, LeafletModule]
 })
 export class GalleryMapComponent implements OnChanges, IRenderable {

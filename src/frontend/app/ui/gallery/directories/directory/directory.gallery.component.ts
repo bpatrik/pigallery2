@@ -13,7 +13,7 @@ import { IconComponent } from '../../../../icon.component';
 @Component({
     selector: 'app-gallery-directory',
     templateUrl: './directory.gallery.component.html',
-    styleUrls: ['./directory.gallery.component.css'],
+    styleUrl: './directory.gallery.component.css',
     imports: [
     RouterLink,
     IconComponent

@@ -60,7 +60,7 @@ export interface RecursiveState extends ConfigState {
 @Component({
   selector: 'app-settings-template',
   templateUrl: './template.component.html',
-  styleUrls: ['./template.component.css'],
+  styleUrl: './template.component.css',
   imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {

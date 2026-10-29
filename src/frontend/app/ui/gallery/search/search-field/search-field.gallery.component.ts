@@ -13,7 +13,7 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
 @Component({
   selector: 'app-gallery-search-field',
   templateUrl: './search-field.gallery.component.html',
-  styleUrls: ['./search-field.gallery.component.css'],
+  styleUrl: './search-field.gallery.component.css',
   providers: [
     AutoCompleteService,
     {

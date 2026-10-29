@@ -8,7 +8,7 @@ import { PopoverDirective } from 'ngx-bootstrap/popover';
 @Component({
     selector: 'app-duplicates-photo',
     templateUrl: './photo.duplicates.component.html',
-    styleUrls: ['./photo.duplicates.component.css'],
+    styleUrl: './photo.duplicates.component.css',
     imports: [PopoverDirective]
 })
 export class DuplicatesPhotoComponent implements OnInit, OnDestroy {

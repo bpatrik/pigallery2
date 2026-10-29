@@ -3,8 +3,7 @@ import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryParserService} from '../ui/gallery/search/search-query-parser.service';
 
 @Pipe({
-    name: 'searchQuery',
-    standalone: true
+    name: 'searchQuery'
 })
 export class StringifySearchQuery implements PipeTransform {
   constructor(private searchQueryParserService: SearchQueryParserService) {

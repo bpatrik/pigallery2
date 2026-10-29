@@ -20,7 +20,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 @Component({
     selector: 'app-gallery-random-query-builder',
     templateUrl: './random-query-builder.gallery.component.html',
-    styleUrls: ['./random-query-builder.gallery.component.css'],
+    styleUrl: './random-query-builder.gallery.component.css',
     imports: [
         NgIconComponent,
         FormsModule,

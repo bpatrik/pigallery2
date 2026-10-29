@@ -31,7 +31,7 @@ export enum LightboxStates {
 
 @Component({
   selector: 'app-gallery-lightbox',
-  styleUrls: ['./lightbox.gallery.component.css'],
+  styleUrl: './lightbox.gallery.component.css',
   templateUrl: './lightbox.gallery.component.html',
   imports: [
     GalleryLightboxMediaComponent,

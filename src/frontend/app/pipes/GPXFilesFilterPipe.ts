@@ -3,8 +3,7 @@ import {FileDTO} from '../../../common/entities/FileDTO';
 import {Config} from '../../../common/config/public/Config';
 
 @Pipe({
-    name: 'gpxFiles',
-    standalone: true,
+    name: 'gpxFiles'
 })
 export class GPXFilesFilterPipe implements PipeTransform {
   transform(metaFiles: FileDTO[]): FileDTO[] | null {

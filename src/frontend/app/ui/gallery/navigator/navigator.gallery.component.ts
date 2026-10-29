@@ -30,7 +30,7 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 
 @Component({
   selector: 'app-gallery-navbar',
-  styleUrls: ['./navigator.gallery.component.css'],
+  styleUrl: './navigator.gallery.component.css',
   templateUrl: './navigator.gallery.component.html',
   imports: [
     RouterLink,

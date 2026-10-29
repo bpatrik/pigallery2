@@ -23,7 +23,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 @Component({
   selector: 'app-gallery-search',
   templateUrl: './search.gallery.component.html',
-  styleUrls: ['./search.gallery.component.css'],
+  styleUrl: './search.gallery.component.css',
   providers: [AutoCompleteService],
   imports: [
     FormsModule,

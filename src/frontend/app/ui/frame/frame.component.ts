@@ -29,7 +29,7 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 @Component({
   selector: 'app-frame',
   templateUrl: './frame.component.html',
-  styleUrls: ['./frame.component.css'],
+  styleUrl: './frame.component.css',
   encapsulation: ViewEncapsulation.Emulated,
   imports: [
     LoadingBarModule,

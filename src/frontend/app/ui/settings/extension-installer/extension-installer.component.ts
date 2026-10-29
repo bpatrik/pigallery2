@@ -10,7 +10,7 @@ import { NgIconComponent } from '@ng-icons/core';
 @Component({
     selector: 'app-extension-installer',
     templateUrl: './extension-installer.component.html',
-    styleUrls: ['./extension-installer.component.css'],
+    styleUrl: './extension-installer.component.css',
     imports: [NgIconComponent, ModalDirective]
 })
 export class ExtensionInstallerComponent {

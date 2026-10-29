@@ -9,7 +9,7 @@ import { NgIconComponent } from '@ng-icons/core';
 @Component({
     selector: 'app-language',
     templateUrl: './language.component.html',
-    styleUrls: ['./language.component.css'],
+    styleUrl: './language.component.css',
     imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,

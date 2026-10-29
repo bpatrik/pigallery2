@@ -3,8 +3,7 @@ import {FileDTO} from '../../../common/entities/FileDTO';
 import {MDFileDTO} from '../../../common/entities/MDFileDTO';
 
 @Pipe({
-    name: 'mdFiles',
-    standalone: true
+    name: 'mdFiles'
 })
 export class MDFilesFilterPipe implements PipeTransform {
   transform(metaFiles: FileDTO[]): MDFileDTO[] | null {
