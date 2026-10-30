@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {ConfigMap, ConfigProperty, IConfigMap, SubConfigClass} from 'typeconfig/common';
+import {ConfigMap, ConfigProperty, GenericConfigType, IConfigMap, SubConfigClass} from 'typeconfig/common';
 import {ClientExtensionsConfig, ConfigPriority, TAGS} from '../../public/ClientConfig';
-import {GenericConfigType} from 'typeconfig/src/GenericConfigType';
 
 declare let $localize: (s: TemplateStringsArray) => string;
 

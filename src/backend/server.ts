@@ -17,7 +17,7 @@ import {PhotoProcessing} from './model/fileaccess/fileprocessing/PhotoProcessing
 import {Event} from '../common/event/Event';
 import {QueryParams} from '../common/QueryParams';
 import {ConfigClassBuilder} from 'typeconfig/node';
-import {ConfigClassOptions} from 'typeconfig/src/decorators/class/IConfigClass';
+import {ConfigClassOptions} from 'typeconfig/common';
 import {ServerConfig} from '../common/config/private/PrivateConfig';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports

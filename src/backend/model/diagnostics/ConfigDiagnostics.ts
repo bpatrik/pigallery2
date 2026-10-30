@@ -31,7 +31,7 @@ import {
 import {SearchQueryTypes, TextSearch,} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {JobRepository} from '../jobs/JobRepository';
-import {ConfigClassBuilder} from '../../../../node_modules/typeconfig/node';
+import {ConfigClassBuilder} from 'typeconfig/node';
 import {Config} from '../../../common/config/private/Config';
 import {SupportedFormats} from '../../../common/SupportedFormats';
 import {MediaRendererInput, PhotoWorker, ThumbnailSourceType} from '../fileaccess/PhotoWorker';

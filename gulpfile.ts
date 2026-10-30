@@ -13,7 +13,7 @@ import * as child_process from 'child_process';
 import * as jeditor from 'gulp-json-editor';
 import {XLIFF} from 'xlf-google-translate';
 import {PrivateConfigClass} from './src/common/config/private/PrivateConfigClass';
-import {ConfigClassBuilder} from 'typeconfig/src/decorators/builders/ConfigClassBuilder';
+import {ConfigClassBuilder} from 'typeconfig/node';
 import {PG2ConfMap, ServerPG2ConfMap} from './src/common/PG2ConfMap';
 
 const execPr = util.promisify(child_process.exec);

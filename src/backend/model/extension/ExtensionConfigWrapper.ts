@@ -1,10 +1,9 @@
-import {IConfigClass} from 'typeconfig/common';
+import {ConfigClassOptions, IConfigClass} from 'typeconfig/common';
 import {PrivateConfigClass} from '../../../common/config/private/PrivateConfigClass';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {ExtensionConfigTemplateLoader} from './ExtensionConfigTemplateLoader';
 import {NotificationManager} from '../NotifocationManager';
 import {ServerConfig} from '../../../common/config/private/PrivateConfig';
-import {ConfigClassOptions} from 'typeconfig/src/decorators/class/IConfigClass';
 import * as fs from 'fs';
 
 
