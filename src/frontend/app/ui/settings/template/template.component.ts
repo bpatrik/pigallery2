@@ -9,7 +9,7 @@ import {JobDTOUtils} from '../../../../../common/entities/job/JobDTO';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {FormsModule, UntypedFormControl} from '@angular/forms';
 import {Subscription} from 'rxjs';
-import {IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
+import {IWebConfigClassPrivate} from 'typeconfig/common';
 import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
 import {UserRoles} from '../../../../../common/entities/UserDTO';

@@ -1,6 +1,5 @@
 import {ClientConfig} from './ClientConfig';
-import {WebConfigClass} from 'typeconfig/src/decorators/class/WebConfigClass';
-import {WebConfigClassBuilder} from 'typeconfig/src/decorators/builders/WebConfigClassBuilder';
+import {WebConfigClass, WebConfigClassBuilder} from 'typeconfig/web';
 import {IWebConfigClass} from 'typeconfig/common';
 
 /**
