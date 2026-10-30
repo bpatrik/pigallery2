@@ -12,6 +12,8 @@ import {TAGS} from '../../common/config/public/ClientConfig';
 import {ExtensionConfigWrapper} from '../model/extension/ExtensionConfigWrapper';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
 import {Config} from '../../common/config/private/Config';
+import {ProjectPath} from '../ProjectPath';
+import * as path from 'path';
 
 const forcedDebug = process.env['NODE_ENV'] === 'debug';
 
@@ -84,18 +86,40 @@ export class RenderingMWs {
     return RenderingMWs.renderMessage(res, rs);
   }
 
+  /**
+   * Media that keep their content under the same URL (thumbnails, previews,
+   * originals). sendFile takes maxAge in ms.
+   */
   public static renderFile(
     req: Request,
     res: Response,
     next: NextFunction
   ): void {
-    if (!req.resultPipe) {
-      return next();
-    }
-    return res.sendFile(req.resultPipe as string, {
-      maxAge: 31536000,
-      dotfiles: 'allow',
-    });
+    return RenderingMWs.sendFile(req, res, next, null);
+  }
+
+  /**
+   * Files that can change under the same URL (best fit video or GPX once
+   * converted, person thumbnail after reindexing): the browser revalidates
+   * with the ETag, so an unchanged file costs a 304.
+   */
+  public static renderFileNoCache(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return RenderingMWs.sendFile(req, res, next, 'no-cache');
+  }
+
+  /**
+   * Files that differ on every request (random photo).
+   */
+  public static renderFileNoStore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return RenderingMWs.sendFile(req, res, next, 'no-store');
   }
 
   public static renderOK(
@@ -166,5 +190,31 @@ export class RenderingMWs {
   protected static renderMessage<T>(res: Response, content: T): void {
     const message = new Message<T>(null, content);
     res.json(message);
+  }
+
+  private static sendFile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    cacheControl: 'no-cache' | 'no-store' | null
+  ): void {
+    if (!req.resultPipe) {
+      return next();
+    }
+    // The routes already reject '..' in the path params; this keeps sendFile
+    // within the media and temp (thumbnails, transcoded files) folders anyway.
+    const filePath = path.resolve(req.resultPipe as string);
+    if (!filePath.startsWith(path.resolve(ProjectPath.ImageFolder) + path.sep) &&
+      !filePath.startsWith(path.resolve(ProjectPath.TempFolder) + path.sep)) {
+      return next(new ErrorDTO(ErrorCodes.PATH_ERROR, 'File is outside of the media and temp folders'));
+    }
+    if (cacheControl) {
+      res.set('Cache-Control', cacheControl);
+    }
+    return res.sendFile(filePath, {
+      cacheControl: !cacheControl,
+      maxAge: '7d',
+      dotfiles: 'allow',
+    });
   }
 }

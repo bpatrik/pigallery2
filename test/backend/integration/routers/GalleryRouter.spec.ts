@@ -131,6 +131,8 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
 
       (result.should as any).have.status(200);
       expect(result.body).to.be.instanceof(Buffer);
+      // served from the original until the transcoded file exists
+      expect(result.header['cache-control']).to.equal('no-cache');
     });
 
 
@@ -179,6 +181,8 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
 
       (result.should as any).have.status(200);
       expect(result.body).to.be.instanceof(Buffer);
+      // sendFile maxAge is in ms: a week, not 604800 ms
+      expect(result.header['cache-control']).to.equal('public, max-age=604800');
     });
   });
 
