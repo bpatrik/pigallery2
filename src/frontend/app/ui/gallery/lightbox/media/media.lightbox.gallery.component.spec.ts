@@ -4,6 +4,8 @@ import {GalleryLightboxMediaComponent} from './media.lightbox.gallery.component'
 import {LightboxService} from '../lightbox.service';
 import {GridMedia} from '../../grid/GridMedia';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../../icons';
 
 class MockLightboxService {
   loopVideos = false;
@@ -36,6 +38,7 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryLightboxMediaComponent],
       providers: [
+        provideIcons(appIcons),
         {provide: LightboxService, useClass: MockLightboxService},
         {
           provide: DomSanitizer,

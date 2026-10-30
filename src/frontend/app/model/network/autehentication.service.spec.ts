@@ -139,10 +139,12 @@ describe('AuthenticationService', () => {
       async (authService: AuthenticationService, userService: UserService, shareService: ShareService) => {
         const users = await setUpLogout(authService, userService, shareService, {sharingKey: 'key', passwordProtected: true});
         (userService.getSessionUser as jasmine.Spy).and.returnValue(Promise.reject('not authenticated'));
+        spyOn(console, 'error');
         await authService.logout();
         expect(userService.logout).toHaveBeenCalled();
         expect(users).toContain(null);
         expect(authService.user.value).toBe(null);
+        expect(console.error).toHaveBeenCalledWith('not authenticated');
       }
     ));
 
@@ -166,8 +168,10 @@ describe('AuthenticationService', () => {
         await setUpLogout(authService, userService, shareService, {sharingKey: 'key', passwordProtected: true});
         (userService.getSessionUser as jasmine.Spy).and.returnValue(Promise.reject('not authenticated'));
         spyOn(shareService, 'dropSharing').and.callThrough();
+        spyOn(console, 'error');
         await authService.logout();
         expect(shareService.dropSharing).not.toHaveBeenCalled();
+        expect(console.error).toHaveBeenCalledWith('not authenticated');
       }
     ));
   });

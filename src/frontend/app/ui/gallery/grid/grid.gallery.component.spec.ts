@@ -15,6 +15,8 @@ import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {provideHttpClient} from '@angular/common/http';
 import {BlogService, GroupedMarkdown} from '../blog/blog.service';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../icons';
 
 class MockQueryService {
 }
@@ -50,6 +52,7 @@ describe('GalleryGridComponent', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryGridComponent],
       providers: [
+        provideIcons(appIcons),
         ChangeDetectorRef, Router,
         {provide: ContentService, useClass: MockContentService},
         {provide: QueryService, useClass: MockQueryService},

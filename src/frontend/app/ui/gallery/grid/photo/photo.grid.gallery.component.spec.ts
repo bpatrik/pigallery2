@@ -7,6 +7,8 @@ import {ThumbnailManagerService} from '../../thumbnailManager.service';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {ExtensionService} from '../../../../model/extension.service';
 import {MediaButtonModalService} from './media-button-modal/media-button-modal.service';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../../icons';
 
 class MockThumbnailManagerService {
   getThumbnail() {
@@ -61,6 +63,7 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryPhotoComponent],
       providers: [
+        provideIcons(appIcons),
         {provide: ThumbnailManagerService, useClass: MockThumbnailManagerService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
         {provide: ExtensionService, useClass: MockExtensionService},
@@ -103,6 +106,7 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryPhotoComponent],
       providers: [
+        provideIcons(appIcons),
         {provide: ThumbnailManagerService, useClass: MockThumbnailManagerService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
         {provide: ExtensionService, useClass: MockExtensionService},

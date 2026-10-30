@@ -40,8 +40,10 @@ describe('NavigationService', () => {
     it('should navigate to error, if the sharing info is not available', async () => {
       // e.g.: logging out of a sharing that is not valid anymore
       const {router, service} = setUp(null);
+      spyOn(console, 'error');
       await service.toLogin();
       expect(router.navigate).toHaveBeenCalledWith(['error']);
+      expect(console.error).toHaveBeenCalledWith('Navigating to share login with an invalid sharing');
     });
 
     it('should navigate to login without sharing', async () => {
@@ -72,8 +74,10 @@ describe('NavigationService', () => {
     it('should fall back to the gallery for a search link without a query (#1176)', async () => {
       Config.Gallery.NavBar.links = [new NavigationLinkConfig(NavigationLinkTypes.search)];
       const {router, service} = setUp(null, false);
+      spyOn(console, 'error');
       await service.toDefault();
       expect(router.navigate).toHaveBeenCalledOnceWith(['gallery', '']);
+      expect(console.error).toHaveBeenCalledWith('First navbar link is a search without a query, falling back to the gallery.');
     });
   });
 });

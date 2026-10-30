@@ -19,6 +19,8 @@ import {AuthenticationService} from '../../../model/network/authentication.servi
 import {GalleryCacheService} from '../cache.gallery.service';
 import {Utils} from '../../../../../common/Utils';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../icons';
 
 // Mock classes
 class MockFullScreenService {
@@ -171,6 +173,7 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryLightboxComponent],
       providers: [
+        provideIcons(appIcons),
         ChangeDetectorRef,
         {provide: FullScreenService, useClass: MockFullScreenService},
         {provide: OverlayService, useClass: MockOverlayService},
