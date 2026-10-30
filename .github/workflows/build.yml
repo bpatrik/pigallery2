@@ -26,9 +26,9 @@ jobs:
         mysql root password: 'password'
         mysql user: 'user'
         mysql password: 'password'
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
         node-version: ${{ matrix.node-version }}
 
@@ -80,10 +80,10 @@ jobs:
     steps:
       -
         name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       -
         name: Setup Node.js for use with actions
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: 22
       -
@@ -112,7 +112,7 @@ jobs:
             platforms: linux/amd64,linux/arm64
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Download Release Artifact
         uses: actions/download-artifact@v8
         with:
@@ -120,9 +120,9 @@ jobs:
           path: pigallery2-release
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and Verify Platforms
         uses: docker/build-push-action@v7
@@ -150,7 +150,7 @@ jobs:
             platforms: linux/amd64,linux/arm64
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Download Release Artifact
         uses: actions/download-artifact@v8
         with:
@@ -158,12 +158,12 @@ jobs:
           path: pigallery2-release
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           username: ${{ secrets.REGISTRY_USERNAME }}
           password: ${{ secrets.REGISTRY_PASSWORD }}
