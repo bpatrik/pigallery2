@@ -53,7 +53,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
       if (!params[QueryParams.gallery.search.query]) {
         return;
       }
-      const searchQuery = JSON.parse(params[QueryParams.gallery.search.query]);
+      const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
       if (searchQuery) {
         this.searchQueryDTO = searchQuery;
         this.onQueryChange();
