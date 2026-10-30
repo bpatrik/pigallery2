@@ -6,6 +6,7 @@ import {VideoDTO, VideoMetadata,} from '../../../../../../common/entities/VideoD
 import {Utils} from '../../../../../../common/Utils';
 import {QueryService} from '../../../../model/query.service';
 import {MapService} from '../../map/map.service';
+import {MarkerFactory} from '../../map/MarkerFactory';
 import {
   ANDSearchQuery,
   type DistanceSearch, type DateSearch,
@@ -62,7 +63,7 @@ export class InfoPanelLightboxComponent implements OnInit {
       marker({
         lat: this.PositionData.GPSData.latitude,
         lng: this.PositionData.GPSData.longitude,
-      } as LatLngLiteral),
+      } as LatLngLiteral, {icon: MarkerFactory.defIcon}),
     ];
   });
 

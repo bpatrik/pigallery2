@@ -56,10 +56,15 @@
               [(open)]="blogOpen" />
             }
             @if (ShowMap) {
-              <app-gallery-map class="rounded"
-                [class.rounded-start-0]="ShowMarkDown"
-                [photos]="directoryContent?.mediaGroups | photosOnly"
-              [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
+              <!-- Leaflet loads only when the map is visible -->
+              @defer (on viewport) {
+                <app-gallery-map class="rounded"
+                  [class.rounded-start-0]="ShowMarkDown"
+                  [photos]="directoryContent?.mediaGroups | photosOnly"
+                [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
+              } @placeholder {
+                <div class="gallery-map-placeholder"></div>
+              }
             }
           </div>
         }

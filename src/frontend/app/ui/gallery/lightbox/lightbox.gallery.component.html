@@ -49,9 +49,12 @@
   </div>
 
   @if (activePhoto && infoPanelVisible) {
-    <app-info-panel id="info-panel"
-      [style.width.px]="infoPanelWidth"
-      [media]="activePhoto.gridMedia().media"
-      (closed)="hideInfoPanel()" />
+    <!-- the info panel has a map, so it loads leaflet -->
+    @defer (on immediate) {
+      <app-info-panel id="info-panel"
+        [style.width.px]="infoPanelWidth"
+        [media]="activePhoto.gridMedia().media"
+        (closed)="hideInfoPanel()" />
+    }
   }
 </div>

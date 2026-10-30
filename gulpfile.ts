@@ -448,43 +448,42 @@ gulp.task('generate-man', async (cb): Promise<void> => {
 });
 
 // this is a workaround for bundle hash is not considering localization
-// so all the js files would have the same name and caching would not be possible to use
-// prefixing main.js with localization to force reload
+// so all the js files would have the same name in every locale. All locales are served from the same urls,
+// so the browser cache would mix the languages.
+// Prefixing every js file (lazy chunks and polyfills too) with the locale to keep them apart.
 // see: https://github.com/angular/angular-cli/issues/17416
 gulp.task('localize-bundles', async (cb): Promise<void> => {
-  const bundlesToUpdate = ['main'];
   const foldersToCheck = ['./dist', './release/dist'];
-  for (let f = 0; f < foldersToCheck.length; ++f) {
-    const folder = foldersToCheck[f];
+  for (const folder of foldersToCheck) {
     if (!fs.existsSync(folder)) {
       continue;
     }
-    const builds = fs.readdirSync(folder);
-
-    for (let i = 0; i < builds.length; ++i) {
-      const dir = path.join(folder, builds[i]);
+    for (const locale of fs.readdirSync(folder)) {
+      const dir = path.join(folder, locale);
       // the builder also writes files (e.g. prerendered-routes.json) next to the locale folders
       if (!fs.statSync(dir).isDirectory()) {
         continue;
       }
-      const indexhtmlPath = path.join(dir, 'index.html');
-
-      let indexhtml = fs.readFileSync(indexhtmlPath, 'utf8');
-
-      for (let j = 0; j < bundlesToUpdate.length; ++j) {
-
-        const rgx = new RegExp('<script src="' + bundlesToUpdate[j], 'g');
-        indexhtml = indexhtml.replace(rgx, '<script src="' + builds[i] + '.' + bundlesToUpdate[j]);
-        fs.readdirSync(folder);
-
-        const fileToRename = fs.readdirSync(dir)
-          .find(fl => fl.startsWith(bundlesToUpdate[j]) && fl.endsWith('js'));
-        if (!fileToRename) {
-          continue;
-        }
-        fs.renameSync(path.join(dir, fileToRename), path.join(dir, builds[i] + '.' + fileToRename));
+      const bundles = fs.readdirSync(dir)
+        .filter(fl => fl.endsWith('.js') && !fl.startsWith(locale + '.'));
+      if (bundles.length === 0) {
+        continue;
       }
-      fs.writeFileSync(indexhtmlPath, indexhtml, 'utf8');
+      // the bundles are referenced after a quote (index.html) or after './' (imports between the bundles)
+      const rgx = new RegExp('(["\'/])(' + bundles.map(b => b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+      const filesToUpdate = fs.readdirSync(dir)
+        .filter(fl => fl.endsWith('.js') || fl === 'index.html');
+      for (const file of filesToUpdate) {
+        const filePath = path.join(dir, file);
+        const content = fs.readFileSync(filePath, 'utf8');
+        const updated = content.replace(rgx, '$1' + locale + '.$2');
+        if (updated !== content) {
+          fs.writeFileSync(filePath, updated, 'utf8');
+        }
+      }
+      for (const bundle of bundles) {
+        fs.renameSync(path.join(dir, bundle), path.join(dir, locale + '.' + bundle));
+      }
     }
   }
   cb();

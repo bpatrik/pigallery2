@@ -1,4 +1,4 @@
-import {DivIcon, setOptions} from 'leaflet';
+import {DivIcon, Marker, setOptions} from 'leaflet';
 
 export interface SvgIconOptions {
   color?: string;
@@ -35,3 +35,6 @@ export class MarkerFactory {
   }
 
 }
+
+// Default icon of every leaflet marker. Set here, so leaflet loads only with the map code.
+Marker.prototype.options.icon = MarkerFactory.defIcon;

@@ -9,8 +9,6 @@ import {provideIcons} from '@ng-icons/core';
 import {provideToastr} from 'ngx-toastr';
 import {provideMarkdown} from 'ngx-markdown';
 import {AppComponent} from './app/app.component';
-import {Marker} from 'leaflet';
-import {MarkerFactory} from './app/ui/gallery/map/MarkerFactory';
 import {appIcons} from './app/icons';
 
 @Injectable()
@@ -42,8 +40,6 @@ export class CustomUrlSerializer implements UrlSerializer {
       .replace(/%29/g, ')');
   }
 }
-
-Marker.prototype.options.icon = MarkerFactory.defIcon;
 
 bootstrapApplication(AppComponent, {
   providers: [

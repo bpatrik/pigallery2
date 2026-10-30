@@ -3,15 +3,9 @@ import {
   UrlMatchResult,
   UrlSegment,
 } from '@angular/router';
-import { LoginComponent } from './ui/login/login.component';
 import { GalleryComponent } from './ui/gallery/gallery.component';
-import { AdminComponent } from './ui/admin/admin.component';
-import { ShareLoginComponent } from './ui/sharelogin/share-login.component';
 import { QueryParams } from '../../common/QueryParams';
-import { DuplicateComponent } from './ui/duplicates/duplicates.component';
-import { FacesComponent } from './ui/faces/faces.component';
 import { authGuard } from './model/network/helper/auth.guard';
-import { AlbumsComponent } from './ui/albums/albums.component';
 import { ErrorComponent } from './ui/error/error.component';
 
 export function galleryMatcherFunction(
@@ -56,30 +50,30 @@ export function galleryMatcherFunction(
 export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () => import('./ui/login/login.component').then(m => m.LoginComponent),
   },
   {
     path: 'shareLogin',
-    component: ShareLoginComponent,
+    loadComponent: () => import('./ui/sharelogin/share-login.component').then(m => m.ShareLoginComponent),
   },
   {
     path: 'admin',
-    component: AdminComponent,
+    loadComponent: () => import('./ui/admin/admin.component').then(m => m.AdminComponent),
     canActivate: [authGuard],
   },
   {
     path: 'duplicates',
-    component: DuplicateComponent,
+    loadComponent: () => import('./ui/duplicates/duplicates.component').then(m => m.DuplicateComponent),
     canActivate: [authGuard],
   },
   {
     path: 'albums',
-    component: AlbumsComponent,
+    loadComponent: () => import('./ui/albums/albums.component').then(m => m.AlbumsComponent),
     canActivate: [authGuard],
   },
   {
     path: 'faces',
-    component: FacesComponent,
+    loadComponent: () => import('./ui/faces/faces.component').then(m => m.FacesComponent),
     canActivate: [authGuard],
   },
   {
