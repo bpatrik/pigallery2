@@ -33,7 +33,6 @@ import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {JobRepository} from '../jobs/JobRepository';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {Config} from '../../../common/config/private/Config';
-import {SupportedFormats} from '../../../common/SupportedFormats';
 import {MediaRendererInput, PhotoWorker, ThumbnailSourceType} from '../fileaccess/PhotoWorker';
 
 const LOG_TAG = '[ConfigDiagnostics]';
@@ -356,8 +355,6 @@ export class ConfigDiagnostics {
     }
     Logger.silly(LOG_TAG, 'Sharp supports:\n' + text);
     Logger.silly(LOG_TAG, 'Sharp versions:' + JSON.stringify(sharp.versions));
-
-    let removedSome = false;
     let i = config.supportedFormats.length;
     while (i--) {
       const ext = config.supportedFormats[i].toLowerCase();
@@ -383,11 +380,7 @@ export class ConfigDiagnostics {
         Logger.verbose(e);
         Logger.verbose(LOG_TAG, `❌ ${ext} image format tested failed, removing it form config.`);
         config.supportedFormats.splice(i, 1);
-        removedSome = true;
       }
-    }
-    if (removedSome) {
-      SupportedFormats.init();
     }
   }
 
