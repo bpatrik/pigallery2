@@ -56,5 +56,7 @@
         [media]="activePhoto.gridMedia().media"
         (closed)="hideInfoPanel()" />
     }
+  } @error {
+    <app-reload-after-upgrade />
   }
 </div>

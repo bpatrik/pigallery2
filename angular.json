@@ -173,6 +173,15 @@
                 "browser": "",
                 "media": "assets"
               }
+            },
+            "stats": {
+              "localize": false,
+              "statsJson": true,
+              "outputPath": {
+                "base": "dist/en",
+                "browser": "",
+                "media": "assets"
+              }
             }
           }
         },
@@ -197,6 +206,7 @@
           "builder": "@angular/build:karma",
           "options": {
             "karmaConfig": "./karma.conf.js",
+            "watch": false,
             "polyfills": [
               "zone.js",
               "zone.js/testing",

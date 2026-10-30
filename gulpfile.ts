@@ -1,5 +1,6 @@
 import * as gulp from 'gulp';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 import {promises as fsp} from 'fs';
 import * as path from 'path';
 import * as util from 'util';
@@ -451,8 +452,21 @@ gulp.task('generate-man', async (cb): Promise<void> => {
 // so all the js files would have the same name in every locale. All locales are served from the same urls,
 // so the browser cache would mix the languages.
 // Prefixing every js file (lazy chunks and polyfills too) with the locale to keep them apart.
+// The hash in the name is also computed before the translations are inlined, so a release that only changes
+// the translations would keep the names, and browsers would keep the old files (they are cached as immutable).
+// Mixing the translation file and the angular version (locale data) into the hash fixes this.
 // see: https://github.com/angular/angular-cli/issues/17416
 gulp.task('localize-bundles', async (cb): Promise<void> => {
+  const i18n = JSON.parse(fs.readFileSync('./angular.json', 'utf8')).projects.pigallery2.i18n;
+  const angularVersion = JSON.parse(fs.readFileSync('./node_modules/@angular/common/package.json', 'utf8')).version;
+  const getLocaleFingerprint = (locale: string): string => {
+    const hash = crypto.createHash('sha256').update(angularVersion);
+    const translation = i18n.locales[locale]?.translation;
+    if (translation) {
+      hash.update(fs.readFileSync(translation));
+    }
+    return hash.digest('hex');
+  };
   const foldersToCheck = ['./dist', './release/dist'];
   for (const folder of foldersToCheck) {
     if (!fs.existsSync(folder)) {
@@ -469,6 +483,10 @@ gulp.task('localize-bundles', async (cb): Promise<void> => {
       if (bundles.length === 0) {
         continue;
       }
+      const fingerprint = getLocaleFingerprint(locale);
+      // e.g. main-PCUX7IQM.js -> hu.main-1A2B3C4D.js
+      const newNames = new Map(bundles.map(b => [b, locale + '.' + b.replace(/-([A-Z0-9]{8})\.js$/, (m, hash: string) =>
+        '-' + crypto.createHash('sha256').update(fingerprint + hash).digest('hex').substring(0, 8).toUpperCase() + '.js')]));
       // the bundles are referenced after a quote (index.html) or after './' (imports between the bundles)
       const rgx = new RegExp('(["\'/])(' + bundles.map(b => b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
       const filesToUpdate = fs.readdirSync(dir)
@@ -476,13 +494,13 @@ gulp.task('localize-bundles', async (cb): Promise<void> => {
       for (const file of filesToUpdate) {
         const filePath = path.join(dir, file);
         const content = fs.readFileSync(filePath, 'utf8');
-        const updated = content.replace(rgx, '$1' + locale + '.$2');
+        const updated = content.replace(rgx, (m, before: string, bundle: string) => before + newNames.get(bundle));
         if (updated !== content) {
           fs.writeFileSync(filePath, updated, 'utf8');
         }
       }
       for (const bundle of bundles) {
-        fs.renameSync(path.join(dir, bundle), path.join(dir, locale + '.' + bundle));
+        fs.renameSync(path.join(dir, bundle), path.join(dir, newNames.get(bundle)));
       }
     }
   }

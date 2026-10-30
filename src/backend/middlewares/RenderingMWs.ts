@@ -85,7 +85,8 @@ export class RenderingMWs {
   }
 
   /**
-   * For media that practically never changes under the same URL (photos, thumbnails, previews).
+   * For media that rarely changes under the same URL (photos, thumbnails, previews).
+   * Cached for a day only: a photo can be replaced in the folder, a thumbnail regenerated with other settings.
    * private: these are behind authentication, so shared caches (proxies, CDNs) must not store them.
    */
   public static renderFile(
@@ -93,7 +94,7 @@ export class RenderingMWs {
     res: Response,
     next: NextFunction
   ): void {
-    return RenderingMWs.sendFile(req, res, next, 'private, max-age=604800');
+    return RenderingMWs.sendFile(req, res, next, 'private, max-age=86400');
   }
 
   /**

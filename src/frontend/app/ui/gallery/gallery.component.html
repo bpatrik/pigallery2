@@ -64,6 +64,8 @@
                 [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
               } @placeholder {
                 <div class="gallery-map-placeholder"></div>
+              } @error {
+                <app-reload-after-upgrade />
               }
             }
           </div>

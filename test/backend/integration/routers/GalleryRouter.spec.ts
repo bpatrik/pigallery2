@@ -237,14 +237,14 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
     const get = (url: string) => (request.execute(server.Server) as SuperAgentStatic)
       .get(Config.Server.apiPath + url);
 
-    it('should cache photos and thumbnails for a week', async () => {
+    it('should cache photos and thumbnails for a day', async () => {
       const photo = await get('/gallery/content/wild-1-small.jpg');
       (photo.should as any).have.status(200);
-      expect(photo.headers['cache-control']).to.equal('private, max-age=604800');
+      expect(photo.headers['cache-control']).to.equal('private, max-age=86400');
 
       const thumbnail = await get('/gallery/content/wild-1-small.jpg/240');
       (thumbnail.should as any).have.status(200);
-      expect(thumbnail.headers['cache-control']).to.equal('private, max-age=604800');
+      expect(thumbnail.headers['cache-control']).to.equal('private, max-age=86400');
     });
 
     it('should revalidate bestFit video', async () => {

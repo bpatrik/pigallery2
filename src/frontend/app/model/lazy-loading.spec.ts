@@ -1,15 +1,25 @@
 import {TestBed} from '@angular/core/testing';
-import {Route} from '@angular/router';
+import {NavigationError, Route} from '@angular/router';
 import {of} from 'rxjs';
-import {isChunkLoadError, PreloadMarkedRoutes} from './lazy-loading';
+import {
+  isChunkLoadError,
+  PageLoader,
+  PreloadMarkedRoutes,
+  ReloadAfterUpgradeComponent,
+  reloadAfterUpgrade,
+  reloadOnChunkLoadError
+} from './lazy-loading';
+import {Config} from '../../../common/config/public/Config';
 import {AuthenticationService} from './network/authentication.service';
+import {UserRoles} from '../../../common/entities/UserDTO';
 
 describe('PreloadMarkedRoutes', () => {
 
-  const setUp = (authenticated: boolean): PreloadMarkedRoutes => {
+  // role: null if not logged in
+  const setUp = (role: UserRoles): PreloadMarkedRoutes => {
     TestBed.configureTestingModule({
       providers: [
-        {provide: AuthenticationService, useValue: {isAuthenticated: () => authenticated}},
+        {provide: AuthenticationService, useValue: {isAuthorized: (r: UserRoles) => role !== null && role >= r}},
       ]
     });
     return TestBed.inject(PreloadMarkedRoutes);
@@ -21,16 +31,53 @@ describe('PreloadMarkedRoutes', () => {
     return load.calls.any();
   };
 
-  it('should preload the marked routes of a logged in user', () => {
-    expect(preloads(setUp(true), {path: 'albums', data: {preload: true}})).toBeTrue();
+  it('should preload the marked routes of a guest or higher user', () => {
+    expect(preloads(setUp(UserRoles.Guest), {path: 'albums', data: {preload: true}})).toBeTrue();
   });
 
   it('should not preload the routes that are not marked', () => {
-    expect(preloads(setUp(true), {path: 'admin'})).toBeFalse();
+    expect(preloads(setUp(UserRoles.Admin), {path: 'admin'})).toBeFalse();
   });
 
   it('should not preload before the login', () => {
-    expect(preloads(setUp(false), {path: 'albums', data: {preload: true}})).toBeFalse();
+    expect(preloads(setUp(null), {path: 'albums', data: {preload: true}})).toBeFalse();
+  });
+
+  it('should not preload for sharing users', () => {
+    expect(preloads(setUp(UserRoles.LimitedGuest), {path: 'albums', data: {preload: true}})).toBeFalse();
+  });
+});
+
+describe('reloadAfterUpgrade', () => {
+
+  beforeEach(() => {
+    sessionStorage.removeItem('pigallery2-chunk-reload');
+    spyOn(PageLoader, 'assign');
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem('pigallery2-chunk-reload');
+  });
+
+  it('should reload a lazy route that failed to load', () => {
+    reloadOnChunkLoadError(new NavigationError(1, '/albums', new TypeError('Failed to fetch dynamically imported module: x')));
+    expect(PageLoader.assign).toHaveBeenCalledOnceWith(Config.Server.getAppUrl('/albums'));
+  });
+
+  it('should not reload for other navigation errors', () => {
+    reloadOnChunkLoadError(new NavigationError(1, '/albums', new Error('Cannot match any routes')));
+    expect(PageLoader.assign).not.toHaveBeenCalled();
+  });
+
+  it('should reload only once in a while', () => {
+    reloadAfterUpgrade('/a');
+    reloadAfterUpgrade('/b');
+    expect(PageLoader.assign).toHaveBeenCalledOnceWith('/a');
+  });
+
+  it('should reload the page from the @error block of a @defer', () => {
+    TestBed.createComponent(ReloadAfterUpgradeComponent).detectChanges();
+    expect(PageLoader.assign).toHaveBeenCalledOnceWith(location.href);
   });
 });
 
