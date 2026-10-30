@@ -224,15 +224,16 @@ export class PublicRouter {
         Config.Server.svgIcon.items + '</svg>';
     };
 
+    // Icons change with Config.Server.svgIcon under the same URL, so the browser revalidates them with the ETag.
     app.get('/icon.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       res.send(getIcon());
     });
 
 
     app.get('/icon_padding_auto.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       // Use 40% padding: https://w3c.github.io/manifest/#icon-masks
       res.send(getIcon('auto', 0.7));
@@ -240,13 +241,13 @@ export class PublicRouter {
 
 
     app.get('/icon_auto.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       res.send(getIcon('auto'));
     });
 
     app.get('/icon_white.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       res.send(getIcon('white'));
     });
@@ -256,8 +257,9 @@ export class PublicRouter {
       try {
         const p = path.join(ProjectPath.TempFolder, '/icon.png');
         const outP = await PhotoProcessing.renderSVG(Config.Server.svgIcon, p);
+        res.set('Cache-Control', 'no-cache');
         res.sendFile(outP, {
-          maxAge: 31536000,
+          cacheControl: false,
           dotfiles: 'allow',
         });
       } catch (e) {
@@ -269,8 +271,9 @@ export class PublicRouter {
       try {
         const p = path.join(ProjectPath.TempFolder, '/icon_inv.png');
         const outP = await PhotoProcessing.renderSVG(Config.Server.svgIcon, p, 'white');
+        res.set('Cache-Control', 'no-cache');
         res.sendFile(outP, {
-          maxAge: 31536000,
+          cacheControl: false,
           dotfiles: 'allow',
         });
       } catch (e) {
@@ -318,8 +321,19 @@ export class PublicRouter {
         if (!fs.existsSync(file)) {
           return res.sendStatus(404);
         }
+        // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
+        // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
+        if (/-[A-Z0-9]{8}\.[a-z0-9]+$/.test(req.params.file)) {
+          res.sendFile(file, {
+            maxAge: '365d', // number would be in ms
+            immutable: true,
+            dotfiles: 'allow',
+          });
+          return;
+        }
+        res.set('Cache-Control', 'no-cache');
         res.sendFile(file, {
-          maxAge: 31536000,
+          cacheControl: false,
           dotfiles: 'allow',
         });
       };

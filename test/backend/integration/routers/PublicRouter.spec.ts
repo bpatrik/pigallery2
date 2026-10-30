@@ -2,6 +2,7 @@ import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
 import * as fs from 'fs';
+import * as path from 'path';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
@@ -230,6 +231,48 @@ describe('PublicRouter', () => {
     });
   });
 
+
+  describe('Cache-Control', () => {
+    let frontendFolder: string;
+    beforeEach(async () => {
+      await setUp();
+      frontendFolder = ProjectPath.FrontendFolder;
+      ProjectPath.FrontendFolder = path.join(TestHelper.TMP_DIR, 'frontend');
+      const files = ['main-PCUX7IQM.js', 'main.js', 'robots.txt', 'assets/layers-55W3Q4RM.png', 'assets/marker-icon.png'];
+      for (const f of files) {
+        const p = path.join(ProjectPath.FrontendFolder, 'en', f);
+        fs.mkdirSync(path.dirname(p), {recursive: true});
+        fs.writeFileSync(p, f);
+      }
+    });
+    afterEach(async () => {
+      fs.rmSync(ProjectPath.FrontendFolder, {recursive: true, force: true});
+      ProjectPath.FrontendFolder = frontendFolder;
+      await tearDown();
+    });
+
+    const getCacheControl = async (url: string): Promise<string> => {
+      const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+      res.should.have.status(200);
+      return res.header['cache-control'];
+    };
+
+    it('should cache hashed build output for a year', async () => {
+      expect(await getCacheControl('/main-PCUX7IQM.js')).to.equal('public, max-age=31536000, immutable');
+      expect(await getCacheControl('/assets/layers-55W3Q4RM.png')).to.equal('public, max-age=31536000, immutable');
+    });
+
+    it('should revalidate not hashed frontend files', async () => {
+      expect(await getCacheControl('/main.js')).to.equal('no-cache');
+      expect(await getCacheControl('/robots.txt')).to.equal('no-cache');
+      expect(await getCacheControl('/assets/marker-icon.png')).to.equal('no-cache');
+    });
+
+    it('should revalidate icons', async () => {
+      expect(await getCacheControl('/icon.svg')).to.equal('no-cache');
+      expect(await getCacheControl('/icon_white.png')).to.equal('no-cache');
+    });
+  });
 
   describe('Language links', () => {
     let languages: string[];
