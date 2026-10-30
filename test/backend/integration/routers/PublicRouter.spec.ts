@@ -272,6 +272,18 @@ describe('PublicRouter', () => {
       expect(await getCacheControl('/icon.svg')).to.equal('no-cache');
       expect(await getCacheControl('/icon_white.png')).to.equal('no-cache');
     });
+
+    it('should not find missing files and files outside of the frontend folder', async () => {
+      fs.writeFileSync(path.join(ProjectPath.FrontendFolder, 'secret.txt'), 'top-secret-content');
+      for (const url of ['/missing-PCUX7IQM.js', '/missing.js', '/assets/missing.png',
+        '/assets/..%2F..%2Fsecret.txt', '/assets/%2E%2E/%2E%2E/secret.txt']) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+        // missing: 404, outside: rejected by normalizePathParam
+        expect(res.status, url).to.not.equal(200);
+        expect(res.text, url).to.not.contain('top-secret-content');
+        expect(res.header['cache-control'], url).to.be.undefined;
+      }
+    });
   });
 
   describe('Language links', () => {

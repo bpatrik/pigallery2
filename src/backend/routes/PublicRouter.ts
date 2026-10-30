@@ -1,6 +1,5 @@
 import {Express, NextFunction, Request, Response} from 'express';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as ejs from 'ejs';
 import {Config} from '../../common/config/private/Config';
 import {ProjectPath} from '../ProjectPath';
@@ -312,29 +311,25 @@ export class PublicRouter {
 
     const renderFile = (subDir = '') => {
       return (req: Request, res: Response) => {
-        const file = path.join(
-          ProjectPath.FrontendFolder,
-          req.localePath,
-          subDir,
-          req.params.file
-        );
-        if (!fs.existsSync(file)) {
-          return res.sendStatus(404);
-        }
         // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
         // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
-        if (/-[A-Z0-9]{8}\.[a-z0-9]+$/.test(req.params.file)) {
-          res.sendFile(file, {
+        const hashed = /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(req.params.file);
+        if (!hashed) {
+          res.set('Cache-Control', 'no-cache');
+        }
+        res.sendFile(req.params.file, {
+          // sendFile refuses paths that would leave the root
+          root: path.join(ProjectPath.FrontendFolder, req.localePath, subDir),
+          dotfiles: 'allow',
+          ...(hashed ? {
             maxAge: '365d', // number would be in ms
             immutable: true,
-            dotfiles: 'allow',
-          });
-          return;
-        }
-        res.set('Cache-Control', 'no-cache');
-        res.sendFile(file, {
-          cacheControl: false,
-          dotfiles: 'allow',
+          } : {cacheControl: false}),
+        }, (err) => {
+          if (err && !res.headersSent) {
+            res.removeHeader('Cache-Control');
+            res.sendStatus(404);
+          }
         });
       };
     };
