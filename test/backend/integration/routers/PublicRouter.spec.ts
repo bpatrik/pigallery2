@@ -230,4 +230,47 @@ describe('PublicRouter', () => {
     });
   });
 
+
+  describe('Language links', () => {
+    let languages: string[];
+    beforeEach(async () => {
+      await setUp();
+      languages = Config.Server.languages;
+      Config.Server.languages = ['en', 'hu'];
+    });
+    afterEach(async () => {
+      Config.Server.languages = languages;
+      await tearDown();
+    });
+
+    const get = (url: string): Promise<any> =>
+      (request.execute(server.Server) as SuperAgentStatic).get(url).redirects(0);
+
+    it('should set the language and open the same page', async () => {
+      const res = await get('/hu/admin');
+      res.should.have.status(302);
+      expect(res.header['location']).to.equal('/admin?ln=hu');
+      expect(res.header['set-cookie'].join(';')).to.contain('pigallery2-lang=hu');
+    });
+
+    it('should open the root without a page', async () => {
+      expect((await get('/hu')).header['location']).to.equal('/?ln=hu');
+      expect((await get('/hu/')).header['location']).to.equal('/?ln=hu');
+    });
+
+    it('should keep the encoded path and the query', async () => {
+      const res = await get('/hu/gallery/%C3%A1rv%C3%ADz%20t%C5%B1r%C5%91?p=k%C3%A9p.jpg');
+      expect(res.header['location']).to.equal('/gallery/%C3%A1rv%C3%ADz%20t%C5%B1r%C5%91?p=k%C3%A9p.jpg&ln=hu');
+    });
+
+    it('should replace the language of an earlier switch', async () => {
+      expect((await get('/en/admin?ln=hu')).header['location']).to.equal('/admin?ln=en');
+      expect((await get('/en/search/cat?ln=hu&p=a.jpg')).header['location']).to.equal('/search/cat?p=a.jpg&ln=en');
+    });
+
+    it('should not redirect an unknown language', async () => {
+      const res = await get('/xx/admin');
+      expect(res.status).to.not.equal(302);
+    });
+  });
 });

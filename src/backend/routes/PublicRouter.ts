@@ -59,13 +59,21 @@ export class PublicRouter {
       );
     };
 
-    const redirectToBase = (locale: string) => {
-      return (req: Request, res: Response) => {
-        if (Config.Server.languages.indexOf(locale) !== -1) {
-          res.cookie(CookieNames.lang, locale);
-        }
-        res.redirect(Config.Server.getAppUrl() + '?ln=' + locale);
-      };
+    // /<locale>/<page> links (e.g. from the language menu) set the language, then open the same page
+    const redirectToLocalePage = (req: Request, res: Response, next: NextFunction) => {
+      const locale = req.params['locale'];
+      if (Config.Server.languages.indexOf(locale) === -1) {
+        return next();
+      }
+      res.cookie(CookieNames.lang, locale);
+      // req.path is still url encoded, so the page is passed on as it is
+      const page = req.path.substring(locale.length + 1);
+      // keep the query, but drop the ln of an earlier language switch
+      const queryStart = req.originalUrl.indexOf('?');
+      const query = queryStart === -1 ? [] : req.originalUrl.substring(queryStart + 1)
+        .split('&').filter((p) => p !== '' && !p.startsWith('ln='));
+      query.push('ln=' + locale);
+      res.redirect(Config.Server.getAppUrl(page) + '?' + query.join('&'));
     };
 
     const addTPl = (req: Request, res: Response, next: NextFunction) => {
@@ -297,20 +305,7 @@ export class PublicRouter {
       setLocale,
       renderIndex
     );
-    Config.Server.languages.forEach((l) => {
-      app.get(
-        [
-          '/' + l + '/',
-          '/' + l + '/login',
-          '/' + l + '/gallery*',
-          '/' + l + '/share*',
-          '/' + l + '/admin',
-          '/' + l + '/search*',
-          '/' + l + '/error',
-        ],
-        redirectToBase(l)
-      );
-    });
+    app.get(['/:locale', '/:locale/*'], redirectToLocalePage);
 
     const renderFile = (subDir = '') => {
       return (req: Request, res: Response) => {
