@@ -12,6 +12,7 @@ import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {SearchQueryTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 
 process.env.NODE_ENV = 'test';
 chai.should();
@@ -255,8 +256,8 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
     });
 
     it('should not store random photo', async () => {
-      // indexes the root folder
-      (await get('/gallery/content/')).should.have.status(200);
+      // the content request would save the folder in the background, the random query needs it in the DB
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
       const result = await get('/gallery/random/' + encodeURIComponent(JSON.stringify({type: SearchQueryTypes.any_text, value: 'wild'})));
       (result.should as any).have.status(200);
       expect(result.headers['content-type']).to.equal('image/jpeg');
