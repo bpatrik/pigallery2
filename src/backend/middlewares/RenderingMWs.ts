@@ -84,21 +84,40 @@ export class RenderingMWs {
     return RenderingMWs.renderMessage(res, rs);
   }
 
+  /**
+   * Media that keep their content under the same URL (thumbnails, previews,
+   * originals). sendFile takes maxAge in ms.
+   */
   public static renderFile(
     req: Request,
     res: Response,
     next: NextFunction
   ): void {
-    if (!req.resultPipe) {
-      return next();
-    }
-    // Express takes maxAge in milliseconds: 31536000 meant one year but gave
-    // 8.7 hours. Media keep their URL when the file changes (e.g. a rotated
-    // or replaced photo), so a week rather than a year.
-    return res.sendFile(req.resultPipe as string, {
-      maxAge: '7d',
-      dotfiles: 'allow',
-    });
+    return RenderingMWs.sendFile(req, res, next, null);
+  }
+
+  /**
+   * Files that can change under the same URL (best fit video or GPX once
+   * converted, person thumbnail after reindexing): the browser revalidates
+   * with the ETag, so an unchanged file costs a 304.
+   */
+  public static renderFileNoCache(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return RenderingMWs.sendFile(req, res, next, 'no-cache');
+  }
+
+  /**
+   * Files that differ on every request (random photo).
+   */
+  public static renderFileNoStore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return RenderingMWs.sendFile(req, res, next, 'no-store');
   }
 
   public static renderOK(
@@ -169,5 +188,24 @@ export class RenderingMWs {
   protected static renderMessage<T>(res: Response, content: T): void {
     const message = new Message<T>(null, content);
     res.json(message);
+  }
+
+  private static sendFile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    cacheControl: 'no-cache' | 'no-store' | null
+  ): void {
+    if (!req.resultPipe) {
+      return next();
+    }
+    if (cacheControl) {
+      res.set('Cache-Control', cacheControl);
+    }
+    return res.sendFile(req.resultPipe as string, {
+      cacheControl: !cacheControl,
+      maxAge: '7d',
+      dotfiles: 'allow',
+    });
   }
 }

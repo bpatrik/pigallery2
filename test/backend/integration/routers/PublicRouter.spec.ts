@@ -14,6 +14,8 @@ import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
+import {CookieNames} from '../../../../src/common/CookieNames';
+import * as path from 'path';
 
 process.env.NODE_ENV = 'test';
 chai.should();
@@ -227,6 +229,51 @@ describe('PublicRouter', () => {
 
       // Restore original configuration
       Config.Server.svgIcon = originalIcon;
+    });
+  });
+
+  describe('Frontend file caching', () => {
+    const lang = 'en';
+    let languages: string[];
+    beforeEach(async () => {
+      await setUp();
+      languages = Config.Server.languages;
+      Config.Server.languages = [lang];
+      const folder = path.join(TestHelper.TMP_DIR, 'frontend');
+      fs.mkdirSync(path.join(folder, lang), {recursive: true});
+      fs.writeFileSync(path.join(folder, lang, 'main.0123456789abcdef.js'), '');
+      fs.writeFileSync(path.join(folder, lang, 'robots.txt'), '');
+      ProjectPath.FrontendFolder = folder;
+    });
+    afterEach(async () => {
+      Config.Server.languages = languages;
+      ProjectPath.reset();
+      await tearDown();
+    });
+
+    const get = (file: string) => (request.execute(server.Server) as SuperAgentStatic)
+      .get('/' + file)
+      .set('Cookie', CookieNames.lang + '=' + lang);
+
+    it('should cache hashed build output for a year (sendFile maxAge is in ms)', async () => {
+      const result = await get('main.0123456789abcdef.js');
+      result.should.have.status(200);
+      expect(result.header['cache-control']).to.equal('public, max-age=31536000, immutable');
+    });
+
+    it('should revalidate files without a content hash', async () => {
+      const result = await get('robots.txt');
+      result.should.have.status(200);
+      expect(result.header['cache-control']).to.equal('no-cache');
+    });
+
+    it('should revalidate the icon, it follows Config.Server.svgIcon', async () => {
+      const svg = await get('icon.svg');
+      svg.should.have.status(200);
+      expect(svg.header['cache-control']).to.equal('no-cache');
+      const png = await get('icon.png');
+      png.should.have.status(200);
+      expect(png.header['cache-control']).to.equal('no-cache');
     });
   });
 
