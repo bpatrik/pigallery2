@@ -129,16 +129,11 @@ export class RenderingMWs {
     if (!req.resultPipe) {
       return next();
     }
-    res.set('Cache-Control', cacheControl);
     return res.sendFile(req.resultPipe as string, {
       cacheControl: false,
+      // only set on a successful transfer, so errors are not cached
+      headers: {'Cache-Control': cacheControl},
       dotfiles: 'allow',
-    }, (err) => {
-      if (err && !res.headersSent) {
-        // don't let the browser cache the error
-        res.removeHeader('Cache-Control');
-        return next(err);
-      }
     });
   }
 
