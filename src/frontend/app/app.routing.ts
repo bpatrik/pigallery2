@@ -69,11 +69,13 @@ export const routes: Routes = [
   {
     path: 'albums',
     loadComponent: () => import('./ui/albums/albums.component').then(m => m.AlbumsComponent),
+    data: {preload: true},
     canActivate: [authGuard],
   },
   {
     path: 'faces',
     loadComponent: () => import('./ui/faces/faces.component').then(m => m.FacesComponent),
+    data: {preload: true},
     canActivate: [authGuard],
   },
   {

@@ -56,8 +56,8 @@
               [(open)]="blogOpen" />
             }
             @if (ShowMap) {
-              <!-- Leaflet loads only when the map is visible -->
-              @defer (on viewport) {
+              <!-- Leaflet is not in the initial bundle: it loads when the browser is idle or the map is visible -->
+              @defer (on viewport; prefetch on idle) {
                 <app-gallery-map class="rounded"
                   [class.rounded-start-0]="ShowMarkDown"
                   [photos]="directoryContent?.mediaGroups | photosOnly"
