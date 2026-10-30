@@ -25,13 +25,15 @@ import {
   MapOptions,
   Marker,
   marker,
-  markerClusterGroup,
   MarkerClusterGroup,
   Point,
   polyline,
   tileLayer,
   TileLayer
 } from 'leaflet';
+// leaflet.markercluster adds itself to the global L object. The bundler copies the exports of
+// CommonJS modules on import, so only the default import (L itself) sees what the plugin added.
+import Leaflet from 'leaflet';
 import 'leaflet.markercluster';
 import {ThemeService} from '../../../../model/theme.service';
 import {Subscription} from 'rxjs';
@@ -114,7 +116,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   } = {
     baseLayers: {},
     overlays: {
-      Photos: markerClusterGroup({
+      Photos: Leaflet.markerClusterGroup({
         maxClusterRadius: 20,
         iconCreateFunction: (cluster) => {
           const childCount = cluster.getChildCount();

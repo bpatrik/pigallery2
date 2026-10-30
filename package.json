@@ -20,8 +20,8 @@
     "start": "node ./src/backend/index",
     "run-diagnostics": "node ./src/backend/index --run-diagnostics --Server-Log-level=silly",
     "run-dev": "ng build  --configuration=dev",
-    "build-stats": "ng build  --stats-json",
-    "analyze": "webpack-bundle-analyzer dist/en/stats.json",
+    "build-stats": "ng build --configuration production --localize=false --stats-json",
+    "analyze": "npm run build-stats && echo Load dist/stats.json into https://esbuild.github.io/analyze/",
     "merge-new-translation": "gulp merge-new-translation",
     "generate-man": "gulp generate-man",
     "lint": "ng lint",
@@ -64,8 +64,8 @@
     "xml2js": "0.6.2"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "21.1.0",
     "@angular/animations": "21.2.25",
+    "@angular/build": "21.2.28",
     "@angular/cli": "21.2.28",
     "@angular/common": "21.2.25",
     "@angular/compiler": "21.2.25",
@@ -141,7 +141,6 @@
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
     "typescript-eslint": "8.72.1",
-    "webpack-bundle-analyzer": "4.10.2",
     "xlf-google-translate": "1.0.1",
     "zone.js": "0.15.1"
   },

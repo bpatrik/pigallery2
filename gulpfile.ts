@@ -157,7 +157,7 @@ gulp.task(
     const tasks = [];
     createFrontendTask(
       'build-frontend-release default',
-      'ng build --configuration production  --no-progress  --output-path=./release/dist'
+      'ng build --configuration production,release --no-progress'
     );
     tasks.push('build-frontend-release default');
     return gulp.series(...tasks);
@@ -463,6 +463,10 @@ gulp.task('localize-bundles', async (cb): Promise<void> => {
 
     for (let i = 0; i < builds.length; ++i) {
       const dir = path.join(folder, builds[i]);
+      // the builder also writes files (e.g. prerendered-routes.json) next to the locale folders
+      if (!fs.statSync(dir).isDirectory()) {
+        continue;
+      }
       const indexhtmlPath = path.join(dir, 'index.html');
 
       let indexhtml = fs.readFileSync(indexhtmlPath, 'utf8');
