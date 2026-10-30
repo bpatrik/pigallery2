@@ -29,6 +29,7 @@ import {GPSMetadata, PhotoDTO, PhotoMetadata} from '../../../../../src/common/en
 import {VideoDTO} from '../../../../../src/common/entities/VideoDTO';
 import {AutoCompleteItem} from '../../../../../src/common/entities/AutoCompleteItem';
 import {Config} from '../../../../../src/common/config/private/Config';
+import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
@@ -97,6 +98,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     p.metadata.creationDate = Date.now();
     p.metadata.creationDateOffset = '+02:00';
     p.metadata.keywords.push('question mark?');
+    p.metadata.keywords.push('Jánoska'.normalize('NFD')); // decomposed: a + combining acute accent
     p2 = TestHelper.getPhotoEntry2(directory);
     p2.metadata.creationDate = Date.now() - 60 * 60 * 24 * 1000;
     p2.metadata.creationDateOffset = '+02:00';
@@ -1448,6 +1450,31 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
           resultOverflow: false
         } as SearchResultDTO));
 
+      });
+
+
+      it('as keyword, ignoring case and accents (#729)', async () => {
+        const sm = new SearchManager();
+        const search = async (value: string, matchType = TextSearchQueryMatchTypes.like) =>
+          (await sm.search(DBTestHelper.defaultSession, {
+            value,
+            matchType,
+            type: SearchQueryTypes.keyword
+          } as TextSearch)).media.map(m => m.name);
+
+        // 'Padmé Amidala' is stored precomposed, 'Jánoska' decomposed (NFD)
+        expect(await search('padme')).to.deep.equal([p2.name]);
+        expect(await search('PADMÉ')).to.deep.equal([p2.name]);
+        if (Config.Database.type === DatabaseType.sqlite) {
+          // MySQL's general_ci does not fold decomposed accents: only SQLiteLike does
+          expect(await search('janos')).to.deep.equal([p.name]);
+          expect(await search('János')).to.deep.equal([p.name]);
+          expect(await search('JÁNOS'.normalize('NFD'))).to.deep.equal([p.name]);
+        }
+        // exact matches keep SQLite's native LIKE (accent-sensitive), MySQL's collation folds them
+        expect(await search('padmé amidala', TextSearchQueryMatchTypes.exact_match)).to.deep.equal([p2.name]);
+        expect(await search('padme amidala', TextSearchQueryMatchTypes.exact_match))
+          .to.deep.equal(Config.Database.type === DatabaseType.sqlite ? [] : [p2.name]);
       });
 
 

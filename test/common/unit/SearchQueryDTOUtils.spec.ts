@@ -385,6 +385,19 @@ describe('SearchQueryDTOUtils.matchDirectorySearch', () => {
     expect(match('photos/family/2024', 'holidays')).to.be.false;
   });
 
+  it('should ignore accents with wildcards, like the SQL search (#729)', () => {
+    const glob = TextSearchQueryMatchTypes.globMatch;
+    expect(match('photos/Fête 2024', '*fete*', glob)).to.be.true;
+    expect(match('photos/Fête 2024', 'fete')).to.be.true;
+    expect(match('photos/fete 2024', '*FÊTE*', glob)).to.be.true;
+    expect(match('photos/Fe\u0302te', 'fête') /* decomposed */).to.be.true;
+    expect(match('photos/Fête 2024', '*fete*', glob, true)).to.be.false;
+    // exact matches keep the accents, as SQLite's native LIKE
+    expect(match('photos/Fête', 'photos/fête', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+    expect(match('photos/Fête', 'photos/fete', TextSearchQueryMatchTypes.exact_match)).to.be.false;
+    expect(match('photos/Fête', 'photos/fete', glob)).to.be.false;
+  });
+
   it('should match glob on the whole path', () => {
     const glob = TextSearchQueryMatchTypes.globMatch;
     expect(match('photos/public/sub', '/photos/public/*', glob)).to.be.true;
@@ -486,5 +499,11 @@ describe('SearchQueryDTOUtils.isDirectoryAnchoredParent', () => {
       expect(SearchQueryUtils.isDirectoryAnchoredParent(p, list), p).to.be.false;
     }
     expect(SearchQueryUtils.isDirectoryAnchoredParent('a', [dq('a', TextSearchQueryMatchTypes.like)])).to.be.false;
+  });
+
+  it('should compare the path as the search does (#729)', () => {
+    expect(SearchQueryUtils.isDirectoryAnchoredParent('Fête', [dq('/fete/*', glob)])).to.be.true;
+    expect(SearchQueryUtils.isDirectoryAnchoredParent('Fête', [dq('/fete/a', exact)])).to.be.false;
+    expect(SearchQueryUtils.isDirectoryAnchoredParent('Fête', [dq('/fête/a', exact)])).to.be.true;
   });
 });
