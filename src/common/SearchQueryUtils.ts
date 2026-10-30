@@ -13,6 +13,7 @@ import {
 } from './entities/SearchQueryDTO';
 import {SearchQueryParser} from './SearchQueryParser';
 import {Utils} from './Utils';
+import {TextFold} from './TextFold';
 
 export const SearchQueryUtils = {
   negate: (query: SearchQueryDTO): SearchQueryDTO => {
@@ -209,11 +210,12 @@ export const SearchQueryUtils = {
    *  - globMatch: the whole path matches the glob (* matches any characters, including '/', ? matches one character)
    *    A trailing '/*' means the directory itself and everything below it (e.g.: 'a/*' matches 'a', 'a/b', 'a/b/c').
    *    Use '/?*' to match only below a directory.
-   * Matching is case-insensitive.
+   * Matching is case-insensitive, and accent-insensitive with wildcards (see directorySearchFold).
    */
   matchDirectorySearch: (dirPath: string, search: DirectorySearch): boolean => {
-    const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase();
-    const value = SearchQueryUtils.normalizeDirectoryPath(search.value).toLowerCase();
+    const fold = SearchQueryUtils.directorySearchFold(search);
+    const p = fold(SearchQueryUtils.normalizeDirectoryPath(dirPath));
+    const value = fold(SearchQueryUtils.normalizeDirectoryPath(search.value));
     let match: boolean;
     switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
       case TextSearchQueryMatchTypes.exact_match:
@@ -239,6 +241,17 @@ export const SearchQueryUtils = {
     return search.negate ? !match : match;
   },
   /**
+   * How a directory search compares texts, the same way as the SQL search (SearchManager): it ignores case,
+   * and accents too when the search has wildcards (like, or a glob with * or ?), see TextFold.
+   * Exact matches keep the accents, like SQLite's native LIKE.
+   */
+  directorySearchFold: (search: DirectorySearch): ((text: string) => string) => {
+    const matchType = search.matchType ?? TextSearchQueryMatchTypes.like;
+    const wildcards = matchType === TextSearchQueryMatchTypes.like ||
+      (matchType === TextSearchQueryMatchTypes.globMatch && /[*?]/.test(search.value));
+    return wildcards ? (t: string) => TextFold.fold(t) : (t: string) => t.toLowerCase();
+  },
+  /**
    * Returns the fixed path segments at the beginning of a directory search, that every match starts with.
    * E.g.: exact 'a/b' -> ['a', 'b'], glob 'a/b/*' -> ['a', 'b'], glob 'a/b*' -> ['a'].
    * Returns null if the matches can be anywhere (like and negated searches).
@@ -247,7 +260,8 @@ export const SearchQueryUtils = {
     if (search.negate) {
       return null;
     }
-    const segments = SearchQueryUtils.normalizeDirectoryPath(search.value).toLowerCase().split('/')
+    const segments = SearchQueryUtils.directorySearchFold(search)(SearchQueryUtils.normalizeDirectoryPath(search.value))
+      .split('/')
       .filter(s => s !== '');
     switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
       case TextSearchQueryMatchTypes.exact_match:
@@ -287,9 +301,10 @@ export const SearchQueryUtils = {
    * so check if the directory is allowed first.
    */
   isDirectoryAnchoredParent: (dirPath: string, list: DirectorySearch[]): boolean => {
-    const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase().split('/')
-      .filter(s => s !== '');
+    const dir = SearchQueryUtils.normalizeDirectoryPath(dirPath);
     return (list || []).some(d => {
+      const p = SearchQueryUtils.directorySearchFold(d)(dir).split('/')
+        .filter(s => s !== '');
       const anchor = SearchQueryUtils.getDirectorySearchAnchor(d);
       if (anchor === null || p.length > anchor.length) {
         return false;

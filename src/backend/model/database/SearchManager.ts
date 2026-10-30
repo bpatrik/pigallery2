@@ -961,7 +961,9 @@ export class SearchManager {
 
       // A search with wildcards ("contains", what is typed in the search box)
       // ignores accents (SQLiteLike); an exact match (e.g. an album of a
-      // keyword) stays exact, and fast.
+      // keyword) stays exact, and fast. So on SQLite person:"janos" does not
+      // find "János", while MySQL's collation folds it (accepted difference).
+      // SearchQueryUtils.matchDirectorySearch folds the same way.
       const foldText = /[*?]/.test((query as TextSearch).value.replace(/\\./g, ''));
       const likeParam = (pattern: string): string => foldText ? SQLiteLike.param(pattern) : pattern;
       const getLikeExpr = (fieldName: string, paramName: string): string => {

@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import {SQLiteLike} from '../../../../../src/backend/model/database/SQLiteLike';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
+import {TextFold} from '../../../../../src/common/TextFold';
 // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 const Database = require('better-sqlite3'); // no type declarations
 
@@ -43,6 +44,14 @@ describe('SQLiteLike', () => {
     expect(like('%\\%\\_%', true)).to.deep.equal(['100%_done']);
     expect(like('%\\%x%', true)).to.deep.equal([]);
     expect(like('%e%', false, true)).to.deep.equal(['Krikštynos', 'plain']);
+  });
+
+  it('should fold only the letters that have a combining mark', () => {
+    expect(TextFold.fold('Noël À Ça')).to.equal('noel a ca');
+    expect(TextFold.fold('Jánoska'.normalize('NFD'))).to.equal('janoska');
+    // no decomposition: kept as they are (MySQL's general_ci does not fold all of these either)
+    expect(TextFold.fold('Łódź')).to.equal('łodz');
+    expect(TextFold.fold('ß ø æ đ')).to.equal('ß ø æ đ');
   });
 
   it('should compare like SQL LIKE in JavaScript', () => {
