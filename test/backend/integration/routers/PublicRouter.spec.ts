@@ -268,6 +268,13 @@ describe('PublicRouter', () => {
       expect((await get('/en/search/cat?ln=hu&p=a.jpg')).header['location']).to.equal('/search/cat?p=a.jpg&ln=en');
     });
 
+    it('should only redirect within the app', async () => {
+      for (const url of ['/hu//evil.com', '/hu/https://evil.com', '/hu/%2F%2Fevil.com', '/hu/%5C%5Cevil.com']) {
+        const location: string = (await get(url)).header['location'];
+        expect(location, url).to.match(/^\/[^/\\]/);
+      }
+    });
+
     it('should not redirect an unknown language', async () => {
       const res = await get('/xx/admin');
       expect(res.status).to.not.equal(302);
