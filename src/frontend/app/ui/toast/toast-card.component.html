@@ -5,9 +5,7 @@
 </div>
 <ng-content select="[toastAction]"/>
 @if (countdown()) {
-  <div class="toast-bar countdown bg-{{ color() }}"
-       [style.animation-duration.ms]="countdown()"
-       (animationend)="countdownEnd.emit()"></div>
+  <div class="toast-bar countdown bg-{{ color() }}" [style.animation-duration.ms]="countdown()"></div>
 } @else if (progress() !== null) {
   <div class="toast-bar bg-{{ color() }}" [style.width.%]="progress()"></div>
 }

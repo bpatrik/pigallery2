@@ -1,24 +1,63 @@
-<div class="toasts position-fixed top-0 start-50 translate-middle-x p-3 d-flex flex-column gap-2">
-  @for (toast of toastService.toasts(); track toast.id) {
-    <div class="app-toast"
-         [attr.role]="toast.type === 'error' ? 'alert' : 'status'"
-         aria-atomic="true"
-         (click)="toastService.dismiss(toast.id)">
-      <ng-icon class="app-toast-icon text-{{ COLORS[toast.type] }}" [name]="ICONS[toast.type]"/>
-      <div class="app-toast-content">
-        @if (toast.title) {
-          <div class="app-toast-title">{{ toast.title }}</div>
-        }
-        @if (toast.text) {
-          <div [class.app-toast-text]="toast.title">{{ toast.text }}</div>
-        }
-      </div>
-      <!-- clicking anywhere on the toast closes it, the button makes that visible -->
-      <button type="button" class="btn-close flex-shrink-0" aria-label="Close" i18n-aria-label></button>
-      <!-- the toast hides when the countdown runs out, it pauses while the mouse is over the toast -->
-      <div class="app-toast-bar countdown bg-{{ COLORS[toast.type] }}"
-           [style.animation-duration.ms]="TIMEOUT"
-           (animationend)="toastService.dismiss(toast.id)"></div>
-    </div>
-  }
-</div>
+@for (placement of PLACEMENTS; track placement) {
+  <div class="toast-stack {{ placement }}">
+    @for (entry of stacks()[placement]; track entry.key) {
+      @if (entry.toast; as toast) {
+        <app-toast-card
+          animate.enter="toast-enter"
+          animate.leave="toast-leave"
+          [class.closable]="toast.closable"
+          [icon]="icon(toast)"
+          [color]="color(toast)"
+          [wrap]="toast.wrap"
+          [countdown]="toast.timeout"
+          [progress]="toast.progress ?? null"
+          (click)="onToastClick(toast)"
+          (mouseenter)="toastService.pause(toast.id)"
+          (mouseleave)="toastService.resume(toast.id)"
+          [attr.role]="toast.type === 'error' ? 'alert' : 'status'"
+          aria-atomic="true">
+          @if (toast.title) {
+            <span toastTitle>{{ toast.title }}</span>
+          }
+          @if (toast.text) {
+            <span>{{ toast.text }}</span>
+          }
+          @if (toast.onCancel) {
+            <button toastAction type="button" class="btn btn-link btn-sm toast-cancel"
+                    (click)="onCancel($event, toast.onCancel)" i18n>Cancel</button>
+          }
+          @if (toast.closable) {
+            <!-- clicking anywhere on the toast closes it, the button makes that visible -->
+            <button toastAction type="button" class="btn-close flex-shrink-0" aria-label="Close" i18n-aria-label></button>
+          }
+        </app-toast-card>
+      } @else if (entry.summary; as summary) {
+        <!-- clicking the summary shows or hides the toasts of the group -->
+        <app-toast-card
+          class="summary"
+          animate.enter="toast-enter"
+          [icon]="icon(summary)"
+          [color]="color(summary)"
+          [wrap]="false"
+          [progress]="summary.progress ?? null"
+          (click)="toastService.toggleGroup(entry.group)"
+          [attr.aria-expanded]="entry.expanded">
+          <span toastTitle>{{ summary.title }}</span>
+          @if (summary.text) {
+            <span>{{ summary.text }}</span>
+          }
+          @if (summary.onCancel) {
+            <button toastAction type="button" class="btn btn-link btn-sm toast-cancel"
+                    (click)="onCancel($event, summary.onCancel)" i18n>Cancel all</button>
+          }
+          @if (summary.closable) {
+            <button toastAction type="button" class="btn-close flex-shrink-0" aria-label="Close" i18n-aria-label
+                    (click)="onCloseGroup($event, entry.group)"></button>
+          } @else {
+            <ng-icon toastAction [name]="entry.expanded ? 'ionChevronDownOutline' : 'ionChevronUpOutline'"/>
+          }
+        </app-toast-card>
+      }
+    }
+  </div>
+}

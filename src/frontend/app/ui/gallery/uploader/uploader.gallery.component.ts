@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import {NgIconComponent} from '@ng-icons/core';
-import {UploaderService} from './uploader.service';
 
+// The drop overlay. The upload progress is shown by the toasts (see UploaderService).
 @Component({
   selector: 'app-gallery-uploader',
   templateUrl: './uploader.gallery.component.html',
@@ -12,37 +12,6 @@ import {UploaderService} from './uploader.service';
 ]
 })
 export class UploaderComponent {
-  uploaderService = inject(UploaderService);
-  private cdr = inject(ChangeDetectorRef);
-
-  public readonly Date = Date;
   readonly isUploadOver = input<boolean>(undefined);
-  public showDetails = false;
-  private timer: any;
-
-  ngOnInit(): void {
-    this.timer = setInterval(() => {
-      this.cdr.detectChanges();
-    }, 500);
-  }
-
-  ngOnDestroy(): void {
-    if (this.timer) {
-      clearInterval(this.timer);
-    }
-  }
-
-  public toggleDetails(): void {
-    this.showDetails = !this.showDetails;
-  }
-
-  public getOverallProgress(): number {
-    if (this.uploaderService.uploadProgress.length === 0) {
-      return 0;
-    }
-    const sum = this.uploaderService.uploadProgress.reduce((a, b) => a + b.progress, 0);
-    return Math.round(sum / this.uploaderService.uploadProgress.length);
-  }
-
 }
 

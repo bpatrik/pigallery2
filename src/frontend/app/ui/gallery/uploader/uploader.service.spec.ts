@@ -52,7 +52,7 @@ describe('UploaderService', () => {
     uploadEnabled = Config.Upload.enabled;
     Config.Upload.enabled = true;
     network = new MockNetworkService();
-    notification = jasmine.createSpyObj('NotificationService', ['success', 'warning', 'error']);
+    notification = jasmine.createSpyObj('NotificationService', ['success', 'warning', 'error', 'info']);
     TestBed.configureTestingModule({
       providers: [
         {provide: NetworkService, useValue: network},
@@ -103,6 +103,46 @@ describe('UploaderService', () => {
     tick();
     fail(0);
     expect(notification.error).toHaveBeenCalledWith('Failed files: 1', 'Upload failed.');
+  }));
+
+  it('should cancel a queued file without sending it', fakeAsync(() => {
+    service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
+    tick();
+    toast('Hévíz.jpg').onCancel();
+    expect(toast('Hévíz.jpg')).toBeUndefined();
+    finish(0);
+    expect(network.requests.length).toBe(1);
+    expect(notification.success).toHaveBeenCalledWith('Uploaded files: 1', 'Upload completed.');
+  }));
+
+  it('should abort a file while it is sent and start the next one', fakeAsync(() => {
+    service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
+    tick();
+    network.requests[0].next({type: HttpEventType.UploadProgress, loaded: 30, total: 100});
+    toast('Tihany.jpg').onCancel();
+    expect(network.requests[0].observed).toBeFalse(); // unsubscribed: the request is aborted
+    expect(toast('Tihany.jpg')).toBeUndefined();
+    expect(network.requests.length).toBe(2);
+    expect(toast('Hévíz.jpg').text).toBe('0%');
+  }));
+
+  it('should not offer canceling once a file is sent completely', fakeAsync(() => {
+    service.uploadFiles([file('Tihany.jpg')]);
+    tick();
+    expect(toast('Tihany.jpg').onCancel).toBeDefined();
+    network.requests[0].next({type: HttpEventType.UploadProgress, loaded: 100, total: 100});
+    expect(toast('Tihany.jpg').onCancel).toBeUndefined();
+    service.cancelAll();
+    expect(network.requests[0].observed).toBeTrue();
+  }));
+
+  it('should cancel everything and say so', fakeAsync(() => {
+    service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg'), file('Eger.jpg')]);
+    tick();
+    service.cancelAll();
+    expect(toasts.toasts().length).toBe(0);
+    expect(network.requests.length).toBe(1); // the queued ones never started
+    expect(notification.info).toHaveBeenCalledWith('Upload canceled.');
   }));
 
   it('should warn about an existing file instead of failing it', fakeAsync(() => {
