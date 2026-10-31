@@ -160,8 +160,16 @@ export class DBTestHelper {
     return dir;
   }
 
+  /**
+   * Like TestHelper.resetConfig(), but keeps the DB settings of this helper.
+   * Use it instead of TestHelper.resetConfig() after initDB(), so the config still matches the open DB connection.
+   */
+  public resetConfig = (): void => {
+    TestHelper.resetConfig();
+    this.applyDBConfig();
+  };
+
   public initDB = async (): Promise<void> => {
-    Config.Extensions.enabled = false; // make all tests clean
     if (typeof this.dbType === 'undefined') {
       throw new Error('dbType is undefined');
     }
@@ -246,6 +254,17 @@ export class DBTestHelper {
     return JSON.stringify({dirs, dCache, media}, null, 2);
   }
 
+  private applyDBConfig(): void {
+    Config.Extensions.enabled = false; // make all tests clean
+    Config.Database.type = this.dbType;
+    if (this.dbType === DatabaseType.mysql) {
+      Config.Database.mysql.database = 'pigallery2_test';
+    } else {
+      Config.Database.dbFolder = TestHelper.TMP_DIR;
+      ProjectPath.reset();
+    }
+  }
+
   private async initMySQL(): Promise<void> {
     await this.resetMySQL();
   }
@@ -259,8 +278,7 @@ export class DBTestHelper {
 
   private async clearUpMysql(): Promise<void> {
     Logger.debug(LOG_TAG, 'clearing up mysql');
-    Config.Database.type = DatabaseType.mysql;
-    Config.Database.mysql.database = 'pigallery2_test';
+    this.applyDBConfig();
     // reset first: it waits for background saves that would otherwise hit the dropped tables
     await ObjectManagers.reset();
     const conn = await SQLConnection.getConnection();
@@ -312,9 +330,7 @@ export class DBTestHelper {
 
   private async clearUpSQLite(): Promise<void> {
     Logger.debug(LOG_TAG, 'clearing up sqlite');
-    Config.Database.type = DatabaseType.sqlite;
-    Config.Database.dbFolder = TestHelper.TMP_DIR;
-    ProjectPath.reset();
+    this.applyDBConfig();
     await ObjectManagers.reset();
     await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
   }

@@ -150,7 +150,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
   after(sqlHelper.clearDB);
   beforeEach(() => {
-    TestHelper.resetConfig();
+    sqlHelper.resetConfig();
     Config.Search.listDirectories = true;
     Config.Search.listMetafiles = false;
   });
@@ -303,7 +303,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
 
     describe('autocomplete', () => {
-      beforeEach(TestHelper.resetConfig);
+      beforeEach(sqlHelper.resetConfig);
 
       it('autocomplete should respect projectionQuery', async () => {
         const sm = new SearchManager();
@@ -488,7 +488,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
   describe('advanced search', () => {
     beforeEach(async () => {
-      TestHelper.resetConfig();
+      sqlHelper.resetConfig();
       Config.Search.listDirectories = false;
       Config.Search.listMetafiles = false;
     });
@@ -1784,7 +1784,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       let sm: SearchManager;
 
       before(async () => {
-        TestHelper.resetConfig();
+        sqlHelper.resetConfig();
         await sqlHelper.clearDB();
         await setUpSqlDB();
         p5 = TestHelper.getBasePhotoEntry(subDir2, 'p5-23h-ago.jpg');

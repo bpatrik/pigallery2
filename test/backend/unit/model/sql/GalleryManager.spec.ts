@@ -190,7 +190,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
 
     beforeEach(() => {
       // Reset config defaults that matter for tests
-      TestHelper.resetConfig();
+      sqlHelper.resetConfig();
 
       gm = new GalleryManagerTest();
       sessionNoProj = new SessionContext();

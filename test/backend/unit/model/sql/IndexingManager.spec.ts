@@ -742,7 +742,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     });
 
     afterEach(async () => {
-      TestHelper.resetConfig();
+      sqlHelper.resetConfig();
       await sqlHelper.clearDB();
     });
 
