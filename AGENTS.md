@@ -9,7 +9,8 @@ PiGallery2 is a fast, directory-first, read-only photo gallery for low-resource 
 The photo folder is never modified.
 
 - Language: TypeScript everywhere; `tsc` emits `.js` next to each `.ts` file (git-ignored).
-- Backend: Node.js + Express + TypeORM. Config via [typeconfig](https://github.com/bpatrik/typeconfig).
+- Backend: Node.js + Express + TypeORM. Config via [typeconfig](https://github.com/bpatrik/typeconfig)
+  (same maintainer, so it can change when PiGallery2 needs it).
 - Frontend: Angular.
 - Databases: SQLite (default) and MySQL/MariaDB. Both must keep working.
 
@@ -54,7 +55,9 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
 - Frontend unit tests: `npm run test-frontend` (Karma, needs Chrome).
 - Lint: `npm run lint`.
-- Frontend dev build (watch): `npm run run-dev`; run the server: `npm start`.
+- Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
+- E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
+  then `npx cypress run`.
 
 ### Running the app
 
@@ -68,6 +71,9 @@ so the maintainer's own `config.json` and DB are not touched:
 - `npm run run-dev` builds the frontend continuously (English only, into `dist/en`), so frontend edits show up on reload.
 - Start it in the background and stop it by PID (`node ... & echo $! > <tmp>/pid`, later `kill $(cat <tmp>/pid)`).
   Don't `pkill -f` a pattern that also matches your own shell command.
+- Dev bundles have unhashed names and a long `max-age`: hard-reload (or use the other host name, `localhost` ↔ `127.0.0.1`)
+  after every rebuild, or the browser runs old code.
+- Admin settings show only the basic fields by default; switch the mode to "Under the hood" to see all of them.
 
 ### Cloud / container sessions
 
@@ -113,6 +119,9 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - Avoid heavy queries, N+1 queries and loading full tables on the server; prefer projections and pagination.
 - Keep TypeORM queries portable between SQLite and MySQL.
 - Changed any TypeORM entity? Bump `DataStructureVersion` in `src/common/DataStructureVersion.ts`.
+- Every `@ConfigProperty` needs an explicit `type` (and `arrayType` for arrays): the frontend is built without decorator metadata,
+  so typeconfig can't infer it there. `test/common/unit/config/ConfigTypes.spec.ts` checks this and snapshots the resolved types;
+  after an intended config change, regenerate the snapshot with `UPDATE_CONFIG_SNAPSHOT=true`.
 - Never expose private config values or another user's data to the client.
 - Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
