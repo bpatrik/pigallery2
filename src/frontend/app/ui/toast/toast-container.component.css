@@ -1,0 +1,46 @@
+/* the card look comes from .app-toast in styles.css */
+.toasts {
+  z-index: 100000; /* above the lightbox */
+  width: 380px; /* same as the upload progress cards */
+  max-width: 100%;
+  pointer-events: none;
+}
+
+.app-toast {
+  pointer-events: auto;
+  cursor: pointer;
+  animation: toast-in 0.2s ease-out;
+}
+
+.app-toast-text {
+  white-space: pre-wrap; /* server notification details have line breaks */
+}
+
+.btn-close {
+  font-size: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.countdown {
+  width: 100%;
+  animation-name: countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.app-toast:hover .countdown {
+  animation-play-state: paused;
+}
+
+@keyframes countdown {
+  to {
+    width: 0;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-1rem);
+  }
+}

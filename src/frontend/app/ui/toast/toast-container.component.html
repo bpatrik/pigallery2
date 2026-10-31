@@ -1,0 +1,24 @@
+<div class="toasts position-fixed top-0 start-50 translate-middle-x p-3 d-flex flex-column gap-2">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="app-toast"
+         [attr.role]="toast.type === 'error' ? 'alert' : 'status'"
+         aria-atomic="true"
+         (click)="toastService.dismiss(toast.id)">
+      <ng-icon class="app-toast-icon text-{{ COLORS[toast.type] }}" [name]="ICONS[toast.type]"/>
+      <div class="app-toast-content">
+        @if (toast.title) {
+          <div class="app-toast-title">{{ toast.title }}</div>
+        }
+        @if (toast.text) {
+          <div [class.app-toast-text]="toast.title">{{ toast.text }}</div>
+        }
+      </div>
+      <!-- clicking anywhere on the toast closes it, the button makes that visible -->
+      <button type="button" class="btn-close flex-shrink-0" aria-label="Close" i18n-aria-label></button>
+      <!-- the toast hides when the countdown runs out, it pauses while the mouse is over the toast -->
+      <div class="app-toast-bar countdown bg-{{ COLORS[toast.type] }}"
+           [style.animation-duration.ms]="TIMEOUT"
+           (animationend)="toastService.dismiss(toast.id)"></div>
+    </div>
+  }
+</div>
