@@ -52,8 +52,11 @@ describe('SharingRouter', () => {
 
 
   const shareLogin = async (srv: Server, sharingKey: string, password?: string): Promise<any> => {
+    const csrf = await RouteTestingHelper.getCsrf(srv.Server);
     return (request.execute(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharingKey)
+      .set('Cookie', csrf.cookies)
+      .set('X-XSRF-TOKEN', csrf.token)
       .send({password});
 
   };

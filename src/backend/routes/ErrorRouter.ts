@@ -11,6 +11,19 @@ export class ErrorRouter {
   }
 
   private static addApiErrorHandler(app: Express): void {
+    app.use(
+      Config.Server.apiPath + '/*',
+      (err: {code?: string}, req: Request, res: Response, next: NextFunction): any => {
+        if (err.code !== 'EBADCSRFTOKEN') {
+          return next(err);
+        }
+
+        res.status(403);
+        return next(
+          new ErrorDTO(ErrorCodes.PERMISSION_DENIED, 'Invalid CSRF token', err, req)
+        );
+      }
+    );
     app.use(Config.Server.apiPath + '/*', RenderingMWs.renderError);
   }
 

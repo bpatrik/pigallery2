@@ -4,6 +4,7 @@
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,

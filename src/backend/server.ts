@@ -15,13 +15,14 @@ import {CookieNames} from '../common/CookieNames';
 import {Router} from './routes/Router';
 import {PhotoProcessing} from './model/fileaccess/fileprocessing/PhotoProcessing';
 import {Event} from '../common/event/Event';
-import {QueryParams} from '../common/QueryParams';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {ConfigClassOptions} from 'typeconfig/common';
 import {ServerConfig} from '../common/config/private/PrivateConfig';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const session = require('cookie-session');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const csrf = require('csurf');
 
 declare const process: NodeJS.Process;
 
@@ -88,6 +89,7 @@ export class Server {
       session({
         name: CookieNames.session,
         keys: Config.Server.sessionSecret,
+        sameSite: 'lax',
       })
     );
 
@@ -98,13 +100,12 @@ export class Server {
     this.app.use(express.json());
     this.app.use(cookieParser());
 
-    // enable token generation but do not check it
-    this.app.post(
-      [Config.Server.apiPath + '/user/login', Config.Server.apiPath + '/share/login'],
-    );
-    this.app.get(
-      [Config.Server.apiPath + '/user/me', Config.Server.apiPath + '/share/:' + QueryParams.gallery.sharingKey_params],
-    );
+    this.app.use(csrf());
+    this.app.use((req, res, next) => {
+      const request = req as express.Request & {csrfToken: () => string};
+      res.cookie('XSRF-TOKEN', request.csrfToken(), {sameSite: 'lax'});
+      next();
+    });
 
     PhotoProcessing.init();
     Localizations.init();
@@ -235,7 +236,6 @@ export class Server {
     });
   }
 }
-
 
 
 
