@@ -13,7 +13,7 @@ import {PageHelper} from '../../model/page.helper';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {LanguageComponent} from '../language/language.component';
 import {ThemeService} from '../../model/theme.service';
-import {DeviceDetectorService} from 'ngx-device-detector';
+import {DeviceHelper} from '../../model/device.helper';
 import {LoadingBarModule} from '@ngx-loading-bar/core';
 import {IconComponent} from '../../icon.component';
 import {CollapseDirective} from 'ngx-bootstrap/collapse';
@@ -55,7 +55,6 @@ export class FrameComponent {
   queryService = inject(QueryService);
   private router = inject(Router);
   themeService = inject(ThemeService);
-  private deviceService = inject(DeviceDetectorService);
   galleryService = inject(GalleryService);
   uploadService = inject(UploaderService);
 
@@ -88,7 +87,7 @@ export class FrameComponent {
   };
 
   constructor() {
-    this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && !this.deviceService.isDesktop());
+    this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && DeviceHelper.isTouchDevice());
     this.user = this.authService.user;
   }
 

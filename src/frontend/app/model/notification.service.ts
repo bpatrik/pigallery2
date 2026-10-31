@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastService, ToastSummary, ToastType} from '../ui/toast/toast.service';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
 import {NotificationDTO, NotificationType,} from '../../../common/entities/NotificationDTO';
@@ -11,19 +11,27 @@ export interface CountedNotificationDTO extends NotificationDTO {
 
 @Injectable({providedIn: 'root'})
 export class NotificationService {
-  private toastr = inject(ToastrService);
+  private static readonly TOAST_GROUP = 'notifications';
+  private toastService = inject(ToastService);
   private networkService = inject(NetworkService);
   private authService = inject(AuthenticationService);
 
-  options = {
-    positionClass: 'toast-top-center',
-    animate: 'flyLeft',
-  };
   countedNotifications: CountedNotificationDTO[] = [];
   numberOfNotifications = 0;
   lastUser: UserDTO = null;
 
   constructor() {
+    // More than 3 notifications at once (e.g. server errors at login) would cover the page
+    this.toastService.registerGroup(NotificationService.TOAST_GROUP, {
+      collapseAfter: 3,
+      visibleWhenCollapsed: 3,
+      summary: (toasts, hidden, expanded): ToastSummary => ({
+        type: 'info',
+        color: 'secondary',
+        title: expanded ? $localize`Show fewer notifications` : $localize`More notifications: ${hidden.length}:count:`,
+        closable: true
+      })
+    });
     this.authService.user.subscribe(() => {
       if (
           this.authService.isAuthenticated() &&
@@ -35,10 +43,6 @@ export class NotificationService {
       }
       this.lastUser = this.authService.user.value;
     });
-  }
-
-  get Toastr(): ToastrService {
-    return this.toastr;
   }
 
   groupNotifications(notifications: NotificationDTO[]): void {
@@ -64,6 +68,20 @@ export class NotificationService {
     }
   }
 
+  /**
+   * Makes notification details readable:
+   * strings are shown without JSON quoting/escaping, one sentence per line,
+   * objects are pretty-printed.
+   */
+  static formatDetails(details: unknown): string {
+    if (typeof details !== 'string') {
+      return JSON.stringify(details, null, 2);
+    }
+    return details
+      .replace(/^Error: /, '')
+      .replace(/([.!?])\s+(?=[A-Z])/g, '$1\n');
+  }
+
   async getServerNotifications(): Promise<void> {
     try {
       this.groupNotifications(
@@ -71,20 +89,19 @@ export class NotificationService {
               '/notifications'
           )) || []
       );
+      // The message is the title, the details go below it, like on the admin page
       this.countedNotifications.forEach((noti) => {
-        let msg = '(' + noti.count + ') ' + noti.message;
-        if (noti.details) {
-          msg += ' Details: ' + JSON.stringify(noti.details);
-        }
+        const title = '(' + noti.count + ') ' + noti.message;
+        const details = noti.details ? NotificationService.formatDetails(noti.details) : null;
         switch (noti.type) {
           case NotificationType.error:
-            this.error(msg, $localize`Server error`);
+            this.error(details, title);
             break;
           case NotificationType.warning:
-            this.warning(msg, $localize`Server error`);
+            this.warning(details, title);
             break;
           case NotificationType.info:
-            this.info(msg, $localize`Server info`);
+            this.info(details, title);
             break;
         }
       });
@@ -94,18 +111,22 @@ export class NotificationService {
   }
 
   success(text: string, title: string = null): void {
-    this.toastr.success(text, title, this.options);
+    this.show('success', text, title);
   }
 
   error(text: string, title?: string): void {
-    this.toastr.error(text, title, this.options);
+    this.show('error', text, title);
   }
 
   warning(text: string, title?: string): void {
-    this.toastr.warning(text, title, this.options);
+    this.show('warning', text, title);
   }
 
   info(text: string, title: string = null): void {
-    this.toastr.info(text, title, this.options);
+    this.show('info', text, title);
+  }
+
+  private show(type: ToastType, text: string, title: string): void {
+    this.toastService.open({type, text, title, timeout: ToastService.TIMEOUT, group: NotificationService.TOAST_GROUP});
   }
 }

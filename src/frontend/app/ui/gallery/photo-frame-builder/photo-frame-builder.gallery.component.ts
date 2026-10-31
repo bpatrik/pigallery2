@@ -9,7 +9,7 @@ import {QueryParams} from '../../../../../common/QueryParams';
 import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import { ClipboardModule } from 'ngx-clipboard';
+import {CopyDirective} from '../../utils/copy/copy.directive';
 
 import { StringifyEnum } from '../../../pipes/StringifyEnum';
 import { LightBoxTitleTexts } from '../../../../../common/config/public/ClientConfig';
@@ -23,7 +23,7 @@ import {Config} from '../../../../../common/config/public/Config';
     imports: [
     NgIconComponent,
     FormsModule,
-    ClipboardModule,
+    CopyDirective,
     StringifyEnum
 ]
   })

@@ -139,6 +139,7 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 
 - 2-space indent, single quotes in TS, UTF-8, final newline (`.editorconfig`; ESLint in `eslint.config.mjs`).
 - Keep strict typing; prefer explicit return types.
+- Angular components: separate `.ts`, `.html` and `.css` files (`templateUrl` / `styleUrls`), no inline `template` or `styles`.
 - Match the style of the surrounding code.
 
 ## Git

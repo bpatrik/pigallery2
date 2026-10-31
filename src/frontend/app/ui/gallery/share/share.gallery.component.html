@@ -46,9 +46,8 @@
           @if (sharing) {
             <button
               id="copyButton" name="copyButton"
-              ngxClipboard
-              [cbContent]="url"
-              (cbOnSuccess)="onCopy()"
+              [appCopy]="url"
+              (copied)="onCopy()"
               [disabled]="!shareForm.form.valid"
               class="btn btn-primary btn-block float-end"
             i18n>Copy</button>
@@ -181,7 +180,7 @@
                 <div class="ellipsisText share-key">
                   <a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a>
                   <button type="button" class="btn btn-link p-0 ms-1"
-                    ngxClipboard [cbContent]="sharingService.getUrl(share)" (cbOnSuccess)="onCopy()"
+                    [appCopy]="sharingService.getUrl(share)" (copied)="onCopy()"
                     title="Copy link" i18n-title>
                     <ng-icon name="ionCopyOutline" />
                   </button>

@@ -6,16 +6,13 @@ import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {Config} from '../../../../common/config/public/Config';
 import {NetworkService} from './network.service';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
-import {CookieNames} from '../../../../common/CookieNames';
 import {ShareService} from '../../ui/gallery/share.service';
-import {CookieService} from 'ngx-cookie-service';
 import {getInjectedUser} from '../server-inject';
 
 @Injectable({providedIn: 'root'})
 export class AuthenticationService {
   private userService = inject(UserService);
   private shareService = inject(ShareService);
-  private cookieService = inject(CookieService);
 
   public readonly user: BehaviorSubject<UserDTO>;
 
@@ -24,11 +21,8 @@ export class AuthenticationService {
 
     this.user = new BehaviorSubject(null);
 
-    // picking up session..
-    if (
-      this.isAuthenticated() === false &&
-      this.cookieService.get(CookieNames.session) != null
-    ) {
+    // Picking up the session. Its cookie is httpOnly, so JS can't check if it exists: always ask the server.
+    if (this.isAuthenticated() === false) {
       const injectedUser = getInjectedUser();
       if (typeof injectedUser !== 'undefined') {
         this.user.next(injectedUser);

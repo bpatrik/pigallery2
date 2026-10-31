@@ -3,17 +3,18 @@ import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
 import {ShareService} from './ui/gallery/share.service';
-import 'hammerjs';
 import {Subscription} from 'rxjs';
 import {NavigationService} from './model/navigation.service';
 import {ThemeService} from './model/theme.service';
 import { RouterOutlet } from '@angular/router';
+import {ToastContainerComponent} from './ui/toast/toast-container.component';
 
 @Component({
     selector: 'app-pi-gallery2',
     template: `
-    <router-outlet />`,
-    imports: [RouterOutlet]
+    <router-outlet />
+    <app-toast-container />`,
+    imports: [RouterOutlet, ToastContainerComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
   private authenticationService = inject(AuthenticationService);

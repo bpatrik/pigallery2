@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnChanges, inject, input } from '@angular/core';
-import {DeviceDetectorService} from 'ngx-device-detector';
+import {DeviceHelper} from '../../../model/device.helper';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
 import { GalleryDirectoryComponent } from './directory/directory.gallery.component';
@@ -15,14 +15,13 @@ import { GalleryDirectoryComponent } from './directory/directory.gallery.compone
 })
 export class DirectoriesComponent implements OnChanges {
   private container = inject(ElementRef);
-  private deviceService = inject(DeviceDetectorService);
 
   readonly directories = input<SubDirectoryDTO[]>(undefined);
   size: number;
   isDesktop: boolean;
 
   constructor() {
-    this.isDesktop = this.deviceService.isDesktop();
+    this.isDesktop = !DeviceHelper.isTouchDevice();
   }
 
   // Side effect: recalculates the tile size from the window and the container.
