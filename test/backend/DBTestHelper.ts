@@ -260,9 +260,11 @@ export class DBTestHelper {
     Logger.debug(LOG_TAG, 'clearing up mysql');
     Config.Database.type = DatabaseType.mysql;
     Config.Database.mysql.database = 'pigallery2_test';
+    // reset first: it waits for background saves that would otherwise hit the dropped tables
+    await ObjectManagers.reset();
     const conn = await SQLConnection.getConnection();
     await conn.dropDatabase();
-    await ObjectManagers.reset();
+    await SQLConnection.close();
     await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
   }
 
