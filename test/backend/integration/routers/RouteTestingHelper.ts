@@ -4,11 +4,42 @@ import {Utils} from '../../../../src/common/Utils';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import * as chai from 'chai';
 import {SharingEntity} from '../../../../src/backend/model/database/enitites/SharingEntity';
+import {Config} from '../../../../src/common/config/private/Config';
+import {Server as HttpServer} from 'http';
+import {SuperAgentStatic} from 'superagent';
+import {request} from 'chai-http';
 
 const should = chai.should();
 
 export class RouteTestingHelper {
 
+  static async getCsrf(server: HttpServer): Promise<{cookies: string[], token: string}> {
+    const response = await (request.execute(server) as SuperAgentStatic)
+      .get(Config.Server.apiPath + '/user/me');
+    const setCookie = response.headers['set-cookie'];
+    if (!setCookie) {
+      throw new Error('CSRF cookies were not set');
+    }
+    const cookies = this.getCookies(setCookie);
+
+    return {cookies, token: this.getCsrfToken(cookies)};
+  }
+
+  static getCookies(setCookie: string | string[]): string[] {
+    const headers = Array.isArray(setCookie) ? setCookie : [setCookie];
+    return headers
+      .flatMap((header) => header.split(/,\s*(?=[^;,]+=)/))
+      .map((header) => header.split(';', 1)[0]);
+  }
+
+  static getCsrfToken(setCookie: string | string[]): string {
+    const cookies = this.getCookies(setCookie);
+    const csrfCookie = cookies.find((cookie) => cookie.startsWith('XSRF-TOKEN='));
+    if (!csrfCookie) {
+      throw new Error('CSRF token cookie was not set');
+    }
+    return decodeURIComponent(csrfCookie.split(';', 1)[0].slice('XSRF-TOKEN='.length));
+  }
 
   static async createSharing(testUser: UserDTO, password: string = null): Promise<SharingEntity> {
     const sharing = {

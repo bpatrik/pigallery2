@@ -48,8 +48,11 @@ describe('UserRouter', () => {
 
 
   const login = async (srv: Server): Promise<any> => {
+    const csrf = await RouteTestingHelper.getCsrf(srv.Server);
     const result = await (request.execute(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/user/login')
+      .set('Cookie', csrf.cookies)
+      .set('X-XSRF-TOKEN', csrf.token)
       .send({
         loginCredential: {
           password: testUser.password,
@@ -71,10 +74,20 @@ describe('UserRouter', () => {
       await login(server);
 
     });
+    it('it should reject requests without a CSRF token', async () => {
+      const result = await (request.execute(server.Server) as SuperAgentStatic)
+        .post(Config.Server.apiPath + '/user/login');
+
+      result.should.have.status(403);
+    });
     it('it skip login', async () => {
+      Config.Users.authenticationRequired = true;
+      const csrf = await RouteTestingHelper.getCsrf(server.Server);
       Config.Users.authenticationRequired = false;
       const result = await request.execute(server.Server)
-        .post(Config.Server.apiPath + '/user/login');
+        .post(Config.Server.apiPath + '/user/login')
+        .set('Cookie', csrf.cookies)
+        .set('X-XSRF-TOKEN', csrf.token);
 
       result.should.have.status(404);
     });
@@ -184,11 +197,15 @@ describe('UserRouter', () => {
     it('it should log out the user', async () => {
       Config.Users.authenticationRequired = true;
       const agent = request.agent(server.Server);
+      const csrfRes = await agent.get(Config.Server.apiPath + '/user/me');
+      const csrfToken = RouteTestingHelper.getCsrfToken(csrfRes.headers['set-cookie']);
       const loginRes = await agent.post(Config.Server.apiPath + '/user/login')
+        .set('X-XSRF-TOKEN', csrfToken)
         .send({loginCredential: {password: testUser.password, username: testUser.name, rememberMe: false} as LoginCredential});
       RouteTestingHelper.shouldBeValidUIUser(loginRes, expectedUser);
 
-      const res = await agent.post(Config.Server.apiPath + '/user/logout');
+      const res = await agent.post(Config.Server.apiPath + '/user/logout')
+        .set('X-XSRF-TOKEN', csrfToken);
       res.should.have.status(200);
 
       const me = await agent.get(Config.Server.apiPath + '/user/me');
@@ -203,11 +220,15 @@ describe('UserRouter', () => {
       const sharing = (await RouteTestingHelper.createSharing(testUser, 'pass_secret'));
       const agent = request.agent(server.Server);
 
+      const csrfRes = await agent.get(Config.Server.apiPath + '/user/me');
+      const csrfToken = RouteTestingHelper.getCsrfToken(csrfRes.headers['set-cookie']);
       const loginRes = await agent.post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharing.sharingKey)
+        .set('X-XSRF-TOKEN', csrfToken)
         .send({password: 'pass_secret'});
       RouteTestingHelper.shouldBeValidUIUser(loginRes, RouteTestingHelper.getExpectedSharingUserForUI(sharing));
 
-      const res = await agent.post(Config.Server.apiPath + '/user/logout');
+      const res = await agent.post(Config.Server.apiPath + '/user/logout')
+        .set('X-XSRF-TOKEN', csrfToken);
       res.should.have.status(200);
 
       // password protected sharing needs a new login

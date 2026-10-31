@@ -69,8 +69,11 @@ describe('UploadRouter', () => {
   };
 
   const login = async (srv: Server): Promise<any> => {
+    const csrf = await RouteTestingHelper.getCsrf(srv.Server);
     return await (request.execute(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/user/login')
+      .set('Cookie', csrf.cookies)
+      .set('X-XSRF-TOKEN', csrf.token)
       .send({
         loginCredential: {
           password: adminUser.password,
@@ -88,7 +91,8 @@ describe('UploadRouter', () => {
       const loginRes = await login(server);
       const res = await request.execute(server.Server)
         .post(Config.Server.apiPath + '/upload/')
-        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .set('Cookie', RouteTestingHelper.getCookies(loginRes.res.headers['set-cookie']))
+        .set('X-XSRF-TOKEN', RouteTestingHelper.getCsrfToken(loginRes.res.headers['set-cookie']))
         .attach('files', Buffer.from('test image'), 'test.jpg');
 
       if (res.body.error) {
@@ -107,7 +111,8 @@ describe('UploadRouter', () => {
       const loginRes = await login(server);
       const res = await request.execute(server.Server)
         .post(Config.Server.apiPath + '/upload/sub_dir')
-        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .set('Cookie', RouteTestingHelper.getCookies(loginRes.res.headers['set-cookie']))
+        .set('X-XSRF-TOKEN', RouteTestingHelper.getCsrfToken(loginRes.res.headers['set-cookie']))
         .attach('files', Buffer.from('test image 2'), 'test2.jpg');
 
       res.should.have.status(200);
@@ -120,7 +125,8 @@ describe('UploadRouter', () => {
       const loginRes = await login(server);
       const res = await request.execute(server.Server)
         .post(Config.Server.apiPath + '/upload/')
-        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .set('Cookie', RouteTestingHelper.getCookies(loginRes.res.headers['set-cookie']))
+        .set('X-XSRF-TOKEN', RouteTestingHelper.getCsrfToken(loginRes.res.headers['set-cookie']))
         .attach('files', Buffer.from('test exe'), 'test.exe');
 
       res.should.have.status(200); // Middleware returns success, but result contains errors
@@ -130,8 +136,11 @@ describe('UploadRouter', () => {
     });
 
     it('should return 401 if not authenticated', async () => {
+      const csrf = await RouteTestingHelper.getCsrf(server.Server);
       const res = await request.execute(server.Server)
         .post(Config.Server.apiPath + '/upload/')
+        .set('Cookie', csrf.cookies)
+        .set('X-XSRF-TOKEN', csrf.token)
         .attach('files', Buffer.from('test'), 'test.jpg');
 
       res.should.have.status(401);
