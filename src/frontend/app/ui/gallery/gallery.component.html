@@ -56,10 +56,17 @@
               [(open)]="blogOpen" />
             }
             @if (ShowMap) {
-              <app-gallery-map class="rounded"
-                [class.rounded-start-0]="ShowMarkDown"
-                [photos]="directoryContent?.mediaGroups | photosOnly"
-              [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
+              <!-- Leaflet is not in the initial bundle: it loads when the browser is idle or the map is visible -->
+              @defer (on viewport; prefetch on idle) {
+                <app-gallery-map class="rounded"
+                  [class.rounded-start-0]="ShowMarkDown"
+                  [photos]="directoryContent?.mediaGroups | photosOnly"
+                [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
+              } @placeholder {
+                <div class="gallery-map-placeholder"></div>
+              } @error {
+                <app-reload-after-upgrade />
+              }
             }
           </div>
         }

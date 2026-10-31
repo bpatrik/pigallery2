@@ -419,7 +419,17 @@ export const SearchQueryUtils = {
       return obj;
     };
 
-    return unshorten(JSON.parse(urlQuery));
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(urlQuery);
+    } catch {
+      // not JSON, handled below
+    }
+    // Not a query object, e.g. a hand-typed /search/cat url: search for it as text
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {type: SearchQueryTypes.any_text, value: urlQuery} as TextSearch;
+    }
+    return unshorten(parsed);
 
 
   }

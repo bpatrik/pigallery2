@@ -29,6 +29,8 @@ import {SortingMethod} from '../../../../common/entities/SortingMethods';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
 import {UploaderService, UploadProgress} from './uploader/uploader.service';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../icons';
 
 
 // Mock services
@@ -133,6 +135,7 @@ describe('GalleryComponent', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryComponent],
       providers: [
+        provideIcons(appIcons),
         ChangeDetectorRef,
         {provide: GalleryCacheService, useValue: mockCacheService},
         {provide: ContentLoaderService, useValue: mockContentLoader},
@@ -261,7 +264,6 @@ describe('GalleryComponent', () => {
 
       // Main content container should not be visible when ContentWrapper is null
       const mainContainer = compiled.querySelector('.app-gallery-body');
-      console.log(mainContainer);
       expect(mainContainer).toBeNull();
 
       // Spinner container should also not be visible

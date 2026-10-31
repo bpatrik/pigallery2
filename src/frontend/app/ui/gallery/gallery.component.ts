@@ -27,6 +27,7 @@ import {GalleryNavigatorComponent} from './navigator/navigator.gallery.component
 import {DirectoriesComponent} from './directories/directories.component';
 import {GalleryBlogComponent} from './blog/blog.gallery.component';
 import {GalleryMapComponent} from './map/map.gallery.component';
+import {ReloadAfterUpgradeComponent} from '../../model/lazy-loading';
 import {PhotoFilterPipe} from '../../pipes/PhotoFilterPipe';
 import {MediaButtonModalComponent} from './grid/photo/media-button-modal/media-button-modal.component';
 import {ContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
@@ -53,6 +54,7 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
     DirectoriesComponent,
     GalleryBlogComponent,
     GalleryMapComponent,
+    ReloadAfterUpgradeComponent,
     GalleryGridComponent,
     GPXFilesFilterPipe,
     PhotoFilterPipe,

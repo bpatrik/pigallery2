@@ -21,6 +21,7 @@ import {PiTitleService} from '../../../model/pi-title.service';
 import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
+import {ReloadAfterUpgradeComponent} from '../../../model/lazy-loading';
 
 export enum LightboxStates {
   Open = 1,
@@ -40,7 +41,8 @@ export enum LightboxStates {
     GalleryLightboxMediaComponent,
     NgIconComponent,
     ControlsLightboxComponent,
-    InfoPanelLightboxComponent
+    InfoPanelLightboxComponent,
+    ReloadAfterUpgradeComponent
 ]
 })
 export class GalleryLightboxComponent implements OnDestroy, OnInit {

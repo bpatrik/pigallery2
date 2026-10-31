@@ -6,9 +6,13 @@ import {
   NavigationLinkTypes
 } from '../../../../../src/common/config/public/ClientConfig';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../../src/common/entities/SearchQueryDTO';
+import {Config} from '../../../../../src/common/config/private/Config';
+import {SupportedFormats} from '../../../../../src/common/SupportedFormats';
+import {MediaRendererInput, PhotoWorker} from '../../../../../src/backend/model/fileaccess/PhotoWorker';
 
 declare const describe: any;
 declare const it: any;
+declare const afterEach: any;
 
 describe('ConfigDiagnostics', () => {
 
@@ -97,6 +101,34 @@ describe('ConfigDiagnostics', () => {
       const nb = navBar([new NavigationLinkConfig(NavigationLinkTypes.search)]);
       ConfigDiagnostics.removeInvalidNavigationLinks(nb);
       expect(nb.links.map(l => l.type)).to.deep.equal(new NavBarConfig().links.map(l => l.type));
+    });
+  });
+
+  describe('removeUnsupportedPhotoExtensions', () => {
+    const originalRender = PhotoWorker.renderFromImage;
+    const originalFormats = Config.Media.Photo.supportedFormats.slice();
+
+    afterEach(() => {
+      PhotoWorker.renderFromImage = originalRender;
+      Config.Media.Photo.supportedFormats = originalFormats.slice();
+      SupportedFormats.init(Config);
+    });
+
+    it('should remove the formats that cannot be rendered from the supported formats', async () => {
+      // pretend that png cannot be rendered
+      PhotoWorker.renderFromImage = async (input: MediaRendererInput): Promise<void> => {
+        if (input.mediaPath.endsWith('.png')) {
+          throw new Error('unsupported');
+        }
+      };
+      Config.Media.Photo.supportedFormats = ['jpg', 'png'];
+      SupportedFormats.init(Config);
+
+      await ConfigDiagnostics.removeUnsupportedPhotoExtensions(Config.Media.Photo);
+
+      expect(Config.Media.Photo.supportedFormats).to.deep.equal(['jpg']);
+      expect(SupportedFormats.Photos).to.deep.equal(['jpg']);
+      expect(SupportedFormats.WithDots.Photos).to.deep.equal(['.jpg']);
     });
   });
 });

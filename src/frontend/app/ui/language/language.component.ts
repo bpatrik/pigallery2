@@ -5,6 +5,7 @@ import {CookieService} from 'ngx-cookie-service';
 import { BsDropdownDirective, BsDropdownToggleDirective, BsDropdownMenuDirective } from 'ngx-bootstrap/dropdown';
 
 import { NgIconComponent } from '@ng-icons/core';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'app-language',
@@ -19,6 +20,7 @@ import { NgIconComponent } from '@ng-icons/core';
 })
 export class LanguageComponent {
   private cookieService = inject(CookieService);
+  private router = inject(Router);
 
   languages: string[] = [];
   current: string = null;
@@ -32,8 +34,9 @@ export class LanguageComponent {
     }
   }
 
+  // the server sets the language and redirects back to the current page
   getLanguageUrl(lang: string): string {
-    return Config.Server.getAppUrl(lang);
+    return Config.Server.getAppUrl(lang, this.router.url);
   }
 }
 

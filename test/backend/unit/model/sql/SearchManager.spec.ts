@@ -1792,10 +1792,10 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         p6 = TestHelper.getBasePhotoEntry(subDir2, 'p6-300d-ago.jpg');
         p6.metadata.creationDate = Date.now() - 60 * 60 * 24 * 300 * 1000;
         //p6.metadata.creationDateOffset = "+02:00";
-        p7 = TestHelper.getBasePhotoEntry(subDir2, 'p7-1y-1min-ago.jpg');
+        p7 = TestHelper.getBasePhotoEntry(subDir2, 'p7-1y-ago.jpg');
+        // exactly 1 year ago keeps today's day; the every-year patterns match by day
         const d = new Date();
         d.setUTCFullYear(d.getUTCFullYear() - 1);
-        d.setUTCMinutes(d.getUTCMinutes() - 1);
         p7.metadata.creationDate = d.getTime();
         //p7.metadata.creationDateOffset = "+02:00";
 
@@ -1814,7 +1814,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         sm = new SearchManager();
       });
 
-      //TODO: this is flaky test for mysql
       it('last-0-days:every-year', async () => {
 
 
@@ -1851,7 +1850,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
       });
 
-      //TODO: this is flaky test for mysql
       it('last-1-days:every-year', async () => {
         let query: DatePatternSearch = {
           daysLength: 1,

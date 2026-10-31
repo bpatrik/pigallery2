@@ -28,7 +28,7 @@ app-gallery-blog {
   margin-left: 2px;
 }
 
-app-gallery-map {
+app-gallery-map, .gallery-map-placeholder {
   display: block;
   height: 80px;
   width: 100px;

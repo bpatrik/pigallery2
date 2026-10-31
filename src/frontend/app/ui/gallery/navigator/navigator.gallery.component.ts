@@ -139,7 +139,8 @@ export class GalleryNavigatorComponent {
           if (Array.isArray(availableParents)) {
             return availableParents[index] === true;
           }
-          return user.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
+          // without a user (e.g. while logging out) no parent is available
+          return user?.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
         };
 
         // create root link

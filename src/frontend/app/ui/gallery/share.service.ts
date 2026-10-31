@@ -76,7 +76,6 @@ export class ShareService {
         }
       }
     });
-    this.currentSharing.subscribe((sharing) => console.log('sharing', sharing));
   }
 
   public getUrl(share: ResponseSharingDTO): string {

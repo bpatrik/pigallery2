@@ -356,7 +356,6 @@ export class ConfigDiagnostics {
     }
     Logger.silly(LOG_TAG, 'Sharp supports:\n' + text);
     Logger.silly(LOG_TAG, 'Sharp versions:' + JSON.stringify(sharp.versions));
-
     let removedSome = false;
     let i = config.supportedFormats.length;
     while (i--) {
@@ -381,13 +380,14 @@ export class ConfigDiagnostics {
         Logger.debug(LOG_TAG, `✔️ ${ext} image formats tested successfully.`);
       } catch (e) {
         Logger.verbose(e);
-        Logger.verbose(LOG_TAG, `❌ ${ext} image format tested failed, removing it form config.`);
+        Logger.verbose(LOG_TAG, `❌ ${ext} image format tested failed, removing it from config.`);
         config.supportedFormats.splice(i, 1);
         removedSome = true;
       }
     }
     if (removedSome) {
-      SupportedFormats.init();
+      // the indexer reads the formats from SupportedFormats, not from the config
+      SupportedFormats.init(Config);
     }
   }
 

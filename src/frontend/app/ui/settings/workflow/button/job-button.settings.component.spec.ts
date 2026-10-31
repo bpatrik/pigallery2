@@ -6,6 +6,8 @@ import {NotificationService} from '../../../../model/notification.service';
 import {BackendtextService} from '../../../../model/backendtext.service';
 import {JobDTOUtils} from '../../../../../../common/entities/job/JobDTO';
 import {JobProgressStates, OnTimerJobProgressDTO} from '../../../../../../common/entities/job/JobProgressDTO';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../../icons';
 
 describe('JobButtonComponent', () => {
   let jobsService: {
@@ -30,6 +32,7 @@ describe('JobButtonComponent', () => {
     TestBed.configureTestingModule({
       imports: [JobButtonComponent],
       providers: [
+        provideIcons(appIcons),
         {provide: ScheduledJobsService, useValue: jobsService},
         {provide: NotificationService, useValue: null},
         {provide: BsModalService, useValue: null},

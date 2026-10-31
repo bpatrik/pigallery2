@@ -48,10 +48,15 @@
     }
   </div>
 
-  @if (activePhoto && infoPanelVisible) {
-    <app-info-panel id="info-panel"
-      [style.width.px]="infoPanelWidth"
-      [media]="activePhoto.gridMedia().media"
-      (closed)="hideInfoPanel()" />
+  <!-- the info panel has a map, so it loads leaflet: prefetched when the browser is idle -->
+  @defer (when activePhoto && infoPanelVisible; prefetch on idle) {
+    @if (activePhoto && infoPanelVisible) {
+      <app-info-panel id="info-panel"
+        [style.width.px]="infoPanelWidth"
+        [media]="activePhoto.gridMedia().media"
+        (closed)="hideInfoPanel()" />
+    }
+  } @error {
+    <app-reload-after-upgrade />
   }
 </div>
