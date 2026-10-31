@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import {Config} from '../src/common/config/private/Config';
 import {ProjectPath} from '../src/backend/ProjectPath';
 import {BenchmarkResult, BenchmarkRunner} from './BenchmarkRunner';

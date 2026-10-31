@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import 'reflect-metadata';
 import {
   AfterJobTrigger,
   JobScheduleDTO,

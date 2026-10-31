@@ -130,8 +130,7 @@
             "allowedCommonJsDependencies": [
               "hammerjs",
               "leaflet",
-              "leaflet.markercluster",
-              "reflect-metadata"
+              "leaflet.markercluster"
             ]
           },
           "configurations": {
