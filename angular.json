@@ -128,7 +128,6 @@
             "scripts": [],
             "i18nMissingTranslation": "warning",
             "allowedCommonJsDependencies": [
-              "hammerjs",
               "leaflet",
               "leaflet.markercluster"
             ]

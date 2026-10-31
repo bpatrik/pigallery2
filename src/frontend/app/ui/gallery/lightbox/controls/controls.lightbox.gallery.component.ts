@@ -19,13 +19,12 @@ import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective}
 import {FormsModule} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/gesture.directive';
 
 
 @Component({
   selector: 'app-lightbox-controls',
   host: {
-    '(pinch)': 'pinch($event)',
-    '(pinchend)': 'pinchend($event)',
     '(window:keydown)': 'onKeyPress($event)',
     '(mousemove)': 'onMouseMove()'
   },
@@ -37,7 +36,8 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
     FormsModule,
-    RouterLink
+    RouterLink,
+    GestureDirective
 ]
 })
 export class ControlsLightboxComponent implements OnDestroy, OnChanges {
@@ -148,7 +148,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
-  pan($event: { deltaY: number; deltaX: number; isFinal: boolean }): void {
+  pan($event: PanEvent): void {
     const activePhoto = this.activePhoto();
     if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
@@ -192,32 +192,21 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
-  // pinch events come from HammerJS, Angular only types them as Event
-  pinch($event: Event): void {
+  pinch($event: PinchEvent): void {
     const activePhoto = this.activePhoto();
     if (!activePhoto || activePhoto.gridMedia().isVideo()) {
       return;
     }
     this.showControls();
-    this.Zoom = this.prevZoom * ($event as Event & { scale: number }).scale;
+    this.Zoom = this.prevZoom * $event.scale;
+    if ($event.isFinal) {
+      this.prevZoom = this.zoom;
+    }
   }
 
-  pinchend($event: Event): void {
+  doubleTap(): void {
     const activePhoto = this.activePhoto();
     if (!activePhoto || activePhoto.gridMedia().isVideo()) {
-      return;
-    }
-    this.showControls();
-    this.Zoom = this.prevZoom * ($event as Event & { scale: number }).scale;
-    this.prevZoom = this.zoom;
-  }
-
-  tap($event: Event): void {
-    const activePhoto = this.activePhoto();
-    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
-      return;
-    }
-    if (($event as unknown as { tapCount: number }).tapCount < 2) {
       return;
     }
 
