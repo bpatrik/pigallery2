@@ -10,7 +10,7 @@ import {BsModalRef} from 'ngx-bootstrap/modal';
 import {Subscription} from 'rxjs';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
-import { ClipboardService, ClipboardModule } from 'ngx-clipboard';
+import {copyToClipboard, CopyDirective} from '../../utils/copy/copy.directive';
 import {ContentLoaderService} from '../contentLoader.service';
 import { DatePipe } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
@@ -25,7 +25,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     imports: [
     NgIconComponent,
     FormsModule,
-    ClipboardModule,
+    CopyDirective,
     DatePipe,
     StringifySearchQuery
 ]
@@ -36,7 +36,6 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   private notification = inject(NotificationService);
   private modalService = inject(BsModalService);
   authService = inject(AuthenticationService);
-  private clipboardService = inject(ClipboardService);
 
   enabled = true;
   readonly dropDownItem = input(false);
@@ -283,11 +282,9 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
 
   async share() {
     await this.get();
-    if (this.clipboardService.isSupported) {
-      this.clipboardService.copy(this.url);
+    if (await copyToClipboard(this.url)) {
       this.onCopy();
     }
-
   }
 
 }

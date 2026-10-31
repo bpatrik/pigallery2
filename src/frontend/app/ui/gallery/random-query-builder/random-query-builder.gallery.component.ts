@@ -13,7 +13,7 @@ import {SearchQueryParserService} from '../search/search-query-parser.service';
 import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import { ClipboardModule } from 'ngx-clipboard';
+import {CopyDirective} from '../../utils/copy/copy.directive';
 import { GallerySearchQueryBuilderComponent } from '../search/query-builder/query-bulder.gallery.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
@@ -24,7 +24,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     imports: [
         NgIconComponent,
         FormsModule,
-        ClipboardModule,
+        CopyDirective,
         GallerySearchQueryBuilderComponent,
     ]
 })

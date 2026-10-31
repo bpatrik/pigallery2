@@ -1,5 +1,4 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {provideRouter} from '@angular/router';
 import {NgIconsModule} from '@ng-icons/core';
 import {
@@ -62,7 +61,6 @@ describe('ControlsLightboxComponent - cursor visibility', () => {
         {provide: LightboxService, useClass: MockLightboxService},
         {provide: FullScreenService, useClass: MockFullScreenService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
-        provideNoopAnimations(),
         provideRouter([]),
       ],
     }).compileComponents();

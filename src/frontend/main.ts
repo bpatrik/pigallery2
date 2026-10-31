@@ -1,27 +1,14 @@
-import {importProvidersFrom, Injectable, provideZoneChangeDetection} from '@angular/core';
+import {provideZoneChangeDetection} from '@angular/core';
 import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
 import {errorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigationErrorHandler, withPreloading} from '@angular/router';
-import {bootstrapApplication, HAMMER_GESTURE_CONFIG, HammerGestureConfig, HammerModule} from '@angular/platform-browser';
-import {provideAnimations} from '@angular/platform-browser/animations';
+import {bootstrapApplication} from '@angular/platform-browser';
 import {routes} from './app/app.routing';
 import {provideIcons} from '@ng-icons/core';
-import {provideToastr} from 'ngx-toastr';
 import {provideMarkdown} from 'ngx-markdown';
 import {AppComponent} from './app/app.component';
 import {appIcons} from './app/icons';
 import {PreloadMarkedRoutes, reloadOnChunkLoadError} from './app/model/lazy-loading';
-
-@Injectable()
-export class MyHammerConfig extends HammerGestureConfig {
-  events: string[] = ['pinch'];
-  overrides = {
-    pan: {threshold: 1},
-    swipe: {direction: 31}, // enable swipe up
-    pinch: {enable: true},
-  };
-}
-
 
 export class CustomUrlSerializer implements UrlSerializer {
   private defaultUrlSerializer: DefaultUrlSerializer =
@@ -45,16 +32,12 @@ export class CustomUrlSerializer implements UrlSerializer {
 bootstrapApplication(AppComponent, {
   providers: [
     provideZoneChangeDetection(),
-    importProvidersFrom(HammerModule),
     provideRouter(routes, withPreloading(PreloadMarkedRoutes), withNavigationErrorHandler(reloadOnChunkLoadError)),
     provideIcons(appIcons),
-    provideToastr(),
     provideMarkdown({loader: HttpClient}),
     {provide: UrlSerializer, useClass: CustomUrlSerializer},
-    {provide: HAMMER_GESTURE_CONFIG, useClass: MyHammerConfig},
     // No withFetch(): the fetch backend does not emit upload progress events, which the uploader needs.
-    provideHttpClient(withInterceptors([errorInterceptor])),
-    provideAnimations()
+    provideHttpClient(withInterceptors([errorInterceptor]))
   ]
 })
   .catch((err) => console.error(err));

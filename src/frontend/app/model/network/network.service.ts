@@ -99,6 +99,10 @@ export class NetworkService {
       },
       error: () => {
         this.loadingBarService.useRef().complete();
+      },
+      // the upload was canceled
+      unsubscribe: () => {
+        this.loadingBarService.useRef().complete();
       }
     }));
   }

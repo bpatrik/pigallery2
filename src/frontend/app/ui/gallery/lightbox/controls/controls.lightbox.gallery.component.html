@@ -150,11 +150,13 @@
 
           <div id="swipeable-container"
             [class.hide-cursor]="controllersDimmed"
-            (swipeleft)="zoom == 1 && nextPhoto.emit()"
-            (swiperight)="zoom == 1 && previousPhoto.emit()"
-            (swipeup)="zoom == 1 && closed.emit()"
-            (tap)="tap($event)"
-            (pan)="pan($any($event))"
+            appGesture
+            (swipeLeft)="zoom == 1 && nextPhoto.emit()"
+            (swipeRight)="zoom == 1 && previousPhoto.emit()"
+            (swipeUp)="zoom == 1 && closed.emit()"
+            (doubleTap)="doubleTap()"
+            (pan)="pan($event)"
+            (pinch)="pinch($event)"
             (wheel)="wheel($event)"
             (click)="mediaElement().playPause()">
 

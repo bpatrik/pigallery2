@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
+import {Subscription} from 'rxjs';
 import {NetworkService} from '../../../model/network/network.service';
 import {UploadUtils} from '../../../../../common/UploadUtils';
 import {Utils} from '../../../../../common/Utils';
@@ -8,15 +9,15 @@ import {Config} from '../../../../../common/config/public/Config';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NotificationService} from '../../../model/notification.service';
 import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
+import {ToastRef, ToastService, ToastSummary} from '../../toast/toast.service';
 
+// A file while it is queued or uploading. Its toast shows the progress.
 export interface UploadProgress {
   name: string;
   progress: number;
-  error?: string;
-  done: boolean;
-  status?: 'queued' | 'uploading' | 'done' | 'error';
-  lastUpdate: number;
-  count?: number; // Added for consolidated items
+  status: 'queued' | 'uploading';
+  toast: ToastRef;
+  request?: Subscription; // unsubscribing aborts the upload
 }
 
 interface QueuedUpload {
@@ -33,8 +34,14 @@ export class UploaderService {
   private notificationService = inject(NotificationService);
   private authService = inject(AuthenticationService);
   private contentLoaderService = inject(ContentLoaderService);
+  private toastService = inject(ToastService);
 
+  private static readonly TOAST_GROUP = 'uploads';
   public uploadProgress: UploadProgress[] = [];
+  // Result of the current batch: everything uploaded since the queue was last empty
+  private batchUploaded = 0;
+  private batchFailed = 0;
+  private batchCanceled = 0;
   private uploadQueue: QueuedUpload[] = [];
   private activeUploads = 0;
   private MAX_CONCURRENT_UPLOADS = 1;
@@ -43,6 +50,27 @@ export class UploaderService {
   private speedTimer: any = null;
   private lastProgressSum = 0;
   private lastUpdateTimestamp = 0;
+
+  constructor() {
+    // More than 5 files collapse into one card with the overall progress
+    this.toastService.registerGroup(UploaderService.TOAST_GROUP, {
+      collapseAfter: 5,
+      visibleWhenCollapsed: 0,
+      summary: (toasts, hidden, expanded): ToastSummary => {
+        const failed = toasts.filter((t) => t.type === 'error').length;
+        const running = toasts.filter((t) => t.type === 'progress').length;
+        return {
+          type: failed > 0 ? 'warning' : 'progress',
+          title: expanded ? $localize`Hide details` : $localize`Uploading files: ${toasts.length}:count:`,
+          text: failed > 0 ? $localize`Failed: ${failed}:count:` : null,
+          progress: expanded ? null : Math.round(toasts.reduce((sum, t) => sum + (t.progress ?? 100), 0) / toasts.length),
+          // nothing is running anymore: the whole list can be closed
+          closable: running === 0,
+          onCancel: running > 0 ? (): void => this.cancelAll() : undefined
+        };
+      }
+    });
+  }
 
   public canUpload(): boolean {
     const dir = this.contentLoaderService.content.value.directory;
@@ -104,10 +132,20 @@ export class UploaderService {
         const progressItem: UploadProgress = {
           name: f.name,
           progress: 0,
-          done: false,
           status: 'queued',
-          lastUpdate: Date.now()
+          toast: null
         };
+        progressItem.toast = this.toastService.open({
+          type: 'progress',
+          color: 'secondary',
+          title: f.name,
+          text: $localize`Queued`,
+          progress: 0,
+          group: UploaderService.TOAST_GROUP,
+          closable: false,
+          wrap: false,
+          onCancel: (): void => this.cancel(progressItem)
+        });
         progressItems.push(progressItem);
         this.uploadQueue.push({
           file: f,
@@ -118,17 +156,16 @@ export class UploaderService {
     }
 
     if (existingFiles.length > 0) {
-      const existingItem: UploadProgress = {
-        name: existingFiles.length === 1 ? existingFiles[0].name : existingFiles.length + ' ' + $localize`files already exist`,
-        progress: 100,
-        done: true,
-        status: 'error',
-        lastUpdate: Date.now(),
-        error: $localize`File already exists`,
-        count: existingFiles.length
-      };
-      this.uploadProgress.push(existingItem);
-      this._cleanupProgress([existingItem]);
+      // Skipped, not failed: nothing to do about it
+      this.toastService.open({
+        type: 'warning',
+        title: existingFiles.length === 1 ? existingFiles[0].name : $localize`Files already exist: ${existingFiles.length}:count:`,
+        text: existingFiles.length === 1 ? $localize`File already exists` : null,
+        timeout: ToastService.TIMEOUT,
+        placement: 'bottom-right',
+        group: UploaderService.TOAST_GROUP,
+        wrap: false
+      });
     }
 
     if (progressItems.length === 0) {
@@ -189,75 +226,123 @@ export class UploaderService {
   private _uploadFile(upload: QueuedUpload): void {
     const {file, directory, progressItem} = upload;
     progressItem.status = 'uploading';
+    progressItem.toast.update({color: undefined, text: '0%'});
 
     const formData = new FormData();
     formData.append('files', file);
 
     const url = '/upload/' + (directory || '');
 
-    this.networkService.postFormData<any>(url, formData).subscribe({
+    progressItem.request = this.networkService.postFormData<any>(url, formData).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress) {
           progressItem.progress = Math.round((100 * event.loaded) / event.total);
-          progressItem.lastUpdate = Date.now();
+          progressItem.toast.update({
+            progress: progressItem.progress,
+            text: progressItem.progress + '%',
+            // Sent completely: the server may already be saving it, canceling would not undo that
+            ...(progressItem.progress >= 100 ? {onCancel: undefined} : {})
+          });
         } else if (event.type === HttpEventType.Response) {
           const response = event.body as any;
           const serverErrors = (response && response.result) ? response.result : [];
 
           const serverError = serverErrors.find((e: any) => e.filename === progressItem.name);
           if (serverError) {
-            progressItem.error = serverError.error;
-            progressItem.status = 'error';
+            this.onUploadFailed(progressItem, serverError.error);
           } else {
-            progressItem.progress = 100;
-            progressItem.lastUpdate = Date.now();
-            progressItem.status = 'done';
+            this.batchUploaded++;
+            // a success needs no action, so it hides like the other short messages
+            progressItem.toast.update({
+              type: 'success',
+              text: null,
+              progress: 100,
+              timeout: ToastService.TIMEOUT,
+              closable: true,
+              onCancel: undefined
+            });
+            this.onUploadFinished(progressItem);
           }
-          progressItem.done = true;
-
-          this.activeUploads--;
-          this.processQueue();
-
-          if (this.activeUploads === 0 && this.uploadQueue.length === 0) {
-            this.notificationService.success($localize`Upload completed.`);
-            this.contentLoaderService.reloadCurrentContent().catch(console.error);
-            this.MAX_CONCURRENT_UPLOADS = this.DEFAULT_MAX_CONCURRENT_UPLOADS; // Reset for next batch
-          }
-          this._cleanupProgress([progressItem]);
         }
       },
       error: (err) => {
-        progressItem.error = err.message || err;
-        progressItem.done = true;
-        progressItem.status = 'error';
-        progressItem.lastUpdate = Date.now();
-
-        this.activeUploads--;
-        this.processQueue();
-
-        if (this.activeUploads === 0 && this.uploadQueue.length === 0) {
-          this.notificationService.error($localize`Upload failed.`);
-          this.MAX_CONCURRENT_UPLOADS = this.DEFAULT_MAX_CONCURRENT_UPLOADS; // Reset for next batch
-        }
-        this._cleanupProgress([progressItem]);
+        this.onUploadFailed(progressItem, err.message || err);
       }
     });
   }
 
-  private _cleanupProgress(items: UploadProgress[]): void {
-    // Remove from list after some time
-    items.forEach(item => {
-      setTimeout(() => {
-        if (!item.done && item.status !== 'error') {
-          // If for some reason it's not done yet, retry later
-          this._cleanupProgress([item]);
-          return;
-        }
-        const idx = this.uploadProgress.indexOf(item);
-        if (idx !== -1) {
-          this.uploadProgress.splice(idx, 1);
-        }
-      }, 5000);
+  // Stops a queued file, or aborts it while it is being sent
+  public cancel(progressItem: UploadProgress): void {
+    const queueIndex = this.uploadQueue.findIndex((u) => u.progressItem === progressItem);
+    if (queueIndex === -1 && (progressItem.status !== 'uploading' || progressItem.progress >= 100)) {
+      return; // already finished, or the server may already be saving it
+    }
+    this.batchCanceled++;
+    progressItem.toast.close();
+    if (queueIndex !== -1) {
+      this.uploadQueue.splice(queueIndex, 1);
+      this.uploadProgress.splice(this.uploadProgress.indexOf(progressItem), 1);
+      this.finishBatchIfDone();
+      return;
+    }
+    progressItem.request.unsubscribe();
+    this.onUploadFinished(progressItem);
+  }
+
+  public cancelAll(): void {
+    // the queued ones first, so canceling a running one does not start them
+    const queued = this.uploadQueue.map((u) => u.progressItem);
+    queued.forEach((p) => this.cancel(p));
+    [...this.uploadProgress].forEach((p) => this.cancel(p));
+  }
+
+  // An error needs the user's attention, so its toast stays until it is closed
+  private onUploadFailed(progressItem: UploadProgress, error: string): void {
+    this.batchFailed++;
+    progressItem.toast.update({
+      type: 'error',
+      color: undefined,
+      text: error,
+      progress: 100,
+      closable: true,
+      wrap: true,
+      onCancel: undefined
     });
+    this.onUploadFinished(progressItem);
+  }
+
+  private onUploadFinished(progressItem: UploadProgress): void {
+    this.uploadProgress.splice(this.uploadProgress.indexOf(progressItem), 1);
+    this.activeUploads--;
+    this.processQueue();
+    this.finishBatchIfDone();
+  }
+
+  private finishBatchIfDone(): void {
+    if (this.activeUploads > 0 || this.uploadQueue.length > 0) {
+      return;
+    }
+
+    // The whole batch finished
+    this.MAX_CONCURRENT_UPLOADS = this.DEFAULT_MAX_CONCURRENT_UPLOADS; // Reset for next batch
+    if (this.batchUploaded > 0) {
+      this.contentLoaderService.reloadCurrentContent().catch(console.error);
+    }
+    if (this.batchUploaded === 0 && this.batchFailed === 0) {
+      if (this.batchCanceled > 0) {
+        this.notificationService.info($localize`Upload canceled.`);
+      }
+    } else if (this.batchFailed === 0) {
+      this.notificationService.success($localize`Uploaded files: ${this.batchUploaded}:count:`, $localize`Upload completed.`);
+    } else if (this.batchUploaded > 0) {
+      this.notificationService.warning(
+        $localize`Uploaded: ${this.batchUploaded}:uploaded:, failed: ${this.batchFailed}:failed:`,
+        $localize`Upload completed with errors`);
+    } else {
+      this.notificationService.error($localize`Failed files: ${this.batchFailed}:count:`, $localize`Upload failed.`);
+    }
+    this.batchUploaded = 0;
+    this.batchFailed = 0;
+    this.batchCanceled = 0;
   }
 }

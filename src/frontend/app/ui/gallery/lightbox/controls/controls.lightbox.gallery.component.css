@@ -37,6 +37,7 @@
   position: absolute;
   height: 100%;
   width: 100%;
+  touch-action: none; /* the gesture directive handles swipe, pan and pinch */
 }
 
 #rightArrow {

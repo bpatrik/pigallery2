@@ -20,7 +20,6 @@ import {GalleryCacheService} from './cache.gallery.service';
 import {ContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {FullScreenService} from './fullscreen.service';
 import {OverlayService} from './overlay.service';
-import {provideNoopAnimations} from '@angular/platform-browser/animations';
 import {QueryService} from '../../model/query.service';
 import {NotificationService} from '../../model/notification.service';
 import {GalleryNavigatorService} from './navigator/navigator.service';
@@ -182,7 +181,6 @@ describe('GalleryComponent', () => {
         LeafletMarkerClusterModule,
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideNoopAnimations(),
         provideRouter([])
       ]
     }).compileComponents();
