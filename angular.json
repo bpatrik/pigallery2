@@ -204,9 +204,6 @@
           "options": {
             "buildTarget": "pigallery2:build:dev",
             "tsConfig": "src/frontend/tsconfig.spec.json",
-            "setupFiles": [
-              "src/frontend/test-setup.ts"
-            ],
             "coverageReporters": [
               "html",
               "lcovonly",

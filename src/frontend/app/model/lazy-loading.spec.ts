@@ -57,6 +57,7 @@ describe('reloadAfterUpgrade', () => {
 
   afterEach(() => {
     sessionStorage.removeItem('pigallery2-chunk-reload');
+    vi.restoreAllMocks();
   });
 
   it('should reload a lazy route that failed to load', () => {

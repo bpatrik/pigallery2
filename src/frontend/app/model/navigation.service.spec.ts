@@ -29,6 +29,10 @@ describe('NavigationService', () => {
     return {router, shareService, service};
   };
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('toLogin', () => {
     it('should navigate to share login for password protected sharing', async () => {
       const {router, shareService, service} = setUp({sharingKey: 'key', passwordProtected: true});

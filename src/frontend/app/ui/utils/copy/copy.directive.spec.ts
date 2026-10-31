@@ -11,18 +11,32 @@ class HostComponent {
   copied = 0;
 }
 
+// jsdom has no clipboard, secure context or execCommand, so each test sets up the browser it needs
+const setUpBrowser = (secure: boolean, execCommand: (command: string) => boolean = () => true) => {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', {value: {writeText}, configurable: true});
+  Object.defineProperty(window, 'isSecureContext', {value: secure, configurable: true});
+  document.execCommand = vi.fn(execCommand);
+  return writeText;
+};
+
+afterEach(() => {
+  delete (navigator as {clipboard?: Clipboard}).clipboard;
+  delete (window as {isSecureContext?: boolean}).isSecureContext;
+  delete (document as Partial<Document>).execCommand;
+});
+
 describe('copyToClipboard', () => {
 
   it('should use navigator.clipboard in a secure context', async () => {
-    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    const writeText = setUpBrowser(true);
     expect(await copyToClipboard('text')).toBe(true);
     expect(writeText).toHaveBeenCalledWith('text');
   });
 
   it('should fall back to a textarea without navigator.clipboard (plain http)', async () => {
-    vi.spyOn(window, 'isSecureContext', 'get').mockReturnValue(false);
     let copied: string = null;
-    vi.spyOn(document, 'execCommand').mockImplementation((command: string): boolean => {
+    setUpBrowser(false, (command: string): boolean => {
       const textarea = document.querySelector('textarea');
       copied = command === 'copy' ? textarea.value.substring(textarea.selectionStart, textarea.selectionEnd) : null;
       return true;
@@ -33,8 +47,7 @@ describe('copyToClipboard', () => {
   });
 
   it('should report a refused copy', async () => {
-    vi.spyOn(window, 'isSecureContext', 'get').mockReturnValue(false);
-    vi.spyOn(document, 'execCommand').mockReturnValue(false);
+    setUpBrowser(false, () => false);
     expect(await copyToClipboard('text')).toBe(false);
   });
 });
@@ -42,7 +55,7 @@ describe('copyToClipboard', () => {
 describe('CopyDirective', () => {
 
   it('should copy the bound text on click and emit copied', async () => {
-    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    const writeText = setUpBrowser(true);
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
     fixture.nativeElement.querySelector('button').click();

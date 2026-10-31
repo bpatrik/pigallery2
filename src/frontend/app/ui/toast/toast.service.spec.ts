@@ -21,6 +21,10 @@ describe('ToastService', () => {
     service = TestBed.inject(ToastService);
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('should place toasts that hide by themselves at the top and the others at the bottom right', () => {
     service.open({type: 'success', text: 'Saved', timeout: ToastService.TIMEOUT});
     service.open({type: 'progress', title: 'Balaton.jpg', progress: 0});

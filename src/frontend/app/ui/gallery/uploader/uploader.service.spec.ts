@@ -68,6 +68,7 @@ describe('UploaderService', () => {
 
   afterEach(() => {
     Config.Upload.enabled = uploadEnabled;
+    vi.useRealTimers();
   });
 
   it('should show the progress of each file at the bottom right', async () => {

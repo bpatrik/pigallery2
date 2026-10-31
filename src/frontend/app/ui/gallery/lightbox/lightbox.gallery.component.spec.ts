@@ -158,7 +158,8 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     mockRouter = new MockRouter(mockActivatedRoute);
     mockAuthenticationService = new MockAuthenticationService();
     mockGalleryCacheService = new MockGalleryCacheService();
-    vi.spyOn(HTMLElement.prototype, 'animate').mockImplementation(mockAnimate);
+    // jsdom has no Web Animations API
+    HTMLElement.prototype.animate = mockAnimate;
 
     await TestBed.configureTestingModule({
       imports: [GalleryLightboxComponent],
@@ -210,6 +211,11 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     (component as any).controls = () => controls;
 
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    delete (HTMLElement.prototype as Partial<HTMLElement>).animate;
   });
 
   it('should create', () => {

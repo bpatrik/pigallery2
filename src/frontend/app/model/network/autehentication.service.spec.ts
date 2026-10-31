@@ -74,6 +74,10 @@ describe('AuthenticationService', () => {
     });
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('should call UserDTO service login', inject(
       [AuthenticationService, UserService],
       async (authService: AuthenticationService, userService: UserService) => {

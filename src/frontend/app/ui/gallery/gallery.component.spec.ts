@@ -28,6 +28,8 @@ import {SortingMethod} from '../../../../common/entities/SortingMethods';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
 import {UploaderService, UploadProgress} from './uploader/uploader.service';
+import {ThemeService} from '../../model/theme.service';
+import {DeviceHelper} from '../../model/device.helper';
 import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../icons';
 
@@ -112,6 +114,11 @@ class MockUploaderService{
   public uploadProgress: unknown[] = [];
 }
 
+// the map reads the dark mode; the real service needs window.matchMedia, which jsdom lacks
+class MockThemeService {
+  darkMode = new BehaviorSubject(false);
+}
+
 
 describe('GalleryComponent', () => {
   let component: GalleryComponent;
@@ -125,6 +132,8 @@ describe('GalleryComponent', () => {
     // Reset Config to default state
     Config.load();
     Config.Server.languages = ['en'];
+    // the frame asks for it; it needs window.matchMedia, which jsdom lacks
+    vi.spyOn(DeviceHelper, 'isTouchDevice').mockReturnValue(false);
 
     mockContentLoader = new MockContentLoaderService();
     mockAuthService = new MockAuthenticationService();
@@ -147,6 +156,7 @@ describe('GalleryComponent', () => {
         {provide: PiTitleService, useClass: MockPiTitleService},
         {provide: BlogService, useClass: MockBlogService},
         {provide: UploaderService, useClass: MockUploaderService},
+        {provide: ThemeService, useClass: MockThemeService},
         {provide: FullScreenService, useValue: {mock: vi.fn()}},
         {provide: OverlayService, useValue: {mock: vi.fn()}},
         {provide: QueryService, useValue: {getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
@@ -190,6 +200,10 @@ describe('GalleryComponent', () => {
   };
 
   beforeEach(setUp);
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 
   it('should create', () => {
     expect(component).toBeTruthy();

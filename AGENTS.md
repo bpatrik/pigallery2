@@ -20,6 +20,8 @@ The photo folder is never modified.
   while the browser is a normal phone/desktop. Push work to the client when it makes sense; keep server queries lean.
 - **Dev velocity matters.** This is a single-maintainer project. Prefer simple, direct solutions over abstractions,
   backward-compatibility shims or migration code.
+- **Stay close to framework defaults.** Prefer the industry-standard, framework-default setup (e.g. what `ng new` generates)
+  over keeping how a legacy setup behaved or adding custom config, so `ng update` and other upgrade scripts keep working.
 - **DB breaking changes are fine.** The DB is treated as a cache of the photo folder: bump `DataStructureVersion`
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
 - **Config breaking changes: avoid if easy.** Keep existing config keys working when that's cheap,
@@ -54,9 +56,13 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
 - Frontend unit tests: `npm run test-frontend` (Vitest in jsdom, no browser needed). Single file: `npx ng test --watch=false --include=<path>.spec.ts`.
-  - jsdom has no layout. Missing browser APIs are stubbed in `src/frontend/test-setup.ts`.
-  - `vi.spyOn()` calls the real method unless you mock it. Use `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync()`,
-    not `fakeAsync`/`tick` (they don't work without a zone-aware test runner).
+  - The test setup is Angular's default (no Vitest config or setup file); keep it that way. Each spec is self-contained.
+  - jsdom has no layout and lacks some browser APIs (`matchMedia`, `animate`, clipboard). Prefer faking the dependency
+    through TestBed providers; otherwise stub it in the spec and remove the stub in `afterEach`.
+  - Spec files share one global scope. `vi.spyOn()` on anything that outlives the test (globals, `console`, static helpers)
+    needs `vi.restoreAllMocks()` in `afterEach`. `vi.spyOn()` calls the real method unless you mock it.
+  - Use `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync()`, not `fakeAsync`/`tick` (they don't work without
+    a zone-aware test runner), and call `vi.useRealTimers()` in the spec's `afterEach`.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
