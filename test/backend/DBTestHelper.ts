@@ -20,6 +20,7 @@ import {SessionManager} from '../../src/backend/model/database/SessionManager';
 import {DirectoryEntity} from '../../src/backend/model/database/enitites/DirectoryEntity';
 import {MediaEntity} from '../../src/backend/model/database/enitites/MediaEntity';
 import {ProjectedDirectoryCacheEntity} from '../../src/backend/model/database/enitites/ProjectedDirectoryCacheEntity';
+import {VersionEntity} from '../../src/backend/model/database/enitites/VersionEntity';
 
 declare let describe: any;
 const savedDescribe = describe;
@@ -47,6 +48,7 @@ const LOG_TAG = '[DBTestHelper]';
 
 export class DBTestHelper {
 
+  private static mysqlSchemeBuilt = false;
   static enable = {
     sqlite: process.env.TEST_SQLITE !== 'false',
     mysql: process.env.TEST_MYSQL !== 'false'
@@ -263,9 +265,40 @@ export class DBTestHelper {
     // reset first: it waits for background saves that would otherwise hit the dropped tables
     await ObjectManagers.reset();
     const conn = await SQLConnection.getConnection();
-    await conn.dropDatabase();
+    // Rebuilding the scheme is slow on MySQL, so do it only once per run (to pick up entity changes)
+    // and only empty the tables afterward. Keeping the version row skips the rebuild in schemeSync.
+    if (!DBTestHelper.mysqlSchemeBuilt || !(await DBTestHelper.truncateMysql(conn))) {
+      await conn.dropDatabase();
+      DBTestHelper.mysqlSchemeBuilt = true;
+    }
     await SQLConnection.close();
     await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
+  }
+
+  /**
+   * Empties every table except the version and resets the ids, like a fresh DB.
+   * DELETE + resetting AUTO_INCREMENT is several times faster than TRUNCATE on InnoDB.
+   * Returns false if it failed (e.g. a test dropped some tables).
+   */
+  private static async truncateMysql(conn: Connection): Promise<boolean> {
+    const versionTable = conn.getMetadata(VersionEntity).tableName;
+    const tables = new Set(conn.entityMetadatas.map(m => m.tableName));
+    tables.delete(versionTable);
+    const qr = conn.createQueryRunner();
+    try {
+      await qr.query('SET FOREIGN_KEY_CHECKS = 0');
+      for (const table of tables) {
+        await qr.query('DELETE FROM `' + table + '`');
+        await qr.query('ALTER TABLE `' + table + '` AUTO_INCREMENT = 1');
+      }
+      return true;
+    } catch (e) {
+      Logger.debug(LOG_TAG, 'Could not truncate mysql tables, dropping the db', e);
+      return false;
+    } finally {
+      await qr.query('SET FOREIGN_KEY_CHECKS = 1');
+      await qr.release();
+    }
   }
 
   private async initSQLite(): Promise<void> {
