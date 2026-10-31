@@ -3,6 +3,7 @@ import {
   ANDSearchQuery,
   DatePatternFrequency,
   DatePatternSearch,
+  DirectorySearch,
   ORSearchQuery,
   SearchQueryDTO,
   SearchQueryTypes,
@@ -293,5 +294,217 @@ describe('SearchQueryDTOUtils.urlify', () => {
       ]
     };
     assertValid(q);
+  });
+});
+
+describe('SearchQueryDTOUtils.validateDirectoryList', () => {
+  const dq = (value: string, matchType?: TextSearchQueryMatchTypes, negate?: boolean): DirectorySearch =>
+    ({type: SearchQueryTypes.directory, value, matchType, negate});
+
+  it('should accept empty and valid lists', () => {
+    expect(() => SearchQueryUtils.validateDirectoryList(null)).to.not.throw();
+    expect(() => SearchQueryUtils.validateDirectoryList([])).to.not.throw();
+    expect(() => SearchQueryUtils.validateDirectoryList([
+      dq('/photos'),
+      dq('/photos/*', TextSearchQueryMatchTypes.globMatch, true),
+      dq('photos', TextSearchQueryMatchTypes.like, false)
+    ])).to.not.throw();
+  });
+
+  it('should reject invalid lists', () => {
+    const invalid: any[] = [
+      dq('photos'), // not an array
+      [{type: SearchQueryTypes.keyword, value: 'photos'}],
+      [{value: 'photos'}],
+      [dq('')],
+      [dq('   ')],
+      [null],
+      [{type: SearchQueryTypes.directory, value: 'photos', matchType: 999}],
+      [{type: SearchQueryTypes.directory, value: 'photos', negate: 'true'}]
+    ];
+    for (const list of invalid) {
+      expect(() => SearchQueryUtils.validateDirectoryList(list), JSON.stringify(list)).to.throw();
+    }
+  });
+});
+
+describe('SearchQueryDTOUtils.directoryListToQuery', () => {
+  it('should return null for empty list', () => {
+    expect(SearchQueryUtils.directoryListToQuery(null)).to.be.null;
+    expect(SearchQueryUtils.directoryListToQuery([])).to.be.null;
+  });
+
+  it('should return the directory search for a single entry', () => {
+    expect(SearchQueryUtils.directoryListToQuery([{type: SearchQueryTypes.directory, value: '/photos'}])).to.deep.equal({
+      type: SearchQueryTypes.directory,
+      value: '/photos'
+    } as TextSearch);
+  });
+
+  it('should convert multiple entries to an OR query and keep negate and match type', () => {
+    expect(SearchQueryUtils.directoryListToQuery([
+      {type: SearchQueryTypes.directory, value: '/photos', negate: false},
+      {type: SearchQueryTypes.directory, value: '/photos/*', matchType: TextSearchQueryMatchTypes.globMatch, negate: true}
+    ])).to.deep.equal({
+      type: SearchQueryTypes.OR,
+      list: [
+        {type: SearchQueryTypes.directory, value: '/photos'} as TextSearch,
+        {type: SearchQueryTypes.directory, value: '/photos/*', matchType: TextSearchQueryMatchTypes.globMatch, negate: true} as TextSearch
+      ]
+    } as ORSearchQuery);
+  });
+
+  it('should throw on invalid list', () => {
+    expect(() => SearchQueryUtils.directoryListToQuery([{type: SearchQueryTypes.directory, value: ''}])).to.throw();
+  });
+});
+
+describe('SearchQueryDTOUtils.matchDirectorySearch', () => {
+  const match = (dirPath: string, value: string, matchType?: TextSearchQueryMatchTypes, negate?: boolean) =>
+    SearchQueryUtils.matchDirectorySearch(dirPath, {type: SearchQueryTypes.directory, value, matchType, negate});
+
+  it('should match exact directory', () => {
+    expect(match('photos/public', '/photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+    expect(match('/photos/public/', 'photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+    expect(match('photos\\public', 'photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+    expect(match('photos/public/sub', 'photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.false;
+    expect(match('photos/publicity', 'photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.false;
+  });
+
+  it('should match root', () => {
+    for (const root of ['', '.', '/', './', '\\']) {
+      expect(match(root, '/', TextSearchQueryMatchTypes.exact_match), root).to.be.true;
+      expect(match(root, '.', TextSearchQueryMatchTypes.exact_match), root).to.be.true;
+    }
+    expect(match('photos', '/', TextSearchQueryMatchTypes.exact_match)).to.be.false;
+  });
+
+  it('should match like as contains, by default', () => {
+    expect(match('photos/holidays/2024', 'holidays')).to.be.true;
+    expect(match('photos/holidays/2024', 'holidays', TextSearchQueryMatchTypes.like)).to.be.true;
+    expect(match('photos/family/2024', 'holidays')).to.be.false;
+  });
+
+  it('should match glob on the whole path', () => {
+    const glob = TextSearchQueryMatchTypes.globMatch;
+    expect(match('photos/public/sub', '/photos/public/*', glob)).to.be.true;
+    expect(match('photos/public/sub/deep', '/photos/public/*', glob)).to.be.true;
+    expect(match('photos/other/sub', '/photos/public/*', glob)).to.be.false;
+    expect(match('photos/publicity', '/photos/public/*', glob)).to.be.false;
+    expect(match('photos/path1', 'photos/path?', glob)).to.be.true;
+    expect(match('photos/path12', 'photos/path?', glob)).to.be.false;
+    expect(match('any/path', '*', glob)).to.be.true;
+    expect(match('any/path', '/*', glob)).to.be.true;
+  });
+
+  it('should match the directory itself with a trailing /*', () => {
+    const glob = TextSearchQueryMatchTypes.globMatch;
+    expect(match('photos/public', '/photos/public/*', glob)).to.be.true;
+    expect(match('photos/public', '/photos/public/*', glob, true)).to.be.false;
+    // only below
+    expect(match('photos/public', '/photos/public/?*', glob)).to.be.false;
+    expect(match('photos/public/sub', '/photos/public/?*', glob)).to.be.true;
+    // root and below
+    expect(match('', '/*', glob)).to.be.true;
+  });
+
+  it('should not treat regexp characters specially', () => {
+    const glob = TextSearchQueryMatchTypes.globMatch;
+    expect(match('photos/a.b', 'photos/a.b', glob)).to.be.true;
+    expect(match('photos/axb', 'photos/a.b', glob)).to.be.false;
+    expect(match('photos/(2024)', 'photos/(2024)*', glob)).to.be.true;
+  });
+
+  it('should be case-insensitive', () => {
+    expect(match('Photos/Public', 'photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+  });
+
+  it('should negate', () => {
+    expect(match('photos/public', 'photos/public', TextSearchQueryMatchTypes.exact_match, true)).to.be.false;
+    expect(match('photos/other', 'photos/public', TextSearchQueryMatchTypes.exact_match, true)).to.be.true;
+  });
+});
+
+describe('SearchQueryDTOUtils.matchDirectoryList', () => {
+  it('should match any entry of a list', () => {
+    const list: DirectorySearch[] = [
+      {type: SearchQueryTypes.directory, value: 'a', matchType: TextSearchQueryMatchTypes.exact_match},
+      {type: SearchQueryTypes.directory, value: 'b', matchType: TextSearchQueryMatchTypes.exact_match}
+    ];
+    expect(SearchQueryUtils.matchDirectoryList('a', list)).to.be.true;
+    expect(SearchQueryUtils.matchDirectoryList('b', list)).to.be.true;
+    expect(SearchQueryUtils.matchDirectoryList('c', list)).to.be.false;
+    expect(SearchQueryUtils.matchDirectoryList('c', [])).to.be.false;
+  });
+});
+
+const anchorDq = (value: string, matchType?: TextSearchQueryMatchTypes, negate?: boolean): DirectorySearch =>
+  ({type: SearchQueryTypes.directory, value, matchType, negate});
+
+describe('SearchQueryDTOUtils.getDirectorySearchAnchor', () => {
+  const dq = anchorDq;
+  const glob = TextSearchQueryMatchTypes.globMatch;
+  const exact = TextSearchQueryMatchTypes.exact_match;
+
+  it('should return the fixed starting segments', () => {
+    expect(SearchQueryUtils.getDirectorySearchAnchor(dq('/a/b', exact))).to.deep.equal(['a', 'b']);
+    expect(SearchQueryUtils.getDirectorySearchAnchor(dq('/a/b/*', glob))).to.deep.equal(['a', 'b']);
+    expect(SearchQueryUtils.getDirectorySearchAnchor(dq('/a/b*', glob))).to.deep.equal(['a']);
+    expect(SearchQueryUtils.getDirectorySearchAnchor(dq('*/b', glob))).to.deep.equal([]);
+    expect(SearchQueryUtils.getDirectorySearchAnchor(dq('a'))).to.be.null; // like
+    expect(SearchQueryUtils.getDirectorySearchAnchor(dq('a', exact, true))).to.be.null;
+  });
+});
+
+describe('SearchQueryDTOUtils.isDirectorySearchAnchored', () => {
+  const dq = anchorDq;
+  const glob = TextSearchQueryMatchTypes.globMatch;
+  const exact = TextSearchQueryMatchTypes.exact_match;
+
+  it('should tell if all matches are known from the path', () => {
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('/a/b', exact))).to.be.true;
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('/a/b/*', glob))).to.be.true;
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('/*', glob))).to.be.true;
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('/a/b*', glob))).to.be.false;
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('*/b', glob))).to.be.false;
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('a'))).to.be.false;
+    expect(SearchQueryUtils.isDirectorySearchAnchored(dq('a', exact, true))).to.be.false;
+  });
+});
+
+describe('SearchQueryDTOUtils.isDirectoryAnchoredParent', () => {
+  const dq = anchorDq;
+  const glob = TextSearchQueryMatchTypes.globMatch;
+  const exact = TextSearchQueryMatchTypes.exact_match;
+
+  it('should find the parents from the path', () => {
+    const list = [dq('/a/b/c', exact), dq('/x/y/*', glob)];
+    for (const p of ['', '/', 'a', 'a/b', 'x', 'x/y', 'X/Y']) {
+      expect(SearchQueryUtils.isDirectoryAnchoredParent(p, list), p).to.be.true;
+    }
+    for (const p of ['a/b/c', 'a/b/c/d', 'a/c', 'b', 'x/y/z', 'xx']) {
+      expect(SearchQueryUtils.isDirectoryAnchoredParent(p, list), p).to.be.false;
+    }
+    expect(SearchQueryUtils.isDirectoryAnchoredParent('a', [dq('a', TextSearchQueryMatchTypes.like)])).to.be.false;
+  });
+});
+
+describe('SearchQueryDTOUtils.parseURLifiedQuery', () => {
+
+  it('should return null for an empty query', () => {
+    expect(SearchQueryUtils.parseURLifiedQuery('')).to.be.null;
+    expect(SearchQueryUtils.parseURLifiedQuery(undefined)).to.be.null;
+  });
+
+  it('should parse an urlified query', () => {
+    expect(SearchQueryUtils.parseURLifiedQuery('{"t":105,"v":"alice"}'))
+      .to.deep.equal({type: SearchQueryTypes.person, value: 'alice'});
+  });
+
+  it('should search for a plain text url as any text', () => {
+    for (const text of ['squirrel', 'árvíztűrő tükörfúrógép', '{"t":105', '2015', 'true', 'null', '[1,2]', '"quoted"']) {
+      expect(SearchQueryUtils.parseURLifiedQuery(text), text)
+        .to.deep.equal({type: SearchQueryTypes.any_text, value: text} as TextSearch);
+    }
   });
 });

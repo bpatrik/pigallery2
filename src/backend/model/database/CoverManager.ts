@@ -14,6 +14,7 @@ import {SearchManager} from './SearchManager';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {SessionContext} from '../SessionContext';
 import {ProjectedDirectoryCacheEntity} from './enitites/ProjectedDirectoryCacheEntity';
+import {SortByTypes} from '../../../common/entities/SortingMethods';
 
 const LOG_TAG = '[CoverManager]';
 
@@ -24,6 +25,19 @@ export interface CoverPhotoDTOWithID extends CoverPhotoDTO {
 
 export class CoverManager {
   private static DIRECTORY_SELECT = ['directory.name', 'directory.path'];
+
+  /**
+   * Applies the configured cover sorting and adds media.id as a tie-breaker,
+   * so equally ranked media (e.g.: no rating) resolve to the same cover on every DB.
+   * Without it, MySQL may return tied rows in any order.
+   */
+  private static setCoverSorting(query: SelectQueryBuilder<MediaEntity>): void {
+    SearchManager.setSorting(query, Config.AlbumCover.Sorting);
+    if (Config.AlbumCover.Sorting?.some(s => s.method === SortByTypes.Random)) {
+      return;
+    }
+    query.addOrderBy('media.id', 'ASC');
+  }
 
 
   public async resetCovers(): Promise<void> {
@@ -58,7 +72,7 @@ export class CoverManager {
         query.andWhere(session.projectionQuery);
       }
 
-      SearchManager.setSorting(query, Config.AlbumCover.Sorting);
+      CoverManager.setCoverSorting(query);
       return query;
     };
     let coverMedia = null;
@@ -156,7 +170,7 @@ export class CoverManager {
         query.andWhere(session.projectionQuery);
       }
 
-      SearchManager.setSorting(query, Config.AlbumCover.Sorting);
+      CoverManager.setCoverSorting(query);
       return query;
     };
 

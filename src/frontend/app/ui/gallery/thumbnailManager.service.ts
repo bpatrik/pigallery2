@@ -1,14 +1,14 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ThumbnailLoaderService, ThumbnailLoadingListener, ThumbnailLoadingPriority, ThumbnailTaskEntity,} from './thumbnailLoader.service';
 import {Media} from './Media';
 import {MediaIcon} from './MediaIcon';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
 import {Person} from '../faces/Person';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ThumbnailManagerService {
-  constructor(private thumbnailLoader: ThumbnailLoaderService) {
-  }
+  private thumbnailLoader = inject(ThumbnailLoaderService);
+
 
   public getThumbnail(photo: Media): Thumbnail {
     return new Thumbnail(photo, this.thumbnailLoader);

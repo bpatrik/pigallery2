@@ -9,7 +9,7 @@ import {
   SVGIconConfig,
   ThemeConfig
 } from '../../../../../common/config/public/ClientConfig';
-import {JobScheduleConfig, UserConfig} from '../../../../../common/config/private/PrivateConfig';
+import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../../common/config/private/PrivateConfig';
 
 /**
  * Configuration in these class have a custom UI
@@ -21,6 +21,7 @@ export class CustomSettingsEntries {
     {c: MapLayers, name: 'MapLayers'},
     {c: JobScheduleConfig, name: 'JobScheduleConfig'},
     {c: UserConfig, name: 'UserConfig'},
+    {c: DirectorySearchConfig, name: 'DirectorySearchConfig'},
     {c: NavigationLinkConfig, name: 'NavigationLinkConfig'},
     {c: MapPathGroupThemeConfig, name: 'MapPathGroupThemeConfig'},
     {c: MapPathGroupConfig, name: 'MapPathGroupConfig'},

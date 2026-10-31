@@ -1,7 +1,7 @@
 import {Column, Entity, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
 import {BaseSharingDTO} from '../../../../common/entities/SharingDTO';
 import {UserEntity} from './UserEntity';
-import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 @Entity()
 export class SharingEntity implements BaseSharingDTO {
@@ -13,11 +13,11 @@ export class SharingEntity implements BaseSharingDTO {
 
   /*
   * This query determines what is available for the user through sharing
-  * Basically it's an allow-list of photos.
+  * Basically it's an allow-list of photos. Optional, if directoryQuery is set.
   * */
   @Column({
     type: 'text',
-    nullable: false,
+    nullable: true,
     transformer: {
       from: (val: string) => {
         return val ? JSON.parse(val) : null;
@@ -28,6 +28,25 @@ export class SharingEntity implements BaseSharingDTO {
     },
   })
   searchQuery: SearchQueryDTO;
+
+  /*
+  * This directory search determines what directories are available (can be listed) for the user through sharing.
+  * Basically it's an allow-list of directories (the photos in them too). Optional, if searchQuery is set.
+  * If not set, only directories with visible photos are available.
+  * */
+  @Column({
+    type: 'text',
+    nullable: true,
+    transformer: {
+      from: (val: string) => {
+        return val ? JSON.parse(val) : null;
+      },
+      to: (val: object) => {
+        return val ? JSON.stringify(val) : null;
+      },
+    },
+  })
+  directoryQuery: DirectorySearch;
 
   /**
    * Only of the defaults should be set at most. If none is set the defaultSearchView will be searchQuery

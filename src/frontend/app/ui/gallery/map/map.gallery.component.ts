@@ -1,6 +1,6 @@
-import {Component, ElementRef, Input, OnChanges, ViewChild,} from '@angular/core';
+import { Component, ElementRef, OnChanges, computed, inject, input, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {Dimension, IRenderable} from '../../../model/IRenderable';
+import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {MapService} from './map.service';
@@ -16,15 +16,19 @@ import {Router} from '@angular/router';
 @Component({
   selector: 'app-gallery-map',
   templateUrl: './map.gallery.component.html',
-  styleUrls: ['./map.gallery.component.css'],
+  styleUrl: './map.gallery.component.css',
   imports: [GalleryMapLightboxComponent, LeafletModule]
 })
 export class GalleryMapComponent implements OnChanges, IRenderable {
-  @Input() photos: PhotoDTO[];
-  @Input() gpxFiles: FileDTO[];
-  @ViewChild(GalleryMapLightboxComponent, {static: false})
-  mapLightbox: GalleryMapLightboxComponent;
-  @ViewChild('map', {static: false}) mapElement: ElementRef;
+  mapService = inject(MapService);
+  private queryService = inject(QueryService);
+  private router = inject(Router);
+  private themeService = inject(ThemeService);
+
+  readonly photos = input<PhotoDTO[]>(undefined);
+  readonly gpxFiles = input<FileDTO[]>(undefined);
+  readonly mapLightbox = viewChild(GalleryMapLightboxComponent);
+  readonly mapElement = viewChild<ElementRef>('map');
 
   leafletMap: Map;
   layers: { light: TileLayer, dark: TileLayer };
@@ -39,13 +43,26 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     zoom: 0,
     center: [0, 0],
   };
-  markerLayer: Marker[] = [];
+  readonly markerLayer = computed((): Marker[] => this.photos()
+    .filter((p): number => {
+      return (
+        p.metadata &&
+        p.metadata.positionData &&
+        p.metadata.positionData.GPSData &&
+        p.metadata.positionData.GPSData.latitude &&
+        p.metadata.positionData.GPSData.longitude
+      );
+    })
+    .slice(0, Config.Map.maxPreviewMarkers)
+    .map((p): Marker => {
+      return marker({
+        lat: p.metadata.positionData.GPSData.latitude,
+        lng: p.metadata.positionData.GPSData.longitude,
+      } as LatLngLiteral).setIcon(MarkerFactory.defIconSmall);
+    }));
   darkModeSubscription: Subscription;
 
-  constructor(public mapService: MapService,
-              private queryService: QueryService,
-              private router: Router,
-              private themeService: ThemeService) {
+  constructor() {
     this.initThemeModes();
   }
 
@@ -95,10 +112,10 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     if (!this.leafletMap) {
       return;
     }
-    if (this.markerLayer.length > 0) {
-      this.leafletMap.setView(this.markerLayer[0].getLatLng(), 99);
+    if (this.markerLayer().length > 0) {
+      this.leafletMap.setView(this.markerLayer()[0].getLatLng(), 99);
       this.leafletMap.fitBounds(
-        this.markerLayer.map(
+        this.markerLayer().map(
           (mp): [number, number] =>
             [mp.getLatLng().lat, mp.getLatLng().lng] as [number, number]
         )
@@ -107,30 +124,14 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     this.leafletMap.setZoom(0);
   }
 
+  // Side effect: moves the Leaflet map to the new markers.
   ngOnChanges(): void {
-    this.markerLayer = this.photos
-      .filter((p): number => {
-        return (
-          p.metadata &&
-          p.metadata.positionData &&
-          p.metadata.positionData.GPSData &&
-          p.metadata.positionData.GPSData.latitude &&
-          p.metadata.positionData.GPSData.longitude
-        );
-      })
-      .slice(0, Config.Map.maxPreviewMarkers)
-      .map((p): Marker => {
-        return marker({
-          lat: p.metadata.positionData.GPSData.latitude,
-          lng: p.metadata.positionData.GPSData.longitude,
-        } as LatLngLiteral).setIcon(MarkerFactory.defIconSmall);
-      });
-
-    if (this.leafletMap && this.markerLayer.length > 0) {
-      this.options.center = this.markerLayer[0].getLatLng();
-      this.leafletMap.setView(this.markerLayer[0].getLatLng(), 99);
+    const markerLayer = this.markerLayer();
+    if (this.leafletMap && markerLayer.length > 0) {
+      this.options.center = markerLayer[0].getLatLng();
+      this.leafletMap.setView(markerLayer[0].getLatLng(), 99);
       this.leafletMap.fitBounds(
-        this.markerLayer.map(
+        markerLayer.map(
           (mp): [number, number] =>
             [mp.getLatLng().lat, mp.getLatLng().lng] as [number, number]
         )
@@ -146,14 +147,15 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   }
 
   public getDimension(): Dimension {
-    if (isNaN(this.mapElement?.nativeElement?.parentElement?.offsetParent.offsetTop)) {
+    const mapElement = this.mapElement();
+    if (isNaN(mapElement?.nativeElement?.parentElement?.offsetParent.offsetTop)) {
       return {top: 0, left: 0, width: 0, height: 0};
     }
     return {
-      top: this.mapElement.nativeElement?.parentElement?.offsetParent?.offsetTop,
-      left: this.mapElement.nativeElement?.parentElement?.offsetLeft,
-      width: this.mapElement.nativeElement?.offsetWidth,
-      height: this.mapElement.nativeElement?.offsetHeight,
+      top: mapElement.nativeElement?.parentElement?.offsetParent?.offsetTop,
+      left: mapElement.nativeElement?.parentElement?.offsetLeft,
+      width: mapElement.nativeElement?.offsetWidth,
+      height: mapElement.nativeElement?.offsetHeight,
     } as Dimension;
   }
 }

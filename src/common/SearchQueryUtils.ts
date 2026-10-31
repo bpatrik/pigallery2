@@ -1,4 +1,5 @@
 import {
+  DirectorySearch,
   NegatableSearchQuery,
   OrientationSearch,
   RangeSearchQueryTypes,
@@ -148,7 +149,7 @@ export const SearchQueryUtils = {
       const normQuery = SearchQueryUtils.stripDefault(query) as SearchQueryDTO;
       if (!Utils.equalsFilter(normParsed, normQuery) || !Utils.equalsFilter(normQuery, normParsed)) {
         throw new Error(
-          `${what} is not valid. Expected: ${JSON.stringify(parsed)} to equal: ${JSON.stringify(query)}`
+          `${what} is set to '${sp.stringify(query)}' and it is not valid. It fails on this validation test: Expected: ${JSON.stringify(parsed)} to equal: ${JSON.stringify(query)}`
         );
       }
     } catch (e) {
@@ -157,6 +158,182 @@ export const SearchQueryUtils = {
       }
       throw new Error(`${what} is not valid. ${(e as Error)?.message ?? e}`);
     }
+  },
+  /**
+   * Validates a directory allow / block list.
+   * Every entry has to be a directory TextSearch (type: SearchQueryTypes.directory).
+   */
+  validateDirectoryList: (list: DirectorySearch[], what = 'Directory list'): void => {
+    if (list === null || typeof list === 'undefined') {
+      return;
+    }
+    if (!Array.isArray(list)) {
+      throw new Error(`${what} is not valid. It should be an array of directory searches. Got: ${JSON.stringify(list)}`);
+    }
+    for (const d of list) {
+      SearchQueryUtils.validateDirectorySearch(d, what);
+    }
+  },
+  /**
+   * Validates that the query is a single directory TextSearch (type: SearchQueryTypes.directory).
+   */
+  validateDirectorySearch: (d: DirectorySearch, what = 'Directory search'): void => {
+    if (!d || d.type !== SearchQueryTypes.directory) {
+      throw new Error(`${what} is not valid. Only directory searches are allowed. Got: ${JSON.stringify(d)}`);
+    }
+    if (typeof d.value !== 'string' || d.value.trim() === '') {
+      throw new Error(`${what} is not valid. Directory search needs a non empty value. Got: ${JSON.stringify(d)}`);
+    }
+    if (typeof d.matchType !== 'undefined' && d.matchType !== null &&
+      !Object.values(TextSearchQueryMatchTypes).includes(d.matchType)) {
+      throw new Error(`${what} is not valid. Unknown match type: ${JSON.stringify(d)}`);
+    }
+    if (typeof d.negate !== 'undefined' && d.negate !== null && typeof d.negate !== 'boolean') {
+      throw new Error(`${what} is not valid. negate should be boolean: ${JSON.stringify(d)}`);
+    }
+  },
+  /**
+   * Normalizes a relative directory path for matching:
+   * '/' separators, no leading './' or '/', no trailing '/'. Root is ''.
+   */
+  normalizeDirectoryPath: (dirPath: string): string => {
+    const parts = (dirPath || '').replace(/\\/g, '/').split('/')
+      .filter(p => p !== '' && p !== '.');
+    return parts.join('/');
+  },
+  /**
+   * Matches a relative directory path against a directory search, without any DB access.
+   * It follows the semantic of the SQL directory search (see SearchManager):
+   *  - exact_match: the path equals to the value
+   *  - like (default): the path contains the value
+   *  - globMatch: the whole path matches the glob (* matches any characters, including '/', ? matches one character)
+   *    A trailing '/*' means the directory itself and everything below it (e.g.: 'a/*' matches 'a', 'a/b', 'a/b/c').
+   *    Use '/?*' to match only below a directory.
+   * Matching is case-insensitive.
+   */
+  matchDirectorySearch: (dirPath: string, search: DirectorySearch): boolean => {
+    const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase();
+    const value = SearchQueryUtils.normalizeDirectoryPath(search.value).toLowerCase();
+    let match: boolean;
+    switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
+      case TextSearchQueryMatchTypes.exact_match:
+        match = p === value;
+        break;
+      case TextSearchQueryMatchTypes.globMatch: {
+        const regex = value.split('').map(c => {
+          if (c === '*') {
+            return '.*';
+          }
+          if (c === '?') {
+            return '.';
+          }
+          return c.replace(/[.+^${}()|[\]\\]/g, '\\$&');
+        }).join('');
+        match = new RegExp('^' + regex + '$', 's').test(p) ||
+          (value.endsWith('/*') && p === value.slice(0, -2));
+        break;
+      }
+      default:
+        match = p.includes(value);
+    }
+    return search.negate ? !match : match;
+  },
+  /**
+   * Returns the fixed path segments at the beginning of a directory search, that every match starts with.
+   * E.g.: exact 'a/b' -> ['a', 'b'], glob 'a/b/*' -> ['a', 'b'], glob 'a/b*' -> ['a'].
+   * Returns null if the matches can be anywhere (like and negated searches).
+   */
+  getDirectorySearchAnchor: (search: DirectorySearch): string[] => {
+    if (search.negate) {
+      return null;
+    }
+    const segments = SearchQueryUtils.normalizeDirectoryPath(search.value).toLowerCase().split('/')
+      .filter(s => s !== '');
+    switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
+      case TextSearchQueryMatchTypes.exact_match:
+        return segments;
+      case TextSearchQueryMatchTypes.globMatch: {
+        const firstWildcard = segments.findIndex(s => s.includes('*') || s.includes('?'));
+        return firstWildcard === -1 ? segments : segments.slice(0, firstWildcard);
+      }
+      default:
+        return null;
+    }
+  },
+  /**
+   * True if all matches of the search can be found from its path alone: exact match, or a glob that has no wildcard
+   * other than a trailing '/*'. For other searches, the parents of the matching directories can only be found in the DB.
+   */
+  isDirectorySearchAnchored: (search: DirectorySearch): boolean => {
+    if (search.negate) {
+      return false;
+    }
+    const value = SearchQueryUtils.normalizeDirectoryPath(search.value);
+    switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
+      case TextSearchQueryMatchTypes.exact_match:
+        return true;
+      case TextSearchQueryMatchTypes.globMatch: {
+        const fixedPart = value.endsWith('/*') ? value.slice(0, -2) : (value === '*' ? '' : value);
+        return !fixedPart.includes('*') && !fixedPart.includes('?');
+      }
+      default:
+        return false;
+    }
+  },
+  /**
+   * Returns true if the directory is a parent of the fixed part of any entry of the list.
+   * These parents are known from the path alone, without DB access.
+   * For globs it can be true for a directory that also matches the entry itself (e.g.: 'a' for 'a/*'),
+   * so check if the directory is allowed first.
+   */
+  isDirectoryAnchoredParent: (dirPath: string, list: DirectorySearch[]): boolean => {
+    const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase().split('/')
+      .filter(s => s !== '');
+    return (list || []).some(d => {
+      const anchor = SearchQueryUtils.getDirectorySearchAnchor(d);
+      if (anchor === null || p.length > anchor.length) {
+        return false;
+      }
+      if (!p.every((s, i) => s === anchor[i])) {
+        return false;
+      }
+      // an exact search (or a glob without wildcards) only has parents above its own path
+      const hasWildcard = d.matchType === TextSearchQueryMatchTypes.globMatch &&
+        (d.value.includes('*') || d.value.includes('?'));
+      return p.length < anchor.length || hasWildcard;
+    });
+  },
+  /**
+   * Returns true if the directory matches any entry of the list.
+   */
+  matchDirectoryList: (dirPath: string, list: DirectorySearch[]): boolean => {
+    return (list || []).some(d => SearchQueryUtils.matchDirectorySearch(dirPath, d));
+  },
+  /**
+   * Converts a directory allow / block list to a single search query.
+   * A directory matches the list if it matches any of its entries.
+   * Returns null for an empty list.
+   */
+  directoryListToQuery: (list: DirectorySearch[]): SearchQueryDTO => {
+    SearchQueryUtils.validateDirectoryList(list);
+    if (!list || list.length === 0) {
+      return null;
+    }
+    // plain copies, so config objects do not end up in the query
+    const queries = list.map(d => {
+      const q: DirectorySearch = {type: SearchQueryTypes.directory, value: d.value};
+      if (typeof d.matchType !== 'undefined' && d.matchType !== null) {
+        q.matchType = d.matchType;
+      }
+      if (d.negate) {
+        q.negate = true;
+      }
+      return q;
+    });
+    if (queries.length === 1) {
+      return queries[0];
+    }
+    return {type: SearchQueryTypes.OR, list: queries} as SearchListQuery;
   },
   URLMap: {
     type: 't',
@@ -242,7 +419,17 @@ export const SearchQueryUtils = {
       return obj;
     };
 
-    return unshorten(JSON.parse(urlQuery));
+    let parsed: unknown = null;
+    try {
+      parsed = JSON.parse(urlQuery);
+    } catch {
+      // not JSON, handled below
+    }
+    // Not a query object, e.g. a hand-typed /search/cat url: search for it as text
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return {type: SearchQueryTypes.any_text, value: urlQuery} as TextSearch;
+    }
+    return unshorten(parsed);
 
 
   }

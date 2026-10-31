@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {BehaviorSubject} from 'rxjs';
 import {UserService} from './user.service';
@@ -9,23 +9,19 @@ import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
 import {CookieNames} from '../../../../common/CookieNames';
 import {ShareService} from '../../ui/gallery/share.service';
 import {CookieService} from 'ngx-cookie-service';
-
-/* Injected config / user from server side */
-// eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword, @typescript-eslint/no-namespace
-declare module ServerInject {
-  export let user: UserDTO;
-}
+import {getInjectedUser} from '../server-inject';
 
 @Injectable({providedIn: 'root'})
 export class AuthenticationService {
+  private userService = inject(UserService);
+  private shareService = inject(ShareService);
+  private cookieService = inject(CookieService);
+
   public readonly user: BehaviorSubject<UserDTO>;
 
-  constructor(
-    private userService: UserService,
-    networkService: NetworkService,
-    private shareService: ShareService,
-    private cookieService: CookieService
-  ) {
+  constructor() {
+    const networkService = inject(NetworkService);
+
     this.user = new BehaviorSubject(null);
 
     // picking up session..
@@ -33,11 +29,9 @@ export class AuthenticationService {
       this.isAuthenticated() === false &&
       this.cookieService.get(CookieNames.session) != null
     ) {
-      if (
-        typeof ServerInject !== 'undefined' &&
-        typeof ServerInject.user !== 'undefined'
-      ) {
-        this.user.next(ServerInject.user);
+      const injectedUser = getInjectedUser();
+      if (typeof injectedUser !== 'undefined') {
+        this.user.next(injectedUser);
       }
       this.getSessionUser().catch(console.error);
     } else {
@@ -96,12 +90,22 @@ export class AuthenticationService {
     return Config.Search.enabled && this.isAuthorized(UserRoles.Guest);
   }
 
-  public async logout(): Promise<void> {
+  public async logout(reason?: ErrorCodes): Promise<void> {
     await this.userService.logout();
+    await this.shareService.wait();
+    if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {
+      const publicSharing = await this.shareService.getPublicSharing();
+      if (publicSharing && !publicSharing.passwordProtected) {
+        // There is no login for this sharing (anyone with the link is logged in),
+        // so logging out leaves the sharing and goes to the normal login.
+        this.shareService.dropSharing();
+        this.user.next(null);
+        return;
+      }
+    }
     this.user.next(null);
     // even on logout try to get sharing user if it's a sharing
-    await this.shareService.wait();
-    if(this.shareService.isSharing()){
+    if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {
       await this.getSessionUser();
     }
   }

@@ -1,5 +1,6 @@
 import * as gulp from 'gulp';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 import {promises as fsp} from 'fs';
 import * as path from 'path';
 import * as util from 'util';
@@ -13,7 +14,7 @@ import * as child_process from 'child_process';
 import * as jeditor from 'gulp-json-editor';
 import {XLIFF} from 'xlf-google-translate';
 import {PrivateConfigClass} from './src/common/config/private/PrivateConfigClass';
-import {ConfigClassBuilder} from 'typeconfig/src/decorators/builders/ConfigClassBuilder';
+import {ConfigClassBuilder} from 'typeconfig/node';
 import {PG2ConfMap, ServerPG2ConfMap} from './src/common/PG2ConfMap';
 
 const execPr = util.promisify(child_process.exec);
@@ -157,7 +158,7 @@ gulp.task(
     const tasks = [];
     createFrontendTask(
       'build-frontend-release default',
-      'ng build --configuration production  --no-progress  --output-path=./release/dist'
+      'ng build --configuration production,release --no-progress'
     );
     tasks.push('build-frontend-release default');
     return gulp.series(...tasks);
@@ -448,39 +449,59 @@ gulp.task('generate-man', async (cb): Promise<void> => {
 });
 
 // this is a workaround for bundle hash is not considering localization
-// so all the js files would have the same name and caching would not be possible to use
-// prefixing main.js with localization to force reload
+// so all the js files would have the same name in every locale. All locales are served from the same urls,
+// so the browser cache would mix the languages.
+// Prefixing every js file (lazy chunks and polyfills too) with the locale to keep them apart.
+// The hash in the name is also computed before the translations are inlined, so a release that only changes
+// the translations would keep the names, and browsers would keep the old files (they are cached as immutable).
+// Mixing the translation file and the angular version (locale data) into the hash fixes this.
 // see: https://github.com/angular/angular-cli/issues/17416
 gulp.task('localize-bundles', async (cb): Promise<void> => {
-  const bundlesToUpdate = ['main'];
+  const i18n = JSON.parse(fs.readFileSync('./angular.json', 'utf8')).projects.pigallery2.i18n;
+  const angularVersion = JSON.parse(fs.readFileSync('./node_modules/@angular/common/package.json', 'utf8')).version;
+  const getLocaleFingerprint = (locale: string): string => {
+    const hash = crypto.createHash('sha256').update(angularVersion);
+    const translation = i18n.locales[locale]?.translation;
+    if (translation) {
+      hash.update(fs.readFileSync(translation));
+    }
+    return hash.digest('hex');
+  };
   const foldersToCheck = ['./dist', './release/dist'];
-  for (let f = 0; f < foldersToCheck.length; ++f) {
-    const folder = foldersToCheck[f];
+  for (const folder of foldersToCheck) {
     if (!fs.existsSync(folder)) {
       continue;
     }
-    const builds = fs.readdirSync(folder);
-
-    for (let i = 0; i < builds.length; ++i) {
-      const dir = path.join(folder, builds[i]);
-      const indexhtmlPath = path.join(dir, 'index.html');
-
-      let indexhtml = fs.readFileSync(indexhtmlPath, 'utf8');
-
-      for (let j = 0; j < bundlesToUpdate.length; ++j) {
-
-        const rgx = new RegExp('<script src="' + bundlesToUpdate[j], 'g');
-        indexhtml = indexhtml.replace(rgx, '<script src="' + builds[i] + '.' + bundlesToUpdate[j]);
-        fs.readdirSync(folder);
-
-        const fileToRename = fs.readdirSync(dir)
-          .find(fl => fl.startsWith(bundlesToUpdate[j]) && fl.endsWith('js'));
-        if (!fileToRename) {
-          continue;
-        }
-        fs.renameSync(path.join(dir, fileToRename), path.join(dir, builds[i] + '.' + fileToRename));
+    for (const locale of fs.readdirSync(folder)) {
+      const dir = path.join(folder, locale);
+      // the builder also writes files (e.g. prerendered-routes.json) next to the locale folders
+      if (!fs.statSync(dir).isDirectory()) {
+        continue;
       }
-      fs.writeFileSync(indexhtmlPath, indexhtml, 'utf8');
+      const bundles = fs.readdirSync(dir)
+        .filter(fl => fl.endsWith('.js') && !fl.startsWith(locale + '.'));
+      if (bundles.length === 0) {
+        continue;
+      }
+      const fingerprint = getLocaleFingerprint(locale);
+      // e.g. main-PCUX7IQM.js -> hu.main-1A2B3C4D.js
+      const newNames = new Map(bundles.map(b => [b, locale + '.' + b.replace(/-([A-Z0-9]{8})\.js$/, (m, hash: string) =>
+        '-' + crypto.createHash('sha256').update(fingerprint + hash).digest('hex').substring(0, 8).toUpperCase() + '.js')]));
+      // the bundles are referenced after a quote (index.html) or after './' (imports between the bundles)
+      const rgx = new RegExp('(["\'/])(' + bundles.map(b => b.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'g');
+      const filesToUpdate = fs.readdirSync(dir)
+        .filter(fl => fl.endsWith('.js') || fl === 'index.html');
+      for (const file of filesToUpdate) {
+        const filePath = path.join(dir, file);
+        const content = fs.readFileSync(filePath, 'utf8');
+        const updated = content.replace(rgx, (m, before: string, bundle: string) => before + newNames.get(bundle));
+        if (updated !== content) {
+          fs.writeFileSync(filePath, updated, 'utf8');
+        }
+      }
+      for (const bundle of bundles) {
+        fs.renameSync(path.join(dir, bundle), path.join(dir, newNames.get(bundle)));
+      }
     }
   }
   cb();

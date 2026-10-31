@@ -6,6 +6,7 @@ import {DBTestHelper} from '../../../DBTestHelper';
 import {
   ANDSearchQuery,
   DatePatternFrequency,
+  DirectorySearch,
   DatePatternSearch,
   DateSearch,
   DistanceSearch,
@@ -31,6 +32,10 @@ import {Config} from '../../../../../src/common/config/private/Config';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
+import {SessionUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {UserRoles} from '../../../../../src/common/entities/UserDTO';
+import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
+import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
@@ -134,7 +139,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   const setUpSqlDB = async () => {
     await sqlHelper.initDB();
     await setUpTestGallery();
-    await ObjectManagers.getInstance().init();
   };
 
 
@@ -143,9 +147,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   });
 
 
-  after(async () => {
-    await sqlHelper.clearDB();
-  });
+  after(sqlHelper.clearDB);
   beforeEach(() => {
     Config.loadSync();
     Config.Search.listDirectories = true;
@@ -1256,6 +1258,20 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     });
 
     describe('should search text', () => {
+      it('should reject query without value', async () => {
+        const sm = new SearchManager();
+        // e.g. legacy saved search with 'text' instead of 'value'
+        const query = {text: 'Landscape', type: SearchQueryTypes.keyword} as unknown as TextSearch;
+        let error: Error = null;
+        try {
+          await sm.search(DBTestHelper.defaultSession, query);
+        } catch (e) {
+          error = e;
+        }
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.contain('Invalid search query');
+      });
+
       it('as any', async () => {
         const sm = new SearchManager();
 
@@ -1776,10 +1792,10 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         p6 = TestHelper.getBasePhotoEntry(subDir2, 'p6-300d-ago.jpg');
         p6.metadata.creationDate = Date.now() - 60 * 60 * 24 * 300 * 1000;
         //p6.metadata.creationDateOffset = "+02:00";
-        p7 = TestHelper.getBasePhotoEntry(subDir2, 'p7-1y-1min-ago.jpg');
+        p7 = TestHelper.getBasePhotoEntry(subDir2, 'p7-1y-ago.jpg');
+        // exactly 1 year ago keeps today's day; the every-year patterns match by day
         const d = new Date();
         d.setUTCFullYear(d.getUTCFullYear() - 1);
-        d.setUTCMinutes(d.getUTCMinutes() - 1);
         p7.metadata.creationDate = d.getTime();
         //p7.metadata.creationDateOffset = "+02:00";
 
@@ -1798,7 +1814,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         sm = new SearchManager();
       });
 
-      //TODO: this is flaky test for mysql
       it('last-0-days:every-year', async () => {
 
 
@@ -1835,7 +1850,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
       });
 
-      //TODO: this is flaky test for mysql
       it('last-1-days:every-year', async () => {
         let query: DatePatternSearch = {
           daysLength: 1,
@@ -2148,4 +2162,111 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   });
 
 
+
+  describe('Directory allow/block list', () => {
+    const dq = (value: string, matchType = TextSearchQueryMatchTypes.exact_match, negate = false): DirectorySearch =>
+      ({type: SearchQueryTypes.directory, value, matchType, negate});
+    const glob = (value: string): DirectorySearch => dq(value, TextSearchQueryMatchTypes.globMatch);
+    const dirSearch = (value: string): TextSearch =>
+      ({type: SearchQueryTypes.directory, value, matchType: TextSearchQueryMatchTypes.like});
+    const fileName = (value: string): TextSearch =>
+      ({type: SearchQueryTypes.file_name, value, matchType: TextSearchQueryMatchTypes.like});
+    const anyPhoto = fileName('Photo');
+
+    const buildSession = (u: Partial<SessionUser>): Promise<SessionContext> =>
+      ObjectManagers.getInstance().SessionManager.buildContext({
+        id: 1,
+        name: 'user',
+        role: UserRoles.User,
+        overrideAllowBlockList: true,
+        ...u
+      } as SessionUser);
+
+    const sharingSession = (s: Partial<SharingEntity>): Promise<SessionContext> => {
+      const sm = ObjectManagers.getInstance().SessionManager;
+      return sm.buildContext(sm.createSharingUser({
+        sharingKey: 'key',
+        creator: {id: 1, name: 'creator', role: UserRoles.Admin} as UserEntity,
+        ...s
+      } as unknown as SharingEntity));
+    };
+
+    const searchMediaNames = async (session: SessionContext, q: SearchQueryDTO) =>
+      (await ObjectManagers.getInstance().SearchManager.search(session, q)).media.map(m => m.name.split('_')[0]).sort();
+    const searchDirNames = async (session: SessionContext, q: SearchQueryDTO) =>
+      (await ObjectManagers.getInstance().SearchManager.search(session, q)).directories.map(d => d.name).sort();
+
+    before(async () => {
+      await sqlHelper.initDB();
+      await sqlHelper.setUpNestedTestGallery();
+    });
+
+    after(async () => {
+      // restore the default gallery of this spec
+      await setUpSqlDB();
+    });
+
+    it('trailing /* in a directory search matches the directory and everything below', async () => {
+      expect(await searchMediaNames(DBTestHelper.defaultSession, glob('private/*'))).to.deep.equal(['deepPhoto', 'privatePhoto']);
+      expect(await searchMediaNames(DBTestHelper.defaultSession, glob('private/?*'))).to.deep.equal(['deepPhoto']);
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('private/*', TextSearchQueryMatchTypes.globMatch, true)))
+        .to.deep.equal(['otherPhoto', 'publicPhoto', 'rootPhoto', 'subPhoto']);
+    });
+
+    it('filters media of blocked directories', async () => {
+      const s = await buildSession({blockDirectoryList: [dq('private')]});
+      expect(await searchMediaNames(s, anyPhoto)).to.deep.equal(['deepPhoto', 'otherPhoto', 'publicPhoto', 'rootPhoto', 'subPhoto']);
+      const sRec = await buildSession({blockDirectoryList: [glob('private/*')]});
+      expect(await searchMediaNames(sRec, anyPhoto)).to.deep.equal(['otherPhoto', 'publicPhoto', 'rootPhoto', 'subPhoto']);
+    });
+
+    it('filters media to allowed directories', async () => {
+      const s = await buildSession({allowDirectoryList: [glob('public/*')]});
+      expect(await searchMediaNames(s, anyPhoto)).to.deep.equal(['publicPhoto', 'subPhoto']);
+    });
+
+    it('filters directories in search results', async () => {
+      const s = await buildSession({blockDirectoryList: [glob('private/*')]});
+      expect(await searchDirNames(s, dirSearch('deep'))).to.deep.equal([]);
+      expect(await searchDirNames(DBTestHelper.defaultSession, dirSearch('deep'))).to.deep.equal(['deep']);
+      // parents of allowed directories are not listed
+      const sAllow = await buildSession({allowDirectoryList: [dq('public/sub')]});
+      expect(await searchDirNames(sAllow, dirSearch('u'))).to.deep.equal(['sub']);
+    });
+
+    it('filters directories in autocomplete', async () => {
+      const s = await buildSession({blockDirectoryList: [glob('private/*')]});
+      const ac = await ObjectManagers.getInstance().SearchManager.autocomplete(s, 'p', SearchQueryTypes.directory);
+      expect(ac.map(a => a.value)).to.deep.equal(['public']);
+    });
+
+    it('sharing directory query limits the directories and the media', async () => {
+      const s = await sharingSession({directoryQuery: glob('public/*')});
+      expect(await searchMediaNames(s, anyPhoto)).to.deep.equal(['publicPhoto', 'subPhoto']);
+      expect(await searchDirNames(s, dirSearch('u'))).to.deep.equal(['public', 'sub']);
+    });
+
+    it('search sharing lists only directories with visible photos', async () => {
+      const s = await sharingSession({searchQuery: fileName('subPhoto')});
+      expect(await searchMediaNames(s, anyPhoto)).to.deep.equal(['subPhoto']);
+      // public only has photos below it
+      expect(await searchDirNames(s, dirSearch('u'))).to.deep.equal(['sub']);
+      const ac = await ObjectManagers.getInstance().SearchManager.autocomplete(s, 'u', SearchQueryTypes.directory);
+      expect(ac.map(a => a.value)).to.deep.equal(['sub']);
+    });
+
+    // keep it last: it adds a directory to the test gallery
+    it('treats SQL wildcards (_ and %) in directory searches as literal characters', async () => {
+      const underscore = TestHelper.getDirectoryEntry(TestHelper.getDirectoryEntry(null, '.'), 'under_score');
+      TestHelper.getRandomizedPhotoEntry(underscore, 'underscorePhoto');
+      await ObjectManagers.getInstance().IndexingManager.saveToDB(underscore as ParentDirectoryDTO);
+
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('under_score'))).to.deep.equal(['underscorePhoto']);
+      const s = await sharingSession({directoryQuery: dq('under_score')});
+      expect(await searchMediaNames(s, anyPhoto)).to.deep.equal(['underscorePhoto']);
+      // '_' and '%' would match any characters if they were not escaped
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('publi_'))).to.deep.equal([]);
+      expect(await searchMediaNames(DBTestHelper.defaultSession, dq('pub%'))).to.deep.equal([]);
+    });
+  });
 });

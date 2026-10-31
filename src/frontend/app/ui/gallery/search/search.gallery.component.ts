@@ -1,11 +1,11 @@
-import {Component, OnDestroy, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, TemplateRef, inject } from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
 import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {MetadataSearchQueryTypes, SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryParserService} from './search-query-parser.service';
 import {AlbumsService} from '../../albums/albums.service';
 import {Config} from '../../../../../common/config/public/Config';
@@ -15,14 +15,14 @@ import {FormsModule} from '@angular/forms';
 import {GallerySearchFieldBaseComponent} from './search-field-base/search-field-base.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {GallerySearchQueryBuilderComponent} from './query-builder/query-bulder.gallery.component';
-import {NgIf} from '@angular/common';
+
 import {SavedSearchPopupComponent} from '../../albums/saved-search-popup/saved-search-popup.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-gallery-search',
   templateUrl: './search.gallery.component.html',
-  styleUrls: ['./search.gallery.component.css'],
+  styleUrl: './search.gallery.component.css',
   providers: [AutoCompleteService],
   imports: [
     FormsModule,
@@ -30,11 +30,17 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     RouterLink,
     NgIconComponent,
     GallerySearchQueryBuilderComponent,
-    NgIf,
-    SavedSearchPopupComponent,
-  ]
+    SavedSearchPopupComponent
+]
 })
 export class GallerySearchComponent implements OnDestroy {
+  private searchQueryParserService = inject(SearchQueryParserService);
+  private albumService = inject(AlbumsService);
+  private route = inject(ActivatedRoute);
+  router = inject(Router);
+  private modalService = inject(BsModalService);
+  authenticationService = inject(AuthenticationService);
+
   public searchQueryDTO: SearchQueryDTO = {
     type: SearchQueryTypes.any_text,
     value: '',
@@ -51,14 +57,7 @@ export class GallerySearchComponent implements OnDestroy {
   private readonly subscription: Subscription = null;
   private saveSearchModalRef: BsModalRef;
 
-  constructor(
-    private searchQueryParserService: SearchQueryParserService,
-    private albumService: AlbumsService,
-    private route: ActivatedRoute,
-    public router: Router,
-    private modalService: BsModalService,
-    public authenticationService: AuthenticationService
-  ) {
+  constructor() {
     this.SearchQueryTypes = SearchQueryTypes;
     this.MetadataSearchQueryTypes = MetadataSearchQueryTypes.map((v) => ({
       key: v,

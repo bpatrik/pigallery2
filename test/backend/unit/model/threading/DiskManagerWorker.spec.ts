@@ -5,6 +5,7 @@ import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {Utils} from '../../../../../src/common/Utils';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {DiskManager} from '../../../../../src/backend/model/fileaccess/DiskManager';
+import {SupportedFormats} from '../../../../../src/common/SupportedFormats';
 
 declare const before: any;
 declare const afterEach: any;
@@ -13,6 +14,7 @@ describe('DiskMangerWorker', () => {
   // loading default settings (this might have been changed by other tests)
   before(() => {
     Config.loadSync();
+    SupportedFormats.init(Config);
     Config.Database.type = DatabaseType.sqlite;
     Config.Faces.enabled = true;
     Config.Faces.keywordsToPersons = true;
@@ -55,7 +57,7 @@ describe('DiskMangerWorker', () => {
     it('excludeFile should exclude files by extension using glob pattern "*.rm"', () => {
       Config.Indexing.excludeFilenameList = ['*.rm'];
       expect(DiskManager.excludeFile('video.rm')).to.be.true;
-      expect(DiskManager.excludeFile('VIDEO.RM')).to.be.true; // case insensitive
+      expect(DiskManager.excludeFile('VIDEO.RM')).to.be.false; // case-sensitive
       expect(DiskManager.excludeFile('video.mp4')).to.be.false;
       expect(DiskManager.excludeFile('video.rm.bak')).to.be.false;
     });
@@ -93,6 +95,44 @@ describe('DiskMangerWorker', () => {
       Config.Indexing.excludeFilenameList = [];
       const dir = await DiskManager.scanDirectory('/');
       expect(dir.media.length).to.be.equals(18);
+    });
+  });
+
+  describe('excludeFolderList', () => {
+    const savedExcludeFolderList = Config.Indexing.excludeFolderList;
+
+    afterEach(() => {
+      Config.Indexing.excludeFolderList = savedExcludeFolderList;
+    });
+
+    const callExcludeDir = (name: string): Promise<boolean> =>
+      DiskManager.excludeDir({
+        name,
+        parentDirRelativeName: '.',
+        parentDirAbsoluteName: path.join(__dirname, '/../../../assets')
+      });
+
+    it('excludeDir should match plain folder names exactly and case-sensitively', async () => {
+      Config.Indexing.excludeFolderList = ['.dtrash'];
+      expect(await callExcludeDir('.dtrash')).to.be.true;
+      expect(await callExcludeDir('.DTrash')).to.be.false;
+      expect(await callExcludeDir('.dtrash2')).to.be.false;
+      expect(await callExcludeDir('photos')).to.be.false;
+    });
+
+    it('excludeDir should exclude folders using glob pattern "*"', async () => {
+      Config.Indexing.excludeFolderList = ['temp*'];
+      expect(await callExcludeDir('temp')).to.be.true;
+      expect(await callExcludeDir('temp2024')).to.be.true;
+      expect(await callExcludeDir('Temp2024')).to.be.false;
+      expect(await callExcludeDir('photos')).to.be.false;
+    });
+
+    it('excludeDir should support "?" wildcard for single character', async () => {
+      Config.Indexing.excludeFolderList = ['202?'];
+      expect(await callExcludeDir('2020')).to.be.true;
+      expect(await callExcludeDir('202')).to.be.false;
+      expect(await callExcludeDir('20200')).to.be.false;
     });
   });
 });

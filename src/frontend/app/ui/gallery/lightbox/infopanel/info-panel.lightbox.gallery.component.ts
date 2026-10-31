@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output,} from '@angular/core';
+import { Component, OnInit, computed, inject, output, input } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -6,18 +6,19 @@ import {VideoDTO, VideoMetadata,} from '../../../../../../common/entities/VideoD
 import {Utils} from '../../../../../../common/Utils';
 import {QueryService} from '../../../../model/query.service';
 import {MapService} from '../../map/map.service';
+import {MarkerFactory} from '../../map/MarkerFactory';
 import {
   ANDSearchQuery,
-  DistanceSearch, DateSearch,
+  type DistanceSearch, type DateSearch,
   SearchQueryTypes,
-  TextSearch,
+  type TextSearch,
   TextSearchQueryMatchTypes,
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';
 import {ThemeService} from '../../../../model/theme.service';
 import {ContentLoaderService} from '../../contentLoader.service';
-import {NgIf, NgFor, NgSwitch, NgSwitchCase, DatePipe} from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {RouterLink} from '@angular/router';
 import {LeafletModule} from '@bluehalo/ngx-leaflet';
@@ -27,24 +28,26 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-info-panel',
-  styleUrls: ['./info-panel.lightbox.gallery.component.css'],
+  styleUrl: './info-panel.lightbox.gallery.component.css',
   templateUrl: './info-panel.lightbox.gallery.component.html',
   imports: [
-    NgIf,
     NgIconComponent,
     RouterLink,
-    NgFor,
-    NgSwitch,
-    NgSwitchCase,
     LeafletModule,
     DatePipe,
     DurationPipe,
-    FileSizePipe,
-  ]
+    FileSizePipe
+]
 })
-export class InfoPanelLightboxComponent implements OnInit, OnChanges {
-  @Input() media: MediaDTO;
-  @Output() closed = new EventEmitter();
+export class InfoPanelLightboxComponent implements OnInit {
+  queryService = inject(QueryService);
+  contentLoaderService = inject(ContentLoaderService);
+  mapService = inject(MapService);
+  private authService = inject(AuthenticationService);
+  private themeService = inject(ThemeService);
+
+  readonly media = input<MediaDTO>(undefined);
+  readonly closed = output();
 
   public readonly mapEnabled: boolean;
   public readonly searchEnabled: boolean;
@@ -52,40 +55,44 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   public readonly SearchQueryTypes: typeof SearchQueryTypes = SearchQueryTypes;
 
   public baseLayer: TileLayer;
-  public markerLayer: Marker[] = [];
+  public readonly markerLayer = computed((): Marker[] => {
+    if (!this.hasGPS()) {
+      return [];
+    }
+    return [
+      marker({
+        lat: this.PositionData.GPSData.latitude,
+        lng: this.PositionData.GPSData.longitude,
+      } as LatLngLiteral, {icon: MarkerFactory.defIcon}),
+    ];
+  });
 
-  constructor(
-    public queryService: QueryService,
-    public contentLoaderService: ContentLoaderService,
-    public mapService: MapService,
-    private authService: AuthenticationService,
-    private themeService: ThemeService
-  ) {
+  constructor() {
     this.mapEnabled = Config.Map.enabled;
     this.searchEnabled = this.authService.canSearch();
     if (this.themeService.darkMode.value) {
-      this.baseLayer = tileLayer(mapService.DarkMapLayer.url, {
-        attribution: mapService.ShortAttributions,
+      this.baseLayer = tileLayer(this.mapService.DarkMapLayer.url, {
+        attribution: this.mapService.ShortAttributions,
       });
     } else {
-      this.baseLayer = tileLayer(mapService.MapLayer.url, {
-        attribution: mapService.ShortAttributions,
+      this.baseLayer = tileLayer(this.mapService.MapLayer.url, {
+        attribution: this.mapService.ShortAttributions,
       });
     }
   }
 
   get FullPath(): string {
     return Utils.concatUrls(
-      this.media.directory.path,
-      this.media.directory.name,
-      this.media.name
+      this.media().directory.path,
+      this.media().directory.name,
+      this.media().name
     );
   }
 
   get DirectoryPath(): string {
     return Utils.concatUrls(
-      this.media.directory.path,
-      this.media.directory.name
+      this.media().directory.path,
+      this.media().directory.name
     );
   }
 
@@ -101,37 +108,26 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   }
 
   get VideoData(): VideoMetadata {
-    if (typeof (this.media as VideoDTO).metadata.bitRate === 'undefined') {
+    if (typeof (this.media() as VideoDTO).metadata.bitRate === 'undefined') {
       return null;
     }
-    return (this.media as VideoDTO).metadata;
+    return (this.media() as VideoDTO).metadata;
   }
 
   get Rating(): number {
-    return (this.media as PhotoDTO).metadata.rating;
+    return (this.media() as PhotoDTO).metadata.rating;
   }
 
   get PositionData(): PositionMetaData {
-    return (this.media as PhotoDTO).metadata.positionData;
+    return (this.media() as PhotoDTO).metadata.positionData;
   }
 
   get CameraData(): CameraMetadata {
-    return (this.media as PhotoDTO).metadata.cameraData;
-  }
-
-  ngOnChanges(): void {
-    if (this.hasGPS()) {
-      this.markerLayer = [
-        marker({
-          lat: this.PositionData.GPSData.latitude,
-          lng: this.PositionData.GPSData.longitude,
-        } as LatLngLiteral),
-      ];
-    }
+    return (this.media() as PhotoDTO).metadata.cameraData;
   }
 
   ngOnInit(): void {
-    const metadata = this.media.metadata as PhotoMetadata;
+    const metadata = this.media().metadata as PhotoMetadata;
     if (
       (metadata.keywords && metadata.keywords.length > 0) ||
       (metadata.faces && metadata.faces.length > 0)
@@ -160,22 +156,23 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
   }
 
   isPhoto(): boolean {
-    return this.media && MediaDTOUtils.isPhoto(this.media);
+    const media = this.media();
+    return media && MediaDTOUtils.isPhoto(media);
   }
 
   isLivePhoto(): boolean {
-    return !!this.media?.liveVideoPath;
+    return !!this.media()?.liveVideoPath;
   }
 
   calcMpx(): string {
     return (
-      (this.media.metadata.size.width * this.media.metadata.size.height) /
+      (this.media().metadata.size.width * this.media().metadata.size.height) /
       1000000
     ).toFixed(2);
   }
 
   isThisYear(): boolean {
-    return MediaDTOUtils.createdThisYear(this.media);
+    return MediaDTOUtils.createdThisYear(this.media());
   }
 
   toFraction(f: number): string | number {
@@ -191,10 +188,10 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   hasGPS(): boolean {
     return !!(
-      (this.media as PhotoDTO).metadata.positionData &&
-      (this.media as PhotoDTO).metadata.positionData.GPSData &&
-      (this.media as PhotoDTO).metadata.positionData.GPSData.latitude &&
-      (this.media as PhotoDTO).metadata.positionData.GPSData.longitude
+      (this.media() as PhotoDTO).metadata.positionData &&
+      (this.media() as PhotoDTO).metadata.positionData.GPSData &&
+      (this.media() as PhotoDTO).metadata.positionData.GPSData.latitude &&
+      (this.media() as PhotoDTO).metadata.positionData.GPSData.longitude
     );
   }
 
@@ -240,7 +237,7 @@ export class InfoPanelLightboxComponent implements OnInit, OnChanges {
 
   getDateSearchQuery(): string {
     // Search for photos taken on the same date (within 24 hours)
-    const creationDate = new Date(this.media.metadata.creationDate);
+    const creationDate = new Date(this.media().metadata.creationDate);
     const startOfDay = new Date(creationDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(creationDate);

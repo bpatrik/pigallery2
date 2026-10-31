@@ -1,7 +1,7 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
 import {NetworkService} from '../../../model/network/network.service';
-import {SupportedFormats} from '../../../../../common/SupportedFormats';
+import {UploadUtils} from '../../../../../common/UploadUtils';
 import {Utils} from '../../../../../common/Utils';
 import {ContentLoaderService} from '../contentLoader.service';
 import {Config} from '../../../../../common/config/public/Config';
@@ -29,6 +29,11 @@ interface QueuedUpload {
   providedIn: 'root'
 })
 export class UploaderService {
+  private networkService = inject(NetworkService);
+  private notificationService = inject(NotificationService);
+  private authService = inject(AuthenticationService);
+  private contentLoaderService = inject(ContentLoaderService);
+
   public uploadProgress: UploadProgress[] = [];
   private uploadQueue: QueuedUpload[] = [];
   private activeUploads = 0;
@@ -38,12 +43,6 @@ export class UploaderService {
   private speedTimer: any = null;
   private lastProgressSum = 0;
   private lastUpdateTimestamp = 0;
-
-  constructor(private networkService: NetworkService,
-              private notificationService: NotificationService,
-              private authService: AuthenticationService,
-              private contentLoaderService: ContentLoaderService) {
-  }
 
   public canUpload(): boolean {
     const dir = this.contentLoaderService.content.value.directory;
@@ -75,12 +74,8 @@ export class UploaderService {
     }
     const dirDto = this.contentLoaderService.content.value.directory;
     const directory = Utils.concatUrls(dirDto.path, dirDto.name);
-    const supportedFiles = files.filter(f => {
-      const ext = f.name.split('.').pop().toLowerCase();
-      return SupportedFormats.Photos.includes(ext) ||
-        SupportedFormats.Videos.includes(ext) ||
-        SupportedFormats.MetaFiles.includes(ext);
-    });
+    const supportedFiles = files.filter(f =>
+      UploadUtils.isUploadableExtension(UploadUtils.getExtension(f.name), Config.Upload.blockedExtensions));
 
     if (supportedFiles.length < files.length) {
       this.notificationService.warning($localize`Some files were skipped due to unsupported format.`);

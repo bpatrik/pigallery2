@@ -61,9 +61,14 @@ export class ProjectedCacheManager implements IObjectManager {
       .leftJoinAndSelect('share.creator', 'creator')
       .getMany();
     for (const s of shares) {
-      const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(s);
-      const key = ObjectManagers.getInstance().SessionManager.createProjectionKey(q);
-      activeKeys.add(key);
+      try {
+        const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(s);
+        const key = ObjectManagers.getInstance().SessionManager.createProjectionKey(q);
+        activeKeys.add(key);
+      } catch (e) {
+        // an invalid sharing can't be opened, so it has no projection
+        Logger.warn(LOG_TAG, 'Skipping invalid sharing ' + s.sharingKey + ': ' + (e as Error)?.message);
+      }
     }
 
     return Array.from(activeKeys);
@@ -134,7 +139,11 @@ export class ProjectedCacheManager implements IObjectManager {
       .where(
         new Brackets(q => {
           q.where('directory.id = :dir', {dir: dir.id});
-          if (Config.Database.type === DatabaseType.mysql) {
+          const root = DiskManager.pathFromRelativeDirName('.');
+          if (dir.name === DiskManager.dirName(root) && dir.path === root) {
+            // everything is below the root. Only its direct children have './' as path, deeper ones don't.
+            q.orWhere('1 = 1');
+          } else if (Config.Database.type === DatabaseType.mysql) {
             q.orWhere('directory.path like :path || \'%\'', {path: DiskManager.pathFromParent(dir)});
           } else {
             q.orWhere('directory.path GLOB :path', {

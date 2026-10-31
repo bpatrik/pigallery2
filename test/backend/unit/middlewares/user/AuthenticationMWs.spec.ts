@@ -1,4 +1,5 @@
 /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
+import {Brackets} from 'typeorm';
 import {expect} from 'chai';
 import {AuthenticationMWs} from '../../../../../src/backend/middlewares/user/AuthenticationMWs';
 import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
@@ -7,34 +8,50 @@ import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Config} from '../../../../../src/common/config/private/Config';
 import * as path from 'path';
 import {UserManager} from '../../../../../src/backend/model/database/UserManager';
-import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
+import {SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {DirectoryAccess, DirectoryAccessTypes} from '../../../../../src/backend/model/DirectoryAccess';
 import {DBTestHelper} from '../../../DBTestHelper';
+import {QueryParams} from '../../../../../src/common/QueryParams';
+import {UserMWs} from '../../../../../src/backend/middlewares/user/UserMWs';
+import {OIDCAuthService} from '../../../../../src/backend/middlewares/user/OIDCAuthService';
 
 
 declare let describe: any;
 declare const it: any;
-declare const before: any;
+declare const after: any;
 declare const beforeEach: any;
+declare const afterEach: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
-  before(sqlHelper.clearDB);
 
-  beforeEach(async () => {
-    await sqlHelper.initDB();
-  });
+  beforeEach(sqlHelper.initDB);
+  after(sqlHelper.clearDB);
 
 
-  describe('authenticate', () => {
+  describe('authenticate', async () => {
+    // session validation against the DB is tested in 'session revocation'
+    let origGetSessionStamp: any;
+    beforeEach(() => {
+      origGetSessionStamp = ObjectManagers.getInstance().SessionManager.getSessionStamp;
+      ObjectManagers.getInstance().SessionManager.getSessionStamp = async (): Promise<string> => 'stamp';
+    });
+    afterEach(() => {
+      ObjectManagers.getInstance().SessionManager.getSessionStamp = origGetSessionStamp;
+    });
+
     it('should call next on authenticated', (done: (err?: any) => void) => {
       const req: any = {
         session: {
           context: {
             user: 'A user'
-          }
+          },
+          expires: Date.now() + 10000,
+          stamp: 'stamp'
         },
         sessionOptions: {},
         query: {},
@@ -63,7 +80,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const next: any = (err: ErrorDTO) => {
         try {
           expect(err).not.to.be.undefined;
-          expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED);
+          expect(err.code).to.be.eql(ErrorCodes.NOT_AUTHENTICATED_SHARING, 'Error code should be NOT_AUTHENTICATED_SHARING');
           done();
         } catch (err) {
           done(err);
@@ -82,7 +99,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k1'};
       const rebuiltContext: any = {user, projectionQuery: {some: 'query'}};
       const req: any = {
-        session: {context: {user, projectionQuery: undefined}},
+        session: {context: {user, projectionQuery: undefined}, expires: Date.now() + 10000, stamp: 'stamp'},
         query: {},
         params: {}
       };
@@ -111,7 +128,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k-empty'};
       const rebuiltContext: any = {user, projectionQuery: {restored: true}};
       const req: any = {
-        session: {context: {user, projectionQuery: {}}},
+        session: {context: {user, projectionQuery: {}}, expires: Date.now() + 10000, stamp: 'stamp'},
         query: {},
         params: {}
       };
@@ -134,11 +151,9 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       expect(req.session.context.projectionQuery).to.deep.equal({restored: true});
     });
 
-    it('should NOT rebuild context if projectionQuery is present', async () => {
+    const countRebuilds = async (originalContext: any): Promise<number> => {
       Config.Users.authenticationRequired = true;
-      const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k2'};
-      const originalContext: any = {user, projectionQuery: {ok: true}};
-      const req: any = {session: {context: originalContext}, query: {}, params: {}};
+      const req: any = {session: {context: originalContext, expires: Date.now() + 10000, stamp: 'stamp'}, query: {}, params: {}};
 
       let called = 0;
       const orig = ObjectManagers.getInstance().SessionManager.buildContext;
@@ -153,12 +168,299 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       (ObjectManagers.getInstance().SessionManager as any).buildContext = orig;
 
       expect(nextErr).to.be.undefined;
-      expect(called).to.eql(0);
       expect(req.session.context).to.eql(originalContext);
+      return called;
+    };
+
+    it('should NOT rebuild context if projectionQuery and directoryAccess are present', async () => {
+      const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k2'};
+      const originalContext: any = {user, projectionQuery: new Brackets(q => q.where('1=1'))};
+      originalContext.directoryAccess = new DirectoryAccess(originalContext);
+      expect(await countRebuilds(originalContext)).to.eql(0);
+    });
+
+    it('should rebuild context if directoryAccess got lost during serialization', async () => {
+      const user: any = {name: 'Guest', role: UserRoles.LimitedGuest, projectionKey: 'k2'};
+      const originalContext: any = {user, projectionQuery: new Brackets(q => q.where('1=1'))};
+      // a deserialized session only has the plain data
+      originalContext.directoryAccess = JSON.parse(JSON.stringify(new DirectoryAccess(originalContext, {blockList: []})));
+      expect(await countRebuilds(originalContext)).to.eql(1);
     });
   });
 
-  describe('inverseAuthenticate', () => {
+  describe('session revocation', async () => {
+    // the session travels in the cookie, only plain data survives between requests
+    const toCookie = (session: any) => JSON.parse(JSON.stringify(session));
+
+    const authenticate = async (session: any, sharingKey?: string) => {
+      const req: any = {
+        session, sessionOptions: {}, params: {},
+        query: sharingKey ? {[QueryParams.gallery.sharingKey_query]: sharingKey} : {}
+      };
+      let status: number = null;
+      const res: any = {
+        status: (s: number) => {
+          status = s;
+          return res;
+        }
+      };
+      let err: any = 'not-called';
+      await AuthenticationMWs.authenticate(req, res, (e?: any) => {
+        err = e;
+      });
+      return {req, status, err};
+    };
+
+    const expectEnded = async (session: any, sharingKey?: string) => {
+      const r = await authenticate(session, sharingKey);
+      expect(r.status).to.equal(401);
+      expect(r.err).to.be.instanceOf(ErrorDTO);
+      expect(r.req.session.context).to.be.undefined;
+    };
+
+    const expectAlive = async (session: any, sharingKey?: string) => {
+      const r = await authenticate(session, sharingKey);
+      expect(r.err).to.be.undefined;
+      expect(r.req.session.context).to.not.be.undefined;
+      return r.req.session;
+    };
+
+    const createUser = (name: string, role = UserRoles.User) =>
+      ObjectManagers.getInstance().UserManager.createUser({name, password: 'pass', role} as UserDTO);
+
+    const login = async (name: string, rememberMe = false) => {
+      const req: any = {
+        session: {}, sessionOptions: {}, query: {}, params: {},
+        body: {loginCredential: {username: name, password: 'pass', rememberMe}}
+      };
+      let err: any = 'not-called';
+      await AuthenticationMWs.login(req, null, (e?: any) => {
+        err = e;
+      });
+      expect(err).to.be.undefined;
+      return toCookie(req.session);
+    };
+
+    const createSharing = async (creator: UserDTO, password: string = null, expires = Date.now() + 100000) => {
+      const sharingKey = 'key_' + Math.random().toString(36).substring(2);
+      await ObjectManagers.getInstance().SharingManager.createSharing({
+        sharingKey,
+        searchQuery: {type: SearchQueryTypes.directory, value: 'shared', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
+        expires,
+        timeStamp: Date.now(),
+        password,
+        creator
+      } as any);
+      return sharingKey;
+    };
+
+    const shareLogin = async (sharingKey: string, password: string = null) => {
+      const req: any = {
+        session: {}, sessionOptions: {}, params: {}, body: {password},
+        query: {[QueryParams.gallery.sharingKey_query]: sharingKey}
+      };
+      let err: any = 'not-called';
+      await AuthenticationMWs.shareLogin(req, {status: (): void => undefined} as any, (e?: any) => {
+        err = e;
+      });
+      expect(err).to.be.undefined;
+      return toCookie(req.session);
+    };
+
+    beforeEach(() => {
+      Config.Users.authenticationRequired = true;
+      Config.Sharing.enabled = true;
+    });
+
+    it('keeps valid sessions', async () => {
+      await createUser('alice');
+      const loginSession = await login('alice');
+      // buildContext signs the DB row and keeps the password hash out of the cookie
+      expect(loginSession.stamp).to.be.a('string');
+      expect(loginSession.context.user).to.not.have.property('password');
+      const session = await expectAlive(loginSession);
+      // still valid when served from the cache
+      await expectAlive(toCookie(session));
+    });
+
+    it('ends the session of a deleted user', async () => {
+      const erin = await createUser('erin');
+      const session = await login('erin');
+      await expectAlive(toCookie(session));
+      await ObjectManagers.getInstance().UserManager.deleteUser(erin.id);
+      await expectEnded(toCookie(session));
+    });
+
+    it('ends the session of a demoted admin', async () => {
+      const carol = await createUser('carol', UserRoles.Admin);
+      const session = await login('carol');
+      await expectAlive(toCookie(session));
+      await ObjectManagers.getInstance().UserManager.changeRole(carol.id, UserRoles.User);
+      await expectEnded(toCookie(session));
+    });
+
+    it('ends the sessions of a user whose settings or password changed', async () => {
+      const dave = await createUser('dave');
+      const session = await login('dave');
+      await ObjectManagers.getInstance().UserManager.updateSettings(dave.id, {
+        overrideAllowBlockList: true,
+        blockDirectoryList: [{type: SearchQueryTypes.directory, value: 'private', matchType: TextSearchQueryMatchTypes.exact_match}]
+      });
+      await expectEnded(toCookie(session));
+
+      const session2 = await login('dave');
+      await ObjectManagers.getInstance().UserManager.updateSettings(dave.id, {newPassword: 'pass'});
+      await expectEnded(toCookie(session2));
+    });
+
+    // mimics the router: the user change is followed by refreshSession
+    const changeOwnUser = async (session: any, mw: (req: any, res: any, next: any) => Promise<void>, body: any) => {
+      const req: any = {session, sessionOptions: {}, params: {id: '' + session.context.user.id}, body};
+      for (const m of [mw, AuthenticationMWs.refreshSession]) {
+        let err: any = 'not-called';
+        await m(req, null, (e?: any) => {
+          err = e;
+        });
+        expect(err).to.be.undefined;
+      }
+      return toCookie(req.session);
+    };
+
+    it('keeps the own session after changing the own role', async () => {
+      await createUser('frank', UserRoles.Admin);
+      const session = await changeOwnUser(await login('frank', true), UserMWs.changeRole, {newRole: UserRoles.Developer});
+      const s = await expectAlive(session);
+      expect(s.context.user.role).to.equal(UserRoles.Developer);
+      expect(s.context.user.password).to.be.undefined;
+      expect(s.rememberMe).to.be.true;
+    });
+
+    it('keeps the own session after changing the own password', async () => {
+      await createUser('fred');
+      const other = await login('fred');
+      const session = await changeOwnUser(await login('fred'), UserMWs.updateSettings, {settings: {newPassword: 'new'}});
+      await expectAlive(session);
+      await expectEnded(other);
+    });
+
+    it('keeps the session after changing an other user', async () => {
+      await createUser('admin2', UserRoles.Admin);
+      const target = await createUser('target');
+      const session = await login('admin2');
+      const req: any = {session, sessionOptions: {}, params: {id: '' + target.id}, body: {newRole: UserRoles.Admin}};
+      await UserMWs.changeRole(req, null, (): void => undefined);
+      await AuthenticationMWs.refreshSession(req, null, (): void => undefined);
+      expect(req.session.stamp).to.equal(session.stamp);
+      expect(req.session.context.user.name).to.equal('admin2');
+    });
+
+    it('starts a remembered session on OIDC login', async () => {
+      const olga = await createUser('olga');
+      const origGetUser = OIDCAuthService.getUserFromAuthenticationResponse;
+      OIDCAuthService.getUserFromAuthenticationResponse = async () => ObjectManagers.getInstance().UserManager.findOne({id: olga.id});
+      const req: any = {session: {}, sessionOptions: {}, query: {}, params: {}};
+      let err: any = 'not-called';
+      try {
+        await AuthenticationMWs.oidcLogin(req, null, (e?: any) => {
+          err = e;
+        });
+      } finally {
+        OIDCAuthService.getUserFromAuthenticationResponse = origGetUser;
+      }
+      expect(err).to.be.undefined;
+      expect(req.session.rememberMe).to.be.true;
+      expect(req.session.context.user).to.not.have.property('password');
+      await expectAlive(toCookie(req.session));
+    });
+
+    it('ends timed out sessions', async () => {
+      await createUser('gina');
+      const session = await login('gina', true);
+      expect(session.expires).to.be.greaterThan(Date.now());
+      session.expires = Date.now() - 1;
+      await expectEnded(session);
+      // sessions without server side expiry (e.g.: created before it existed)
+      const session2 = await login('gina');
+      delete session2.expires;
+      await expectEnded(session2);
+    });
+
+    it('extends the session on use', async () => {
+      await createUser('hank');
+      const session = await login('hank', true);
+      session.expires = Date.now() + 1000;
+      const r = await authenticate(session);
+      expect(r.err).to.be.undefined;
+      expect(r.req.session.expires).to.be.greaterThan(Date.now() + Config.Server.sessionTimeout - 10000);
+      expect(r.req.sessionOptions.expires.getTime()).to.equal(r.req.session.expires);
+    });
+
+    it('rejects sessions without stamp', async () => {
+      const ivy = await createUser('ivy', UserRoles.Admin);
+      await expectEnded({context: {user: {id: ivy.id, name: 'ivy', role: UserRoles.Admin}}, expires: Date.now() + 10000});
+    });
+
+    it('ends the guest session of a deleted sharing', async () => {
+      const owner = await createUser('owner', UserRoles.Admin);
+      const sharingKey = await createSharing(owner);
+      const session = await shareLogin(sharingKey);
+      await expectAlive(toCookie(session));
+      await ObjectManagers.getInstance().SharingManager.deleteSharing(sharingKey);
+      await expectEnded(toCookie(session));
+      await expectEnded(toCookie(session), sharingKey);
+    });
+
+    it('ends the guest session of an expired sharing', async () => {
+      const owner = await createUser('owner', UserRoles.Admin);
+      const sharingKey = await createSharing(owner, null, Date.now() + 300);
+      const session = await shareLogin(sharingKey);
+      await expectAlive(toCookie(session));
+      await new Promise(resolve => setTimeout(resolve, 400));
+      await expectEnded(toCookie(session), sharingKey);
+    });
+
+    it('ends the guest sessions of a deleted user\'s sharings', async () => {
+      const owner = await createUser('owner', UserRoles.Admin);
+      const sharingKey = await createSharing(owner);
+      const session = await shareLogin(sharingKey);
+      await ObjectManagers.getInstance().UserManager.deleteUser(owner.id);
+      await expectEnded(toCookie(session), sharingKey);
+    });
+
+    it('ends the guest session after the sharing changed', async () => {
+      const owner = await createUser('owner', UserRoles.Admin);
+      const sharingKey = await createSharing(owner, 'secret');
+      const session = await shareLogin(sharingKey, 'secret');
+      await expectAlive(toCookie(session));
+      const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
+      await ObjectManagers.getInstance().SharingManager.updateSharing({
+        id: sharing.id,
+        creator: owner,
+        password: 'other',
+        searchQuery: sharing.searchQuery,
+        expires: sharing.expires
+      } as any, true);
+      await expectEnded(toCookie(session), sharingKey);
+    });
+
+    it('logs in a guest again with the key of a passwordless sharing', async () => {
+      const owner = await createUser('owner', UserRoles.Admin);
+      const sharingKey = await createSharing(owner);
+      const session = await shareLogin(sharingKey);
+      const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
+      await ObjectManagers.getInstance().SharingManager.updateSharing({
+        id: sharing.id,
+        creator: owner,
+        password: null,
+        searchQuery: {type: SearchQueryTypes.directory, value: 'other', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
+        expires: sharing.expires
+      } as any, true);
+      const s = await expectAlive(toCookie(session), sharingKey);
+      expect(s.stamp).to.not.equal(session.stamp);
+    });
+  });
+
+  describe('inverseAuthenticate', async () => {
 
     it('should call next with error on authenticated', (done: (err?: any) => void) => {
       const req: any = {
@@ -198,7 +500,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('authorise', () => {
+  describe('authorise', async () => {
     it('should call next on authorised', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -247,12 +549,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
-  describe('login', () => {
-    beforeEach(async () => {
-      await sqlHelper.initDB();
-    });
+  describe('login', async () => {
 
-    describe('should call input ErrorDTO next on missing...', () => {
+
+    describe('should call input ErrorDTO next on missing...', async () => {
       it('body', (done: (err?: any) => void) => {
         const req: any = {
           query: {},
@@ -382,7 +682,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         query: {},
         params: {}
       };
-      const testUser = 'test user';
+      const testUser = {name: 'test user', role: UserRoles.User};
       const testContext = {user: testUser};
 
       const next: any = (err: ErrorDTO) => {
@@ -411,7 +711,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
       // @ts-ignore
       ObjectManagers.getInstance().SessionManager.buildContext = async (user: any) => {
-        expect(user).to.be.eql(testUser);
+        expect(user).to.deep.include(testUser);
         return testContext;
       };
 
@@ -467,7 +767,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
       // @ts-ignore
       ObjectManagers.getInstance().SessionManager.buildContext = async (user: any) => {
-        expect(user).to.be.eql(testUser);
+        expect(user).to.deep.include(testUser);
         return testContext;
       };
 
@@ -532,7 +832,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
       // @ts-ignore
       ObjectManagers.getInstance().SessionManager.buildContext = async (user: any) => {
-        expect(user).to.be.eql(testUser);
+        expect(user).to.deep.include(testUser);
         return testContext;
       };
 
@@ -616,8 +916,34 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
+  describe('normalizePathParam', async () => {
+    const run = (p: string): { err: ErrorDTO, value: string } => {
+      const req: any = {params: {directory: p}};
+      let err: ErrorDTO;
+      AuthenticationMWs.normalizePathParam('directory')(req, {} as any, (e?: unknown) => {
+        err = e as ErrorDTO;
+      });
+      return {err, value: req.params.directory};
+    };
 
-  describe('authoriseMedia', () => {
+    it('should reject paths escaping the base folder', () => {
+      for (const p of ['..', '../', '../..', 'a/../..', '../x.jpg', 'a/../../x.jpg', '..\\x.jpg'.replace('\\', path.sep)]) {
+        const ret = run(p);
+        expect(ret.err, p).to.be.instanceOf(ErrorDTO);
+        expect(ret.err.code, p).to.equal(ErrorCodes.INPUT_ERROR);
+      }
+    });
+
+    it('should normalize paths inside the base folder', () => {
+      expect(run(undefined)).to.deep.equal({err: undefined, value: path.sep});
+      expect(run('a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('a/b.jpg')});
+      expect(run('a/../b.jpg')).to.deep.equal({err: undefined, value: 'b.jpg'});
+      expect(run('/a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('/a/b.jpg')});
+      expect(run('..foo.jpg')).to.deep.equal({err: undefined, value: '..foo.jpg'});
+    });
+  });
+
+  describe('authoriseMedia', async () => {
 
     const buildReq = (mediaRelPath: string) => ({
       session: {
@@ -652,7 +978,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       expect(result).to.eql('ok');
     });
 
-    it('should deny if GalleryManager.authoriseMedia denies', async () => {
+    it('should deny (404) if GalleryManager.authoriseMedia denies', async () => {
       const req = buildReq('/allowed/dir/photo.jpg');
 
       // Mock GalleryManager to deny
@@ -661,10 +987,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       } as any;
 
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404);
     });
 
-    it('should deny (403) on error thrown by GalleryManager.authoriseMedia', async () => {
+    it('should deny (404) on error thrown by GalleryManager.authoriseMedia', async () => {
       const req = buildReq('/allowed/dir/photo.jpg');
 
       (ObjectManagers.getInstance() as any).GalleryManager = {
@@ -674,11 +1000,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       } as any;
 
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404);
     });
   });
 
-  describe('authoriseMetaFiles', () => {
+  describe('authoriseMetaFiles', async () => {
     const buildReq = (metaPath: string) => ({
       session: {
         context: {
@@ -714,10 +1040,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         authoriseMetaFile: async (_session: any, _path: string) => false
       } as any;
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404); // same as not existing
     });
 
-    it('should deny (403) on error thrown by GalleryManager.authoriseMetaFile', async () => {
+    it('should deny (404) on error thrown by GalleryManager.authoriseMetaFile', async () => {
       const req = buildReq('/some/dir/notes.md');
       (ObjectManagers.getInstance() as any).GalleryManager = {
         authoriseMetaFile: async () => {
@@ -725,11 +1051,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         }
       } as any;
       const result = await run(req);
-      expect(result).to.eql(403);
+      expect(result).to.eql(404); // same as not existing
     });
   });
 
-  describe('logout', () => {
+  describe('logout', async () => {
     it('should call next on logout', (done: (err?: any) => void) => {
       const req: any = {
         session: {
@@ -755,4 +1081,89 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
   });
 
+
+  describe('authoriseDirectory', async () => {
+    const dq = (value: string, matchType = TextSearchQueryMatchTypes.exact_match): DirectorySearch =>
+      ({type: SearchQueryTypes.directory, value, matchType});
+
+    const userContext = (u: any) => ObjectManagers.getInstance().SessionManager.buildContext({
+      id: 1, name: 'user', role: UserRoles.User, overrideAllowBlockList: true, ...u
+    });
+
+    const authorise = async (context: SessionContext, directory: string) => {
+      const req: any = {session: {context}, params: {directory: path.normalize(directory)}, query: {}};
+      let status: number = null;
+      const res: any = {
+        status: (s: number) => {
+          status = s;
+          return res;
+        }
+      };
+      let nextArgs: any[] = null;
+      await AuthenticationMWs.authoriseDirectory('directory')(req, res, (...args: any[]) => {
+        nextArgs = args;
+      });
+      return {req, status, nextArgs};
+    };
+
+    it('lets available directories through', async () => {
+      const ctx = await userContext({allowDirectoryList: [dq('public/*', TextSearchQueryMatchTypes.globMatch)]});
+      const r = await authorise(ctx, 'public/sub');
+      expect(r.nextArgs).to.deep.equal([]);
+      expect(r.status).to.be.null;
+      expect(r.req.directoryAccess).to.equal(DirectoryAccessTypes.available);
+    });
+
+    it('lets parents of available directories through', async () => {
+      const ctx = await userContext({allowDirectoryList: [dq('public/sub')]});
+      const r = await authorise(ctx, 'public');
+      expect(r.nextArgs).to.deep.equal([]);
+      expect(r.req.directoryAccess).to.equal(DirectoryAccessTypes.parent);
+    });
+
+    it('stops with not found for not available directories', async () => {
+      const ctx = await userContext({
+        allowDirectoryList: [dq('public/*', TextSearchQueryMatchTypes.globMatch)],
+        blockDirectoryList: [dq('public/private')]
+      });
+      for (const d of ['other', 'public/private', 'publicity']) {
+        const r = await authorise(ctx, d);
+        expect(r.status, d).to.equal(404);
+        expect(r.nextArgs[0], d).to.be.instanceOf(ErrorDTO);
+        expect((r.nextArgs[0] as ErrorDTO).code, d).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+        expect(r.req.directoryAccess, d).to.be.undefined;
+      }
+    });
+
+    it('answers the same for not available and not existing directories', async () => {
+      const ctx = await userContext({blockDirectoryList: [dq('private/*', TextSearchQueryMatchTypes.globMatch)]});
+      const existing = await authorise(ctx, 'private');
+      const notExisting = await authorise(ctx, 'private/not_existing_' + Date.now());
+      expect(notExisting.status).to.equal(existing.status);
+      expect(notExisting.nextArgs).to.deep.equal(existing.nextArgs);
+    });
+
+    it('sharing users can not open parents', async () => {
+      const sm = ObjectManagers.getInstance().SessionManager;
+      const ctx = await sm.buildContext(sm.createSharingUser({
+        sharingKey: 'key',
+        directoryQuery: dq('public/*', TextSearchQueryMatchTypes.globMatch),
+        defaultSearchView: {type: SearchQueryTypes.any_text, value: 'x'},
+        creator: {id: 1, name: 'creator', role: UserRoles.Admin}
+      } as any));
+      expect((await authorise(ctx, 'public')).req.directoryAccess).to.equal(DirectoryAccessTypes.available);
+      expect((await authorise(ctx, 'public/sub')).req.directoryAccess).to.equal(DirectoryAccessTypes.available);
+      expect((await authorise(ctx, '/')).status).to.equal(404);
+      expect((await authorise(ctx, 'other')).status).to.equal(404);
+    });
+
+    it('fails closed', async () => {
+      const r = await authorise(undefined, 'public');
+      expect(r.status).to.equal(404);
+      const ctx = await userContext({});
+      (ctx.directoryAccess as any).blockList = {}; // broken context
+      const r2 = await authorise(ctx, 'public');
+      expect(r2.status).to.equal(404);
+    });
+  });
 });

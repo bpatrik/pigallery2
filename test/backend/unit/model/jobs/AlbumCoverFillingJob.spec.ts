@@ -52,13 +52,10 @@ describe('AlbumCoverFillingJob', (sqlHelper: DBTestHelper) => {
   before(async () => {
     await sqlHelper.initDB();
     await sqlHelper.setUpTestGallery();
-    await ObjectManagers.getInstance().init();
     connection = await SQLConnection.getConnection();
   });
 
-  after(async () => {
-    await sqlHelper.clearDB();
-  });
+  after(sqlHelper.clearDB);
 
 
   it('runs full flow: Persons -> Albums -> Directory for all sessions and directories', async () => {

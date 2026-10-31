@@ -1,26 +1,25 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {FilterOption, FilterService, SelectedFilter} from './filter.service';
-import { NgIf, NgFor, NgClass, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-gallery-filter',
-    styleUrls: ['./filter.gallery.component.css'],
+    styleUrl: './filter.gallery.component.css',
     templateUrl: './filter.gallery.component.html',
     imports: [
-        NgIf,
-        NgFor,
-        PopoverDirective,
-        NgIconComponent,
-        FormsModule,
-        NgClass,
-        DatePipe,
-    ]
+    PopoverDirective,
+    NgIconComponent,
+    FormsModule,
+    DatePipe
+]
 })
 export class GalleryFilterComponent implements OnInit, OnDestroy {
+  filterService = inject(FilterService);
+
   public readonly unknownText;
   minDate = 0;
   maxDate = 100;
@@ -28,7 +27,7 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
   NUMBER_MIN_VALUE = Number.MIN_VALUE;
   showStatistic = false;
 
-  constructor(public filterService: FilterService) {
+  constructor() {
     this.unknownText = '<' + $localize`unknown` + '>';
   }
 

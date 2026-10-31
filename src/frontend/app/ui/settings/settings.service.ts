@@ -1,16 +1,16 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {BehaviorSubject, first} from 'rxjs';
 import {NetworkService} from '../../model/network/network.service';
 
 import {WebConfig} from '../../../../common/config/private/WebConfig';
-import {WebConfigClassBuilder} from 'typeconfig/src/decorators/builders/WebConfigClassBuilder';
+import {WebConfigClassBuilder} from 'typeconfig/web';
 import {ConfigPriority, TAGS} from '../../../../common/config/public/ClientConfig';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {StatisticDTO} from '../../../../common/entities/settings/StatisticDTO';
 import {ScheduledJobsService} from './scheduled-jobs.service';
-import {IWebConfigClassPrivate} from 'typeconfig/src/decorators/class/IWebConfigClass';
+import {IWebConfigClassPrivate} from 'typeconfig/common';
 
 
 export enum ConfigStyle {
@@ -18,17 +18,19 @@ export enum ConfigStyle {
 }
 
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class SettingsService {
+  private networkService = inject(NetworkService);
+  private jobsService = inject(ScheduledJobsService);
+  private cookieService = inject(CookieService);
+
   public configPriority = ConfigPriority.basic;
   public configStyle = ConfigStyle.full;
   public settings: BehaviorSubject<IWebConfigClassPrivate<TAGS> & WebConfig>;
   private fetchingSettings = false;
   public statistic: BehaviorSubject<StatisticDTO>;
 
-  constructor(private networkService: NetworkService,
-              private jobsService: ScheduledJobsService,
-              private cookieService: CookieService) {
+  constructor() {
     this.statistic = new BehaviorSubject(null);
     this.settings = new BehaviorSubject<IWebConfigClassPrivate<TAGS> & WebConfig>(WebConfigClassBuilder.attachPrivateInterface(new WebConfig()));
     this.getSettings().catch(console.error);

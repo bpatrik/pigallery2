@@ -3,8 +3,7 @@ import {FileDTO} from '../../../common/entities/FileDTO';
 import {Utils} from '../../../common/Utils';
 
 @Pipe({
-    name: 'toPath',
-    standalone: true
+    name: 'toPath'
 })
 export class FileDTOToPathPipe implements PipeTransform {
   transform(metaFile: FileDTO): string | null {

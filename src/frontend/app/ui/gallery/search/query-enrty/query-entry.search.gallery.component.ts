@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
+import {Component, forwardRef, input, output} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -22,17 +22,18 @@ import {
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
   UntypedFormControl,
-  ValidationErrors,
+  type ValidationErrors,
   Validator
 } from '@angular/forms';
-import {DatePipe, NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
+import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 
 @Component({
   selector: 'app-gallery-search-query-entry',
   templateUrl: './query-entry.search.gallery.component.html',
-  styleUrls: ['./query-entry.search.gallery.component.css'],
+  styleUrl: './query-entry.search.gallery.component.css',
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -46,16 +47,11 @@ import {StringifySearchType} from '../../../../pipes/StringifySearchType';
     },
   ],
   imports: [
-    NgIf,
     FormsModule,
-    NgFor,
-    NgClass,
     NgIconComponent,
-    NgSwitch,
-    NgSwitchCase,
     DatePipe,
-    StringifySearchType,
-  ]
+    StringifySearchType
+]
 })
 export class GallerySearchQueryEntryComponent
   implements ControlValueAccessor, Validator {
@@ -64,8 +60,8 @@ export class GallerySearchQueryEntryComponent
   public SearchQueryTypes = SearchQueryTypes;
   public DatePatternFrequency = DatePatternFrequency;
   public TextSearchQueryMatchTypes = TextSearchQueryMatchTypes;
-  @Output() delete = new EventEmitter<void>();
-  @Input() id = 'NA';
+  readonly delete = output<void>();
+  readonly id = input('NA');
 
   public locationInputText: string = '';
 
@@ -128,70 +124,28 @@ export class GallerySearchQueryEntryComponent
       return [];
     }
     if (this.IsTextQuery) {
-      return ['~', '!~', '=', '!=', 'glob', '!glob'];
+      return TextSearchMatchingTypes.values;
     }
     return ['=', '!=']; //normal negatable query
   }
 
   get SelectedMatchType(): string {
-    if (this.AsTextQuery.matchType === TextSearchQueryMatchTypes.exact_match) {
-      if (this.AsTextQuery.negate) {
-        return '!=';
-      } else {
-        return '=';
-      }
-    } else if (typeof this.AsTextQuery.matchType === 'undefined' ||
-      this.AsTextQuery.matchType === TextSearchQueryMatchTypes.like) {
-      if (this.AsTextQuery.negate) {
-        return '!~';
-      } else {
-        return '~';
-      }
-    } else if (this.AsTextQuery.matchType === TextSearchQueryMatchTypes.globMatch) {
-      if (this.AsTextQuery.negate) {
-        return '!glob';
-      } else {
-        return 'glob';
-      }
-    }
+    return TextSearchMatchingTypes.get(this.AsTextQuery);
   }
 
   set SelectedMatchType(value: string) {
     if (this.IsListQuery) {
       return;
     }
-    this.AsTextQuery.negate = value.charAt(0) === '!';
     if (!this.IsTextQuery) {
+      this.AsTextQuery.negate = value.charAt(0) === '!';
       return;
     }
-    if (value === '!~' || value === '~') {
-      this.AsTextQuery.matchType = TextSearchQueryMatchTypes.like;
-    } else if (value === '!=' || value === '=') {
-      this.AsTextQuery.matchType = TextSearchQueryMatchTypes.exact_match;
-    } else if (value === '!glob' || value === 'glob') {
-      this.AsTextQuery.matchType = TextSearchQueryMatchTypes.globMatch;
-    }
+    TextSearchMatchingTypes.set(this.AsTextQuery, value);
   }
 
   getMatchingTypesDescription(type: string) {
-    switch (type) {
-      case '=':
-        if (this.IsTextQuery) {
-          return $localize`Exact match (e.g.: bb matches for \' bb \')`;
-        }
-        return $localize`Exact match`;
-      case '!=':
-        return $localize`Exact negative match`;
-      // only supported for text queries
-      case '~':
-        return $localize`Open and start match (e.g.: bb matches for \'abba\' and \' bb \')`;
-      case '!~':
-        return $localize`Negative open and start  match`;
-      case 'glob':
-        return $localize`glob match (supports wildcards: * and ?)`;
-      case '!glob':
-        return $localize`Negative glob match`;
-    }
+    return TextSearchMatchingTypes.getDescription(type, this.IsTextQuery);
   }
 
   validate(control: UntypedFormControl): ValidationErrors {
@@ -217,6 +171,9 @@ export class GallerySearchQueryEntryComponent
       ];
     } else {
       delete this.AsListQuery.list;
+    }
+    if (!this.IsTextQuery) {
+      delete this.AsTextQuery.value;
     }
     if (this.queryEntry.type === SearchQueryTypes.distance) {
       this.AsDistanceQuery.distance = 1;
@@ -255,6 +212,28 @@ export class GallerySearchQueryEntryComponent
       delete this.AsDatePatternQuery.daysLength;
       delete this.AsDatePatternQuery.frequency;
       delete this.AsDatePatternQuery.agoNumber;
+    }
+    this.onChange();
+  }
+
+  /**
+   * Date inputs emit 'yyyy-MM-dd' strings, but RangeSearch expects UTC timestamps
+   */
+  onDateChange(field: 'min' | 'max', value: string): void {
+    const parts = (value || '').split('-').map((t) => parseInt(t, 10));
+    if (parts.length === 3 && parts.every((p) => !isNaN(p))) {
+      this.AsRangeQuery[field] = Date.UTC(parts[0], parts[1] - 1, parts[2]);
+    } else {
+      delete this.AsRangeQuery[field];
+    }
+    // keep the range valid: moving one end past the other drags the other end along
+    const q = this.AsRangeQuery;
+    if (q.min !== undefined && q.max !== undefined && q.min > q.max) {
+      if (field === 'min') {
+        q.max = q.min;
+      } else {
+        q.min = q.max;
+      }
     }
     this.onChange();
   }

@@ -1,25 +1,21 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message} from '../../../../common/entities/Message';
 import {LoadingBarService} from '@ngx-loading-bar/core';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
-import {Utils} from '../../../../common/Utils';
 import {CustomHeaders} from '../../../../common/CustomHeaders';
 import {VersionService} from '../version.service';
 import {lastValueFrom, Observable, tap} from 'rxjs';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class NetworkService {
-  readonly apiBaseUrl = Utils.concatUrls(Config.Server.urlBase, Config.Server.apiPath);
-  private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
+  private http = inject(HttpClient);
+  private loadingBarService = inject(LoadingBarService);
+  private versionService = inject(VersionService);
 
-  constructor(
-    private http: HttpClient,
-    private loadingBarService: LoadingBarService,
-    private versionService: VersionService
-  ) {
-  }
+  readonly apiBaseUrl = Config.Server.getApiUrl();
+  private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
 
   public static buildUrl(url: string, data?: { [key: string]: unknown }): string {
     if (data) {

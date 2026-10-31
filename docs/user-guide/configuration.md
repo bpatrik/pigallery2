@@ -54,10 +54,15 @@ App CLI options:
   --Users-oidc-usernameClaim                                                JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty. (default: 'preferred_username')
   --Users-oidc-emailClaim                                                    (default: 'email')
   --Users-oidc-allowedDomains                                               If set, only identities with emails in these domains will be accepted. (default: [])
-  --Users-oidc-autoCreateUser                                               If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in. (default: false)
+  --Users-oidc-autoCreateUser                                               If enabled, unknown users will be created on first login. If disabled, only existing app users can log in. (default: false)
+  --Users-oidc-autoCreateUserRole                                           Role of the users that are created on their first OIDC login. (default: 'Guest')
+  --Users-oidc-strictSecurity                                               Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider. (default: false)
+  --Users-oidc-strictLinkMaxRole                                            Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back. (default: 'User')
   --Users-enforcedUsers                                                     Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   --Users-allowQuery                                                        Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   --Users-blockQuery                                                        Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
+  --Users-allowDirectoryList                                                If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately. (default: [])
+  --Users-blockDirectoryList                                                The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately. (default: [])
   --Users-suppressDefUserWarn                                               if true, the app won't show a warning for using the default user. (default: false)
   --Gallery-enableCache                                                     Caches directory contents and search results for better performance. (default: true)
   --Gallery-enableOnScrollRendering                                         Those thumbnails get higher priority that are visible on the screen. (default: true)
@@ -179,6 +184,7 @@ App CLI options:
   --Upload-enabled                                                           (default: false)
   --Upload-minimumRole                                                      Minimum user role to enable file upload. (default: 'Admin')
   --Upload-enforcedDirectoryConfig                                          Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
+  --Upload-blockedExtensions                                                Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts. (default: ["pg2conf","svg"])
   --Database-type                                                           SQLite is recommended. (default: 'sqlite')
   --Database-dbFolder                                                       All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   --Database-sqlite-DBFileName                                              Sqlite will save the db with this filename. (default: 'sqlite.db')
@@ -189,9 +195,9 @@ App CLI options:
   --Database-mysql-password                                                  (default: '')
   --Indexing-cachedFolderTimeout                                            If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low). (default: 3600000)
   --Indexing-reIndexingSensitivity                                          Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
-  --Indexing-excludeFolderList                                              Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
-  --Indexing-excludeFileList                                                Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
-  --Indexing-excludeFilenameList                                            Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
+  --Indexing-excludeFolderList                                              Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
+  --Indexing-excludeFileList                                                Skip folders that contain a file with any of these names. (default: [])
+  --Indexing-excludeFilenameList                                            Photos and videos to skip by file name. Supports * and ?, case-sensitive. E.g.: ._* or *.rm (default: [])
   --AlbumCover-SearchQuery                                                  Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   --AlbumCover-Sorting                                                      If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   --Duplicates-listingLimit                                                 Maximum number of duplicates to list. (default: 1000)
@@ -236,10 +242,15 @@ Environmental variables:
   Users-oidc-usernameClaim                                              JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty. (default: 'preferred_username')
   Users-oidc-emailClaim                                                  (default: 'email')
   Users-oidc-allowedDomains                                             If set, only identities with emails in these domains will be accepted. (default: [])
-  Users-oidc-autoCreateUser                                             If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in. (default: false)
+  Users-oidc-autoCreateUser                                             If enabled, unknown users will be created on first login. If disabled, only existing app users can log in. (default: false)
+  Users-oidc-autoCreateUserRole                                         Role of the users that are created on their first OIDC login. (default: 'Guest')
+  Users-oidc-strictSecurity                                             Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider. (default: false)
+  Users-oidc-strictLinkMaxRole                                          Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back. (default: 'User')
   Users-enforcedUsers                                                   Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different. (default: [])
   Users-allowQuery                                                      Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
   Users-blockQuery                                                      Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately. (default: {"type":100,"value":""})
+  Users-allowDirectoryList                                              If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately. (default: [])
+  Users-blockDirectoryList                                              The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately. (default: [])
   Users-suppressDefUserWarn                                             if true, the app won't show a warning for using the default user. (default: false)
   Gallery-enableCache                                                   Caches directory contents and search results for better performance. (default: true)
   Gallery-enableOnScrollRendering                                       Those thumbnails get higher priority that are visible on the screen. (default: true)
@@ -361,6 +372,7 @@ Environmental variables:
   Upload-enabled                                                         (default: false)
   Upload-minimumRole                                                    Minimum user role to enable file upload. (default: 'Admin')
   Upload-enforcedDirectoryConfig                                        Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
+  Upload-blockedExtensions                                              Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts. (default: ["pg2conf","svg"])
   Database-type                                                         SQLite is recommended. (default: 'sqlite')
   Database-dbFolder                                                     All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   Database-sqlite-DBFileName                                            Sqlite will save the db with this filename. (default: 'sqlite.db')
@@ -376,9 +388,9 @@ Environmental variables:
   MYSQL_PASSWORD                                                         same as Database-mysql-password
   Indexing-cachedFolderTimeout                                          If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low). (default: 3600000)
   Indexing-reIndexingSensitivity                                        Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job. (default: 'low')
-  Indexing-excludeFolderList                                            Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
-  Indexing-excludeFileList                                              Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing. (default: [])
-  Indexing-excludeFilenameList                                          Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files. (default: [])
+  Indexing-excludeFolderList                                            Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path. (default: [".Trash-1000",".dtrash","$RECYCLE.BIN"])
+  Indexing-excludeFileList                                              Skip folders that contain a file with any of these names. (default: [])
+  Indexing-excludeFilenameList                                          Photos and videos to skip by file name. Supports * and ?, case-sensitive. E.g.: ._* or *.rm (default: [])
   AlbumCover-SearchQuery                                                Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter. (default: {"type":100,"value":""})
   AlbumCover-Sorting                                                    If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method. (default: [{"method":30,"ascending":false},{"method":20,"ascending":false},{"method":40,"ascending":false}])
   Duplicates-listingLimit                                               Maximum number of duplicates to list. (default: 1000)
@@ -461,8 +473,14 @@ Environmental variables:
             "emailClaim": "email",
             "//[allowedDomains]": "If set, only identities with emails in these domains will be accepted.",
             "allowedDomains": [],
-            "//[autoCreateUser]": "If enabled, unknown users will be created with Guest role on first login. If disabled, only existing app users can log in.",
-            "autoCreateUser": false
+            "//[autoCreateUser]": "If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.",
+            "autoCreateUser": false,
+            "//[autoCreateUserRole]": "Role of the users that are created on their first OIDC login.",
+            "autoCreateUserRole": "Guest",
+            "//[strictSecurity]": "Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to \"Max role for linking\" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider.",
+            "strictSecurity": false,
+            "//[strictLinkMaxRole]": "Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back.",
+            "strictLinkMaxRole": "User"
         },
         "//[enforcedUsers]": "Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.",
         "enforcedUsers": [],
@@ -476,6 +494,10 @@ Environmental variables:
             "type": 100,
             "value": ""
         },
+        "//[allowDirectoryList]": "If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately.",
+        "allowDirectoryList": [],
+        "//[blockDirectoryList]": "The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately.",
+        "blockDirectoryList": [],
         "//[suppressDefUserWarn]": "if true, the app won't show a warning for using the default user.",
         "suppressDefUserWarn": false
     },
@@ -1053,7 +1075,12 @@ Environmental variables:
         "//[minimumRole]": "Minimum user role to enable file upload.",
         "minimumRole": "Admin",
         "//[enforcedDirectoryConfig]": "Only enable upload in folder where an \".uploader.pg2conf\" is present in the folder.",
-        "enforcedDirectoryConfig": false
+        "enforcedDirectoryConfig": false,
+        "//[blockedExtensions]": "Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.",
+        "blockedExtensions": [
+            "pg2conf",
+            "svg"
+        ]
     },
     "Database": {
         "//[type]": "SQLite is recommended.",
@@ -1077,15 +1104,15 @@ Environmental variables:
         "cachedFolderTimeout": 3600000,
         "//[reIndexingSensitivity]": "Set the reindexing sensitivity. High value check the folders for change more often.  Setting to never only indexes if never indexed or explicit running the Indexing Job.",
         "reIndexingSensitivity": "low",
-        "//[excludeFolderList]": "Folders to exclude from indexing. If an entry starts with '/' it is treated as an absolute path. If it doesn't start with '/' but contains a '/', the path is relative to the image directory. If it doesn't contain a '/', any folder with this name will be excluded.",
+        "//[excludeFolderList]": "Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path.",
         "excludeFolderList": [
             ".Trash-1000",
             ".dtrash",
             "$RECYCLE.BIN"
         ],
-        "//[excludeFileList]": "Files that mark a folder to be excluded from indexing. Any folder that contains a file with this name will be excluded from indexing.",
+        "//[excludeFileList]": "Skip folders that contain a file with any of these names.",
         "excludeFileList": [],
-        "//[excludeFilenameList]": "Glob patterns to exclude individual media files from indexing. Supports '*' (any characters), '?' (single character) wildcards and ';' to separate multiple patterns. E.g.: '._*' excludes macOS resource fork files starting with '._'; '*.rm' excludes .rm files.",
+        "//[excludeFilenameList]": "Photos and videos to skip by file name. Supports * and ?, case-sensitive. E.g.: ._* or *.rm",
         "excludeFilenameList": []
     },
     "//[AlbumCover]": "Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.",

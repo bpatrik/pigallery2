@@ -96,6 +96,14 @@ export interface IMediaRequestBodyData {
 }
 
 
+export type MetadataFilterComparator = '>=' | '<=' | '==' | 'contains' | '!contains';
+
+export interface IMetadataFilter {
+  field: string;
+  comparator: MetadataFilterComparator;
+  value: string | number;
+}
+
 export interface IClientMediaButtonConfig {
   /**
    * Name of the button. This is also used as id.
@@ -119,10 +127,14 @@ export interface IClientMediaButtonConfig {
    * example values:
    * [
    *   {field: 'rating', comparator: '==', value: 4}, // matches if rating is 4
-   *   {field: 'size.width', comparator: '>=', value: 400} // matches if width is >= 400px
+   *   {field: 'size.width', comparator: '>=', value: 400}, // matches if width is >= 400px
+   *   {field: 'keywords', comparator: 'contains', value: 'favorite'}, // matches if the keywords include 'favorite'
+   *   {field: 'keywords', comparator: '!contains', value: 'favorite'} // matches if they don't (or if there are no keywords)
    * ]
+   * 'contains' and '!contains' work on arrays (exact item match) and on strings (substring match).
+   * Matching is case-sensitive. On other field types (e.g. numbers) 'contains' never matches, so '!contains' always does.
    */
-  metadataFilter?: { field: string, comparator: '>=' | '<=' | '==', value: string | number }[];
+  metadataFilter?: IMetadataFilter[];
   /**
    * If true, the button will always be visible, not only on hover.
    */

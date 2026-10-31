@@ -3,8 +3,7 @@ import {EnumTranslations} from '../ui/EnumTranslations';
 import {SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 
 @Pipe({
-    name: 'stringifySearchType',
-    standalone: true
+    name: 'stringifySearchType'
 })
 export class StringifySearchType implements PipeTransform {
 

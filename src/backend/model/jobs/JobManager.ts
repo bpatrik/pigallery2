@@ -127,6 +127,7 @@ export class JobManager implements IJobListener, IObjectManager {
 
   public async cleanUp() {
     this.stopSchedules();
+    await this.progressManager?.cleanUp();
   }
 
   public stopSchedules(): void {

@@ -88,7 +88,7 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
   });
 
   it('should show companion video row when media is a Live Photo', () => {
-    component.media = makePhoto({
+    fixture.componentRef.setInput('media', makePhoto({
       liveVideoPath: 'vacation/IMG_7936_HEVC.MOV',
       liveVideoInfo: {
         name: 'IMG_7936_HEVC.MOV',
@@ -96,8 +96,7 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
         fileSize: 4500000,
         duration: 3000,
       },
-    });
-    component.ngOnChanges();
+    }));
     fixture.detectChanges();
 
     const rows = fixture.nativeElement.querySelectorAll('.row');
@@ -111,8 +110,7 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
   });
 
   it('should not show companion video row for regular photos', () => {
-    component.media = makePhoto();
-    component.ngOnChanges();
+    fixture.componentRef.setInput('media', makePhoto());
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
@@ -130,14 +128,14 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
   });
 
   it('isLivePhoto() should return true when liveVideoPath is set', () => {
-    component.media = makePhoto({
+    fixture.componentRef.setInput('media', makePhoto({
       liveVideoPath: 'vacation/IMG_7936_HEVC.MOV',
-    });
+    }));
     expect(component.isLivePhoto()).toBeTrue();
   });
 
   it('isLivePhoto() should return false for regular photos', () => {
-    component.media = makePhoto();
+    fixture.componentRef.setInput('media', makePhoto());
     expect(component.isLivePhoto()).toBeFalse();
   });
 });

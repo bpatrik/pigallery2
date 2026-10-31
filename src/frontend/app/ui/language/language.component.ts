@@ -1,36 +1,42 @@
-import {Component, ViewChild} from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieService} from 'ngx-cookie-service';
 import { BsDropdownDirective, BsDropdownToggleDirective, BsDropdownMenuDirective } from 'ngx-bootstrap/dropdown';
-import { NgIf, NgFor } from '@angular/common';
+
 import { NgIconComponent } from '@ng-icons/core';
+import {Router} from '@angular/router';
 
 @Component({
     selector: 'app-language',
     templateUrl: './language.component.html',
-    styleUrls: ['./language.component.css'],
+    styleUrl: './language.component.css',
     imports: [
-        BsDropdownDirective,
-        BsDropdownToggleDirective,
-        NgIf,
-        NgIconComponent,
-        BsDropdownMenuDirective,
-        NgFor,
-    ]
+    BsDropdownDirective,
+    BsDropdownToggleDirective,
+    NgIconComponent,
+    BsDropdownMenuDirective
+]
 })
 export class LanguageComponent {
+  private cookieService = inject(CookieService);
+  private router = inject(Router);
+
   languages: string[] = [];
   current: string = null;
-  urlBase = Config.Server.urlBase;
 
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
 
-  constructor(private cookieService: CookieService) {
+  constructor() {
     this.languages = Config.Server.languages.sort();
     if (this.cookieService.get(CookieNames.lang) != null) {
       this.current = this.cookieService.get(CookieNames.lang);
     }
+  }
+
+  // the server sets the language and redirects back to the current page
+  getLanguageUrl(lang: string): string {
+    return Config.Server.getAppUrl(lang, this.router.url);
   }
 }
 

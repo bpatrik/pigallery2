@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
 import {RouterLink} from '@angular/router';
@@ -7,33 +7,29 @@ import {Media} from '../../Media';
 import {Thumbnail, ThumbnailManagerService,} from '../../thumbnailManager.service';
 import {QueryService} from '../../../../model/query.service';
 import {CoverPhotoDTO} from '../../../../../../common/entities/PhotoDTO';
-import { NgIf } from '@angular/common';
+
 import { IconComponent } from '../../../../icon.component';
 
 @Component({
     selector: 'app-gallery-directory',
     templateUrl: './directory.gallery.component.html',
-    styleUrls: ['./directory.gallery.component.css'],
+    styleUrl: './directory.gallery.component.css',
     imports: [
-        RouterLink,
-        NgIf,
-        IconComponent,
-    ]
+    RouterLink,
+    IconComponent
+]
 })
 export class GalleryDirectoryComponent implements OnInit, OnDestroy {
-  @Input() directory: SubDirectoryDTO;
-  @Input() size: number;
+  private thumbnailService = inject(ThumbnailManagerService);
+  private sanitizer = inject(DomSanitizer);
+  queryService = inject(QueryService);
+
+  readonly directory = input<SubDirectoryDTO>(undefined);
+  readonly size = input<number>(undefined);
   thumbnail: Thumbnail = null;
 
-  constructor(
-      private thumbnailService: ThumbnailManagerService,
-      private sanitizer: DomSanitizer,
-      public queryService: QueryService
-  ) {
-  }
-
   public get SamplePhoto(): CoverPhotoDTO {
-    return this.directory.cache?.cover;
+    return this.directory().cache?.cover;
   }
 
   getSanitizedThUrl(): SafeStyle {
@@ -53,7 +49,7 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
    }*/
 
   getDirectoryPath(): string {
-    return Utils.concatUrls(this.directory.path, this.directory.name);
+    return Utils.concatUrls(this.directory().path, this.directory().name);
   }
 
   ngOnDestroy(): void {
@@ -63,9 +59,9 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.directory.cache?.cover) {
+    if (this.directory().cache?.cover) {
       this.thumbnail = this.thumbnailService.getThumbnail(
-          new Media(this.SamplePhoto, this.size, this.size)
+          new Media(this.SamplePhoto, this.size(), this.size())
       );
     }
   }

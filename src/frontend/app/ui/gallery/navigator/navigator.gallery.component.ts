@@ -1,10 +1,11 @@
-import {Component, ElementRef, HostListener, ViewChild} from '@angular/core';
+import { Component, ElementRef, inject, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {QueryService} from '../../../model/query.service';
 import {Utils} from '../../../../../common/Utils';
+import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
@@ -17,7 +18,7 @@ import {FilterService} from '../filter/filter.service';
 import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 import {GalleryNavigatorService} from './navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../utils/sorting-method-icon/sorting-method-icon.component';
 import {GridSizeIconComponent} from '../../utils/grid-size-icon/grid-size-icon.component';
@@ -29,11 +30,13 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 
 @Component({
   selector: 'app-gallery-navbar',
-  styleUrls: ['./navigator.gallery.component.css'],
+  host: {
+    '(window:keydown)': 'onKeyPress($event)',
+    '(window:scroll)': 'onScroll()'
+  },
+  styleUrl: './navigator.gallery.component.css',
   templateUrl: './navigator.gallery.component.html',
   imports: [
-    NgIf,
-    NgFor,
     RouterLink,
     NgIconComponent,
     BsDropdownDirective,
@@ -45,10 +48,19 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
     AsyncPipe,
     StringifySortingMethod,
     StringifySearchQuery,
-    StringifyGridSize,
-  ]
+    StringifyGridSize
+]
 })
 export class GalleryNavigatorComponent {
+  authService = inject(AuthenticationService);
+  queryService = inject(QueryService);
+  contentLoaderService = inject(ContentLoaderService);
+  filterService = inject(FilterService);
+  sortingService = inject(GallerySortingService);
+  navigatorService = inject(GalleryNavigatorService);
+  private router = inject(Router);
+  sanitizer = inject(DomSanitizer);
+
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly groupingByTypes: { key: number; value: string }[] = [];
   public readonly gridSizes: { key: number; value: string }[] = [];
@@ -59,8 +71,8 @@ export class GalleryNavigatorComponent {
   public directoryContent: Observable<DirectoryContent>;
   public routes: Observable<NavigatorPath[]>;
   public showFilters = false;
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
-  @ViewChild('navigator', {read: ElementRef}) navigatorElement: ElementRef<HTMLInputElement>;
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
+  readonly navigatorElement = viewChild('navigator', { read: ElementRef });
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
   protected readonly GroupByTypes = GroupByTypes;
   private readonly RootFolderName: string;
@@ -71,16 +83,7 @@ export class GalleryNavigatorComponent {
     down: 0
   };
 
-  constructor(
-    public authService: AuthenticationService,
-    public queryService: QueryService,
-    public contentLoaderService: ContentLoaderService,
-    public filterService: FilterService,
-    public sortingService: GallerySortingService,
-    public navigatorService: GalleryNavigatorService,
-    private router: Router,
-    public sanitizer: DomSanitizer
-  ) {
+  constructor() {
     this.sortingByTypes = Utils.enumToArray(SortByTypes);
     // can't group by random
     this.groupingByTypes = Utils.enumToArray(GroupByTypes);
@@ -130,6 +133,15 @@ export class GalleryNavigatorComponent {
 
         const user = this.authService.user.value;
         const arr: NavigatorPath[] = [];
+        // the server tells which parents are available, starting from the root
+        const availableParents = c?.directory?.availableParents;
+        const isParentAvailable = (index: number): boolean => {
+          if (Array.isArray(availableParents)) {
+            return availableParents[index] === true;
+          }
+          // without a user (e.g. while logging out) no parent is available
+          return user?.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
+        };
 
         // create root link
         if (dirs.length === 0) {
@@ -137,9 +149,7 @@ export class GalleryNavigatorComponent {
         } else {
           arr.push({
             name: this.RootFolderName,
-            route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-              ? '/'
-              : null,
+            route: isParentAvailable(0) ? '/' : null,
           });
         }
 
@@ -151,9 +161,8 @@ export class GalleryNavigatorComponent {
           } else {
             arr.push({
               name,
-              route: user.role > UserRoles.LimitedGuest // it's basically a sharing. they should not just navigate wherever
-                ? route
-                : null,
+              // root is the 0th parent
+              route: isParentAvailable(index + 1) ? route : null,
             });
 
           }
@@ -268,9 +277,7 @@ export class GalleryNavigatorComponent {
       queryParams += e[0] + '=' + e[1];
     });
 
-    return Utils.concatUrls(
-      Config.Server.urlBase,
-      Config.Server.apiPath,
+    return Config.Server.getApiUrl(
       '/gallery/zip/',
       encodeURIComponent(JSON.stringify(searchQuery)) +
       '?' + queryParams
@@ -282,7 +289,7 @@ export class GalleryNavigatorComponent {
     if (!c.directory) {
       return null;
     }
-    return JSON.stringify({
+    return SearchQueryUtils.urlify({
       type: SearchQueryTypes.directory,
       matchType: TextSearchQueryMatchTypes.globMatch,
       value: Utils.concatUrls('./', c?.directory.path, c?.directory.name) + '*',
@@ -299,7 +306,6 @@ export class GalleryNavigatorComponent {
       .catch(console.error);
   }
 
-  @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
     switch (event.key) {
       case 'ArrowUp':
@@ -311,14 +317,13 @@ export class GalleryNavigatorComponent {
   }
 
 
-  @HostListener('window:scroll')
   onScroll(): void {
     const scrollPosition = PageHelper.ScrollY;
     if (this.lastScroll.any < scrollPosition) { // scroll down
       //hide delay
       if (this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay) {
         this.showFilters = false;
-        this.dropdown.hide();
+        this.dropdown().hide();
       }
       this.lastScroll.down = scrollPosition;
     } else if (this.lastScroll.any > scrollPosition) {

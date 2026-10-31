@@ -64,7 +64,7 @@ export class DiskManager {
       .replace(/\*/g, '.*')                   // * matches any number of any chars
       .replace(/\?/g, '.') +                  // ? matches exactly one char
       '$';
-    return new RegExp(regexStr, 'i');
+    return new RegExp(regexStr);
   }
 
   public static excludeFile(filename: string): boolean {
@@ -104,7 +104,7 @@ export class DiskManager {
           return true;
         }
       } else {
-        if (exclude === dir.name) {
+        if (DiskManager.globToRegex(exclude).test(dir.name)) {
           return true;
         }
       }
@@ -140,6 +140,9 @@ export class DiskManager {
   ): Promise<ParentDirectoryDTO> {
     Logger.silly(LOG_TAG, 'scanning directory:', relativeDirectoryName);
     relativeDirectoryName = this.normalizeDirPath(relativeDirectoryName);
+    if (!ProjectPath.isInsideImageFolder(relativeDirectoryName)) {
+      throw new Error('Directory is outside of the image folder: ' + relativeDirectoryName);
+    }
     const dto = this.getDTOFromPath(relativeDirectoryName);
 
     const absoluteDirectoryName = path.join(

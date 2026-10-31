@@ -3,6 +3,6 @@ export interface ExtensionListItem {
   name: string;
   url?: string;
   readme?: string;
-  zipUrl: string;
+  zipUrl?: string;
   installed?: boolean;
 }

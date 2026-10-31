@@ -1,11 +1,11 @@
-import {Component, forwardRef, Input, OnInit} from '@angular/core';
-import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
+import { Component, forwardRef, OnInit, inject, input } from '@angular/core';
+import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {SortByDirectionalTypes, SortingMethod} from '../../../../../../../common/entities/SortingMethods';
 import {enumToTranslatedArray} from '../../../../EnumTranslations';
 import {AutoCompleteService} from '../../../../gallery/search/autocomplete.service';
 import {Utils} from '../../../../../../../common/Utils';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
-import {NgFor, NgIf} from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../../../utils/sorting-method-icon/sorting-method-icon.component';
 import {StringifySortingMethod} from '../../../../../pipes/StringifySortingMethod';
@@ -14,7 +14,7 @@ import {NotificationService} from '../../../../../model/notification.service';
 @Component({
   selector: 'app-settings-entry-sorting-method',
   templateUrl: './sorting-method.settings-entry.component.html',
-  styleUrls: ['./sorting-method.settings-entry.component.css'],
+  styleUrl: './sorting-method.settings-entry.component.css',
   providers: [
     AutoCompleteService,
     {
@@ -31,26 +31,25 @@ import {NotificationService} from '../../../../../model/notification.service';
   imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,
-    NgIf,
     NgIconComponent,
     SortingMethodIconComponent,
     BsDropdownMenuDirective,
-    NgFor,
-    StringifySortingMethod,
-  ]
+    StringifySortingMethod
+]
 })
 export class SortingMethodSettingsEntryComponent
   implements ControlValueAccessor, Validator, OnInit {
-  @Input() sortingByEnum: Record<string, number | string> & { [k: number]: string };
+  private notificationService = inject(NotificationService);
+
+  readonly sortingByEnum = input<Record<string, number | string> & {
+    [k: number]: string;
+}>(undefined);
 
   public sortingMethod: SortingMethod;
   public sortingByTypes: { key: number; value: string }[] = [];
 
-  constructor(private notificationService: NotificationService) {
-  }
-
   ngOnInit(): void {
-    this.sortingByTypes = enumToTranslatedArray(this.sortingByEnum);
+    this.sortingByTypes = enumToTranslatedArray(this.sortingByEnum());
   }
 
   public onTouched(): void {

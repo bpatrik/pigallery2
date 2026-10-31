@@ -1,15 +1,15 @@
-import {Component, Input} from '@angular/core';
-import { NgIf } from '@angular/common';
+import {Component, input} from '@angular/core';
+
 import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
     selector: 'app-gallery-grid-photo-loading',
     templateUrl: './loading.photo.grid.gallery.component.html',
-    styleUrls: ['./loading.photo.grid.gallery.component.css'],
-    imports: [NgIf, NgIconComponent]
+    styleUrl: './loading.photo.grid.gallery.component.css',
+    imports: [NgIconComponent]
 })
 export class GalleryPhotoLoadingComponent {
-  @Input() animate: boolean;
-  @Input() error: boolean;
+  readonly animate = input<boolean>(undefined);
+  readonly error = input<boolean>(undefined);
 }
 

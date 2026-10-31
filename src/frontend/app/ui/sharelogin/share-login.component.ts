@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
@@ -6,34 +6,33 @@ import {NavigationService} from '../../model/navigation.service';
 import {ShareService} from '../gallery/share.service';
 import { LanguageComponent } from '../language/language.component';
 import { IconComponent } from '../../icon.component';
-import { NgIf, AsyncPipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
     selector: 'app-share-login',
     templateUrl: './share-login.component.html',
-    styleUrls: ['./share-login.component.css'],
+    styleUrl: './share-login.component.css',
     imports: [
-        LanguageComponent,
-        IconComponent,
-        NgIf,
-        FormsModule,
-        NgIconComponent,
-        AsyncPipe,
-    ]
+    LanguageComponent,
+    IconComponent,
+    FormsModule,
+    NgIconComponent,
+    AsyncPipe
+]
 })
 export class ShareLoginComponent implements OnInit {
+  shareService = inject(ShareService);
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+
   password: string;
   loginError = false;
   inProgress = false;
   title: string;
 
-  constructor(
-      public shareService: ShareService,
-      private authService: AuthenticationService,
-      private navigation: NavigationService
-  ) {
+  constructor() {
     this.title = Config.Server.applicationTitle;
   }
 

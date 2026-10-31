@@ -16,6 +16,9 @@ import {
   ClientSharingConfig,
   MapLayers,
   MapProviders,
+  NavBarConfig,
+  NavigationLinkConfig,
+  NavigationLinkTypes,
 } from '../../../common/config/public/ClientConfig';
 import {
   DatabaseType,
@@ -28,7 +31,7 @@ import {
 import {SearchQueryTypes, TextSearch,} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {JobRepository} from '../jobs/JobRepository';
-import {ConfigClassBuilder} from '../../../../node_modules/typeconfig/node';
+import {ConfigClassBuilder} from 'typeconfig/node';
 import {Config} from '../../../common/config/private/Config';
 import {SupportedFormats} from '../../../common/SupportedFormats';
 import {MediaRendererInput, PhotoWorker, ThumbnailSourceType} from '../fileaccess/PhotoWorker';
@@ -36,7 +39,7 @@ import {MediaRendererInput, PhotoWorker, ThumbnailSourceType} from '../fileacces
 const LOG_TAG = '[ConfigDiagnostics]';
 
 export class ConfigDiagnostics {
-  private static adjustConfigWarn = 'Please adjust the config properly: manually edit the confing in the UI OR edit directly the config.json or even fully delete the config.json and let the app create a new one.';
+  private static adjustConfigWarn = 'To fix it, edit the setting on this admin page, or edit config.json directly (or delete config.json to let the app recreate it with default values).';
 
   static testAlbumsConfig(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -284,6 +287,53 @@ export class ConfigDiagnostics {
     }
   }
 
+  static async testUsersConfig(config: PrivateConfigClass): Promise<void> {
+    Logger.debug(LOG_TAG, 'Testing users config');
+    SearchQueryUtils.validateDirectoryList(config.Users.allowDirectoryList, 'Directory allow list');
+    SearchQueryUtils.validateDirectoryList(config.Users.blockDirectoryList, 'Directory block list');
+  }
+
+  static testNavigationLink(link: NavigationLinkConfig, what = 'NavBar link'): void {
+    if (!link || !NavigationLinkTypes[link.type]) {
+      throw new Error(`${what} has unknown type: ${JSON.stringify(link?.type)}`);
+    }
+    if (link.type === NavigationLinkTypes.search) {
+      if (!link.SearchQuery) {
+        throw new Error(`${what} is a search link without a search query`);
+      }
+      SearchQueryUtils.validateSearchQuery(link.SearchQuery, what + ' SearchQuery');
+    }
+    if (link.type === NavigationLinkTypes.url && (!link.url || link.url.trim().length === 0)) {
+      throw new Error(`${what} is an url link without an url`);
+    }
+  }
+
+  static async testNavBarConfig(navBar: NavBarConfig): Promise<void> {
+    Logger.debug(LOG_TAG, 'Testing navbar config');
+    (navBar.links || []).forEach((l, i) => ConfigDiagnostics.testNavigationLink(l, `NavBar link #${i + 1} (${l.name})`));
+  }
+
+  /**
+   * Drops the links that the client could not navigate to.
+   * Falls back to the default links if nothing is left.
+   */
+  static removeInvalidNavigationLinks(navBar: NavBarConfig): void {
+    const valid = (navBar.links || []).filter((l) => {
+      try {
+        ConfigDiagnostics.testNavigationLink(l);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    });
+    if (valid.length === 0) {
+      const pc = ConfigClassBuilder.attachPrivateInterface(new PrivateConfigClass());
+      navBar.links = pc.Gallery.NavBar.links;
+      return;
+    }
+    navBar.links = valid;
+  }
+
   static async testAlbumCoverConfig(settings: ServerAlbumCoverConfig): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing cover config');
     SearchQueryUtils.validateSearchQuery(settings.SearchQuery, 'SearchQuery');
@@ -306,7 +356,6 @@ export class ConfigDiagnostics {
     }
     Logger.silly(LOG_TAG, 'Sharp supports:\n' + text);
     Logger.silly(LOG_TAG, 'Sharp versions:' + JSON.stringify(sharp.versions));
-
     let removedSome = false;
     let i = config.supportedFormats.length;
     while (i--) {
@@ -331,13 +380,14 @@ export class ConfigDiagnostics {
         Logger.debug(LOG_TAG, `✔️ ${ext} image formats tested successfully.`);
       } catch (e) {
         Logger.verbose(e);
-        Logger.verbose(LOG_TAG, `❌ ${ext} image format tested failed, removing it form config.`);
+        Logger.verbose(LOG_TAG, `❌ ${ext} image format tested failed, removing it from config.`);
         config.supportedFormats.splice(i, 1);
         removedSome = true;
       }
     }
     if (removedSome) {
-      SupportedFormats.init();
+      // the indexer reads the formats from SupportedFormats, not from the config
+      SupportedFormats.init(Config);
     }
   }
 
@@ -353,9 +403,11 @@ export class ConfigDiagnostics {
     await ConfigDiagnostics.testPhotoConfig(config.Media.Photo);
     await ConfigDiagnostics.testSearchConfig(config.Search, config);
     await ConfigDiagnostics.testAlbumCoverConfig(config.AlbumCover);
+    await ConfigDiagnostics.testNavBarConfig(config.Gallery.NavBar);
     await ConfigDiagnostics.testFacesConfig(config.Faces, config);
     await ConfigDiagnostics.testTasksConfig(config.Jobs, config);
     await ConfigDiagnostics.testSharingConfig(config.Sharing, config);
+    await ConfigDiagnostics.testUsersConfig(config);
     await ConfigDiagnostics.testRandomPhotoConfig(config.Sharing, config);
     await ConfigDiagnostics.testMapConfig(config.Map);
     await ConfigDiagnostics.testJobsConfig(config.Jobs);
@@ -507,6 +559,21 @@ export class ConfigDiagnostics {
         type: SearchQueryTypes.any_text,
         value: '',
       } as TextSearch;
+    }
+
+    try {
+      await ConfigDiagnostics.testNavBarConfig(Config.Gallery.NavBar);
+    } catch (ex) {
+      const err: Error = ex;
+      const errorText = 'Some NavBar links are not valid, they are hidden until you fix them. ' + ConfigDiagnostics.adjustConfigWarn;
+      NotificationManager.warning(errorText,
+        err.toString()
+      );
+      Logger.warn(
+        LOG_TAG, errorText,
+        err.toString()
+      );
+      ConfigDiagnostics.removeInvalidNavigationLinks(Config.Gallery.NavBar);
     }
 
     try {

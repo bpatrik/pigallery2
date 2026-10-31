@@ -118,6 +118,14 @@ describe('SearchQueryParser', () => {
       reverseCheck('3-of:(a d v)');
     });
 
+    it('boolean keywords should be case-insensitive', () => {
+      equalCheck('a or b', 'a OR b');
+      equalCheck('a and b', 'a AND b');
+      equalCheck('a or b', 'a Or b');
+      equalCheck('directory:(some text) or any-text:(some other)', 'directory:(some text) OR any-text:(some other)');
+      equalCheck('directory:(some text) and any-text:(some other)', 'directory:(some text) AND any-text:(some other)');
+    });
+
   });
 
   describe('should deserialize and serialize', () => {

@@ -15,11 +15,12 @@ import {TestHelper} from '../TestHelper';
 import {VideoDTO} from '../../src/common/entities/VideoDTO';
 import {PhotoDTO} from '../../src/common/entities/PhotoDTO';
 import {Logger} from '../../src/backend/Logger';
-import {SessionContext} from '../../src/backend/model/SessionContext';
+import {SessionUser, SessionContext} from '../../src/backend/model/SessionContext';
 import {SessionManager} from '../../src/backend/model/database/SessionManager';
 import {DirectoryEntity} from '../../src/backend/model/database/enitites/DirectoryEntity';
 import {MediaEntity} from '../../src/backend/model/database/enitites/MediaEntity';
 import {ProjectedDirectoryCacheEntity} from '../../src/backend/model/database/enitites/ProjectedDirectoryCacheEntity';
+import {VersionEntity} from '../../src/backend/model/database/enitites/VersionEntity';
 
 declare let describe: any;
 const savedDescribe = describe;
@@ -47,6 +48,7 @@ const LOG_TAG = '[DBTestHelper]';
 
 export class DBTestHelper {
 
+  private static mysqlSchemeBuilt = false;
   static enable = {
     sqlite: process.env.TEST_SQLITE !== 'false',
     mysql: process.env.TEST_MYSQL !== 'false'
@@ -82,8 +84,11 @@ export class DBTestHelper {
     p3: null,
     p4: null
   };
+
   public static get defaultSession(): SessionContext {
-    return {user: {projectionKey: SessionManager.NO_PROJECTION_KEY}} as any;
+    const session = new SessionContext();
+    session.user = {projectionKey: SessionManager.NO_PROJECTION_KEY} as SessionUser;
+    return session;
   }
 
   constructor(public dbType: DatabaseType) {
@@ -117,7 +122,10 @@ export class DBTestHelper {
   }
 
   public static async persistTestDir(directory: DirectoryBaseDTO): Promise<ParentDirectoryDTO> {
-    await ObjectManagers.getInstance().init();
+    const OMInited = ObjectManagers.isReady();
+    if (!OMInited) {
+      await ObjectManagers.getInstance().init();
+    }
     const connection = await SQLConnection.getConnection();
     ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null);
 
@@ -146,30 +154,37 @@ export class DBTestHelper {
       }
     };
     await populateDir(dir);
-
-    await ObjectManagers.reset();
+    if (!OMInited) {
+      await ObjectManagers.reset();
+    }
     return dir;
   }
 
-  public async initDB(): Promise<void> {
+  public initDB = async (): Promise<void> => {
     await Config.load();
     Config.Extensions.enabled = false; // make all tests clean
+    if (typeof this.dbType === 'undefined') {
+      throw new Error('dbType is undefined');
+    }
     if (this.dbType === DatabaseType.sqlite) {
       await this.initSQLite();
     } else if (this.dbType === DatabaseType.mysql) {
       await this.initMySQL();
     }
-  }
+  };
 
-  public async clearDB(): Promise<void> {
+  public clearDB = async (): Promise<void> => {
+    if (typeof this.dbType === 'undefined') {
+      throw new Error('dbType is undefined');
+    }
     if (this.dbType === DatabaseType.sqlite) {
       await this.clearUpSQLite();
     } else if (this.dbType === DatabaseType.mysql) {
       await this.clearUpMysql();
     }
-  }
+  };
 
-  public async setUpTestGallery(): Promise<void> {
+  public setUpTestGallery = async (): Promise<void> => {
     const directory: ParentDirectoryDTO = TestHelper.getDirectoryEntry(null, '.');
     this.testGalleyEntities.subDir = TestHelper.getDirectoryEntry(directory, 'The Phantom Menace');
     this.testGalleyEntities.subDir2 = TestHelper.getDirectoryEntry(directory, 'Return of the Jedi');
@@ -192,7 +207,36 @@ export class DBTestHelper {
     this.testGalleyEntities.p3.directory = this.testGalleyEntities.dir.directories[0];
     this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media[0] as any);
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir.directories[1];
-  }
+  };
+
+  /**
+   * Gallery with nested directories, each photo name starts with the given prefix:
+   * ./ (rootPhoto)
+   *  public/ (publicPhoto, publicTrack.gpx)
+   *    sub/ (subPhoto)
+   *  private/ (privatePhoto)
+   *    deep/ (deepPhoto)
+   *  other/ (otherPhoto)
+   */
+  public setUpNestedTestGallery = async (): Promise<void> => {
+    const root = TestHelper.getDirectoryEntry(null, '.');
+    const pub = TestHelper.getDirectoryEntry(root, 'public');
+    const sub = TestHelper.getDirectoryEntry(pub, 'sub');
+    const priv = TestHelper.getDirectoryEntry(root, 'private');
+    const deep = TestHelper.getDirectoryEntry(priv, 'deep');
+    const other = TestHelper.getDirectoryEntry(root, 'other');
+    TestHelper.getRandomizedPhotoEntry(root, 'rootPhoto');
+    TestHelper.getRandomizedPhotoEntry(pub, 'publicPhoto');
+    TestHelper.getRandomizedGPXEntry(pub, 'publicTrack');
+    TestHelper.getRandomizedPhotoEntry(sub, 'subPhoto');
+    TestHelper.getRandomizedPhotoEntry(priv, 'privatePhoto');
+    TestHelper.getRandomizedPhotoEntry(deep, 'deepPhoto');
+    TestHelper.getRandomizedPhotoEntry(other, 'otherPhoto');
+    await DBTestHelper.persistTestDir(root);
+    // grandchildren are only saved with their parents
+    await ObjectManagers.getInstance().IndexingManager.saveToDB(pub as ParentDirectoryDTO);
+    await ObjectManagers.getInstance().IndexingManager.saveToDB(priv as ParentDirectoryDTO);
+  };
 
   public static async printDB() {
     const conn = await SQLConnection.getConnection();
@@ -207,24 +251,54 @@ export class DBTestHelper {
     await this.resetMySQL();
   }
 
+
   private async resetMySQL(): Promise<void> {
     Logger.debug(LOG_TAG, 'resetting up mysql');
     await this.clearUpMysql();
-    const conn = await SQLConnection.getConnection();
-    await conn.query('CREATE DATABASE IF NOT EXISTS ' + conn.options.database);
-    await SQLConnection.close();
     await ObjectManagers.getInstance().init();
   }
 
   private async clearUpMysql(): Promise<void> {
     Logger.debug(LOG_TAG, 'clearing up mysql');
-    await ObjectManagers.reset();
     Config.Database.type = DatabaseType.mysql;
     Config.Database.mysql.database = 'pigallery2_test';
-    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
+    // reset first: it waits for background saves that would otherwise hit the dropped tables
+    await ObjectManagers.reset();
     const conn = await SQLConnection.getConnection();
-    await conn.query('DROP DATABASE IF EXISTS ' + conn.options.database);
+    // Rebuilding the scheme is slow on MySQL, so do it only once per run (to pick up entity changes)
+    // and only empty the tables afterward. Keeping the version row skips the rebuild in schemeSync.
+    if (!DBTestHelper.mysqlSchemeBuilt || !(await DBTestHelper.truncateMysql(conn))) {
+      await conn.dropDatabase();
+      DBTestHelper.mysqlSchemeBuilt = true;
+    }
     await SQLConnection.close();
+    await fs.promises.rm(TestHelper.TMP_DIR, {recursive: true, force: true});
+  }
+
+  /**
+   * Empties every table except the version and resets the ids, like a fresh DB.
+   * DELETE + resetting AUTO_INCREMENT is several times faster than TRUNCATE on InnoDB.
+   * Returns false if it failed (e.g. a test dropped some tables).
+   */
+  private static async truncateMysql(conn: Connection): Promise<boolean> {
+    const versionTable = conn.getMetadata(VersionEntity).tableName;
+    const tables = new Set(conn.entityMetadatas.map(m => m.tableName));
+    tables.delete(versionTable);
+    const qr = conn.createQueryRunner();
+    try {
+      await qr.query('SET FOREIGN_KEY_CHECKS = 0');
+      for (const table of tables) {
+        await qr.query('DELETE FROM `' + table + '`');
+        await qr.query('ALTER TABLE `' + table + '` AUTO_INCREMENT = 1');
+      }
+      return true;
+    } catch (e) {
+      Logger.debug(LOG_TAG, 'Could not truncate mysql tables, dropping the db', e);
+      return false;
+    } finally {
+      await qr.query('SET FOREIGN_KEY_CHECKS = 1');
+      await qr.release();
+    }
   }
 
   private async initSQLite(): Promise<void> {

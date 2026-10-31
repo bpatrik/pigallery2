@@ -2,6 +2,7 @@ import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
 import * as fs from 'fs';
+import * as path from 'path';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
@@ -40,7 +41,6 @@ describe('PublicRouter', () => {
     server = new Server(false);
     await server.onStarted.wait();
 
-    await ObjectManagers.getInstance().init();
     await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(testUser));
     await SQLConnection.close();
   };
@@ -231,4 +231,108 @@ describe('PublicRouter', () => {
     });
   });
 
+
+  describe('Cache-Control', () => {
+    let frontendFolder: string;
+    beforeEach(async () => {
+      await setUp();
+      frontendFolder = ProjectPath.FrontendFolder;
+      ProjectPath.FrontendFolder = path.join(TestHelper.TMP_DIR, 'frontend');
+      const files = ['main-PCUX7IQM.js', 'main.js', 'robots.txt', 'assets/layers-55W3Q4RM.png', 'assets/marker-icon.png'];
+      for (const f of files) {
+        const p = path.join(ProjectPath.FrontendFolder, 'en', f);
+        fs.mkdirSync(path.dirname(p), {recursive: true});
+        fs.writeFileSync(p, f);
+      }
+    });
+    afterEach(async () => {
+      fs.rmSync(ProjectPath.FrontendFolder, {recursive: true, force: true});
+      ProjectPath.FrontendFolder = frontendFolder;
+      await tearDown();
+    });
+
+    const getCacheControl = async (url: string): Promise<string> => {
+      const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+      res.should.have.status(200);
+      return res.header['cache-control'];
+    };
+
+    it('should cache hashed build output for a year', async () => {
+      expect(await getCacheControl('/main-PCUX7IQM.js')).to.equal('public, max-age=31536000, immutable');
+      expect(await getCacheControl('/assets/layers-55W3Q4RM.png')).to.equal('public, max-age=31536000, immutable');
+    });
+
+    it('should revalidate not hashed frontend files', async () => {
+      expect(await getCacheControl('/main.js')).to.equal('no-cache');
+      expect(await getCacheControl('/robots.txt')).to.equal('no-cache');
+      expect(await getCacheControl('/assets/marker-icon.png')).to.equal('no-cache');
+    });
+
+    it('should revalidate icons', async () => {
+      expect(await getCacheControl('/icon.svg')).to.equal('no-cache');
+      expect(await getCacheControl('/icon_white.png')).to.equal('no-cache');
+    });
+
+    it('should not find missing files and files outside of the frontend folder', async () => {
+      fs.writeFileSync(path.join(ProjectPath.FrontendFolder, 'secret.txt'), 'top-secret-content');
+      for (const url of ['/missing-PCUX7IQM.js', '/missing.js', '/assets/missing.png',
+        '/assets/..%2F..%2Fsecret.txt', '/assets/%2E%2E/%2E%2E/secret.txt']) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+        // missing: 404, outside: rejected by normalizePathParam
+        expect(res.status, url).to.not.equal(200);
+        expect(res.text, url).to.not.contain('top-secret-content');
+        expect(res.header['cache-control'], url).to.be.undefined;
+      }
+    });
+  });
+
+  describe('Language links', () => {
+    let languages: string[];
+    beforeEach(async () => {
+      await setUp();
+      languages = Config.Server.languages;
+      Config.Server.languages = ['en', 'hu'];
+    });
+    afterEach(async () => {
+      Config.Server.languages = languages;
+      await tearDown();
+    });
+
+    const get = (url: string): Promise<any> =>
+      (request.execute(server.Server) as SuperAgentStatic).get(url).redirects(0);
+
+    it('should set the language and open the same page', async () => {
+      const res = await get('/hu/admin');
+      res.should.have.status(302);
+      expect(res.header['location']).to.equal('/admin?ln=hu');
+      expect(res.header['set-cookie'].join(';')).to.contain('pigallery2-lang=hu');
+    });
+
+    it('should open the root without a page', async () => {
+      expect((await get('/hu')).header['location']).to.equal('/?ln=hu');
+      expect((await get('/hu/')).header['location']).to.equal('/?ln=hu');
+    });
+
+    it('should keep the encoded path and the query', async () => {
+      const res = await get('/hu/gallery/%C3%A1rv%C3%ADz%20t%C5%B1r%C5%91?p=k%C3%A9p.jpg');
+      expect(res.header['location']).to.equal('/gallery/%C3%A1rv%C3%ADz%20t%C5%B1r%C5%91?p=k%C3%A9p.jpg&ln=hu');
+    });
+
+    it('should replace the language of an earlier switch', async () => {
+      expect((await get('/en/admin?ln=hu')).header['location']).to.equal('/admin?ln=en');
+      expect((await get('/en/search/cat?ln=hu&p=a.jpg')).header['location']).to.equal('/search/cat?p=a.jpg&ln=en');
+    });
+
+    it('should only redirect within the app', async () => {
+      for (const url of ['/hu//evil.com', '/hu/https://evil.com', '/hu/%2F%2Fevil.com', '/hu/%5C%5Cevil.com']) {
+        const location: string = (await get(url)).header['location'];
+        expect(location, url).to.match(/^\/[^/\\]/);
+      }
+    });
+
+    it('should not redirect an unknown language', async () => {
+      const res = await get('/xx/admin');
+      expect(res.status).to.not.equal(302);
+    });
+  });
 });

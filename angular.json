@@ -90,17 +90,24 @@
       },
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular/build:application",
           "options": {
             "localize": true,
             "aot": true,
             "crossOrigin": "anonymous",
-            "outputPath": "dist",
+            "outputPath": {
+              "base": "dist",
+              "browser": "",
+              "media": "assets"
+            },
             "index": "src/frontend/index.html",
             "progress": true,
-            "main": "src/frontend/main.ts",
+            "browser": "src/frontend/main.ts",
             "tsConfig": "src/frontend/tsconfig.app.json",
-            "polyfills": "src/frontend/polyfills.ts",
+            "polyfills": [
+              "zone.js",
+              "@angular/localize/init"
+            ],
             "assets": [
               "src/frontend/robots.txt",
               {
@@ -118,22 +125,23 @@
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
               "src/frontend/styles.css"
             ],
-            "scripts": [
-              "node_modules/marked/marked.min.js"
-            ],
+            "scripts": [],
             "i18nMissingTranslation": "warning",
-            "customWebpackConfig": {
-              "path": "./angular.webpack.js",
-              "replaceDuplicatePlugins": true
-            }
+            "allowedCommonJsDependencies": [
+              "hammerjs",
+              "leaflet",
+              "leaflet.markercluster"
+            ]
           },
           "configurations": {
             "dev": {
-              "outputPath": "dist/en",
+              "outputPath": {
+                "base": "dist/en",
+                "browser": "",
+                "media": "assets"
+              },
               "localize": false,
-              "buildOptimizer": false,
               "optimization": false,
-              "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true,
@@ -145,14 +153,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "vendorChunk": false,
-              "buildOptimizer": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/frontend/environments/environment.ts",
-                  "with": "src/frontend/environments/environment.prod.ts"
-                }
-              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -165,33 +165,51 @@
                   "maximumError": "10kb"
                 }
               ]
+            },
+            "release": {
+              "outputPath": {
+                "base": "release/dist",
+                "browser": "",
+                "media": "assets"
+              }
+            },
+            "stats": {
+              "localize": false,
+              "statsJson": true,
+              "outputPath": {
+                "base": "dist/en",
+                "browser": "",
+                "media": "assets"
+              }
             }
           }
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
+          "builder": "@angular/build:dev-server",
           "options": {
-            "browserTarget": "pigallery2:build"
+            "buildTarget": "pigallery2:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "pigallery2:build:production"
+              "buildTarget": "pigallery2:build:production"
             }
           }
         },
         "extract-i18n": {
-          "builder": "@angular-builders/custom-webpack:extract-i18n",
+          "builder": "@angular/build:extract-i18n",
           "options": {
             "buildTarget": "pigallery2:build"
           }
         },
         "test": {
-          "builder": "@angular-builders/custom-webpack:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "karmaConfig": "./karma.conf.js",
+            "watch": false,
             "polyfills": [
-              "src/frontend/polyfills.ts",
-              "zone.js/testing"
+              "zone.js",
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "src/frontend/tsconfig.spec.json",
             "scripts": [],
@@ -211,11 +229,7 @@
                 "input": "node_modules/leaflet/dist/images/",
                 "output": "./assets/"
               }
-            ],
-            "customWebpackConfig": {
-              "path": "./angular.webpack.js",
-              "replaceDuplicatePlugins": true
-            }
+            ]
           }
         },
         "lint": {
@@ -236,6 +250,30 @@
     },
     "@angular-eslint/schematics:library": {
       "setParserOptionsProject": true
+    },
+    "@schematics/angular:component": {
+      "type": "component"
+    },
+    "@schematics/angular:directive": {
+      "type": "directive"
+    },
+    "@schematics/angular:service": {
+      "type": "service"
+    },
+    "@schematics/angular:guard": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:interceptor": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:module": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:pipe": {
+      "typeSeparator": "."
+    },
+    "@schematics/angular:resolver": {
+      "typeSeparator": "."
     }
   }
 }

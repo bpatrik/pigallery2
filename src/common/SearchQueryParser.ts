@@ -218,8 +218,13 @@ export class SearchQueryParser {
     // tokenize
     const tokenEnd = fistSpace();
 
+    // case-insensitive variant of str.startsWith(search, pos) so that
+    // boolean keywords (e.g. `or` vs `OR`) are matched regardless of casing
+    const startsWithI = (search: string, pos: number): boolean =>
+      str.slice(pos, pos + search.length).toLowerCase() === search.toLowerCase();
+
     if (tokenEnd !== str.length - 1) {
-      if (str.startsWith(' ' + this.keywords.and, tokenEnd)) {
+      if (startsWithI(' ' + this.keywords.and, tokenEnd)) {
         const rest = this.parse(
           str.slice(tokenEnd + (' ' + this.keywords.and).length),
           implicitAND
@@ -233,7 +238,7 @@ export class SearchQueryParser {
               : [rest]),
           ],
         } as ANDSearchQuery;
-      } else if (str.startsWith(' ' + this.keywords.or, tokenEnd)) {
+      } else if (startsWithI(' ' + this.keywords.or, tokenEnd)) {
         const rest = this.parse(
           str.slice(tokenEnd + (' ' + this.keywords.or).length),
           implicitAND

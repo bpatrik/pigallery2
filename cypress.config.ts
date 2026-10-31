@@ -12,12 +12,4 @@ export default defineConfig({
     downloadsFolder:'test/cypress/downloads',
   },
 
-  component: {
-    devServer: {
-      framework: 'angular',
-      bundler: 'webpack',
-    },
-    specPattern: '**/*.cy.ts'
-  }
-
 });

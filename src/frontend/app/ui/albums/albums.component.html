@@ -1,29 +1,33 @@
 <app-frame>
 
   <div body #container class="container-fluid">
-    <app-album *ngFor="let album of albumsService.albums | async"
-               [album]="album"
-               [size]="size"></app-album>
+    @for (album of albumsService.albums | async; track album.id) {
+      <app-album [album]="album"
+      [size]="size" />
+    }
 
-    <div class="add-saved-search btn btn-secondary"
-         *ngIf="CanCreateAlbum"
-         [style.width.px]="size"
-         [style.height.px]="size"
-         (click)="openModal(modal)">
-      <div class="text">
-        <ng-icon name="ionAddOutline" class="mb-2"></ng-icon>
-        <span i18n>Add saved search</span>
+    @if (CanCreateAlbum) {
+      <div class="add-saved-search btn btn-secondary"
+        [style.width.px]="size"
+        [style.height.px]="size"
+        (click)="openModal(modal)">
+        <div class="text">
+          <ng-icon name="ionAddOutline" class="mb-2" />
+          <span i18n>Add saved search</span>
+        </div>
       </div>
-    </div>
+    }
 
-    <div class="d-flex no-item-msg"
-         *ngIf="(albumsService.albums | async) && (albumsService.albums | async).length == 0">
-      <div class="flex-fill">
-        <h2>:(
-          <ng-container i18n>No albums to show.</ng-container>
-        </h2>
+    @if ((albumsService.albums | async) && (albumsService.albums | async).length == 0) {
+      <div class="d-flex no-item-msg"
+        >
+        <div class="flex-fill">
+          <h2>:(
+            <ng-container i18n>No albums to show.</ng-container>
+          </h2>
+        </div>
       </div>
-    </div>
+    }
   </div>
 </app-frame>
 
@@ -50,24 +54,20 @@
       </div>
       <div class="mb-1">
         <label for="album-search-query-builder">Search query</label>
-        <app-gallery-search-query-builder
-          id="album-search-query-builder"
+        <app-gallery-search-query-builder id="album-search-query-builder"
           name="album-search-query-builder"
-          [(ngModel)]="savedSearch.searchQuery">
-        </app-gallery-search-query-builder>
+          [(ngModel)]="savedSearch.searchQuery" />
       </div>
 
 
       <div class="input-group-btn float-end" style="display: block">
-        <app-saved-search-popup-btn
-          [disabled]="savedSearch.searchQuery.value == ''"
+        <app-saved-search-popup-btn [disabled]="IsSearchQueryEmpty"
           class="me-2"
-          [savedSearchDTO]="savedSearch">
-        </app-saved-search-popup-btn>
+          [savedSearchDTO]="savedSearch" />
         <button class="btn btn-primary" type="button"
-                [disabled]="savedSearch.searchQuery.value == ''"
-                (click)="saveSearch()">
-          <ng-icon name="ionSaveOutline" class="me-1"></ng-icon><span i18n>Save</span>
+          [disabled]="IsSearchQueryEmpty"
+          (click)="saveSearch()">
+          <ng-icon name="ionSaveOutline" class="me-1" /><span i18n>Save</span>
         </button>
       </div>
     </form>

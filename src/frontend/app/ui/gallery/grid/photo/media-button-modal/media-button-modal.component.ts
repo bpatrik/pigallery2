@@ -1,24 +1,25 @@
-import {Component, HostListener, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
 import {Subscription} from 'rxjs';
-import {NgFor, NgIf} from '@angular/common';
+
 import {FormsModule} from '@angular/forms';
 import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../common/entities/extension/IClientUIConfig';
 
 @Component({
   selector: 'app-media-button-modal',
+  host: {
+    '(document:keydown)': 'onKeyDown($event)'
+  },
   templateUrl: './media-button-modal.component.html',
-  styleUrls: ['./media-button-modal.component.css'],
-  imports: [NgIf, NgFor, FormsModule],
-  standalone: true
+  styleUrl: './media-button-modal.component.css',
+  imports: [FormsModule]
 })
 export class MediaButtonModalComponent implements OnInit, OnDestroy {
+  private modalService = inject(MediaButtonModalService);
+
   modalData: MediaButtonModalData | null = null;
   formData: IMediaRequestBodyData = {};
   private subscription: Subscription;
-
-  constructor(private modalService: MediaButtonModalService) {
-  }
 
   ngOnInit(): void {
     this.subscription = this.modalService.modalData.subscribe(data => {
@@ -88,7 +89,6 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
     this.modalService.hideModal();
   }
 
-  @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     if (event.key === 'Escape' && this.modalData?.visible) {
       this.closeModal();

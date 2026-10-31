@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, OnChanges, OnDestroy, SimpleChanges, ViewChild,} from '@angular/core';
+import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, inject, input, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -25,21 +25,24 @@ import {
   MapOptions,
   Marker,
   marker,
-  markerClusterGroup,
   MarkerClusterGroup,
   Point,
   polyline,
   tileLayer,
   TileLayer
 } from 'leaflet';
+// leaflet.markercluster adds itself to the global L object. The bundler copies the exports of
+// CommonJS modules on import, so only the default import (L itself) sees what the plugin added.
+import Leaflet from 'leaflet';
+import 'leaflet.markercluster';
 import {ThemeService} from '../../../../model/theme.service';
 import {Subscription} from 'rxjs';
 import {MarkerFactory} from '../MarkerFactory';
 import {ionImageOutline, ionSpeedometerOutline, ionTimeOutline, ionTrailSignOutline, ionWarningOutline} from '@ng-icons/ionicons';
 import {LeafletControlLayersConfig, LeafletModule} from '@bluehalo/ngx-leaflet';
-import {NgIf} from '@angular/common';
+
 import {NgIconComponent} from '@ng-icons/core';
-import {DurationPipe} from '../../../../pipes/DurationPipe';
+import {formatDuration} from '../../../../pipes/DurationPipe';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../../common/QueryParams';
 import {QueryService} from '../../../../model/query.service';
@@ -47,18 +50,29 @@ import {QueryService} from '../../../../model/query.service';
 
 @Component({
   selector: 'app-gallery-map-lightbox',
-  styleUrls: ['./lightbox.map.gallery.component.css'],
+  host: {
+    '(window:resize)': 'onResize()',
+    '(window:keydown)': 'onKeyPress($event)'
+  },
+  styleUrl: './lightbox.map.gallery.component.css',
   templateUrl: './lightbox.map.gallery.component.html',
   imports: [
     LeafletModule,
-    NgIf,
-    NgIconComponent,
-  ]
+    NgIconComponent
+]
 })
 export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
-  @Input() photos: PhotoDTO[];
-  @Input() gpxFiles: FileDTO[];
-  @Input() parentDimension: Dimension;
+  fullScreenService = inject(FullScreenService);
+  private thumbnailService = inject(ThumbnailManagerService);
+  mapService = inject(MapService);
+  private themeService = inject(ThemeService);
+  private route = inject(ActivatedRoute);
+  private queryService = inject(QueryService);
+  private router = inject(Router);
+
+  readonly photos = input<PhotoDTO[]>(undefined);
+  readonly gpxFiles = input<FileDTO[]>(undefined);
+  readonly parentDimension = input<Dimension>(undefined);
   public lightboxDimension: Dimension = {
     top: 0,
     left: 0,
@@ -74,7 +88,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   public visible = false;
   public controllersVisible = false;
   public opacity = 1.0;
-  @ViewChild('root', {static: true}) elementRef: ElementRef;
+  readonly elementRef = viewChild<ElementRef>('root');
   public mapOptions: MapOptions = {
     zoom: 2,
     // setting max zoom is needed to MarkerCluster https://github.com/Leaflet/Leaflet.markercluster/issues/611
@@ -102,7 +116,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   } = {
     baseLayers: {},
     overlays: {
-      Photos: markerClusterGroup({
+      Photos: Leaflet.markerClusterGroup({
         maxClusterRadius: 20,
         iconCreateFunction: (cluster) => {
           const childCount = cluster.getChildCount();
@@ -142,26 +156,17 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private leafletMap: Map;
   private longPathSEPairs: { [key: string]: number } = {}; // stores how often a long distance path pair comes up
 
-  constructor(
-    public fullScreenService: FullScreenService,
-    private thumbnailService: ThumbnailManagerService,
-    public mapService: MapService,
-    private themeService: ThemeService,
-    private route: ActivatedRoute,
-    private queryService: QueryService,
-    private router: Router,
-    private durationPipe: DurationPipe
-  ) {
+  constructor() {
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
     this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));
-    for (let i = 0; i < mapService.Layers.length; ++i) {
-      const l = mapService.Layers[i];
-      const tl = tileLayer(l.url, {attribution: mapService.Attributions});
-      if (l.url === mapService.MapLayer.url) {
+    for (let i = 0; i < this.mapService.Layers.length; ++i) {
+      const l = this.mapService.Layers[i];
+      const tl = tileLayer(l.url, {attribution: this.mapService.Attributions});
+      if (l.url === this.mapService.MapLayer.url) {
         this.defLayer = tl;
       }
-      if (l.url === mapService.DarkMapLayer.url) {
+      if (l.url === this.mapService.DarkMapLayer.url) {
         this.darkLayer = tl;
       }
       this.mapLayersControlOption.baseLayers[l.name] = tl;
@@ -249,6 +254,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     this.subscription.route?.unsubscribe();
   }
 
+  // Side effect: redraws the Leaflet layers.
   ngOnChanges(changes: SimpleChanges): void {
     if (this.visible === false) {
       return;
@@ -259,7 +265,6 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   }
 
 
-  @HostListener('window:resize', ['$event'])
   async onResize(): Promise<void> {
     this.lightboxDimension = {
       top: 0,
@@ -288,7 +293,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       this.leafletMap.addLayer(this.mapLayersControlOption.overlays.Photos);
     }
     this.thumbnailsOnLoad = [];
-    this.photos
+    this.photos()
       .filter((p): number => {
         return (
           p.metadata &&
@@ -397,7 +402,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
           });
         }
       });
-    if (this.gpxFiles) {
+    if (this.gpxFiles()) {
       this.loadGPXFiles().catch(console.error);
     }
   }
@@ -432,7 +437,6 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
   }
 
-  @HostListener('window:keydown', ['$event'])
   onKeyPress(event: KeyboardEvent): void {
     if (this.visible !== true) {
       return;
@@ -443,7 +447,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         if (this.fullScreenService.isFullScreenEnabled()) {
           this.fullScreenService.exitFullScreen();
         } else {
-          this.fullScreenService.showFullScreen(this.elementRef.nativeElement);
+          this.fullScreenService.showFullScreen(this.elementRef().nativeElement);
         }
         break;
       case 'Escape':
@@ -499,7 +503,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     this.clearMap();
     this.visible = true;
     this.opacity = 1.0;
-    this.lightboxDimension = Utils.clone(this.parentDimension);
+    this.lightboxDimension = Utils.clone(this.parentDimension());
     this.lightboxDimension.top -= PageHelper.ScrollY;
     this.mapDimension = {
       top: 0,
@@ -530,7 +534,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     }
     this.fullScreenService.exitFullScreen();
     this.controllersVisible = false;
-    const to = this.parentDimension;
+    const to = this.parentDimension();
 
     // if target image out of screen -> scroll to there
     if (
@@ -541,7 +545,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       PageHelper.ScrollY = to?.top;
     }
 
-    this.lightboxDimension = this.parentDimension;
+    this.lightboxDimension = this.parentDimension();
     this.lightboxDimension.top -= PageHelper.ScrollY;
     PageHelper.showScrollY('map-lightbox');
     this.opacity = 0.0;
@@ -663,7 +667,8 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
   private async loadGPXFiles(): Promise<void> {
     this.clearPath();
-    if (this.gpxFiles.length === 0) {
+    const gpxFiles = this.gpxFiles();
+    if (gpxFiles.length === 0) {
       this.pathLayersConfigOrdered.forEach(p => {
         // remove from controls
         this.mapLayerControl.removeLayer(p.layer);
@@ -713,7 +718,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
             stats.push(`<span title="Distance"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionTrailSignOutline}</svg> ${this.formatDistance(parsedGPX.stats.distance)}</span>`);
           }
           if (parsedGPX.stats.duration > 0) {
-            stats.push(`<span title="Duration"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionTimeOutline}</svg> ${this.durationPipe.transform(parsedGPX.stats.duration)}</span>`);
+            stats.push(`<span title="Duration"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionTimeOutline}</svg> ${formatDuration(parsedGPX.stats.duration)}</span>`);
           }
           if (parsedGPX.stats.averageSpeed > 0) {
             stats.push(`<span title="Average Speed"><svg style="width: 16px; height: 16px; vertical-align: middle;" viewBox="0 0 512 512">${ionSpeedometerOutline}</svg> ${parsedGPX.stats.averageSpeed.toFixed(1)} km/h</span>`);
@@ -762,7 +767,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       });
     };
 
-    await Promise.all(this.gpxFiles.map(f => loadAFile(f)));
+    await Promise.all(gpxFiles.map(f => loadAFile(f)));
 
     // Add layer to the map
     this.pathLayersConfigOrdered.filter(pl => pl.layer.getLayers().length > 0).forEach((pl) => {
@@ -778,7 +783,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       }
     });
     // center map on paths if no photos to center map on
-    if (!this.photos?.length) {
+    if (!this.photos()?.length) {
       this.centerMap();
     }
   }

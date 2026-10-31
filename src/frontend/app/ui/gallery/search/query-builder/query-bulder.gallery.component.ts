@@ -1,15 +1,16 @@
-import {Component, EventEmitter, forwardRef, Input, Output,} from '@angular/core';
+import { Component, forwardRef, inject, input, output } from '@angular/core';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../../common/entities/SearchQueryDTO';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
 import {Utils} from '../../../../../../common/Utils';
+import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 import { GallerySearchFieldBaseComponent } from '../search-field-base/search-field-base.gallery.component';
 import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.search.gallery.component';
 
 @Component({
     selector: 'app-gallery-search-query-builder',
     templateUrl: './query-builder.gallery.component.html',
-    styleUrls: ['./query-builder.gallery.component.css'],
+    styleUrl: './query-builder.gallery.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -30,15 +31,24 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
 })
 export class GallerySearchQueryBuilderComponent
     implements ControlValueAccessor, Validator {
+  private searchQueryParserService = inject(SearchQueryParserService);
+
   public searchQueryDTO: SearchQueryDTO = {
     type: SearchQueryTypes.any_text,
     value: '',
   } as TextSearch;
-  @Output() search = new EventEmitter<void>();
-  @Input() placeholder = $localize`Search`;
+  readonly search = output<void>();
+  readonly placeholder = input($localize `Search`);
   public rawSearchText = '';
 
-  constructor(private searchQueryParserService: SearchQueryParserService) {
+  /**
+   * Utils.equalsFilter only checks the keys of its second argument,
+   * so a removed property (e.g. a deleted date range end) would go unnoticed.
+   */
+  private static isSameQuery(a: SearchQueryDTO, b: SearchQueryDTO): boolean {
+    const nA = SearchQueryUtils.stripDefault(a);
+    const nB = SearchQueryUtils.stripDefault(b);
+    return Utils.equalsFilter(nA, nB) && Utils.equalsFilter(nB, nA);
   }
 
   validateRawSearchText(): void {
@@ -47,7 +57,7 @@ export class GallerySearchQueryBuilderComponent
       const newDTO = this.searchQueryParserService.parse(
           this.rawSearchText
       );
-      if (Utils.equalsFilter(this.searchQueryDTO, newDTO)) {
+      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryDTO, newDTO)) {
         return;
       }
       this.searchQueryDTO = newDTO;
@@ -76,8 +86,8 @@ export class GallerySearchQueryBuilderComponent
   public writeValue(obj: SearchQueryDTO): void {
     try {
       // do not trigger change if nothing changed
-      if (Utils.equalsFilter(this.searchQueryDTO, obj) &&
-          Utils.equalsFilter(this.searchQueryParserService.parse(
+      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryDTO, obj) &&
+          GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryParserService.parse(
               this.rawSearchText
           ), obj)) {
         return;
@@ -101,7 +111,7 @@ export class GallerySearchQueryBuilderComponent
 
   public onChange(): void {
     try {
-      if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
+      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
         this.propagateChange(this.searchQueryDTO);
         return;
       }

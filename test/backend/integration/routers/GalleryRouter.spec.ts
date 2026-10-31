@@ -10,6 +10,9 @@ import {ReIndexingSensitivity} from '../../../../src/common/config/private/Priva
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
+import {UserRoles} from '../../../../src/common/entities/UserDTO';
+import {SearchQueryTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 
 process.env.NODE_ENV = 'test';
 chai.should();
@@ -227,5 +230,75 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
     });
   });
 
+  describe('Cache-Control', async () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const get = (url: string) => (request.execute(server.Server) as SuperAgentStatic)
+      .get(Config.Server.apiPath + url);
+
+    it('should cache photos and thumbnails for a day', async () => {
+      const photo = await get('/gallery/content/wild-1-small.jpg');
+      (photo.should as any).have.status(200);
+      expect(photo.headers['cache-control']).to.equal('private, max-age=86400');
+
+      const thumbnail = await get('/gallery/content/wild-1-small.jpg/240');
+      (thumbnail.should as any).have.status(200);
+      expect(thumbnail.headers['cache-control']).to.equal('private, max-age=86400');
+    });
+
+    it('should revalidate bestFit video', async () => {
+      const result = await get('/gallery/content/video.mp4/bestFit');
+      (result.should as any).have.status(200);
+      expect(result.headers['cache-control']).to.equal('private, no-cache');
+      expect(result.headers['etag']).to.be.a('string');
+    });
+
+    it('should not store random photo', async () => {
+      // the content request would save the folder in the background, the random query needs it in the DB
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
+      const result = await get('/gallery/random/' + encodeURIComponent(JSON.stringify({type: SearchQueryTypes.any_text, value: 'wild'})));
+      (result.should as any).have.status(200);
+      expect(result.headers['content-type']).to.equal('image/jpeg');
+      expect(result.headers['cache-control']).to.equal('no-store');
+    });
+  });
+
+  describe('role based access', async () => {
+
+    beforeEach(setUp);
+    afterEach(async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.Admin;
+      await tearDown();
+    });
+
+    const get = (url: string) => (request.execute(server.Server) as SuperAgentStatic)
+      .get(Config.Server.apiPath + url);
+
+    it('LimitedGuest should not use autocomplete', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.LimitedGuest;
+      const result = await get('/autocomplete/a');
+      (result.should as any).have.status(401);
+    });
+
+    it('Guest should use autocomplete', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.Guest;
+      const result = await get('/autocomplete/a');
+      (result.should as any).have.status(200);
+    });
+
+    it('Guest should not see notifications', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.Guest;
+      const result = await get('/notifications');
+      (result.should as any).have.status(401);
+    });
+
+    it('User should see notifications', async () => {
+      Config.Users.unAuthenticatedUserRole = UserRoles.User;
+      const result = await get('/notifications');
+      (result.should as any).have.status(200);
+    });
+  });
 
 });

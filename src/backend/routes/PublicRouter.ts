@@ -1,6 +1,5 @@
 import {Express, NextFunction, Request, Response} from 'express';
 import * as path from 'path';
-import * as fs from 'fs';
 import * as ejs from 'ejs';
 import {Config} from '../../common/config/private/Config';
 import {ProjectPath} from '../ProjectPath';
@@ -11,7 +10,6 @@ import {UserDTO} from '../../common/entities/UserDTO';
 import {ServerTimeEntry} from '../middlewares/ServerTimingMWs';
 import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
-import {Utils} from '../../common/Utils';
 import {ObjectManagers} from '../model/ObjectManagers';
 
 declare global {
@@ -60,13 +58,21 @@ export class PublicRouter {
       );
     };
 
-    const redirectToBase = (locale: string) => {
-      return (req: Request, res: Response) => {
-        if (Config.Server.languages.indexOf(locale) !== -1) {
-          res.cookie(CookieNames.lang, locale);
-        }
-        res.redirect(Utils.concatUrls('/' + Config.Server.urlBase) + '/?ln=' + locale);
-      };
+    // /<locale>/<page> links (e.g. from the language menu) set the language, then open the same page
+    const redirectToLocalePage = (req: Request, res: Response, next: NextFunction) => {
+      const locale = req.params['locale'];
+      if (Config.Server.languages.indexOf(locale) === -1) {
+        return next();
+      }
+      res.cookie(CookieNames.lang, locale);
+      // req.path is still url encoded, so the page is passed on as it is
+      const page = req.path.substring(locale.length + 1);
+      // keep the query, but drop the ln of an earlier language switch
+      const queryStart = req.originalUrl.indexOf('?');
+      const query = queryStart === -1 ? [] : req.originalUrl.substring(queryStart + 1)
+        .split('&').filter((p) => p !== '' && !p.startsWith('ln='));
+      query.push('ln=' + locale);
+      res.redirect(Config.Server.getAppUrl(page) + '?' + query.join('&'));
     };
 
     const addTPl = (req: Request, res: Response, next: NextFunction) => {
@@ -94,6 +100,7 @@ export class PublicRouter {
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
       res.tpl.Config = confCopy;
+      res.tpl.baseHref = Config.Server.getAppUrl();
       res.tpl.customHTMLHead = Config.Server.customHTMLHead;
       const selectedTheme = Config.Gallery.Themes.availableThemes.find(th => th.name === Config.Gallery.Themes.selectedTheme)?.theme || '';
       res.tpl.usedTheme = selectedTheme;
@@ -135,7 +142,7 @@ export class PublicRouter {
           'photo'
         ],
         start_url:
-          Config.Server.publicUrl === '' ? '.' : Config.Server.publicUrl,
+          Config.Server.getPublicUrl(),
         background_color: '#000000',
         theme_color: '#000000',
       });
@@ -216,15 +223,16 @@ export class PublicRouter {
         Config.Server.svgIcon.items + '</svg>';
     };
 
+    // Icons change with Config.Server.svgIcon under the same URL, so the browser revalidates them with the ETag.
     app.get('/icon.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       res.send(getIcon());
     });
 
 
     app.get('/icon_padding_auto.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       // Use 40% padding: https://w3c.github.io/manifest/#icon-masks
       res.send(getIcon('auto', 0.7));
@@ -232,13 +240,13 @@ export class PublicRouter {
 
 
     app.get('/icon_auto.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       res.send(getIcon('auto'));
     });
 
     app.get('/icon_white.svg', (req: Request, res: Response) => {
-      res.set('Cache-control', 'public, max-age=31536000');
+      res.set('Cache-Control', 'no-cache');
       res.header('Content-Type', 'image/svg+xml');
       res.send(getIcon('white'));
     });
@@ -248,8 +256,9 @@ export class PublicRouter {
       try {
         const p = path.join(ProjectPath.TempFolder, '/icon.png');
         const outP = await PhotoProcessing.renderSVG(Config.Server.svgIcon, p);
+        res.set('Cache-Control', 'no-cache');
         res.sendFile(outP, {
-          maxAge: 31536000,
+          cacheControl: false,
           dotfiles: 'allow',
         });
       } catch (e) {
@@ -261,8 +270,9 @@ export class PublicRouter {
       try {
         const p = path.join(ProjectPath.TempFolder, '/icon_inv.png');
         const outP = await PhotoProcessing.renderSVG(Config.Server.svgIcon, p, 'white');
+        res.set('Cache-Control', 'no-cache');
         res.sendFile(outP, {
-          maxAge: 31536000,
+          cacheControl: false,
           dotfiles: 'allow',
         });
       } catch (e) {
@@ -297,35 +307,29 @@ export class PublicRouter {
       setLocale,
       renderIndex
     );
-    Config.Server.languages.forEach((l) => {
-      app.get(
-        [
-          '/' + l + '/',
-          '/' + l + '/login',
-          '/' + l + '/gallery*',
-          '/' + l + '/share*',
-          '/' + l + '/admin',
-          '/' + l + '/search*',
-          '/' + l + '/error',
-        ],
-        redirectToBase(l)
-      );
-    });
+    app.get(['/:locale', '/:locale/*'], redirectToLocalePage);
 
     const renderFile = (subDir = '') => {
       return (req: Request, res: Response) => {
-        const file = path.join(
-          ProjectPath.FrontendFolder,
-          req.localePath,
-          subDir,
-          req.params.file
-        );
-        if (!fs.existsSync(file)) {
-          return res.sendStatus(404);
+        // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
+        // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
+        const hashed = /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(req.params.file);
+        if (!hashed) {
+          res.set('Cache-Control', 'no-cache');
         }
-        res.sendFile(file, {
-          maxAge: 31536000,
+        res.sendFile(req.params.file, {
+          // sendFile refuses paths that would leave the root
+          root: path.join(ProjectPath.FrontendFolder, req.localePath, subDir),
           dotfiles: 'allow',
+          ...(hashed ? {
+            maxAge: '365d', // number would be in ms
+            immutable: true,
+          } : {cacheControl: false}),
+        }, (err) => {
+          if (err && !res.headersSent) {
+            res.removeHeader('Cache-Control');
+            res.sendStatus(404);
+          }
         });
       };
     };

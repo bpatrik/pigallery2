@@ -19,4 +19,18 @@ describe('ExtensionRepository', () => {
     const extensions = (new ExtensionRepository()).repoMD(text);
     expect(extensions[0].id).to.deep.equal('sample-extension');
   });
+
+  it('should parse a manual-install extension without a zip URL', () => {
+    const text = `# Pigallery2 extension repository
+
+|     **Name**     | **Url** | **Readme** | **Download** |   |
+|:----------------:|:--------:|:----------:|:------------:|---|
+| Manual extension | [manual](https://example.com/manual) | [README.md](https://example.com/readme) | |   |`;
+    const extensions = (new ExtensionRepository()).repoMD(text);
+
+    expect(extensions).to.have.length(1);
+    expect(extensions[0].id).to.equal('manual-extension');
+    expect(extensions[0].url).to.equal('https://example.com/manual');
+    expect(extensions[0].zipUrl).to.equal(undefined);
+  });
 });

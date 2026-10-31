@@ -2,9 +2,8 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import {BehaviorSubject, Observable, of} from 'rxjs';
 import {ChangeDetectorRef} from '@angular/core';
-import {provideHttpClient, withInterceptorsFromDi} from '@angular/common/http';
+import {provideHttpClient} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
-import {DatePipe} from '@angular/common';
 
 import {GalleryComponent} from './gallery.component';
 import {ContentLoaderService} from './contentLoader.service';
@@ -15,8 +14,6 @@ import {NavigationService} from '../../model/navigation.service';
 import {FilterService} from './filter/filter.service';
 import {GallerySortingService} from './navigator/sorting.service';
 import {PiTitleService} from '../../model/pi-title.service';
-import {GPXFilesFilterPipe} from '../../pipes/GPXFilesFilterPipe';
-import {MDFilesFilterPipe} from '../../pipes/MDFilesFilterPipe';
 import {Config} from '../../../../common/config/public/Config';
 import {LeafletMarkerClusterModule} from '@bluehalo/ngx-leaflet-markercluster';
 import {GalleryCacheService} from './cache.gallery.service';
@@ -32,6 +29,8 @@ import {SortingMethod} from '../../../../common/entities/SortingMethods';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
 import {UploaderService, UploadProgress} from './uploader/uploader.service';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../icons';
 
 
 // Mock services
@@ -105,14 +104,6 @@ class MockPiTitleService {
   setDirectoryTitle = jasmine.createSpy('setDirectoryTitle');
 }
 
-class MockGPXFilesFilterPipe {
-  transform = jasmine.createSpy('transform').and.returnValue([]);
-}
-
-class MockMDFilesFilterPipe {
-  transform = jasmine.createSpy('transform').and.returnValue([]);
-}
-
 class MockRouter {
   navigate = jasmine.createSpy('navigate').and.returnValue(Promise.resolve(true));
 }
@@ -144,8 +135,8 @@ describe('GalleryComponent', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryComponent],
       providers: [
+        provideIcons(appIcons),
         ChangeDetectorRef,
-        DatePipe,
         {provide: GalleryCacheService, useValue: mockCacheService},
         {provide: ContentLoaderService, useValue: mockContentLoader},
         {provide: ContentService, useClass: MockContentService},
@@ -155,9 +146,7 @@ describe('GalleryComponent', () => {
         {provide: FilterService, useClass: MockFilterService},
         {provide: GallerySortingService, useClass: MockGallerySortingService},
         {provide: PiTitleService, useClass: MockPiTitleService},
-        {provide: GPXFilesFilterPipe, useClass: MockGPXFilesFilterPipe},
         {provide: BlogService, useClass: MockBlogService},
-        {provide: MDFilesFilterPipe, useClass: MockMDFilesFilterPipe},
         {provide: UploaderService, useClass: MockUploaderService},
         {provide: FullScreenService, useValue: jasmine.createSpyObj('FullScreenService', ['mock'])},
         {provide: OverlayService, useValue: jasmine.createSpyObj('OverlayService', ['mock'])},
@@ -191,7 +180,7 @@ describe('GalleryComponent', () => {
           }
         },
         LeafletMarkerClusterModule,
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
         provideRouter([])
@@ -275,7 +264,6 @@ describe('GalleryComponent', () => {
 
       // Main content container should not be visible when ContentWrapper is null
       const mainContainer = compiled.querySelector('.app-gallery-body');
-      console.log(mainContainer);
       expect(mainContainer).toBeNull();
 
       // Spinner container should also not be visible
@@ -485,9 +473,6 @@ describe('GalleryComponent', () => {
         mediaGroups: [],
         metaFile: [{name: 'README.md'} as any]
       };
-
-      const mockMDPipe = TestBed.inject(MDFilesFilterPipe) as any;
-      mockMDPipe.transform.and.returnValue([{name: 'README.md'}]);
 
       expect(component.ShowMarkDown).toBeTrue();
     });

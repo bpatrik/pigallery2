@@ -61,6 +61,86 @@ describe('UploadManager', () => {
     }
   });
 
+  it('should reject filenames with path components', async () => {
+    for (const name of ['../escape.jpg', '..\\escape.jpg', 'sub/escape.jpg', '../../../../../tmp/poc.gpx', '..', '.', '']) {
+      const file: any = {
+        originalname: name,
+        buffer: Buffer.from('test content')
+      };
+      try {
+        await uploadManager.saveFile('traversal_test', file);
+        expect.fail('Should have thrown an error for: ' + name);
+      } catch (e) {
+        expect(e.message, name).to.contain('Invalid filename');
+      }
+    }
+    expect(fs.existsSync(path.join(testDir, 'escape.jpg'))).to.be.false;
+    expect(fs.existsSync(path.join(testDir, 'traversal_test', 'sub'))).to.be.false;
+  });
+
+  it('should reject a directory outside of the image folder', async () => {
+    const file: any = {
+      originalname: 'outside.jpg',
+      buffer: Buffer.from('test content')
+    };
+    try {
+      await uploadManager.saveFile('../outside_dir', file);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      expect(e.message).to.contain('Invalid upload path');
+    }
+    expect(fs.existsSync(path.join(testDir, '..', 'outside_dir'))).to.be.false;
+  });
+
+  it('should not accept blocked extensions by default', async () => {
+    for (const name of ['.uploader.pg2conf', 'sorting.PG2CONF', 'image.svg']) {
+      const file: any = {
+        originalname: name,
+        buffer: Buffer.from('{}')
+      };
+      try {
+        await uploadManager.saveFile('blocked_test', file);
+        expect.fail('Should have thrown an error for: ' + name);
+      } catch (e) {
+        expect(e.message, name).to.contain('Unsupported file format');
+      }
+    }
+  });
+
+  it('should accept supported extensions that are removed from blockedExtensions', async () => {
+    const blocked = Config.Upload.blockedExtensions;
+    Config.Upload.blockedExtensions = [];
+    try {
+      for (const name of ['.uploader.pg2conf', 'image.svg']) {
+        const file: any = {
+          originalname: name,
+          buffer: Buffer.from('{}')
+        };
+        await uploadManager.saveFile('unblocked_test', file);
+        expect(fs.existsSync(path.join(testDir, 'unblocked_test', name)), name).to.be.true;
+      }
+    } finally {
+      Config.Upload.blockedExtensions = blocked;
+    }
+  });
+
+  it('should block any listed extension', async () => {
+    const blocked = Config.Upload.blockedExtensions;
+    Config.Upload.blockedExtensions = ['JPG'];
+    try {
+      const file: any = {
+        originalname: 'image.jpg',
+        buffer: Buffer.from('test')
+      };
+      await uploadManager.saveFile('blocked_jpg_test', file);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      expect(e.message).to.contain('Unsupported file format');
+    } finally {
+      Config.Upload.blockedExtensions = blocked;
+    }
+  });
+
   it('should handle multiple files with some errors', async () => {
     const files: any[] = [
       {

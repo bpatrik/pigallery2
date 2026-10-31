@@ -1,15 +1,16 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 
 import {IsActiveMatchOptions, Router} from '@angular/router';
 import {ShareService} from '../ui/gallery/share.service';
 import {Config} from '../../../common/config/public/Config';
 import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
-import {firstValueFrom} from 'rxjs';
+import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class NavigationService {
-  constructor(private router: Router, private shareService: ShareService) {
-  }
+  private router = inject(Router);
+  private shareService = inject(ShareService);
+
 
   public isLoginPage(): boolean {
     return (
@@ -31,7 +32,12 @@ export class NavigationService {
   public async toLogin(): Promise<boolean> {
     await this.shareService.wait();
     if (this.shareService.isSharing()) {
-      if ((await firstValueFrom(this.shareService.currentSharing)).passwordProtected === true) {
+      const publicSharing = await this.shareService.getPublicSharing();
+      if (!publicSharing) {
+        console.error('Navigating to share login with an invalid sharing');
+        return this.toError();
+      }
+      if (publicSharing.passwordProtected === true) {
         return this.router.navigate(['shareLogin'], {
           queryParams: {sk: this.shareService.getSharingKey()},
         });
@@ -58,7 +64,12 @@ export class NavigationService {
           case NavigationLinkTypes.faces:
             return this.router.navigate(['faces']);
           case NavigationLinkTypes.search:
-            return this.router.navigate(['search', JSON.stringify(Config.Gallery.NavBar.links[0].SearchQuery)]);
+            // a search link without a query has nowhere to go, fall back to the gallery
+            if (Config.Gallery.NavBar.links[0].SearchQuery) {
+              return this.router.navigate(['search', SearchQueryUtils.urlify(Config.Gallery.NavBar.links[0].SearchQuery)]);
+            }
+            console.error('First navbar link is a search without a query, falling back to the gallery.');
+            break;
           default:
             console.error('nowhere to navigate.');
         }

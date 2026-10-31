@@ -1,4 +1,4 @@
-import {Component, ElementRef, HostListener, Input, ViewChild, ViewEncapsulation} from '@angular/core';
+import { Component, ElementRef, ViewEncapsulation, inject, input, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -17,7 +17,7 @@ import {DeviceDetectorService} from 'ngx-device-detector';
 import {LoadingBarModule} from '@ngx-loading-bar/core';
 import {IconComponent} from '../../icon.component';
 import {CollapseDirective} from 'ngx-bootstrap/collapse';
-import {NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+
 import {GallerySearchComponent} from '../gallery/search/search.gallery.component';
 import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
@@ -28,16 +28,17 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 @Component({
   selector: 'app-frame',
+  host: {
+    '(window:scroll)': 'onScroll()'
+  },
   templateUrl: './frame.component.html',
-  styleUrls: ['./frame.component.css'],
+  styleUrl: './frame.component.css',
   encapsulation: ViewEncapsulation.Emulated,
   imports: [
     LoadingBarModule,
     RouterLink,
     IconComponent,
     CollapseDirective,
-    NgFor,
-    NgIf,
     GallerySearchComponent,
     GalleryShareComponent,
     NgIconComponent,
@@ -45,14 +46,21 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
     BsDropdownDirective,
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
-    NgSwitch,
-    NgSwitchCase,
-    FormsModule,
-  ],
+    FormsModule
+],
 })
 export class FrameComponent {
-  @Input() showSearch = false;
-  @Input() showShare = false;
+  private authService = inject(AuthenticationService);
+  notificationService = inject(NotificationService);
+  queryService = inject(QueryService);
+  private router = inject(Router);
+  themeService = inject(ThemeService);
+  private deviceService = inject(DeviceDetectorService);
+  galleryService = inject(GalleryService);
+  uploadService = inject(UploaderService);
+
+  readonly showSearch = input(false);
+  readonly showShare = input(false);
   public readonly user: BehaviorSubject<UserDTO>;
   public readonly authenticationRequired = Config.Users.authenticationRequired;
   public readonly title = Config.Server.applicationTitle;
@@ -66,10 +74,10 @@ export class FrameComponent {
   public navbarKeepTop = true;
   public animateNavbar = false;
   public fixNavbarOnTop = false;
-  @ViewChild('dropdownMenu', {static: true}) dropdownMenu: ElementRef;
-  @ViewChild('navContainer', {static: true}) navContainer: ElementRef;
-  @ViewChild('dropdown', {static: true}) dropdown: BsDropdownDirective;
-  @ViewChild('languageSelector', {static: true}) languageSelector: LanguageComponent;
+  readonly dropdownMenu = viewChild<ElementRef>('dropdownMenu');
+  readonly navContainer = viewChild<ElementRef>('navContainer');
+  readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
+  readonly languageSelector = viewChild<LanguageComponent>('languageSelector');
   ThemeModes = ThemeModes;
   public readonly enableScrollUpButton: boolean;
   /* sticky top navbar */
@@ -79,16 +87,7 @@ export class FrameComponent {
     down: 0
   };
 
-  constructor(
-    private authService: AuthenticationService,
-    public notificationService: NotificationService,
-    public queryService: QueryService,
-    private router: Router,
-    public themeService: ThemeService,
-    private deviceService: DeviceDetectorService,
-    public galleryService: GalleryService,
-    public uploadService: UploaderService
-  ) {
+  constructor() {
     this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && !this.deviceService.isDesktop());
     this.user = this.authService.user;
   }
@@ -150,7 +149,6 @@ export class FrameComponent {
   }
 
 
-  @HostListener('window:scroll')
   onScroll(): void {
     const scrollPosition = PageHelper.ScrollY;
     const up = this.lastScroll.any > scrollPosition;
@@ -158,7 +156,7 @@ export class FrameComponent {
     const upDelay = up && this.lastScroll.down > scrollPosition + window.innerHeight * Config.Gallery.NavBar.NavbarShowDelay;
     const downDelay = down && this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay;
     // We are the top where the navbar by default lives
-    if (this.navContainer.nativeElement.offsetHeight > scrollPosition) {
+    if (this.navContainer().nativeElement.offsetHeight > scrollPosition) {
       // do not force move navbar up when we are scrolling up from bottom
       if (this.shouldHideNavbar != false || scrollPosition <= 0) {
         this.navbarKeepTop = true;
@@ -173,8 +171,8 @@ export class FrameComponent {
       this.navbarKeepTop = false;
 
       if (downDelay) { // scroll down
-        this.dropdown.hide();
-        this.languageSelector.dropdown.hide();
+        this.dropdown().hide();
+        this.languageSelector().dropdown().hide();
       }
     }
 

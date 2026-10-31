@@ -1,5 +1,5 @@
-import {Component, forwardRef, Input, OnChanges, TemplateRef} from '@angular/core';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
+import { Component, forwardRef, OnChanges, TemplateRef, inject, input } from '@angular/core';
+import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
 import {SearchQueryParserService} from '../../../gallery/search/search-query-parser.service';
@@ -20,13 +20,14 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
-import { NgIf, NgSwitch, NgSwitchCase, NgFor, NgClass } from '@angular/common';
+
 import { GallerySearchFieldComponent } from '../../../gallery/search/search-field/search-field.gallery.component';
 import { NgIconComponent } from '@ng-icons/core';
 import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-method.settings-entry.component';
 import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
+import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
 
 interface IState {
   shouldHide(): boolean;
@@ -51,7 +52,7 @@ interface IState {
 @Component({
     selector: 'app-settings-entry',
     templateUrl: './settings-entry.component.html',
-    styleUrls: ['./settings-entry.settings.component.css'],
+    styleUrl: './settings-entry.settings.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -65,22 +66,22 @@ interface IState {
         },
     ],
     imports: [
-        NgIf,
-        NgSwitch,
-        NgSwitchCase,
-        GallerySearchFieldComponent,
-        FormsModule,
-        NgFor,
-        NgIconComponent,
-        SortingMethodSettingsEntryComponent,
-        WorkflowComponent,
-        NgClass,
-        PopoverDirective,
-        SafeHtmlPipe,
-    ]
+    GallerySearchFieldComponent,
+    FormsModule,
+    NgIconComponent,
+    SortingMethodSettingsEntryComponent,
+    WorkflowComponent,
+    PopoverDirective,
+    SafeHtmlPipe,
+    DirectorySearchListSettingsComponent
+]
 })
 export class SettingsEntryComponent
     implements ControlValueAccessor, Validator, OnChanges {
+  private searchQueryParserService = inject(SearchQueryParserService);
+  settingsService = inject(SettingsService);
+  private modalService = inject(BsModalService);
+
   name: string;
   required: boolean;
   dockerWarning: boolean;
@@ -96,6 +97,7 @@ export class SettingsEntryComponent
   idName: string;
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
+  readonly newDirectorySearch = () => new this.state.arrayType();
   public type: string | object;
   public arrayType: string;
   public uiType: string;
@@ -104,20 +106,13 @@ export class SettingsEntryComponent
     ref?: any,
     error?: string
   };
-  @Input() noChangeDetection = false;
+  readonly noChangeDetection = input(false);
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
 
-
-  constructor(private searchQueryParserService: SearchQueryParserService,
-              public settingsService: SettingsService,
-              private modalService: BsModalService,
-  ) {
-  }
-
   get changed(): boolean {
-    if (this.Disabled || this.noChangeDetection) {
+    if (this.Disabled || this.noChangeDetection()) {
       return false;
     }
 
@@ -235,6 +230,7 @@ export class SettingsEntryComponent
     return this.state.tags.uiDisabled(this.state.rootConfig, this.settingsService.settings.value);
   }
 
+  // Derives the editor from this.state, which is set by writeValue, not by an input.
   ngOnChanges(): void {
     if (!this.state) {
       return;
@@ -345,7 +341,11 @@ export class SettingsEntryComponent
       const eClass = state.isEnumType
           ? state.type
           : state.arrayType;
-      if (state.tags?.uiOptions) {
+      if (state.tags?.uiOptions && typeof eClass === 'object') {
+        // enum with a restricted set of options
+        state.optionsView = enumToTranslatedArray(eClass)
+          .filter(o => state.tags.uiOptions.includes(o.key));
+      } else if (state.tags?.uiOptions) {
         state.optionsView = state.tags?.uiOptions.map(o => ({
           key: o,
           value: o + (state.tags?.unit ? state.tags?.unit : '')

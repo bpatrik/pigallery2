@@ -3,8 +3,7 @@ import {GroupByTypes, SortByTypes} from '../../../common/entities/SortingMethods
 import {EnumTranslations} from '../ui/EnumTranslations';
 
 @Pipe({
-    name: 'stringifySorting',
-    standalone: true
+    name: 'stringifySorting'
 })
 export class StringifySortingMethod implements PipeTransform {
 

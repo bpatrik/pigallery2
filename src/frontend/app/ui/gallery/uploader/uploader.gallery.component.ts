@@ -1,28 +1,24 @@
-import {ChangeDetectorRef, Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {NgFor, NgIf, NgStyle} from '@angular/common';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject, input } from '@angular/core';
+
 import {NgIconComponent} from '@ng-icons/core';
 import {UploaderService} from './uploader.service';
 
 @Component({
   selector: 'app-gallery-uploader',
   templateUrl: './uploader.gallery.component.html',
-  styleUrls: ['./uploader.gallery.component.css'],
+  styleUrl: './uploader.gallery.component.css',
   imports: [
-    NgIf,
-    NgFor,
-    NgIconComponent,
-    NgStyle,
-  ]
+    NgIconComponent
+]
 })
 export class UploaderComponent {
+  uploaderService = inject(UploaderService);
+  private cdr = inject(ChangeDetectorRef);
+
   public readonly Date = Date;
-  @Input() isUploadOver: boolean;
+  readonly isUploadOver = input<boolean>(undefined);
   public showDetails = false;
   private timer: any;
-
-  constructor(public uploaderService: UploaderService,
-              private cdr: ChangeDetectorRef) {
-  }
 
   ngOnInit(): void {
     this.timer = setInterval(() => {

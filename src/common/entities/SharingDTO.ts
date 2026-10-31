@@ -1,8 +1,14 @@
 import {UserDTO} from './UserDTO';
-import {SearchQueryDTO} from './SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO} from './SearchQueryDTO';
 
-export interface SharingDTOKey {
+interface SharingDTOKey {
   sharingKey: string;
+}
+
+
+export interface PublicSharingDTO extends SharingDTOKey {
+  sharingKey: string;
+  passwordProtected: boolean;
 }
 
 export interface BaseSharingDTO extends SharingDTOKey {
@@ -10,6 +16,7 @@ export interface BaseSharingDTO extends SharingDTOKey {
   defaultSearchView?: SearchQueryDTO;
   defaultDirectoryView?: string;
   searchQuery: SearchQueryDTO;
+  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
   sharingKey: string;
   expires: number;
   timeStamp: number;
@@ -17,11 +24,12 @@ export interface BaseSharingDTO extends SharingDTOKey {
 }
 
 
-export interface ResponseSharingDTO extends BaseSharingDTO {
+export interface ResponseSharingDTO extends BaseSharingDTO, PublicSharingDTO {
   id: number;
   defaultSearchView?: SearchQueryDTO;
   defaultDirectoryView?: string;
   searchQuery: SearchQueryDTO;
+  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
   sharingKey: string;
   expires: number;
   timeStamp: number;
@@ -34,6 +42,7 @@ export interface UpdateSharingDTO extends BaseSharingDTO {
   defaultSearchView?: SearchQueryDTO;
   defaultDirectoryView?: string;
   searchQuery: SearchQueryDTO;
+  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
   sharingKey: string;
   password?: string;
   expires: number;
@@ -48,4 +57,5 @@ export interface CreateSharingDTO {
   defaultSearchView?: SearchQueryDTO;
   defaultDirectoryView?: string;
   searchQuery: SearchQueryDTO;
+  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
 }

@@ -1,17 +1,4 @@
-import {
-  AfterViewInit,
-  ChangeDetectorRef,
-  Component,
-  ElementRef,
-  HostListener,
-  Input,
-  OnChanges,
-  OnDestroy,
-  OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild, input } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -28,7 +15,7 @@ import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
 import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {AsyncPipe, NgFor, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
@@ -36,28 +23,38 @@ import {BlogService} from '../blog/blog.service';
 
 @Component({
   selector: 'app-gallery-grid',
+  host: {
+    '(window:resize)': 'onResize()',
+    '(window:scroll)': 'onScroll()'
+  },
   templateUrl: './grid.gallery.component.html',
-  styleUrls: ['./grid.gallery.component.css'],
+  styleUrl: './grid.gallery.component.css',
   imports: [
-    NgIf,
-    NgFor,
-    NgSwitch,
-    NgSwitchCase,
     NgIconComponent,
-    NgSwitchDefault,
     GalleryBlogComponent,
     GalleryPhotoComponent,
     ParseIntPipe,
-    AsyncPipe,
-  ]
+    AsyncPipe
+]
 })
 export class GalleryGridComponent
   implements OnInit, OnChanges, AfterViewInit, OnDestroy {
-  @ViewChild('gridContainer', {static: false}) gridContainer: ElementRef;
+  private overlayService = inject(OverlayService);
+  private changeDetector = inject(ChangeDetectorRef);
+  queryService = inject(QueryService);
+  private router = inject(Router);
+  sortingService = inject(GallerySortingService);
+  navigatorService = inject(GalleryNavigatorService);
+  private route = inject(ActivatedRoute);
+  blogService = inject(BlogService);
+
+  readonly gridContainer = viewChild<ElementRef>('gridContainer');
+  // Kept as a QueryList: the lightbox navigates on its changes (setGridPhotoQL).
+  // Moving that to signals is part of the gallery content pipeline rework (E2, #1243).
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
-  @Input() lightbox: GalleryLightboxComponent;
-  @Input() mediaGroups: MediaGroup[];
+  readonly lightbox = input<GalleryLightboxComponent>(undefined);
+  readonly mediaGroups = input<MediaGroup[]>(undefined);
   mediaToRender: GridMediaGroup[] = [];
   containerWidth = 0;
   containerMinHeight = 0; // used to fix container height while updating photos to prevent flickering
@@ -82,24 +79,13 @@ export class GalleryGridComponent
   private onScrollFired = false;
   private helperTime: number = null;
 
-  constructor(
-    private overlayService: OverlayService,
-    private changeDetector: ChangeDetectorRef,
-    public queryService: QueryService,
-    private router: Router,
-    public sortingService: GallerySortingService,
-    public navigatorService: GalleryNavigatorService,
-    private route: ActivatedRoute,
-    public blogService: BlogService
-  ) {
-  }
-
+  // Side effect: merges the new media into the rendered grid after the view settled.
   ngOnChanges(): void {
     if (this.isAfterViewInit === false) {
       return;
     }
 
-    this.containerMinHeight = Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer.nativeElement.clientHeight); // reduce flickering
+    this.containerMinHeight = Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer().nativeElement.clientHeight); // reduce flickering
     setTimeout(() => {
       this.updateContainerDimensions();
       this.mergeNewPhotos();
@@ -118,7 +104,7 @@ export class GalleryGridComponent
           params[QueryParams.gallery.photo] !== ''
         ) {
           this.delayedRenderUpToPhoto = params[QueryParams.gallery.photo];
-          if (!this.mediaGroups?.length) {
+          if (!this.mediaGroups()?.length) {
             return;
           }
 
@@ -183,7 +169,6 @@ export class GalleryGridComponent
     }
   }
 
-  @HostListener('window:resize')
   onResize(): void {
     if (this.isAfterViewInit === false) {
       return;
@@ -211,7 +196,7 @@ export class GalleryGridComponent
   }
 
   ngAfterViewInit(): void {
-    this.lightbox.setGridPhotoQL(this.gridPhotoQL);
+    this.lightbox().setGridPhotoQL(this.gridPhotoQL);
 
     if (Config.Gallery.enableOnScrollThumbnailPrioritising === true) {
       this.gridPhotoQL.changes.subscribe((): void => {
@@ -227,12 +212,21 @@ export class GalleryGridComponent
     this.isAfterViewInit = true;
   }
 
+  private static hasSameLayout(m1: MediaDTO, m2: MediaDTO): boolean {
+    return m1.name === m2.name &&
+      m1.directory?.name === m2.directory?.name &&
+      m1.directory?.path === m2.directory?.path &&
+      m1.metadata?.size?.width === m2.metadata?.size?.width &&
+      m1.metadata?.size?.height === m2.metadata?.size?.height;
+  }
+
   // Merging photos after new sorting and filter was applied
   public mergeNewPhotos(): void {
     if (this.mediaToRender.length === 0) {
       return;
     }
-    if (this.mediaGroups?.length === 0) {
+    const mediaGroups = this.mediaGroups();
+    if (mediaGroups?.length === 0) {
       this.clearRenderedPhotos();
       return;
     }
@@ -249,18 +243,18 @@ export class GalleryGridComponent
     let i = 0;
     let j = 0;
 
-    for (; i < this.mediaGroups.length && i < this.mediaToRender.length; ++i) {
+    for (; i < mediaGroups.length && i < this.mediaToRender.length; ++i) {
 
       if (diffFound) {
         break;
       }
 
-      this.mediaToRender[i].name = this.mediaGroups[i].name; // update name if only this changed
+      this.mediaToRender[i].name = mediaGroups[i].name; // update name if only this changed
 
       let lastRowId = null;
       j = 0;
-      for (; j < this.mediaGroups[i].media.length && j < this.mediaToRender[i].media.length; ++j) {
-        const media = this.mediaGroups[i].media[j];
+      for (; j < mediaGroups[i].media.length && j < this.mediaToRender[i].media.length; ++j) {
+        const media = mediaGroups[i].media[j];
         const gridMedia = this.mediaToRender[i].media[j];
 
         // If a media changed the whole row has to be removed
@@ -270,23 +264,30 @@ export class GalleryGridComponent
           lastRowId = gridMedia.rowId;
         }
 
-        // we go no further. Found the first bad media
         if (gridMedia.equals(media) === false) {
-          diffFound = true;
-          break;
+          // Same file with the same size: only its metadata changed (e.g. an
+          // extension button edited its keywords). Swap it in place: the rows
+          // and the scroll position are kept, only this tile is re-rendered.
+          if (GalleryGridComponent.hasSameLayout(gridMedia.media, media)) {
+            this.mediaToRender[i].media[j] = new GridMedia(media, gridMedia.renderWidth, gridMedia.renderHeight, gridMedia.rowId);
+          } else {
+            // we go no further. Found the first bad media
+            diffFound = true;
+            break;
+          }
         }
         // save the last media that was checked and was ok
         lastOkIndex.groups = i;
         lastOkIndex.media = j;
       }
-      if (this.mediaGroups[i].media.length != this.mediaToRender[i].media.length) {
+      if (mediaGroups[i].media.length != this.mediaToRender[i].media.length) {
         break;
       }
     }
 
     // if all check passed, nothing to delete from the last group
     if (!diffFound &&
-      lastOkIndex.media == this.mediaGroups[lastOkIndex.groups].media.length - 1) {
+      lastOkIndex.media == mediaGroups[lastOkIndex.groups].media.length - 1) {
       firstDeleteIndex.groups = lastOkIndex.groups; // delete last ok group as we might want to add more photos
       firstDeleteIndex.media = lastOkIndex.media + 1;
     }
@@ -314,21 +315,23 @@ export class GalleryGridComponent
     }
 
     // step group
+    const mediaGroups = this.mediaGroups();
     if (this.mediaToRender.length == 0 ||
       this.mediaToRender[this.mediaToRender.length - 1].media.length >=
-      this.mediaGroups[this.mediaToRender.length - 1].media.length) {
+      this.mediaGroups()[this.mediaToRender.length - 1].media.length) {
       this.mediaToRender.push({
-        name: this.mediaGroups[this.mediaToRender.length].name,
-        date: this.mediaGroups[this.mediaToRender.length].date,
+        name: mediaGroups[this.mediaToRender.length].name,
+        date: mediaGroups[this.mediaToRender.length].date,
         media: []
       } as GridMediaGroup);
     }
 
-    let maxRowHeight = this.getMaxRowHeight();
+    const baseMaxRowHeight = this.getMaxRowHeight();
+    let maxRowHeight = baseMaxRowHeight;
     const minRowHeight = this.screenHeight / this.MAX_ROW_COUNT;
 
     const photoRowBuilder = new GridRowBuilder(
-      this.mediaGroups[this.mediaToRender.length - 1].media,
+      mediaGroups[this.mediaToRender.length - 1].media,
       this.mediaToRender[this.mediaToRender.length - 1].media.length,
       this.IMAGE_MARGIN,
       this.containerWidth - this.overlayService.getPhantomScrollbarWidth()
@@ -342,8 +345,9 @@ export class GalleryGridComponent
       maxRowHeight *= 1.2;
     }
     const noFullRow = photoRowBuilder.calcRowHeight() > maxRowHeight;
-    // if the row is not full, make it average sized
-    const rowHeight = noFullRow ? (minRowHeight + maxRowHeight) / 2 :
+    // if the row is not full, make it average sized.
+    // Use the base max height, so not full rows of different groups that share a line have the same height
+    const rowHeight = noFullRow ? (minRowHeight + baseMaxRowHeight) / 2 :
       Math.min(photoRowBuilder.calcRowHeight(), maxRowHeight);
     const imageHeight = rowHeight - this.IMAGE_MARGIN * 2;
 
@@ -359,11 +363,10 @@ export class GalleryGridComponent
     return rowHeight;
   }
 
-  @HostListener('window:scroll')
   onScroll(): void {
     if (
       !this.onScrollFired &&
-      this.mediaGroups &&
+      this.mediaGroups() &&
       // should we trigger this at all?
       (this.isMoreToRender() ||
         this.scrollListenerPhotos.length > 0)
@@ -412,14 +415,15 @@ export class GalleryGridComponent
    * Makes sure that the photo with the given mediaString is visible on the screen
    */
   private renderUpToMedia(mediaStringId: string): void {
-    if (!this.mediaGroups) {
+    const mediaGroups = this.mediaGroups();
+    if (!mediaGroups) {
       return;
     }
     let groupIndex = -1;
     let mediaIndex = -1;
 
-    for (let i = 0; i < this.mediaGroups.length; ++i) {
-      mediaIndex = this.mediaGroups[i].media.findIndex(
+    for (let i = 0; i < mediaGroups.length; ++i) {
+      mediaIndex = mediaGroups[i].media.findIndex(
         (p): boolean => this.queryService.getMediaStringId(p) === mediaStringId
       );
       if (mediaIndex !== -1) {
@@ -436,7 +440,7 @@ export class GalleryGridComponent
     // so not required to render more. However, the scrollbar does not trigger more photos to render
     // (on lightbox navigation)
     while (
-      ((this.mediaToRender.length - 1 <= groupIndex && this.mediaGroups.length > 1) ||
+      ((this.mediaToRender.length - 1 <= groupIndex && mediaGroups.length > 1) ||
         this.mediaToRender[this.mediaToRender.length - 1]?.media?.length < mediaIndex) &&
       this.renderARow() !== null
       // eslint-disable-next-line no-empty
@@ -466,7 +470,7 @@ export class GalleryGridComponent
   }
 
   private renderPhotos(numberOfPhotos = 0): void {
-    if (!this.mediaGroups) {
+    if (!this.mediaGroups()) {
       return;
     }
     if (
@@ -492,12 +496,13 @@ export class GalleryGridComponent
   }
 
   private isMoreToRender() {
-    return this.mediaToRender.length < this.mediaGroups.length ||
-      (this.mediaToRender[this.mediaToRender.length - 1]?.media.length || 0) < this.mediaGroups[this.mediaToRender.length - 1]?.media.length;
+    return this.mediaToRender.length < this.mediaGroups().length ||
+      (this.mediaToRender[this.mediaToRender.length - 1]?.media.length || 0) < this.mediaGroups()[this.mediaToRender.length - 1]?.media.length;
   }
 
   private updateContainerDimensions(): boolean {
-    if (!this.gridContainer) {
+    const gridContainer = this.gridContainer();
+    if (!gridContainer) {
       return false;
     }
 
@@ -505,12 +510,12 @@ export class GalleryGridComponent
     PageHelper.showScrollY('grid');
     // if the width changed a bit or the height changed a lot
     if (
-      this.containerWidth !== this.gridContainer.nativeElement.parentElement.clientWidth ||
+      this.containerWidth !== gridContainer.nativeElement.parentElement.clientWidth ||
       this.screenHeight < window.innerHeight * 0.75 ||
       this.screenHeight > window.innerHeight * 1.25
     ) {
       this.screenHeight = window.innerHeight;
-      this.containerWidth = this.gridContainer.nativeElement.parentElement.clientWidth;
+      this.containerWidth = gridContainer.nativeElement.parentElement.clientWidth;
       this.clearRenderedPhotos();
       PageHelper.OverflowY = scrollY;
       return true;

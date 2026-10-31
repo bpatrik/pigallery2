@@ -92,7 +92,7 @@ export class SQLConnection {
     config: ServerDataBaseConfig
   ): Promise<boolean> {
     try {
-      await getConnection('test').close();
+      await getConnection('test').destroy();
       // eslint-disable-next-line no-empty
     } catch (err) {
     }
@@ -100,7 +100,7 @@ export class SQLConnection {
     options.name = 'test';
     const conn = await this.createConnection(options);
     await SQLConnection.schemeSync(conn);
-    await conn.close();
+    await conn.destroy();
     return true;
   }
 
@@ -161,7 +161,7 @@ export class SQLConnection {
   public static async close(): Promise<void> {
     try {
       if (this.connection != null) {
-        await this.connection.close();
+        await this.connection.destroy();
         this.connection = null;
       }
     } catch (err) {
@@ -217,7 +217,7 @@ export class SQLConnection {
         await tmpConn.query(
           'CREATE DATABASE IF NOT EXISTS ' + options.database
         );
-        await tmpConn.close();
+        await tmpConn.destroy();
         return await createConnection(options);
       }
       throw e;
@@ -242,9 +242,18 @@ export class SQLConnection {
 
     let users: UserEntity[] = [];
     try {
+      // only select the columns that exist in the old scheme, so adding a column to the user does not lose the users
+      const metadata = connection.getMetadata(UserEntity);
+      const queryRunner = connection.createQueryRunner();
+      const table = await queryRunner.getTable(metadata.tableName);
+      await queryRunner.release();
+      const existingColumns = new Set((table?.columns || []).map(c => c.name));
       users = await connection
         .getRepository(UserEntity)
         .createQueryBuilder('user')
+        .select(metadata.columns
+          .filter(c => existingColumns.has(c.databaseName))
+          .map(c => 'user.' + c.propertyName))
         .getMany();
       // eslint-disable-next-line no-empty
     } catch (ex) {

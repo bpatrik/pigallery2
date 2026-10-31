@@ -1,33 +1,31 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, inject, viewChild } from '@angular/core';
 import { ExtensionInstallerService } from './extension-installer.service';
 import { ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
 import { NotificationService } from '../../../model/notification.service';
 import { ModalDirective } from 'ngx-bootstrap/modal';
 import {SettingsService} from '../settings.service';
 import { NgIconComponent } from '@ng-icons/core';
-import { NgIf, NgFor } from '@angular/common';
+
 
 @Component({
     selector: 'app-extension-installer',
     templateUrl: './extension-installer.component.html',
-    styleUrls: ['./extension-installer.component.css'],
-    imports: [NgIconComponent, ModalDirective, NgIf, NgFor]
+    styleUrl: './extension-installer.component.css',
+    imports: [NgIconComponent, ModalDirective]
 })
 export class ExtensionInstallerComponent {
-  @ViewChild('extensionsModal', { static: false }) public extensionsModal: ModalDirective;
+  settingsService = inject(SettingsService);
+  private extensionService = inject(ExtensionInstallerService);
+  private notificationService = inject(NotificationService);
+
+  public readonly extensionsModal = viewChild<ModalDirective>('extensionsModal');
 
   public extensions: ExtensionListItem[] = [];
   public loading = false;
   public error: string | null = null;
 
-  constructor(
-    public settingsService: SettingsService,
-    private extensionService: ExtensionInstallerService,
-    private notificationService: NotificationService
-  ) {}
-
   public openExtensionsModal(): void {
-    this.extensionsModal.show();
+    this.extensionsModal().show();
     this.loadExtensions();
   }
 

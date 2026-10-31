@@ -1,36 +1,30 @@
-import {Injectable} from '@angular/core';
-import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
+import {inject} from '@angular/core';
+import {HttpInterceptorFn} from '@angular/common/http';
+import {throwError} from 'rxjs';
 import {catchError} from 'rxjs/operators';
 import {AuthenticationService} from '../authentication.service';
 import {NavigationService} from '../../navigation.service';
 import {ErrorCodes} from '../../../../../common/entities/Error';
 
 
-@Injectable()
-export class ErrorInterceptor implements HttpInterceptor {
-  constructor(private authenticationService: AuthenticationService,
-              private navigationService: NavigationService) {
-  }
+export const errorInterceptor: HttpInterceptorFn = (request, next) => {
+  const authenticationService = inject(AuthenticationService);
+  const navigationService = inject(NavigationService);
+  return next(request).pipe(
+    catchError((err) => {
+      // err.error is not an object when the response body is not JSON (e.g. a proxy error page)
+      const serverError = err.error?.error;
+      if (err.status === 401) {
+        // auto logout if 401 response returned from server
+        authenticationService.logout(serverError?.code).catch(console.error);
+      }
+      if (err.status === 500 && serverError?.code === ErrorCodes.INTERNAL) {
+        // Unknown server error
+        navigationService.toError();
+      }
 
-  intercept(
-    request: HttpRequest<any>,
-    next: HttpHandler
-  ): Observable<HttpEvent<any>> {
-    return next.handle(request).pipe(
-      catchError((err) => {
-        if (err.status === 401) {
-          // auto logout if 401 response returned from server
-          this.authenticationService.logout();
-        }
-        if (err.status === 500 && err.error.error.code === ErrorCodes.INTERNAL) {
-          // Unknown server error
-          this.navigationService.toError();
-        }
-
-        const error = err.error.error || err.error.message || err.statusText;
-        return throwError(error);
-      })
-    );
-  }
-}
+      const error = serverError || err.error?.message || err.statusText;
+      return throwError(() => error);
+    })
+  );
+};

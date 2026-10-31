@@ -1,7 +1,7 @@
 import {ProjectPath} from '../ProjectPath';
 import * as path from 'path';
 import * as fs from 'fs';
-import {SupportedFormats} from '../../common/SupportedFormats';
+import {UploadUtils} from '../../common/UploadUtils';
 import {FileAlreadyExists} from '../exceptions/FileAlreadyExists';
 import {ObjectManagers} from './ObjectManagers';
 import {DiskManager} from './fileaccess/DiskManager';
@@ -48,15 +48,25 @@ export class UploadManager {
 
   public async saveFile(directory: string, file: Express.Multer.File): Promise<void> {
     const relativeDir = directory || '';
-    const fullDirPath = path.join(ProjectPath.ImageFolder, relativeDir);
+    const fullDirPath = path.resolve(path.join(ProjectPath.ImageFolder, relativeDir));
 
+    const filename = file.originalname;
+    // the filename must be a plain name, no path components
+    if (!filename || filename === '.' || filename === '..' ||
+      /[/\\\0]/.test(filename) || path.basename(filename) !== filename) {
+      throw new Error('Invalid filename: ' + filename);
+    }
 
-    const extension = path.extname(file.originalname).toLowerCase().substring(1);
-    if (!this.isSupportedExtension(extension)) {
+    const extension = UploadUtils.getExtension(filename);
+    if (!UploadUtils.isUploadableExtension(extension, Config.Upload.blockedExtensions)) {
       throw new Error('Unsupported file format: ' + extension);
     }
 
-    const fullFilePath = path.join(fullDirPath, file.originalname);
+    const fullFilePath = path.join(fullDirPath, filename);
+    const imageFolder = path.resolve(ProjectPath.ImageFolder);
+    if (fullFilePath.indexOf(imageFolder + path.sep) !== 0) {
+      throw new Error('Invalid upload path: ' + filename);
+    }
 
     if (fs.existsSync(fullFilePath)) {
       throw new FileAlreadyExists('File already exists: ' + fullFilePath, file.originalname);
@@ -67,11 +77,5 @@ export class UploadManager {
     }
 
     await fs.promises.writeFile(fullFilePath, file.buffer);
-  }
-
-  private isSupportedExtension(ext: string): boolean {
-    return SupportedFormats.Photos.includes(ext) ||
-      SupportedFormats.Videos.includes(ext) ||
-      SupportedFormats.MetaFiles.includes(ext);
   }
 }

@@ -1,8 +1,8 @@
-import {Component, EventEmitter, forwardRef, Input, Output, TemplateRef} from '@angular/core';
+import { Component, forwardRef, TemplateRef, inject, input, output } from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
-import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator} from '@angular/forms';
+import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
 import {BsModalRef, BsModalService,} from 'ngx-bootstrap/modal';
 import {Utils} from '../../../../../../common/Utils';
@@ -13,7 +13,7 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
 @Component({
   selector: 'app-gallery-search-field',
   templateUrl: './search-field.gallery.component.html',
-  styleUrls: ['./search-field.gallery.component.css'],
+  styleUrl: './search-field.gallery.component.css',
   providers: [
     AutoCompleteService,
     {
@@ -36,19 +36,16 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
 })
 export class GallerySearchFieldComponent
   implements ControlValueAccessor, Validator {
-  @Output() search = new EventEmitter<void>();
-  @Input() placeholder: string;
+  private autoCompleteService = inject(AutoCompleteService);
+  private searchQueryParserService = inject(SearchQueryParserService);
+  private modalService = inject(BsModalService);
+  router = inject(Router);
+
+  readonly search = output<void>();
+  readonly placeholder = input<string>(undefined);
   public rawSearchText = '';
   public searchQueryDTO: SearchQueryDTO;
   private searchModalRef: BsModalRef;
-
-  constructor(
-    private autoCompleteService: AutoCompleteService,
-    private searchQueryParserService: SearchQueryParserService,
-    private modalService: BsModalService,
-    public router: Router
-  ) {
-  }
 
   public async openSearchModal(template: TemplateRef<unknown>): Promise<void> {
     this.searchModalRef = this.modalService.show(template, {

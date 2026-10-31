@@ -11,7 +11,7 @@ declare const document: {
   webkitExitFullscreen: () => void;
 };
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class FullScreenService {
   OnFullScreenChange = new Event<boolean>();
 

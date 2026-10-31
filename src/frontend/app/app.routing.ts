@@ -1,19 +1,11 @@
-import { NgModule } from '@angular/core';
 import {
-  RouterModule,
   Routes,
   UrlMatchResult,
   UrlSegment,
 } from '@angular/router';
-import { LoginComponent } from './ui/login/login.component';
 import { GalleryComponent } from './ui/gallery/gallery.component';
-import { AdminComponent } from './ui/admin/admin.component';
-import { ShareLoginComponent } from './ui/sharelogin/share-login.component';
 import { QueryParams } from '../../common/QueryParams';
-import { DuplicateComponent } from './ui/duplicates/duplicates.component';
-import { FacesComponent } from './ui/faces/faces.component';
-import { AuthGuard } from './model/network/helper/auth.guard';
-import { AlbumsComponent } from './ui/albums/albums.component';
+import { authGuard } from './model/network/helper/auth.guard';
 import { ErrorComponent } from './ui/error/error.component';
 
 export function galleryMatcherFunction(
@@ -55,34 +47,36 @@ export function galleryMatcherFunction(
   return null;
 }
 
-const routes: Routes = [
+export const routes: Routes = [
   {
     path: 'login',
-    component: LoginComponent,
+    loadComponent: () => import('./ui/login/login.component').then(m => m.LoginComponent),
   },
   {
     path: 'shareLogin',
-    component: ShareLoginComponent,
+    loadComponent: () => import('./ui/sharelogin/share-login.component').then(m => m.ShareLoginComponent),
   },
   {
     path: 'admin',
-    component: AdminComponent,
-    canActivate: [AuthGuard],
+    loadComponent: () => import('./ui/admin/admin.component').then(m => m.AdminComponent),
+    canActivate: [authGuard],
   },
   {
     path: 'duplicates',
-    component: DuplicateComponent,
-    canActivate: [AuthGuard],
+    loadComponent: () => import('./ui/duplicates/duplicates.component').then(m => m.DuplicateComponent),
+    canActivate: [authGuard],
   },
   {
     path: 'albums',
-    component: AlbumsComponent,
-    canActivate: [AuthGuard],
+    loadComponent: () => import('./ui/albums/albums.component').then(m => m.AlbumsComponent),
+    data: {preload: true},
+    canActivate: [authGuard],
   },
   {
     path: 'faces',
-    component: FacesComponent,
-    canActivate: [AuthGuard],
+    loadComponent: () => import('./ui/faces/faces.component').then(m => m.FacesComponent),
+    data: {preload: true},
+    canActivate: [authGuard],
   },
   {
     path: 'error',
@@ -91,14 +85,8 @@ const routes: Routes = [
   {
     matcher: galleryMatcherFunction,
     component: GalleryComponent,
-    canActivate: [AuthGuard],
+    canActivate: [authGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/error', pathMatch: 'full' },
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule],
-})
-export class AppRoutingModule {}

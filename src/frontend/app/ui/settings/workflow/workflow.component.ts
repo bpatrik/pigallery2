@@ -1,4 +1,4 @@
-import {Component, forwardRef, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
+import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -18,11 +18,11 @@ import {
   PeriodicJobTriggerConfig,
   ScheduledJobTriggerConfig
 } from '../../../../../common/config/private/PrivateConfig';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
 import {SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
-import { NgFor, NgIf, NgSwitch, NgSwitchCase, AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { JobButtonComponent } from './button/job-button.settings.component';
@@ -35,7 +35,7 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
 @Component({
     selector: 'app-settings-workflow',
     templateUrl: './workflow.component.html',
-    styleUrls: ['./workflow.component.css'],
+    styleUrl: './workflow.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -49,30 +49,30 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
         },
     ],
     imports: [
-        NgFor,
-        NgIf,
-        PopoverDirective,
-        NgIconComponent,
-        NgSwitch,
-        NgSwitchCase,
-        JobButtonComponent,
-        FormsModule,
-        TimeStampDatePickerComponent,
-        TimeStampTimePickerComponent,
-        GallerySearchFieldComponent,
-        SortingMethodSettingsEntryComponent,
-        JobProgressComponent,
-        ModalDirective,
-        AsyncPipe,
-        DatePipe,
-    ]
+    PopoverDirective,
+    NgIconComponent,
+    JobButtonComponent,
+    FormsModule,
+    TimeStampDatePickerComponent,
+    TimeStampTimePickerComponent,
+    GallerySearchFieldComponent,
+    SortingMethodSettingsEntryComponent,
+    JobProgressComponent,
+    ModalDirective,
+    AsyncPipe,
+    DatePipe
+]
 })
 export class WorkflowComponent implements ControlValueAccessor, Validator, OnInit, OnDestroy {
+  settingsService = inject(SettingsService);
+  jobsService = inject(ScheduledJobsService);
+  backendTextService = inject(BackendtextService);
+
 
 
   public schedules: JobScheduleConfig[] = [];
 
-  @ViewChildren('jobModal') public jobModalQL: QueryList<ModalDirective>;
+  public readonly jobModalQL = viewChildren<ModalDirective>('jobModal');
 
   public disableButtons = false;
   public JobTriggerTypeMap: { key: number; value: string }[];
@@ -95,11 +95,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
   error: string;
 
-  constructor(
-    public settingsService: SettingsService,
-    public jobsService: ScheduledJobsService,
-    public backendTextService: BackendtextService,
-  ) {
+  constructor() {
     this.JobTriggerTypeMap = [
       {key: JobTriggerType.after, value: $localize`after`},
       {key: JobTriggerType.never, value: $localize`never`},
@@ -246,7 +242,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
         (ct) => (this.newSchedule.config[ct.id] = ct.defaultValue as never)
       );
     }
-    this.jobModalQL.first.show();
+    this.jobModalQL().at(0)!.show();
   }
 
   addNewJob(): void {
@@ -261,7 +257,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
         : this.backendTextService.getJobName(jobName) + ' ' + (count + 1);
     this.schedules.push(this.newSchedule);
 
-    this.jobModalQL.first.hide();
+    this.jobModalQL().at(0)!.hide();
     this.onChange(null); // trigger change detection after adding new job
   }
 

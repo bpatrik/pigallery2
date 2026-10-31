@@ -6,6 +6,7 @@ import {FindOptionsWhere} from 'typeorm';
 import {UserSettingsDTO} from '../../../common/entities/UserSettingsDTO';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {Config} from '../../../common/config/private/Config';
+import {ObjectManagers} from '../ObjectManagers';
 
 export class UserManager {
 
@@ -37,14 +38,21 @@ export class UserManager {
     if (user.blockQuery) {
       SearchQueryUtils.validateSearchQuery(user.blockQuery, 'User blockQuery');
     }
+    SearchQueryUtils.validateDirectoryList(user.allowDirectoryList, 'User allowDirectoryList');
+    SearchQueryUtils.validateDirectoryList(user.blockDirectoryList, 'User blockDirectoryList');
     user.password = PasswordHelper.cryptPassword(user.password);
-    return connection.getRepository(UserEntity).save(user);
+    const ret = await connection.getRepository(UserEntity).save(user);
+    ObjectManagers.getInstance().SessionManager.invalidateSessionCache();
+    return ret;
   }
 
   public async deleteUser(id: number): Promise<UserEntity> {
     const connection = await SQLConnection.getConnection();
     const user = await connection.getRepository(UserEntity).findOneBy({id});
-    return await connection.getRepository(UserEntity).remove(user);
+    const ret = await connection.getRepository(UserEntity).remove(user);
+    // ends the sessions of the user and of its sharings
+    ObjectManagers.getInstance().SessionManager.invalidateSessionCache();
+    return ret;
   }
 
   public async changeRole(id: number, newRole: UserRoles): Promise<UserEntity> {
@@ -52,6 +60,19 @@ export class UserManager {
     const userRepository = connection.getRepository(UserEntity);
     const user = await userRepository.findOneBy({id});
     user.role = newRole;
+    const ret = await userRepository.save(user);
+    ObjectManagers.getInstance().SessionManager.invalidateSessionCache();
+    return ret;
+  }
+
+  public async setOidcSubject(id: number, oidcSubject: string | null): Promise<UserEntity> {
+    const connection = await SQLConnection.getConnection();
+    const userRepository = connection.getRepository(UserEntity);
+    const user = await userRepository.findOneBy({id});
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.oidcSubject = oidcSubject;
     return userRepository.save(user);
   }
 
@@ -82,11 +103,23 @@ export class UserManager {
       user.blockQuery = settings.blockQuery ?? null;
     }
 
+    if (typeof settings.allowDirectoryList !== 'undefined') {
+      SearchQueryUtils.validateDirectoryList(settings.allowDirectoryList, 'User allowDirectoryList');
+      user.allowDirectoryList = settings.allowDirectoryList ?? null;
+    }
+
+    if (typeof settings.blockDirectoryList !== 'undefined') {
+      SearchQueryUtils.validateDirectoryList(settings.blockDirectoryList, 'User blockDirectoryList');
+      user.blockDirectoryList = settings.blockDirectoryList ?? null;
+    }
+
     if (settings.newPassword && settings.newPassword.length > 0) {
       user.password = PasswordHelper.cryptPassword(settings.newPassword);
     }
 
-    return userRepository.save(user);
+    const ret = await userRepository.save(user);
+    ObjectManagers.getInstance().SessionManager.invalidateSessionCache();
+    return ret;
   }
 
   getUnAuthenticatedUser(): UserDTO {

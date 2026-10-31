@@ -1,24 +1,25 @@
-import {Component} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {IconComponent} from '../../icon.component';
-import {NgIf} from '@angular/common';
+
 import {Router} from '@angular/router';
 import {NavigationService} from '../../model/navigation.service';
 
 @Component({
   selector: 'app-error',
   templateUrl: './error.component.html',
-  styleUrls: ['./error.component.css'],
+  styleUrl: './error.component.css',
   imports: [
-    NgIf,
     IconComponent
-  ]
+]
 })
 export class ErrorComponent {
+  private navigationService = inject(NavigationService);
+
   title: string;
   showHelp = false;
 
-  constructor(private navigationService: NavigationService) {
+  constructor() {
     this.title = Config.Server.applicationTitle;
   }
 

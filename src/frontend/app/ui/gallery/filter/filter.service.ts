@@ -29,7 +29,7 @@ export interface SelectedFilter {
   options: FilterOption[];
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class FilterService {
   public readonly AVAILABLE_FILTERS: Filter[] = [
     {

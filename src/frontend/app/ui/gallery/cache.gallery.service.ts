@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
@@ -15,14 +15,18 @@ import {
 } from '../../../../common/entities/ContentWrapper';
 import {ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {GridSizes} from '../../../../common/entities/GridSizes';
+import {AuthenticationService} from '../../model/network/authentication.service';
+import {UserDTO} from '../../../../common/entities/UserDTO';
 
 interface CacheItem<T> {
   timestamp: number;
   item: T;
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class GalleryCacheService {
+  private versionService = inject(VersionService);
+
   private static readonly CONTENT_PREFIX = 'CONTENT:';
   private static readonly AUTO_COMPLETE_PREFIX = 'AUTOCOMPLETE:';
   private static readonly INSTANT_SEARCH_PREFIX = 'INSTANT_SEARCH:';
@@ -31,10 +35,13 @@ export class GalleryCacheService {
   private static readonly GROUPING_PREFIX = 'GROUPING:';
   private static readonly GRID_SIZE_PREFIX = 'GRID_SIZE:';
   private static readonly VERSION = 'VERSION';
+  private static readonly USER = 'USER';
   private static readonly SLIDESHOW_SPEED = 'SLIDESHOW_SPEED';
   private static THEME_MODE = 'THEME_MODE';
 
-  constructor(private versionService: VersionService) {
+  constructor() {
+    const authService = inject(AuthenticationService);
+
     // if it was a forced reload not a navigation, clear cache
     if (GalleryCacheService.wasAReload()) {
       GalleryCacheService.deleteCache();
@@ -51,6 +58,25 @@ export class GalleryCacheService {
     };
     this.versionService.version.subscribe(onNewVersion);
     onNewVersion(this.versionService.version.value);
+
+    // The cached content depends on what the user can see (e.g.: allow/block lists, sharing).
+    // The server can answer 'not modified' to a different user, so the cache should not be reused.
+    authService.user.subscribe((user) => GalleryCacheService.onUser(user));
+  }
+
+  private static onUser(user: UserDTO): void {
+    if (!user) {
+      return;
+    }
+    const userKey = JSON.stringify([user.id ?? null, user.name, user.usedSharingKey ?? null, user.projectionKey ?? null]);
+    try {
+      if (localStorage.getItem(GalleryCacheService.USER) !== userKey) {
+        GalleryCacheService.deleteCache();
+        localStorage.setItem(GalleryCacheService.USER, userKey);
+      }
+    } catch (e) {
+      // ignoring errors
+    }
   }
 
   private static wasAReload(): boolean {

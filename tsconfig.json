@@ -25,11 +25,17 @@
     "strictInputAccessModifiers": true,
     "strictTemplates": true
   },
+  "ts-node": {
+    // load the global typings (e.g. customtypings/ExtendedRequest.d.ts) like tsc does
+    "files": true
+  },
   "exclude": [
     "cypress.config.ts",
     // See https://github.com/cypress-io/cypress/issues/7552#issuecomment-763498855
     "test/cypress/**/*",
     "extension/**/*",
-    "extensions/**/*"
+    "extensions/**/*",
+    // The Angular CLI builds the frontend with src/frontend/tsconfig.*.json
+    "src/frontend/**/*"
   ]
 }
