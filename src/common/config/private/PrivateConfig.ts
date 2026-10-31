@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import 'reflect-metadata';
 import {
   AfterJobTrigger,
   JobScheduleDTO,
@@ -100,6 +99,7 @@ export type videoFormatType = 'mp4' | 'webm';
 @SubConfigClass({softReadonly: true})
 export class MySQLConfig {
   @ConfigProperty({
+    type: 'string',
     envAlias: 'MYSQL_HOST',
     tags:
       {
@@ -110,6 +110,7 @@ export class MySQLConfig {
   })
   host: string = 'localhost';
   @ConfigProperty({
+    type: 'float',
     envAlias: 'MYSQL_PORT', min: 0, max: 65535,
     tags:
       {
@@ -120,6 +121,7 @@ export class MySQLConfig {
   })
   port: number = 3306;
   @ConfigProperty({
+    type: 'string',
     envAlias: 'MYSQL_DATABASE',
     tags:
       {
@@ -130,6 +132,7 @@ export class MySQLConfig {
   })
   database: string = 'pigallery2';
   @ConfigProperty({
+    type: 'string',
     envAlias: 'MYSQL_USERNAME',
     tags:
       {
@@ -154,6 +157,7 @@ export class MySQLConfig {
 @SubConfigClass({softReadonly: true})
 export class SQLiteConfig {
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Sqlite db filename`,
@@ -168,6 +172,7 @@ export class SQLiteConfig {
 @SubConfigClass({softReadonly: true})
 export class UserConfig {
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Name`,
@@ -199,6 +204,7 @@ export class UserConfig {
   password: string;
 
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Encrypted password`,
@@ -209,6 +215,7 @@ export class UserConfig {
   encryptedPassword: string | undefined;
 
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         priority: ConfigPriority.underTheHood,
@@ -246,6 +253,7 @@ export class ServerDataBaseConfig {
   type: DatabaseType = DatabaseType.sqlite;
 
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Database folder`,
@@ -257,6 +265,7 @@ export class ServerDataBaseConfig {
   dbFolder: string = 'db';
 
   @ConfigProperty({
+    type: SQLiteConfig,
     tags:
       {
         name: $localize`SQLite`,
@@ -267,6 +276,7 @@ export class ServerDataBaseConfig {
   sqlite?: SQLiteConfig = new SQLiteConfig();
 
   @ConfigProperty({
+    type: MySQLConfig,
     tags:
       {
         name: $localize`MySQL`,
@@ -284,6 +294,7 @@ export class ServerDataBaseConfig {
 export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Issuer URL`,
       priority: ConfigPriority.advanced,
@@ -297,6 +308,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   issuerUrl: string = '';
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Client ID`,
       priority: ConfigPriority.advanced,
@@ -320,6 +332,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   clientSecret: string = '';
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Redirect URI`, priority:
       ConfigPriority.advanced,
@@ -333,6 +346,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   redirectUri: string = '';
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Scopes`,
@@ -343,6 +357,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   scopes: string[] = ['openid', 'profile', 'email'];
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Username claim`,
       relevant: (c: any) => c.enabled,
@@ -353,6 +368,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   usernameClaim: string = 'preferred_username';
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Email claim`,
       relevant: (c: any) => c.enabled,
@@ -362,6 +378,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   emailClaim: string = 'email';
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Allowed email domains`,
@@ -374,6 +391,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   allowedDomains: string[] = [];
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Auto-create users`,
       relevant: (c: any) => c.enabled,
@@ -402,6 +420,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
   autoCreateUserRole: UserRoles = UserRoles.Guest;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Strict security`,
       relevant: (c: any) => c.enabled,
@@ -439,6 +458,7 @@ export class DirectorySearchConfig implements DirectorySearch {
   type: SearchQueryTypes.directory = SearchQueryTypes.directory;
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Directory`,
       priority: ConfigPriority.advanced,
@@ -459,6 +479,7 @@ export class DirectorySearchConfig implements DirectorySearch {
   matchType: TextSearchQueryMatchTypes = TextSearchQueryMatchTypes.exact_match;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Negate`,
       priority: ConfigPriority.advanced
@@ -477,6 +498,7 @@ export class DirectorySearchConfig implements DirectorySearch {
 @SubConfigClass({softReadonly: true})
 export class ServerUserConfig extends ClientUserConfig {
   @ConfigProperty({
+    type: 'array',
     arrayType: UserConfig,
     tags:
       {
@@ -522,6 +544,7 @@ export class ServerUserConfig extends ClientUserConfig {
   } as TextSearch;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: DirectorySearchConfig,
     tags: {
       name: $localize`Directory allow list`,
@@ -533,6 +556,7 @@ export class ServerUserConfig extends ClientUserConfig {
   allowDirectoryList: DirectorySearchConfig[] = [];
 
   @ConfigProperty({
+    type: 'array',
     arrayType: DirectorySearchConfig,
     tags: {
       name: $localize`Directory block list`,
@@ -544,6 +568,7 @@ export class ServerUserConfig extends ClientUserConfig {
   blockDirectoryList: DirectorySearchConfig[] = [];
 
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Suppress default user warning`,
@@ -554,6 +579,7 @@ export class ServerUserConfig extends ClientUserConfig {
   suppressDefUserWarn: boolean = false;
 
   @ConfigProperty({
+    type: ServerUserOIDCConfig,
     tags: {
       name: $localize`OpenID Connect`,
       priority: ConfigPriority.advanced,
@@ -570,6 +596,7 @@ export class ServerUserConfig extends ClientUserConfig {
 @SubConfigClass({softReadonly: true})
 export class ServerPhotoConfig extends ClientPhotoConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`High quality resampling`,
@@ -636,6 +663,7 @@ export class ServerPhotoConfig extends ClientPhotoConfig {
 @SubConfigClass({softReadonly: true})
 export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`OnTheFly *.gpx compression`,
@@ -686,6 +714,7 @@ export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
 @SubConfigClass({softReadonly: true})
 export class ServerMetaFileConfig extends ClientMetaFileConfig {
   @ConfigProperty({
+    type: ServerGPXCompressingConfig,
     tags:
       {
         name: $localize`GPX compression`,
@@ -742,6 +771,7 @@ export class ServerIndexingConfig {
   })
   reIndexingSensitivity: ReIndexingSensitivity = ReIndexingSensitivity.low;
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags:
       {
@@ -755,6 +785,7 @@ export class ServerIndexingConfig {
   })
   excludeFolderList: string[] = ['.Trash-1000', '.dtrash', '$RECYCLE.BIN'];
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags:
       {
@@ -768,6 +799,7 @@ export class ServerIndexingConfig {
   })
   excludeFileList: string[] = [];
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags:
       {
@@ -817,6 +849,7 @@ export class ServerLogConfig {
   })
   sqlLevel: SQLLogLevel = SQLLogLevel.error;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Server timing`,
       priority: ConfigPriority.underTheHood,
@@ -876,7 +909,7 @@ export class PeriodicJobTriggerConfig extends JobTriggerConfigBase implements Pe
 export class AfterJobTriggerConfig extends JobTriggerConfigBase implements AfterJobTrigger {
   @ConfigProperty({type: JobTriggerType})
   readonly type = JobTriggerType.after;
-  @ConfigProperty()
+  @ConfigProperty({type: 'string'})
   afterScheduleName: string | undefined; // runs after schedule
 
   constructor(afterScheduleName?: string) {
@@ -887,13 +920,13 @@ export class AfterJobTriggerConfig extends JobTriggerConfigBase implements After
 
 @SubConfigClass({softReadonly: true})
 export class JobScheduleConfig implements JobScheduleDTO {
-  @ConfigProperty()
+  @ConfigProperty({type: 'string'})
   name: string;
-  @ConfigProperty()
+  @ConfigProperty({type: 'string'})
   jobName: string;
-  @ConfigProperty()
+  @ConfigProperty({type: 'object'})
   config: Record<string, string | number | string[] | number[] | MediaPickDTO[]> = {};
-  @ConfigProperty()
+  @ConfigProperty({type: 'boolean'})
   allowParallelRun: boolean = false;
   @ConfigProperty({
     type: JobTriggerConfigBase,
@@ -960,6 +993,7 @@ export class ServerJobConfig {
   })
   mediaProcessingBatchSize: number = 1000;
   @ConfigProperty({
+    type: 'array',
     arrayType: JobScheduleConfig,
     tags: {
       name: $localize`Scheduled jobs`,
@@ -1043,6 +1077,7 @@ export class VideoTranscodingConfig {
   })
   fps: number = 25;
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Format`,
@@ -1052,6 +1087,7 @@ export class VideoTranscodingConfig {
   })
   format: videoFormatType = 'mp4';
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`MP4 codec`,
@@ -1062,6 +1098,7 @@ export class VideoTranscodingConfig {
   })
   mp4Codec: videoCodecType = 'libx264';
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Webm Codec`,
@@ -1094,6 +1131,7 @@ export class VideoTranscodingConfig {
   preset: FFmpegPresets = FFmpegPresets.medium;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Custom Output Options`,
@@ -1106,6 +1144,7 @@ export class VideoTranscodingConfig {
   customOutputOptions: string[] = [];
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Custom Input Options`,
@@ -1123,6 +1162,7 @@ export class VideoTranscodingConfig {
 @SubConfigClass({softReadonly: true})
 export class ServerVideoConfig extends ClientVideoConfig {
   @ConfigProperty({
+    type: VideoTranscodingConfig,
     tags: {
       name: $localize`Video transcoding`,
       priority: ConfigPriority.advanced,
@@ -1152,6 +1192,7 @@ export class ServerAlbumCoverConfig {
   } as TextSearch;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: ClientSortingConfig,
     tags: {
       name: $localize`Cover Sorting`,
@@ -1178,6 +1219,7 @@ export class ServerAlbumCoverConfig {
 export class ServerMediaConfig extends ClientMediaConfig {
   @ConfigProperty({
 
+    type: 'string',
     tags: {
       name: $localize`Images folder`,
       priority: ConfigPriority.basic,
@@ -1189,6 +1231,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
   })
   folder: string = 'demo/images';
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Temp folder`,
       uiResetNeeded: {server: true},
@@ -1200,6 +1243,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
   tempFolder: string = 'demo/tmp';
 
   @ConfigProperty({
+    type: ServerVideoConfig,
     tags: {
       name: $localize`Video`,
       uiIcon: 'ionVideocamOutline',
@@ -1214,6 +1258,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
   })
   Video: ServerVideoConfig = new ServerVideoConfig();
   @ConfigProperty({
+    type: ServerPhotoConfig,
     tags: {
       name: $localize`Photo`,
       uiIcon: 'ionCameraOutline',
@@ -1227,6 +1272,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
 @SubConfigClass({softReadonly: true})
 export class ServerServiceConfig extends ClientServiceConfig {
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       secret: true,
@@ -1247,6 +1293,7 @@ export class ServerServiceConfig extends ClientServiceConfig {
   sessionTimeout: number = 1000 * 60 * 60 * 24 * 7; // in ms
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Trust Proxy`,
       priority: ConfigPriority.underTheHood,
@@ -1269,6 +1316,7 @@ export class ServerServiceConfig extends ClientServiceConfig {
   port: number = 80;
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Host`,
       priority: ConfigPriority.advanced,
@@ -1280,6 +1328,7 @@ export class ServerServiceConfig extends ClientServiceConfig {
   host: string = '0.0.0.0';
 
   @ConfigProperty({
+    type: ServerLogConfig,
     tags: {
       name: $localize`Logs`,
       priority: ConfigPriority.advanced,
@@ -1291,15 +1340,15 @@ export class ServerServiceConfig extends ClientServiceConfig {
 
 @SubConfigClass({softReadonly: true})
 export class ServerEnvironmentConfig {
-  @ConfigProperty({volatile: true})
+  @ConfigProperty({type: 'string', volatile: true})
   upTime: string | undefined;
-  @ConfigProperty({volatile: true})
+  @ConfigProperty({type: 'string', volatile: true})
   appVersion: string | undefined;
-  @ConfigProperty({volatile: true})
+  @ConfigProperty({type: 'string', volatile: true})
   buildTime: string | undefined;
-  @ConfigProperty({volatile: true})
+  @ConfigProperty({type: 'string', volatile: true})
   buildCommitHash: string | undefined;
-  @ConfigProperty({volatile: true})
+  @ConfigProperty({type: 'boolean', volatile: true})
   isDocker: boolean | undefined;
 }
 
@@ -1311,10 +1360,11 @@ export class ServerUploadConfig extends ClientUploadConfig {
 @SubConfigClass<TAGS>({softReadonly: true})
 export class ServerConfig extends ClientConfig {
 
-  @ConfigProperty({volatile: true})
+  @ConfigProperty({type: ServerEnvironmentConfig, volatile: true})
   Environment: ServerEnvironmentConfig = new ServerEnvironmentConfig();
 
   @ConfigProperty({
+    type: ServerServiceConfig,
     tags: {
       name: $localize`Server`,
       uiIcon: 'ionCloudOutline'
@@ -1323,6 +1373,7 @@ export class ServerConfig extends ClientConfig {
   Server: ServerServiceConfig = new ServerServiceConfig();
 
   @ConfigProperty({
+    type: ServerDataBaseConfig,
     tags: {
       name: $localize`Database`,
       uiIcon: 'ionServerOutline'
@@ -1331,6 +1382,7 @@ export class ServerConfig extends ClientConfig {
   Database: ServerDataBaseConfig = new ServerDataBaseConfig();
 
   @ConfigProperty({
+    type: ServerUserConfig,
     tags: {
       name: $localize`Users`,
       uiIcon: 'ionPersonOutline'
@@ -1339,6 +1391,7 @@ export class ServerConfig extends ClientConfig {
   Users: ServerUserConfig = new ServerUserConfig();
 
   @ConfigProperty({
+    type: ServerIndexingConfig,
     tags: {
       name: $localize`Indexing`,
       uiIcon: 'ionFileTrayFullOutline',
@@ -1355,6 +1408,7 @@ export class ServerConfig extends ClientConfig {
   Indexing: ServerIndexingConfig = new ServerIndexingConfig();
 
   @ConfigProperty({
+    type: ServerMediaConfig,
     tags: {
       name: $localize`Media`,
       uiIcon: 'ionImagesOutline'
@@ -1363,6 +1417,7 @@ export class ServerConfig extends ClientConfig {
   Media: ServerMediaConfig = new ServerMediaConfig();
 
   @ConfigProperty({
+    type: ServerMetaFileConfig,
     tags: {
       name: $localize`Meta file`,
       uiIcon: 'ionDocumentOutline'
@@ -1371,6 +1426,7 @@ export class ServerConfig extends ClientConfig {
   MetaFile: ServerMetaFileConfig = new ServerMetaFileConfig();
 
   @ConfigProperty({
+    type: ServerAlbumCoverConfig,
     tags: {
       name: $localize`Album cover`,
       uiIcon: 'ionImageOutline',
@@ -1388,6 +1444,7 @@ export class ServerConfig extends ClientConfig {
   AlbumCover: ServerAlbumCoverConfig = new ServerAlbumCoverConfig();
 
   @ConfigProperty({
+    type: ServerSharingConfig,
     tags: {
       name: $localize`Sharing`,
       uiIcon: 'ionShareSocialOutline'
@@ -1396,6 +1453,7 @@ export class ServerConfig extends ClientConfig {
   Sharing: ServerSharingConfig = new ServerSharingConfig();
 
   @ConfigProperty({
+    type: ServerDuplicatesConfig,
     tags: {
       name: $localize`Duplicates`,
       uiIcon: 'ionCopyOutline'
@@ -1404,6 +1462,7 @@ export class ServerConfig extends ClientConfig {
   Duplicates: ServerDuplicatesConfig = new ServerDuplicatesConfig();
 
   @ConfigProperty({
+    type: MessagingConfig,
     tags: {
       name: $localize`Messaging`,
       uiIcon: 'ionChatboxOutline',
@@ -1415,6 +1474,7 @@ export class ServerConfig extends ClientConfig {
 
 
   @ConfigProperty({
+    type: ServerExtensionsConfig,
     tags: {
       name: $localize`Extensions`,
       uiIcon: 'ionExtensionPuzzleOutline'
@@ -1423,6 +1483,7 @@ export class ServerConfig extends ClientConfig {
   Extensions: ServerExtensionsConfig = new ServerExtensionsConfig();
 
   @ConfigProperty({
+    type: ServerUploadConfig,
     tags: {
       name: $localize`Upload`,
       uiIcon: 'ionCloudUploadOutline'
@@ -1431,6 +1492,7 @@ export class ServerConfig extends ClientConfig {
   Upload: ServerUploadConfig = new ServerUploadConfig();
 
   @ConfigProperty({
+    type: ServerJobConfig,
     tags: {
       name: $localize`Jobs`,
       uiIcon: 'ionPlayOutline'

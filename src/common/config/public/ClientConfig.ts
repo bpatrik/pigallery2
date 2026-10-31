@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import 'reflect-metadata';
 import {FaceSortByTypes, GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
@@ -176,6 +175,7 @@ export class AutoCompleteItemsPerCategoryConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class AutoCompleteConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Enable Autocomplete`,
@@ -186,6 +186,7 @@ export class AutoCompleteConfig {
   enabled: boolean = true;
 
   @ConfigProperty({
+    type: AutoCompleteItemsPerCategoryConfig,
     tags:
       {
         name: $localize`Max items per category`,
@@ -211,6 +212,7 @@ export class AutoCompleteConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientSearchConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Enable`,
@@ -231,6 +233,7 @@ export class ClientSearchConfig {
   })
   searchCacheTimeout: number = 1000 * 60 * 60;
   @ConfigProperty({
+    type: AutoCompleteConfig,
     tags:
       {
         name: $localize`Autocomplete`,
@@ -258,6 +261,7 @@ export class ClientSearchConfig {
   })
   maxDirectoryResult: number = 200;
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`List directories`,
@@ -267,6 +271,7 @@ export class ClientSearchConfig {
   })
   listDirectories: boolean = false;
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`List metafiles`,
@@ -280,6 +285,7 @@ export class ClientSearchConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientAlbumConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Enable`,
@@ -302,6 +308,7 @@ export class ClientAlbumConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientSharingConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Enable`,
@@ -311,6 +318,7 @@ export class ClientSharingConfig {
   })
   enabled: boolean = true;
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Require password`,
@@ -335,6 +343,7 @@ export class ClientSharingConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientRandomPhotoConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         name: $localize`Enable`,
@@ -348,6 +357,7 @@ export class ClientRandomPhotoConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class MapLayers {
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         priority: ConfigPriority.advanced
@@ -356,6 +366,7 @@ export class MapLayers {
   })
   name: string = 'street';
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         priority: ConfigPriority.advanced,
@@ -365,6 +376,7 @@ export class MapLayers {
   })
   url: string = '';
   @ConfigProperty({
+    type: 'boolean',
     tags:
       {
         priority: ConfigPriority.advanced,
@@ -379,6 +391,7 @@ export class MapLayers {
 export class SVGIconConfig {
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`SVG icon viewBox`,
       priority: ConfigPriority.advanced
@@ -387,6 +400,7 @@ export class SVGIconConfig {
   })
   viewBox: string = '0 0 512 512';
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`SVG Items`,
       priority: ConfigPriority.advanced
@@ -406,6 +420,7 @@ export class PathThemeConfig {
 
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Color`,
       priority: ConfigPriority.advanced
@@ -414,6 +429,7 @@ export class PathThemeConfig {
   })
   color: string = '';
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Dash pattern`,
       priority: ConfigPriority.advanced,
@@ -445,6 +461,7 @@ export class MapPathGroupThemeConfig {
 
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Matchers`,
@@ -474,6 +491,7 @@ export class MapPathGroupConfig {
 
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Name`,
       priority: ConfigPriority.advanced
@@ -482,6 +500,7 @@ export class MapPathGroupConfig {
   })
   name: string = '';
   @ConfigProperty({
+    type: 'array',
     arrayType: MapPathGroupThemeConfig,
     tags: {
       name: $localize`Path themes`,
@@ -500,6 +519,7 @@ export class MapPathGroupConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientMapConfig {
   @ConfigProperty<boolean, ClientConfig, TAGS>({
+    type: 'boolean',
     onNewValue: (value, config) => {
       if (value === false) {
         config.MetaFile.gpx = false;
@@ -512,6 +532,7 @@ export class ClientMapConfig {
   })
   enabled: boolean = true;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Image Markers`,
       priority: ConfigPriority.underTheHood
@@ -528,6 +549,7 @@ export class ClientMapConfig {
   })
   mapProvider: MapProviders = MapProviders.OpenStreetMap;
   @ConfigProperty({
+    type: 'string',
     tags:
       {
         name: $localize`Mapbox access token`,
@@ -538,6 +560,7 @@ export class ClientMapConfig {
   })
   mapboxAccessToken: string = '';
   @ConfigProperty({
+    type: 'array',
     arrayType: MapLayers,
     description: $localize`The map module will use these urls to fetch the map tiles.`,
     tags: {
@@ -561,6 +584,7 @@ export class ClientMapConfig {
 
 
   @ConfigProperty({
+    type: 'array',
     arrayType: MapPathGroupConfig,
     tags: {
       name: $localize`Path theme groups`,
@@ -703,6 +727,7 @@ export class ClientSortingConfig implements SortingMethod {
   })
   method: number = SortByTypes.Date;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Ascending`,
     },
@@ -726,6 +751,7 @@ export class ClientFaceSortingConfig implements SortingMethod {
   })
   method: number = FaceSortByTypes.PersonCount;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Ascending`,
     },
@@ -749,6 +775,7 @@ export class ClientGroupingConfig implements GroupingMethod {
   })
   method: number = GroupByTypes.Date;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Ascending`,
     },
@@ -812,6 +839,7 @@ export class NavBarSortingAndGroupingConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class NavBarConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Download Zip`,
       priority: ConfigPriority.advanced,
@@ -822,6 +850,7 @@ export class NavBarConfig {
   enableDownloadZip: boolean = true;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Directory flattening`,
       priority: ConfigPriority.advanced,
@@ -845,6 +874,7 @@ export class NavBarConfig {
 
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Show item count`,
       priority: ConfigPriority.underTheHood
@@ -854,6 +884,7 @@ export class NavBarConfig {
   showItemCount: boolean = true;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: NavigationLinkConfig,
     tags: {
       name: $localize`Links`,
@@ -913,6 +944,7 @@ export class NavBarConfig {
 export class ClientLightboxTitleConfig {
 
   @ConfigProperty({
+    type: 'array',
     arrayType: LightBoxTitleTexts,
     tags: {
       name: $localize`Top left titles`,
@@ -922,6 +954,7 @@ export class ClientLightboxTitleConfig {
   topLeftTitle: LightBoxTitleTexts[] = [LightBoxTitleTexts.title];
 
   @ConfigProperty({
+    type: 'array',
     arrayType: LightBoxTitleTexts,
     tags: {
       name: $localize`Top left subtitles`,
@@ -931,6 +964,7 @@ export class ClientLightboxTitleConfig {
   topLeftSubtitle: LightBoxTitleTexts[] = [LightBoxTitleTexts.caption];
 
   @ConfigProperty({
+    type: 'array',
     arrayType: LightBoxTitleTexts,
     tags: {
       name: $localize`Bottom left titles`,
@@ -940,6 +974,7 @@ export class ClientLightboxTitleConfig {
   bottomLeftTitle: LightBoxTitleTexts[] = [LightBoxTitleTexts.date, LightBoxTitleTexts.location];
 
   @ConfigProperty({
+    type: 'array',
     arrayType: LightBoxTitleTexts,
     tags: {
       name: $localize`Bottom left subtitles`,
@@ -952,6 +987,7 @@ export class ClientLightboxTitleConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class AutoUpdateConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enable auto update`,
       priority: ConfigPriority.advanced,
@@ -962,6 +998,7 @@ export class AutoUpdateConfig {
   enable: boolean = false;
 
   @ConfigProperty({
+    type: 'float',
     tags: {
       name: $localize`Interval`,
       priority: ConfigPriority.advanced,
@@ -977,6 +1014,7 @@ export class AutoUpdateConfig {
 export class ClientLightboxConfig {
 
   @ConfigProperty({
+    type: 'float',
     tags: {
       name: $localize`Default slideshow speed`,
       priority: ConfigPriority.underTheHood,
@@ -988,6 +1026,7 @@ export class ClientLightboxConfig {
   slideshowSpeed: number = 5;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Always show captions`,
       priority: ConfigPriority.underTheHood,
@@ -996,6 +1035,7 @@ export class ClientLightboxConfig {
   })
   captionAlwaysOn: boolean = false;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Always show faces`,
       priority: ConfigPriority.underTheHood,
@@ -1004,6 +1044,7 @@ export class ClientLightboxConfig {
   })
   facesAlwaysOn: boolean = false;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Loop Videos`,
       priority: ConfigPriority.underTheHood,
@@ -1013,6 +1054,7 @@ export class ClientLightboxConfig {
   loopVideos: boolean = false;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Loop Slideshow`,
       priority: ConfigPriority.underTheHood,
@@ -1022,6 +1064,7 @@ export class ClientLightboxConfig {
   loopSlideshow: boolean = false;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Load full resolution image on zoom.`,
       priority: ConfigPriority.advanced
@@ -1031,6 +1074,7 @@ export class ClientLightboxConfig {
   loadFullImageOnZoom: boolean = true;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Load full image if previews are too small`,
       priority: ConfigPriority.advanced
@@ -1040,6 +1084,7 @@ export class ClientLightboxConfig {
   loadFullImageIfPreviewTooSmall: boolean = true;
 
   @ConfigProperty({
+    type: ClientLightboxTitleConfig,
     tags: {
       name: $localize`Titles`,
       priority: ConfigPriority.advanced,
@@ -1054,6 +1099,7 @@ export class ClientLightboxConfig {
 export class ThemeConfig {
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Name`,
     } as TAGS,
@@ -1061,6 +1107,7 @@ export class ThemeConfig {
   })
   name: string;
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Theme`,
     } as TAGS,
@@ -1078,6 +1125,7 @@ export class ThemeConfig {
 export class ThemesConfig {
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enable`,
       githubIssue: 642
@@ -1108,6 +1156,7 @@ export class ThemesConfig {
   selectedTheme: 'default' | string = 'classic';
 
   @ConfigProperty({
+    type: 'array',
     arrayType: ThemeConfig,
     tags: {
       name: $localize`Selected theme CSS`, //this is a 'hack' to the UI settings. UI will only show the selected setting's CSS
@@ -1136,6 +1185,7 @@ export class ThemesConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class ClientGalleryConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Cache`,
       priority: ConfigPriority.underTheHood,
@@ -1144,6 +1194,7 @@ export class ClientGalleryConfig {
   })
   enableCache: boolean = true;
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Scroll based thumbnail generation`,
       priority: ConfigPriority.advanced,
@@ -1153,6 +1204,7 @@ export class ClientGalleryConfig {
   enableOnScrollRendering: boolean = true;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Sort directories by date`,
       priority: ConfigPriority.advanced,
@@ -1162,6 +1214,7 @@ export class ClientGalleryConfig {
   enableDirectorySortingByDate: boolean = false;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Ignore timestamp offsets (use local time)`,
       priority: ConfigPriority.advanced,
@@ -1174,6 +1227,7 @@ export class ClientGalleryConfig {
 
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`On scroll thumbnail prioritising`,
       priority: ConfigPriority.underTheHood,
@@ -1182,6 +1236,7 @@ export class ClientGalleryConfig {
   })
   enableOnScrollThumbnailPrioritising: boolean = true;
   @ConfigProperty({
+    type: NavBarConfig,
     tags: {
       name: $localize`Navigation bar`,
       uiIcon: 'ionMenuOutline',
@@ -1190,6 +1245,7 @@ export class ClientGalleryConfig {
   })
   NavBar: NavBarConfig = new NavBarConfig();
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Caption first naming`,
       priority: ConfigPriority.advanced,
@@ -1200,6 +1256,7 @@ export class ClientGalleryConfig {
 
 
   @ConfigProperty({
+    type: ClientLightboxConfig,
     tags: {
       name: $localize`Lightbox`,
       uiIcon: 'ionImageOutline',
@@ -1210,6 +1267,7 @@ export class ClientGalleryConfig {
   Lightbox: ClientLightboxConfig = new ClientLightboxConfig();
 
   @ConfigProperty({
+    type: ThemesConfig,
     tags: {
       name: $localize`Themes`,
       uiIcon: 'ionBrushOutline',
@@ -1219,6 +1277,7 @@ export class ClientGalleryConfig {
   })
   Themes: ThemesConfig = new ThemesConfig();
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Inline blog starts open`,
       priority: ConfigPriority.advanced,
@@ -1229,6 +1288,7 @@ export class ClientGalleryConfig {
   InlineBlogStartsOpen: boolean = false;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Top blog starts open`,
       priority: ConfigPriority.advanced,
@@ -1239,6 +1299,7 @@ export class ClientGalleryConfig {
   TopBlogStartsOpen: boolean = false;
 
   @ConfigProperty({
+    type: AutoUpdateConfig,
     tags: {
       name: $localize`Auto update`,
       priority: ConfigPriority.advanced,
@@ -1251,6 +1312,7 @@ export class ClientGalleryConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientVideoConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enable`,
       priority: ConfigPriority.advanced,
@@ -1259,6 +1321,7 @@ export class ClientVideoConfig {
   })
   enabled: boolean = true;
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Supported formats with transcoding`,
@@ -1272,6 +1335,7 @@ export class ClientVideoConfig {
   // Browser-supported video formats
   // Read more: https://www.w3schools.com/html/html5_video.asp
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Supported formats without transcoding`,
@@ -1311,6 +1375,7 @@ export class ClientPhotoConfig {
   personThumbnailSize: number = 200;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'unsignedInt', tags: {
       name: $localize`Thumbnail and photo preview sizes`,
       priority: ConfigPriority.advanced,
@@ -1321,6 +1386,7 @@ export class ClientPhotoConfig {
   thumbnailSizes: number[] = [320, 540, 1080, 2160];
 
   @ConfigProperty({
+    type: 'float',
     volatile: true,
     description: 'Updated to match the number of CPUs. This manny thumbnail will be concurrently generated.',
   })
@@ -1329,6 +1395,7 @@ export class ClientPhotoConfig {
 
   @ConfigProperty({
 
+    type: 'float',
     tags: {
       name: $localize`Concurrent photo generation limit`,
       priority: ConfigPriority.underTheHood,
@@ -1339,6 +1406,7 @@ export class ClientPhotoConfig {
   concurrentThumbnailGenerationsLimit: number = 0;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Supported photo formats`,
@@ -1371,6 +1439,7 @@ export class ClientPhotoConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientGPXCompressingConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enable GPX compressing`,
       priority: ConfigPriority.advanced,
@@ -1385,6 +1454,7 @@ export class ClientGPXCompressingConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientLivePhotoConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enable`,
       priority: ConfigPriority.advanced,
@@ -1398,6 +1468,7 @@ export class ClientLivePhotoConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientMediaConfig {
   @ConfigProperty({
+    type: ClientVideoConfig,
     tags: {
       name: $localize`Video`,
       priority: ConfigPriority.advanced
@@ -1405,6 +1476,7 @@ export class ClientMediaConfig {
   })
   Video: ClientVideoConfig = new ClientVideoConfig();
   @ConfigProperty({
+    type: ClientPhotoConfig,
     tags: {
       name: $localize`Photo`,
       priority: ConfigPriority.advanced
@@ -1412,6 +1484,7 @@ export class ClientMediaConfig {
   })
   Photo: ClientPhotoConfig = new ClientPhotoConfig();
   @ConfigProperty({
+    type: ClientLivePhotoConfig,
     tags: {
       name: $localize`Live Photo`,
       priority: ConfigPriority.advanced
@@ -1423,6 +1496,7 @@ export class ClientMediaConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientMetaFileConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`*.gpx files`,
       priority: ConfigPriority.advanced,
@@ -1434,6 +1508,7 @@ export class ClientMetaFileConfig {
   gpx: boolean = true;
 
   @ConfigProperty({
+    type: ClientGPXCompressingConfig,
     tags: {
       name: $localize`GPX compression`,
       priority: ConfigPriority.advanced,
@@ -1443,6 +1518,7 @@ export class ClientMetaFileConfig {
   GPXCompressing: ClientGPXCompressingConfig = new ClientGPXCompressingConfig();
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Markdown files`,
       uiResetNeeded: {db: true},
@@ -1453,6 +1529,7 @@ export class ClientMetaFileConfig {
   markdown: boolean = true;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`*.pg2conf files`,
       uiResetNeeded: {db: true},
@@ -1462,6 +1539,7 @@ export class ClientMetaFileConfig {
   })
   pg2conf: boolean = true;
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Supported formats`,
@@ -1476,6 +1554,7 @@ export class ClientMetaFileConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientFacesConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enabled`,
       priority: ConfigPriority.advanced,
@@ -1486,6 +1565,7 @@ export class ClientFacesConfig {
 
 
   @ConfigProperty({
+    type: ClientFaceSortingConfig,
     tags: {
       name: $localize`Default sorting`,
       priority: ConfigPriority.advanced,
@@ -1495,6 +1575,7 @@ export class ClientFacesConfig {
   sorting: ClientFaceSortingConfig = new ClientFaceSortingConfig();
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Override keywords`,
       priority: ConfigPriority.underTheHood,
@@ -1525,6 +1606,7 @@ export class ClientFacesConfig {
 export class ClientServiceConfig {
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Page title`
     } as TAGS
@@ -1532,6 +1614,7 @@ export class ClientServiceConfig {
   applicationTitle: string = 'PiGallery 2';
 
   @ConfigProperty({
+    type: 'string',
     description: $localize`If you access the page from local network it's good to know the public url for creating sharing link.`,
     tags: {
       name: $localize`Page public url`,
@@ -1542,6 +1625,7 @@ export class ClientServiceConfig {
   publicUrl: string = '';
 
   @ConfigProperty({
+    type: 'string',
     description: $localize`If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url.`,
     tags: {
       name: $localize`Url Base`,
@@ -1555,6 +1639,7 @@ export class ClientServiceConfig {
   urlBase: string = '';
 
   @ConfigProperty({
+    type: 'string',
     description: 'PiGallery api path.',
     tags: {
       name: $localize`Api path`,
@@ -1564,10 +1649,11 @@ export class ClientServiceConfig {
   })
   apiPath: string = '/pgapi';
 
-  @ConfigProperty({arrayType: 'string', volatile: true})
+  @ConfigProperty({type: 'array', arrayType: 'string', volatile: true})
   languages: string[] | undefined;
 
   @ConfigProperty({
+    type: 'string',
     description: $localize`Injects the content of this between the <head></head> HTML tags of the app. (You can use it to add analytics or custom code to the app).`,
     tags: {
       name: $localize`Custom HTML Head`,
@@ -1595,6 +1681,7 @@ export class ClientServiceConfig {
 
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Reload client on server update`,
       priority: ConfigPriority.underTheHood,
@@ -1642,6 +1729,7 @@ export class ClientServiceConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientUserOIDCConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enabled`,
       priority: ConfigPriority.advanced,
@@ -1651,6 +1739,7 @@ export class ClientUserOIDCConfig {
   enabled: boolean = false;
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Display name`,
       priority: ConfigPriority.advanced,
@@ -1667,6 +1756,7 @@ export class ClientUserOIDCConfig {
 export class ClientUserConfig {
 
   @ConfigProperty<boolean, ClientConfig>({
+    type: 'boolean',
     onNewValue: (value, config) => {
       if (config && value === false) {
         config.Sharing.enabled = false;
@@ -1692,6 +1782,7 @@ export class ClientUserConfig {
   unAuthenticatedUserRole: UserRoles = UserRoles.Admin;
 
   @ConfigProperty({
+    type: ClientUserOIDCConfig,
     tags: {
       name: $localize`OpenID Connect`,
       priority: ConfigPriority.advanced,
@@ -1708,6 +1799,7 @@ export class ClientUserConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientExtensionsConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enabled`,
       priority: ConfigPriority.advanced,
@@ -1719,6 +1811,7 @@ export class ClientExtensionsConfig {
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientUploadConfig {
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enabled`,
     }
@@ -1735,6 +1828,7 @@ export class ClientUploadConfig {
   minimumRole: UserRoles = UserRoles.Admin;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Require uploader.pg2conf`,
     },
@@ -1743,6 +1837,7 @@ export class ClientUploadConfig {
   enforcedDirectoryConfig: boolean = false;
 
   @ConfigProperty({
+    type: 'array',
     arrayType: 'string',
     tags: {
       name: $localize`Blocked extensions`,
@@ -1756,13 +1851,14 @@ export class ClientUploadConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class ClientConfig {
 
-  @ConfigProperty()
+  @ConfigProperty({type: ClientServiceConfig})
   Server: ClientServiceConfig = new ClientServiceConfig();
 
-  @ConfigProperty()
+  @ConfigProperty({type: ClientUserConfig})
   Users: ClientUserConfig = new ClientUserConfig();
 
   @ConfigProperty({
+    type: ClientGalleryConfig,
     tags: {
       name: $localize`Gallery`,
       uiIcon: 'ionBrowsersOutline'
@@ -1770,13 +1866,14 @@ export class ClientConfig {
   })
   Gallery: ClientGalleryConfig = new ClientGalleryConfig();
 
-  @ConfigProperty()
+  @ConfigProperty({type: ClientMediaConfig})
   Media: ClientMediaConfig = new ClientMediaConfig();
 
-  @ConfigProperty()
+  @ConfigProperty({type: ClientMetaFileConfig})
   MetaFile: ClientMetaFileConfig = new ClientMetaFileConfig();
 
   @ConfigProperty({
+    type: ClientAlbumConfig,
     tags: {
       name: $localize`Album`,
       uiIcon: 'ionAlbumsOutline',
@@ -1789,6 +1886,7 @@ export class ClientConfig {
   Album: ClientAlbumConfig = new ClientAlbumConfig();
 
   @ConfigProperty({
+    type: ClientSearchConfig,
     tags: {
       name: $localize`Search`,
       uiIcon: 'ionSearchOutline'
@@ -1796,10 +1894,11 @@ export class ClientConfig {
   })
   Search: ClientSearchConfig = new ClientSearchConfig();
 
-  @ConfigProperty()
+  @ConfigProperty({type: ClientSharingConfig})
   Sharing: ClientSharingConfig = new ClientSharingConfig();
 
   @ConfigProperty({
+    type: ClientMapConfig,
     tags: {
       name: $localize`Map`,
       uiIcon: 'ionLocationOutline'
@@ -1808,6 +1907,7 @@ export class ClientConfig {
   Map: ClientMapConfig = new ClientMapConfig();
 
   @ConfigProperty({
+    type: ClientFacesConfig,
     tags: {
       name: $localize`Faces`,
       uiIcon: 'ionPeopleOutline'
@@ -1816,6 +1916,7 @@ export class ClientConfig {
   Faces: ClientFacesConfig = new ClientFacesConfig();
 
   @ConfigProperty({
+    type: ClientRandomPhotoConfig,
     tags: {
       name: $localize`Random photo`,
       uiIcon: 'ionShuffleOutline',
@@ -1827,6 +1928,7 @@ export class ClientConfig {
 
 
   @ConfigProperty({
+    type: ClientExtensionsConfig,
     tags: {
       name: $localize`Extensions`,
       uiIcon: 'ionExtensionPuzzleOutline'
@@ -1835,6 +1937,7 @@ export class ClientConfig {
   Extensions: ClientExtensionsConfig = new ClientExtensionsConfig();
 
   @ConfigProperty({
+    type: ClientUploadConfig,
     tags: {
       name: $localize`Upload`,
       uiIcon: 'ionCloudUploadOutline'

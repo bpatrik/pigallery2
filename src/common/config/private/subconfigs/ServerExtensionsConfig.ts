@@ -18,6 +18,7 @@ export class ServerExtensionsEntryConfig {
   }
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Enabled`,
       priority: ConfigPriority.advanced,
@@ -26,6 +27,7 @@ export class ServerExtensionsEntryConfig {
   enabled: boolean = true;
 
   @ConfigProperty({
+    type: 'string',
     readonly: true,
     tags: {
       name: $localize`Extension folder`,
@@ -49,6 +51,7 @@ export class ServerExtensionsEntryConfig {
 export class ServerExtensionsConfig extends ClientExtensionsConfig {
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Repository url`,
       priority: ConfigPriority.underTheHood
@@ -58,6 +61,7 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
   repositoryUrl: string = 'https://raw.githubusercontent.com/bpatrik/pigallery2/master/extension/REPOSITORY.md';
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Extension folder`,
       priority: ConfigPriority.underTheHood,
@@ -80,6 +84,7 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
 
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`Clean up unused tables`,
       priority: ConfigPriority.underTheHood,
