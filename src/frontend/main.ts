@@ -3,7 +3,6 @@ import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/h
 import {errorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigationErrorHandler, withPreloading} from '@angular/router';
 import {bootstrapApplication} from '@angular/platform-browser';
-import {provideAnimations} from '@angular/platform-browser/animations';
 import {routes} from './app/app.routing';
 import {provideIcons} from '@ng-icons/core';
 import {provideToastr} from 'ngx-toastr';
@@ -40,8 +39,7 @@ bootstrapApplication(AppComponent, {
     provideMarkdown({loader: HttpClient}),
     {provide: UrlSerializer, useClass: CustomUrlSerializer},
     // No withFetch(): the fetch backend does not emit upload progress events, which the uploader needs.
-    provideHttpClient(withInterceptors([errorInterceptor])),
-    provideAnimations()
+    provideHttpClient(withInterceptors([errorInterceptor]))
   ]
 })
   .catch((err) => console.error(err));

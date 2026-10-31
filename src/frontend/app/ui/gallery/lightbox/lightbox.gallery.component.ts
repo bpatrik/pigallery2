@@ -4,7 +4,6 @@ import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
 import {OverlayService} from '../overlay.service';
 import {WakeLockService} from '../wakelock.service';
-import {animate, AnimationBuilder, AnimationPlayer, style,} from '@angular/animations';
 import {GalleryLightboxMediaComponent} from './media/media.lightbox.gallery.component';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Params, Router} from '@angular/router';
@@ -49,7 +48,6 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   fullScreenService = inject(FullScreenService);
   private changeDetector = inject(ChangeDetectorRef);
   private overlayService = inject(OverlayService);
-  private builder = inject(AnimationBuilder);
   private router = inject(Router);
   private queryService = inject(QueryService);
   private route = inject(ActivatedRoute);
@@ -85,8 +83,8 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
   private delayedMediaShow: string = null;
   private activePhotoId: number = null;
   private gridPhotoQL: QueryList<GalleryPhotoComponent>;
-  private photoPlayer: AnimationPlayer = null;
-  private lightboxPlayer: AnimationPlayer = null;
+  private photoPlayer: Animation = null;
+  private lightboxPlayer: Animation = null;
   private subscription: {
     photosChange: Subscription;
     route: Subscription;
@@ -158,9 +156,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   ngOnDestroy(): void {
     this.stopSlideShow();
-    // Stop running animations, so their onDone can't fire later and release a newer lightbox's scroll lock.
-    this.photoPlayer?.destroy();
-    this.lightboxPlayer?.destroy();
+    // Stop running animations, so their finish can't fire later and release a newer lightbox's scroll lock.
+    this.photoPlayer?.cancel();
+    this.lightboxPlayer?.cancel();
     // Destroyed while open (e.g. browser history jump to another page): release what
     // showLightbox() took, or the next page can no longer be scrolled.
     if (this.status !== LightboxStates.Closed) {
@@ -261,7 +259,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
     this.animatePhoto(
       selectedPhoto.getDimension(),
       this.calcLightBoxPhotoDimension(selectedPhoto.gridMedia().media)
-    ).onDone((): void => {
+    ).addEventListener('finish', (): void => {
       this.animating = false;
       this.status = LightboxStates.Open;
     });
@@ -291,16 +289,9 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
 
   }
 
-  animatePhoto(from: Dimension, to: Dimension = from): AnimationPlayer {
-    const elem = this.builder
-      .build([
-        style(DimensionUtils.toString(from)),
-        animate('0.2s ease-in-out', style(DimensionUtils.toString(to))),
-      ])
-      .create(this.mediaElement().elementRef.nativeElement);
-    elem.play();
-    this.photoPlayer = elem;
-    return elem;
+  animatePhoto(from: Dimension, to: Dimension = from): Animation {
+    this.photoPlayer = GalleryLightboxComponent.animate(this.mediaElement().elementRef.nativeElement, from, to);
+    return this.photoPlayer;
   }
 
   animateLightbox(
@@ -311,16 +302,17 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
       height: this.photoFrameDim.height,
     } as Dimension,
     to: Dimension = from
-  ): AnimationPlayer {
-    const elem = this.builder
-      .build([
-        style(DimensionUtils.toString(from)),
-        animate('0.2s ease-in-out', style(DimensionUtils.toString(to))),
-      ])
-      .create(this.lightboxElement().nativeElement);
-    elem.play();
-    this.lightboxPlayer = elem;
-    return elem;
+  ): Animation {
+    this.lightboxPlayer = GalleryLightboxComponent.animate(this.lightboxElement().nativeElement, from, to);
+    return this.lightboxPlayer;
+  }
+
+  // The animation keeps its end state (fill: forwards). The browser drops it once a newer animation covers the same properties.
+  private static animate(element: HTMLElement, from: Dimension, to: Dimension): Animation {
+    return element.animate(
+      [DimensionUtils.toString(from), DimensionUtils.toString(to)],
+      {duration: 200, easing: 'ease-in-out', fill: 'forwards'}
+    );
   }
 
   public toggleInfoPanel(): void {
@@ -536,7 +528,7 @@ export class GalleryLightboxComponent implements OnDestroy, OnInit {
         height: this.photoFrameDim.height,
       } as Dimension,
       lightboxDimension
-    ).onDone((): void => {
+    ).addEventListener('finish', (): void => {
       this.status = LightboxStates.Closed;
       this.activePhoto = null;
       this.activePhotoId = null;
