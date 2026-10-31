@@ -3,9 +3,11 @@ import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/filep
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import * as path from 'path';
+import {TestHelper} from '../../../../TestHelper';
 
 
 describe('VideoProcessing', () => {
+  before(TestHelper.resetConfig);
 
   /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted file path', async () => {

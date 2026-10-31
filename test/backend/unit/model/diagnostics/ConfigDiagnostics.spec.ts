@@ -9,12 +9,14 @@ import {SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../../src/c
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SupportedFormats} from '../../../../../src/common/SupportedFormats';
 import {MediaRendererInput, PhotoWorker} from '../../../../../src/backend/model/fileaccess/PhotoWorker';
+import {TestHelper} from '../../../../TestHelper';
 
 declare const describe: any;
 declare const it: any;
 declare const afterEach: any;
 
 describe('ConfigDiagnostics', () => {
+  before(TestHelper.resetConfig);
 
   const validQuery = {type: SearchQueryTypes.any_text, value: 'cat'} as TextSearch;
 

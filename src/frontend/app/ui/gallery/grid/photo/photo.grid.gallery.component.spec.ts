@@ -125,30 +125,30 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
 
   it('should keep the existing comparators working', () => {
     withMetadata({rating: 4});
-    expect(component.matchesMetadataFilter([{field: 'rating', comparator: '>=', value: 4}])).toBeTrue();
-    expect(component.matchesMetadataFilter([{field: 'rating', comparator: '<=', value: 3}])).toBeFalse();
-    expect(component.matchesMetadataFilter([{field: 'size.width', comparator: '==', value: 4032}])).toBeTrue();
-    expect(component.matchesMetadataFilter([{field: 'title', comparator: '==', value: 'x'}])).toBeFalse();
+    expect(component.matchesMetadataFilter([{field: 'rating', comparator: '>=', value: 4}])).toBe(true);
+    expect(component.matchesMetadataFilter([{field: 'rating', comparator: '<=', value: 3}])).toBe(false);
+    expect(component.matchesMetadataFilter([{field: 'size.width', comparator: '==', value: 4032}])).toBe(true);
+    expect(component.matchesMetadataFilter([{field: 'title', comparator: '==', value: 'x'}])).toBe(false);
   });
 
   it('should match "contains" on array items', () => {
     withMetadata({keywords: ['holiday', 'favorite']});
-    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: 'contains', value: 'favorite'}])).toBeTrue();
-    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: 'contains', value: 'fav'}])).toBeFalse();
-    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: '!contains', value: 'favorite'}])).toBeFalse();
+    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: 'contains', value: 'favorite'}])).toBe(true);
+    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: 'contains', value: 'fav'}])).toBe(false);
+    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: '!contains', value: 'favorite'}])).toBe(false);
   });
 
   it('should match "contains" as a substring on strings', () => {
     withMetadata({caption: 'Summer at the beach'});
-    expect(component.matchesMetadataFilter([{field: 'caption', comparator: 'contains', value: 'beach'}])).toBeTrue();
-    expect(component.matchesMetadataFilter([{field: 'caption', comparator: '!contains', value: 'snow'}])).toBeTrue();
+    expect(component.matchesMetadataFilter([{field: 'caption', comparator: 'contains', value: 'beach'}])).toBe(true);
+    expect(component.matchesMetadataFilter([{field: 'caption', comparator: '!contains', value: 'snow'}])).toBe(true);
   });
 
   it('should treat a missing field as not containing anything', () => {
     withMetadata({});
-    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: 'contains', value: 'favorite'}])).toBeFalse();
-    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: '!contains', value: 'favorite'}])).toBeTrue();
-    expect(component.matchesMetadataFilter([{field: 'positionData.city', comparator: '!contains', value: 'Paris'}])).toBeTrue();
+    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: 'contains', value: 'favorite'}])).toBe(false);
+    expect(component.matchesMetadataFilter([{field: 'keywords', comparator: '!contains', value: 'favorite'}])).toBe(true);
+    expect(component.matchesMetadataFilter([{field: 'positionData.city', comparator: '!contains', value: 'Paris'}])).toBe(true);
   });
 
   it('should require every filter to match', () => {
@@ -156,6 +156,6 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
     expect(component.matchesMetadataFilter([
       {field: 'keywords', comparator: 'contains', value: 'favorite'},
       {field: 'rating', comparator: '>=', value: 4},
-    ])).toBeFalse();
+    ])).toBe(false);
   });
 });

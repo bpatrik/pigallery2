@@ -124,18 +124,18 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
         hasCompanionRow = true;
       }
     });
-    expect(hasCompanionRow).toBeFalse();
+    expect(hasCompanionRow).toBe(false);
   });
 
   it('isLivePhoto() should return true when liveVideoPath is set', () => {
     fixture.componentRef.setInput('media', makePhoto({
       liveVideoPath: 'vacation/IMG_7936_HEVC.MOV',
     }));
-    expect(component.isLivePhoto()).toBeTrue();
+    expect(component.isLivePhoto()).toBe(true);
   });
 
   it('isLivePhoto() should return false for regular photos', () => {
     fixture.componentRef.setInput('media', makePhoto());
-    expect(component.isLivePhoto()).toBeFalse();
+    expect(component.isLivePhoto()).toBe(false);
   });
 });

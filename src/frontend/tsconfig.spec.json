@@ -9,7 +9,7 @@
     "emitDecoratorMetadata": false,
     "isolatedModules": true,
     "types": [
-      "jasmine",
+      "vitest/globals",
       "@angular/localize"
     ]
   },

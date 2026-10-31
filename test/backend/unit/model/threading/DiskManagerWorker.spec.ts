@@ -5,16 +5,14 @@ import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {Utils} from '../../../../../src/common/Utils';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {DiskManager} from '../../../../../src/backend/model/fileaccess/DiskManager';
-import {SupportedFormats} from '../../../../../src/common/SupportedFormats';
+import {TestHelper} from '../../../../TestHelper';
 
 declare const before: any;
 declare const afterEach: any;
 
 describe('DiskMangerWorker', () => {
-  // loading default settings (this might have been changed by other tests)
+  before(TestHelper.resetConfig);
   before(() => {
-    Config.loadSync();
-    SupportedFormats.init(Config);
     Config.Database.type = DatabaseType.sqlite;
     Config.Faces.enabled = true;
     Config.Faces.keywordsToPersons = true;

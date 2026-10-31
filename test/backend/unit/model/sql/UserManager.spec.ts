@@ -10,6 +10,7 @@ import chaiAsPromised from 'chai-as-promised';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {VersionEntity} from '../../../../../src/backend/model/database/enitites/VersionEntity';
+import {TestHelper} from '../../../../TestHelper';
 
 chai.use(chaiAsPromised);
 
@@ -21,6 +22,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it so the IDE plays nicely (recognize the test)
 
 describe('UserManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
   describe('buildContext',async () => {
 

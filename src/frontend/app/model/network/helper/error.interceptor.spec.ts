@@ -1,3 +1,4 @@
+import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
 import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
@@ -9,13 +10,13 @@ import {ErrorCodes} from '../../../../../common/entities/Error';
 describe('errorInterceptor', () => {
   let http: HttpClient;
   let httpMock: HttpTestingController;
-  let authService: jasmine.SpyObj<AuthenticationService>;
-  let navigationService: jasmine.SpyObj<NavigationService>;
+  let authService: Mocked<AuthenticationService>;
+  let navigationService: Mocked<NavigationService>;
 
   beforeEach(() => {
-    authService = jasmine.createSpyObj('AuthenticationService', ['logout']);
-    authService.logout.and.resolveTo();
-    navigationService = jasmine.createSpyObj('NavigationService', ['toError']);
+    authService = {logout: vi.fn()} as unknown as Mocked<AuthenticationService>;
+    authService.logout.mockResolvedValue(undefined);
+    navigationService = {toError: vi.fn()} as unknown as Mocked<NavigationService>;
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([errorInterceptor])),

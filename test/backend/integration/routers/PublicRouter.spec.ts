@@ -22,6 +22,7 @@ const {expect} = chai;
 chai.use(chaiHttp);
 
 describe('PublicRouter', () => {
+  before(TestHelper.resetConfig);
   const sqlHelper = new DBTestHelper(DatabaseType.sqlite);
 
   const testUser: UserDTO = {

@@ -2,6 +2,7 @@ import {expect} from 'chai';
 import * as path from 'path';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {DiskManager} from '../../../../src/backend/model/fileaccess/DiskManager';
+import {TestHelper} from '../../../TestHelper';
 
 declare const describe: any;
 declare const it: any;
@@ -9,6 +10,7 @@ declare const before: any;
 declare const after: any;
 
 describe('ProjectPath', () => {
+  before(TestHelper.resetConfig);
   const imageFolder = path.resolve(__dirname, 'gallery');
   let origImageFolder: string;
 

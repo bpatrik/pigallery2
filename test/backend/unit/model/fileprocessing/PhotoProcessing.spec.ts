@@ -3,13 +3,15 @@ import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import * as path from 'path';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
+import {TestHelper} from '../../../../TestHelper';
 
 
 describe('PhotoProcessing', () => {
+  before(TestHelper.resetConfig);
 
   it('should generate converted gif file path', async () => {
 
-    await Config.load();
+    TestHelper.resetConfig();
     Config.Media.Photo.thumbnailSizes = [];
     ProjectPath.ImageFolder = path.join(__dirname, './../../../assets');
     const gifPath = path.join(ProjectPath.ImageFolder, 'earth.gif');
@@ -34,7 +36,7 @@ describe('PhotoProcessing', () => {
   /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted thumbnail path', async () => {
 
-    await Config.load();
+    TestHelper.resetConfig();
     Config.Media.Photo.thumbnailSizes = [10, 20];
     ProjectPath.ImageFolder = path.join(__dirname, './../../../assets');
     const photoPath = path.join(ProjectPath.ImageFolder, 'test_png.png');

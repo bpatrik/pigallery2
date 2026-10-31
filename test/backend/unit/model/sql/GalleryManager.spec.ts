@@ -20,6 +20,7 @@ import {UserEntity} from '../../../../../src/backend/model/database/enitites/Use
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
 import {IndexingManager} from '../../../../../src/backend/model/database/IndexingManager';
 import {ProjectedDirectoryCacheEntity} from '../../../../../src/backend/model/database/enitites/ProjectedDirectoryCacheEntity';
+import {TestHelper} from '../../../../TestHelper';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
@@ -52,6 +53,7 @@ class GalleryManagerTest extends GalleryManager {
 }
 
 describe('GalleryManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   let galleryManager: GalleryManagerTest;
@@ -188,7 +190,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
 
     beforeEach(() => {
       // Reset config defaults that matter for tests
-      Config.loadSync();
+      sqlHelper.resetConfig();
 
       gm = new GalleryManagerTest();
       sessionNoProj = new SessionContext();

@@ -11,37 +11,51 @@ class HostComponent {
   copied = 0;
 }
 
+// jsdom has no clipboard, secure context or execCommand, so each test sets up the browser it needs
+const setUpBrowser = (secure: boolean, execCommand: (command: string) => boolean = () => true) => {
+  const writeText = vi.fn().mockResolvedValue(undefined);
+  Object.defineProperty(navigator, 'clipboard', {value: {writeText}, configurable: true});
+  Object.defineProperty(window, 'isSecureContext', {value: secure, configurable: true});
+  document.execCommand = vi.fn(execCommand);
+  return writeText;
+};
+
+afterEach(() => {
+  delete (navigator as {clipboard?: Clipboard}).clipboard;
+  delete (window as {isSecureContext?: boolean}).isSecureContext;
+  delete (document as Partial<Document>).execCommand;
+});
+
 describe('copyToClipboard', () => {
 
   it('should use navigator.clipboard in a secure context', async () => {
-    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
-    expect(await copyToClipboard('text')).toBeTrue();
+    const writeText = setUpBrowser(true);
+    expect(await copyToClipboard('text')).toBe(true);
     expect(writeText).toHaveBeenCalledWith('text');
   });
 
   it('should fall back to a textarea without navigator.clipboard (plain http)', async () => {
-    spyOnProperty(window, 'isSecureContext').and.returnValue(false);
     let copied: string = null;
-    spyOn(document, 'execCommand').and.callFake((command: string): boolean => {
-      copied = command === 'copy' ? (document.activeElement as HTMLTextAreaElement).value : null;
+    setUpBrowser(false, (command: string): boolean => {
+      const textarea = document.querySelector('textarea');
+      copied = command === 'copy' ? textarea.value.substring(textarea.selectionStart, textarea.selectionEnd) : null;
       return true;
     });
-    expect(await copyToClipboard('fallback')).toBeTrue();
+    expect(await copyToClipboard('fallback')).toBe(true);
     expect(copied).toBe('fallback');
     expect(document.querySelector('textarea')).toBeNull();
   });
 
   it('should report a refused copy', async () => {
-    spyOnProperty(window, 'isSecureContext').and.returnValue(false);
-    spyOn(document, 'execCommand').and.returnValue(false);
-    expect(await copyToClipboard('text')).toBeFalse();
+    setUpBrowser(false, () => false);
+    expect(await copyToClipboard('text')).toBe(false);
   });
 });
 
 describe('CopyDirective', () => {
 
   it('should copy the bound text on click and emit copied', async () => {
-    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+    const writeText = setUpBrowser(true);
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
     fixture.nativeElement.querySelector('button').click();

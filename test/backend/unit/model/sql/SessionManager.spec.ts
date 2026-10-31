@@ -16,6 +16,7 @@ import {SharingEntity} from '../../../../../src/backend/model/database/enitites/
 import {SessionManager} from '../../../../../src/backend/model/database/SessionManager';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {DirectorySearchConfig} from '../../../../../src/common/config/private/PrivateConfig';
+import {TestHelper} from '../../../../TestHelper';
 
 declare let describe: any;
 declare const it: any;
@@ -25,6 +26,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it so the IDE plays nicely (recognize the test)
 
 describe('SessionManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
   describe('buildContext', () => {
 

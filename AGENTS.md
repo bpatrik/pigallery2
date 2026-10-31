@@ -20,6 +20,8 @@ The photo folder is never modified.
   while the browser is a normal phone/desktop. Push work to the client when it makes sense; keep server queries lean.
 - **Dev velocity matters.** This is a single-maintainer project. Prefer simple, direct solutions over abstractions,
   backward-compatibility shims or migration code.
+- **Stay close to framework defaults.** Prefer the industry-standard, framework-default setup (e.g. what `ng new` generates)
+  over keeping how a legacy setup behaved or adding custom config, so `ng update` and other upgrade scripts keep working.
 - **DB breaking changes are fine.** The DB is treated as a cache of the photo folder: bump `DataStructureVersion`
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
 - **Config breaking changes: avoid if easy.** Keep existing config keys working when that's cheap,
@@ -52,8 +54,17 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 
 - Compile backend + tests: `npm run build-backend` (plain `tsc`). Mocha runs the compiled `.js`, so compile before running tests.
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
+  - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
+    never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
-- Frontend unit tests: `npm run test-frontend` (Karma, needs Chrome).
+- Frontend unit tests: `npm run test-frontend` (Vitest in jsdom, no browser needed). Single file: `npx ng test --watch=false --include=<path>.spec.ts`.
+  - The test setup is Angular's default (no Vitest config or setup file); keep it that way. Each spec is self-contained.
+  - jsdom has no layout and lacks some browser APIs (`matchMedia`, `animate`, clipboard). Prefer faking the dependency
+    through TestBed providers; otherwise stub it in the spec and remove the stub in `afterEach`.
+  - Spec files share one global scope. `vi.spyOn()` on anything that outlives the test (globals, `console`, static helpers)
+    needs `vi.restoreAllMocks()` in `afterEach`. `vi.spyOn()` calls the real method unless you mock it.
+  - Use `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync()`, not `fakeAsync`/`tick` (they don't work without
+    a zone-aware test runner), and call `vi.useRealTimers()` in the spec's `afterEach`.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
@@ -79,11 +90,9 @@ so the maintainer's own `config.json` and DB are not touched:
 
 - Dependencies come from the environment's setup script (`npm ci`). If `node_modules` is missing, run `npm ci`
   without `--ignore-scripts`: tests need the native `better-sqlite3` build and the `ffmpeg-static`/`ffprobe-static` downloads.
-- `npm run test-frontend` works as is: `karma.conf.js` uses Playwright's Chromium when `CHROME_BIN` is unset,
-  `--no-sandbox` when running as root, and the `dots` reporter when stdout is not a terminal.
 - Test output is long (server logs, browser console warnings). Save it to a file and read only the summary, e.g.:
   - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
-  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; grep -aE "FAILED|Executed .* secs /" <tmp>/fe.log`
+  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; grep -aE "FAIL|Test Files|Tests " <tmp>/fe.log`
 
 ### SQLite vs MySQL tests
 
