@@ -161,7 +161,6 @@ export class DBTestHelper {
   }
 
   public initDB = async (): Promise<void> => {
-    await Config.load();
     Config.Extensions.enabled = false; // make all tests clean
     if (typeof this.dbType === 'undefined') {
       throw new Error('dbType is undefined');

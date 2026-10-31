@@ -61,10 +61,11 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('IndexingManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   beforeEach(async () => {
-    Config.loadSync();
+    TestHelper.resetConfig();
     Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
     await sqlHelper.initDB();
   });
@@ -72,7 +73,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
   after(async () => {
       await sqlHelper.clearDB();
-      Config.loadSync();
+      TestHelper.resetConfig();
     }
   );
 
@@ -741,7 +742,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     });
 
     afterEach(async () => {
-      Config.loadSync();
+      TestHelper.resetConfig();
       await sqlHelper.clearDB();
     });
 

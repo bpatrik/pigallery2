@@ -10,6 +10,7 @@ import {JobRepository} from '../../../../../src/backend/model/jobs/JobRepository
 import {Config} from '../../../../../src/common/config/private/Config';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {UserDTO} from '../../../../../src/common/entities/UserDTO';
+import {TestHelper} from '../../../../TestHelper';
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -30,6 +31,7 @@ describe = DBTestHelper.describe();
 
 
 describe('AlbumCoverFillingJob', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   let connection: Connection;

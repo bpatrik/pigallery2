@@ -63,6 +63,7 @@ class SearchManagerTest extends SearchManager {
 
 
 describe('SearchManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
   /**
    * dir  <-- root: '.'
@@ -149,7 +150,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
   after(sqlHelper.clearDB);
   beforeEach(() => {
-    Config.loadSync();
+    TestHelper.resetConfig();
     Config.Search.listDirectories = true;
     Config.Search.listMetafiles = false;
   });
@@ -302,7 +303,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
 
     describe('autocomplete', () => {
-      beforeEach(() => Config.loadSync());
+      beforeEach(TestHelper.resetConfig);
 
       it('autocomplete should respect projectionQuery', async () => {
         const sm = new SearchManager();
@@ -487,7 +488,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
   describe('advanced search', () => {
     beforeEach(async () => {
-      Config.loadSync();
+      TestHelper.resetConfig();
       Config.Search.listDirectories = false;
       Config.Search.listMetafiles = false;
     });
@@ -1783,7 +1784,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       let sm: SearchManager;
 
       before(async () => {
-        Config.loadSync();
+        TestHelper.resetConfig();
         await sqlHelper.clearDB();
         await setUpSqlDB();
         p5 = TestHelper.getBasePhotoEntry(subDir2, 'p5-23h-ago.jpg');

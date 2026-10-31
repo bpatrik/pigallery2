@@ -15,6 +15,7 @@ import {DBTestHelper} from '../../../DBTestHelper';
 import {QueryParams} from '../../../../../src/common/QueryParams';
 import {UserMWs} from '../../../../../src/backend/middlewares/user/UserMWs';
 import {OIDCAuthService} from '../../../../../src/backend/middlewares/user/OIDCAuthService';
+import {TestHelper} from '../../../../TestHelper';
 
 
 declare let describe: any;
@@ -26,6 +27,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
 

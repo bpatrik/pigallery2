@@ -16,12 +16,14 @@ import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
+import {TestHelper} from '../../../TestHelper';
 
 process.env.NODE_ENV = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 
 describe('UserRouter', () => {
+  before(TestHelper.resetConfig);
   const sqlHelper = new DBTestHelper(DatabaseType.sqlite);
 
   const testUser: UserDTO = {

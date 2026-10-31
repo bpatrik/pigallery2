@@ -32,6 +32,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe({sqlite: true});
 
 describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   let server: Server;

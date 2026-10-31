@@ -9,6 +9,7 @@ import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {SharingEntity} from '../../../../src/backend/model/database/enitites/SharingEntity';
 import {UserEntity} from '../../../../src/backend/model/database/enitites/UserEntity';
+import {TestHelper} from '../../../TestHelper';
 
 declare let describe: any;
 declare const before: any;
@@ -18,6 +19,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('DirectoryAccess', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   const {none, parent, available} = DirectoryAccessTypes;

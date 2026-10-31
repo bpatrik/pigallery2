@@ -14,6 +14,7 @@ import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
+import {TestHelper} from '../../../TestHelper';
 
 declare const describe: any;
 declare const it: any;
@@ -27,6 +28,7 @@ const should = chai.should();
 chai.use(chaiHttp);
 
 describe('UploadRouter', () => {
+  before(TestHelper.resetConfig);
   const sqlHelper = new DBTestHelper(DatabaseType.sqlite);
   const testDir = path.join(__dirname, 'tmp_upload');
 

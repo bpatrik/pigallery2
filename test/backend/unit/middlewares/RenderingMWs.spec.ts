@@ -5,6 +5,7 @@ import * as express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import {expect} from 'chai';
 import {RenderingMWs} from '../../../../src/backend/middlewares/RenderingMWs';
+import {TestHelper} from '../../../TestHelper';
 
 declare const beforeEach: any;
 declare const afterEach: any;
@@ -12,6 +13,7 @@ declare const describe: any;
 declare const it: any;
 
 describe('RenderingMWs', () => {
+  before(TestHelper.resetConfig);
 
   describe('renderFile', () => {
     const photo = path.join(__dirname, '../../assets/wild-1-small.jpg');

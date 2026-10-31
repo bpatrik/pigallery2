@@ -54,6 +54,8 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 
 - Compile backend + tests: `npm run build-backend` (plain `tsc`). Mocha runs the compiled `.js`, so compile before running tests.
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
+  - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
+    never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
 - Frontend unit tests: `npm run test-frontend` (Vitest in jsdom, no browser needed). Single file: `npx ng test --watch=false --include=<path>.spec.ts`.
   - The test setup is Angular's default (no Vitest config or setup file); keep it that way. Each spec is self-contained.

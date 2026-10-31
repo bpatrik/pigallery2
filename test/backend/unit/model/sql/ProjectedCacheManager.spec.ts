@@ -30,6 +30,7 @@ declare const it: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
   let connection: Connection;
   let pcm: ProjectedCacheManager;

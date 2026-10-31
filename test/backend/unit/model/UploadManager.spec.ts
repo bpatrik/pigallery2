@@ -5,6 +5,7 @@ import {UploadManager} from '../../../../src/backend/model/UploadManager';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {Config} from '../../../../src/common/config/private/Config';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
+import {TestHelper} from '../../../TestHelper';
 
 declare const describe: any;
 declare const before: any;
@@ -12,6 +13,7 @@ declare const after: any;
 declare const it: any;
 
 describe('UploadManager', () => {
+  before(TestHelper.resetConfig);
   const uploadManager = new UploadManager();
   const testDir = path.join(__dirname, 'tmp');
 

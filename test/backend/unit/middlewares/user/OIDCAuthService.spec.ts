@@ -6,9 +6,11 @@ import {Config} from '../../../../../src/common/config/private/Config';
 import {ErrorCodes} from '../../../../../src/common/entities/Error';
 import {Issuer} from 'openid-client';
 import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
+import {TestHelper} from '../../../../TestHelper';
 
 
 describe('OIDCAuthService', () => {
+  before(TestHelper.resetConfig);
 
   const createTokenSet = (claims: Record<string, unknown>, accessToken: string | null = 'access-token'): any => ({
     access_token: accessToken,
