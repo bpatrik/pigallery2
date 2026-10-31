@@ -11,7 +11,7 @@ describe('ShareService', () => {
 
   const setUp = (publicSharing: PublicSharingDTO) => {
     const networkService = {
-      getJson: jasmine.createSpy('getJson').and.callFake((url: string) =>
+      getJson: vi.fn().mockImplementation((url: string) =>
         url.endsWith('/publicInfo') ? Promise.resolve(publicSharing) : Promise.resolve(null))
     };
     const router = {events: new Subject()};
@@ -33,7 +33,7 @@ describe('ShareService', () => {
       expect(networkService.getJson).toHaveBeenCalledWith('/share/key/publicInfo');
 
       // does not load it again
-      networkService.getJson.calls.reset();
+      networkService.getJson.mockClear();
       await service.getPublicSharing();
       expect(networkService.getJson).not.toHaveBeenCalled();
     });
@@ -67,7 +67,7 @@ describe('ShareService', () => {
 
       service.dropSharing();
 
-      expect(service.isSharing()).toBeFalse();
+      expect(service.isSharing()).toBe(false);
       expect(service.getSharingKey()).toBeNull();
       expect(service.sharingSubject.value).toBeNull();
       expect(service.publicSharingSubject.value).toBeNull();

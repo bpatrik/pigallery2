@@ -14,34 +14,35 @@ class HostComponent {
 describe('copyToClipboard', () => {
 
   it('should use navigator.clipboard in a secure context', async () => {
-    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
-    expect(await copyToClipboard('text')).toBeTrue();
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
+    expect(await copyToClipboard('text')).toBe(true);
     expect(writeText).toHaveBeenCalledWith('text');
   });
 
   it('should fall back to a textarea without navigator.clipboard (plain http)', async () => {
-    spyOnProperty(window, 'isSecureContext').and.returnValue(false);
+    vi.spyOn(window, 'isSecureContext', 'get').mockReturnValue(false);
     let copied: string = null;
-    spyOn(document, 'execCommand').and.callFake((command: string): boolean => {
-      copied = command === 'copy' ? (document.activeElement as HTMLTextAreaElement).value : null;
+    vi.spyOn(document, 'execCommand').mockImplementation((command: string): boolean => {
+      const textarea = document.querySelector('textarea');
+      copied = command === 'copy' ? textarea.value.substring(textarea.selectionStart, textarea.selectionEnd) : null;
       return true;
     });
-    expect(await copyToClipboard('fallback')).toBeTrue();
+    expect(await copyToClipboard('fallback')).toBe(true);
     expect(copied).toBe('fallback');
     expect(document.querySelector('textarea')).toBeNull();
   });
 
   it('should report a refused copy', async () => {
-    spyOnProperty(window, 'isSecureContext').and.returnValue(false);
-    spyOn(document, 'execCommand').and.returnValue(false);
-    expect(await copyToClipboard('text')).toBeFalse();
+    vi.spyOn(window, 'isSecureContext', 'get').mockReturnValue(false);
+    vi.spyOn(document, 'execCommand').mockReturnValue(false);
+    expect(await copyToClipboard('text')).toBe(false);
   });
 });
 
 describe('CopyDirective', () => {
 
   it('should copy the bound text on click and emit copied', async () => {
-    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+    const writeText = vi.spyOn(navigator.clipboard, 'writeText').mockResolvedValue();
     const fixture = TestBed.createComponent(HostComponent);
     fixture.detectChanges();
     fixture.nativeElement.querySelector('button').click();

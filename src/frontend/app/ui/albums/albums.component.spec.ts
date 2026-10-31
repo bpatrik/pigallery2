@@ -32,29 +32,29 @@ describe('AlbumsComponent - IsSearchQueryEmpty', () => {
   };
 
   it('should be empty for an empty text query', () => {
-    expect(withQuery({type: SearchQueryTypes.any_text, value: ''} as TextSearch)).toBeTrue();
+    expect(withQuery({type: SearchQueryTypes.any_text, value: ''} as TextSearch)).toBe(true);
   });
 
   it('should not be empty for a text query', () => {
-    expect(withQuery({type: SearchQueryTypes.any_text, value: 'cat'} as TextSearch)).toBeFalse();
+    expect(withQuery({type: SearchQueryTypes.any_text, value: 'cat'} as TextSearch)).toBe(false);
   });
 
   it('should be empty for a date query without dates', () => {
-    expect(withQuery({type: SearchQueryTypes.date} as RangeSearch)).toBeTrue();
+    expect(withQuery({type: SearchQueryTypes.date} as RangeSearch)).toBe(true);
   });
 
   it('should not be empty for a date query with dates', () => {
-    expect(withQuery({type: SearchQueryTypes.date, min: Date.UTC(2024, 0, 10)} as RangeSearch)).toBeFalse();
-    expect(withQuery({type: SearchQueryTypes.date, max: Date.UTC(2024, 0, 10)} as RangeSearch)).toBeFalse();
+    expect(withQuery({type: SearchQueryTypes.date, min: Date.UTC(2024, 0, 10)} as RangeSearch)).toBe(false);
+    expect(withQuery({type: SearchQueryTypes.date, max: Date.UTC(2024, 0, 10)} as RangeSearch)).toBe(false);
     expect(withQuery({
       type: SearchQueryTypes.date,
       min: Date.UTC(2024, 0, 10),
       max: Date.UTC(2024, 1, 20)
-    } as RangeSearch)).toBeFalse();
+    } as RangeSearch)).toBe(false);
   });
 
   it('should not be empty for a date query with a leftover empty text value', () => {
     // switching the type in the query builder used to leave value: '' behind
-    expect(withQuery({type: SearchQueryTypes.date, value: '', min: Date.UTC(2024, 0, 10)} as unknown as RangeSearch)).toBeFalse();
+    expect(withQuery({type: SearchQueryTypes.date, value: '', min: Date.UTC(2024, 0, 10)} as unknown as RangeSearch)).toBe(false);
   });
 });

@@ -1,3 +1,4 @@
+import type {Mock} from 'vitest';
 import {TestBed} from '@angular/core/testing';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {JobButtonComponent} from './job-button.settings.component';
@@ -12,7 +13,7 @@ import {appIcons} from '../../../../icons';
 describe('JobButtonComponent', () => {
   let jobsService: {
     progress: { value: Record<string, OnTimerJobProgressDTO> },
-    getDefaultConfig: jasmine.Spy
+    getDefaultConfig: Mock
   };
 
   const createComponent = (inputs: { config?: unknown } = {}): JobButtonComponent => {
@@ -27,7 +28,7 @@ describe('JobButtonComponent', () => {
   beforeEach(() => {
     jobsService = {
       progress: {value: {}},
-      getDefaultConfig: jasmine.createSpy('getDefaultConfig')
+      getDefaultConfig: vi.fn()
     };
     TestBed.configureTestingModule({
       imports: [JobButtonComponent],
@@ -42,7 +43,7 @@ describe('JobButtonComponent', () => {
   });
 
   it('should not fail without a config and without a default config', () => {
-    jobsService.getDefaultConfig.and.returnValue(null);
+    jobsService.getDefaultConfig.mockReturnValue(null);
     const component = createComponent();
     expect(component.Progress).toBeUndefined();
     expect(component.Running).toBeFalsy();
@@ -50,16 +51,16 @@ describe('JobButtonComponent', () => {
 
   it('should look up the progress with the default config if the config is not set', () => {
     const defaultConfig = {indexChangesOnly: true};
-    jobsService.getDefaultConfig.and.returnValue(defaultConfig);
+    jobsService.getDefaultConfig.mockReturnValue(defaultConfig);
     const progress = {state: JobProgressStates.running} as OnTimerJobProgressDTO;
     jobsService.progress.value[JobDTOUtils.getHashName('Indexing', defaultConfig)] = progress;
     const component = createComponent();
     expect(component.Progress).toBe(progress);
-    expect(component.Running).toBeTrue();
+    expect(component.Running).toBe(true);
   });
 
   it('should prefer the config input over the default config', () => {
-    jobsService.getDefaultConfig.and.returnValue({indexChangesOnly: true});
+    jobsService.getDefaultConfig.mockReturnValue({indexChangesOnly: true});
     const config = {indexChangesOnly: false};
     const progress = {state: JobProgressStates.running} as OnTimerJobProgressDTO;
     jobsService.progress.value[JobDTOUtils.getHashName('Indexing', config)] = progress;

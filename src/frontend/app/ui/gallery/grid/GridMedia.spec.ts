@@ -13,7 +13,7 @@ describe('GridMedia', () => {
         liveVideoPath: 'photos/IMG_001_HEVC.MOV',
       } as any;
       const gm = new GridMedia(media, 100, 100, 0);
-      expect(gm.isLivePhoto()).toBeTrue();
+      expect(gm.isLivePhoto()).toBe(true);
     });
 
     it('should return false when liveVideoPath is not set', () => {
@@ -23,7 +23,7 @@ describe('GridMedia', () => {
         metadata: {size: {width: 100, height: 100}},
       } as PhotoDTO;
       const gm = new GridMedia(media, 100, 100, 0);
-      expect(gm.isLivePhoto()).toBeFalse();
+      expect(gm.isLivePhoto()).toBe(false);
     });
   });
 

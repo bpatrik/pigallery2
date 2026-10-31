@@ -97,16 +97,16 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   });
 
   it('should toggle liveVideoPlaying via startLiveVideo/stopLiveVideo', () => {
-    expect(component.liveVideoPlaying).toBeFalse();
+    expect(component.liveVideoPlaying).toBe(false);
     // liveVideo ViewChild is null in unit tests (no real DOM video),
     // so startLiveVideo returns early, but liveVideoPlaying is set first
     component.startLiveVideo();
     // Without a real video element, the method returns early before setting the flag
     // Test the flag directly
     component.liveVideoPlaying = true;
-    expect(component.liveVideoPlaying).toBeTrue();
+    expect(component.liveVideoPlaying).toBe(true);
     component.liveVideoPlaying = false;
-    expect(component.liveVideoPlaying).toBeFalse();
+    expect(component.liveVideoPlaying).toBe(false);
   });
 
   it('should have pointer-events:none on live-photo-container', () => {

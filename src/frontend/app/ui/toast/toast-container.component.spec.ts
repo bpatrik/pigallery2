@@ -3,8 +3,16 @@ import {provideIcons} from '@ng-icons/core';
 import {ToastContainerComponent} from './toast-container.component';
 import {ToastService} from './toast.service';
 import {appIcons} from '../../icons';
+import {BehaviorSubject} from 'rxjs';
 import {AuthenticationService} from '../../model/network/authentication.service';
-import {MockToastAuthenticationService} from './toast.service.spec';
+
+class MockToastAuthenticationService {
+  user = new BehaviorSubject<unknown>({name: 'admin'});
+
+  isAuthenticated(): boolean {
+    return !!this.user.value;
+  }
+}
 
 describe('ToastContainerComponent', () => {
   let fixture: ComponentFixture<ToastContainerComponent>;
@@ -58,14 +66,14 @@ describe('ToastContainerComponent', () => {
     render();
     (cards('bottom-right')[0].querySelector('.btn-close') as HTMLElement).click();
     render();
-    expect(cards('bottom-right').map((c) => c.textContent)).toEqual([jasmine.stringContaining('Careful')]);
+    expect(cards('bottom-right').map((c) => c.textContent)).toEqual([expect.stringContaining('Careful')]);
     cards('bottom-right')[0].click();
     render();
     expect(cards('bottom-right').length).toBe(0);
   });
 
   it('should call the cancel action without closing the toast by the click', () => {
-    const onCancel = jasmine.createSpy('onCancel');
+    const onCancel = vi.fn();
     service.open({type: 'progress', title: 'Balaton.jpg', progress: 30, closable: true, onCancel});
     render();
     (cards('bottom-right')[0].querySelector('.toast-cancel') as HTMLElement).click();
@@ -103,10 +111,10 @@ describe('ToastContainerComponent', () => {
     it('should show the newest toasts and a summary for the rest, and expand on click', () => {
       notify(5);
       expect(cards().map((c) => c.textContent.trim())).toEqual([
-        jasmine.stringContaining('Error 4'),
-        jasmine.stringContaining('Error 3'),
-        jasmine.stringContaining('Error 2'),
-        jasmine.stringContaining('More: 2')
+        expect.stringContaining('Error 4'),
+        expect.stringContaining('Error 3'),
+        expect.stringContaining('Error 2'),
+        expect.stringContaining('More: 2')
       ]);
       cards()[3].click();
       render();

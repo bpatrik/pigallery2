@@ -1,3 +1,4 @@
+import type {Mock} from 'vitest';
 import {inject, TestBed} from '@angular/core/testing';
 import {UserService} from './user.service';
 import {UserDTO} from '../../../../common/entities/UserDTO';
@@ -76,7 +77,7 @@ describe('AuthenticationService', () => {
   it('should call UserDTO service login', inject(
       [AuthenticationService, UserService],
       async (authService: AuthenticationService, userService: UserService) => {
-        spyOn(userService, 'login').and.callThrough();
+        vi.spyOn(userService, 'login');
 
         expect(userService.login).not.toHaveBeenCalled();
         await authService.login(null);
@@ -92,9 +93,9 @@ describe('AuthenticationService', () => {
       }
   ));
 
-  it('should have Authenticated use', (done) =>
+  it('should have Authenticated use', () => new Promise<void>((done) =>
       inject([AuthenticationService], (authService: AuthenticationService) => {
-        spyOn(authService.user, 'next').and.callThrough();
+        vi.spyOn(authService.user, 'next');
         authService.user.subscribe((user) => {
           if (user == null) {
             return;
@@ -105,7 +106,7 @@ describe('AuthenticationService', () => {
           done();
         });
         authService.login({} as any);
-      })());
+      })()));
 
   describe('logout', () => {
     const setUpLogout = async (authService: AuthenticationService, userService: UserService, shareService: ShareService,
@@ -115,10 +116,10 @@ describe('AuthenticationService', () => {
       authService.user.next({name: 'logged in'} as UserDTO);
       const users: UserDTO[] = [];
       authService.user.subscribe(u => users.push(u));
-      spyOn(userService, 'logout').and.callThrough();
-      spyOn(userService, 'getSessionUser').and.returnValue(Promise.resolve({name: 'Guest'} as UserDTO));
-      spyOn(shareService, 'isSharing').and.returnValue(!!sharing);
-      spyOn(shareService, 'getPublicSharing').and.returnValue(Promise.resolve(sharing));
+      vi.spyOn(userService, 'logout');
+      vi.spyOn(userService, 'getSessionUser').mockReturnValue(Promise.resolve({name: 'Guest'} as UserDTO));
+      vi.spyOn(shareService, 'isSharing').mockReturnValue(!!sharing);
+      vi.spyOn(shareService, 'getPublicSharing').mockReturnValue(Promise.resolve(sharing));
       return users;
     };
 
@@ -138,8 +139,8 @@ describe('AuthenticationService', () => {
       [AuthenticationService, UserService, ShareService],
       async (authService: AuthenticationService, userService: UserService, shareService: ShareService) => {
         const users = await setUpLogout(authService, userService, shareService, {sharingKey: 'key', passwordProtected: true});
-        (userService.getSessionUser as jasmine.Spy).and.returnValue(Promise.reject('not authenticated'));
-        spyOn(console, 'error');
+        (userService.getSessionUser as Mock).mockReturnValue(Promise.reject('not authenticated'));
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
         await authService.logout();
         expect(userService.logout).toHaveBeenCalled();
         expect(users).toContain(null);
@@ -152,7 +153,7 @@ describe('AuthenticationService', () => {
       [AuthenticationService, UserService, ShareService],
       async (authService: AuthenticationService, userService: UserService, shareService: ShareService) => {
         await setUpLogout(authService, userService, shareService, {sharingKey: 'key', passwordProtected: false});
-        spyOn(shareService, 'dropSharing').and.callThrough();
+        vi.spyOn(shareService, 'dropSharing');
         await authService.logout();
         expect(userService.logout).toHaveBeenCalled();
         expect(shareService.dropSharing).toHaveBeenCalled();
@@ -166,9 +167,9 @@ describe('AuthenticationService', () => {
       [AuthenticationService, UserService, ShareService],
       async (authService: AuthenticationService, userService: UserService, shareService: ShareService) => {
         await setUpLogout(authService, userService, shareService, {sharingKey: 'key', passwordProtected: true});
-        (userService.getSessionUser as jasmine.Spy).and.returnValue(Promise.reject('not authenticated'));
-        spyOn(shareService, 'dropSharing').and.callThrough();
-        spyOn(console, 'error');
+        (userService.getSessionUser as Mock).mockReturnValue(Promise.reject('not authenticated'));
+        vi.spyOn(shareService, 'dropSharing');
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
         await authService.logout();
         expect(shareService.dropSharing).not.toHaveBeenCalled();
         expect(console.error).toHaveBeenCalledWith('not authenticated');
