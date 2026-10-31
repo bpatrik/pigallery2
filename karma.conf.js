@@ -35,10 +35,12 @@ module.exports = function (config) {
       suppressAll: true // removes the duplicated traces
     },
     coverageReporter: {
-      dir: require('path').join(__dirname, 'coverage'),
+      // own folder: nyc writes the backend report into coverage/
+      dir: require('path').join(__dirname, 'coverage', 'frontend'),
       subdir: '.',
       reporters: [
         { type: 'html' },
+        { type: 'lcovonly' },
         { type: 'text-summary' }
       ]
     },

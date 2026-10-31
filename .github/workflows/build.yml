@@ -61,6 +61,8 @@ jobs:
         CI: true
     - name: Coveralls
       uses: coverallsapp/github-action@v2
+      with:
+        files: coverage/lcov.info coverage/frontend/lcov.info
     - name: E2E test - Cypress run
       uses: cypress-io/github-action@v7
       env:

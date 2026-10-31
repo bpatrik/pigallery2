@@ -13,7 +13,7 @@
     "create-release": "gulp create-release",
     "build-backend": "tsc",
     "pretest": "tsc",
-    "test": "ng test  && nyc mocha test --exclude test/cypress/**/*.js --exclude folder-reset.js",
+    "test": "ng test --code-coverage && nyc mocha test --exclude test/cypress/**/*.js --exclude folder-reset.js",
     "test-frontend": "ng test",
     "test-backend": "tsc && mocha test --exclude test/cypress/**/*.js --exclude folder-reset.js",
     "coverage": "nyc report --reporter=lcov",
