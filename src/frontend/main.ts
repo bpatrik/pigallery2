@@ -5,7 +5,6 @@ import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigat
 import {bootstrapApplication} from '@angular/platform-browser';
 import {routes} from './app/app.routing';
 import {provideIcons} from '@ng-icons/core';
-import {provideToastr} from 'ngx-toastr';
 import {provideMarkdown} from 'ngx-markdown';
 import {AppComponent} from './app/app.component';
 import {appIcons} from './app/icons';
@@ -35,7 +34,6 @@ bootstrapApplication(AppComponent, {
     provideZoneChangeDetection(),
     provideRouter(routes, withPreloading(PreloadMarkedRoutes), withNavigationErrorHandler(reloadOnChunkLoadError)),
     provideIcons(appIcons),
-    provideToastr(),
     provideMarkdown({loader: HttpClient}),
     {provide: UrlSerializer, useClass: CustomUrlSerializer},
     // No withFetch(): the fetch backend does not emit upload progress events, which the uploader needs.

@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import {ToastrService} from 'ngx-toastr';
+import {ToastService} from '../ui/toast/toast.service';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
 import {NotificationDTO, NotificationType,} from '../../../common/entities/NotificationDTO';
@@ -11,14 +11,10 @@ export interface CountedNotificationDTO extends NotificationDTO {
 
 @Injectable({providedIn: 'root'})
 export class NotificationService {
-  private toastr = inject(ToastrService);
+  private toastService = inject(ToastService);
   private networkService = inject(NetworkService);
   private authService = inject(AuthenticationService);
 
-  options = {
-    positionClass: 'toast-top-center',
-    animate: 'flyLeft',
-  };
   countedNotifications: CountedNotificationDTO[] = [];
   numberOfNotifications = 0;
   lastUser: UserDTO = null;
@@ -35,10 +31,6 @@ export class NotificationService {
       }
       this.lastUser = this.authService.user.value;
     });
-  }
-
-  get Toastr(): ToastrService {
-    return this.toastr;
   }
 
   groupNotifications(notifications: NotificationDTO[]): void {
@@ -94,18 +86,18 @@ export class NotificationService {
   }
 
   success(text: string, title: string = null): void {
-    this.toastr.success(text, title, this.options);
+    this.toastService.show('success', text, title);
   }
 
   error(text: string, title?: string): void {
-    this.toastr.error(text, title, this.options);
+    this.toastService.show('error', text, title);
   }
 
   warning(text: string, title?: string): void {
-    this.toastr.warning(text, title, this.options);
+    this.toastService.show('warning', text, title);
   }
 
   info(text: string, title: string = null): void {
-    this.toastr.info(text, title, this.options);
+    this.toastService.show('info', text, title);
   }
 }
