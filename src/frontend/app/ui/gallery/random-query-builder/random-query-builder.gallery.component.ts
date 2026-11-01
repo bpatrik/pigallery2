@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import { Component, OnDestroy, TemplateRef, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -29,7 +28,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
         GallerySearchQueryBuilderComponent,
     ]
 })
-export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
+export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   contentLoaderService = inject(ContentLoaderService);
   private notification = inject(NotificationService);
   private searchQueryParserService = inject(SearchQueryParserService);
@@ -40,10 +39,9 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
     type: SearchQueryTypes.any_text,
     value: '',
   } as TextSearch;
-  enabled = true;
+  readonly enabled = computed((): boolean => !!this.contentLoaderService.content()?.directory);
   url = '';
 
-  contentSubscription: Subscription = null;
 
   modalRef: BsModalRef;
 
@@ -72,30 +70,14 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
     );
   }
 
-  ngOnInit(): void {
-    this.contentSubscription = this.contentLoaderService.content.subscribe(
-        (content: ContentWrapper) => {
-          this.enabled = !!content?.directory;
-          if (!this.enabled) {
-            return;
-          }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
-        }
-    );
-  }
-
   ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
-    }
-
     if (this.subscription !== null) {
       this.subscription.unsubscribe();
     }
   }
 
   openModal(template: TemplateRef<unknown>): boolean {
-    if (!this.enabled) {
+    if (!this.enabled()) {
       return;
     }
     if (this.modalRef) {

@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {FilterOption, FilterService, SelectedFilter} from './filter.service';
+import {ActiveFilters, FilterOption, FilterService, SelectedFilter} from './filter.service';
 import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
@@ -52,18 +52,8 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
     );
   }
 
-  get ActiveFilters(): {
-    filtersVisible: boolean;
-    areFiltersActive: boolean;
-    dateFilter: {
-      minDate: number;
-      maxDate: number;
-      minFilter: number;
-      maxFilter: number;
-    };
-    selectedFilters: SelectedFilter[];
-  } {
-    return this.filterService.activeFilters.value;
+  get ActiveFilters(): ActiveFilters {
+    return this.filterService.filteredContent().filters;
   }
 
 

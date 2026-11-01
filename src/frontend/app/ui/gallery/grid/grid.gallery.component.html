@@ -4,7 +4,7 @@
     @for (group of mediaToRender; track group) {
       <div class="d-inline-block media-group">
         @if (group.name) {
-          @switch (sortingService.grouping.value.method) {
+          @switch (sortingService.grouping().method) {
             @case (GroupByTypes.Rating) {
               <div class="mt-4 mb-3">
                 <h6 class="ms-2">
@@ -26,7 +26,7 @@
             }
           }
         }
-        @if (group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0) {
+        @if (group.date && blogService.getMarkDowns(group.date)?.length > 0) {
           <app-gallery-blog [date]="group.date"
             [open]="blogOpen" />
         }

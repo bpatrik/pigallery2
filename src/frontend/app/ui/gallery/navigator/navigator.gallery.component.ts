@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, computed, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
@@ -9,16 +9,13 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
-import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {GallerySortingService} from './sorting.service';
 import {PageHelper} from '../../../model/page.helper';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {FilterService} from '../filter/filter.service';
-import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
+import {ContentLoaderService} from '../contentLoader.service';
 import {GalleryNavigatorService} from './navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import { AsyncPipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../utils/sorting-method-icon/sorting-method-icon.component';
 import {GridSizeIconComponent} from '../../utils/grid-size-icon/grid-size-icon.component';
@@ -46,7 +43,6 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
     BsDropdownMenuDirective,
     GridSizeIconComponent,
     GalleryFilterComponent,
-    AsyncPipe,
     StringifySortingMethod,
     StringifySearchQuery,
     StringifyGridSize
@@ -68,21 +64,103 @@ export class GalleryNavigatorComponent {
   public readonly config = Config;
   // DefaultSorting = Config.Gallery.defaultPhotoSortingMethod;
   public readonly SearchQueryTypes = SearchQueryTypes;
-  public wrappedContent: Observable<ContentWrapperWithError>;
-  public directoryContent: Observable<DirectoryContent>;
-  public routes: Observable<NavigatorPath[]>;
   public showFilters = false;
   readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
   readonly navigatorElement = viewChild('navigator', { read: ElementRef });
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
   protected readonly GroupByTypes = GroupByTypes;
   private readonly RootFolderName: string;
-  private parentPath: string = null;
   private lastScroll = {
     any: 0,
     up: 0,
     down: 0
   };
+
+  public readonly routes = computed((): NavigatorPath[] => {
+    const c = this.contentLoaderService.content();
+    if (!c?.directory && !this.isExactDirectorySearch(c)) {
+      return [];
+    }
+
+    let path: string;
+    let name: string;
+    if (c?.directory) {
+      path = c.directory.path;
+      name = c.directory.name;
+    } else {
+      // Handle exact directory search
+      const searchQuery = c?.searchResult.searchQuery as TextSearch;
+      path = searchQuery.value.replace(/^\.\//, ''); // Remove leading ./ if present
+      const lastSlashIndex = path.lastIndexOf('/');
+      if (lastSlashIndex !== -1) {
+        name = path.substring(lastSlashIndex + 1);
+        path = path.substring(0, lastSlashIndex);
+      } else {
+        name = path;
+        path = '';
+      }
+    }
+
+    path = path.replace(new RegExp('\\\\', 'g'), '/');
+    const dirs = path.split('/');
+    dirs.push(name);
+
+    // removing empty strings
+    for (let i = 0; i < dirs.length; i++) {
+      if (!dirs[i] || 0 === dirs[i].length || '.' === dirs[i]) {
+        dirs.splice(i, 1);
+        i--;
+      }
+    }
+
+    const user = this.authService.user();
+    const arr: NavigatorPath[] = [];
+    // the server tells which parents are available, starting from the root
+    const availableParents = c?.directory?.availableParents;
+    const isParentAvailable = (index: number): boolean => {
+      if (Array.isArray(availableParents)) {
+        return availableParents[index] === true;
+      }
+      // without a user (e.g. while logging out) no parent is available
+      return user?.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
+    };
+
+    // create root link
+    if (dirs.length === 0) {
+      arr.push({name: this.RootFolderName, route: null});
+    } else {
+      arr.push({
+        name: this.RootFolderName,
+        route: isParentAvailable(0) ? '/' : null,
+      });
+    }
+
+    // create rest navigation
+    dirs.forEach((name, index) => {
+      const route = dirs.slice(0, index + 1).join('/');
+      if (dirs.length - 1 === index) {
+        arr.push({name, route: null});
+      } else {
+        arr.push({
+          name,
+          // root is the 0th parent
+          route: isParentAvailable(index + 1) ? route : null,
+        });
+
+      }
+    });
+
+    // parent directory has a shortcut to navigate to
+    if (arr.length >= 2 && arr[arr.length - 2].route) {
+      arr[arr.length - 2].title = $localize`key: alt + up`;
+    }
+    return arr;
+  });
+
+  private readonly parentPath = computed((): string => {
+    const arr = this.routes();
+    return arr.length >= 2 ? arr[arr.length - 2].route : null;
+  });
 
   constructor() {
     this.sortingByTypes = Utils.enumToArray(SortByTypes);
@@ -90,108 +168,20 @@ export class GalleryNavigatorComponent {
     this.groupingByTypes = Utils.enumToArray(GroupByTypes);
     this.gridSizes = Utils.enumToArray(GridSizes);
     this.RootFolderName = $localize`Home`;
-    this.wrappedContent = this.contentLoaderService.content;
-    this.directoryContent = this.wrappedContent.pipe(
-      map((c) => (c.directory ? c.directory : c.searchResult))
-    );
-    this.routes = this.contentLoaderService.content.pipe(
-      map((c) => {
-        this.parentPath = null;
-        if (!c?.directory && !this.isExactDirectorySearch(c)) {
-          return [];
-        }
-
-        let path: string;
-        let name: string;
-        if (c?.directory) {
-          path = c.directory.path;
-          name = c.directory.name;
-        } else {
-          // Handle exact directory search
-          const searchQuery = c?.searchResult.searchQuery as TextSearch;
-          path = searchQuery.value.replace(/^\.\//, ''); // Remove leading ./ if present
-          const lastSlashIndex = path.lastIndexOf('/');
-          if (lastSlashIndex !== -1) {
-            name = path.substring(lastSlashIndex + 1);
-            path = path.substring(0, lastSlashIndex);
-          } else {
-            name = path;
-            path = '';
-          }
-        }
-
-        path = path.replace(new RegExp('\\\\', 'g'), '/');
-        const dirs = path.split('/');
-        dirs.push(name);
-
-        // removing empty strings
-        for (let i = 0; i < dirs.length; i++) {
-          if (!dirs[i] || 0 === dirs[i].length || '.' === dirs[i]) {
-            dirs.splice(i, 1);
-            i--;
-          }
-        }
-
-        const user = this.authService.user();
-        const arr: NavigatorPath[] = [];
-        // the server tells which parents are available, starting from the root
-        const availableParents = c?.directory?.availableParents;
-        const isParentAvailable = (index: number): boolean => {
-          if (Array.isArray(availableParents)) {
-            return availableParents[index] === true;
-          }
-          // without a user (e.g. while logging out) no parent is available
-          return user?.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
-        };
-
-        // create root link
-        if (dirs.length === 0) {
-          arr.push({name: this.RootFolderName, route: null});
-        } else {
-          arr.push({
-            name: this.RootFolderName,
-            route: isParentAvailable(0) ? '/' : null,
-          });
-        }
-
-        // create rest navigation
-        dirs.forEach((name, index) => {
-          const route = dirs.slice(0, index + 1).join('/');
-          if (dirs.length - 1 === index) {
-            arr.push({name, route: null});
-          } else {
-            arr.push({
-              name,
-              // root is the 0th parent
-              route: isParentAvailable(index + 1) ? route : null,
-            });
-
-          }
-        });
-
-        // parent directory has a shortcut to navigate to
-        if (arr.length >= 2 && arr[arr.length - 2].route) {
-          this.parentPath = arr[arr.length - 2].route;
-          arr[arr.length - 2].title = $localize`key: alt + up`;
-        }
-        return arr;
-
-      })
-    );
   }
 
   get isDirectory(): boolean {
-    const content = this.contentLoaderService.content.value;
+    const content = this.contentLoaderService.content();
     return !!content?.directory || this.isExactDirectorySearch(content);
   }
 
   get isSearch(): boolean {
-    const content = this.contentLoaderService.content.value;
+    const content = this.contentLoaderService.content();
     return !!content?.searchResult && !this.isExactDirectorySearch(content);
   }
 
   get ItemCount(): number {
-    const c = this.contentLoaderService.content.value;
+    const c = this.contentLoaderService.content();
     return c?.directory
       ? c?.directory.cache?.mediaCount
       : c?.searchResult
@@ -201,7 +191,7 @@ export class GalleryNavigatorComponent {
 
   isDefaultSortingAndGrouping(): boolean {
     return this.sortingService.isDefaultSortingAndGrouping(
-      this.contentLoaderService.content.value
+      this.contentLoaderService.content()
     );
   }
 
@@ -211,7 +201,7 @@ export class GalleryNavigatorComponent {
   }
 
   setSortingBy(sorting: number): void {
-    const s = {method: sorting, ascending: this.sortingService.sorting.value.ascending};
+    const s = {method: sorting, ascending: this.sortingService.sorting().ascending};
     // random does not have a direction
     if (!this.isDirectionalSort(sorting)) {
       s.ascending = null;
@@ -222,7 +212,7 @@ export class GalleryNavigatorComponent {
     // you cannot group by random
     if (!this.isDirectionalSort(sorting) ||
       // if grouping is disabled, do not update it
-      this.sortingService.grouping.value.method === GroupByTypes.NoGrouping || !this.groupingFollowSorting
+      this.sortingService.grouping().method === GroupByTypes.NoGrouping || !this.groupingFollowSorting
     ) {
       return;
     }
@@ -231,29 +221,29 @@ export class GalleryNavigatorComponent {
   }
 
   setSortingAscending(asc: boolean) {
-    const s = {method: this.sortingService.sorting.value.method, ascending: asc};
+    const s = {method: this.sortingService.sorting().method, ascending: asc};
     this.sortingService.setSorting(s);
 
     // if grouping is disabled, do not update it
-    if (this.sortingService.grouping.value.method == GroupByTypes.NoGrouping || !this.groupingFollowSorting) {
+    if (this.sortingService.grouping().method == GroupByTypes.NoGrouping || !this.groupingFollowSorting) {
       return;
     }
     this.sortingService.setGrouping(s as GroupingMethod);
   }
 
   setGroupingBy(grouping: number): void {
-    const s = {method: grouping, ascending: this.sortingService.grouping.value.ascending};
+    const s = {method: grouping, ascending: this.sortingService.grouping().ascending};
     this.sortingService.setGrouping(s);
   }
 
   setGroupingAscending(asc: boolean) {
-    const s = {method: this.sortingService.grouping.value.method, ascending: asc};
+    const s = {method: this.sortingService.grouping().method, ascending: asc};
     this.sortingService.setGrouping(s);
   }
 
 
   getDownloadZipLink(): string {
-    const c = this.contentLoaderService.content.value;
+    const c = this.contentLoaderService.content();
     if (!c) {
       return null;
     }
@@ -286,7 +276,7 @@ export class GalleryNavigatorComponent {
   }
 
   getDirectoryFlattenSearchQuery(): string {
-    const c = this.contentLoaderService.content.value;
+    const c = this.contentLoaderService.content();
     if (!c.directory) {
       return null;
     }
@@ -299,10 +289,10 @@ export class GalleryNavigatorComponent {
 
 
   navigateToParentDirectory() {
-    if (!this.parentPath) {
+    if (!this.parentPath()) {
       return;
     }
-    this.router.navigate(['/gallery', this.parentPath],
+    this.router.navigate(['/gallery', this.parentPath()],
       {queryParams: this.queryService.getParams()})
       .catch(console.error);
   }

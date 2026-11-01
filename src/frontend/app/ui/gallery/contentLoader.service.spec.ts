@@ -2,7 +2,6 @@ import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
 import {signal} from '@angular/core';
 import {toObservable} from '@angular/core/rxjs-interop';
-import {BehaviorSubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {ContentLoaderService} from './contentLoader.service';
 import {NetworkService} from '../../model/network/network.service';
@@ -48,7 +47,7 @@ describe('ContentLoaderService', () => {
         {provide: NetworkService, useClass: MockNetworkService},
         {provide: GalleryCacheService, useValue: {getDirectory: (): null => null}},
         {provide: ShareService, useClass: MockShareService},
-        {provide: GalleryService, useValue: {autoPollIntervalS: new BehaviorSubject(0)}},
+        {provide: GalleryService, useValue: {autoPollIntervalS: signal(0)}},
         {provide: Router, useValue: router},
       ]
     });

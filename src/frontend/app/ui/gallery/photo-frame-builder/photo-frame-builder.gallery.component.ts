@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import { Component, OnDestroy, TemplateRef, computed, inject, ChangeDetectionStrategy } from '@angular/core';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -28,14 +27,17 @@ import {Config} from '../../../../../common/config/public/Config';
     StringifyEnum
 ]
   })
-  export class PhotoFrameBuilderGalleryComponent implements OnInit, OnDestroy {
+  export class PhotoFrameBuilderGalleryComponent implements OnDestroy {
     contentLoaderService = inject(ContentLoaderService);
     private notification = inject(NotificationService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private modalService = inject(BsModalService);
 
-    enabled = true;
+    readonly enabled = computed((): boolean => {
+      const content = this.contentLoaderService.content();
+      return !!(content?.directory || content?.searchResult);
+    });
     url = '';
     showSettings = false;
     // Options
@@ -52,8 +54,6 @@ import {Config} from '../../../../../common/config/public/Config';
 
     // Enum option names for selects
     readonly LightBoxTitleTextsArr = Utils.enumToArray(LightBoxTitleTexts).map(v=>v.value);
-
-  contentSubscription: Subscription = null;
 
   modalRef: BsModalRef;
 
@@ -149,30 +149,14 @@ import {Config} from '../../../../../common/config/public/Config';
   }
 
 
-  ngOnInit(): void {
-    this.contentSubscription = this.contentLoaderService.content.subscribe(
-        (content: ContentWrapper) => {
-          this.enabled = !!(content?.directory || content?.searchResult);
-          if (!this.enabled) {
-            return;
-          }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
-        }
-    );
-  }
-
   ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
-    }
-
     if (this.subscription !== null) {
       this.subscription.unsubscribe();
     }
   }
 
   openModal(template: TemplateRef<unknown>): boolean {
-    if (!this.enabled) {
+    if (!this.enabled()) {
       return;
     }
     if (this.modalRef) {

@@ -1,16 +1,18 @@
 import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
+import {ApplicationRef, signal, WritableSignal} from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {ContentService} from '../content.service';
-import {of} from 'rxjs';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {DirectoryPathDTO} from '../../../../../common/entities/DirectoryDTO';
+import {GroupedDirectoryContent} from '../navigator/sorting.service';
 
 describe('BlogService', () => {
   let service: BlogService;
   let mockNetworkService: Mocked<NetworkService>;
   let mockGalleryService: Mocked<ContentService>;
+  let content: WritableSignal<GroupedDirectoryContent>;
 
   const createMockDirectory = (path: string, name: string): DirectoryPathDTO => ({
     path: path,
@@ -26,8 +28,9 @@ describe('BlogService', () => {
 
   beforeEach(() => {
     mockNetworkService = {getText: vi.fn()} as unknown as Mocked<NetworkService>;
+    content = signal<GroupedDirectoryContent>(null);
     mockGalleryService = {
-      sortedFilteredContent: of(null)
+      sortedFilteredContent: content
     } as unknown as Mocked<ContentService>;
 
     TestBed.configureTestingModule({
@@ -555,6 +558,68 @@ This is dated.`;
       await (service as any).getMarkDown(file);
 
       expect(mockNetworkService.getText).toHaveBeenCalledWith('/gallery/content//photos/2025/vacation/index.md');
+    });
+  });
+
+  describe('loading the markdowns of the content', () => {
+    // the server answers, resolved by the test
+    let answers: Map<string, (text: string) => void>;
+
+    const folder = (name: string): GroupedDirectoryContent => ({
+      directories: [],
+      mediaGroups: [],
+      metaFile: [createMockMDFile('index.md', null, createMockDirectory('./', name))]
+    });
+    const answer = (name: string, text: string): void => answers.get('/gallery/content/' + name + '/index.md')(text);
+    // the resource starts loading after the tick
+    const show = async (dc: GroupedDirectoryContent): Promise<void> => {
+      content.set(dc);
+      TestBed.tick();
+      await Promise.resolve();
+    };
+    const settle = async (): Promise<void> => {
+      TestBed.tick();
+      await TestBed.inject(ApplicationRef).whenStable();
+    };
+    const topTexts = (): string[] => service.getMarkDowns(null)?.map((m) => m.text);
+
+    beforeEach(() => {
+      answers = new Map();
+      mockNetworkService.getText.mockImplementation((url: string) => new Promise<string>((resolve) => answers.set(url, resolve)));
+    });
+
+    it('should load the markdown of the content', async () => {
+      await show(folder('Őszi kirándulás'));
+      answer('Őszi kirándulás', 'Hello Őszi');
+      await settle();
+      expect(topTexts()).toEqual(['Hello Őszi']);
+    });
+
+    it('should keep the previous markdowns while the next ones load', async () => {
+      await show(folder('Őszi kirándulás'));
+      answer('Őszi kirándulás', 'Hello Őszi');
+      await settle();
+      // the templates read it on every render
+      expect(topTexts()).toEqual(['Hello Őszi']);
+
+      await show(folder('Balaton'));
+      expect(topTexts()).toEqual(['Hello Őszi']);
+
+      answer('Balaton', 'Hello Balaton');
+      await settle();
+      expect(topTexts()).toEqual(['Hello Balaton']);
+    });
+
+    it('should show the newest content even if an older one loads slower', async () => {
+      await show(folder('Balaton'));
+      await show(folder('Őszi kirándulás'));
+
+      answer('Őszi kirándulás', 'Hello Őszi');
+      await settle();
+      answer('Balaton', 'Hello Balaton');
+      await settle();
+
+      expect(topTexts()).toEqual(['Hello Őszi']);
     });
   });
 });

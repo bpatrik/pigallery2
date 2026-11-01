@@ -1,4 +1,4 @@
-@if (mkObservable() | async; as markdowns) {
+@if (markdowns(); as markdowns) {
   @if (markdowns.length > 0) {
     <div class="blog h-100">
       <div class="card h-100">

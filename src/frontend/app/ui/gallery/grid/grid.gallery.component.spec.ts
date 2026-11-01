@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {ChangeDetectorRef} from '@angular/core';
+import {ChangeDetectorRef, signal} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
 
 import {GalleryGridComponent} from './grid.gallery.component';
@@ -7,7 +7,7 @@ import {OverlayService} from '../overlay.service';
 import {ContentService} from '../content.service';
 import {GallerySortingService} from '../navigator/sorting.service';
 import {QueryService} from '../../../model/query.service';
-import {BehaviorSubject, Observable, of} from 'rxjs';
+import {of} from 'rxjs';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {GridMedia} from './GridMedia';
@@ -34,13 +34,13 @@ class MockGallerySortingService {
 }
 
 class MockGalleryNavigatorService {
-  girdSize = new BehaviorSubject(GridSizes.medium);
+  girdSize = signal(GridSizes.medium);
 }
 
 
 class MockBlogService {
-  getMarkDowns(date: Date): Observable<GroupedMarkdown[]> {
-    return of([]);
+  getMarkDowns(date: Date): GroupedMarkdown[] {
+    return [];
   }
 }
 

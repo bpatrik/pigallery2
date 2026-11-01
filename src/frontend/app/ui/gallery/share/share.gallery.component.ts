@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, effect, inject, input, untracked, ChangeDetectionStrategy } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -7,7 +7,6 @@ import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
-import {Subscription} from 'rxjs';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {copyToClipboard, CopyDirective} from '../../utils/copy/copy.directive';
@@ -31,7 +30,7 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     StringifySearchQuery
 ]
 })
-export class GalleryShareComponent implements OnInit, OnDestroy {
+export class GalleryShareComponent {
   sharingService = inject(ShareService);
   galleryService = inject(ContentLoaderService);
   private notification = inject(NotificationService);
@@ -59,7 +58,6 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   currentMediaCount = 0;
   currentMediaCountIsLowerBound = false;
   sharing: ResponseSharingDTO = null;
-  contentSubscription: Subscription = null;
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
 
@@ -76,49 +74,49 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   constructor() {
     this.text.Yes = $localize`Yes`;
     this.text.No = $localize`No`;
+    effect(() => {
+      const content = this.galleryService.content();
+      untracked(() => this.onContentChange(content).catch(console.error));
+    });
   }
 
   public get IsAdmin() {
     return this.authService.user().role > UserRoles.Admin;
   }
 
-  ngOnInit(): void {
-    this.contentSubscription = this.galleryService.content.subscribe(
-        async (content: ContentWrapper) => {
-          this.activeShares = [];
-          this.enabled = !!(content?.directory || (content as any)?.searchResult);
-          this.currentDir = '';
-          this.currentQuery = null;
-          this.sharingTarget = '';
-          this.currentMediaCount = 0;
-          this.currentRecursiveMediaCount = 0;
-          this.currentMediaCountIsLowerBound = false;
+  private async onContentChange(content: ContentWrapper): Promise<void> {
+    this.activeShares = [];
+    this.enabled = !!(content?.directory || (content as any)?.searchResult);
+    this.currentDir = '';
+    this.currentQuery = null;
+    this.sharingTarget = '';
+    this.currentMediaCount = 0;
+    this.currentRecursiveMediaCount = 0;
+    this.currentMediaCountIsLowerBound = false;
 
-          if ((content as any)?.searchResult) {
-            const sr = (content as any).searchResult;
-            this.currentQuery = sr.searchQuery as SearchQueryDTO;
-            this.sharingTarget = $localize`Search query`;
-            this.currentMediaCount = (sr.media ? sr.media.length : 0);
-            this.currentMediaCountIsLowerBound = !!sr.resultOverflow;
-          } else if (content?.directory) {
-            this.currentDir = Utils.concatUrls(
-              content?.directory.path,
-              content?.directory.name
-            );
-            this.currentQuery = this.buildDirectoryQuery();
-            this.sharingTarget = this.currentDir;
-            // Prefer mediaCount, fallback to media length if needed
-            this.currentMediaCount = (typeof content?.directory.cache?.mediaCount === 'number' ? content.directory.cache?.mediaCount : (content.directory.media ? content.directory.media.length : 0));
-            this.currentRecursiveMediaCount = content?.directory.cache?.recursiveMediaCount ?? this.currentMediaCount;
-            this.currentMediaCountIsLowerBound = false;
-          }
+    if ((content as any)?.searchResult) {
+      const sr = (content as any).searchResult;
+      this.currentQuery = sr.searchQuery as SearchQueryDTO;
+      this.sharingTarget = $localize`Search query`;
+      this.currentMediaCount = (sr.media ? sr.media.length : 0);
+      this.currentMediaCountIsLowerBound = !!sr.resultOverflow;
+    } else if (content?.directory) {
+      this.currentDir = Utils.concatUrls(
+        content?.directory.path,
+        content?.directory.name
+      );
+      this.currentQuery = this.buildDirectoryQuery();
+      this.sharingTarget = this.currentDir;
+      // Prefer mediaCount, fallback to media length if needed
+      this.currentMediaCount = (typeof content?.directory.cache?.mediaCount === 'number' ? content.directory.cache?.mediaCount : (content.directory.media ? content.directory.media.length : 0));
+      this.currentRecursiveMediaCount = content?.directory.cache?.recursiveMediaCount ?? this.currentMediaCount;
+      this.currentMediaCountIsLowerBound = false;
+    }
 
-          if (!this.enabled || !this.currentQuery) {
-            return;
-          }
-          await this.updateActiveSharesList();
-        }
-    );
+    if (!this.enabled || !this.currentQuery) {
+      return;
+    }
+    await this.updateActiveSharesList();
   }
 
   get isDirectorySharing(): boolean {
@@ -151,12 +149,6 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     this.currentQuery = this.buildDirectoryQuery();
     if (this.sharing) {
       await this.update();
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
     }
   }
 

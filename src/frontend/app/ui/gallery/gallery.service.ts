@@ -1,6 +1,6 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
-import {BehaviorSubject, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
 import {QueryParams} from '../../../../common/QueryParams';
 
@@ -11,7 +11,7 @@ export class GalleryService {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  public autoPollIntervalS = new BehaviorSubject(Config.Gallery.AutoUpdate.enable ? Config.Gallery.AutoUpdate.interval : 0);
+  public readonly autoPollIntervalS = signal(Config.Gallery.AutoUpdate.enable ? Config.Gallery.AutoUpdate.interval : 0);
   private subscription: Subscription;
 
   constructor() {
@@ -28,12 +28,12 @@ export class GalleryService {
   }
 
   get autoPollInterval(): number {
-    return this.autoPollIntervalS.value;
+    return this.autoPollIntervalS();
   }
 
   set autoPollInterval(value: number) {
-    if (this.autoPollIntervalS.value != value) {
-      this.autoPollIntervalS.next(value);
+    if (this.autoPollIntervalS() != value) {
+      this.autoPollIntervalS.set(value);
     }
     this.updateQuery(QueryParams.gallery.autoPollInterval, Config.Gallery.AutoUpdate.enable ? Config.Gallery.AutoUpdate.interval : 0, value);
   }

@@ -48,7 +48,7 @@
       </div>
         }
         <app-gallery-directories class="directories"
-        [directories]="directoryContent?.directories || []" />
+        [directories]="directoryContent()?.directories || []" />
         @if (ShowMarkDown || ShowMap) {
           <div class="blog-map-row">
             @if (ShowMarkDown) {
@@ -60,8 +60,8 @@
               @defer (on viewport; prefetch on idle) {
                 <app-gallery-map class="rounded"
                   [class.rounded-start-0]="ShowMarkDown"
-                  [photos]="directoryContent?.mediaGroups | photosOnly"
-                [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
+                  [photos]="directoryContent()?.mediaGroups | photosOnly"
+                [gpxFiles]="directoryContent()?.metaFile | gpxFiles" />
               } @placeholder {
                 <div class="gallery-map-placeholder"></div>
               } @error {
@@ -70,7 +70,7 @@
             }
           </div>
         }
-        <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
+        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups"
         [lightbox]="lightbox" />
       }
     </div>

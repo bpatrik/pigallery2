@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, effect, inject, untracked, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -15,7 +15,6 @@ import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
 import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import { AsyncPipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
@@ -34,8 +33,7 @@ import {BlogService} from '../blog/blog.service';
     NgIconComponent,
     GalleryBlogComponent,
     GalleryPhotoComponent,
-    ParseIntPipe,
-    AsyncPipe
+    ParseIntPipe
 ]
 })
 export class GalleryGridComponent
@@ -51,7 +49,7 @@ export class GalleryGridComponent
 
   readonly gridContainer = viewChild<ElementRef>('gridContainer');
   // Kept as a QueryList: the lightbox navigates on its changes (setGridPhotoQL).
-  // Moving that to signals is part of the gallery content pipeline rework (E2, #1243).
+  // Moving that to signals needs the lightbox refactor (E8, #1271).
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
   readonly lightbox = input<GalleryLightboxComponent>(undefined);
@@ -62,11 +60,9 @@ export class GalleryGridComponent
   screenHeight = 0;
   isAfterViewInit = false;
   subscriptions: {
-    girdSize: Subscription;
     route: Subscription;
   } = {
-    route: null,
-    girdSize: null
+    route: null
   };
   delayedRenderUpToPhoto: string = null;
   public IMAGE_MARGIN = 2;
@@ -79,6 +75,13 @@ export class GalleryGridComponent
   private MAX_ROW_COUNT = 5;
   private onScrollFired = false;
   private helperTime: number = null;
+
+  constructor() {
+    effect(() => {
+      const gs = this.navigatorService.girdSize();
+      untracked(() => this.onGridSizeChange(gs));
+    });
+  }
 
   // Side effect: merges the new media into the rendered grid after the view settled.
   ngOnChanges(): void {
@@ -113,43 +116,47 @@ export class GalleryGridComponent
         }
       }
     );
+  }
 
-    this.subscriptions.girdSize = this.navigatorService.girdSize.subscribe(gs => {
-      switch (gs) {
-        case GridSizes.extraSmall:
-          this.TARGET_COL_COUNT = 12;
-          this.MIN_ROW_COUNT = 5;
-          this.MAX_ROW_COUNT = 10;
-          this.IMAGE_MARGIN = 1;
-          break;
-        case GridSizes.small:
-          this.TARGET_COL_COUNT = 8;
-          this.MIN_ROW_COUNT = 3;
-          this.MAX_ROW_COUNT = 8;
-          this.IMAGE_MARGIN = 1.5;
-          break;
-        case GridSizes.medium:
-          this.TARGET_COL_COUNT = 5;
-          this.MIN_ROW_COUNT = 2;
-          this.MAX_ROW_COUNT = 5;
-          this.IMAGE_MARGIN = 2;
-          break;
-        case GridSizes.large:
-          this.TARGET_COL_COUNT = 2;
-          this.MIN_ROW_COUNT = 1;
-          this.MAX_ROW_COUNT = 3;
-          this.IMAGE_MARGIN = 2;
-          break;
-        case GridSizes.extraLarge:
-          this.TARGET_COL_COUNT = 1;
-          this.MIN_ROW_COUNT = 1;
-          this.MAX_ROW_COUNT = 2;
-          this.IMAGE_MARGIN = 2;
-          break;
-      }
-      this.clearRenderedPhotos();
-      this.renderMinimalPhotos();
-    });
+  private onGridSizeChange(gs: GridSizes): void {
+    switch (gs) {
+      case GridSizes.extraSmall:
+        this.TARGET_COL_COUNT = 12;
+        this.MIN_ROW_COUNT = 5;
+        this.MAX_ROW_COUNT = 10;
+        this.IMAGE_MARGIN = 1;
+        break;
+      case GridSizes.small:
+        this.TARGET_COL_COUNT = 8;
+        this.MIN_ROW_COUNT = 3;
+        this.MAX_ROW_COUNT = 8;
+        this.IMAGE_MARGIN = 1.5;
+        break;
+      case GridSizes.medium:
+        this.TARGET_COL_COUNT = 5;
+        this.MIN_ROW_COUNT = 2;
+        this.MAX_ROW_COUNT = 5;
+        this.IMAGE_MARGIN = 2;
+        break;
+      case GridSizes.large:
+        this.TARGET_COL_COUNT = 2;
+        this.MIN_ROW_COUNT = 1;
+        this.MAX_ROW_COUNT = 3;
+        this.IMAGE_MARGIN = 2;
+        break;
+      case GridSizes.extraLarge:
+        this.TARGET_COL_COUNT = 1;
+        this.MIN_ROW_COUNT = 1;
+        this.MAX_ROW_COUNT = 2;
+        this.IMAGE_MARGIN = 2;
+        break;
+    }
+    // the first render happens in ngAfterViewInit
+    if (!this.isAfterViewInit) {
+      return;
+    }
+    this.clearRenderedPhotos();
+    this.renderMinimalPhotos();
   }
 
   ngOnDestroy(): void {
@@ -163,10 +170,6 @@ export class GalleryGridComponent
     if (this.subscriptions.route) {
       this.subscriptions.route.unsubscribe();
       this.subscriptions.route = null;
-    }
-    if (this.subscriptions.girdSize) {
-      this.subscriptions.girdSize.unsubscribe();
-      this.subscriptions.girdSize = null;
     }
   }
 

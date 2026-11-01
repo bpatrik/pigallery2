@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, linkedSignal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -85,7 +85,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
   public blogOpen = Config.Gallery.TopBlogStartsOpen;
 
   config = Config;
-  public isPhotoWithLocation = false;
   public countDown: {
     day: number;
     hour: number;
@@ -93,14 +92,21 @@ export class GalleryComponent implements OnInit, OnDestroy {
     second: number;
   } = null;
   public readonly mapEnabled: boolean;
-  public directoryContent: GroupedDirectoryContent;
+  // keeps showing the previous content while the next one loads
+  public readonly directoryContent = linkedSignal<GroupedDirectoryContent, GroupedDirectoryContent>({
+    source: this.contentService.sortedFilteredContent,
+    computation: (content, previous) => content ?? previous?.value
+  });
+  public readonly isPhotoWithLocation = computed((): boolean =>
+    !!this.directoryContent()?.mediaGroups.some((mediaGroup) =>
+      mediaGroup.media.some((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude)
+    )
+  );
   public isUploadOver = false;
   private $counter: Observable<number>;
   private subscription: { [key: string]: Subscription } = {
-    content: null,
     route: null,
     timer: null,
-    sorting: null,
   };
 
   constructor() {
@@ -109,15 +115,15 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   get ContentWrapper(): ContentWrapperWithError {
-    return this.contentLoader.content.value;
+    return this.contentLoader.content();
   }
 
   get ShowMarkDown(): boolean {
-    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && filterMDFiles(this.directoryContent.metaFile).length > 0;
+    return this.config.MetaFile.markdown && this.directoryContent()?.metaFile && filterMDFiles(this.directoryContent().metaFile).length > 0;
   }
 
   get ShowMap(): boolean {
-    return (this.isPhotoWithLocation || filterGPXFiles(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
+    return (this.isPhotoWithLocation() || filterGPXFiles(this.directoryContent()?.metaFile)?.length > 0) && this.mapEnabled;
   }
 
   updateTimer(t: number): void {
@@ -149,17 +155,11 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.subscription.content !== null) {
-      this.subscription.content.unsubscribe();
-    }
     if (this.subscription.route !== null) {
       this.subscription.route.unsubscribe();
     }
     if (this.subscription.timer !== null) {
       this.subscription.timer.unsubscribe();
-    }
-    if (this.subscription.sorting !== null) {
-      this.subscription.sorting.unsubscribe();
     }
   }
 
@@ -175,10 +175,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
     this.showRandomPhotoBuilder =
       Config.RandomPhoto.enabled &&
       this.authService.isAuthorized(UserRoles.User);
-    this.subscription.content = this.contentService.sortedFilteredContent
-      .subscribe((dc: GroupedDirectoryContent) => {
-        this.onContentChange(dc);
-      });
     this.subscription.route = this.route.params.subscribe(this.onRoute);
 
     if (this.shareService.isSharing()) {
@@ -251,28 +247,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
     this.piTitleService.setDirectoryTitle(directoryName);
     this.contentLoader.loadDirectory(directoryName);
-  };
-
-  private onContentChange = (content: GroupedDirectoryContent): void => {
-    if (!content) {
-      return;
-    }
-    this.directoryContent = content;
-
-    // enforce change detection on grid
-    this.directoryContent.mediaGroups = this.directoryContent.mediaGroups?.slice();
-    this.isPhotoWithLocation = false;
-
-    for (const mediaGroup of content.mediaGroups) {
-
-      if (
-        mediaGroup.media
-          .findIndex((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude) !== -1
-      ) {
-        this.isPhotoWithLocation = true;
-        break;
-      }
-    }
   };
 
 }

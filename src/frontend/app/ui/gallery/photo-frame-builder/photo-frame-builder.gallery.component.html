@@ -1,4 +1,4 @@
-<button class="dropdown-item {{enabled? '' : 'disabled'}}" (click)="openModal(photoFrameModal)">
+<button class="dropdown-item {{enabled()? '' : 'disabled'}}" (click)="openModal(photoFrameModal)">
   <ng-icon name="ionImagesOutline" />
   <ng-container i18n>Photo frame link</ng-container>
 </button>

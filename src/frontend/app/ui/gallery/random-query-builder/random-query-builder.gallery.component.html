@@ -1,4 +1,4 @@
-<button class="dropdown-item {{enabled? '' : 'disabled'}}" (click)="openModal(randomModal)">
+<button class="dropdown-item {{enabled()? '' : 'disabled'}}" (click)="openModal(randomModal)">
   <ng-icon name="ionShuffleOutline" />
   <ng-container i18n>Random link</ng-container>
 </button>

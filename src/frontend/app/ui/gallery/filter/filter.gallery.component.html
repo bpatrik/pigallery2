@@ -6,7 +6,7 @@
       </div>
       @if (showStatistic) {
         <div class="col-md-9 col-12 date-frequency">
-          @for (freq of filterService.statistic; track freq; let length = $count) {
+          @for (freq of filterService.statistic(); track freq; let length = $count) {
             <div class="d-inline-block date-frequency-column"
               [style.width.%]="(1/length)*100"
               container="body"
@@ -37,7 +37,7 @@
 
     </div>
     <div class="row">
-      @if (filterService.statistic.length>1) {
+      @if (filterService.statistic().length>1) {
         <div class="position-absolute w-auto start-50">
           <div class="text-md-center">
             <ng-icon [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
