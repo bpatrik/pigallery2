@@ -38,6 +38,7 @@
     "url": "https://github.com/bpatrik/PiGallery2/issues"
   },
   "dependencies": {
+    "@photostructure/tz-lookup": "11.7.0",
     "adm-zip": "0.6.1",
     "archiver": "7.0.1",
     "bcrypt": "6.0.0",
