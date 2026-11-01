@@ -127,6 +127,13 @@ describe('MetadataLoader', () => {
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben.json'));
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
+  it('should load jpg whose XMP segment starts right before the end of exifr\'s first chunk', async () => {
+    // big_ben.jpg with its XMP segment moved to byte 65508 (by an APP4 filler):
+    // exifr's chunked reader returns only errors for it (https://github.com/MikeKovarik/exifr/issues/141)
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_xmp_at_64k.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_xmp_at_64k.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
   it('should load jpg with timestamps and gps (UTC) and calculate offset +1', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.jpg'));
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.json'));
