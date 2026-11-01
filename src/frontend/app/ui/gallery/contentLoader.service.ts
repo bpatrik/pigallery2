@@ -3,7 +3,7 @@ import {NetworkService} from '../../model/network/network.service';
 import {ContentWrapperUtils, ContentWrapperWithError, PackedContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {SubDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {GalleryCacheService} from './cache.gallery.service';
-import {BehaviorSubject, EMPTY, from, Observable, Subject, Subscription, timer} from 'rxjs';
+import {BehaviorSubject, EMPTY, firstValueFrom, from, Observable, Subject, Subscription, timer} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
 import {ShareService} from './share.service';
 import {QueryParams} from '../../../../common/QueryParams';
@@ -154,7 +154,9 @@ export class ContentLoaderService implements OnDestroy {
 
     let route: string[];
     if (this.shareService.isSharing()) {
-      route = this.shareService.getDefaultRoute(this.shareService.sharingSubject.value);
+      // the sharing loads in parallel with the content, so the 404 can arrive first
+      const sharing = this.shareService.sharingSubject.value ?? await firstValueFrom(this.shareService.currentSharing);
+      route = this.shareService.getDefaultRoute(sharing);
     } else {
       route = ['/gallery', ''];
     }
