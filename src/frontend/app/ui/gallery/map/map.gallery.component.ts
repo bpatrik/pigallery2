@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, computed, inject, input, viewChild } from '@angular/core';
+import { Component, ElementRef, OnChanges, computed, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
@@ -17,6 +17,7 @@ import {Router} from '@angular/router';
   selector: 'app-gallery-map',
   templateUrl: './map.gallery.component.html',
   styleUrl: './map.gallery.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GalleryMapLightboxComponent, LeafletModule]
 })
 export class GalleryMapComponent implements OnChanges, IRenderable {

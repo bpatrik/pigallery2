@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, viewChildren } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, viewChildren, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {NotificationService} from '../../model/notification.service';
@@ -27,6 +27,7 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     selector: 'app-admin',
     templateUrl: './admin.component.html',
     styleUrl: './admin.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     PopoverDirective,

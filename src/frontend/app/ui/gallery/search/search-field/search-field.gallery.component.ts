@@ -1,4 +1,4 @@
-import { Component, forwardRef, TemplateRef, inject, input, output } from '@angular/core';
+import { Component, forwardRef, TemplateRef, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
@@ -27,6 +27,7 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GallerySearchFieldBaseComponent,
     FormsModule,

@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewEncapsulation, inject, input, viewChild } from '@angular/core';
+import { Component, ElementRef, ViewEncapsulation, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -34,6 +34,7 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.css',
   encapsulation: ViewEncapsulation.Emulated,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LoadingBarModule,
     RouterLink,

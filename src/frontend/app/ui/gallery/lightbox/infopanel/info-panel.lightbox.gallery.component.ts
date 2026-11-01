@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, output, input } from '@angular/core';
+import { Component, OnInit, computed, inject, output, input, ChangeDetectionStrategy } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -30,6 +30,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
   selector: 'app-info-panel',
   styleUrl: './info-panel.lightbox.gallery.component.css',
   templateUrl: './info-panel.lightbox.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     RouterLink,

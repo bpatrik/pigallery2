@@ -13,7 +13,7 @@ import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {GridMedia} from './GridMedia';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {provideHttpClient} from '@angular/common/http';
+import {provideHttpClient, withXhr} from '@angular/common/http';
 import {BlogService, GroupedMarkdown} from '../blog/blog.service';
 import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../../icons';
@@ -68,7 +68,7 @@ describe('GalleryGridComponent', () => {
             params: of([{id: 1}]),
           },
         },
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting()
       ]
     })

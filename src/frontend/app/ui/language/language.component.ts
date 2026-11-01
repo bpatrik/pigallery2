@@ -1,4 +1,4 @@
-import { Component, inject, viewChild } from '@angular/core';
+import { Component, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieHelper} from '../../model/cookie.helper';
@@ -11,6 +11,7 @@ import {Router} from '@angular/router';
     selector: 'app-language',
     templateUrl: './language.component.html',
     styleUrl: './language.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,

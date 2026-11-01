@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -20,6 +20,7 @@ import {Config} from '../../../../../common/config/public/Config';
     selector: 'app-gallery-photo-frame-builder',
     templateUrl: './photo-frame-builder.gallery.component.html',
     styleUrl: './photo-frame-builder.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,

@@ -1,4 +1,4 @@
-import { Component, ElementRef, forwardRef, OnDestroy, inject, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, forwardRef, OnDestroy, inject, input, output, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Router} from '@angular/router';
 import {BehaviorSubject, Subscription} from 'rxjs';
 import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
@@ -26,6 +26,7 @@ import {NgIconComponent} from '@ng-icons/core';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     NgIconComponent

@@ -1,4 +1,4 @@
-import {Component, inject, Injectable, OnInit} from '@angular/core';
+import {Component, inject, Injectable, OnInit, ChangeDetectionStrategy} from '@angular/core';
 import {NavigationError, PreloadingStrategy, Route} from '@angular/router';
 import {EMPTY, Observable} from 'rxjs';
 import {AuthenticationService} from './network/authentication.service';
@@ -70,6 +70,7 @@ export const reloadOnChunkLoadError = (event: NavigationError): void => {
  */
 @Component({
   selector: 'app-reload-after-upgrade',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: '',
 })
 export class ReloadAfterUpgradeComponent implements OnInit {

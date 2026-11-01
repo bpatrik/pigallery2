@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 
 import { NgIconComponent } from '@ng-icons/core';
@@ -7,6 +7,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-grid-size-icon',
     templateUrl: './grid-size-icon.component.html',
     styleUrl: './grid-size-icon.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent]
 })
 export class GridSizeIconComponent {

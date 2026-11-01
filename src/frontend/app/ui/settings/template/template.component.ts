@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, OnInit, inject, viewChild, input } from '@angular/core';
+import { Component, OnChanges, OnDestroy, OnInit, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -61,6 +61,7 @@ export interface RecursiveState extends ConfigState {
   selector: 'app-settings-template',
   templateUrl: './template.component.html',
   styleUrl: './template.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
 })
 export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {

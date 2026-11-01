@@ -1,6 +1,6 @@
 import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
-import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
+import {HttpClient, provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {HttpTestingController, provideHttpClientTesting} from '@angular/common/http/testing';
 import {errorInterceptor} from './error.interceptor';
 import {AuthenticationService} from '../authentication.service';
@@ -19,7 +19,7 @@ describe('errorInterceptor', () => {
     navigationService = {toError: vi.fn()} as unknown as Mocked<NavigationService>;
     TestBed.configureTestingModule({
       providers: [
-        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClient(withXhr(), withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         {provide: AuthenticationService, useValue: authService},
         {provide: NavigationService, useValue: navigationService},

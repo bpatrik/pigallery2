@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
@@ -17,6 +17,7 @@ import {RangeSearch, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../.
     <form>
       <app-gallery-search-query-builder name="query" [(ngModel)]="query" />
     </form>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, GallerySearchQueryBuilderComponent]
 })
 class HostComponent {

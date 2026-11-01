@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideIcons} from '@ng-icons/core';
 import {ToastCardComponent} from './toast-card.component';
@@ -11,6 +11,7 @@ import {appIcons} from '../../icons';
       <span>{{ progress }}%</span>
       <button toastAction>x</button>
     </app-toast-card>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ToastCardComponent]
 })
 class HostComponent {

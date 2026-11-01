@@ -1,5 +1,5 @@
 import {provideZoneChangeDetection} from '@angular/core';
-import {HttpClient, provideHttpClient, withInterceptors} from '@angular/common/http';
+import {HttpClient, provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {errorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigationErrorHandler, withPreloading} from '@angular/router';
 import {bootstrapApplication} from '@angular/platform-browser';
@@ -36,8 +36,8 @@ bootstrapApplication(AppComponent, {
     provideIcons(appIcons),
     provideMarkdown({loader: HttpClient}),
     {provide: UrlSerializer, useClass: CustomUrlSerializer},
-    // No withFetch(): the fetch backend does not emit upload progress events, which the uploader needs.
-    provideHttpClient(withInterceptors([errorInterceptor]))
+    // withXhr(): the fetch backend (the default since Angular 22) does not emit upload progress events, which the uploader needs.
+    provideHttpClient(withXhr(), withInterceptors([errorInterceptor]))
   ]
 })
   .catch((err) => console.error(err));

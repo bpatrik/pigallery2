@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, inject, input } from '@angular/core';
+import { Component, ElementRef, OnChanges, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {DeviceHelper} from '../../../model/device.helper';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
@@ -11,6 +11,7 @@ import { GalleryDirectoryComponent } from './directory/directory.gallery.compone
     },
     templateUrl: './directories.component.html',
     styleUrl: './directories.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [GalleryDirectoryComponent]
 })
 export class DirectoriesComponent implements OnChanges {

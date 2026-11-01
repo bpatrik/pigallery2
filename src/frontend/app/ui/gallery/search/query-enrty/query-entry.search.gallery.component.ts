@@ -1,4 +1,4 @@
-import {Component, forwardRef, input, output} from '@angular/core';
+import {Component, forwardRef, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -46,6 +46,7 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     NgIconComponent,

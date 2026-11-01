@@ -1,9 +1,10 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {copyToClipboard, CopyDirective} from './copy.directive';
 
 @Component({
   template: `<button [appCopy]="text" (copied)="copied = copied + 1">Copy</button>`,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CopyDirective]
 })
 class HostComponent {
