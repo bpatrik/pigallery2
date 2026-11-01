@@ -57,15 +57,15 @@
                 <app-gallery-share />
               </li>
             }
-            @if (authenticationRequired && user.value && showShare()) {
+            @if (authenticationRequired && user() && showShare()) {
               <li class="nav-item divider-vertical  d-xl-block d-none"
                 >
               </li>
             }
-            @if (authenticationRequired && user.value) {
+            @if (authenticationRequired && user()) {
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
                 <span style="white-space: nowrap;">
-                  <ng-icon name="ionPersonOutline" class="me-1" /><span>{{ user.value.name }}</span>
+                  <ng-icon name="ionPersonOutline" class="me-1" /><span>{{ user().name }}</span>
                 </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
@@ -97,9 +97,9 @@
 
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">
-                      @if (authenticationRequired && user.value) {
+                      @if (authenticationRequired && user()) {
                         <ng-icon name="ionPersonOutline" />
-                        <span>{{ user.value.name }}</span>
+                        <span>{{ user().name }}</span>
                       }
                       <app-language class="navbar-btn d-inline-block float-end" />
                     </div>

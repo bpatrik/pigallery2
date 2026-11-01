@@ -1,9 +1,8 @@
 import { Component, ElementRef, ViewEncapsulation, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
-import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
+import {UserRoles} from '../../../../common/entities/UserDTO';
 import {Config} from '../../../../common/config/public/Config';
-import {BehaviorSubject} from 'rxjs';
 import {NotificationService} from '../../model/notification.service';
 import {QueryService} from '../../model/query.service';
 import {NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/public/ClientConfig';
@@ -61,7 +60,7 @@ export class FrameComponent {
 
   readonly showSearch = input(false);
   readonly showShare = input(false);
-  public readonly user: BehaviorSubject<UserDTO>;
+  public readonly user = this.authService.user;
   public readonly authenticationRequired = Config.Users.authenticationRequired;
   public readonly title = Config.Server.applicationTitle;
   public collapsed = true;
@@ -89,34 +88,33 @@ export class FrameComponent {
 
   constructor() {
     this.enableScrollUpButton = Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.always || (Config.Gallery.NavBar.showScrollUpButton === ScrollUpModes.mobileOnly && DeviceHelper.isTouchDevice());
-    this.user = this.authService.user;
   }
 
   isAdmin(): boolean {
-    return this.user.value && this.user.value.role >= UserRoles.Admin;
+    return this.authService.isAdmin();
   }
 
   isFacesAvailable(): boolean {
     return (
       Config.Faces.enabled &&
-      this.user.value &&
-      this.user.value.role >= Config.Faces.readAccessMinRole
+      this.user() &&
+      this.user().role >= Config.Faces.readAccessMinRole
     );
   }
 
 
   isGalleryAvailable(): boolean {
     return (
-      this.user.value &&
-      this.user.value.role >= UserRoles.User
+      this.user() &&
+      this.user().role >= UserRoles.User
     );
   }
 
 
   isCustomLinksAvailable(): boolean {
     return (
-      this.user.value &&
-      this.user.value.role >= UserRoles.User
+      this.user() &&
+      this.user().role >= UserRoles.User
     );
   }
 
@@ -144,8 +142,8 @@ export class FrameComponent {
 
   isAlbumsAvailable(): boolean {
     return Config.Album.enabled &&
-      this.user.value &&
-      this.user.value.role >= Config.Album.readAccessMinRole;
+      this.user() &&
+      this.user().role >= Config.Album.readAccessMinRole;
   }
 
 

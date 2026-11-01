@@ -1,5 +1,6 @@
 import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
+import {computed, signal} from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
 import {BehaviorSubject, Subject} from 'rxjs';
 import {UploaderService} from './uploader.service';
@@ -27,11 +28,8 @@ class MockContentLoaderService {
 }
 
 class MockAuthenticationService {
-  user = new BehaviorSubject({name: 'admin', role: UserRoles.Admin});
-
-  isAuthenticated(): boolean {
-    return !!this.user.value;
-  }
+  user = signal({name: 'admin', role: UserRoles.Admin});
+  isAuthenticated = computed((): boolean => !!this.user());
 }
 
 describe('UploaderService', () => {

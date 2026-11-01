@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, effect, inject, untracked } from '@angular/core';
 import {ToastService, ToastSummary, ToastType} from '../ui/toast/toast.service';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
@@ -32,17 +32,22 @@ export class NotificationService {
         closable: true
       })
     });
-    this.authService.user.subscribe(() => {
-      if (
-          this.authService.isAuthenticated() &&
-          (!this.lastUser ||
-              this.lastUser.id !== this.authService.user.value.id) &&
-          this.authService.user.value.role >= UserRoles.User
-      ) {
-        this.getServerNotifications();
-      }
-      this.lastUser = this.authService.user.value;
+    effect(() => {
+      const user = this.authService.user();
+      untracked(() => this.onUser(user));
     });
+  }
+
+  private onUser(user: UserDTO): void {
+    if (
+        this.authService.isAuthenticated() &&
+        (!this.lastUser ||
+            this.lastUser.id !== user.id) &&
+        user.role >= UserRoles.User
+    ) {
+      this.getServerNotifications();
+    }
+    this.lastUser = user;
   }
 
   groupNotifications(notifications: NotificationDTO[]): void {

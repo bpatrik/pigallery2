@@ -69,21 +69,21 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < UserRoles.Admin
+      this.authService.user().role < UserRoles.Admin
     ) {
       this.navigation.toLogin();
       return;
     }
     this.userRoles = Utils.enumToArray(UserRoles)
       .filter((r) => r.key !== UserRoles.LimitedGuest)
-      .filter((r) => r.key <= this.authService.user.value.role)
+      .filter((r) => r.key <= this.authService.user().role)
       .sort((a, b) => a.key - b.key);
 
     this.getUsersList();
   }
 
   canModifyUser(user: UserDTO): boolean {
-    const currentUser = this.authService.user.value;
+    const currentUser = this.authService.user();
     if (!currentUser) {
       return false;
     }
@@ -92,7 +92,7 @@ export class UsersComponent implements OnInit {
   }
 
   canDeleteUser(user: UserDTO): boolean {
-    const currentUser = this.authService.user.value;
+    const currentUser = this.authService.user();
     if (!currentUser) {
       return false;
     }
@@ -101,7 +101,7 @@ export class UsersComponent implements OnInit {
   }
 
   canModifyRole(user: UserDTO): boolean {
-    const currentUser = this.authService.user.value;
+    const currentUser = this.authService.user();
     if (!currentUser) {
       return false;
     }

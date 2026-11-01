@@ -76,7 +76,7 @@ export class UploaderService {
     const dir = this.contentLoaderService.content.value.directory;
     if (!Config.Upload.enabled ||
       !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < Config.Upload.minimumRole ||
+      this.authService.user().role < Config.Upload.minimumRole ||
       !dir) {
       return false;
     }

@@ -55,7 +55,7 @@ export class AlbumsComponent implements OnInit {
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.user.getValue().role >= UserRoles.Admin;
+    return this.authenticationService.user().role >= UserRoles.Admin;
   }
 
   get IsSearchQueryEmpty(): boolean {

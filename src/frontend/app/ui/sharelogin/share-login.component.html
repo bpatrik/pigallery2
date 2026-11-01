@@ -7,12 +7,12 @@
   </div>
   <div class="row card align-self-center">
     <div class="card-body">
-      @if (!(shareService.sharingIsValid | async)) {
+      @if (!shareService.sharingIsValid()) {
         <div
           class="h3 text-center text-danger" i18n>Unknown sharing key.
       </div>
       }
-      @if ((shareService.sharingIsValid | async)) {
+      @if (shareService.sharingIsValid()) {
         <form
           name="form" id="form" class="form-horizontal" #LoginForm="ngForm" (submit)="onLogin()">
           <div class="error-message" [hidden]="loginError==false" i18n>Wrong password</div>

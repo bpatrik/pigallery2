@@ -6,7 +6,6 @@ import {NavigationService} from '../../model/navigation.service';
 import {ShareService} from '../gallery/share.service';
 import { LanguageComponent } from '../language/language.component';
 import { IconComponent } from '../../icon.component';
-import { AsyncPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NgIconComponent } from '@ng-icons/core';
 
@@ -19,8 +18,7 @@ import { NgIconComponent } from '@ng-icons/core';
     LanguageComponent,
     IconComponent,
     FormsModule,
-    NgIconComponent,
-    AsyncPipe
+    NgIconComponent
 ]
 })
 export class ShareLoginComponent implements OnInit {

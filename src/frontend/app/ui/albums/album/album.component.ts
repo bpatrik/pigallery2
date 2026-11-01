@@ -46,7 +46,7 @@ export class AlbumComponent implements OnInit, OnDestroy {
   }
 
   get CanUpdate(): boolean {
-    return this.authenticationService.user.getValue().role >= UserRoles.Admin;
+    return this.authenticationService.user().role >= UserRoles.Admin;
   }
 
   get RouterLink(): any[] {

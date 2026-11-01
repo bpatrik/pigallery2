@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, effect, inject, untracked } from '@angular/core';
 import {ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
@@ -61,7 +61,10 @@ export class GalleryCacheService {
 
     // The cached content depends on what the user can see (e.g.: allow/block lists, sharing).
     // The server can answer 'not modified' to a different user, so the cache should not be reused.
-    authService.user.subscribe((user) => GalleryCacheService.onUser(user));
+    effect(() => {
+      const user = authService.user();
+      untracked(() => GalleryCacheService.onUser(user));
+    });
   }
 
   private static onUser(user: UserDTO): void {

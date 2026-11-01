@@ -121,12 +121,12 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   updateTimer(t: number): void {
-    if (this.shareService.sharingSubject.value == null) {
+    if (this.shareService.sharing() == null) {
       return;
     }
     // if the timer is longer than 10 years, just do not show it
     if (
-      (this.shareService.sharingSubject.value.expires - Date.now()) /
+      (this.shareService.sharing().expires - Date.now()) /
       1000 /
       86400 /
       365 >
@@ -136,7 +136,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
 
     t = Math.floor(
-      (this.shareService.sharingSubject.value.expires - Date.now()) / 1000
+      (this.shareService.sharing().expires - Date.now()) / 1000
     );
     this.countDown = {} as any;
     this.countDown.day = Math.floor(t / 86400);

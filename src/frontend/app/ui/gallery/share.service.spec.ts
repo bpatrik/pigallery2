@@ -63,14 +63,14 @@ describe('ShareService', () => {
       const {service} = setUp({sharingKey: 'key', passwordProtected: false});
       service.sharingKey = 'key';
       await service.getPublicSharing();
-      service.sharingSubject.next({sharingKey: 'key'} as ResponseSharingDTO);
+      service.sharing.set({sharingKey: 'key'} as ResponseSharingDTO);
 
       service.dropSharing();
 
       expect(service.isSharing()).toBe(false);
       expect(service.getSharingKey()).toBeNull();
-      expect(service.sharingSubject.value).toBeNull();
-      expect(service.publicSharingSubject.value).toBeNull();
+      expect(service.sharing()).toBeNull();
+      expect(service.publicSharing()).toBeNull();
     });
   });
 });

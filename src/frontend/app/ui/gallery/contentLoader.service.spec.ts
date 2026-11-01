@@ -1,5 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
+import {signal} from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {BehaviorSubject} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {ContentLoaderService} from './contentLoader.service';
@@ -16,8 +18,8 @@ class MockNetworkService {
 }
 
 class MockShareService {
-  sharingSubject = new BehaviorSubject<ResponseSharingDTO>(null);
-  currentSharing = this.sharingSubject.pipe(filter((s) => s !== null));
+  sharing = signal<ResponseSharingDTO>(null);
+  currentSharing = toObservable(this.sharing).pipe(filter((s) => s !== null));
 
   isSharing(): boolean {
     return true;
@@ -55,7 +57,8 @@ describe('ContentLoaderService', () => {
   });
 
   it('should open the shared directory when a not shared one is not found', async () => {
-    share.sharingSubject.next(sharing);
+    share.sharing.set(sharing);
+    TestBed.tick();
 
     await service.loadDirectory('timestamps');
 
@@ -68,7 +71,8 @@ describe('ContentLoaderService', () => {
     await Promise.resolve();
     expect(router.navigate).not.toHaveBeenCalled();
 
-    share.sharingSubject.next(sharing);
+    share.sharing.set(sharing);
+    TestBed.tick();
     await loading;
 
     expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Balaton nyár'],

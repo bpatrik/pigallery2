@@ -155,7 +155,7 @@ export class ContentLoaderService implements OnDestroy {
     let route: string[];
     if (this.shareService.isSharing()) {
       // the sharing loads in parallel with the content, so the 404 can arrive first
-      const sharing = this.shareService.sharingSubject.value ?? await firstValueFrom(this.shareService.currentSharing);
+      const sharing = this.shareService.sharing() ?? await firstValueFrom(this.shareService.currentSharing);
       route = this.shareService.getDefaultRoute(sharing);
     } else {
       route = ['/gallery', ''];

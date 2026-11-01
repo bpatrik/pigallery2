@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute, provideRouter} from '@angular/router';
 import {BehaviorSubject, Observable, of} from 'rxjs';
-import {ChangeDetectorRef} from '@angular/core';
+import {ChangeDetectorRef, signal} from '@angular/core';
 import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 
@@ -52,15 +52,16 @@ class MockContentService {
 }
 
 class MockAuthenticationService {
-  user = new BehaviorSubject(null); // Add this line
+  user = signal(null);
   isAuthenticated = vi.fn().mockReturnValue(true);
   canSearch = vi.fn().mockReturnValue(true);
   isAuthorized = vi.fn().mockReturnValue(true);
+  isAdmin = vi.fn().mockReturnValue(false);
   logout = vi.fn(); // Also add logout method if needed
 }
 
 class MockShareService {
-  sharingSubject = new BehaviorSubject(null);
+  sharing = signal(null);
   currentSharing = new BehaviorSubject(null);
 
   wait = vi.fn().mockReturnValue(Promise.resolve());

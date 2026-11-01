@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {NetworkService} from '../../model/network/network.service';
 import {
   CreateSharingDTO,
@@ -6,7 +7,6 @@ import {
   ResponseSharingDTO,
 } from '../../../../common/entities/SharingDTO';
 import {Router, RoutesRecognized} from '@angular/router';
-import {BehaviorSubject} from 'rxjs';
 import {distinctUntilChanged, filter} from 'rxjs/operators';
 import {QueryParams} from '../../../../common/QueryParams';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
@@ -27,27 +27,24 @@ export class ShareService {
   param: string = null;
   queryParam: string = null;
   sharingKey: string = null;
-  inited = false;
+  // true once the router read the sharing key of the first navigation (it might be none)
+  public readonly routeRecognized = signal(false);
+  // true once the sharing key is known (from the route or from the session user)
+  public readonly ready = signal(false);
   public ReadyPR: Promise<void>;
-  public sharingSubject: BehaviorSubject<ResponseSharingDTO> = new BehaviorSubject(
-    null
-  );
-  public sharingIsValid: BehaviorSubject<boolean> = new BehaviorSubject(
-    null
-  );
-  public currentSharing = this.sharingSubject
-    .asObservable()
+  public readonly sharing = signal<ResponseSharingDTO>(null);
+  public readonly sharingIsValid = signal<boolean>(null);
+  // a stream, so it can be awaited until the sharing is loaded
+  public currentSharing = toObservable(this.sharing)
     .pipe(filter((s) => s !== null))
     .pipe(distinctUntilChanged());
 
   private resolve: () => void;
-  public publicSharingSubject: BehaviorSubject<PublicSharingDTO> = new BehaviorSubject(
-    null
-  );
+  public readonly publicSharing = signal<PublicSharingDTO>(null);
 
   constructor() {
     this.ReadyPR = new Promise((resolve: () => void) => {
-      if (this.inited === true) {
+      if (this.ready()) {
         return resolve();
       }
       this.resolve = resolve;
@@ -67,12 +64,15 @@ export class ShareService {
         const changed = this.sharingKey !== (this.param || this.queryParam);
         if (changed) {
           this.sharingKey = this.param || this.queryParam || this.sharingKey;
+        }
+        this.routeRecognized.set(true);
+        if (changed) {
           await this.checkSharing();
         }
         if (this.resolve) {
           this.resolve();
           this.resolve = null;
-          this.inited = true;
+          this.ready.set(true);
         }
       }
     });
@@ -83,13 +83,13 @@ export class ShareService {
   }
 
 
-  onNewUser = async (user: UserDTO) => {
+  onNewUser = async (user: UserDTO): Promise<void> => {
     // if this is a sharing user or a logged-in user, get sharing key
     if (user?.usedSharingKey || user?.role > UserRoles.LimitedGuest) {
       if (
         (user?.usedSharingKey &&
           user?.usedSharingKey !== this.sharingKey) ||
-        this.sharingSubject.value == null
+        this.sharing() == null
       ) {
         this.sharingKey = user.usedSharingKey || this.getSharingKey();
         if (!this.sharingKey) { //no key to fetch
@@ -100,13 +100,13 @@ export class ShareService {
       if (this.resolve) {
         this.resolve();
         this.resolve = null;
-        this.inited = true;
+        this.ready.set(true);
       }
     }
   };
 
   public wait(): Promise<void> {
-    if (this.inited) {
+    if (this.ready()) {
       return Promise.resolve();
     }
     return this.ReadyPR;
@@ -288,13 +288,13 @@ export class ShareService {
 
   private async getSharing(): Promise<void> {
     try {
-      this.sharingSubject.next(null);
+      this.sharing.set(null);
       const sharing = await this.networkService.getJson<ResponseSharingDTO>(
         '/share/' + this.getSharingKey()
       );
-      this.sharingSubject.next(sharing);
+      this.sharing.set(sharing);
     } catch (e) {
-      this.sharingSubject.next(this.UnknownSharingKey);
+      this.sharing.set(this.UnknownSharingKey);
       console.error(e);
     }
   }
@@ -306,9 +306,9 @@ export class ShareService {
     this.sharingKey = null;
     this.param = null;
     this.queryParam = null;
-    this.sharingSubject.next(null);
-    this.publicSharingSubject.next(null);
-    this.sharingIsValid.next(null);
+    this.sharing.set(null);
+    this.publicSharing.set(null);
+    this.sharingIsValid.set(null);
   }
 
   /**
@@ -317,27 +317,27 @@ export class ShareService {
    * (e.g.: the sharing key comes from the session user after a page reload).
    */
   public async getPublicSharing(): Promise<PublicSharingDTO> {
-    if (this.publicSharingSubject.value === null) {
+    if (this.publicSharing() === null) {
       await this.checkSharing();
     }
-    return this.publicSharingSubject.value;
+    return this.publicSharing();
   }
 
   private async checkSharing(): Promise<void> {
     try {
-      this.sharingIsValid.next(null);
+      this.sharingIsValid.set(null);
       const sharing = await this.networkService.getJson<PublicSharingDTO>(
         '/share/' + this.getSharingKey() + '/publicInfo'
       );
       const valid = sharing.sharingKey === this.getSharingKey();
-      this.sharingIsValid.next(valid);
+      this.sharingIsValid.set(valid);
       if (valid) {
-        this.publicSharingSubject.next(sharing);
+        this.publicSharing.set(sharing);
       } else {
-        this.publicSharingSubject.next(null);
+        this.publicSharing.set(null);
       }
     } catch (e) {
-      this.sharingIsValid.next(false);
+      this.sharingIsValid.set(false);
       console.error(e);
     }
   }

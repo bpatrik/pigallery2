@@ -1,4 +1,4 @@
-import {inject, Injectable, signal} from '@angular/core';
+import {effect, inject, Injectable, signal, untracked} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info' | 'progress';
@@ -82,9 +82,9 @@ export class ToastService {
 
   constructor() {
     // e.g. no toasts left on the login page after a logout
-    this.authService.user.subscribe(() => {
+    effect(() => {
       if (!this.authService.isAuthenticated()) {
-        this.clear();
+        untracked(() => this.clear());
       }
     });
   }

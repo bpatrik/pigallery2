@@ -132,7 +132,7 @@ export class GalleryNavigatorComponent {
           }
         }
 
-        const user = this.authService.user.value;
+        const user = this.authService.user();
         const arr: NavigatorPath[] = [];
         // the server tells which parents are available, starting from the root
         const availableParents = c?.directory?.availableParents;
