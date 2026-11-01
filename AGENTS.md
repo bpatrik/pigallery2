@@ -22,10 +22,10 @@ The photo folder is never modified.
   backward-compatibility shims or migration code.
 - **Stay close to framework defaults.** Prefer the industry-standard, framework-default setup (e.g. what `ng new` generates)
   over keeping how a legacy setup behaved or adding custom config, so `ng update` and other upgrade scripts keep working.
-- **Latest stable, not bleeding edge.** Adopt a framework feature or API once it is stable and the next major kept it
-  unchanged (e.g. stable in Angular 21 and still the same in 22). If it's new or only just stable in the latest major,
-  wait for the next major and note it as "revisit later". Don't use experimental or developer-preview APIs.
-  Move to the current standard rather than keeping a legacy pattern or a one-off exception (both are tech debt),
+- **Latest stable, not bleeding edge.** Any API that is stable in a given package/framework (e.g. Angular) version we're on may be used, also one that
+  only became stable in the latest major (e.g. `resource()` in angular v22), when it fits the task and moves the code towards the
+  current standard (e.g. signals). Don't migrate working code to a new API just because it exists (e.g.: do not migrate to signals, when signals were first introduced in angular v16).
+  Never use experimental or developer-preview APIs. Move to the current standard rather than keeping a legacy pattern or a one-off exception (both are tech debt),
   but don't change working code that's outside the task.
 - **DB breaking changes are fine.** The DB is treated as a cache of the photo folder: bump `DataStructureVersion`
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
