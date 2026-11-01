@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, input } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
@@ -18,6 +18,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-album',
     templateUrl: './album.component.html',
     styleUrl: './album.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     IconComponent,

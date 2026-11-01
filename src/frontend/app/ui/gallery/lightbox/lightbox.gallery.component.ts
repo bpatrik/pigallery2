@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, QueryList, inject, viewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, QueryList, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {GalleryPhotoComponent} from '../grid/photo/photo.grid.gallery.component';
 import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
@@ -36,6 +36,7 @@ export enum LightboxStates {
   },
   styleUrl: './lightbox.gallery.component.css',
   templateUrl: './lightbox.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryLightboxMediaComponent,
     NgIconComponent,

@@ -1,6 +1,6 @@
 import * as path from 'path';
 import {promises as fsp} from 'fs';
-import * as archiver from 'archiver';
+import archiver from 'archiver';
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {ParentDirectoryDTO,} from '../../common/entities/DirectoryDTO';

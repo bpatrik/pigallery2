@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild, input } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnChanges, OnDestroy, OnInit, QueryList, ViewChildren, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import {GalleryLightboxComponent} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -29,6 +29,7 @@ import {BlogService} from '../blog/blog.service';
   },
   templateUrl: './grid.gallery.component.html',
   styleUrl: './grid.gallery.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     GalleryBlogComponent,

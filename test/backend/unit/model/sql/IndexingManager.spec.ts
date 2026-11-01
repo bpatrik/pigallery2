@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';

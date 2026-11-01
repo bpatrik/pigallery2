@@ -1,4 +1,4 @@
-import { Component, ElementRef, inject, viewChild } from '@angular/core';
+import { Component, ElementRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
@@ -36,6 +36,7 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
   },
   styleUrl: './navigator.gallery.component.css',
   templateUrl: './navigator.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     RouterLink,
     NgIconComponent,

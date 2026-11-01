@@ -1,19 +1,24 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "strict": false,
     "noImplicitAny": true,
     "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "sourceMap": true,
     "declaration": false,
-    "downlevelIteration": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
     "module": "CommonJS",
     "useDefineForClassFields": false,
+    "types": [
+      "node",
+      "mocha"
+    ],
     "lib": [
       "ES2022",
       "dom"

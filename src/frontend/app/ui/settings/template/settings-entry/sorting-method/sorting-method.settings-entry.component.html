@@ -4,7 +4,7 @@
   <button dropdownToggle type="button"
     class="btn dropdown-toggle btn-outline-primary btn-navigator"
     aria-controls="sorting-dropdown">
-    @if (sortingMethod?.ascending !== null) {
+    @if (sortingMethod && sortingMethod.ascending !== null) {
       <ng-icon [name]="!sortingMethod?.ascending ? 'ionArrowDownOutline' : 'ionArrowUpOutline'" />
     }
     <app-sorting-method-icon [method]="sortingMethod?.method" />

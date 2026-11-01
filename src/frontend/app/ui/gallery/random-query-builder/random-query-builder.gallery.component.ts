@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
@@ -21,6 +21,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     selector: 'app-gallery-random-query-builder',
     templateUrl: './random-query-builder.gallery.component.html',
     styleUrl: './random-query-builder.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         NgIconComponent,
         FormsModule,

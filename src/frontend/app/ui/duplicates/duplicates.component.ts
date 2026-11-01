@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {DuplicateService} from './duplicates.service';
 import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
@@ -27,6 +27,7 @@ interface GroupedDuplicate {
     },
     templateUrl: './duplicates.component.html',
     styleUrl: './duplicates.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     RouterLink,

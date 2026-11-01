@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
@@ -14,6 +14,7 @@ import {ToastContainerComponent} from './ui/toast/toast-container.component';
     template: `
     <router-outlet />
     <app-toast-container />`,
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterOutlet, ToastContainerComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {Component, input, ChangeDetectionStrategy} from '@angular/core';
 
 import { NgIconComponent } from '@ng-icons/core';
 
@@ -6,6 +6,7 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-gallery-grid-photo-loading',
     templateUrl: './loading.photo.grid.gallery.component.html',
     styleUrl: './loading.photo.grid.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent]
 })
 export class GalleryPhotoLoadingComponent {

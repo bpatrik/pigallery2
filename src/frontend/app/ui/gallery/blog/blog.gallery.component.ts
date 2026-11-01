@@ -1,4 +1,4 @@
-import {Component, computed, inject, input, model} from '@angular/core';
+import {Component, computed, inject, input, model, ChangeDetectionStrategy} from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {Observable} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
@@ -10,6 +10,7 @@ import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathP
     selector: 'app-gallery-blog',
     templateUrl: './blog.gallery.component.html',
     styleUrl: './blog.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     MarkdownComponent,
     NgIconComponent,

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as http from 'http';
 import {AddressInfo} from 'net';
-import * as express from 'express';
+import express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import {expect} from 'chai';
 import {RenderingMWs} from '../../../../src/backend/middlewares/RenderingMWs';

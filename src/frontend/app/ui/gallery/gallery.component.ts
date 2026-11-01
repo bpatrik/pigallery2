@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, viewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -45,6 +45,7 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
   },
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryLightboxComponent,
     FrameComponent,

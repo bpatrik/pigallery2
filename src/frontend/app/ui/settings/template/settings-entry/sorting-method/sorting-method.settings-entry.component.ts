@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnInit, inject, input } from '@angular/core';
+import { Component, forwardRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
 import {SortByDirectionalTypes, SortingMethod} from '../../../../../../../common/entities/SortingMethods';
 import {enumToTranslatedArray} from '../../../../EnumTranslations';
@@ -28,6 +28,7 @@ import {NotificationService} from '../../../../../model/notification.service';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,

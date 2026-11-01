@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, inject, input, output, viewChild } from '@angular/core';
+import { Component, ElementRef, OnChanges, inject, input, output, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -11,6 +11,7 @@ import {LightboxService} from '../lightbox.service';
   selector: 'app-gallery-lightbox-media',
   styleUrl: './media.lightbox.gallery.component.css',
   templateUrl: './media.lightbox.gallery.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: []
 })
 export class GalleryLightboxMediaComponent implements OnChanges {
