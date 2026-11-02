@@ -1,7 +1,7 @@
 <app-frame>
 
   <div body #container class="container-fluid">
-    @for (album of albumsService.albums | async; track album.id) {
+    @for (album of albumsService.albums(); track album.id) {
       <app-album [album]="album"
       [size]="size" />
     }
@@ -18,7 +18,7 @@
       </div>
     }
 
-    @if ((albumsService.albums | async) && (albumsService.albums | async).length == 0) {
+    @if (albumsService.albums() && albumsService.albums().length == 0) {
       <div class="d-flex no-item-msg"
         >
         <div class="flex-fill">

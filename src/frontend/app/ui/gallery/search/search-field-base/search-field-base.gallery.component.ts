@@ -1,7 +1,6 @@
-import { Component, ElementRef, forwardRef, OnDestroy, inject, input, output, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, forwardRef, inject, input, output, viewChild, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import {Router} from '@angular/router';
-import {BehaviorSubject, Subscription} from 'rxjs';
-import {AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
+import {AutoCompleteResult, AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
 import {MetadataSearchQueryTypes, SearchQueryTypes,} from '../../../../../../common/entities/SearchQueryDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {ControlValueAccessor, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator} from '@angular/forms';
@@ -33,7 +32,7 @@ import {NgIconComponent} from '@ng-icons/core';
 ]
 })
 export class GallerySearchFieldBaseComponent
-  implements ControlValueAccessor, Validator, OnDestroy {
+  implements ControlValueAccessor, Validator {
   private autoCompleteService = inject(AutoCompleteService);
   router = inject(Router);
 
@@ -43,22 +42,23 @@ export class GallerySearchFieldBaseComponent
   readonly searchField = viewChild<ElementRef>('SearchField');
   readonly searchHintField = viewChild<ElementRef>('SearchHintField');
 
-  autoCompleteRenders: AutoCompleteRenderItem[] = [];
-  public rawSearchText = '';
-  mouseOverAutoComplete = false;
+  readonly autoCompleteRenders = signal<AutoCompleteRenderItem[]>([]);
+  public readonly rawSearchText = signal('');
+  readonly mouseOverAutoComplete = signal(false);
   readonly SearchQueryTypes: typeof SearchQueryTypes;
   public readonly MetadataSearchQueryTypes: {
     value: string;
     key: SearchQueryTypes;
   }[];
-  public highlightedAutoCompleteItem = -1;
-  inFocus: boolean;
+  public readonly highlightedAutoCompleteItem = signal(-1);
+  readonly inFocus = signal(false);
   private cache = {
     lastAutocomplete: '',
     lastInstantSearch: '',
   };
-  private autoCompleteItemsSubscription: Subscription = null;
-  private autoCompleteItems: BehaviorSubject<RenderableAutoCompleteItem[]>;
+  private readonly autoCompleteItems = signal<RenderableAutoCompleteItem[]>([]);
+  // only the latest autocomplete request may show its server results
+  private autoCompleteRequest = 0;
 
   constructor() {
     this.SearchQueryTypes = SearchQueryTypes;
@@ -70,53 +70,47 @@ export class GallerySearchFieldBaseComponent
     );
   }
 
-  get SearchHint(): string {
-    if (!this.rawSearchText) {
+  readonly SearchHint = computed((): string => {
+    const rawSearchText = this.rawSearchText();
+    const autoCompleteItems = this.autoCompleteItems();
+    if (!rawSearchText) {
       return '';
     }
     if (
-      !this.inFocus ||
-      !this.autoCompleteItems ||
-      !this.autoCompleteItems.value ||
-      this.autoCompleteItems.value.length === 0
+      !this.inFocus() ||
+      !autoCompleteItems ||
+      autoCompleteItems.length === 0
     ) {
-      return this.rawSearchText;
+      return rawSearchText;
     }
     const itemIndex =
-      this.highlightedAutoCompleteItem < 0
+      this.highlightedAutoCompleteItem() < 0
         ? 0
-        : this.highlightedAutoCompleteItem;
+        : this.highlightedAutoCompleteItem();
     const searchText = this.getAutocompleteToken();
     if (searchText.current === '') {
       return (
-        this.rawSearchText + this.autoCompleteItems.value[itemIndex].queryHint
+        rawSearchText + autoCompleteItems[itemIndex].queryHint
       );
     }
     if (
-      this.autoCompleteItems.value[0].queryHint.startsWith(searchText.current)
+      autoCompleteItems[0].queryHint.startsWith(searchText.current)
     ) {
       return (
-        this.rawSearchText +
-        this.autoCompleteItems.value[itemIndex].queryHint.substr(
+        rawSearchText +
+        autoCompleteItems[itemIndex].queryHint.substr(
           searchText.current.length
         )
       );
     }
-    return this.rawSearchText;
-  }
-
-  ngOnDestroy(): void {
-    if (this.autoCompleteItemsSubscription) {
-      this.autoCompleteItemsSubscription.unsubscribe();
-      this.autoCompleteItemsSubscription = null;
-    }
-  }
+    return rawSearchText;
+  });
 
   getAutocompleteToken(): { current: string; prev: string } {
-    if (this.rawSearchText.trim().length === 0) {
+    if (this.rawSearchText().trim().length === 0) {
       return {current: '', prev: ''};
     }
-    const tokens = this.rawSearchText.split(' ');
+    const tokens = this.rawSearchText().split(' ');
     return {
       current: tokens[tokens.length - 1],
       prev: tokens.length > 2 ? tokens[tokens.length - 2] : '',
@@ -135,44 +129,44 @@ export class GallerySearchFieldBaseComponent
   }
 
   public setMouseOverAutoComplete(value: boolean): void {
-    this.mouseOverAutoComplete = value;
+    this.mouseOverAutoComplete.set(value);
   }
 
   onFocus(): void {
-    this.inFocus = true;
+    this.inFocus.set(true);
   }
 
   public onFocusLost(): void {
-    this.inFocus = false;
-    if (this.mouseOverAutoComplete === false) {
-      this.autoCompleteRenders = [];
+    this.inFocus.set(false);
+    if (this.mouseOverAutoComplete() === false) {
+      this.autoCompleteRenders.set([]);
     }
   }
 
   applyHint($event: Event): void {
-    if (($event.target as HTMLInputElement).selectionStart !== this.rawSearchText.length) {
+    if (($event.target as HTMLInputElement).selectionStart !== this.rawSearchText().length) {
       return;
     }
     // if no item selected, apply hint
-    if (this.highlightedAutoCompleteItem < 0) {
-      this.rawSearchText = this.SearchHint;
+    if (this.highlightedAutoCompleteItem() < 0) {
+      this.rawSearchText.set(this.SearchHint());
       this.onChange();
       return;
     }
 
     // force apply selected autocomplete item
     this.applyAutoComplete(
-      this.autoCompleteRenders[this.highlightedAutoCompleteItem]
+      this.autoCompleteRenders()[this.highlightedAutoCompleteItem()]
     );
   }
 
   applyAutoComplete(item: AutoCompleteRenderItem): void {
     const token = this.getAutocompleteToken();
-    this.rawSearchText =
-      this.rawSearchText.substr(
+    this.rawSearchText.set(
+      this.rawSearchText().substr(
         0,
-        this.rawSearchText.length - token.current.length
-      ) + item.queryHint;
+        this.rawSearchText().length - token.current.length
+      ) + item.queryHint);
     this.onChange();
     this.emptyAutoComplete();
   }
@@ -186,36 +180,35 @@ export class GallerySearchFieldBaseComponent
   }
 
   setMouseOverAutoCompleteItem(i: number): void {
-    this.highlightedAutoCompleteItem = i;
+    this.highlightedAutoCompleteItem.set(i);
   }
 
   selectAutocompleteUp(): void {
-    if (this.highlightedAutoCompleteItem > 0) {
-      this.highlightedAutoCompleteItem--;
+    if (this.highlightedAutoCompleteItem() > 0) {
+      this.highlightedAutoCompleteItem.update((i) => i - 1);
     }
   }
 
   selectAutocompleteDown(): void {
     if (
-      this.autoCompleteItems &&
-      this.highlightedAutoCompleteItem < this.autoCompleteItems.value.length - 1
+      this.highlightedAutoCompleteItem() < this.autoCompleteItems().length - 1
     ) {
-      this.highlightedAutoCompleteItem++;
+      this.highlightedAutoCompleteItem.update((i) => i + 1);
     }
   }
 
   OnEnter(): boolean {
     // no autocomplete shown, just search whatever is there.
     if (
-      this.autoCompleteRenders.length === 0 ||
-      this.highlightedAutoCompleteItem === -1
+      this.autoCompleteRenders().length === 0 ||
+      this.highlightedAutoCompleteItem() === -1
     ) {
       this.search.emit();
       return false;
     }
     // search selected autocomplete
     this.searchAutoComplete(
-      this.autoCompleteRenders[this.highlightedAutoCompleteItem]
+      this.autoCompleteRenders()[this.highlightedAutoCompleteItem()]
     );
     return false;
   }
@@ -225,7 +218,7 @@ export class GallerySearchFieldBaseComponent
   }
 
   public writeValue(obj: string): void {
-    this.rawSearchText = obj;
+    this.rawSearchText.set(obj);
   }
 
   registerOnChange(fn: (_: unknown) => void): void {
@@ -237,7 +230,7 @@ export class GallerySearchFieldBaseComponent
   }
 
   public onChange(): void {
-    this.propagateChange(this.rawSearchText);
+    this.propagateChange(this.rawSearchText());
   }
 
   validate(): ValidationErrors {
@@ -250,9 +243,9 @@ export class GallerySearchFieldBaseComponent
   }
 
   private emptyAutoComplete(): void {
-    this.mouseOverAutoComplete = false;
-    this.highlightedAutoCompleteItem = -1;
-    this.autoCompleteRenders = [];
+    this.mouseOverAutoComplete.set(false);
+    this.highlightedAutoCompleteItem.set(-1);
+    this.autoCompleteRenders.set([]);
   }
 
   private async autocomplete(searchText: {
@@ -263,26 +256,28 @@ export class GallerySearchFieldBaseComponent
       return;
     }
 
-    if (this.rawSearchText.trim().length > 0) {
+    if (this.rawSearchText().trim().length > 0) {
       // are we searching for anything?
+      // a new request drops the server results of the previous one
+      const request = ++this.autoCompleteRequest;
+      let result: AutoCompleteResult;
       try {
-        if (this.autoCompleteItemsSubscription) {
-          this.autoCompleteItemsSubscription.unsubscribe();
-          this.autoCompleteItemsSubscription = null;
-        }
-        this.autoCompleteItems =
-          this.autoCompleteService.autoComplete(searchText);
-        this.autoCompleteItemsSubscription = this.autoCompleteItems.subscribe(
-          (): void => {
-            this.showSuggestions(
-              this.autoCompleteItems.value,
-              searchText.current
-            );
-          }
-        );
+        result = this.autoCompleteService.autoComplete(searchText);
+        this.autoCompleteItems.set(result.items);
+        this.showSuggestions(result.items, searchText.current);
       } catch (error) {
         console.error(error);
+        return;
       }
+      if (!result.more) {
+        return;
+      }
+      const items = await result.more;
+      if (request !== this.autoCompleteRequest) {
+        return;
+      }
+      this.autoCompleteItems.set(items);
+      this.showSuggestions(items, searchText.current);
     } else {
       this.emptyAutoComplete();
     }
@@ -293,16 +288,15 @@ export class GallerySearchFieldBaseComponent
     searchText: string
   ): void {
     this.emptyAutoComplete();
-    suggestions.forEach((item: RenderableAutoCompleteItem): void => {
-      const renderItem = new AutoCompleteRenderItem(
+    this.autoCompleteRenders.set(suggestions.map((item: RenderableAutoCompleteItem): AutoCompleteRenderItem =>
+      new AutoCompleteRenderItem(
         item.value,
         this.autoCompleteService.getPrefixLessSearchText(searchText),
         item.type,
         item.queryHint,
         item.notSearchable
-      );
-      this.autoCompleteRenders.push(renderItem);
-    });
+      )
+    ));
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function

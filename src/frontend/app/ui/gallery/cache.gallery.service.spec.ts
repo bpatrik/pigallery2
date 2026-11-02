@@ -1,4 +1,3 @@
-import {BehaviorSubject} from 'rxjs';
 import {TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
 import {GalleryCacheService} from './cache.gallery.service';
@@ -10,7 +9,7 @@ import {PackedContentWrapperWithError} from '../../../../common/entities/Content
 describe('GalleryCacheService', () => {
 
   const setUp = () => {
-    const versionService = {version: new BehaviorSubject<string>(null)};
+    const versionService = {version: signal<string>(null)};
     const authService = {user: signal<UserDTO>(null)};
     // a fresh injector per setUp, like a page reload
     TestBed.resetTestingModule();

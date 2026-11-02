@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, computed, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnChanges, computed, effect, inject, input, untracked, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {type Dimension, IRenderable} from '../../../model/IRenderable';
 import {GalleryMapLightboxComponent} from './lightbox/lightbox.map.gallery.component';
@@ -7,7 +7,6 @@ import {MapService} from './map.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {LatLngLiteral, Map, MapOptions, Marker, marker, tileLayer, TileLayer} from 'leaflet';
 import {ThemeService} from '../../../model/theme.service';
-import {Subscription} from 'rxjs';
 import {MarkerFactory} from './MarkerFactory';
 import {LeafletModule} from '@bluehalo/ngx-leaflet';
 import {QueryService} from '../../../model/query.service';
@@ -61,14 +60,9 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
         lng: p.metadata.positionData.GPSData.longitude,
       } as LatLngLiteral).setIcon(MarkerFactory.defIconSmall);
     }));
-  darkModeSubscription: Subscription;
 
   constructor() {
     this.initThemeModes();
-  }
-
-  ngOnDestroy(): void {
-    this.darkModeSubscription.unsubscribe();
   }
 
   initThemeModes() {
@@ -81,30 +75,34 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
           attribution: this.mapService.ShortAttributions,
         })
     };
-    if (this.themeService.darkMode.value) {
+    if (this.themeService.darkMode()) {
       this.options.layers = [this.layers.dark];
     } else {
       this.options.layers = [this.layers.light];
     }
     // update map theme on dark theme
-    this.darkModeSubscription = this.themeService.darkMode.subscribe((isDark) => {
-      if (!this.leafletMap) {
-        return;
-      }
+    // effect: swapping the Leaflet layer is an imperative call to a third-party library
+    effect(() => {
+      const isDark = this.themeService.darkMode();
+      untracked(() => {
+        if (!this.leafletMap) {
+          return;
+        }
 
-      if (isDark) {
-        if (this.leafletMap.hasLayer(this.layers.dark)) {
-          return;
+        if (isDark) {
+          if (this.leafletMap.hasLayer(this.layers.dark)) {
+            return;
+          }
+          this.leafletMap.removeLayer(this.layers.light);
+          this.leafletMap.addLayer(this.layers.dark);
+        } else {
+          if (this.leafletMap.hasLayer(this.layers.light)) {
+            return;
+          }
+          this.leafletMap.removeLayer(this.layers.dark);
+          this.leafletMap.addLayer(this.layers.light);
         }
-        this.leafletMap.removeLayer(this.layers.light);
-        this.leafletMap.addLayer(this.layers.dark);
-      } else {
-        if (this.leafletMap.hasLayer(this.layers.light)) {
-          return;
-        }
-        this.leafletMap.removeLayer(this.layers.dark);
-        this.leafletMap.addLayer(this.layers.light);
-      }
+      });
     });
   }
 

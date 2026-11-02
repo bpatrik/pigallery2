@@ -113,7 +113,7 @@
                     <li role="menuitem">
                       <div class="dropdown-item bg-transparent">
                         <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
-                          @switch (themeService.mode) {
+                          @switch (themeService.mode()) {
                             @case (ThemeModes.light) {
                               <ng-icon name="ionSunnyOutline" />
                               <ng-container i18n>Light</ng-container>

@@ -71,7 +71,7 @@ export class InfoPanelLightboxComponent implements OnInit {
   constructor() {
     this.mapEnabled = Config.Map.enabled;
     this.searchEnabled = this.authService.canSearch();
-    if (this.themeService.darkMode.value) {
+    if (this.themeService.darkMode()) {
       this.baseLayer = tileLayer(this.mapService.DarkMapLayer.url, {
         attribution: this.mapService.ShortAttributions,
       });

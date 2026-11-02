@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, effect, inject, input, untracked, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -99,7 +99,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   defLayer: TileLayer;
   darkLayer: TileLayer;
   mapLayerControl: Control.Layers;
-  private subscription: { darkMode: Subscription, route: Subscription } = {darkMode: null, route: null};
+  private subscription: { route: Subscription } = {route: null};
   private smallIconSize = new Point(
     Config.Media.Photo.iconSize * 0.75,
     Config.Media.Photo.iconSize * 0.75
@@ -158,6 +158,12 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   private longPathSEPairs: { [key: string]: number } = {}; // stores how often a long distance path pair comes up
 
   constructor() {
+    // update map theme on dark theme
+    // effect: swapping the Leaflet layer is an imperative call to a third-party library
+    effect(() => {
+      this.themeService.darkMode();
+      untracked(this.selectBaseLayer);
+    });
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
     this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));
@@ -175,7 +181,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     if (!this.defLayer || !this.darkLayer) {
       throw new Error('Cant find default or dark layer');
     }
-    this.mapOptions.layers.push(this.themeService.darkMode.value ? this.darkLayer : this.defLayer);
+    this.mapOptions.layers.push(this.themeService.darkMode() ? this.darkLayer : this.defLayer);
 
     this.mapLayerControl = control.layers(
       this.mapLayersControlOption.baseLayers,
@@ -245,13 +251,9 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
         }
       }
     );
-
-    // update map theme on dark theme
-    this.subscription.darkMode = this.themeService.darkMode.subscribe(this.selectBaseLayer);
   }
 
   ngOnDestroy(): void {
-    this.subscription.darkMode?.unsubscribe();
     this.subscription.route?.unsubscribe();
   }
 
@@ -561,11 +563,11 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     if (!this.leafletMap) {
       return;
     }
-    if (this.leafletMap.hasLayer(this.defLayer) && this.themeService.darkMode.value) {
+    if (this.leafletMap.hasLayer(this.defLayer) && this.themeService.darkMode()) {
       this.leafletMap.removeLayer(this.defLayer);
       this.leafletMap.addLayer(this.darkLayer);
     }
-    if (this.leafletMap.hasLayer(this.darkLayer) && !this.themeService.darkMode.value) {
+    if (this.leafletMap.hasLayer(this.darkLayer) && !this.themeService.darkMode()) {
       this.leafletMap.removeLayer(this.darkLayer);
       this.leafletMap.addLayer(this.defLayer);
     }

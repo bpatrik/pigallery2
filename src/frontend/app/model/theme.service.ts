@@ -1,5 +1,4 @@
-import { Injectable, inject } from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
 import {ThemeModes} from '../../../common/config/public/ClientConfig';
 import {Config} from '../../../common/config/public/Config';
 import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
@@ -11,11 +10,12 @@ import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
 export class ThemeService {
   private cachingService = inject(GalleryCacheService);
 
-  mode: ThemeModes = ThemeModes.light;
-  public readonly darkMode: BehaviorSubject<boolean> = new BehaviorSubject(false);
+  public readonly mode = signal<ThemeModes>(ThemeModes.light);
+  private readonly _darkMode = signal(false);
+  public readonly darkMode = this._darkMode.asReadonly();
   public readonly matcher = window.matchMedia('(prefers-color-scheme: dark)');
   private readonly onModePreferenceChange = (event: MediaQueryListEvent): void => {
-    this.darkMode.next(event.matches);
+    this.setDarkMode(event.matches);
   };
 
   constructor() {
@@ -28,17 +28,15 @@ export class ThemeService {
     } else {
       this.setMode(Config.Gallery.Themes.defaultMode);
     }
-    this.darkMode.subscribe((darkMode: boolean) => {
-          this.applyMode(darkMode);
-        }
-    );
+    // Applied synchronously (not in an effect), so the theme is already set while the app is being constructed
+    this.applyMode(this.darkMode());
   }
 
   listenToModePreference() {
-    if (this.mode !== ThemeModes.auto) {
+    if (this.mode() !== ThemeModes.auto) {
       return;
     }
-    this.darkMode.next(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    this.setDarkMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     this.matcher.removeEventListener('change', this.onModePreferenceChange);
     this.matcher.addEventListener('change', this.onModePreferenceChange);
@@ -60,25 +58,25 @@ export class ThemeService {
   }
 
   setMode(mode: ThemeModes) {
-    if (this.mode === mode) {
+    if (this.mode() === mode) {
       return;
     }
-    this.mode = mode;
-    if (this.mode === ThemeModes.light) {
-      this.darkMode.next(false);
+    this.mode.set(mode);
+    if (mode === ThemeModes.light) {
+      this.setDarkMode(false);
       this.stopListening();
-    } else if (this.mode === ThemeModes.dark) {
-      this.darkMode.next(true);
+    } else if (mode === ThemeModes.dark) {
+      this.setDarkMode(true);
       this.stopListening();
-    } else if (this.mode === ThemeModes.auto) {
+    } else if (mode === ThemeModes.auto) {
       this.listenToModePreference();
     }
-    this.cachingService.setThemeMode(this.mode);
+    this.cachingService.setThemeMode(mode);
   }
 
 
   toggleMode() {
-    switch (this.mode) {
+    switch (this.mode()) {
       case ThemeModes.light:
         this.setMode(ThemeModes.dark);
         break;
@@ -90,5 +88,9 @@ export class ThemeService {
         break;
     }
   }
-}
 
+  private setDarkMode(dark: boolean): void {
+    this._darkMode.set(dark);
+    this.applyMode(dark);
+  }
+}

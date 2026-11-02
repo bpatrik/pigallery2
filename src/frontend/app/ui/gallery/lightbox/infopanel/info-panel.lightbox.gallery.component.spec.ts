@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {BehaviorSubject} from 'rxjs';
+import {signal} from '@angular/core';
 import {NgIconsModule} from '@ng-icons/core';
 import {ionCalendarOutline, ionImageOutline, ionVideocamOutline} from '@ng-icons/ionicons';
 
@@ -38,7 +38,7 @@ class MockAuthenticationService {
 }
 
 class MockThemeService {
-  darkMode = new BehaviorSubject(false);
+  darkMode = signal(false);
 }
 
 class MockContentLoaderService {

@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-import {BehaviorSubject} from 'rxjs';
 import {AlbumBaseDTO} from '../../../../common/entities/album/AlbumBaseDTO';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
@@ -8,14 +7,10 @@ import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 export class AlbumsService {
   private networkService = inject(NetworkService);
 
-  public albums: BehaviorSubject<AlbumBaseDTO[]>;
-
-  constructor() {
-    this.albums = new BehaviorSubject<AlbumBaseDTO[]>(null);
-  }
+  public readonly albums = signal<AlbumBaseDTO[]>(null);
 
   public async getAlbums(): Promise<void> {
-    this.albums.next(
+    this.albums.set(
         (await this.networkService.getJson<AlbumBaseDTO[]>('/albums')).sort(
             (a, b): number => a.name.localeCompare(b.name)
         )

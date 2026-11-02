@@ -118,7 +118,7 @@ class MockUploaderService{
 
 // the map reads the dark mode; the real service needs window.matchMedia, which jsdom lacks
 class MockThemeService {
-  darkMode = new BehaviorSubject(false);
+  darkMode = signal(false);
 }
 
 
@@ -174,10 +174,7 @@ describe('GalleryComponent', () => {
         },
         {
           provide: MediaButtonModalService, useValue: {
-            modalData: {
-              subscribe: () => {
-              }
-            }
+            modalData: signal(null)
           }
         },
         {provide: SearchQueryParserService, useValue: {stringify: () => ''}},

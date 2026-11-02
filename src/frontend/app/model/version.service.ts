@@ -1,33 +1,29 @@
-import { Injectable, inject } from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {Config} from '../../../common/config/public/Config';
+import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
 
 @Injectable({providedIn: 'root'})
 export class VersionService {
   private router = inject(Router);
 
-  public version: BehaviorSubject<string>;
-  public appVersion: BehaviorSubject<string>;
-
-  constructor() {
-    this.version = new BehaviorSubject<string>(null);
-    this.appVersion = new BehaviorSubject<string>(null);
-  }
+  public readonly version = signal<string>(null);
+  public readonly appVersion = signal<string>(null);
 
   public onNewVersion(version: string): void {
-    if (this.version.value === version) {
+    if (this.version() === version) {
       return;
     }
-    this.version.next(version);
+    this.version.set(version);
+    GalleryCacheService.checkVersion(version);
   }
 
   public onNewAppVersion(version: string): void {
-    if (this.appVersion.value === version) {
+    if (this.appVersion() === version) {
       return;
     }
-    if(!this.appVersion.value) {
-      this.appVersion.next(version);
+    if(!this.appVersion()) {
+      this.appVersion.set(version);
       return;
     }
     if(Config.Server.reloadClientOnServerUpdate)

@@ -42,13 +42,13 @@ export class FacesNavigatorComponent {
   setSortingBy(sorting: number): void {
     this.facesService.setSorting({
       method: sorting,
-      ascending: this.facesService.sorting.value.ascending
+      ascending: this.facesService.sorting().ascending
     });
   }
 
   setSortingAscending(asc: boolean) {
     this.facesService.setSorting({
-      method: this.facesService.sorting.value.method,
+      method: this.facesService.sorting().method,
       ascending: asc
     });
   }
