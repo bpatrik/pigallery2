@@ -61,7 +61,7 @@ export class JobButtonComponent {
   }
 
   get Progress(): OnTimerJobProgressDTO {
-    return this.jobsService.progress.value[
+    return this.jobsService.progress()[
       JobDTOUtils.getHashName(this.jobName(), this.Config)
       ];
   }

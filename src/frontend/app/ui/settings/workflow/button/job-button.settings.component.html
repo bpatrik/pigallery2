@@ -3,7 +3,7 @@
     [class.progress-bar-striped]="Progress?.onTimer"
     title="Trigger job run manually"
     i18n-title
-    [disabled]="disabled() || jobsService.jobStartingStopping[jobName()]"
+    [disabled]="disabled() || jobsService.jobStartingStopping()[jobName()]"
     (click)="openModal(jobRunModal);">
     @if (!shortName()) {
       <span class="me-2"><ng-container
@@ -14,7 +14,7 @@
 }
 @if (Running) {
   <button class="btn btn-secondary"
-    [disabled]="disabled() || jobsService.jobStartingStopping[jobName()] || Progress.state !== JobProgressStates.running"
+    [disabled]="disabled() || jobsService.jobStartingStopping()[jobName()] || Progress.state !== JobProgressStates.running"
     (click)="stop();">
     <ng-icon name="ionStopOutline" />
     @if (!shortName()) {

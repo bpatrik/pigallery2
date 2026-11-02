@@ -110,7 +110,7 @@ export class UsersComponent implements OnInit {
   }
 
   get Enabled(): boolean {
-    return this.settingsService.settings.value.Users.authenticationRequired;
+    return this.settingsService.settings().Users.authenticationRequired;
   }
 
 

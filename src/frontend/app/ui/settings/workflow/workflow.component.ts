@@ -22,7 +22,7 @@ import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type Validation
 import {SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
 import {SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { JobButtonComponent } from './button/job-button.settings.component';
@@ -60,7 +60,6 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
     SortingMethodSettingsEntryComponent,
     JobProgressComponent,
     ModalDirective,
-    AsyncPipe,
     DatePipe
 ]
 })
@@ -146,7 +145,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   jobTypeChanged(schedule: JobScheduleDTO): void {
-    const job = this.jobsService.availableJobs.value.find(
+    const job = this.jobsService.availableJobs().find(
       (t) => t.Name === schedule.jobName
     );
     schedule.config = schedule.config || {};
@@ -228,13 +227,13 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   prepareNewJob(): void {
-    const jobName = this.jobsService.availableJobs.value[0].Name;
+    const jobName = this.jobsService.availableJobs()[0].Name;
     this.newSchedule = new JobScheduleConfig('new job',
       jobName,
       new NeverJobTriggerConfig());
 
     // setup job specific config
-    const job = this.jobsService.availableJobs.value.find(
+    const job = this.jobsService.availableJobs().find(
       (t) => t.Name === jobName
     );
     this.newSchedule.config = this.newSchedule.config || {};

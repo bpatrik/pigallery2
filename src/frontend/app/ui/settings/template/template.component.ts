@@ -1,4 +1,5 @@
-import { Component, OnChanges, OnDestroy, OnInit, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, viewChild, input, ChangeDetectionStrategy, computed, signal, DestroyRef} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -8,7 +9,6 @@ import {JobProgressDTO} from '../../../../../common/entities/job/JobProgressDTO'
 import {JobDTOUtils} from '../../../../../common/entities/job/JobDTO';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {FormsModule, UntypedFormControl} from '@angular/forms';
-import {Subscription} from 'rxjs';
 import {IWebConfigClassPrivate} from 'typeconfig/common';
 import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
@@ -18,7 +18,7 @@ import {ErrorDTO} from '../../../../../common/entities/Error';
 import {ISettingsComponent} from './ISettingsComponent';
 import {CustomSettingsEntries} from './CustomSettingsEntries';
 import {NgIconComponent} from '@ng-icons/core';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {SettingsEntryComponent} from './settings-entry/settings-entry.component';
 import {JobButtonComponent} from '../workflow/button/job-button.settings.component';
 import {JobProgressComponent} from '../workflow/progress/job-progress.settings.component';
@@ -62,9 +62,9 @@ export interface RecursiveState extends ConfigState {
   templateUrl: './template.component.html',
   styleUrl: './template.component.css',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
+  imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent]
 })
-export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {
+export class TemplateComponent implements OnInit, ISettingsComponent {
   protected authService = inject(AuthenticationService);
   private navigation = inject(NavigationService);
   protected notification = inject(NotificationService);
@@ -73,70 +73,72 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   private extensionService = inject(ExtensionInstallerService);
 
 
-  public icon: string;
+  private destroyRef = inject(DestroyRef);
+
   readonly ConfigPath = input<string>(undefined);
-  nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
 
   readonly form = viewChild<UntypedFormControl>('settingsForm');
 
 
-  public inProgress = false;
-  public error: string = null;
-  public changed = false;
-  public states: RecursiveState = {} as RecursiveState;
-  public readonly ConfigStyle = ConfigStyle;
-  protected name: string;
-  protected sliceFN?: (s: IWebConfigClassPrivate<TAGS> & WebConfig) => ConfigState;
-  private subscription: Subscription = null;
-  private settingsSubscription: Subscription = null;
-
-  get Name(): string {
-    return this.changed ? this.name + '*' : this.name;
-  }
-
-  get Changed(): boolean {
-    return this.changed;
-  }
-
-  get HasAvailableSettings(): boolean {
-    return !this.states?.shouldHide || !this.states?.shouldHide();
-  }
-
-  getSaveTitle(isFormValid: boolean): string {
-    if (isFormValid) {
-      return $localize`Can't save: invalid form.`;
-    }
-    if (!this.changed) {
-      return $localize`Can't save: not changed.`;
-    }
-    if (this.inProgress) {
-      return $localize`Can't save: saving in progress.`;
-    }
-    return $localize`Click to save.`;
-  }
-
-  // Side effect: subscribes to the settings slice of the new config path.
-  ngOnChanges(): void {
-    const ConfigPath = this.ConfigPath();
-    if (!ConfigPath) {
-      this.setSliceFN(c => ({value: c as any, isConfigType: true, type: WebConfig} as any));
-    } else {
-      this.setSliceFN(c => c.__state[this.ConfigPath()]);
-    }
-    this.name = this.states.tags?.name || ConfigPath;
-    this.nestedConfigs = [];
-    for (const key of this.getKeys(this.states)) {
-      if (this.states.value.__state[key].isConfigType &&
-        this.states?.value.__state[key].tags?.uiIcon) {
-        this.nestedConfigs.push({
-          id: ConfigPath + '.' + key,
-          name: this.states?.value.__state[key].tags?.name,
-          icon: this.states?.value.__state[key].tags?.uiIcon,
-          visible: () => !(this.states.value.__state[key].shouldHide && this.states.value.__state[key].shouldHide())
+  public readonly inProgress = signal(false);
+  public readonly error = signal<string>(null);
+  public readonly changed = signal(false);
+  /**
+   * A fresh, instrumented clone of the current settings slice.
+   * The UI edits it in place; it is only re-derived when the settings are (re)loaded.
+   */
+  public readonly states = computed<RecursiveState>(() => {
+    const s = this.settingsService.settings().clone() as IWebConfigClassPrivate<TAGS> & WebConfig;
+    const configPath = this.ConfigPath();
+    const states = (!configPath ?
+      {value: s, isConfigType: true, type: WebConfig} :
+      s.__state[configPath]) as unknown as RecursiveState;
+    this.instrument(states, null);
+    return states;
+  });
+  public readonly icon = computed<string>(() => this.states().tags?.uiIcon);
+  public readonly nestedConfigs = computed(() => {
+    const states = this.states();
+    const nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
+    for (const key of this.getKeys(states)) {
+      const st = states.value.__state[key];
+      if (st.isConfigType && st.tags?.uiIcon) {
+        nestedConfigs.push({
+          id: this.ConfigPath() + '.' + key,
+          name: st.tags?.name,
+          icon: st.tags?.uiIcon,
+          visible: () => !(st.shouldHide && st.shouldHide())
         });
       }
     }
+    return nestedConfigs;
+  });
+  public readonly ConfigStyle = ConfigStyle;
+  protected readonly name = computed<string>(() => this.states().tags?.name || this.ConfigPath());
 
+  get Name(): string {
+    return this.changed() ? this.name() + '*' : this.name();
+  }
+
+  get Changed(): boolean {
+    return this.changed();
+  }
+
+  get HasAvailableSettings(): boolean {
+    return !this.states()?.shouldHide || !this.states()?.shouldHide();
+  }
+
+  getSaveTitle(isFormInvalid: boolean): string {
+    if (isFormInvalid) {
+      return $localize`Can't save: invalid form.`;
+    }
+    if (!this.changed()) {
+      return $localize`Can't save: not changed.`;
+    }
+    if (this.inProgress()) {
+      return $localize`Can't save: saving in progress.`;
+    }
+    return $localize`Click to save.`;
   }
 
   ngOnInit(): void {
@@ -151,108 +153,82 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     this.getSettings();
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
-    this.subscription = this.form().valueChanges.subscribe(() => {
+    this.form().valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.onOptionChange();
     });
-
-
   }
 
-  ngOnDestroy(): void {
-    if (this.subscription != null) {
-      this.subscription.unsubscribe();
-    }
-    if (this.settingsSubscription != null) {
-      this.settingsSubscription.unsubscribe();
-    }
-  }
+  // Adds the UI helpers (shouldHide, onChange, original value, ...) to every state of the tree.
+  private instrument(st: RecursiveState, parent: RecursiveState): void {
+    const shouldHide = (state: RecursiveState) => {
+      return () => {
+        if (state.volatile) {
+          return true;
+        }
 
-  setSliceFN(sliceFN?: (s: IWebConfigClassPrivate<TAGS> & WebConfig) => ConfigState) {
-    if (sliceFN) {
-      this.sliceFN = sliceFN;
-      this.settingsSubscription = this.settingsService.settings.subscribe(
-        this.onNewSettings
-      );
-    }
-  }
+        if (state.tags &&
+          ((state.tags.relevant && !state.tags.relevant(parent.value))
+            || state.tags.secret)) {
+          return true;
+        }
 
-  onNewSettings = (s: IWebConfigClassPrivate<TAGS> & WebConfig) => {
-    this.states = this.sliceFN(s.clone()) as RecursiveState;
-
-    const instrument = (st: RecursiveState, parent: RecursiveState) => {
-      const shouldHide = (state: RecursiveState) => {
-        return () => {
-          if (state.volatile) {
+        // if all sub elements are hidden, hide the parent too.
+        if (state.isConfigType) {
+          if (state.value && state.value.__state &&
+            Object.keys(state.value.__state).findIndex(k => !st.value.__state[k].shouldHide()) === -1) {
             return true;
           }
+        }
 
-          if (state.tags &&
-            ((state.tags.relevant && !state.tags.relevant(parent.value))
-              || state.tags.secret)) {
-            return true;
-          }
+        const forcedVisibility = !(state.tags?.priority > this.settingsService.configPriority() ||
+          //if this value should not change in Docker, lets hide it
+          (this.settingsService.configPriority() === ConfigPriority.basic &&
+            state.tags?.dockerSensitive && this.settingsService.settings().Environment.isDocker));
 
-          // if all sub elements are hidden, hide the parent too.
-          if (state.isConfigType) {
-            if (state.value && state.value.__state &&
-              Object.keys(state.value.__state).findIndex(k => !st.value.__state[k].shouldHide()) === -1) {
-              return true;
-            }
-          }
+        if (state.isConfigArrayType) {
+          for (let i = 0; i < state.value?.length; ++i) {
+            for (const k of Object.keys(state.value[i].__state)) {
+              if (!Utils.equalsFilter(
+                state.value[i]?.__state[k]?.value,
+                state.default[i] ? state.default[i][k] : undefined,
+                ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
 
-          const forcedVisibility = !(state.tags?.priority > this.settingsService.configPriority ||
-            //if this value should not change in Docker, lets hide it
-            (this.settingsService.configPriority === ConfigPriority.basic &&
-              state.tags?.dockerSensitive && this.settingsService.settings.value.Environment.isDocker));
-
-          if (state.isConfigArrayType) {
-            for (let i = 0; i < state.value?.length; ++i) {
-              for (const k of Object.keys(state.value[i].__state)) {
-                if (!Utils.equalsFilter(
-                  state.value[i]?.__state[k]?.value,
-                  state.default[i] ? state.default[i][k] : undefined,
-                  ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
-
-                  return false;
-                }
+                return false;
               }
             }
-            return !forcedVisibility;
           }
+          return !forcedVisibility;
+        }
 
 
-          return (!forcedVisibility &&
-            Utils.equalsFilter(state.value, state.default,
-              ['__propPath', '__created', '__prototype', '__rootConfig']) &&
-            Utils.equalsFilter(state.original, state.default,
-              ['__propPath', '__created', '__prototype', '__rootConfig']));
-        };
+        return (!forcedVisibility &&
+          Utils.equalsFilter(state.value, state.default,
+            ['__propPath', '__created', '__prototype', '__rootConfig']) &&
+          Utils.equalsFilter(state.original, state.default,
+            ['__propPath', '__created', '__prototype', '__rootConfig']));
       };
-
-      st.shouldHide = shouldHide(st);
-      st.onChange = this.onOptionChange;
-      st.rootConfig = parent?.value;
-      if (typeof st.value !== 'undefined') {
-        st.original = Utils.clone(st.value);
-      }
-
-      if (st.isConfigType && st.value) {
-        for (const k of Object.keys(st.value.__state)) {
-          instrument(st.value.__state[k], st);
-        }
-      }
-      if (st.isConfigArrayType && st.value) {
-        for (let i = 0; i < st.value?.length; ++i) {
-          for (const k of Object.keys(st.value[i].__state)) {
-            instrument(st.value[i].__state[k], st);
-          }
-        }
-      }
     };
 
-    instrument(this.states, null);
-    this.icon = this.states.tags?.uiIcon;
-  };
+    st.shouldHide = shouldHide(st);
+    st.onChange = this.onOptionChange;
+    st.rootConfig = parent?.value;
+    if (typeof st.value !== 'undefined') {
+      st.original = Utils.clone(st.value);
+    }
+
+    if (st.isConfigType && st.value) {
+      for (const k of Object.keys(st.value.__state)) {
+        this.instrument(st.value.__state[k], st);
+      }
+    }
+    if (st.isConfigArrayType && st.value) {
+      for (let i = 0; i < st.value?.length; ++i) {
+        for (const k of Object.keys(st.value[i].__state)) {
+          this.instrument(st.value[i].__state[k], st);
+        }
+      }
+    }
+  }
 
   onOptionChange = () => {
     setTimeout(() => {
@@ -279,7 +255,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
         return true;
       };
 
-      this.changed = !settingsSame(this.states);
+      this.changed.set(!settingsSame(this.states()));
     }, 0);
   };
 
@@ -300,26 +276,26 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   }
 
   public async save(): Promise<boolean> {
-    this.inProgress = true;
-    this.error = '';
+    this.inProgress.set(true);
+    this.error.set('');
     try {
-      const state = WebConfigClassBuilder.attachInterface(this.states.value).toJSON();
+      const state = WebConfigClassBuilder.attachInterface(this.states().value).toJSON();
       await this.settingsService.updateSettings(state, this.ConfigPath());
       await this.getSettings();
       this.notification.success(
         this.Name + ' ' + $localize`settings saved`,
         $localize`Success`
       );
-      this.inProgress = false;
+      this.inProgress.set(false);
       return true;
     } catch (err) {
       console.error(err);
       if (err.message) {
-        this.error = (err as ErrorDTO).message;
+        this.error.set((err as ErrorDTO).message);
       }
     }
 
-    this.inProgress = false;
+    this.inProgress.set(false);
     return false;
   }
 
@@ -358,7 +334,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     if (!uiJob.config) {
       uiJob.config = this.jobsService.getDefaultConfig(uiJob.job);
     }
-    return this.jobsService.progress.value[JobDTOUtils.getHashName(uiJob.job, uiJob.config || {})];
+    return this.jobsService.progress()[JobDTOUtils.getHashName(uiJob.job, uiJob.config || {})];
   }
 
   protected isExtension(c: ConfigState): boolean {
@@ -368,7 +344,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   protected async removeExtension(c: ConfigState): Promise<void> {
     const extensionPath = c.value.__state['path'].value;
     try {
-      this.inProgress = true;
+      this.inProgress.set(true);
       await this.extensionService.deleteExtension(extensionPath);
       await this.settingsService.getSettings();
       this.notification.success(
@@ -379,7 +355,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
       console.error(err);
       this.notification.error($localize`Failed to delete extension`, err);
     } finally {
-      this.inProgress = false;
+      this.inProgress.set(false);
     }
   }
 
@@ -387,7 +363,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   protected async reloadExtension(c: ConfigState): Promise<void> {
     const extensionPath = c.value.__state['path'].value;
     try {
-      this.inProgress = true;
+      this.inProgress.set(true);
       await this.extensionService.reloadExtension(extensionPath);
       await this.settingsService.getSettings();
       this.notification.success(
@@ -398,12 +374,12 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
       console.error(err);
       this.notification.error($localize`Failed to reload extension`, err);
     } finally {
-      this.inProgress = false;
+      this.inProgress.set(false);
     }
   }
 
   private async getSettings(): Promise<void> {
     await this.settingsService.getSettings();
-    this.changed = false;
+    this.changed.set(false);
   }
 }

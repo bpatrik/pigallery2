@@ -52,7 +52,7 @@
       <div class="card-body" [hidden]="!showDetails[schedule.name]">
         <div class="row">
           <div class="col-md-12">
-            @if (settingsService.configStyle == ConfigStyle.full) {
+            @if (settingsService.configStyle() == ConfigStyle.full) {
               <div class="alert alert-secondary" role="alert"
                 >
                 <ng-icon size="1.3em" name="ionInformationCircleOutline" />
@@ -76,7 +76,7 @@
             <div class="mb-1 row">
               <label class="col-md-2 control-label" [for]="'repeatType'+i" i18n>Periodicity:</label>
               <div class="col-md-10">
-                <select class="form-select" [(ngModel)]="schedule.trigger.type"
+                <select class="form-select" [(ngModel)]="schedule.trigger.type" [ngModelOptions]="{standalone: true}"
                   (ngModelChange)="jobTriggerTypeChanged($event,schedule); onChange($event);"
                   [name]="'repeatType'+i"
                   [id]="'repeatType'+i"
@@ -87,7 +87,7 @@
                     </option>
                   }
                 </select>
-                @if (settingsService.configStyle == ConfigStyle.full) {
+                @if (settingsService.configStyle() == ConfigStyle.full) {
                   <small class="form-text text-muted"
                     i18n>Set the time to run the job.
               </small>
@@ -96,12 +96,13 @@
             </div>
             @if (schedule.trigger.type == JobTriggerType.after) {
               <div class="mb-1 row"
-                [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+                [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
                 >
                 <label class="col-md-2 control-label" [for]="'triggerAfter'+i" i18n>After:</label>
                 <div class="col-md-10">
                   <select class="form-select"
                     [(ngModel)]="schedule.trigger.afterScheduleName"
+                    [ngModelOptions]="{standalone: true}"
                     (ngModelChange)="onChange($event)"
                     [name]="'triggerAfter'+i"
                     [id]="'triggerAfter'+i" required>
@@ -113,7 +114,7 @@
                       }
                     }
                   </select>
-                  @if (settingsService.configStyle == ConfigStyle.full) {
+                  @if (settingsService.configStyle() == ConfigStyle.full) {
                     <small class="form-text text-muted"
                       i18n>The job will run after that job finishes.
               </small>
@@ -123,7 +124,7 @@
             }
             @if (schedule.trigger.type == JobTriggerType.scheduled) {
               <div class="mb-1 row"
-                [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+                [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
                 >
                 <label class="col-md-2 control-label" [for]="'triggerTime'+i" i18n>At:</label>
                 <div class="col-md-10">
@@ -136,13 +137,14 @@
             }
             @if (schedule.trigger.type == JobTriggerType.periodic) {
               <div class="mb-1 row"
-                [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+                [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
                 >
                 <label class="col-md-2 control-label" [for]="'periodicity'+i" i18n>At:</label>
                 <div class="col-md-10">
                   <select
                     class="form-select"
                     [(ngModel)]="schedule.trigger.periodicity"
+                    [ngModelOptions]="{standalone: true}"
                     (ngModelChange)="onChange($event)"
                     [name]="'periodicity' + i"
                     [id]="'periodicity' + i"
@@ -162,7 +164,7 @@
               </div>
             }
             <div class="mb-1 row"
-              [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
               <label class="col-md-2 control-label" [for]="'allowParallelRun'+'_'+i" i18n>Allow parallel run</label>
               <div class="col-md-10">
                 <div class="input-group">
@@ -174,10 +176,11 @@
                       [name]="'allowParallelRun'+'_'+i"
                       [id]="'allowParallelRun'+'_'+i"
                       (ngModelChange)="onChange($event)"
-                      [(ngModel)]="schedule.allowParallelRun">
+                      [(ngModel)]="schedule.allowParallelRun"
+                      [ngModelOptions]="{standalone: true}">
                   </div>
                 </div>
-                @if (settingsService.configStyle == ConfigStyle.full) {
+                @if (settingsService.configStyle() == ConfigStyle.full) {
                   <small class="form-text text-muted"
                     i18n>Enables the job to start even if another job is already running.
               </small>
@@ -192,7 +195,7 @@
             <div>
               @if (!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue) {
                 <div class="mb-1 row"
-                  [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                  [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
                   <label class="col-md-2 control-label"
                   [for]="configEntry.id+'_'+i">{{ backendTextService.get(configEntry.name) }}</label>
                   <div class="col-md-10">
@@ -207,34 +210,39 @@
                               [name]="configEntry.id+'_'+i"
                               [id]="configEntry.id+'_'+i"
                               (ngModelChange)="onChange($event)"
-                              [(ngModel)]="schedule.config[configEntry.id]">
+                              [(ngModel)]="schedule.config[configEntry.id]"
+                              [ngModelOptions]="{standalone: true}">
                           </div>
                         }
                         @case ('string') {
                           <input type="text" class="form-control" [name]="configEntry.id+'_'+i"
                             [id]="configEntry.id+'_'+i"
                             (ngModelChange)="onChange($event)"
-                            [(ngModel)]="schedule.config[configEntry.id]" required>
+                            [(ngModel)]="schedule.config[configEntry.id]"
+                            [ngModelOptions]="{standalone: true}" required>
                         }
                         @case ('string-array') {
                           <input type="text" class="form-control"
                             [name]="configEntry.id+'_'+i"
                             [id]="configEntry.id+'_'+i"
                             (ngModelChange)="setEmailArray(schedule.config,configEntry.id,$event); onChange($event);"
-                            [ngModel]="getArray($any(schedule.config),configEntry.id)" required>
+                            [ngModel]="getArray($any(schedule.config),configEntry.id)"
+                            [ngModelOptions]="{standalone: true}" required>
                         }
                         @case ('number') {
                           <input type="number" class="form-control" [name]="configEntry.id+'_'+i"
                             [id]="configEntry.id+'_'+i"
                             (ngModelChange)="onChange($event)"
-                            [(ngModel)]="schedule.config[configEntry.id]" required>
+                            [(ngModel)]="schedule.config[configEntry.id]"
+                            [ngModelOptions]="{standalone: true}" required>
                         }
                         @case ('number-array') {
                           <input type="text" class="form-control"
                             [name]="configEntry.id+'_'+i"
                             [id]="configEntry.id+'_'+i"
                             (ngModelChange)="setNumberArray(schedule.config,configEntry.id,$event); onChange($event);"
-                            [ngModel]="getArray($any(schedule.config),configEntry.id)" required>
+                            [ngModel]="getArray($any(schedule.config),configEntry.id)"
+                            [ngModelOptions]="{standalone: true}" required>
                         }
                         @case ('messenger') {
                           <select
@@ -242,8 +250,9 @@
                             [name]="configEntry.id+'_'+i"
                             (ngModelChange)="onChange($event)"
                             [(ngModel)]="schedule.config[configEntry.id]"
+                            [ngModelOptions]="{standalone: true}"
                             class="form-select">
-                            @for (msg of jobsService.availableMessengers | async; track msg) {
+                            @for (msg of jobsService.availableMessengers(); track msg) {
                               <option [ngValue]="msg">{{ msg }}
                               </option>
                             }
@@ -252,20 +261,20 @@
                         @case ('MediaPickDTO-array') {
                           @for (mp of AsMediaPickDTOArray(schedule.config[configEntry.id]); track mp; let j = $index) {
                             <div class="mb-1 row"
-                              [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
                               <label class="col-md-2 control-label"
                                 [for]="configEntry.id+'_'+i">
                                 <ng-container>Search Query</ng-container>
                               - {{ (j + 1) }}</label>
                               <div class="col-md-10">
                                 <div class="input-group">
-                                  <app-gallery-search-field [(ngModel)]="mp.searchQuery"
+                                  <app-gallery-search-field [(ngModel)]="mp.searchQuery" [ngModelOptions]="{standalone: true}"
                                     [id]="'sq_'+configEntry.id+'_'+i+'_'+j"
                                     [name]="'sq_'+configEntry.id+'_'+i+'_'+j"
                                     (change)="onChange($event)"
                                     placeholder="Search Query" />
                                 </div>
-                                @if (settingsService.configStyle == ConfigStyle.full) {
+                                @if (settingsService.configStyle() == ConfigStyle.full) {
                                   <small class="form-text text-muted"
                                     i18n>
                             Search query to list photos and videos.
@@ -274,7 +283,7 @@
                               </div>
                             </div>
                             <div class="mb-1 row"
-                              [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
                               <label class="col-md-2 control-label"
                               [for]="configEntry.id+'_'+i" i18n>Sort by</label>
                               <div class="col-md-10">
@@ -283,7 +292,7 @@
                                     <div
                                       class="row col-12 mt-1 m-0 p-0">
                                       <div class="col p-0">
-                                        <app-settings-entry-sorting-method [(ngModel)]="mp.sortBy[k]"
+                                        <app-settings-entry-sorting-method [(ngModel)]="mp.sortBy[k]" [ngModelOptions]="{standalone: true}"
                                           [id]="configEntry.id+'_'+i+'_'+j+'_'+k"
                                           [name]="configEntry.id+'_'+i+'_'+j+'_'+k"
                                           [sortingByEnum]="SortByTypes"
@@ -312,7 +321,7 @@
                                     </button>
                                   </div>
                                 </div>
-                                @if (settingsService.configStyle == ConfigStyle.full) {
+                                @if (settingsService.configStyle() == ConfigStyle.full) {
                                   <small class="form-text text-muted"
                                     i18n>
                             Sorts the photos and videos by this.
@@ -321,7 +330,7 @@
                               </div>
                             </div>
                             <div class="mb-1 row"
-                              [class.mb-3]="settingsService.configStyle == ConfigStyle.full">
+                              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
                               <label class="col-md-2 control-label"
                               [for]="configEntry.id+'_'+i+'_'+j" i18n>Pick</label>
                               <div class="col-md-10">
@@ -329,9 +338,10 @@
                                   <input type="number" class="form-control" [name]="configEntry.id+'_'+i+'_'+j"
                                     [id]="configEntry.id+'_'+i+'_'+j"
                                     (ngModelChange)="onChange($event)"
-                                    [(ngModel)]="mp.pick" required>
+                                    [(ngModel)]="mp.pick"
+                                    [ngModelOptions]="{standalone: true}" required>
                                 </div>
-                                @if (settingsService.configStyle == ConfigStyle.full) {
+                                @if (settingsService.configStyle() == ConfigStyle.full) {
                                   <small class="form-text text-muted"
                                     i18n>
                             Number of photos and videos to pick.
@@ -366,7 +376,7 @@
                         }
                       }
                     </div>
-                    @if (settingsService.configStyle == ConfigStyle.full) {
+                    @if (settingsService.configStyle() == ConfigStyle.full) {
                       <small class="form-text text-muted">
                         @if (configEntry.type == 'number-array') {
                           <ng-container i18n>';' separated integers.
@@ -413,13 +423,13 @@
             (change)="jobTypeChanged(newSchedule)"
             [(ngModel)]="newSchedule.jobName"
             name="newJobName" required>
-            @for (availableJob of jobsService.availableJobs | async; track availableJob.Name) {
+            @for (availableJob of jobsService.availableJobs(); track availableJob.Name) {
               <option
                 [ngValue]="availableJob.Name">{{ backendTextService.getJobName(availableJob.Name) }}
               </option>
             }
           </select>
-          @if (settingsService.configStyle == ConfigStyle.full) {
+          @if (settingsService.configStyle() == ConfigStyle.full) {
             <small class="form-text text-muted"
               i18n>Select a job to schedule.
           </small>

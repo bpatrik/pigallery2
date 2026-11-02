@@ -30,7 +30,8 @@
         <input
           type="text" class="form-control"
           disabled
-          [ngModel]="progress().logs[progress().logs.length-1].comment" name="details">
+          [ngModel]="progress().logs[progress().logs.length-1].comment"
+          [ngModelOptions]="{standalone: true}" name="details">
       }
       @if (progress().state === JobProgressStates.cancelling) {
         <input

@@ -26,7 +26,7 @@ export class SharingsListComponent implements OnInit {
   }
 
   get Enabled(): boolean {
-    return this.settingsService.settings.value.Sharing.enabled;
+    return this.settingsService.settings().Sharing.enabled;
   }
 
   async deleteSharing(sharing: ResponseSharingDTO): Promise<void> {

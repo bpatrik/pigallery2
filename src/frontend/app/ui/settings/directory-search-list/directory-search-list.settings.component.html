@@ -17,6 +17,7 @@
           i18n-title
           [disabled]="disabled()"
           [ngModel]="getMatchingType(d)"
+          [ngModelOptions]="{standalone: true}"
           (ngModelChange)="setMatchingType(d, $event)">
           @for (mt of MatchingTypes; track mt) {
             <option [ngValue]="mt" [title]="getMatchingTypesDescription(mt)">{{ mt }}</option>
@@ -33,6 +34,7 @@
         class="form-control rounded-2"
         [disabled]="disabled()"
         [(ngModel)]="d.value"
+        [ngModelOptions]="{standalone: true}"
         (ngModelChange)="changed.emit()"
         type="text"/>
     </div>

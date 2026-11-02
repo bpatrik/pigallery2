@@ -6,7 +6,7 @@
 
 @if (state) {
   <div class="mb-1 row"
-    [class.mb-3]="settingsService.configStyle == ConfigStyle.full"
+    [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
     [class.changed-settings]="changed"
     [class.docker-warning]="dockerWarning"
     [hidden]="shouldHide">
@@ -15,7 +15,7 @@
       <div class="input-group">
         @switch (uiType) {
           @case ('SearchQuery') {
-            <app-gallery-search-field [(ngModel)]="state.value"
+            <app-gallery-search-field [(ngModel)]="state.value" [ngModelOptions]="{standalone: true}"
               [id]="idName"
               [name]="idName"
               [title]="title"
@@ -34,6 +34,7 @@
                 [placeholder]="placeholder"
                 [title]="title"
                 [(ngModel)]="StringValue"
+                [ngModelOptions]="{standalone: true}"
                 (ngModelChange)="onChange($event)"
                 [name]="idName"
                 [disabled]="state.readonly || Disabled"
@@ -52,7 +53,7 @@
               [title]="title"
               (ngModelChange)="onChange($event)"
               [disabled]="state.readonly || Disabled"
-              class="form-select" [(ngModel)]="state.value">
+              class="form-select" [(ngModel)]="state.value" [ngModelOptions]="{standalone: true}">
               @for (opt of getOptionsView(state); track opt.key) {
                 <option [ngValue]="opt.key">{{opt.value}}
                 </option>
@@ -70,7 +71,8 @@
                 type="checkbox"
                 role="switch"
                 (ngModelChange)="onChange($event)"
-                [(ngModel)]="state.value">
+                [(ngModel)]="state.value"
+                [ngModelOptions]="{standalone: true}">
             </div>
           }
           @case ('ThemeSelector') {
@@ -82,7 +84,7 @@
                 [title]="title"
                 (ngModelChange)="onChange($event)"
                 [disabled]="state.readonly || Disabled"
-                class="form-select" [(ngModel)]="state.value">
+                class="form-select" [(ngModel)]="state.value" [ngModelOptions]="{standalone: true}">
                 @for (th of AvailableThemes; track th.key) {
                   <option [ngValue]="th.key">{{th.value}}
                   </option>
@@ -142,6 +144,7 @@
               [title]="title"
               [id]="idName"
               [(ngModel)]="SelectedThemeSettings.theme"
+              [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onChange($event)"
               [name]="idName"
               [disabled]="state.readonly || Disabled"
@@ -151,6 +154,7 @@
           @case ('ClientSortingConfig') {
             <app-settings-entry-sorting-method class="w-100"
               [(ngModel)]="state.value"
+              [ngModelOptions]="{standalone: true}"
               [sortingByEnum]="SortByTypes"
               [id]="idName"
               [name]="idName"
@@ -159,6 +163,7 @@
           @case ('ClientGroupingConfig') {
             <app-settings-entry-sorting-method class="w-100"
               [(ngModel)]="state.value"
+              [ngModelOptions]="{standalone: true}"
               [sortingByEnum]="GroupByTypes"
               [id]="idName"
               [name]="idName"
@@ -167,6 +172,7 @@
           @case ('JobScheduleConfig-Array') {
             <app-settings-workflow class="w-100"
               [(ngModel)]="state.value"
+              [ngModelOptions]="{standalone: true}"
               [id]="idName"
               [name]="idName"
               (ngModelChange)="onChange($event)" />
@@ -215,12 +221,12 @@
                   </div>
                 </div>
                 <hr/>
-                <app-settings-entry [ngModel]="state.value.__state.viewBox"
+                <app-settings-entry [ngModel]="state.value.__state.viewBox" [ngModelOptions]="{standalone: true}"
                   [noChangeDetection]="true"
                   [name]="'icon_w_'+idName"
                   [id]="'icon_w_'+idName"
                 (change)="onChange($event)" />
-                <app-settings-entry [ngModel]="state.value.__state.items"
+                <app-settings-entry [ngModel]="state.value.__state.items" [ngModelOptions]="{standalone: true}"
                   [noChangeDetection]="true"
                   [name]="'icon_i_'+idName"
                   [id]="'icon_i_'+idName"
@@ -252,12 +258,14 @@
                   <tr>
                     <td><input type="text" class="form-control" placeholder="Street"
                       [(ngModel)]="layer.name"
+                      [ngModelOptions]="{standalone: true}"
                       (ngModelChange)="onChange($event)"
                     [name]="'list_ml_'+idName+i" [id]="'list_ml_'+idName+i" required></td>
                     <td>
                       <input type="text" class="form-control"
                         placeholder="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                         [(ngModel)]="layer.url"
+                        [ngModelOptions]="{standalone: true}"
                         (ngModelChange)="onChange($event)"
                         [name]="'list_ml_url_'+idName+i" [id]="'list_ml_url_'+idName+i" required>
                     </td>
@@ -287,7 +295,7 @@
                 <div class="row  mt-1 mb-1 bg-body-tertiary">
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
                     <div class="col ps-0">
-                      <app-settings-entry [ngModel]="val.__state.matchers"
+                      <app-settings-entry [ngModel]="val.__state.matchers" [ngModelOptions]="{standalone: true}"
                         [noChangeDetection]="true"
                         [name]="'val_m_'+idName+i"
                         [id]="'val_m_'+idName+i"
@@ -302,21 +310,21 @@
                     </div>
                   </div>
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
-                    <app-settings-entry [ngModel]="val.theme.__state.color"
+                    <app-settings-entry [ngModel]="val.theme.__state.color" [ngModelOptions]="{standalone: true}"
                       [noChangeDetection]="true"
                       [name]="'color_m_'+idName+i"
                       [id]="'color_m_'+idName+i"
                     (change)="onChange($event)" />
                   </div>
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
-                    <app-settings-entry [ngModel]="val.theme.__state.dashArray"
+                    <app-settings-entry [ngModel]="val.theme.__state.dashArray" [ngModelOptions]="{standalone: true}"
                       [noChangeDetection]="true"
                       [name]="'dashArray_n_'+idName+i"
                       [id]="'dashArray_n_'+idName+i"
                     (change)="onChange($event)" />
                   </div>
                   <div class="row  mt-1 mb-1 bg-body-tertiary">
-                    <app-settings-entry [ngModel]="val.theme.__state.svgIcon"
+                    <app-settings-entry [ngModel]="val.theme.__state.svgIcon" [ngModelOptions]="{standalone: true}"
                       [noChangeDetection]="true"
                       [name]="'svgIcon_'+idName+i"
                       [id]="'svgIcon_'+idName+i"
@@ -347,6 +355,7 @@
                       <input type="text" class="form-control"
                         placeholder="Name"
                         [(ngModel)]="arr.name"
+                        [ngModelOptions]="{standalone: true}"
                         (ngModelChange)="onChange($event)"
                         [name]="'arr_n_'+idName+i"
                         [id]="'arr_n_'+idName+i" required>
@@ -363,6 +372,7 @@
                     <div class="col">
                       <app-settings-entry [noChangeDetection]="true"
                         [ngModel]="arr.__state.matchers"
+                        [ngModelOptions]="{standalone: true}"
                         [name]="'arr_m_'+idName+i"
                         [id]="'arr_m_'+idName+i"
                         (ngModelChange)="onChange($event)" />
@@ -391,7 +401,8 @@
                       [id]="'link_t_'+idName+i"
                       (ngModelChange)="onChange($event)"
                       class="form-select"
-                      [(ngModel)]="link.type">
+                      [(ngModel)]="link.type"
+                      [ngModelOptions]="{standalone: true}">
                       @for (opt of getOptionsView(link.__state.type); track opt.key) {
                         <option [ngValue]="opt.key">{{opt.value}}
                         </option>
@@ -404,6 +415,7 @@
                       <input type="text" class="form-control"
                         placeholder="Name"
                         [(ngModel)]="link.name"
+                        [ngModelOptions]="{standalone: true}"
                         (ngModelChange)="onChange($event)"
                         [name]="'link_n_'+idName+i"
                         [id]="'link_n_'+idName+i" required>
@@ -416,6 +428,7 @@
                         <input type="text" class="form-control"
                           placeholder="github.com/bpatrik/pigallery2"
                           [(ngModel)]="link.url"
+                          [ngModelOptions]="{standalone: true}"
                           (ngModelChange)="onChange($event)"
                           [name]="'link_u_'+idName+i"
                           [id]="'link_u_'+idName+i"
@@ -424,6 +437,7 @@
                       @if (link.type === NavigationLinkTypes.search) {
                         <app-gallery-search-field class="d-inline-block"
                           [(ngModel)]="link.SearchQuery"
+                          [ngModelOptions]="{standalone: true}"
                           [name]="'link_s_'+idName+i"
                           [id]="'link_s_'+idName+i"
                           (change)="onChange($event)"
@@ -459,6 +473,7 @@
                     <input type="text" class="form-control"
                       placeholder="Name"
                       [(ngModel)]="item.name"
+                      [ngModelOptions]="{standalone: true}"
                       (ngModelChange)="onChange($event)"
                       [disabled]="state.readonly"
                       [name]="'link_n_'+idName+i"
@@ -471,7 +486,8 @@
                       [disabled]="state.readonly"
                       (ngModelChange)="onChange($event)"
                       class="form-select"
-                      [(ngModel)]="item.role">
+                      [(ngModel)]="item.role"
+                      [ngModelOptions]="{standalone: true}">
                       @for (opt of getOptionsView(item.__state.role); track opt.key) {
                         <option [ngValue]="opt.key">{{opt.value}}
                         </option>
@@ -484,6 +500,7 @@
                         type="password"
                         class="form-control"
                         [(ngModel)]="item.password"
+                        [ngModelOptions]="{standalone: true}"
                         [disabled]="state.readonly"
                         (ngModelChange)="onChange($event)"
                         [name]="'item_p_'+idName+i"
@@ -536,6 +553,7 @@
                 <div class="col p-0">
                   <app-settings-entry-sorting-method class="w-100"
                     [(ngModel)]="state.value[i]"
+                    [ngModelOptions]="{standalone: true}"
                     [sortingByEnum]="SortByTypes"
                     [id]="'list_'+idName+i"
                     [name]="'list_'+idName+i"
@@ -576,7 +594,7 @@
                     [title]="title"
                     (ngModelChange)="onChange($event)"
                     [disabled]="state.readonly || Disabled"
-                    class="form-select" [(ngModel)]="state.value[i]">
+                    class="form-select" [(ngModel)]="state.value[i]" [ngModelOptions]="{standalone: true}">
                     @for (opt of getOptionsView(state); track opt.key) {
                       <option [ngValue]="opt.key">{{opt.value}}
                       </option>
@@ -622,7 +640,7 @@
           </div>
         }
       </div>
-      @if (settingsService.configStyle == ConfigStyle.full) {
+      @if (settingsService.configStyle() == ConfigStyle.full) {
         <small class="form-text text-muted">
           @if (experimental) {
             <ng-icon name="ionWarningOutline" />

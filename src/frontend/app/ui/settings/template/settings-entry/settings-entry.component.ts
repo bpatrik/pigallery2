@@ -228,7 +228,7 @@ export class SettingsEntryComponent
     if (!this.state?.tags?.uiDisabled) {
       return false;
     }
-    return this.state.tags.uiDisabled(this.state.rootConfig, this.settingsService.settings.value);
+    return this.state.tags.uiDisabled(this.state.rootConfig, this.settingsService.settings());
   }
 
   // Derives the editor from this.state, which is set by writeValue, not by an input.
@@ -323,7 +323,7 @@ export class SettingsEntryComponent
     this.description = this.description || this.state.description;
     if (this.state.tags) {
       if (typeof this.dockerWarning === 'undefined') {
-        this.dockerWarning = this.state.tags.dockerSensitive && this.settingsService.settings.value.Environment.isDocker;
+        this.dockerWarning = this.state.tags.dockerSensitive && this.settingsService.settings().Environment.isDocker;
       }
       this.name = this.name || this.state.tags.name;
       this.allowSpaces = this.allowSpaces || this.state.tags.uiAllowSpaces;

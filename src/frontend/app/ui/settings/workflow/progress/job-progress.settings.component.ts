@@ -1,6 +1,7 @@
-import { Component, OnChanges, OnDestroy, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import {Component, TemplateRef, inject, input, linkedSignal, ChangeDetectionStrategy} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
-import {Subscription, timer} from 'rxjs';
+import {timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {BackendtextService} from '../../../../model/backendtext.service';
 import { DecimalPipe, DatePipe } from '@angular/common';
@@ -21,15 +22,23 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
     DurationPipe
 ]
 })
-export class JobProgressComponent implements OnDestroy, OnChanges {
+export class JobProgressComponent {
   private modalService = inject(BsModalService);
   backendTextService = inject(BackendtextService);
 
   readonly progress = input<JobProgressDTO>(undefined);
   JobProgressStates = JobProgressStates;
-  timeCurrentCopy: number;
   modalRef: BsModalRef;
-  private timerSub: Subscription;
+  // Reset to the job's last reported time on every new progress, then ticks forward every second.
+  private readonly timeCurrentCopy = linkedSignal<number>(() => this.progress()?.time.end);
+
+  constructor() {
+    timer(0, 1000).pipe(takeUntilDestroyed()).subscribe(() => {
+      if (this.progress()) {
+        this.timeCurrentCopy.update(t => t + 1000);
+      }
+    });
+  }
 
   get ProgressTitle(): string {
     const progress = this.progress();
@@ -105,7 +114,7 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
     if (!progress) {
       return 0;
     }
-    return this.timeCurrentCopy - progress.time.start;
+    return this.timeCurrentCopy() - progress.time.start;
   }
 
   get State(): string {
@@ -135,27 +144,6 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
   }
 
-  // Side effect: starts the timer that counts the elapsed job time.
-  ngOnChanges(): void {
-    const progress = this.progress();
-    if (!progress) {
-      return;
-    }
-    this.timeCurrentCopy = progress.time.end;
-    if (!this.timerSub) {
-      this.timerSub = timer(0, 1000).subscribe(() => {
-        if (this.progress()) {
-          this.timeCurrentCopy += 1000;
-        }
-      });
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.timerSub) {
-      this.timerSub.unsubscribe();
-    }
-  }
 }
 
 

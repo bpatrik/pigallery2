@@ -4,7 +4,7 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
 import {NavigationService} from '../../model/navigation.service';
-import { ViewportScroller, AsyncPipe, JsonPipe, DatePipe } from '@angular/common';
+import { ViewportScroller, JsonPipe, DatePipe } from '@angular/common';
 import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
@@ -40,7 +40,6 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     UsersComponent,
     SharingsListComponent,
     ExtensionInstallerComponent,
-    AsyncPipe,
     DatePipe,
     StringifyEnum
 ]
