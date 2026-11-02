@@ -1,16 +1,16 @@
-import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef} from 'ngx-bootstrap/modal';
 import {Subscription} from 'rxjs';
 import {ActivatedRoute, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import { ClipboardModule } from 'ngx-clipboard';
-import { NgFor, NgIf } from '@angular/common';
+import {CopyDirective} from '../../utils/copy/copy.directive';
+
 import { StringifyEnum } from '../../../pipes/StringifyEnum';
 import { LightBoxTitleTexts } from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
@@ -19,17 +19,22 @@ import {Config} from '../../../../../common/config/public/Config';
 @Component({
     selector: 'app-gallery-photo-frame-builder',
     templateUrl: './photo-frame-builder.gallery.component.html',
-    styleUrls: ['./photo-frame-builder.gallery.component.css'],
+    styleUrl: './photo-frame-builder.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
-        NgIconComponent,
-        FormsModule,
-        ClipboardModule,
-        NgFor,
-        NgIf,
-        StringifyEnum,
-    ]
+    NgIconComponent,
+    FormsModule,
+    CopyDirective,
+    StringifyEnum
+]
   })
   export class PhotoFrameBuilderGalleryComponent implements OnInit, OnDestroy {
+    contentLoaderService = inject(ContentLoaderService);
+    private notification = inject(NotificationService);
+    private route = inject(ActivatedRoute);
+    private router = inject(Router);
+    private modalService = inject(BsModalService);
+
     enabled = true;
     url = '';
     showSettings = false;
@@ -54,13 +59,7 @@ import {Config} from '../../../../../common/config/public/Config';
 
   private readonly subscription: Subscription = null;
 
-  constructor(
-      public contentLoaderService: ContentLoaderService,
-      private notification: NotificationService,
-      private route: ActivatedRoute,
-      private router: Router,
-      private modalService: BsModalService
-  ) {
+  constructor() {
     // keep for potential future route driven defaults
     this.subscription = this.route.queryParams.subscribe(() => {
       // no-op, we only need router.url at open/build time
@@ -143,9 +142,6 @@ import {Config} from '../../../../../common/config/public/Config';
 
   onOptionsChange(): void {
     this.buildUrl();
-  }
-  trackByIndex(index: number): number {
-    return index;
   }
 
   toggleSettings(): void {

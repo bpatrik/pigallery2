@@ -1,32 +1,31 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
 import {ShareService} from './ui/gallery/share.service';
-import 'hammerjs';
 import {Subscription} from 'rxjs';
 import {NavigationService} from './model/navigation.service';
 import {ThemeService} from './model/theme.service';
 import { RouterOutlet } from '@angular/router';
+import {ToastContainerComponent} from './ui/toast/toast-container.component';
 
 @Component({
     selector: 'app-pi-gallery2',
     template: `
-    <router-outlet></router-outlet>`,
-    imports: [RouterOutlet]
+    <router-outlet />
+    <app-toast-container />`,
+    changeDetection: ChangeDetectionStrategy.Eager,
+    imports: [RouterOutlet, ToastContainerComponent]
 })
 export class AppComponent implements OnInit, OnDestroy {
-  private subscription: Subscription = null;
+  private authenticationService = inject(AuthenticationService);
+  private shareService = inject(ShareService);
+  private navigation = inject(NavigationService);
+  private title = inject(Title);
+  // ThemeService applies the theme when it is created
+  private themeService = inject(ThemeService);
 
-  constructor(
-    private authenticationService: AuthenticationService,
-    private shareService: ShareService,
-    private navigation: NavigationService,
-    private title: Title,
-    private themeService: ThemeService
-  ) {
-    themeService.init();
-  }
+  private subscription: Subscription = null;
 
   async ngOnInit(): Promise<void> {
     this.title.setTitle(Config.Server.applicationTitle);

@@ -30,6 +30,15 @@ export class ProjectPathClass {
     return path.relative(this.ImageFolder, pathStr);
   }
 
+  /**
+   * Checks if pathStr (absolute or relative to ImageFolder) stays inside ImageFolder.
+   * Pure string check, no disk access.
+   */
+  public isInsideImageFolder(pathStr: string): boolean {
+    const rel = path.relative(this.ImageFolder, path.resolve(this.ImageFolder, pathStr));
+    return !(rel === '..' || rel.startsWith('..' + path.sep) || path.isAbsolute(rel));
+  }
+
   reset(): void {
     this.Root = path.join(__dirname, '/../../');
     this.FrontendFolder = path.join(this.Root, 'dist');

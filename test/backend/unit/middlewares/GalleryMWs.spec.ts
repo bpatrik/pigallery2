@@ -16,6 +16,7 @@ import {AuthenticationMWs} from '../../../../src/backend/middlewares/user/Authen
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
+import {TestHelper} from '../../../TestHelper';
 
 declare const before: any;
 declare const beforeEach: any;
@@ -55,8 +56,8 @@ function makeVideo(name: string, dirPath: string, dirName: string, contentIdenti
 }
 
 describe('GalleryMWs', () => {
+  before(TestHelper.resetConfig);
   before(() => {
-    Config.loadSync();
     Config.Database.type = DatabaseType.sqlite;
     Config.Extensions.enabled = false;
   });
@@ -312,7 +313,7 @@ describe('GalleryMWs', () => {
       });
     });
 
-    it('should return INPUT_ERROR on invalid JSON', (done: (err?: any) => void) => {
+    it('should fall back to any-text search on non-JSON input', (done: (err?: any) => void) => {
       const req: any = {
         params: {
           searchQueryDTO: '{invalid-json',
@@ -320,8 +321,11 @@ describe('GalleryMWs', () => {
       };
       GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
         try {
-          expect(err).to.not.be.undefined;
-          expect(err.code).to.equal(ErrorCodes.INPUT_ERROR);
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal({
+            type: SearchQueryTypes.any_text,
+            value: '{invalid-json',
+          });
           done();
         } catch (e) {
           done(e);

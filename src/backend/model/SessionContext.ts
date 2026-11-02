@@ -4,7 +4,7 @@ import {DirectorySearch, SearchQueryDTO} from '../../common/entities/SearchQuery
 import {DirectoryAccess} from './DirectoryAccess';
 
 export class SessionContext {
-  user: ContextUser;
+  user: SessionUser;
   // New structured projection with prebuilt SQL and params
   // It also contains the directory allow/block list, so media in a not available directory is filtered out
   projectionQuery?: Brackets;
@@ -13,7 +13,7 @@ export class SessionContext {
   directoryAccess: DirectoryAccess = new DirectoryAccess(this);
 }
 
-export interface ContextUser extends UserDTO {
+export interface SessionUser extends UserDTO {
   overrideAllowBlockList?: boolean;
 
   allowQuery?: SearchQueryDTO;

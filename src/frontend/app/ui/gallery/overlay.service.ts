@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Event} from '../../../../common/event/Event';
 import {PageHelper} from '../../model/page.helper';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class OverlayService {
   OnOverlayChange = new Event<boolean>();
   private scrollWidth: number = null;

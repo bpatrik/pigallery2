@@ -1,17 +1,16 @@
+import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {ContentService} from '../content.service';
-import {MDFilesFilterPipe} from '../../../pipes/MDFilesFilterPipe';
 import {of} from 'rxjs';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {DirectoryPathDTO} from '../../../../../common/entities/DirectoryDTO';
 
 describe('BlogService', () => {
   let service: BlogService;
-  let mockNetworkService: jasmine.SpyObj<NetworkService>;
-  let mockGalleryService: jasmine.SpyObj<ContentService>;
-  let mockMdFilesFilterPipe: jasmine.SpyObj<MDFilesFilterPipe>;
+  let mockNetworkService: Mocked<NetworkService>;
+  let mockGalleryService: Mocked<ContentService>;
 
   const createMockDirectory = (path: string, name: string): DirectoryPathDTO => ({
     path: path,
@@ -26,18 +25,16 @@ describe('BlogService', () => {
   } as MDFileDTO);
 
   beforeEach(() => {
-    mockNetworkService = jasmine.createSpyObj('NetworkService', ['getText']);
-    mockGalleryService = jasmine.createSpyObj('ContentService', [], {
+    mockNetworkService = {getText: vi.fn()} as unknown as Mocked<NetworkService>;
+    mockGalleryService = {
       sortedFilteredContent: of(null)
-    });
-    mockMdFilesFilterPipe = jasmine.createSpyObj('MDFilesFilterPipe', ['transform']);
+    } as unknown as Mocked<ContentService>;
 
     TestBed.configureTestingModule({
       providers: [
         BlogService,
         {provide: NetworkService, useValue: mockNetworkService},
-        {provide: ContentService, useValue: mockGalleryService},
-        {provide: MDFilesFilterPipe, useValue: mockMdFilesFilterPipe}
+        {provide: ContentService, useValue: mockGalleryService}
       ]
     });
 
@@ -47,7 +44,7 @@ describe('BlogService', () => {
   describe('splitMarkDown', () => {
     it('should return empty array for empty markdown', async () => {
       const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
-      mockNetworkService.getText.and.returnValue(Promise.resolve(''));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(''));
 
       const result = await (service as any).splitMarkDown(file, [], 0);
 
@@ -56,7 +53,7 @@ describe('BlogService', () => {
 
     it('should return empty array for whitespace-only markdown', async () => {
       const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
-      mockNetworkService.getText.and.returnValue(Promise.resolve('   \n\n  \t  \n  '));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve('   \n\n  \t  \n  '));
 
       const result = await (service as any).splitMarkDown(file, [], 0);
 
@@ -66,7 +63,7 @@ describe('BlogService', () => {
     it('should return entire markdown with date=null when no date groups exist', async () => {
       const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
       const markdown = '# Test Markdown\n\nSome content here.';
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, [], 0);
 
@@ -77,12 +74,31 @@ describe('BlogService', () => {
       expect(result[0].textShort).toBe(markdown.substring(0, 200));
     });
 
+    it('should remove date tags and comments when no date groups exist', async () => {
+      const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
+      const markdown = '<!-- comment -->\n# Intro\n\n<!-- @pg-date 2025-02-01 -->\n## Day 1\n\nContent.';
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
+
+      const result = await (service as any).splitMarkDown(file, [], 0);
+
+      expect(result.length).toBe(1);
+      expect(result[0].text).toBe('# Intro\n\n\n## Day 1\n\nContent.');
+    });
+
+    it('should return empty array for comment-only markdown', async () => {
+      const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve('<!-- only a comment -->'));
+
+      expect(await (service as any).splitMarkDown(file, [], 0)).toEqual([]);
+      expect(await (service as any).splitMarkDown(file, [Date.UTC(2025, 1, 1)], 0)).toEqual([]);
+    });
+
     it('should place undated markdown at top (date=null) when not a search result', async () => {
       const firstMedia = Date.UTC(2025, 1, 1);
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '# Test Markdown\n\nNo date tags here.';
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -97,7 +113,7 @@ describe('BlogService', () => {
       const file = createMockMDFile('test.md', fileDate);
       const markdown = '# Test Markdown\n\nNo date tags here.';
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3), Date.UTC(2025, 1, 5)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -111,7 +127,7 @@ describe('BlogService', () => {
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '<!-- @pg-date 2025-02-03 -->\n## Day 1\n\nContent for Feb 3rd.';
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3), Date.UTC(2025, 1, 5)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -124,7 +140,7 @@ describe('BlogService', () => {
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '<!-- @pg-date 2025-02-02 -->\n## Day 1\n\nContent for Feb 2nd.';
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3), Date.UTC(2025, 1, 5)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -143,7 +159,7 @@ Content for Feb 1st.
 ## Day 2
 Content for Feb 3rd.`;
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -165,7 +181,7 @@ First part.
 ## Part 2
 Second part (goes to Feb 1).`;
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 5)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -185,7 +201,7 @@ This is undated.
 ## Day 1
 This is dated.`;
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -201,7 +217,7 @@ This is dated.`;
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '<!-- @pg-date: 2025-02-01 -->\n## Day 1\n\nContent.';
       const dates = [Date.UTC(2025, 1, 1)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -214,7 +230,7 @@ This is dated.`;
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '  <!--   @pg-date   2025-02-01   -->  \n## Day 1\n\nContent.';
       const dates = [Date.UTC(2025, 1, 1)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -228,7 +244,7 @@ This is dated.`;
       const longText = 'A'.repeat(300);
       const markdown = `<!-- @pg-date 2025-02-01 -->\n${longText}`;
       const dates = [Date.UTC(2025, 1, 1)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -241,7 +257,7 @@ This is dated.`;
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '<!-- @pg-date 2025-02-03 -->\n## Content at 23:59\n\nLate in the day.';
       const dates = [Date.UTC(2025, 1, 3)];
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -254,7 +270,7 @@ This is dated.`;
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '<!-- @pg-date 2025-02-02 -->\n## Content\n\nTest.';
       const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3), Date.UTC(2025, 1, 5)]; // Ascending
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -266,7 +282,7 @@ This is dated.`;
       const file = createMockMDFile('test.md', firstMedia);
       const markdown = '<!-- @pg-date 2025-02-02 -->\n## Content\n\nTest.';
       const dates = [Date.UTC(2025, 1, 5), Date.UTC(2025, 1, 3), Date.UTC(2025, 1, 1)]; // Descending
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       const result = await (service as any).splitMarkDown(file, dates, firstMedia);
 
@@ -341,6 +357,16 @@ This is dated.`;
       expect(sections.length).toBe(1);
       expect(sections[0].date).toBeNull();
       expect(sections[0].text).toContain('Content');
+    });
+
+    it('should remove standalone comments but keep comments inside text', () => {
+      const markdown = '<!-- comment -->\n# Intro\n<!-- multi\nline -->\nUse `<!-- @pg-date <ISO_DATE> -->` tags.\n' +
+        '<!-- @pg-date 2025-02-01 -->\n<!-- another -->  \n## Day 1';
+      const sections = (service as any).parseMarkdownSections(markdown);
+
+      expect(sections.length).toBe(2);
+      expect(sections[0].text).toBe('# Intro\n\nUse `<!-- @pg-date <ISO_DATE> -->` tags.');
+      expect(sections[1].text).toBe('## Day 1');
     });
   });
 
@@ -513,7 +539,7 @@ This is dated.`;
     it('should cache markdown content', async () => {
       const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));
       const markdown = '# Test Content';
-      mockNetworkService.getText.and.returnValue(Promise.resolve(markdown));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve(markdown));
 
       await (service as any).getMarkDown(file);
       await (service as any).getMarkDown(file);
@@ -524,7 +550,7 @@ This is dated.`;
     it('should build correct file path', async () => {
       const directory = createMockDirectory('/photos/2025', 'vacation');
       const file = createMockMDFile('index.md', Date.UTC(2025, 1, 1), directory);
-      mockNetworkService.getText.and.returnValue(Promise.resolve('# Test'));
+      mockNetworkService.getText.mockReturnValue(Promise.resolve('# Test'));
 
       await (service as any).getMarkDown(file);
 

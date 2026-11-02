@@ -14,6 +14,7 @@ if (typeof $localize === 'undefined') {
 @SubConfigClass<TAGS>({softReadonly: true})
 export class EmailSMTPMessagingConfig {
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`Host`,
       priority: ConfigPriority.advanced,
@@ -24,6 +25,7 @@ export class EmailSMTPMessagingConfig {
   host: string = '';
 
   @ConfigProperty({
+    type: 'float',
     tags: {
       name: $localize`Port`,
       priority: ConfigPriority.advanced,
@@ -33,6 +35,7 @@ export class EmailSMTPMessagingConfig {
   port: number = 587;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`isSecure`,
       priority: ConfigPriority.advanced,
@@ -42,6 +45,7 @@ export class EmailSMTPMessagingConfig {
   secure: boolean = false;
 
   @ConfigProperty({
+    type: 'boolean',
     tags: {
       name: $localize`TLS required`,
       priority: ConfigPriority.advanced,
@@ -52,6 +56,7 @@ export class EmailSMTPMessagingConfig {
 
 
   @ConfigProperty({
+    type: 'string',
     tags: {
       name: $localize`User`,
       priority: ConfigPriority.advanced,
@@ -77,6 +82,7 @@ export class EmailSMTPMessagingConfig {
 export class EmailMessagingConfig {
 
   @ConfigProperty({
+    type: 'string',
     tags:
         {
           name: $localize`Sender email`,
@@ -87,6 +93,7 @@ export class EmailMessagingConfig {
   emailFrom: string = 'noreply@pigallery2.com';
 
   @ConfigProperty({
+    type: EmailSMTPMessagingConfig,
     tags:
         {
           name: $localize`SMTP`,
@@ -99,6 +106,7 @@ export class EmailMessagingConfig {
 @SubConfigClass<TAGS>({softReadonly: true})
 export class MessagingConfig {
   @ConfigProperty({
+    type: EmailMessagingConfig,
     tags:
         {
           name: $localize`Email`,

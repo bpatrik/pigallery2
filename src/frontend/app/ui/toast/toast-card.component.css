@@ -1,0 +1,79 @@
+:host {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0.75rem calc(0.75rem + 3px) 1rem;
+  font-size: 0.875rem;
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border: var(--bs-border-width) solid var(--bs-border-color-translucent);
+  border-radius: var(--bs-border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+:host-context([data-bs-theme=dark]) {
+  background-color: var(--bs-secondary-bg);
+}
+
+.toast-icon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.toast-content {
+  flex-grow: 1;
+  min-width: 0; /* let long words wrap instead of pushing out the action */
+  overflow-wrap: anywhere;
+}
+
+.toast-title {
+  font-weight: 600;
+}
+
+.toast-title:empty, .toast-text:empty {
+  display: none;
+}
+
+.toast-text {
+  white-space: pre-wrap; /* server notification details have line breaks */
+}
+
+/* with a title, the text is the less important part */
+.toast-title:not(:empty) + .toast-text {
+  margin-top: 0.125rem;
+  color: var(--bs-secondary-color);
+}
+
+:host(.single-line) .toast-title, :host(.single-line) .toast-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast-bar {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  transition: width 0.3s ease;
+}
+
+.countdown {
+  width: 100%;
+  animation-name: countdown;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+:host(:hover) .countdown {
+  animation-play-state: paused;
+}
+
+@keyframes countdown {
+  to {
+    width: 0;
+  }
+}

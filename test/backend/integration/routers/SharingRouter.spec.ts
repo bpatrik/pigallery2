@@ -14,12 +14,14 @@ import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig'
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
+import {TestHelper} from '../../../TestHelper';
 
 process.env.NODE_ENV = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 
 describe('SharingRouter', () => {
+  before(TestHelper.resetConfig);
 
   const testUser: UserDTO = {
     id: 1,

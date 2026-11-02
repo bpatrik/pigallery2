@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {backendText, backendTexts} from '../../../common/BackendTexts';
 import {DefaultsJobs} from '../../../common/entities/job/JobDTO';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class BackendtextService {
 
   public get(id: backendText | string): string {

@@ -1,7 +1,6 @@
-import {ComponentFixture, fakeAsync, TestBed, tick} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ChangeDetectorRef, QueryList} from '@angular/core';
 import {ActivatedRoute, Router} from '@angular/router';
-import {AnimationBuilder} from '@angular/animations';
 import {BehaviorSubject, of} from 'rxjs';
 
 import {GalleryLightboxComponent, LightboxStates} from './lightbox.gallery.component';
@@ -17,10 +16,10 @@ import {GridMedia} from '../grid/GridMedia';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {GalleryCacheService} from '../cache.gallery.service';
-import {FileSizePipe} from '../../../pipes/FileSizePipe';
-import {DatePipe} from '@angular/common';
 import {Utils} from '../../../../../common/Utils';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../icons';
 
 // Mock classes
 class MockFullScreenService {
@@ -81,9 +80,6 @@ class MockGalleryCacheService {
   }
 }
 
-class MockFileSizePipe {
-}
-
 class MockPiTitleService {
   setMediaTitle() {
   }
@@ -93,23 +89,13 @@ class MockPiTitleService {
 }
 
 
-class MockAnimationBuilder {
-  build() {
-    return {
-      create() {
-        return {
-          play() {
-          },
-          destroy() {
-          },
-          onDone(callback: () => void) {
-            setTimeout(callback, 0);
-            return this;
-          }
-        };
-      }
-    };
-  }
+// Finishes on the next timer tick, so fake-timer tests don't wait for the 200 ms animation
+function mockAnimate(): Animation {
+  const animation = new EventTarget() as Animation;
+  animation.cancel = () => {
+  };
+  setTimeout(() => animation.dispatchEvent(new Event('finish')), 0);
+  return animation;
 }
 
 class MockRouter {
@@ -136,10 +122,11 @@ class MockActivatedRoute {
 
 // Mock photo components
 function createMockPhotoComponent(media: PhotoDTO, index: number): GalleryPhotoComponent {
+  const gridMedia = new GridMedia(media, 1, 1, index);
   const mockComponent = {
-    gridMedia: new GridMedia(media, 1, 1, index),
+    gridMedia: () => gridMedia,
     getDimension: () => ({top: 0, left: 0, width: 100, height: 100})
-  } as GalleryPhotoComponent;
+  } as unknown as GalleryPhotoComponent;
   return mockComponent;
 }
 
@@ -171,23 +158,23 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     mockRouter = new MockRouter(mockActivatedRoute);
     mockAuthenticationService = new MockAuthenticationService();
     mockGalleryCacheService = new MockGalleryCacheService();
+    // jsdom has no Web Animations API
+    HTMLElement.prototype.animate = mockAnimate;
 
     await TestBed.configureTestingModule({
       imports: [GalleryLightboxComponent],
       providers: [
+        provideIcons(appIcons),
         ChangeDetectorRef,
         {provide: FullScreenService, useClass: MockFullScreenService},
         {provide: OverlayService, useClass: MockOverlayService},
         {provide: WakeLockService, useClass: MockWakeLockService},
-        {provide: AnimationBuilder, useClass: MockAnimationBuilder},
         {provide: Router, useValue: mockRouter},
         {provide: QueryService, useClass: MockQueryService},
         {provide: ActivatedRoute, useValue: mockActivatedRoute},
         {provide: PiTitleService, useClass: MockPiTitleService},
         {provide: AuthenticationService, useValue: mockAuthenticationService},
         {provide: GalleryCacheService, useValue: mockGalleryCacheService},
-        {provide: FileSizePipe, useValue: MockFileSizePipe},
-        {provide: DatePipe, useValue: MockFileSizePipe},
       ]
     }).compileComponents();
 
@@ -215,51 +202,60 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
 
     component.setGridPhotoQL(mockQueryList);
 
-    // Mock controls component
-    component.controls = {
-      resetZoom: jasmine.createSpy('resetZoom'),
-      runSlideShow: jasmine.createSpy('runSlideShow'),
-      stopSlideShow: jasmine.createSpy('stopSlideShow')
-    } as any;
+    // Mock controls component (replaces the view query)
+    const controls = {
+      resetZoom: vi.fn(),
+      runSlideShow: vi.fn(),
+      stopSlideShow: vi.fn()
+    };
+    (component as any).controls = () => controls;
 
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    delete (HTMLElement.prototype as Partial<HTMLElement>).animate;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should start slideshow when playback button is clicked', fakeAsync(() => {
+  it('should start slideshow when playback button is clicked', async () => {
+    vi.useFakeTimers();
     // Arrange
     component.status = LightboxStates.Open;
     (component as any).navigateToPhoto(0);
 
     // Act
     lightboxService.playback = true;
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert
     expect(component.status).toBe(LightboxStates.Open);
     expect(component.slideShowRunning).toBe(true);
-  }));
+  });
 
-  it('should cycle through images during slideshow', fakeAsync(() => {
+  it('should cycle through images during slideshow', async () => {
+    vi.useFakeTimers();
     expect(lightboxService).toBeTruthy();
     // Arrange
-    spyOn(mockRouter, 'navigate').and.returnValue(Promise.resolve(true));
+    vi.spyOn(mockRouter, 'navigate').mockReturnValue(Promise.resolve(true));
     component.status = LightboxStates.Open;
     (component as any).navigateToPhoto(0);
     component.slideShowRunning = true;
 
     // Act - simulate next image calls during slideshow
     component.nextImage();
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert
     expect(mockRouter.navigate).toHaveBeenCalled();
-  }));
+  });
 
-  it('should stop slideshow at last image when loopSlideshow is disabled', fakeAsync(() => {
+  it('should stop slideshow at last image when loopSlideshow is disabled', async () => {
+    vi.useFakeTimers();
     component.status = LightboxStates.Open;
     (component as any).navigateToPhoto(2);
     // Arrange
@@ -268,62 +264,66 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
 
     // Act - try to go to next image from last photo
     component.nextImage();
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert - should wrap to first photo but slideshow should stop in real scenario
     // The nextImage method always wraps, but slideshow logic in controls should stop
     expect(component.NexGridMedia).toBeNull(); // No next media when not looping
-  }));
+  });
 
-  it('should continue slideshow from first image when loopSlideshow is enabled', fakeAsync(() => {
+  it('should continue slideshow from first image when loopSlideshow is enabled', async () => {
+    vi.useFakeTimers();
     // Arrange
     component.status = LightboxStates.Open;
     (component as any).navigateToPhoto(2); // Navigate to last photo
     lightboxService.loopSlideshow = true;
     component.slideShowRunning = true;
 
-    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia) // Should return first media when looping
+    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia()) // Should return first media when looping
     // Act - go to next image from last photo
     component.nextImage();
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert - should wrap to first photo and continue slideshow
-    expect(component.NexGridMedia).toBe(photoComponents[1].gridMedia); // Should return first media when looping
-  }));
+    expect(component.NexGridMedia).toBe(photoComponents[1].gridMedia()); // Should return first media when looping
+  });
 
-  it('should stop slideshow when pause button is clicked', fakeAsync(() => {
+  it('should stop slideshow when pause button is clicked', async () => {
+    vi.useFakeTimers();
     // Arrange
     component.slideShowRunning = true;
     (component as any).navigateToPhoto(0);
 
     // Act
     lightboxService.playback = false;
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert
     expect(component.slideShowRunning).toBe(false);
-  }));
+  });
 
-  it('should handle slideshow with route params', fakeAsync(() => {
+  it('should handle slideshow with route params', async () => {
+    vi.useFakeTimers();
     // Arrange - spy on public property instead
     const initialSlideShowState = component.slideShowRunning;
 
     // Act - simulate playback param in route
     mockActivatedRoute.queryParams.next({[QueryParams.gallery.lightbox.playback]: 'true'});
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert
     expect(component.slideShowRunning).toBe(true);
 
     // Act - simulate removing playback param
     mockActivatedRoute.queryParams.next({});
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert
     expect(component.slideShowRunning).toBe(false);
-  }));
+  });
 
-  it('should navigate to specific photo and start slideshow', fakeAsync(() => {
+  it('should navigate to specific photo and start slideshow', async () => {
+    vi.useFakeTimers();
     // Arrange
     component.status = LightboxStates.Open;
 
@@ -332,11 +332,11 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
       [QueryParams.gallery.photo]: 'photo2.jpg',
       [QueryParams.gallery.lightbox.playback]: 'true'
     });
-    tick();
+    await vi.advanceTimersByTimeAsync(0);
 
     // Assert
     expect(component.slideShowRunning).toBe(true);
-  }));
+  });
 
   it('should not advance to next photo when no more photos and loopSlideshow disabled', () => {
     // Arrange
@@ -356,14 +356,14 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
     (component as any).navigateToPhoto(2); // Navigate to last photo
 
     // Act & Assert
-    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia);
+    expect(component.NexGridMedia).toBe(photoComponents[0].gridMedia());
   });
 
   it('should release the scroll lock and full screen when destroyed while open', () => {
     const overlayService = TestBed.inject(OverlayService);
     const fullScreenService = TestBed.inject(FullScreenService);
-    spyOn(overlayService, 'hideOverlay');
-    spyOn(fullScreenService, 'exitFullScreen');
+    vi.spyOn(overlayService, 'hideOverlay').mockImplementation(() => undefined);
+    vi.spyOn(fullScreenService, 'exitFullScreen').mockImplementation(() => undefined);
     component.status = LightboxStates.Open;
 
     fixture.destroy();
@@ -374,7 +374,7 @@ describe('GalleryLightboxComponent - Slideshow Tests', () => {
 
   it('should not touch the scroll lock when destroyed while closed', () => {
     const overlayService = TestBed.inject(OverlayService);
-    spyOn(overlayService, 'hideOverlay');
+    vi.spyOn(overlayService, 'hideOverlay').mockImplementation(() => undefined);
     component.status = LightboxStates.Closed;
 
     fixture.destroy();

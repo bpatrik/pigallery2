@@ -1,4 +1,7 @@
+import {TestBed} from '@angular/core/testing';
 import {LoginComponent} from './login.component';
+import {AuthenticationService} from '../../model/network/authentication.service';
+import {NavigationService} from '../../model/navigation.service';
 import {Config} from '../../../../common/config/public/Config';
 
 describe('LoginComponent', () => {
@@ -16,7 +19,15 @@ describe('LoginComponent', () => {
     Config.Server.apiPath = origApiPath;
   });
 
-  const createComponent = () => new LoginComponent(null, null);
+  const createComponent = (): LoginComponent => {
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: AuthenticationService, useValue: null},
+        {provide: NavigationService, useValue: null},
+      ]
+    });
+    return TestBed.runInInjectionContext(() => new LoginComponent());
+  };
 
   it('should link OIDC login to the api path without urlBase', () => {
     Config.Server.urlBase = '';

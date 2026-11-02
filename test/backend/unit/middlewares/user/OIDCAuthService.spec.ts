@@ -5,9 +5,12 @@ import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ErrorCodes} from '../../../../../src/common/entities/Error';
 import {Issuer} from 'openid-client';
+import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
+import {TestHelper} from '../../../../TestHelper';
 
 
 describe('OIDCAuthService', () => {
+  before(TestHelper.resetConfig);
 
   const createTokenSet = (claims: Record<string, unknown>, accessToken: string | null = 'access-token'): any => ({
     access_token: accessToken,
@@ -141,6 +144,15 @@ describe('OIDCAuthService', () => {
       expect(claims.email).to.equal('alice@example.com');
     });
 
+    it('should ignore userinfo of a different subject', async () => {
+      const tokenSet = createTokenSet({sub: '123'});
+      const client = createClient(tokenSet, {sub: '456', preferred_username: 'mallory'});
+
+      const claims = await OIDCAuthService.getClaims(client as any, tokenSet, ['preferred_username', 'email']);
+
+      expect(claims).to.deep.equal({sub: '123'});
+    });
+
     it('should fall back to ID token claims if userinfo fails', async () => {
       const tokenSet = createTokenSet({preferred_username: 'alice'});
       const client = createClient(tokenSet, new Error('userinfo not available'));
@@ -161,7 +173,7 @@ describe('OIDCAuthService', () => {
     });
   });
 
-  describe('callback', () => {
+  describe('getUserFromAuthenticationResponse', () => {
     let origInstance: ObjectManagers;
     let origClientPromise: Promise<any>;
     let origOidc: any;
@@ -174,12 +186,16 @@ describe('OIDCAuthService', () => {
         usernameClaim: Config.Users.oidc.usernameClaim,
         emailClaim: Config.Users.oidc.emailClaim,
         autoCreateUser: Config.Users.oidc.autoCreateUser,
-        allowedDomains: Config.Users.oidc.allowedDomains
+        allowedDomains: Config.Users.oidc.allowedDomains,
+        strictSecurity: Config.Users.oidc.strictSecurity,
+        strictLinkMaxRole: Config.Users.oidc.strictLinkMaxRole
       };
       Config.Users.oidc.usernameClaim = 'preferred_username';
       Config.Users.oidc.emailClaim = 'email';
       Config.Users.oidc.autoCreateUser = false;
       Config.Users.oidc.allowedDomains = [];
+      Config.Users.oidc.strictSecurity = false;
+      Config.Users.oidc.strictLinkMaxRole = UserRoles.User;
       foundUserNames = [];
       (ObjectManagers as any).instance = {
         UserManager: {
@@ -187,9 +203,6 @@ describe('OIDCAuthService', () => {
             foundUserNames.push(filter.name);
             return {id: 1, name: filter.name};
           }
-        },
-        SessionManager: {
-          buildContext: async (user: any) => ({user})
         }
       };
     });
@@ -200,46 +213,36 @@ describe('OIDCAuthService', () => {
       Object.assign(Config.Users.oidc, origOidc);
     });
 
-    const runCallback = async (client: any) => {
+    const getUser = async (client: any) => {
       (OIDCAuthService as any).clientPromise = Promise.resolve(client);
       const req: any = {
         session: {oidc: {state: 'state', verifier: 'verifier'}},
         query: {code: 'code', state: 'state'}
       };
-      let redirectedTo: string = null;
-      const res: any = {
-        redirect: (url: string) => {
-          redirectedTo = url;
-        }
-      };
-      await OIDCAuthService.callback(req, res);
-      return {req, redirectedTo};
+      const user = await OIDCAuthService.getUserFromAuthenticationResponse(req);
+      return {req, user};
     };
 
-    it('should log in with ID token claims and redirect to root', async () => {
-      Config.Server.urlBase = '';
+    it('should log in with ID token claims', async () => {
       const tokenSet = createTokenSet({preferred_username: 'alice', email: 'alice@example.com'});
       const client = createClient(tokenSet);
 
-      const {req, redirectedTo} = await runCallback(client);
+      const {req, user} = await getUser(client);
 
       expect(foundUserNames).to.deep.equal(['alice']);
-      expect(req.session.context.user.name).to.equal('alice');
+      expect(user.name).to.equal('alice');
       expect(req.session.oidc).to.be.undefined;
       expect(client.userinfoCalls).to.be.empty;
-      expect(redirectedTo).to.equal('/');
     });
 
-    it('should log in with userinfo claims and redirect to urlBase', async () => {
-      Config.Server.urlBase = '/galerie';
+    it('should log in with userinfo claims', async () => {
       const tokenSet = createTokenSet({sub: '123'});
-      const client = createClient(tokenSet, {preferred_username: 'alice', email: 'alice@example.com'});
+      const client = createClient(tokenSet, {sub: '123', preferred_username: 'alice', email: 'alice@example.com'});
 
-      const {req, redirectedTo} = await runCallback(client);
+      const {req, user} = await getUser(client);
 
       expect(foundUserNames).to.deep.equal(['alice']);
-      expect(req.session.context.user.name).to.equal('alice');
-      expect(redirectedTo).to.equal('/galerie/');
+      expect(user.name).to.equal('alice');
     });
 
     it('should fail if neither ID token nor userinfo has username or email', async () => {
@@ -248,13 +251,123 @@ describe('OIDCAuthService', () => {
 
       let error: any = null;
       try {
-        await runCallback(client);
+        await getUser(client);
       } catch (err) {
         error = err;
       }
       expect(error).to.not.be.null;
       expect(error.code).to.equal(ErrorCodes.CREDENTIAL_NOT_FOUND);
       expect(foundUserNames).to.be.empty;
+    });
+
+    const expectLoginError = async (client: any): Promise<any> => {
+      let error: any = null;
+      try {
+        await getUser(client);
+      } catch (err) {
+        error = err;
+      }
+      expect(error).to.not.be.null;
+      expect(error.code).to.equal(ErrorCodes.CREDENTIAL_NOT_FOUND);
+      return error;
+    };
+
+    it('should use the email local part as fallback name', async () => {
+      const tokenSet = createTokenSet({sub: '123', email: 'alice@example.com'});
+
+      const {user} = await getUser(createClient(tokenSet, new Error('no userinfo')));
+
+      expect(user.name).to.equal('alice');
+    });
+
+    it('should reject a missing email if allowed domains are set', async () => {
+      Config.Users.oidc.allowedDomains = ['example.com'];
+      const tokenSet = createTokenSet({sub: '123', preferred_username: 'alice'});
+
+      await expectLoginError(createClient(tokenSet, new Error('no userinfo')));
+      expect(foundUserNames).to.be.empty;
+    });
+
+    describe('strict security', () => {
+      const ISS = 'https://idp.example.com';
+      let users: UserDTO[];
+
+      beforeEach(() => {
+        Config.Users.oidc.strictSecurity = true;
+        users = [
+          {id: 1, name: 'admin', role: UserRoles.Admin},
+          {id: 2, name: 'alice', role: UserRoles.User},
+          {id: 3, name: 'bob', role: UserRoles.User, oidcSubject: ISS + '|bob-sub'}
+        ];
+        (ObjectManagers as any).instance = {
+          UserManager: {
+            findOne: async (filter: Partial<UserDTO>) =>
+              users.find(u => Object.keys(filter).every((k: keyof UserDTO) => u[k] === filter[k])) || null,
+            setOidcSubject: async (id: number, oidcSubject: string) => {
+              const u = users.find(e => e.id === id);
+              u.oidcSubject = oidcSubject;
+              return u;
+            },
+            createUser: async (user: UserDTO) => {
+              const u = {...user, id: users.length + 1};
+              users.push(u);
+              return u;
+            }
+          }
+        };
+      });
+
+      const login = (claims: Record<string, unknown>) =>
+        getUser(createClient(createTokenSet({iss: ISS, ...claims}), new Error('no userinfo')));
+
+      it('should link an unlinked user on first login and use the link later', async () => {
+        const {user} = await login({sub: 'alice-sub', preferred_username: 'alice'});
+        expect(user.id).to.equal(2);
+        expect(users[1].oidcSubject).to.equal(ISS + '|alice-sub');
+
+        // renamed at the provider, still the same account
+        const {user: user2} = await login({sub: 'alice-sub', preferred_username: 'alice2'});
+        expect(user2.id).to.equal(2);
+      });
+
+      it('should reject a different account with the name of a linked user', async () => {
+        await expectLoginError(createClient(createTokenSet({iss: ISS, sub: 'mallory', preferred_username: 'bob'})));
+        expect(users[2].oidcSubject).to.equal(ISS + '|bob-sub');
+      });
+
+      it('should not link a user above the max link role', async () => {
+        await expectLoginError(createClient(createTokenSet({iss: ISS, sub: 'mallory', preferred_username: 'admin'})));
+        expect(users[0].oidcSubject).to.be.undefined;
+      });
+
+      it('should link an admin if the max link role allows it', async () => {
+        Config.Users.oidc.strictLinkMaxRole = UserRoles.Admin;
+        const {user} = await login({sub: 'admin-sub', preferred_username: 'admin'});
+        expect(user.id).to.equal(1);
+        expect(users[0].oidcSubject).to.equal(ISS + '|admin-sub');
+      });
+
+      it('should reject a token without subject', async () => {
+        await expectLoginError(createClient(createTokenSet({iss: ISS, preferred_username: 'alice'})));
+        expect(users[1].oidcSubject).to.be.undefined;
+      });
+
+      it('should use the full email as fallback name only if verified', async () => {
+        users.push({id: 4, name: 'carol', role: UserRoles.User});
+        users.push({id: 5, name: 'carol@example.com', role: UserRoles.User});
+
+        await expectLoginError(createClient(createTokenSet({iss: ISS, sub: 'c', email: 'carol@example.com'}), new Error('-')));
+
+        const {user} = await login({sub: 'c', email: 'carol@example.com', email_verified: true});
+        expect(user.id).to.equal(5);
+      });
+
+      it('should link auto-created users', async () => {
+        Config.Users.oidc.autoCreateUser = true;
+        const {user} = await login({sub: 'dave-sub', preferred_username: 'dave'});
+        expect(user.name).to.equal('dave');
+        expect(user.oidcSubject).to.equal(ISS + '|dave-sub');
+      });
     });
   });
 });

@@ -79,7 +79,7 @@ describe('FilterService', () => {
       expect(latestResult.media.length).toBe(4);
       expect(latestResult.media.every(photo =>
         (photo.metadata as PhotoMetadata).faces?.some((face: FaceRegion) => face.name === 'Kate')
-      )).toBeTrue();
+      )).toBe(true);
 
       subscription.unsubscribe();
     });

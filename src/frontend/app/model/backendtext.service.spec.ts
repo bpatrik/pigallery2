@@ -20,7 +20,7 @@ describe('BackendTextService', () => {
             getTexts(obj[key]);
             continue;
           }
-          expect(backendTextService.get(obj[key])).not.toEqual(null, 'Error for key: ' + obj[key] + ', ' + key);
+          expect(backendTextService.get(obj[key]), 'Error for key: ' + obj[key] + ', ' + key).not.toEqual(null);
         }
       };
       getTexts(backendTexts);
@@ -34,8 +34,8 @@ describe('BackendTextService', () => {
       const allJobs = Utils.enumToArray(DefaultsJobs);
 
       for (let i = 0; i < allJobs.length; ++i){
-        expect(backendTextService.getJobName(allJobs[i].value)).not.toEqual(null, 'Cant find job name: ' + allJobs[i].value);
-        expect(backendTextService.getJobDescription(allJobs[i].value)).not.toEqual(null, 'Cant find job name: ' + allJobs[i].value);
+        expect(backendTextService.getJobName(allJobs[i].value), 'Cant find job name: ' + allJobs[i].value).not.toEqual(null);
+        expect(backendTextService.getJobDescription(allJobs[i].value), 'Cant find job name: ' + allJobs[i].value).not.toEqual(null);
       }
     }
   ));

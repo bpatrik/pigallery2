@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -6,13 +6,13 @@ import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef} from 'ngx-bootstrap/modal';
 import {Subscription} from 'rxjs';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
-import { ClipboardService, ClipboardModule } from 'ngx-clipboard';
+import {copyToClipboard, CopyDirective} from '../../utils/copy/copy.directive';
 import {ContentLoaderService} from '../contentLoader.service';
-import { NgIf, NgFor, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
@@ -21,20 +21,25 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
 @Component({
     selector: 'app-gallery-share',
     templateUrl: './share.gallery.component.html',
-    styleUrls: ['./share.gallery.component.css'],
+    styleUrl: './share.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
-        NgIf,
-        NgIconComponent,
-        FormsModule,
-        ClipboardModule,
-        NgFor,
-        DatePipe,
-        StringifySearchQuery,
-    ]
+    NgIconComponent,
+    FormsModule,
+    CopyDirective,
+    DatePipe,
+    StringifySearchQuery
+]
 })
 export class GalleryShareComponent implements OnInit, OnDestroy {
+  sharingService = inject(ShareService);
+  galleryService = inject(ContentLoaderService);
+  private notification = inject(NotificationService);
+  private modalService = inject(BsModalService);
+  authService = inject(AuthenticationService);
+
   enabled = true;
-  @Input() dropDownItem = false;
+  readonly dropDownItem = input(false);
   url = '';
   urlValid = false;
   showSharingList = false;
@@ -68,14 +73,7 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
     No: 'No',
   };
 
-  constructor(
-      public sharingService: ShareService,
-      public galleryService: ContentLoaderService,
-      private notification: NotificationService,
-      private modalService: BsModalService,
-      public authService: AuthenticationService,
-      private clipboardService: ClipboardService
-  ) {
+  constructor() {
     this.text.Yes = $localize`Yes`;
     this.text.No = $localize`No`;
   }
@@ -285,11 +283,9 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
 
   async share() {
     await this.get();
-    if (this.clipboardService.isSupported) {
-      this.clipboardService.copy(this.url);
+    if (await copyToClipboard(this.url)) {
       this.onCopy();
     }
-
   }
 
 }

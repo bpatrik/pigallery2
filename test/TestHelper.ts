@@ -22,6 +22,8 @@ import {FileDTO} from '../src/common/entities/FileDTO';
 import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
 import * as path from 'path';
 import {Config} from '../src/common/config/private/Config';
+import {ProjectPath} from '../src/backend/ProjectPath';
+import {SupportedFormats} from '../src/common/SupportedFormats';
 import {SortByTypes} from '../src/common/entities/SortingMethods';
 
 export class TestHelper {
@@ -29,6 +31,18 @@ export class TestHelper {
   static creationCounter = 0;
 
   public static readonly TMP_DIR = path.join(__dirname, './tmp');
+
+  /**
+   * Resets the config to the defaults plus the cli and env inputs (e.g. the MySQL settings on CI).
+   * Does not read the local config.json, so tests do not depend on the developer's config.
+   * Call it first in the top-level before() of every backend spec, so no config leaks in from earlier specs.
+   */
+  public static resetConfig(): void {
+    Config.resetToDefaults();
+    Config.loadSync({pathOverride: path.join(TestHelper.TMP_DIR, 'not-existing-config.json'), preventSaving: true});
+    ProjectPath.reset();
+    SupportedFormats.init(Config);
+  }
 
   public static getDirectoryEntry(parent: DirectoryBaseDTO = null, name = '.'): DirectoryEntity {
 

@@ -29,6 +29,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('PersonManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
 

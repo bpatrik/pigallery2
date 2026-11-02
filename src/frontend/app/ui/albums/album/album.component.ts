@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
@@ -10,42 +10,39 @@ import {SavedSearchDTO} from '../../../../../common/entities/album/SavedSearchDT
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
-import { NgIf } from '@angular/common';
+
 import { IconComponent } from '../../../icon.component';
 import { NgIconComponent } from '@ng-icons/core';
 
 @Component({
     selector: 'app-album',
     templateUrl: './album.component.html',
-    styleUrls: ['./album.component.css'],
+    styleUrl: './album.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
-        RouterLink,
-        NgIf,
-        IconComponent,
-        NgIconComponent,
-    ]
+    RouterLink,
+    IconComponent,
+    NgIconComponent
+]
 })
 export class AlbumComponent implements OnInit, OnDestroy {
-  @Input() album: AlbumBaseDTO;
-  @Input() size: number;
+  private thumbnailService = inject(ThumbnailManagerService);
+  private sanitizer = inject(DomSanitizer);
+  private albumService = inject(AlbumsService);
+  authenticationService = inject(AuthenticationService);
+
+  readonly album = input<AlbumBaseDTO>(undefined);
+  readonly size = input<number>(undefined);
   public readonly svgIcon = Config.Server.svgIcon;
 
   public thumbnail: Thumbnail = null;
 
-  constructor(
-      private thumbnailService: ThumbnailManagerService,
-      private sanitizer: DomSanitizer,
-      private albumService: AlbumsService,
-      public authenticationService: AuthenticationService
-  ) {
-  }
-
   get IsSavedSearch(): boolean {
-    return this.album && !!this.AsSavedSearch.searchQuery;
+    return this.album() && !!this.AsSavedSearch.searchQuery;
   }
 
   get AsSavedSearch(): SavedSearchDTO {
-    return this.album as SavedSearchDTO;
+    return this.album() as SavedSearchDTO;
   }
 
   get CanUpdate(): boolean {
@@ -61,9 +58,10 @@ export class AlbumComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.album?.cache?.cover) {
+    const album = this.album();
+    if (album?.cache?.cover) {
       this.thumbnail = this.thumbnailService.getThumbnail(
-          new Media(this.album.cache?.cover, this.size, this.size)
+          new Media(album.cache?.cover, this.size(), this.size())
       );
     }
   }
@@ -87,7 +85,7 @@ export class AlbumComponent implements OnInit, OnDestroy {
   async deleteAlbum($event: MouseEvent): Promise<void> {
     $event.preventDefault();
     $event.stopPropagation();
-    await this.albumService.deleteAlbum(this.album).catch(console.error);
+    await this.albumService.deleteAlbum(this.album()).catch(console.error);
   }
 }
 

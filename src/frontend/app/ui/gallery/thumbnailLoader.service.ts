@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {GalleryCacheService} from './cache.gallery.service';
 import {Media} from './Media';
 import {MediaIcon} from './MediaIcon';
@@ -13,13 +13,12 @@ export enum ThumbnailLoadingPriority {
   low = 1,
 }
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ThumbnailLoaderService {
+  private galleryCacheService = inject(GalleryCacheService);
+
   que: Array<ThumbnailTask> = [];
   runningRequests = 0;
-
-  constructor(private galleryCacheService: GalleryCacheService) {
-  }
 
   run = (): void => {
     if (

@@ -1,5 +1,5 @@
-import {Injectable} from '@angular/core';
-import {DatePipe} from '@angular/common';
+import { Injectable, LOCALE_ID, inject } from '@angular/core';
+import {formatDate} from '@angular/common';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {BehaviorSubject, Observable} from 'rxjs';
 import {Config} from '../../../../../common/config/public/Config';
@@ -15,18 +15,18 @@ import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
 import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class GallerySortingService {
+  private galleryCacheService = inject(GalleryCacheService);
+  private galleryService = inject(ContentLoaderService);
+  private rndService = inject(SeededRandomService);
+  private locale = inject(LOCALE_ID);
+
   public sorting: BehaviorSubject<SortingMethod>;
   public grouping: BehaviorSubject<GroupingMethod>;
   private collator = new Intl.Collator(undefined, {numeric: true});
 
-  constructor(
-    private galleryCacheService: GalleryCacheService,
-    private galleryService: ContentLoaderService,
-    private rndService: SeededRandomService,
-    private datePipe: DatePipe
-  ) {
+  constructor() {
     this.sorting = new BehaviorSubject(
       {
         method: Config.Gallery.NavBar.SortingGrouping.defaultPhotoSortingMethod.method,
@@ -190,10 +190,10 @@ export class GallerySortingService {
       case SortByTypes.Date:
         if (Config.Gallery.ignoreTimestampOffset === true) {
           //Datepipe used this way, converts creationDate to date in local time.
-          return (m: MediaDTO) => this.datePipe.transform(m.metadata.creationDate, 'longDate', m.metadata.creationDateOffset ? m.metadata.creationDateOffset : 'UTC');
+          return (m: MediaDTO) => formatDate(m.metadata.creationDate, 'longDate', this.locale, m.metadata.creationDateOffset ? m.metadata.creationDateOffset : 'UTC');
         } else {
           //Grouping with global time, requires a common timeframe.
-          return (m: MediaDTO) => this.datePipe.transform(m.metadata.creationDate, 'longDate', 'UTC');
+          return (m: MediaDTO) => formatDate(m.metadata.creationDate, 'longDate', this.locale, 'UTC');
         }
 
       case SortByTypes.Name:

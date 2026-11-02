@@ -1,20 +1,15 @@
 import {Injectable} from '@angular/core';
 import {UIExtensionDTO} from '../../../common/entities/extension/IClientUIConfig';
-
-/* Injected config / user from server side */
-// eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword, @typescript-eslint/no-namespace
-declare module ServerInject {
-  export let UIExtensionConfigs: UIExtensionDTO[];
-}
+import {getInjectedUIExtensionConfigs} from './server-inject';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ExtensionService {
-  public readonly UIExtensionConfig: UIExtensionDTO[];
+  public readonly UIExtensionConfig: UIExtensionDTO[] | undefined;
 
   constructor() {
-    this.UIExtensionConfig = ServerInject.UIExtensionConfigs;
+    this.UIExtensionConfig = getInjectedUIExtensionConfigs();
   }
 
 }

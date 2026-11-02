@@ -1,7 +1,9 @@
 import {expect} from 'chai';
 import {TaskExecuter} from '../../../../../src/backend/model/fileaccess/TaskExecuter';
+import {TestHelper} from '../../../../TestHelper';
 
 describe('TaskExecuter', () => {
+  before(TestHelper.resetConfig);
 
   it('should execute', async () => {
     const taskWorker = (input: number) => {

@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
@@ -61,10 +61,11 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('IndexingManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   beforeEach(async () => {
-    Config.loadSync();
+    TestHelper.resetConfig();
     Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
     await sqlHelper.initDB();
   });
@@ -72,7 +73,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
   after(async () => {
       await sqlHelper.clearDB();
-      Config.loadSync();
+      TestHelper.resetConfig();
     }
   );
 
@@ -741,7 +742,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     });
 
     afterEach(async () => {
-      Config.loadSync();
+      sqlHelper.resetConfig();
       await sqlHelper.clearDB();
     });
 

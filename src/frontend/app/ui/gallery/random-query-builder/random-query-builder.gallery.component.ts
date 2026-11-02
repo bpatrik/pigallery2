@@ -1,9 +1,9 @@
-import {Component, OnDestroy, OnInit, TemplateRef} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef} from 'ngx-bootstrap/modal';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
 import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
@@ -13,7 +13,7 @@ import {SearchQueryParserService} from '../search/search-query-parser.service';
 import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import { ClipboardModule } from 'ngx-clipboard';
+import {CopyDirective} from '../../utils/copy/copy.directive';
 import { GallerySearchQueryBuilderComponent } from '../search/query-builder/query-bulder.gallery.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 import {Utils} from '../../../../../common/Utils';
@@ -21,15 +21,22 @@ import {Utils} from '../../../../../common/Utils';
 @Component({
     selector: 'app-gallery-random-query-builder',
     templateUrl: './random-query-builder.gallery.component.html',
-    styleUrls: ['./random-query-builder.gallery.component.css'],
+    styleUrl: './random-query-builder.gallery.component.css',
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         NgIconComponent,
         FormsModule,
-        ClipboardModule,
+        CopyDirective,
         GallerySearchQueryBuilderComponent,
     ]
 })
 export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
+  contentLoaderService = inject(ContentLoaderService);
+  private notification = inject(NotificationService);
+  private searchQueryParserService = inject(SearchQueryParserService);
+  private route = inject(ActivatedRoute);
+  private modalService = inject(BsModalService);
+
   public searchQueryDTO: SearchQueryDTO = {
     type: SearchQueryTypes.any_text,
     value: '',
@@ -44,13 +51,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
 
   private readonly subscription: Subscription = null;
 
-  constructor(
-      public contentLoaderService: ContentLoaderService,
-      private notification: NotificationService,
-      private searchQueryParserService: SearchQueryParserService,
-      private route: ActivatedRoute,
-      private modalService: BsModalService
-  ) {
+  constructor() {
     this.subscription = this.route.params.subscribe((params: Params) => {
       if (!params[QueryParams.gallery.search.query]) {
         return;

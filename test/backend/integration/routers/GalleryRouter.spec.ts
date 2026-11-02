@@ -33,6 +33,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe({sqlite: true});
 
 describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   let server: Server;
@@ -309,6 +310,41 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
       } finally {
         ObjectManagers.getInstance().SearchManager.getNMedia = origGetNMedia;
       }
+    });
+  });
+
+  describe('Cache-Control', async () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const get = (url: string) => (request.execute(server.Server) as SuperAgentStatic)
+      .get(Config.Server.apiPath + url);
+
+    it('should cache photos and thumbnails for a day', async () => {
+      const photo = await get('/gallery/content/wild-1-small.jpg');
+      (photo.should as any).have.status(200);
+      expect(photo.headers['cache-control']).to.equal('private, max-age=86400');
+
+      const thumbnail = await get('/gallery/content/wild-1-small.jpg/240');
+      (thumbnail.should as any).have.status(200);
+      expect(thumbnail.headers['cache-control']).to.equal('private, max-age=86400');
+    });
+
+    it('should revalidate bestFit video', async () => {
+      const result = await get('/gallery/content/video.mp4/bestFit');
+      (result.should as any).have.status(200);
+      expect(result.headers['cache-control']).to.equal('private, no-cache');
+      expect(result.headers['etag']).to.be.a('string');
+    });
+
+    it('should not store random photo', async () => {
+      // the content request would save the folder in the background, the random query needs it in the DB
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
+      const result = await get('/gallery/random/' + encodeURIComponent(JSON.stringify({type: SearchQueryTypes.any_text, value: 'wild'})));
+      (result.should as any).have.status(200);
+      expect(result.headers['content-type']).to.equal('image/jpeg');
+      expect(result.headers['cache-control']).to.equal('no-store');
     });
   });
 

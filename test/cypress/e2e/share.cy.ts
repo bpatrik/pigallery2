@@ -66,7 +66,8 @@ const createSharing = (options: { password?: string, recursive?: boolean } = {})
   cy.get('button#getShareButton').click();
   cy.get('input#shareLink').should('contain.value', 'http');
   return cy.get('input#shareLink').invoke('val').then((link) => {
-    cy.get('button.btn-close').click();
+    // the "copied to clipboard" toast has a close button too
+    cy.get('modal-container button.btn-close').click();
     return cy.wrap(link as unknown as string);
   });
 };

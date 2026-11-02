@@ -3,8 +3,7 @@ import {EnumTranslations} from '../ui/EnumTranslations';
 import {GridSizes} from '../../../common/entities/GridSizes';
 
 @Pipe({
-    name: 'stringifyGridSize',
-    standalone: true
+    name: 'stringifyGridSize'
 })
 export class StringifyGridSize implements PipeTransform {
 

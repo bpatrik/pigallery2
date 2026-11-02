@@ -9,7 +9,8 @@ PiGallery2 is a fast, directory-first, read-only photo gallery for low-resource 
 The photo folder is never modified.
 
 - Language: TypeScript everywhere; `tsc` emits `.js` next to each `.ts` file (git-ignored).
-- Backend: Node.js + Express + TypeORM. Config via [typeconfig](https://github.com/bpatrik/typeconfig).
+- Backend: Node.js + Express + TypeORM. Config via [typeconfig](https://github.com/bpatrik/typeconfig)
+  (same maintainer, so it can change when PiGallery2 needs it).
 - Frontend: Angular.
 - Databases: SQLite (default) and MySQL/MariaDB. Both must keep working.
 
@@ -19,6 +20,13 @@ The photo folder is never modified.
   while the browser is a normal phone/desktop. Push work to the client when it makes sense; keep server queries lean.
 - **Dev velocity matters.** This is a single-maintainer project. Prefer simple, direct solutions over abstractions,
   backward-compatibility shims or migration code.
+- **Stay close to framework defaults.** Prefer the industry-standard, framework-default setup (e.g. what `ng new` generates)
+  over keeping how a legacy setup behaved or adding custom config, so `ng update` and other upgrade scripts keep working.
+- **Latest stable, not bleeding edge.** Adopt a framework feature or API once it is stable and the next major kept it
+  unchanged (e.g. stable in Angular 21 and still the same in 22). If it's new or only just stable in the latest major,
+  wait for the next major and note it as "revisit later". Don't use experimental or developer-preview APIs.
+  Move to the current standard rather than keeping a legacy pattern or a one-off exception (both are tech debt),
+  but don't change working code that's outside the task.
 - **DB breaking changes are fine.** The DB is treated as a cache of the photo folder: bump `DataStructureVersion`
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
 - **Config breaking changes: avoid if easy.** Keep existing config keys working when that's cheap,
@@ -51,10 +59,45 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 
 - Compile backend + tests: `npm run build-backend` (plain `tsc`). Mocha runs the compiled `.js`, so compile before running tests.
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
+  - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
+    never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
-- Frontend unit tests: `npm run test-frontend` (Karma, needs Chrome).
+- Frontend unit tests: `npm run test-frontend` (Vitest in jsdom, no browser needed). Single file: `npx ng test --watch=false --include=<path>.spec.ts`.
+  - The test setup is Angular's default (no Vitest config or setup file); keep it that way. Each spec is self-contained.
+  - jsdom has no layout and lacks some browser APIs (`matchMedia`, `animate`, clipboard). Prefer faking the dependency
+    through TestBed providers; otherwise stub it in the spec and remove the stub in `afterEach`.
+  - Spec files share one global scope. `vi.spyOn()` on anything that outlives the test (globals, `console`, static helpers)
+    needs `vi.restoreAllMocks()` in `afterEach`. `vi.spyOn()` calls the real method unless you mock it.
+  - Use `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync()`, not `fakeAsync`/`tick` (they don't work without
+    a zone-aware test runner), and call `vi.useRealTimers()` in the spec's `afterEach`.
 - Lint: `npm run lint`.
-- Frontend dev build (watch): `npm run run-dev`; run the server: `npm start`.
+- Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
+- E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
+  then `npx cypress run`.
+
+### Running the app
+
+To try a change in the real app, run the server against a throwaway config and DB (like `start-e2e-server` in `package.json`)
+so the maintainer's own `config.json` and DB are not touched:
+
+- `node ./src/backend/index --config-path=<tmp>/config.json --Database-dbFolder=<tmp> --Server-port=8080`
+- An empty DB gets the default user `admin` / `admin`.
+- For a different admin, enforce one on the CLI:
+  `'--Users-enforcedUsers=[{"name":"tester","role":"Admin","password":"tester"}]'`.
+- `npm run run-dev` builds the frontend continuously (English only, into `dist/en`), so frontend edits show up on reload.
+- Start it in the background and stop it by PID (`node ... & echo $! > <tmp>/pid`, later `kill $(cat <tmp>/pid)`).
+  Don't `pkill -f` a pattern that also matches your own shell command.
+- Dev bundles have unhashed names and a long `max-age`: hard-reload (or use the other host name, `localhost` ↔ `127.0.0.1`)
+  after every rebuild, or the browser runs old code.
+- Admin settings show only the basic fields by default; switch the mode to "Under the hood" to see all of them.
+
+### Cloud / container sessions
+
+- Dependencies come from the environment's setup script (`npm ci`). If `node_modules` is missing, run `npm ci`
+  without `--ignore-scripts`: tests need the native `better-sqlite3` build and the `ffmpeg-static`/`ffprobe-static` downloads.
+- Test output is long (server logs, browser console warnings). Save it to a file and read only the summary, e.g.:
+  - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
+  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; grep -aE "FAIL|Test Files|Tests " <tmp>/fe.log`
 
 ### SQLite vs MySQL tests
 
@@ -75,31 +118,49 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
   `SessionContext` carries the projection and its `projectionKey` hash. Changes that affect what a user may see must keep these caches correct.
 - **Indexing**: filesystem scanning and reindexing (`IndexingManager`, `DiskManager`, `ReIndexingSensitivity` config) are
   performance-critical on slow disks.
+- **Sessions**: the session lives in the signed `cookie-session` cookie. `req.session.stamp` (see `SessionManager.getSessionStamp`)
+  ties it to its user or sharing DB row, and `AuthenticationMWs` ends the session once that row changes. Only `AuthenticationMWs`
+  starts, restores or ends sessions. Call `SessionManager.invalidateSessionCache()` after every write to users or sharings.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
 
 ## Rules for changes
 
+- Routers contain no logic: they only list the middlewares of each path. Put the logic in `*MWs` classes.
+- Middlewares are only called from routers. Helpers shared inside a middleware class are private;
+  services and managers return values instead of using `res`.
 - Avoid heavy queries, N+1 queries and loading full tables on the server; prefer projections and pagination.
 - Keep TypeORM queries portable between SQLite and MySQL.
 - Changed any TypeORM entity? Bump `DataStructureVersion` in `src/common/DataStructureVersion.ts`.
+- Every `@ConfigProperty` needs an explicit `type` (and `arrayType` for arrays): the frontend is built without decorator metadata,
+  so typeconfig can't infer it there. `test/common/unit/config/ConfigTypes.spec.ts` checks this and snapshots the resolved types;
+  after an intended config change, regenerate the snapshot with `UPDATE_CONFIG_SNAPSHOT=true`.
 - Never expose private config values or another user's data to the client.
 - Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
 - Add or adjust tests under `test/` for behaviour changes.
 - New UI strings must use Angular i18n (`i18n` attributes / `$localize`); `npm run merge-new-translation` updates the `.xlf` files.
+- Support non-ASCII text everywhere: accented and other Unicode characters in file/folder names, paths, URLs,
+  metadata (keywords, captions, person names) and search, on both SQLite and MySQL.
+  Search and sorting should handle accents sensibly (e.g. locale-aware `localeCompare`).
+- Translation-friendly UI: translate whole sentences with placeholders instead of concatenating pieces
+  (word order and suffixes differ between languages), expect much longer words than in English without breaking the layout,
+  format dates and numbers by locale, and don't assume a "first name last name" order.
 - Prefer implementing new features as extensions when feasible (see contribution guide).
 
 ## Code style
 
 - 2-space indent, single quotes in TS, UTF-8, final newline (`.editorconfig`; ESLint in `eslint.config.mjs`).
 - Keep strict typing; prefer explicit return types.
+- Angular components: separate `.ts`, `.html` and `.css` files (`templateUrl` / `styleUrls`), no inline `template` or `styles`.
 - Match the style of the surrounding code.
 
 ## Git
 
 - Commit messages: short imperative summary, with the GitHub issue when there is one (e.g. `Fix X #1234`).
+- `git add` every new file that belongs in the repo as soon as you create it (not scratch or generated files),
+  so it shows up in the IDE's diff before the commit.
 
 ## Maintaining this file
 
