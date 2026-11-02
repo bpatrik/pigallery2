@@ -73,7 +73,21 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
-  then `npx cypress run`.
+  then `npx cypress run`. It covers login, gallery (filters, lightbox, URL deep links), search, faces and sharing.
+  - Cypress 16 removed `Cypress.env()`. A throwaway spec outside the repo must be plain `.js`:
+    `npx cypress run --spec <path> --config specPattern=<path>`.
+  - If the browser doesn't start (EPERM on a Cypress profile folder, "closed unexpectedly"), retry or use another `--browser`.
+- Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
+  read only the summary:
+  - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
+  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/fe.log | grep -E "FAIL|Test Files|Tests "`
+
+### Tooling
+
+- `gh issue view <n> --comments` prints only the comments when not run in a terminal; read the body with
+  `gh issue view <n> --json body --jq .body`. Outside the repo folder pass `--repo bpatrik/pigallery2`.
+- Whether an Angular API is stable: its JSDoc tag in `node_modules/@angular/*/types/*.d.ts`. `@publicApi <version>` is stable
+  since that version; `@experimental` and `@developerPreview` are not.
 
 ### Running the app
 
@@ -87,17 +101,13 @@ so the maintainer's own `config.json` and DB are not touched:
 - `npm run run-dev` builds the frontend continuously (English only, into `dist/en`), so frontend edits show up on reload.
 - Start it in the background and stop it by PID (`node ... & echo $! > <tmp>/pid`, later `kill $(cat <tmp>/pid)`).
   Don't `pkill -f` a pattern that also matches your own shell command.
-- Dev bundles have unhashed names and a long `max-age`: hard-reload (or use the other host name, `localhost` ↔ `127.0.0.1`)
-  after every rebuild, or the browser runs old code.
+- Dev bundles have unhashed names; the server revalidates them with their ETag, so a normal reload picks up a rebuild.
 - Admin settings show only the basic fields by default; switch the mode to "Under the hood" to see all of them.
 
 ### Cloud / container sessions
 
 - Dependencies come from the environment's setup script (`npm ci`). If `node_modules` is missing, run `npm ci`
   without `--ignore-scripts`: tests need the native `better-sqlite3` build and the `ffmpeg-static`/`ffprobe-static` downloads.
-- Test output is long (server logs, browser console warnings). Save it to a file and read only the summary, e.g.:
-  - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
-  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; grep -aE "FAIL|Test Files|Tests " <tmp>/fe.log`
 
 ### SQLite vs MySQL tests
 
@@ -124,6 +134,17 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
+
+### Frontend state (signals)
+
+State read in templates is a signal; derived state is `computed()`/`linkedSignal()`. HTTP, timers and router events stay RxJS,
+bridged with `toObservable()`/`toSignal()` (to await a signal: `firstValueFrom(toObservable(...))`). Pitfalls seen so far:
+
+- Effects run after the constructor and asynchronously; in specs run them with `TestBed.tick()`.
+  `AuthenticationService` must not send requests from its constructor: the error interceptor injects it (NG0200).
+- A `linkedSignal` only remembers values that were read. `resource()` falls back to its `defaultValue` while it loads new params.
+- A signal view query (`viewChildren()`) returns fresh results whenever it is read. A template checked before that view
+  (e.g. the lightbox reading the grid's photos) then gets NG0100 in dev mode; see #1271.
 
 ## Rules for changes
 
@@ -168,3 +189,9 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
   that contradicts or is missing from this file, also update this file (keep it short, and mention the update in your summary).
 - Anyone else (other contributors, PRs, forks): do **not** modify `AGENTS.md`, `CLAUDE.md` or `.junie/guidelines.md`.
   Suggest changes in the PR description instead.
+
+## Maintainer's setup
+
+Only relevant when working with the maintainer, Patrik J. Braun.
+
+- Works on Windows (Git Bash and PowerShell). `python` there is only the Microsoft Store stub; use `perl` or `node` for scripted edits.
