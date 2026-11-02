@@ -5,16 +5,25 @@
     "outDir": "../../out-tsc/spec",
     "target": "ES2022",
     "module": "ES2022",
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": false,
+    "isolatedModules": true,
     "types": [
-      "jasmine"
+      "vitest/globals",
+      "@angular/localize"
     ]
   },
-  "files": [
-    "test.ts",
-    "polyfills.ts"
-  ],
   "include": [
     "**/*.spec.ts",
     "**/*.d.ts"
-  ]
+  ],
+  "exclude": [],
+  "angularCompilerOptions": {
+    "extendedDiagnostics": {
+      "checks": {
+        "nullishCoalescingNotNullable": "suppress",
+        "optionalChainNotNullable": "suppress"
+      }
+    }
+  }
 }

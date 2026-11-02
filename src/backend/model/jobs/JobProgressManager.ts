@@ -41,6 +41,18 @@ export class JobProgressManager {
     this.delayedSave();
   }
 
+  /**
+   * Writes out a pending delayed save, so it does not fire after shutdown.
+   */
+  async cleanUp(): Promise<void> {
+    if (this.timer === null) {
+      return;
+    }
+    clearTimeout(this.timer);
+    this.timer = null;
+    await this.saveDB().catch(console.error);
+  }
+
   private async loadDB(): Promise<void> {
     try {
       await fsp.access(this.dbPath);
@@ -81,6 +93,7 @@ export class JobProgressManager {
   }
 
   private async saveDB(): Promise<void> {
+    await fsp.mkdir(path.dirname(this.dbPath), {recursive: true});
     await fsp.writeFile(this.dbPath, JSON.stringify(this.db));
   }
 

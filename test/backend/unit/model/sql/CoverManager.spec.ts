@@ -62,6 +62,7 @@ class GalleryManagerTest extends GalleryManager {
 }
 
 describe('CoverManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
   /**
    * dir

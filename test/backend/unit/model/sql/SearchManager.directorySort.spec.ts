@@ -18,6 +18,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it os IDE plays nicely (recognize the test)
 
 describe('SearchManager directory sorting', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   /**
@@ -80,7 +81,7 @@ describe('SearchManager directory sorting', (sqlHelper: DBTestHelper) => {
   });
 
   beforeEach(() => {
-    Config.loadSync();
+    sqlHelper.resetConfig();
   });
 
   it('should order by directory path, so same-named directories are not interleaved', async () => {

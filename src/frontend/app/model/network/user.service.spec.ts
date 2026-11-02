@@ -6,7 +6,7 @@ import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {LoadingBarService} from '@ngx-loading-bar/core';
 import {ShareService} from '../../ui/gallery/share.service';
 import {VersionService} from '../version.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {provideHttpClient, withXhr} from '@angular/common/http';
 
 class MockShareService {
   wait(): Promise<boolean> {
@@ -28,7 +28,7 @@ describe('UserService', (): void => {
         LoadingBarService,
         NetworkService,
         { provide: ShareService, useClass: MockShareService },
-        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
     ]
 });
@@ -40,11 +40,11 @@ describe('UserService', (): void => {
           userService: UserService,
           networkService: NetworkService
       ): Promise<void> => {
-        spyOn(networkService, 'postJson');
+        vi.spyOn(networkService, 'postJson').mockImplementation(() => undefined);
         const credential = new LoginCredential('name', 'pass');
         await userService.login(credential);
         expect(networkService.postJson).toHaveBeenCalled();
-        expect((networkService.postJson as any).calls.argsFor(0)).toEqual([
+        expect((networkService.postJson as any).mock.calls[0]).toEqual([
           '/user/login',
           {loginCredential: credential},
         ]);
@@ -57,10 +57,10 @@ describe('UserService', (): void => {
           userService: UserService,
           networkService: NetworkService
       ): Promise<void> => {
-        spyOn(networkService, 'getJson');
+        vi.spyOn(networkService, 'getJson').mockImplementation(() => undefined);
         await userService.getSessionUser();
         expect(networkService.getJson).toHaveBeenCalled();
-        expect((networkService.getJson as any).calls.argsFor(0)).toEqual([
+        expect((networkService.getJson as any).mock.calls[0]).toEqual([
           '/user/me',
         ]);
       }

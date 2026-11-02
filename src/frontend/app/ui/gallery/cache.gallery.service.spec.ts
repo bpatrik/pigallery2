@@ -1,5 +1,8 @@
 import {BehaviorSubject} from 'rxjs';
+import {TestBed} from '@angular/core/testing';
 import {GalleryCacheService} from './cache.gallery.service';
+import {VersionService} from '../../model/version.service';
+import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {PackedContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 
@@ -8,7 +11,15 @@ describe('GalleryCacheService', () => {
   const setUp = () => {
     const versionService = {version: new BehaviorSubject<string>(null)};
     const authService = {user: new BehaviorSubject<UserDTO>(null)};
-    const service = new GalleryCacheService(versionService as any, authService as any);
+    // a fresh injector per setUp, like a page reload
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: VersionService, useValue: versionService},
+        {provide: AuthenticationService, useValue: authService},
+      ]
+    });
+    const service = TestBed.inject(GalleryCacheService);
     return {service, authService};
   };
 

@@ -1,8 +1,8 @@
 <input
   class="form-control"
-  [name]="name"
+  [name]="name()"
   bsDatepicker
-  [ngModel]="date"
+  [ngModel]="date()"
   (ngModelChange)="onChange($event)"
   [bsConfig]="{ dateInputFormat: 'YYYY.MM.DD, HH:mm' }"
   required>

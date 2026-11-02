@@ -10,6 +10,7 @@ import {MediaDTO} from '../../../../../src/common/entities/MediaDTO';
 import {SavedSearchDTO} from '../../../../../src/common/entities/album/SavedSearchDTO';
 import {ProjectedAlbumCacheEntity} from '../../../../../src/backend/model/database/enitites/album/ProjectedAlbumCacheEntity';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {TestHelper} from '../../../../TestHelper';
 
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -32,6 +33,7 @@ describe = DBTestHelper.describe(); // fake it os IDE plays nicely (recognize th
 
 
 describe('AlbumManager', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
 

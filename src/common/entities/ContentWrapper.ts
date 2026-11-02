@@ -101,7 +101,9 @@ export class ContentWrapperUtils {
       return false;
     }
 
-    if (!Utils.equalsFilter(pm1, pm2)) {
+    // equalsFilter only checks the properties of its second argument: compare
+    // both ways, so a removed property (e.g. the last keyword) is noticed too.
+    if (!Utils.equalsFilter(pm1, pm2) || !Utils.equalsFilter(pm2, pm1)) {
       return false;
     }
 

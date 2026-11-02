@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
 import {BehaviorSubject} from 'rxjs';
 import {UserService} from './user.service';
@@ -6,38 +6,26 @@ import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {Config} from '../../../../common/config/public/Config';
 import {NetworkService} from './network.service';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
-import {CookieNames} from '../../../../common/CookieNames';
 import {ShareService} from '../../ui/gallery/share.service';
-import {CookieService} from 'ngx-cookie-service';
-
-/* Injected config / user from server side */
-// eslint-disable-next-line @typescript-eslint/prefer-namespace-keyword, @typescript-eslint/no-namespace
-declare module ServerInject {
-  export let user: UserDTO;
-}
+import {getInjectedUser} from '../server-inject';
 
 @Injectable({providedIn: 'root'})
 export class AuthenticationService {
+  private userService = inject(UserService);
+  private shareService = inject(ShareService);
+
   public readonly user: BehaviorSubject<UserDTO>;
 
-  constructor(
-    private userService: UserService,
-    networkService: NetworkService,
-    private shareService: ShareService,
-    private cookieService: CookieService
-  ) {
+  constructor() {
+    const networkService = inject(NetworkService);
+
     this.user = new BehaviorSubject(null);
 
-    // picking up session..
-    if (
-      this.isAuthenticated() === false &&
-      this.cookieService.get(CookieNames.session) != null
-    ) {
-      if (
-        typeof ServerInject !== 'undefined' &&
-        typeof ServerInject.user !== 'undefined'
-      ) {
-        this.user.next(ServerInject.user);
+    // Picking up the session. Its cookie is httpOnly, so JS can't check if it exists: always ask the server.
+    if (this.isAuthenticated() === false) {
+      const injectedUser = getInjectedUser();
+      if (typeof injectedUser !== 'undefined') {
+        this.user.next(injectedUser);
       }
       this.getSessionUser().catch(console.error);
     } else {

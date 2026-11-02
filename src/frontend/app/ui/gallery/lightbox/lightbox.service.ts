@@ -1,4 +1,4 @@
-import {Injectable} from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
@@ -10,10 +10,12 @@ import {Utils} from '../../../../../common/Utils';
   providedIn: 'root'
 })
 export class LightboxService {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   private subscription: Subscription;
 
-  constructor(private route: ActivatedRoute,
-              private router: Router) {
+  constructor() {
 
 
     this.subscription = this.route.queryParams.subscribe(

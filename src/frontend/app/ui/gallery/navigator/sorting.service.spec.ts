@@ -1,8 +1,11 @@
-import {DatePipe} from '@angular/common';
+import {TestBed} from '@angular/core/testing';
+import {LOCALE_ID} from '@angular/core';
 import {BehaviorSubject, of} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {GallerySortingService, GroupedDirectoryContent} from './sorting.service';
-import {DirectoryContent} from '../contentLoader.service';
+import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
+import {GalleryCacheService} from '../cache.gallery.service';
+import {SeededRandomService} from '../../../model/seededRandom.service';
 import {GroupByBasicTypes, GroupByTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 
@@ -17,12 +20,16 @@ describe('GallerySortingService directory sorting and grouping', () => {
   let service: GallerySortingService;
 
   beforeEach(() => {
-    service = new GallerySortingService(
-      {getSorting: (): null => null, getGrouping: (): null => null} as never,
-      {content: new BehaviorSubject(null)} as never,
-      {setSeed: (): void => undefined, get: (): number => 0} as never,
-      new DatePipe('en-US')
-    );
+    TestBed.configureTestingModule({
+      providers: [
+        GallerySortingService,
+        {provide: GalleryCacheService, useValue: {getSorting: (): null => null, getGrouping: (): null => null}},
+        {provide: ContentLoaderService, useValue: {content: new BehaviorSubject(null)}},
+        {provide: SeededRandomService, useValue: {setSeed: (): void => undefined, get: (): number => 0}},
+        {provide: LOCALE_ID, useValue: 'en-US'}
+      ]
+    });
+    service = TestBed.inject(GallerySortingService);
   });
 
   const applyDirectorySorting = (items: MediaDTO[], grouping: number): GroupedDirectoryContent => {
@@ -50,7 +57,7 @@ describe('GallerySortingService directory sorting and grouping', () => {
     expect(mediaNames(result.mediaGroups[0])).toEqual(['r.jpg', '1.jpg', '3.jpg', '2.jpg', '4.jpg']);
   });
 
-  it('should group same-named directories separately by their full path and label the root as Home', () => {
+  it('should group media by directory path, keeping same-named directories separate', () => {
     const result = applyDirectorySorting([
       media('1.jpg', summer2020),
       media('2.jpg', summer2021),

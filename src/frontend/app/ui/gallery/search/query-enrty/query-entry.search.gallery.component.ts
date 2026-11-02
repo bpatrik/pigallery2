@@ -1,4 +1,4 @@
-import {Component, EventEmitter, forwardRef, Input, Output} from '@angular/core';
+import {Component, forwardRef, input, output, ChangeDetectionStrategy} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -22,10 +22,10 @@ import {
   NG_VALIDATORS,
   NG_VALUE_ACCESSOR,
   UntypedFormControl,
-  ValidationErrors,
+  type ValidationErrors,
   Validator
 } from '@angular/forms';
-import {DatePipe, NgClass, NgFor, NgIf, NgSwitch, NgSwitchCase} from '@angular/common';
+import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
 import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
@@ -33,7 +33,7 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 @Component({
   selector: 'app-gallery-search-query-entry',
   templateUrl: './query-entry.search.gallery.component.html',
-  styleUrls: ['./query-entry.search.gallery.component.css'],
+  styleUrl: './query-entry.search.gallery.component.css',
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -46,17 +46,13 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
       multi: true,
     },
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    NgIf,
     FormsModule,
-    NgFor,
-    NgClass,
     NgIconComponent,
-    NgSwitch,
-    NgSwitchCase,
     DatePipe,
-    StringifySearchType,
-  ]
+    StringifySearchType
+]
 })
 export class GallerySearchQueryEntryComponent
   implements ControlValueAccessor, Validator {
@@ -65,8 +61,8 @@ export class GallerySearchQueryEntryComponent
   public SearchQueryTypes = SearchQueryTypes;
   public DatePatternFrequency = DatePatternFrequency;
   public TextSearchQueryMatchTypes = TextSearchQueryMatchTypes;
-  @Output() delete = new EventEmitter<void>();
-  @Input() id = 'NA';
+  readonly delete = output<void>();
+  readonly id = input('NA');
 
   public locationInputText: string = '';
 

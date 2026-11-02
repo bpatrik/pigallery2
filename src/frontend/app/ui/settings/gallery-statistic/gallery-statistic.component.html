@@ -3,24 +3,24 @@
     Statistic:
   </div>
   <div class="col-md-2 col-6">
-    <ng-icon name="ionFolderOutline" title="Folders" i18n-title></ng-icon>
+    <ng-icon name="ionFolderOutline" title="Folders" i18n-title />
     {{settingsService.statistic.value ? settingsService.statistic.value.directories : '...'}}
   </div>
   <div class="col-md-2 col-6">
-    <ng-icon name="ionCameraOutline" title="Photos" i18n-title></ng-icon>
+    <ng-icon name="ionCameraOutline" title="Photos" i18n-title />
     {{settingsService.statistic.value ? settingsService.statistic.value.photos : '...'}}
   </div>
   <div class="col-md-2 col-6">
-    <ng-icon name="ionVideocamOutline" title="Videos" i18n-title></ng-icon>
+    <ng-icon name="ionVideocamOutline" title="Videos" i18n-title />
     {{settingsService.statistic.value ? settingsService.statistic.value.videos : '...'}}
 
   </div>
   <div class="col-md-2 col-6">
-    <ng-icon name="ionPersonOutline" title="Persons" i18n-title></ng-icon>
+    <ng-icon name="ionPersonOutline" title="Persons" i18n-title />
     {{settingsService.statistic.value ? settingsService.statistic.value.persons : '...'}}
   </div>
   <div class="col-md-2 col-6">
-    <ng-icon name="ionPieChartOutline" title="Size" i18n-title></ng-icon>
+    <ng-icon name="ionPieChartOutline" title="Size" i18n-title />
     {{settingsService.statistic.value ? (settingsService.statistic.value.diskUsage | fileSize) : '...'}}
   </div>
 </div>

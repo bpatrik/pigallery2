@@ -9,6 +9,7 @@ import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {ExtensionConfigWrapper} from '../../../../../src/backend/model/extension/ExtensionConfigWrapper';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {DBTestHelper} from '../../../DBTestHelper';
+import {TestHelper} from '../../../../TestHelper';
 
 
 declare let describe: any;
@@ -19,6 +20,7 @@ const tmpDescribe = describe;
 describe = DBTestHelper.describe();
 
 describe('Settings middleware', (sqlHelper: DBTestHelper) => {
+  before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
   beforeEach(sqlHelper.initDB);

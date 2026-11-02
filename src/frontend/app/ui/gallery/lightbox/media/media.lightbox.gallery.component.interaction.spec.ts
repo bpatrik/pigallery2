@@ -1,3 +1,4 @@
+import type {Mock} from 'vitest';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {DomSanitizer} from '@angular/platform-browser';
 
@@ -5,6 +6,8 @@ import {GalleryLightboxMediaComponent} from './media.lightbox.gallery.component'
 import {LightboxService} from '../lightbox.service';
 import {GridMedia} from '../../grid/GridMedia';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
+import {provideIcons} from '@ng-icons/core';
+import {appIcons} from '../../../../icons';
 
 class MockLightboxService {
   loopVideos = false;
@@ -32,13 +35,13 @@ function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
 
 function createMockVideoElement(): {
   currentTime: number;
-  play: jasmine.Spy;
-  pause: jasmine.Spy;
+  play: Mock;
+  pause: Mock;
 } {
   return {
     currentTime: 12,
-    play: jasmine.createSpy('play').and.returnValue(Promise.resolve()),
-    pause: jasmine.createSpy('pause'),
+    play: vi.fn().mockReturnValue(Promise.resolve()),
+    pause: vi.fn(),
   };
 }
 
@@ -50,6 +53,7 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
     await TestBed.configureTestingModule({
       imports: [GalleryLightboxMediaComponent],
       providers: [
+        provideIcons(appIcons),
         {provide: LightboxService, useClass: MockLightboxService},
         {
           provide: DomSanitizer,
@@ -65,8 +69,8 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
   });
 
   const renderLivePhoto = () => {
-    component.gridMedia = makeGridMedia();
-    component.loadMedia = true;
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
+    fixture.componentRef.setInput('loadMedia', true);
     component.ngOnChanges();
     fixture.detectChanges();
     return fixture.nativeElement.querySelector('.live-photo-badge') as HTMLElement;
@@ -75,38 +79,38 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
   it('should start and stop the companion video from badge hover events', () => {
     const badge = renderLivePhoto();
     const video = createMockVideoElement();
-    component.liveVideo = {nativeElement: video as any} as any;
+    (component as any).liveVideo = () => ({nativeElement: video});
 
     badge.dispatchEvent(new Event('mouseenter'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBeTrue();
+    expect(component.liveVideoPlaying).toBe(true);
     expect(video.currentTime).toBe(0);
     expect(video.play).toHaveBeenCalled();
 
     badge.dispatchEvent(new Event('mouseleave'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBeFalse();
+    expect(component.liveVideoPlaying).toBe(false);
     expect(video.pause).toHaveBeenCalled();
   });
 
   it('should start and stop the companion video from badge touch events', () => {
     const badge = renderLivePhoto();
     const video = createMockVideoElement();
-    component.liveVideo = {nativeElement: video as any} as any;
+    (component as any).liveVideo = () => ({nativeElement: video});
 
     badge.dispatchEvent(new Event('touchstart'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBeTrue();
+    expect(component.liveVideoPlaying).toBe(true);
     expect(video.currentTime).toBe(0);
     expect(video.play).toHaveBeenCalled();
 
     badge.dispatchEvent(new Event('touchend'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBeFalse();
+    expect(component.liveVideoPlaying).toBe(false);
     expect(video.pause).toHaveBeenCalled();
   });
 });

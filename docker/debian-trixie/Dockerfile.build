@@ -51,8 +51,7 @@ COPY --from=builder /app /app
 # Run build time diagnostics to make sure the app would work after build is finished
 RUN ["node", "--expose-gc", "./src/backend/index", "--run-diagnostics", "--config-path=/app/diagnostics-config.json", "--Server-Log-level=silly"]
 HEALTHCHECK --interval=40s --timeout=30s --retries=3 --start-period=60s \
-  CMD wget --quiet --tries=1 --no-check-certificate --spider \
-  http://127.0.0.1:80/heartbeat || exit 1
+  CMD ["sh", "-c", "wget --quiet --tries=1 --no-check-certificate --spider http://127.0.0.1:80/heartbeat || exit 1"]
 
 # after a extensive job (like video converting), pigallery calls gc, to clean up everthing as fast as possible
 # Exec form entrypoint is need otherwise (using shell form) ENV variables are not properly passed down to the app

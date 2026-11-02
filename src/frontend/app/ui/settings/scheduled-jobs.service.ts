@@ -1,4 +1,4 @@
-import {EventEmitter, Injectable} from '@angular/core';
+import { EventEmitter, Injectable, inject } from '@angular/core';
 import {BehaviorSubject} from 'rxjs';
 import {JobProgressDTO, JobProgressStates, OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
 import {NetworkService} from '../../model/network/network.service';
@@ -8,8 +8,12 @@ import {BackendtextService} from '../../model/backendtext.service';
 import {NotificationService} from '../../model/notification.service';
 import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class ScheduledJobsService {
+  private networkService = inject(NetworkService);
+  private notification = inject(NotificationService);
+  private backendTextService = inject(BackendtextService);
+
   public progress: BehaviorSubject<Record<string, OnTimerJobProgressDTO>>;
   public onJobFinish: EventEmitter<string> = new EventEmitter<string>();
   timer: number = null;
@@ -18,11 +22,7 @@ export class ScheduledJobsService {
   public jobStartingStopping: { [key: string]: boolean } = {};
   private subscribers = 0;
 
-  constructor(
-    private networkService: NetworkService,
-    private notification: NotificationService,
-    private backendTextService: BackendtextService
-  ) {
+  constructor() {
     this.progress = new BehaviorSubject({});
     this.availableJobs = new BehaviorSubject([]);
     this.availableMessengers = new BehaviorSubject([]);

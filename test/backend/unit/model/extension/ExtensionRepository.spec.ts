@@ -3,6 +3,7 @@ import { readFile } from 'fs/promises';
 import {ExtensionRepository} from '../../../../../src/backend/model/extension/ExtensionRepository';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import path = require('path');
+import {TestHelper} from '../../../../TestHelper';
 
 // to help WebStorm to handle the test cases
 declare let describe: any;
@@ -12,6 +13,7 @@ declare const it: any;
 
 
 describe('ExtensionRepository', () => {
+  before(TestHelper.resetConfig);
 
   it('should parse MD repo file', async () => {
 

@@ -84,16 +84,55 @@ export class RenderingMWs {
     return RenderingMWs.renderMessage(res, rs);
   }
 
+  /**
+   * For media that rarely changes under the same URL (photos, thumbnails, previews).
+   * Cached for a day only: a photo can be replaced in the folder, a thumbnail regenerated with other settings.
+   * private: these are behind authentication, so shared caches (proxies, CDNs) must not store them.
+   */
   public static renderFile(
     req: Request,
     res: Response,
     next: NextFunction
   ): void {
+    return RenderingMWs.sendFile(req, res, next, 'private, max-age=86400');
+  }
+
+  /**
+   * For files that can change under the same URL (e.g. bestFit switches to the transcoded video once it is ready).
+   * The browser revalidates them with the ETag.
+   */
+  public static renderFileNoCache(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return RenderingMWs.sendFile(req, res, next, 'private, no-cache');
+  }
+
+  /**
+   * For responses that differ on every request (e.g. random photo).
+   */
+  public static renderFileNoStore(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return RenderingMWs.sendFile(req, res, next, 'no-store');
+  }
+
+  private static sendFile(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+    cacheControl: string
+  ): void {
     if (!req.resultPipe) {
       return next();
     }
     return res.sendFile(req.resultPipe as string, {
-      maxAge: 31536000,
+      cacheControl: false,
+      // only set on a successful transfer, so errors are not cached
+      headers: {'Cache-Control': cacheControl},
       dotfiles: 'allow',
     });
   }

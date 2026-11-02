@@ -19,19 +19,19 @@ jobs:
     name: Dockerfile linting
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Lint Alpine Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.5.0
         with:
           dockerfile: ./docker/alpine/Dockerfile.build
           config: ./docker/.config/hadolint.yml
       - name: Lint Debian Trixie Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.5.0
         with:
           dockerfile: ./docker/debian-trixie/Dockerfile.build
           config: ./docker/.config/hadolint.yml
       - name: Lint Debian Trixie Self-contained Dockerfile
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.5.0
         with:
           dockerfile: ./docker/debian-trixie/selfcontained/Dockerfile
           config: ./docker/.config/hadolint.yml

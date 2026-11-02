@@ -1,13 +1,13 @@
-import {Component, ElementRef, OnInit, TemplateRef, ViewChild,} from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryTypes, TextSearch,} from '../../../../common/entities/SearchQueryDTO';
 import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {FrameComponent} from '../frame/frame.component';
-import {AsyncPipe, NgFor, NgIf} from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {AlbumComponent} from './album/album.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {FormsModule} from '@angular/forms';
@@ -20,21 +20,29 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
 @Component({
   selector: 'app-albums',
   templateUrl: './albums.component.html',
-  styleUrls: ['./albums.component.css'],
+  styleUrl: './albums.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
-    NgFor,
     AlbumComponent,
-    NgIf,
     NgIconComponent,
     FormsModule,
     GallerySearchQueryBuilderComponent,
     SavedSearchPopupComponent,
-    AsyncPipe,
-  ]
+    AsyncPipe
+]
 })
 export class AlbumsComponent implements OnInit {
-  @ViewChild('container', {static: true}) container: ElementRef;
+  albumsService = inject(AlbumsService);
+  private modalService = inject(BsModalService);
+  authenticationService = inject(AuthenticationService);
+  private piTitleService = inject(PiTitleService);
+  private shareService = inject(ShareService);
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+  private searchQueryParserService = inject(SearchQueryParserService);
+
+  readonly container = viewChild<ElementRef>('container');
   public size: number;
   public savedSearch = {
     name: '',
@@ -42,16 +50,7 @@ export class AlbumsComponent implements OnInit {
   };
   private modalRef: BsModalRef;
 
-  constructor(
-    public albumsService: AlbumsService,
-    private modalService: BsModalService,
-    public authenticationService: AuthenticationService,
-    private piTitleService: PiTitleService,
-    private shareService: ShareService,
-    private authService: AuthenticationService,
-    private navigation: NavigationService,
-    private searchQueryParserService: SearchQueryParserService,
-  ) {
+  constructor() {
     this.albumsService.getAlbums().catch(console.error);
   }
 
@@ -94,7 +93,7 @@ export class AlbumsComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container.nativeElement.clientWidth - 30;
+    const containerWidth = this.container().nativeElement.clientWidth - 30;
     this.size = containerWidth / Math.round(containerWidth / size) - 5;
   }
 }

@@ -1,6 +1,6 @@
-import {Component, EventEmitter, forwardRef, Input, Output,} from '@angular/core';
+import { Component, forwardRef, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../../common/entities/SearchQueryDTO';
-import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, FormsModule } from '@angular/forms';
+import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
@@ -10,7 +10,7 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
 @Component({
     selector: 'app-gallery-search-query-builder',
     templateUrl: './query-builder.gallery.component.html',
-    styleUrls: ['./query-builder.gallery.component.css'],
+    styleUrl: './query-builder.gallery.component.css',
     providers: [
         {
             provide: NG_VALUE_ACCESSOR,
@@ -23,6 +23,7 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
             multi: true,
         },
     ],
+    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         GallerySearchFieldBaseComponent,
         FormsModule,
@@ -31,16 +32,15 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
 })
 export class GallerySearchQueryBuilderComponent
     implements ControlValueAccessor, Validator {
+  private searchQueryParserService = inject(SearchQueryParserService);
+
   public searchQueryDTO: SearchQueryDTO = {
     type: SearchQueryTypes.any_text,
     value: '',
   } as TextSearch;
-  @Output() search = new EventEmitter<void>();
-  @Input() placeholder = $localize`Search`;
+  readonly search = output<void>();
+  readonly placeholder = input($localize `Search`);
   public rawSearchText = '';
-
-  constructor(private searchQueryParserService: SearchQueryParserService) {
-  }
 
   /**
    * Utils.equalsFilter only checks the keys of its second argument,

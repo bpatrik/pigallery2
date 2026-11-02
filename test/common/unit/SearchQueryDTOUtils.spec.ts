@@ -488,3 +488,23 @@ describe('SearchQueryDTOUtils.isDirectoryAnchoredParent', () => {
     expect(SearchQueryUtils.isDirectoryAnchoredParent('a', [dq('a', TextSearchQueryMatchTypes.like)])).to.be.false;
   });
 });
+
+describe('SearchQueryDTOUtils.parseURLifiedQuery', () => {
+
+  it('should return null for an empty query', () => {
+    expect(SearchQueryUtils.parseURLifiedQuery('')).to.be.null;
+    expect(SearchQueryUtils.parseURLifiedQuery(undefined)).to.be.null;
+  });
+
+  it('should parse an urlified query', () => {
+    expect(SearchQueryUtils.parseURLifiedQuery('{"t":105,"v":"alice"}'))
+      .to.deep.equal({type: SearchQueryTypes.person, value: 'alice'});
+  });
+
+  it('should search for a plain text url as any text', () => {
+    for (const text of ['squirrel', 'árvíztűrő tükörfúrógép', '{"t":105', '2015', 'true', 'null', '[1,2]', '"quoted"']) {
+      expect(SearchQueryUtils.parseURLifiedQuery(text), text)
+        .to.deep.equal({type: SearchQueryTypes.any_text, value: text} as TextSearch);
+    }
+  });
+});

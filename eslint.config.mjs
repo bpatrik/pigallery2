@@ -41,6 +41,29 @@ export default tseslint.config(
     ],
     rules: {},
   },
+  // Modernisation guardrails (#1250), for every frontend file.
+  // The blocks above only match top-level files, so these rules are applied separately.
+  {
+    files: ["src/frontend/**/*.ts"],
+    // @typescript-eslint is only registered for the existing eslint-disable comments
+    plugins: {"@angular-eslint": angular.tsPlugin, "@typescript-eslint": tseslint.plugin},
+    languageOptions: {parser: tseslint.parser},
+    linterOptions: {reportUnusedDisableDirectives: "off"},
+    processor: angular.processInlineTemplates,
+    rules: {
+      "@angular-eslint/prefer-inject": "error",
+      "@angular-eslint/prefer-output-readonly": "error",
+    },
+  },
+  {
+    files: ["src/frontend/**/*.html"],
+    plugins: {"@angular-eslint/template": angular.templatePlugin},
+    languageOptions: {parser: angular.templateParser},
+    rules: {
+      "@angular-eslint/template/prefer-control-flow": "error",
+      "@angular-eslint/template/prefer-self-closing-tags": "error",
+    },
+  },
   {
     files: ["src/common/*.ts", "src/backend/*.ts"],
     extends: [

@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
@@ -8,21 +8,24 @@ import {LanguageComponent} from '../language/language.component';
 import {IconComponent} from '../../icon.component';
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
-import {NgIf} from '@angular/common';
+
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrls: ['./login.component.css'],
+  styleUrl: './login.component.css',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
-    NgIf,
     LanguageComponent,
     IconComponent,
     FormsModule,
-    NgIconComponent,
-  ]
+    NgIconComponent
+]
 })
 export class LoginComponent implements OnInit {
+  private authService = inject(AuthenticationService);
+  private navigation = inject(NavigationService);
+
   loginCredential: LoginCredential;
   loginError = false;
   title: string;
@@ -30,10 +33,7 @@ export class LoginComponent implements OnInit {
   oidcEnabled = false;
   oidcDisplayName = 'OpenID login';
 
-  constructor(
-    private authService: AuthenticationService,
-    private navigation: NavigationService
-  ) {
+  constructor() {
     this.loginCredential = new LoginCredential();
     this.title = Config.Server.applicationTitle;
     this.oidcEnabled = !!Config.Users.oidc?.enabled;

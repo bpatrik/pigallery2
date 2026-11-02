@@ -1,7 +1,9 @@
 import {expect} from 'chai';
 import {TaskQue} from '../../../../../src/backend/model/fileaccess/TaskQue';
+import {TestHelper} from '../../../../TestHelper';
 
 describe('TaskQue', () => {
+  before(TestHelper.resetConfig);
 
   it('should be empty', () => {
     const tq = new TaskQue<number, number>();
