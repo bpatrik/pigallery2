@@ -4,8 +4,8 @@ import {ToastService} from './toast.service';
 import {AuthenticationService} from '../../model/network/authentication.service';
 
 class MockToastAuthenticationService {
-  user = signal<unknown>({name: 'admin'});
-  isAuthenticated = computed((): boolean => !!this.user());
+  readonly user = signal<unknown>({name: 'admin'});
+  readonly isAuthenticated = computed((): boolean => !!this.user());
 }
 
 describe('ToastService', () => {

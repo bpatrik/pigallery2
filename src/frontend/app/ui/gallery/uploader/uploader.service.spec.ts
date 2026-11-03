@@ -23,13 +23,13 @@ class MockNetworkService {
 }
 
 class MockContentLoaderService {
-  content = signal({directory: {path: '.', name: 'Balaton', media: [{name: 'exists.jpg'}], metaFile: []}});
+  readonly content = signal({directory: {path: '.', name: 'Balaton', media: [{name: 'exists.jpg'}], metaFile: []}});
   reloadCurrentContent = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockAuthenticationService {
-  user = signal({name: 'admin', role: UserRoles.Admin});
-  isAuthenticated = computed((): boolean => !!this.user());
+  readonly user = signal({name: 'admin', role: UserRoles.Admin});
+  readonly isAuthenticated = computed((): boolean => !!this.user());
 }
 
 describe('UploaderService', () => {

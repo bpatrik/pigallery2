@@ -53,6 +53,7 @@ export default tseslint.config(
     rules: {
       "@angular-eslint/prefer-inject": "error",
       "@angular-eslint/prefer-output-readonly": "error",
+      "@angular-eslint/prefer-signals": "error",
     },
   },
   {

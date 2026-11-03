@@ -34,7 +34,7 @@ class MockGallerySortingService {
 }
 
 class MockGalleryNavigatorService {
-  girdSize = signal(GridSizes.medium);
+  readonly girdSize = signal(GridSizes.medium);
 }
 
 

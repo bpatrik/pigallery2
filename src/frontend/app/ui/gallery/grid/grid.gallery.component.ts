@@ -50,6 +50,7 @@ export class GalleryGridComponent
   readonly gridContainer = viewChild<ElementRef>('gridContainer');
   // Kept as a QueryList: the lightbox navigates on its changes (setGridPhotoQL).
   // Moving that to signals needs the lightbox refactor (E8, #1271).
+  // eslint-disable-next-line @angular-eslint/prefer-signals
   @ViewChildren(GalleryPhotoComponent)
   gridPhotoQL: QueryList<GalleryPhotoComponent>;
   readonly lightbox = input<GalleryLightboxComponent>(undefined);

@@ -38,7 +38,7 @@ class MockAuthenticationService {
 }
 
 class MockThemeService {
-  darkMode = signal(false);
+  readonly darkMode = signal(false);
 }
 
 class MockContentLoaderService {

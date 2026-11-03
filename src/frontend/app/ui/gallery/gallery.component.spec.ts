@@ -38,7 +38,7 @@ import {appIcons} from '../../icons';
 
 // Mock services
 class MockContentLoaderService {
-  content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
+  readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
   loadDirectory = vi.fn();
   search = vi.fn().mockReturnValue(Promise.resolve());
 
@@ -50,11 +50,11 @@ class MockContentLoaderService {
 }
 
 class MockContentService {
-  sortedFilteredContent = signal<GroupedDirectoryContent>(null);
+  readonly sortedFilteredContent = signal<GroupedDirectoryContent>(null);
 }
 
 class MockAuthenticationService {
-  user = signal(null);
+  readonly user = signal(null);
   isAuthenticated = vi.fn().mockReturnValue(true);
   canSearch = vi.fn().mockReturnValue(true);
   isAuthorized = vi.fn().mockReturnValue(true);
@@ -63,7 +63,7 @@ class MockAuthenticationService {
 }
 
 class MockShareService {
-  sharing = signal(null);
+  readonly sharing = signal(null);
   currentSharing = new BehaviorSubject(null);
 
   wait = vi.fn().mockReturnValue(Promise.resolve());
@@ -77,7 +77,7 @@ class MockNavigationService {
 }
 
 class MockFilterService {
-  filteredContent = signal({content: null, filters: {areFiltersActive: false}});
+  readonly filteredContent = signal({content: null, filters: {areFiltersActive: false}});
 }
 
 class MockCacheService {
@@ -97,8 +97,8 @@ class MockBlogService{
 
 
 class MockGallerySortingService {
-  sorting = signal({} as SortingMethod);
-  grouping = signal({} as SortingMethod);
+  readonly sorting = signal({} as SortingMethod);
+  readonly grouping = signal({} as SortingMethod);
   isDefaultSortingAndGrouping = vi.fn().mockReturnValue(of(true));
 }
 
@@ -118,7 +118,7 @@ class MockUploaderService{
 
 // the map reads the dark mode; the real service needs window.matchMedia, which jsdom lacks
 class MockThemeService {
-  darkMode = signal(false);
+  readonly darkMode = signal(false);
 }
 
 

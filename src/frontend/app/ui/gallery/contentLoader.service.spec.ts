@@ -17,7 +17,7 @@ class MockNetworkService {
 }
 
 class MockShareService {
-  sharing = signal<ResponseSharingDTO>(null);
+  readonly sharing = signal<ResponseSharingDTO>(null);
   currentSharing = toObservable(this.sharing).pipe(filter((s) => s !== null));
 
   isSharing(): boolean {

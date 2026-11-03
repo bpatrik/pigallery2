@@ -34,7 +34,7 @@ class MockNetworkService {
 }
 
 class MockShareService {
-  routeRecognized = signal(true);
+  readonly routeRecognized = signal(true);
 
   onNewUser(user: any): Promise<void> {
     return Promise.resolve();
