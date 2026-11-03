@@ -202,9 +202,7 @@ export class ContentLoaderService {
     this.setContent(ContentWrapperUtils.unpack(cw));
   }
 
-  isSearchResult(): boolean {
-    return !!this.content().searchResult;
-  }
+  public readonly isSearchResult = computed((): boolean => !!this.content().searchResult);
 
   public async reloadCurrentContent(): Promise<void> {
     if (!this.lastContentRequest) {

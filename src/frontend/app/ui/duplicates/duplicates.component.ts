@@ -13,6 +13,7 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DuplicatesPhotoComponent } from './photo/photo.duplicates.component';
 import { FileSizePipe } from '../../pipes/FileSizePipe';
+import {DirectoryPathPipe} from '../../pipes/DirectoryPathPipe';
 
 interface GroupedDuplicate {
   name: string;
@@ -32,7 +33,8 @@ interface GroupedDuplicate {
     RouterLink,
     DuplicatesPhotoComponent,
     DatePipe,
-    FileSizePipe
+    FileSizePipe,
+    DirectoryPathPipe
 ]
 })
 export class DuplicateComponent implements OnInit {

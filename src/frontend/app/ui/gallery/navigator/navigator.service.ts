@@ -1,4 +1,4 @@
-import { Injectable, inject, linkedSignal } from '@angular/core';
+import { Injectable, computed, inject, linkedSignal } from '@angular/core';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {ContentLoaderService} from '../contentLoader.service';
@@ -39,9 +39,7 @@ export class GalleryNavigatorService {
     }
   }
 
-  isDefaultGridSize(): boolean {
-    return this.girdSize() === this.getDefaultGridSize();
-  }
+  public readonly isDefaultGridSize = computed((): boolean => this.girdSize() === this.getDefaultGridSize());
 
 
   getDefaultGridSize(): GridSizes {

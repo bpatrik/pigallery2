@@ -15,14 +15,14 @@
   }
 
 
-  @if (gridMedia().isVideo()) {
+  @if (isVideo()) {
     <div class="video-indicator">
       {{gridMedia().Video.metadata.duration  | duration}}
       <ng-icon name="ionVideocamOutline" />
     </div>
   }
 
-  @if (gridMedia().isLivePhoto()) {
+  @if (isLivePhoto()) {
     <div class="live-photo-indicator">
       LIVE
     </div>
@@ -54,26 +54,26 @@
   @if (infoBarVisible) {
     <div class="info rounded-bottom"
       >
-      <div class="photo-name">{{Title}}</div>
-      @if (gridMedia().hasPositionData()) {
+      <div class="photo-name">{{title()}}</div>
+      @if (hasPositionData()) {
         <div class="photo-position">
           <ng-icon name="ionLocationOutline" />
-          @if (getPositionText()) {
+          @if (positionText()) {
             @if (searchEnabled) {
-              <a [routerLink]="['/search', getPositionSearchQuery()]"
-              >{{getPositionText()}}</a>
+              <a [routerLink]="['/search', (positionText() | textSearchLink: SearchQueryTypes.position)]"
+              >{{positionText()}}</a>
             }
             @if (!searchEnabled) {
-              <span>{{getPositionText()}}</span>
+              <span>{{positionText()}}</span>
             }
           }
         </div>
       }
-      @if (keywords) {
+      @if (keywords(); as keywords) {
         <div class="photo-keywords">
           @for (keyword of keywords; track keyword; let last = $last) {
             @if (searchEnabled) {
-              <a [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]">
+              <a [routerLink]="['/search', (keyword.value | textSearchLink: keyword.type)]">
                 @switch (keyword.type) {
                   @case (SearchQueryTypes.keyword) {#}
                   @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}

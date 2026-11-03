@@ -39,6 +39,8 @@ class MockGalleryNavigatorService {
 
 
 class MockBlogService {
+  readonly groupedMarkdowns = signal<GroupedMarkdown[]>([]);
+
   getMarkDowns(date: Date): GroupedMarkdown[] {
     return [];
   }

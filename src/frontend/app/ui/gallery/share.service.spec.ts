@@ -28,7 +28,7 @@ describe('ShareService', () => {
   describe('getPublicSharing', () => {
     it('should load the public info if it is not loaded yet', async () => {
       const {networkService, service} = setUp({sharingKey: 'key', passwordProtected: false});
-      service.sharingKey = 'key'; // e.g.: set from the session user, not from the route
+      service.sharingKey.set('key'); // e.g.: set from the session user, not from the route
       expect(await service.getPublicSharing()).toEqual({sharingKey: 'key', passwordProtected: false});
       expect(networkService.getJson).toHaveBeenCalledWith('/share/key/publicInfo');
 
@@ -40,7 +40,7 @@ describe('ShareService', () => {
 
     it('should return null for not valid sharing', async () => {
       const {service} = setUp({sharingKey: 'other_key', passwordProtected: false});
-      service.sharingKey = 'key';
+      service.sharingKey.set('key');
       expect(await service.getPublicSharing()).toBeNull();
     });
   });
@@ -61,7 +61,7 @@ describe('ShareService', () => {
   describe('dropSharing', () => {
     it('should forget the sharing', async () => {
       const {service} = setUp({sharingKey: 'key', passwordProtected: false});
-      service.sharingKey = 'key';
+      service.sharingKey.set('key');
       await service.getPublicSharing();
       service.sharing.set({sharingKey: 'key'} as ResponseSharingDTO);
 

@@ -2,15 +2,15 @@
 <app-frame [showSearch]="showSearchBar" [showShare]="showShare">
 
   <ng-container navbar>
-    @if (countDown) {
+    @if (countDown(); as countDown) {
       <li class="nav-item navbar-text me-2">
         <span>
           <ng-container i18n>Link availability</ng-container>
           : {{ countDown.day }}
           <ng-container i18n>days</ng-container>
           ,
-          {{ ("0" + countDown.hour).slice(-2) }}:{{ ("0" + countDown.minute).slice(-2) }}
-          :{{ ("0" + countDown.second).slice(-2) }}
+          {{ countDown.hour }}:{{ countDown.minute }}
+          :{{ countDown.second }}
         </span>
       </li>
     }

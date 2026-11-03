@@ -80,9 +80,7 @@ export class AuthenticationService {
     return !!user && user.role >= role;
   }
 
-  public canSearch(): boolean {
-    return Config.Search.enabled && this.isAuthorized(UserRoles.Guest);
-  }
+  public readonly canSearch = computed((): boolean => Config.Search.enabled && this.isAuthorized(UserRoles.Guest));
 
   public async logout(reason?: ErrorCodes): Promise<void> {
     await this.userService.logout();

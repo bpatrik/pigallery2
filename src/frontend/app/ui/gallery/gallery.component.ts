@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, linkedSignal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, linkedSignal, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -85,12 +85,13 @@ export class GalleryComponent implements OnInit, OnDestroy {
   public blogOpen = Config.Gallery.TopBlogStartsOpen;
 
   config = Config;
-  public countDown: {
+  // the remaining time of the sharing; hours, minutes and seconds are two digits
+  public readonly countDown = signal<{
     day: number;
-    hour: number;
-    minute: number;
-    second: number;
-  } = null;
+    hour: string;
+    minute: string;
+    second: string;
+  }>(null);
   public readonly mapEnabled: boolean;
   // keeps showing the previous content while the next one loads
   public readonly directoryContent = linkedSignal<GroupedDirectoryContent, GroupedDirectoryContent>({
@@ -144,14 +145,15 @@ export class GalleryComponent implements OnInit, OnDestroy {
     t = Math.floor(
       (this.shareService.sharing().expires - Date.now()) / 1000
     );
-    this.countDown = {} as any;
-    this.countDown.day = Math.floor(t / 86400);
-    t -= this.countDown.day * 86400;
-    this.countDown.hour = Math.floor(t / 3600) % 24;
-    t -= this.countDown.hour * 3600;
-    this.countDown.minute = Math.floor(t / 60) % 60;
-    t -= this.countDown.minute * 60;
-    this.countDown.second = t % 60;
+    const day = Math.floor(t / 86400);
+    t -= day * 86400;
+    const hour = Math.floor(t / 3600) % 24;
+    t -= hour * 3600;
+    const minute = Math.floor(t / 60) % 60;
+    t -= minute * 60;
+    const second = t % 60;
+    const twoDigits = (n: number): string => ('0' + n).slice(-2);
+    this.countDown.set({day, hour: twoDigits(hour), minute: twoDigits(minute), second: twoDigits(second)});
   }
 
   ngOnDestroy(): void {

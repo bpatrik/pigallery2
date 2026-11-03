@@ -72,6 +72,7 @@ class MockShareService {
 }
 
 class MockNavigationService {
+  readonly url = signal('/gallery');
   toLogin = vi.fn().mockReturnValue(Promise.resolve(true));
   toGallery = vi.fn().mockReturnValue(Promise.resolve(true));
 }
@@ -155,7 +156,7 @@ describe('GalleryComponent', () => {
         {provide: ContentService, useClass: MockContentService},
         {provide: AuthenticationService, useValue: mockAuthService},
         {provide: ShareService, useValue: mockShareService},
-        {provide: NavigationService, useValue: MockNavigationService},
+        {provide: NavigationService, useClass: MockNavigationService},
         {provide: FilterService, useClass: MockFilterService},
         {provide: GallerySortingService, useClass: MockGallerySortingService},
         {provide: PiTitleService, useClass: MockPiTitleService},
@@ -164,7 +165,7 @@ describe('GalleryComponent', () => {
         {provide: ThemeService, useClass: MockThemeService},
         {provide: FullScreenService, useValue: {mock: vi.fn()}},
         {provide: OverlayService, useValue: {mock: vi.fn()}},
-        {provide: QueryService, useValue: {getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
+        {provide: QueryService, useValue: {params: signal({}), getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
         {provide: NotificationService, useValue: {mock: vi.fn()}},
         {
           provide: GalleryNavigatorService, useValue: {

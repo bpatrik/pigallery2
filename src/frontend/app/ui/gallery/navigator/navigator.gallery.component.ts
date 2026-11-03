@@ -1,6 +1,5 @@
-import { Component, ElementRef, computed, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, computed, inject, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
-import {DomSanitizer} from '@angular/platform-browser';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {QueryService} from '../../../model/query.service';
@@ -29,7 +28,8 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
   selector: 'app-gallery-navbar',
   host: {
     '(window:keydown)': 'onKeyPress($event)',
-    '(window:scroll)': 'onScroll()'
+    '(window:scroll)': 'onScroll()',
+    '(window:resize)': 'updateFilterMaxHeight()'
   },
   styleUrl: './navigator.gallery.component.css',
   templateUrl: './navigator.gallery.component.html',
@@ -56,7 +56,6 @@ export class GalleryNavigatorComponent {
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
   private router = inject(Router);
-  sanitizer = inject(DomSanitizer);
 
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly groupingByTypes: { key: number; value: string }[] = [];
@@ -65,6 +64,8 @@ export class GalleryNavigatorComponent {
   // DefaultSorting = Config.Gallery.defaultPhotoSortingMethod;
   public readonly SearchQueryTypes = SearchQueryTypes;
   public showFilters = false;
+  // the filters fill the screen below the navigator; measured when they open and on scroll or resize
+  public readonly filterMaxHeight = signal<string>(null);
   readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
   readonly navigatorElement = viewChild('navigator', { read: ElementRef });
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
@@ -170,30 +171,32 @@ export class GalleryNavigatorComponent {
     this.RootFolderName = $localize`Home`;
   }
 
-  get isDirectory(): boolean {
+  public readonly isDirectory = computed((): boolean => {
     const content = this.contentLoaderService.content();
     return !!content?.directory || this.isExactDirectorySearch(content);
-  }
+  });
 
-  get isSearch(): boolean {
+  public readonly isSearch = computed((): boolean => {
     const content = this.contentLoaderService.content();
     return !!content?.searchResult && !this.isExactDirectorySearch(content);
-  }
+  });
 
-  get ItemCount(): number {
+  public readonly itemCount = computed((): number => {
     const c = this.contentLoaderService.content();
     return c?.directory
       ? c?.directory.cache?.mediaCount
       : c?.searchResult
         ? c?.searchResult?.media?.length
         : 0;
-  }
+  });
 
-  isDefaultSortingAndGrouping(): boolean {
-    return this.sortingService.isDefaultSortingAndGrouping(
+  public readonly isDefaultSortingAndGrouping = computed((): boolean =>
+    this.sortingService.isDefaultSortingAndGrouping(
       this.contentLoaderService.content()
-    );
-  }
+    ));
+
+  public readonly isDirectionalSorting = computed((): boolean => this.isDirectionalSort(this.sortingService.sorting().method));
+  public readonly isDirectionalGrouping = computed((): boolean => this.isDirectionalSort(this.sortingService.grouping().method));
 
 
   isDirectionalSort(value: number) {
@@ -242,7 +245,7 @@ export class GalleryNavigatorComponent {
   }
 
 
-  getDownloadZipLink(): string {
+  public readonly downloadZipLink = computed((): string => {
     const c = this.contentLoaderService.content();
     if (!c) {
       return null;
@@ -264,7 +267,7 @@ export class GalleryNavigatorComponent {
     }
 
     let queryParams = '';
-    Object.entries(this.queryService.getParams()).forEach((e) => {
+    Object.entries(this.queryService.params()).forEach((e) => {
       queryParams += e[0] + '=' + e[1];
     });
 
@@ -273,9 +276,9 @@ export class GalleryNavigatorComponent {
       encodeURIComponent(JSON.stringify(searchQuery)) +
       '?' + queryParams
     );
-  }
+  });
 
-  getDirectoryFlattenSearchQuery(): string {
+  public readonly directoryFlattenSearchQuery = computed((): string => {
     const c = this.contentLoaderService.content();
     if (!c.directory) {
       return null;
@@ -285,7 +288,7 @@ export class GalleryNavigatorComponent {
       matchType: TextSearchQueryMatchTypes.globMatch,
       value: Utils.concatUrls('./', c?.directory.path, c?.directory.name) + '*',
     } as TextSearch);
-  }
+  });
 
 
   navigateToParentDirectory() {
@@ -321,6 +324,20 @@ export class GalleryNavigatorComponent {
       this.lastScroll.up = scrollPosition;
     }
     this.lastScroll.any = scrollPosition;
+    this.updateFilterMaxHeight();
+  }
+
+  toggleFilters(): void {
+    this.showFilters = !this.showFilters;
+    this.updateFilterMaxHeight();
+  }
+
+  updateFilterMaxHeight(): void {
+    if (!this.showFilters) {
+      return;
+    }
+    const rect = this.navigatorElement()?.nativeElement?.getBoundingClientRect();
+    this.filterMaxHeight.set('calc(100dvh - ' + (rect?.top + rect?.height) + 'px)');
   }
 
   private isExactDirectorySearch(content: ContentWrapperWithError): boolean {

@@ -22,14 +22,14 @@
     <div id="controllers-container">
       <div id="controls" class="controls-top">
         <div class="controls-background rounded-start-bottom">
-          @if (fullScreenService.isFullScreenEnabled()) {
+          @if (fullScreenService.fullScreenEnabled()) {
             <div class="highlight control-button"
               (click)="fullScreenService.exitFullScreen()" title="toggle fullscreen, key: f" i18n-title>
               <ng-icon size="0.9em"
               name="ionContractOutline" />
             </div>
           }
-          @if (!fullScreenService.isFullScreenEnabled()) {
+          @if (!fullScreenService.fullScreenEnabled()) {
             <div class="highlight control-button"
               (click)="fullScreenService.showFullScreen(root)" title="toggle fullscreen, key: f" i18n-title>
               <ng-icon size="0.9em"

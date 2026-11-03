@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {RouterLink} from '@angular/router';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {AlbumsService} from '../albums.service';
@@ -13,6 +12,7 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
 import { IconComponent } from '../../../icon.component';
 import { NgIconComponent } from '@ng-icons/core';
+import {CssUrlPipe} from '../../../pipes/CssUrlPipe';
 
 @Component({
     selector: 'app-album',
@@ -22,12 +22,12 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [
     RouterLink,
     IconComponent,
-    NgIconComponent
+    NgIconComponent,
+    CssUrlPipe
 ]
 })
 export class AlbumComponent implements OnInit, OnDestroy {
   private thumbnailService = inject(ThumbnailManagerService);
-  private sanitizer = inject(DomSanitizer);
   private albumService = inject(AlbumsService);
   authenticationService = inject(AuthenticationService);
 
@@ -37,25 +37,16 @@ export class AlbumComponent implements OnInit, OnDestroy {
 
   public thumbnail: Thumbnail = null;
 
-  get IsSavedSearch(): boolean {
-    return this.album() && !!this.AsSavedSearch.searchQuery;
-  }
+  public readonly canUpdate = computed((): boolean => this.authenticationService.user().role >= UserRoles.Admin);
 
-  get AsSavedSearch(): SavedSearchDTO {
-    return this.album() as SavedSearchDTO;
-  }
-
-  get CanUpdate(): boolean {
-    return this.authenticationService.user().role >= UserRoles.Admin;
-  }
-
-  get RouterLink(): any[] {
-    if (this.IsSavedSearch) {
-      return ['/search', SearchQueryUtils.urlify(this.AsSavedSearch.searchQuery)];
+  public readonly routerLink = computed((): string[] => {
+    const savedSearch = this.album() as SavedSearchDTO;
+    if (savedSearch && !!savedSearch.searchQuery) {
+      return ['/search', SearchQueryUtils.urlify(savedSearch.searchQuery)];
     }
     // TODO: add "normal" albums here once they are ready, see: https://github.com/bpatrik/pigallery2/issues/301
     return null;
-  }
+  });
 
   ngOnInit(): void {
     const album = this.album();
@@ -64,16 +55,6 @@ export class AlbumComponent implements OnInit, OnDestroy {
           new Media(album.cache?.cover, this.size(), this.size())
       );
     }
-  }
-
-  getSanitizedThUrl(): SafeStyle {
-    return this.sanitizer.bypassSecurityTrustStyle(
-        'url(' +
-        this.thumbnail.Src.replace(/\(/g, '%28')
-            .replace(/'/g, '%27')
-            .replace(/\)/g, '%29') +
-        ')'
-    );
   }
 
   ngOnDestroy(): void {

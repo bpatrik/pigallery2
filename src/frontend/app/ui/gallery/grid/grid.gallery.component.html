@@ -26,7 +26,7 @@
             }
           }
         }
-        @if (group.date && blogService.getMarkDowns(group.date)?.length > 0) {
+        @if (group.date && (blogService.groupedMarkdowns() | markdownsForDate: group.date)?.length > 0) {
           <app-gallery-blog [date]="group.date"
             [open]="blogOpen" />
         }

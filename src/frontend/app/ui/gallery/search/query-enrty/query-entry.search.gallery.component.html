@@ -79,7 +79,7 @@
               [(ngModel)]="SelectedMatchType" [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onChange()">
               @for (mt of MatchingTypes; track mt) {
-                <option [ngValue]="mt" [title]="getMatchingTypesDescription(mt)">{{mt}}</option>
+                <option [ngValue]="mt" [title]="mt | matchingTypeDescription: IsTextQuery">{{mt}}</option>
               }
             </select>
               </div>

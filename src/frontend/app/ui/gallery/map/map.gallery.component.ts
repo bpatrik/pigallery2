@@ -145,7 +145,8 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     });
   }
 
-  public getDimension(): Dimension {
+  // an arrow function, so the map lightbox can call it
+  public readonly getDimension = (): Dimension => {
     const mapElement = this.mapElement();
     if (isNaN(mapElement?.nativeElement?.parentElement?.offsetParent.offsetTop)) {
       return {top: 0, left: 0, width: 0, height: 0};
@@ -156,6 +157,6 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
       width: mapElement.nativeElement?.offsetWidth,
       height: mapElement.nativeElement?.offsetHeight,
     } as Dimension;
-  }
+  };
 }
 

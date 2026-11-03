@@ -27,16 +27,13 @@ export class FacesNavigatorComponent {
 
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly config = Config;
+  public readonly isDefaultSorting = this.facesService.isDefaultSorting;
 
   constructor() {
     this.sortingByTypes = [
       {key: SortByDirectionalTypes.Name, value: SortByDirectionalTypes[SortByDirectionalTypes.Name]},
       {key: SortByDirectionalTypes.PersonCount, value: SortByDirectionalTypes[SortByDirectionalTypes.PersonCount]}
     ];
-  }
-
-  isDefaultSorting(): boolean {
-    return this.facesService.isDefaultSorting();
   }
 
   setSortingBy(sorting: number): void {

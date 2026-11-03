@@ -73,7 +73,8 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
   readonly photos = input<PhotoDTO[]>(undefined);
   readonly gpxFiles = input<FileDTO[]>(undefined);
-  readonly parentDimension = input<Dimension>(undefined);
+  // read only when the lightbox opens or closes, so the parent is not measured on every change detection
+  readonly getParentDimension = input<() => Dimension>(undefined);
   public lightboxDimension: Dimension = {
     top: 0,
     left: 0,
@@ -506,7 +507,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     this.clearMap();
     this.visible = true;
     this.opacity = 1.0;
-    this.lightboxDimension = Utils.clone(this.parentDimension());
+    this.lightboxDimension = Utils.clone(this.getParentDimension()());
     this.lightboxDimension.top -= PageHelper.ScrollY;
     this.mapDimension = {
       top: 0,
@@ -537,7 +538,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     }
     this.fullScreenService.exitFullScreen();
     this.controllersVisible = false;
-    const to = this.parentDimension();
+    const to = this.getParentDimension()();
 
     // if target image out of screen -> scroll to there
     if (
@@ -548,7 +549,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       PageHelper.ScrollY = to?.top;
     }
 
-    this.lightboxDimension = this.parentDimension();
+    this.lightboxDimension = this.getParentDimension()();
     this.lightboxDimension.top -= PageHelper.ScrollY;
     PageHelper.showScrollY('map-lightbox');
     this.opacity = 0.0;

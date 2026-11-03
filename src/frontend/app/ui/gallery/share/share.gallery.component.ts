@@ -16,6 +16,8 @@ import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
+import {SharingUrlPipe} from '../../../pipes/SharingUrlPipe';
+import {RecursiveSharingPipe} from '../../../pipes/RecursiveSharingPipe';
 
 @Component({
     selector: 'app-gallery-share',
@@ -27,7 +29,9 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     FormsModule,
     CopyDirective,
     DatePipe,
-    StringifySearchQuery
+    StringifySearchQuery,
+    SharingUrlPipe,
+    RecursiveSharingPipe
 ]
 })
 export class GalleryShareComponent {
@@ -176,11 +180,6 @@ export class GalleryShareComponent {
       this.activeShares = [];
       console.error(e);
     }
-  }
-
-  isRecursive(share: ResponseSharingDTO): boolean {
-    return share.directoryQuery?.matchType === TextSearchQueryMatchTypes.globMatch &&
-      share.directoryQuery.value?.endsWith('*');
   }
 
   calcValidity(): number {

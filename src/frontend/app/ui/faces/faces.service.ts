@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
 import {SortByDirectionalTypes, type SortingMethod} from '../../../../common/entities/SortingMethods';
@@ -14,10 +14,9 @@ export class FacesService {
     ascending: Config.Faces.sorting.ascending
   });
 
-  public isDefaultSorting(){
-    return this.sorting().method === Config.Faces.sorting.method &&
-      this.sorting().ascending === Config.Faces.sorting.ascending;
-  }
+  public readonly isDefaultSorting = computed((): boolean =>
+    this.sorting().method === Config.Faces.sorting.method &&
+    this.sorting().ascending === Config.Faces.sorting.ascending);
 
   public async setFavourite(
     person: PersonDTO,

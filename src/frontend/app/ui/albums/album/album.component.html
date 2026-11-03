@@ -1,4 +1,4 @@
-<a [routerLink]="RouterLink"
+<a [routerLink]="routerLink()"
   style="display: inline-block;">
 
 
@@ -8,7 +8,7 @@
 
     @if (thumbnail && thumbnail.Available) {
       <div class="photo "
-      [style.background-image]="getSanitizedThUrl()"></div>
+      [style.background-image]="thumbnail.Src | cssUrl"></div>
     }
 
     @if (!thumbnail || !thumbnail.Available) {
@@ -20,7 +20,7 @@
   <!--Info box -->
   <div class="info rounded-bottom">
     {{album().name}} ({{album().cache?.itemCount}})
-    @if (CanUpdate && !album().locked) {
+    @if (canUpdate() && !album().locked) {
       <ng-icon (click)="deleteAlbum($event)"
         class="info-button delete float-end"
         name="ionTrashOutline"

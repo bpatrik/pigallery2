@@ -28,6 +28,7 @@ import {
 import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
+import {MatchingTypeDescriptionPipe} from '../../../../pipes/MatchingTypeDescriptionPipe';
 import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 
 @Component({
@@ -51,7 +52,8 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
     FormsModule,
     NgIconComponent,
     DatePipe,
-    StringifySearchType
+    StringifySearchType,
+    MatchingTypeDescriptionPipe
 ]
 })
 export class GallerySearchQueryEntryComponent
@@ -143,10 +145,6 @@ export class GallerySearchQueryEntryComponent
       return;
     }
     TextSearchMatchingTypes.set(this.AsTextQuery, value);
-  }
-
-  getMatchingTypesDescription(type: string) {
-    return TextSearchMatchingTypes.getDescription(type, this.IsTextQuery);
   }
 
   validate(control: UntypedFormControl): ValidationErrors {

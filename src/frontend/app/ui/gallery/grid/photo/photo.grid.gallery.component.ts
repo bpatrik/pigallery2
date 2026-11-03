@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import {type Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -6,7 +6,7 @@ import {Thumbnail, ThumbnailManagerService,} from '../../thumbnailManager.servic
 import {Config} from '../../../../../../common/config/public/Config';
 import {PageHelper} from '../../../../model/page.helper';
 import {PhotoDTO, PhotoMetadata,} from '../../../../../../common/entities/PhotoDTO';
-import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryTypes} from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {ExtensionService} from '../../../../model/extension.service';
 import {MediaButtonModalService} from './media-button-modal/media-button-modal.service';
@@ -17,7 +17,7 @@ import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
 import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
-import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {TextSearchLinkPipe} from '../../../../pipes/TextSearchLinkPipe';
 
 export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaButtonConfig {
   extensionBasePath: string;
@@ -33,7 +33,8 @@ export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaBut
     NgIconComponent,
     RouterLink,
     DurationPipe,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    TextSearchLinkPipe
 ]
 })
 export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
@@ -47,7 +48,6 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   readonly container = viewChild<ElementRef>('photoContainer');
 
   thumbnail: Thumbnail;
-  keywords: { value: string; type: SearchQueryTypes }[] = null;
   infoBarVisible = false;
   animationTimer: number = null;
 
@@ -58,15 +58,11 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   loaded = false;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[];
 
-  constructor() {
-    this.searchEnabled = this.authService.canSearch();
-  }
+  readonly isVideo = computed((): boolean => this.gridMedia().isVideo());
+  readonly isLivePhoto = computed((): boolean => this.gridMedia().isLivePhoto());
+  readonly hasPositionData = computed((): boolean => this.gridMedia().hasPositionData());
 
-  get ScrollListener(): boolean {
-    return !this.thumbnail.Available && !this.thumbnail.Error;
-  }
-
-  get Title(): string {
+  readonly title = computed((): string => {
     if (Config.Gallery.captionFirstNaming === false) {
       return this.gridMedia().media.name;
     }
@@ -80,6 +76,57 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
       return (this.gridMedia().media as PhotoDTO).metadata.caption;
     }
     return this.gridMedia().media.name;
+  });
+
+  // the faces and keywords of the media, null if it has none
+  readonly keywords = computed((): { value: string; type: SearchQueryTypes }[] => {
+    const metadata = this.gridMedia().media.metadata as PhotoMetadata;
+    if (
+      !(metadata.keywords && metadata.keywords.length > 0) &&
+      !(metadata.faces && metadata.faces.length > 0)
+    ) {
+      return null;
+    }
+    let keywords: { value: string; type: SearchQueryTypes }[] = [];
+    if (Config.Faces.enabled) {
+      const names: string[] = (metadata.faces || []).map(
+        (f): string => f.name
+      );
+      keywords = names
+        .filter((name, index): boolean => names.indexOf(name) === index)
+        .map((n): { type: SearchQueryTypes; value: string } => ({
+          value: n,
+          type: SearchQueryTypes.person,
+        }));
+    }
+    return keywords.concat(
+      (metadata.keywords || []).map(
+        (k): { type: SearchQueryTypes; value: string } => ({
+          value: k,
+          type: SearchQueryTypes.keyword,
+        })
+      )
+    );
+  });
+
+  readonly positionText = computed((): string => {
+    const gridMedia = this.gridMedia();
+    if (!gridMedia || !gridMedia.isPhoto() || !(gridMedia.media as PhotoDTO).metadata.positionData) {
+      return '';
+    }
+    return ( //not much space in the gridview, so we only deliver city, or state or country
+      (gridMedia.media as PhotoDTO).metadata.positionData.city ||
+      (gridMedia.media as PhotoDTO).metadata.positionData.state ||
+      (gridMedia.media as PhotoDTO).metadata.positionData.country || ''
+    ).trim();
+  });
+
+  constructor() {
+    this.searchEnabled = this.authService.canSearch();
+  }
+
+  get ScrollListener(): boolean {
+    return !this.thumbnail.Available && !this.thumbnail.Error;
   }
 
   updateMediaButtons(): void {
@@ -175,33 +222,6 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
-    const metadata = this.gridMedia().media.metadata as PhotoMetadata;
-    if (
-      (metadata.keywords && metadata.keywords.length > 0) ||
-      (metadata.faces && metadata.faces.length > 0)
-    ) {
-      this.keywords = [];
-      if (Config.Faces.enabled) {
-        const names: string[] = (metadata.faces || []).map(
-          (f): string => f.name
-        );
-        this.keywords = names
-          .filter((name, index): boolean => names.indexOf(name) === index)
-          .map((n): { type: SearchQueryTypes; value: string } => ({
-            value: n,
-            type: SearchQueryTypes.person,
-          }));
-      }
-      this.keywords = this.keywords.concat(
-        (metadata.keywords || []).map(
-          (k): { type: SearchQueryTypes; value: string } => ({
-            value: k,
-            type: SearchQueryTypes.keyword,
-          })
-        )
-      );
-    }
-
     this.updateMediaButtons();
   }
 
@@ -232,34 +252,6 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
       this.wasInView = isInView;
       this.thumbnail.Visible = isInView;
     }
-  }
-
-  getPositionSearchQuery(): string {
-    return SearchQueryUtils.urlify({
-      type: SearchQueryTypes.position,
-      matchType: TextSearchQueryMatchTypes.exact_match,
-      value: this.getPositionText(),
-    } as TextSearch);
-  }
-
-  getTextSearchQuery(name: string, type: SearchQueryTypes): string {
-    return SearchQueryUtils.urlify({
-      type,
-      matchType: TextSearchQueryMatchTypes.exact_match,
-      value: name,
-    } as TextSearch);
-  }
-
-  getPositionText(): string {
-    const gridMedia = this.gridMedia();
-    if (!gridMedia || !gridMedia.isPhoto() || !(gridMedia.media as PhotoDTO).metadata.positionData) {
-      return '';
-    }
-    return ( //not much space in the gridview, so we only deliver city, or state or country
-      (gridMedia.media as PhotoDTO).metadata.positionData.city ||
-      (gridMedia.media as PhotoDTO).metadata.positionData.state ||
-      (gridMedia.media as PhotoDTO).metadata.positionData.country || ''
-    ).trim();
   }
 
   mouseOver(): void {

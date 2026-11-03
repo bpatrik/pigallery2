@@ -26,7 +26,7 @@ export class ShareService {
   } as ResponseSharingDTO;
   param: string = null;
   queryParam: string = null;
-  sharingKey: string = null;
+  public readonly sharingKey = signal<string>(null);
   // true once the router read the sharing key of the first navigation (it might be none)
   public readonly routeRecognized = signal(false);
   // true once the sharing key is known (from the route or from the session user)
@@ -61,9 +61,9 @@ export class ShareService {
             QueryParams.gallery.sharingKey_query
             ] || null;
 
-        const changed = this.sharingKey !== (this.param || this.queryParam);
+        const changed = this.sharingKey() !== (this.param || this.queryParam);
         if (changed) {
-          this.sharingKey = this.param || this.queryParam || this.sharingKey;
+          this.sharingKey.set(this.param || this.queryParam || this.sharingKey());
         }
         this.routeRecognized.set(true);
         if (changed) {
@@ -88,11 +88,11 @@ export class ShareService {
     if (user?.usedSharingKey || user?.role > UserRoles.LimitedGuest) {
       if (
         (user?.usedSharingKey &&
-          user?.usedSharingKey !== this.sharingKey) ||
+          user?.usedSharingKey !== this.sharingKey()) ||
         this.sharing() == null
       ) {
-        this.sharingKey = user.usedSharingKey || this.getSharingKey();
-        if (!this.sharingKey) { //no key to fetch
+        this.sharingKey.set(user.usedSharingKey || this.getSharingKey());
+        if (!this.sharingKey()) { //no key to fetch
           return;
         }
         await this.getSharing();
@@ -262,11 +262,11 @@ export class ShareService {
   }
 
   public getSharingKey(): string {
-    return this.sharingKey;
+    return this.sharingKey();
   }
 
   public isSharing(): boolean {
-    return this.sharingKey != null;
+    return this.sharingKey() != null;
   }
 
   public async getSharingListForQuery(
@@ -303,7 +303,7 @@ export class ShareService {
    * Leaves the current sharing (e.g.: on logout). The app behaves as if it was opened without a sharing link.
    */
   public dropSharing(): void {
-    this.sharingKey = null;
+    this.sharingKey.set(null);
     this.param = null;
     this.queryParam = null;
     this.sharing.set(null);

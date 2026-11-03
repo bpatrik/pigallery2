@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
 import {Subscription} from 'rxjs';
 import {NetworkService} from '../../../model/network/network.service';
@@ -72,7 +72,7 @@ export class UploaderService {
     });
   }
 
-  public canUpload(): boolean {
+  public readonly canUpload = computed((): boolean => {
     const dir = this.contentLoaderService.content().directory;
     if (!Config.Upload.enabled ||
       !this.authService.isAuthenticated() ||
@@ -88,7 +88,7 @@ export class UploaderService {
     }
 
     return true;
-  }
+  });
 
 
   public async uploadFiles(filesIn: FileList | File[]): Promise<void> {

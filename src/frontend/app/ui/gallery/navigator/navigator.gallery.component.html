@@ -1,14 +1,14 @@
 <div #navigator class="container-fluid pt-1 pb-1 pe-0 ps-0 bg-body-secondary">
   <nav class="d-md-flex row" aria-label="breadcrumb">
     <div class="col-auto">
-      @if (isDirectory) {
+      @if (isDirectory()) {
         <ol id="directory-path" class="mb-0 mt-1 breadcrumb">
           @for (path of routes(); track $index) {
             <li class="breadcrumb-item">
               @if (path.route) {
                 <a [routerLink]="['/gallery',path.route]"
                   [title]="path.title || ''"
-                [queryParams]="queryService.getParams()">{{path.name}}</a>
+                [queryParams]="queryService.params()">{{path.name}}</a>
               }
               @if (!path.route) {<ng-container>{{path.name}}</ng-container>}
             </li>
@@ -16,7 +16,7 @@
         </ol>
       }
 
-      @if (isSearch) {
+      @if (isSearch()) {
         <ol class="mb-0 mt-1 breadcrumb">
           <li class="active">
             <ng-container i18n>Searching for:</ng-container>
@@ -27,35 +27,35 @@
 
     </div>
     <div class="ms-auto text-end col-auto">
-      @if (ItemCount> 0 && config.Gallery.NavBar.showItemCount) {
+      @if (itemCount()> 0 && config.Gallery.NavBar.showItemCount) {
         <div class="photos-count">
-          {{ItemCount}} <span i18n>items</span>
+          {{itemCount()}} <span i18n>items</span>
         </div>
         <div class="divider">&nbsp;</div>
       }
 
-      @if (config.Gallery.NavBar.enableDownloadZip  && ItemCount > 0) {
-        <a [href]="getDownloadZipLink()"
+      @if (config.Gallery.NavBar.enableDownloadZip  && itemCount() > 0) {
+        <a [href]="downloadZipLink()"
           class="btn  btn-outline-secondary btn-navigator">
           <ng-icon name="ionDownloadOutline" title="Download" i18n-title />
         </a>
         <div class="divider">&nbsp;</div>
       }
 
-      @if (config.Gallery.NavBar.enableDirectoryFlattening && isDirectory && authService.canSearch()) {
+      @if (config.Gallery.NavBar.enableDirectoryFlattening && isDirectory() && authService.canSearch()) {
         <a
-          [routerLink]="['/search', getDirectoryFlattenSearchQuery()]"
+          [routerLink]="['/search', directoryFlattenSearchQuery()]"
           class="btn btn-outline-secondary btn-navigator">
           <ng-icon name="ionGitBranchOutline"
           title="Show all subdirectories" i18n-title />
         </a>
         <div class="divider">&nbsp;</div>
       }
-      @if (ItemCount> 0) {
+      @if (itemCount()> 0) {
         <a class="btn btn-outline-secondary btn-navigator"
           [class.btn-secondary]="filterService.filteredContent().filters.areFiltersActive"
           [class.btn-outline-secondary]="!filterService.filteredContent().filters.areFiltersActive"
-          (click)="showFilters = ! showFilters">
+          (click)="toggleFilters()">
           <ng-icon name="ionFunnelOutline"
           title="Filters" i18n-title />
         </a>
@@ -112,7 +112,7 @@
                 </div>
               }
 
-              @if (isDirectionalSort(sortingService.sorting().method)) {
+              @if (isDirectionalSorting()) {
                 <hr>
                   <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
                     [class.active]="sortingService.sorting().ascending == true"
@@ -146,7 +146,7 @@
                     <div class="d-inline-block">{{type.key | stringifySorting}}</div>
                   </div>
                 }
-                @if (isDirectionalSort(sortingService.grouping().method)) {
+                @if (isDirectionalGrouping()) {
                   <hr>
                     <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
                       [class.active]="sortingService.grouping().ascending == true"
@@ -202,8 +202,8 @@
 
 
   </div>
-  @if (showFilters && ItemCount> 0) {
+  @if (showFilters && itemCount()> 0) {
     <app-gallery-filter #filterComponent
-      [style.max-height]="sanitizer.bypassSecurityTrustStyle('calc(100dvh - '+(navigatorElement()?.nativeElement?.getBoundingClientRect().top+navigatorElement()?.nativeElement?.getBoundingClientRect().height)+'px)')"
+      [style.max-height]="filterMaxHeight()"
     class="position-absolute w-100" />
   }

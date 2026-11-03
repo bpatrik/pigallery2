@@ -16,7 +16,7 @@
   </button>
   <div *dropdownMenu class="dropdown-menu" aria-labelledby="language">
     @for (lang of languages; track lang) {
-      <a class="dropdown-item" href="{{getLanguageUrl(lang)}}">{{lang}}</a>
+      <a class="dropdown-item" href="{{languageUrls()[lang]}}">{{lang}}</a>
     }
   </div>
 </div>

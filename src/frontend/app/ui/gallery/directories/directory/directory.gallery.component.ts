@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
+import { Component, OnDestroy, OnInit, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import {SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
 import {RouterLink} from '@angular/router';
 import {Utils} from '../../../../../../common/Utils';
@@ -9,6 +8,7 @@ import {QueryService} from '../../../../model/query.service';
 import {CoverPhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 
 import { IconComponent } from '../../../../icon.component';
+import {CssUrlPipe} from '../../../../pipes/CssUrlPipe';
 
 @Component({
     selector: 'app-gallery-directory',
@@ -17,12 +17,12 @@ import { IconComponent } from '../../../../icon.component';
     changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
-    IconComponent
+    IconComponent,
+    CssUrlPipe
 ]
 })
 export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   private thumbnailService = inject(ThumbnailManagerService);
-  private sanitizer = inject(DomSanitizer);
   queryService = inject(QueryService);
 
   readonly directory = input<SubDirectoryDTO>(undefined);
@@ -33,25 +33,13 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
     return this.directory().cache?.cover;
   }
 
-  getSanitizedThUrl(): SafeStyle {
-    return this.sanitizer.bypassSecurityTrustStyle(
-        'url(' +
-        this.thumbnail.Src.replace(/\(/g, '%28')
-            .replace(/'/g, '%27')
-            .replace(/\)/g, '%29') +
-        ')'
-    );
-  }
-
   // TODO: implement scroll
   /* isInView(): boolean {
      return document.body.scrollTop < this.container.nativeElement.offsetTop + this.container.nativeElement.clientHeight
        && document.body.scrollTop + window.innerHeight > this.container.nativeElement.offsetTop;
    }*/
 
-  getDirectoryPath(): string {
-    return Utils.concatUrls(this.directory().path, this.directory().name);
-  }
+  public readonly directoryPath = computed((): string => Utils.concatUrls(this.directory().path, this.directory().name));
 
   ngOnDestroy(): void {
     if (this.thumbnail != null) {

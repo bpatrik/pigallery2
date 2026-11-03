@@ -18,6 +18,7 @@ import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
+import {MarkdownsForDatePipe} from '../../../pipes/MarkdownsForDatePipe';
 import {BlogService} from '../blog/blog.service';
 
 @Component({
@@ -33,7 +34,8 @@ import {BlogService} from '../blog/blog.service';
     NgIconComponent,
     GalleryBlogComponent,
     GalleryPhotoComponent,
-    ParseIntPipe
+    ParseIntPipe,
+    MarkdownsForDatePipe
 ]
 })
 export class GalleryGridComponent
