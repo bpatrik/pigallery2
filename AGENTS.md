@@ -70,6 +70,8 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
     needs `vi.restoreAllMocks()` in `afterEach`. `vi.spyOn()` calls the real method unless you mock it.
   - Use `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync()`, not `fakeAsync`/`tick` (they don't work without
     a zone-aware test runner), and call `vi.useRealTimers()` in the spec's `afterEach`.
+  - A spec that loads `EnumTranslations` (e.g. through the `Stringify*` pipes) must first
+    `import '<…>/common/config/public/Config';`, like `main.ts` does; otherwise the private config's asserts throw on load.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
