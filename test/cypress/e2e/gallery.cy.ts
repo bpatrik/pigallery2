@@ -50,8 +50,8 @@ describe('Gallery', () => {
     cy.get('app-gallery-navbar #button-grid-size').should('have.class', 'btn-secondary');
 
     // another folder has its own sorting and grid size
-    cy.get('app-gallery-directory a[href="/gallery/sub_dir"]').first().click({scrollBehavior: false});
-    cy.location('pathname').should('eq', '/gallery/sub_dir');
+    cy.get('app-gallery-directory a[href="/gallery/dupl"]').first().click({scrollBehavior: false});
+    cy.location('pathname').should('eq', '/gallery/dupl');
     cy.get('app-gallery-navbar #button-alignment').should('have.class', 'btn-outline-secondary');
     cy.get('app-gallery-navbar #button-grid-size').should('have.class', 'btn-outline-secondary');
 
