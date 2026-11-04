@@ -41,6 +41,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private authService = inject(AuthenticationService);
   private extensionService = inject(ExtensionService);
   private modalService = inject(MediaButtonModalService);
+  private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
   readonly gridMedia = input<GridMedia>(undefined);
   readonly imageRef = viewChild<ElementRef>('img');
@@ -288,9 +289,10 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     }
   }
 
+  // the position of the tile in the page; also while its thumbnail is loading (no <img> yet)
   public getDimension(): Dimension {
-    const imageRef = this.imageRef();
-    if (!imageRef?.nativeElement?.offsetParent) {
+    const host = this.elementRef.nativeElement;
+    if (!host.offsetParent) {
       return {
         top: 0,
         left: 0,
@@ -298,11 +300,12 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
         height: 0,
       };
     }
+    const image = this.imageRef()?.nativeElement as HTMLImageElement;
     return {
-      top: imageRef.nativeElement.offsetParent.offsetTop,
-      left: imageRef.nativeElement.offsetParent.offsetLeft,
-      width: imageRef.nativeElement.width,
-      height: imageRef.nativeElement.height,
+      top: host.offsetTop,
+      left: host.offsetLeft,
+      width: image ? image.width : this.gridMedia().renderWidth,
+      height: image ? image.height : this.gridMedia().renderHeight,
     };
   }
 }

@@ -1,4 +1,4 @@
-<app-gallery-lightbox #lightbox />
+<app-gallery-lightbox [grid]="grid()" />
 <app-frame [showSearch]="showSearchBar" [showShare]="showShare">
 
   <ng-container navbar>
@@ -70,8 +70,7 @@
             }
           </div>
         }
-        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups"
-        [lightbox]="lightbox" />
+        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups" />
       }
     </div>
   }
