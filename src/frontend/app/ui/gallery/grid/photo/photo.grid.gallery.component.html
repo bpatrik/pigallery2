@@ -60,7 +60,7 @@
           <ng-icon name="ionLocationOutline" />
           @if (positionText()) {
             @if (searchEnabled) {
-              <a [routerLink]="['/search', (positionText() | textSearchLink: SearchQueryTypes.position)]"
+              <a [routerLink]="['/search', positionLink()]"
               >{{positionText()}}</a>
             }
             @if (!searchEnabled) {
@@ -73,7 +73,7 @@
         <div class="photo-keywords">
           @for (keyword of keywords; track keyword; let last = $last) {
             @if (searchEnabled) {
-              <a [routerLink]="['/search', (keyword.value | textSearchLink: keyword.type)]">
+              <a [routerLink]="['/search', keyword.link]">
                 @switch (keyword.type) {
                   @case (SearchQueryTypes.keyword) {#}
                   @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}

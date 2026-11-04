@@ -17,7 +17,7 @@ import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
 import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
-import {TextSearchLinkPipe} from '../../../../pipes/TextSearchLinkPipe';
+import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
 export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaButtonConfig {
   extensionBasePath: string;
@@ -33,8 +33,7 @@ export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaBut
     NgIconComponent,
     RouterLink,
     DurationPipe,
-    SafeHtmlPipe,
-    TextSearchLinkPipe
+    SafeHtmlPipe
 ]
 })
 export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
@@ -78,8 +77,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     return this.gridMedia().media.name;
   });
 
-  // the faces and keywords of the media, null if it has none
-  readonly keywords = computed((): { value: string; type: SearchQueryTypes }[] => {
+  // the faces and keywords of the media with their search links, null if it has none
+  readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] => {
     const metadata = this.gridMedia().media.metadata as PhotoMetadata;
     if (
       !(metadata.keywords && metadata.keywords.length > 0) &&
@@ -106,7 +105,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
           type: SearchQueryTypes.keyword,
         })
       )
-    );
+    ).map(k => ({...k, link: SearchQueryUtils.urlifyExactMatch(k.type, k.value)}));
   });
 
   readonly positionText = computed((): string => {
@@ -120,6 +119,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
       (gridMedia.media as PhotoDTO).metadata.positionData.country || ''
     ).trim();
   });
+
+  readonly positionLink = computed((): string => SearchQueryUtils.urlifyExactMatch(SearchQueryTypes.position, this.positionText()));
 
   constructor() {
     this.searchEnabled = this.authService.canSearch();

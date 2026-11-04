@@ -148,13 +148,13 @@
     </div>
   </form>
 </div>
-@if (activeShares && activeShares.length>0) {
+@if (activeShareRows().length > 0) {
   <div class="modal-footer">
     @if (!showSharingList) {
       <a
         (click)="showSharingList = true"
         class="list-shares-button m-0">
-        <span class="badge text-bg-secondary me-1">{{ activeShares.length }}</span>
+        <span class="badge text-bg-secondary me-1">{{ activeShareRows().length }}</span>
         <ng-container i18n>active share(s) for this folder.
       </ng-container>
         <ng-icon name="ionChevronForwardOutline" class="ms-1" />
@@ -174,19 +174,20 @@
           </tr>
         </thead>
         <tbody>
-          @for (share of activeShares; track share.id) {
+          @for (row of activeShareRows(); track row.share.id) {
+            @let share = row.share;
             <tr>
               <td class="ellipsisContainer">
                 <div class="ellipsisText share-key">
-                  <a [href]="share | sharingUrl">{{share.sharingKey}}</a>
+                  <a [href]="row.url">{{share.sharingKey}}</a>
                   <button type="button" class="btn btn-link p-0 ms-1"
-                    [appCopy]="share | sharingUrl" (copied)="onCopy()"
+                    [appCopy]="row.url" (copied)="onCopy()"
                     title="Copy link" i18n-title>
                     <ng-icon name="ionCopyOutline" />
                   </button>
                 </div>
               </td>
-              <td>{{ (share | recursiveSharing) ? text.Yes : text.No }}</td>
+              <td>{{ row.recursive ? text.Yes : text.No }}</td>
               @if (IsAdmin) {
                 <td>{{share.creator.name}}</td>
               }

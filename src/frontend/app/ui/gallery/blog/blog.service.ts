@@ -5,7 +5,6 @@ import {Utils} from '../../../../../common/Utils';
 import {ContentService} from '../content.service';
 import {GroupedDirectoryContent} from '../navigator/sorting.service';
 import {filterMDFiles} from '../../../pipes/MDFilesFilterPipe';
-import {filterMarkdownsByDate} from '../../../pipes/MarkdownsForDatePipe';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {Config} from '../../../../../common/config/public/Config';
 
@@ -43,8 +42,20 @@ export class BlogService {
     return (await Promise.all(files)).flat();
   }
 
+  /**
+   * The markdowns of a date group. Without a date, the ones that go to the top.
+   * Undefined while the markdowns are not loaded.
+   */
   getMarkDowns(date: Date): GroupedMarkdown[] {
-    return filterMarkdownsByDate(this.groupedMarkdowns(), date);
+    const markdowns = this.groupedMarkdowns();
+    if (!markdowns) {
+      return undefined;
+    }
+    if (!date) {
+      return markdowns.filter(g => !g.date);
+    }
+    const utcDate = date.getTime();
+    return markdowns.filter(g => g.date == utcDate);
   }
 
   /**

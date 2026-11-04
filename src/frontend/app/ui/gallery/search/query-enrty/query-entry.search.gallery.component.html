@@ -78,8 +78,8 @@
               i18n-title
               [(ngModel)]="SelectedMatchType" [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onChange()">
-              @for (mt of MatchingTypes; track mt) {
-                <option [ngValue]="mt" [title]="mt | matchingTypeDescription: IsTextQuery">{{mt}}</option>
+              @for (mt of MatchingTypes; track mt.value) {
+                <option [ngValue]="mt.value" [title]="mt.description">{{mt.value}}</option>
               }
             </select>
               </div>

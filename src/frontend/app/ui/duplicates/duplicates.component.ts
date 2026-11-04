@@ -13,11 +13,16 @@ import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { DuplicatesPhotoComponent } from './photo/photo.duplicates.component';
 import { FileSizePipe } from '../../pipes/FileSizePipe';
-import {DirectoryPathPipe} from '../../pipes/DirectoryPathPipe';
+
+// a duplicate media with the path of its directory
+interface DuplicateMedia {
+  media: MediaDTO;
+  directoryPath: string;
+}
 
 interface GroupedDuplicate {
   name: string;
-  duplicates: DuplicatesDTO[];
+  duplicates: { media: DuplicateMedia[] }[];
 }
 
 @Component({
@@ -33,8 +38,7 @@ interface GroupedDuplicate {
     RouterLink,
     DuplicatesPhotoComponent,
     DatePipe,
-    FileSizePipe,
-    DirectoryPathPipe
+    FileSizePipe
 ]
 })
 export class DuplicateComponent implements OnInit {
@@ -97,7 +101,9 @@ export class DuplicateComponent implements OnInit {
       );
       groups.push({
         name: this.getDirectoryPath(dir) + ' (' + group.length + ')',
-        duplicates: group,
+        duplicates: group.map(d => ({
+          media: d.media.map(m => ({media: m, directoryPath: this.getDirectoryPath(m.directory)}))
+        })),
       });
     }
     return groups;

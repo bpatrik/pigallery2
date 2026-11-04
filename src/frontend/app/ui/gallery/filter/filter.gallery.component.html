@@ -7,7 +7,7 @@
       @if (showStatistic) {
         <div class="col-md-9 col-12 date-frequency">
           @for (freq of filterService.statistic(); track freq; let length = $count) {
-            @let outOfRange = freq | outOfDateRange: ActiveFilters.dateFilter.minFilter : ActiveFilters.dateFilter.maxFilter;
+            @let outOfRange = freq.endTime < ActiveFilters.dateFilter.minFilter || freq.time > ActiveFilters.dateFilter.maxFilter;
             <div class="d-inline-block date-frequency-column"
               [style.width.%]="(1/length)*100"
               container="body"

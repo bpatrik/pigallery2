@@ -5,7 +5,6 @@ import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
-import {OutOfDateRangePipe} from '../../../pipes/OutOfDateRangePipe';
 
 @Component({
     selector: 'app-gallery-filter',
@@ -16,8 +15,7 @@ import {OutOfDateRangePipe} from '../../../pipes/OutOfDateRangePipe';
     PopoverDirective,
     NgIconComponent,
     FormsModule,
-    DatePipe,
-    OutOfDateRangePipe
+    DatePipe
 ]
 })
 export class GalleryFilterComponent implements OnInit, OnDestroy {

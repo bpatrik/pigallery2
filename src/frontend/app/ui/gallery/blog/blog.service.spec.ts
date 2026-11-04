@@ -44,6 +44,27 @@ describe('BlogService', () => {
     service = TestBed.inject(BlogService);
   });
 
+  describe('getMarkDowns', () => {
+    const day = new Date(Date.UTC(2023, 6, 15));
+    const top = {date: null, text: '# Nyári túra'} as GroupedMarkdown;
+    const ofDay = {date: day.getTime(), text: '## Balatonfüred, július 15.'} as GroupedMarkdown;
+    const other = {date: day.getTime() + 86400000, text: '## Tihany'} as GroupedMarkdown;
+
+    it('should return the markdowns of the date', () => {
+      service.groupedMarkdowns.set([top, ofDay, other]);
+      expect(service.getMarkDowns(new Date(day.getTime()))).toEqual([ofDay]);
+    });
+
+    it('should return the markdowns without a date when there is no date', () => {
+      service.groupedMarkdowns.set([top, ofDay, other]);
+      expect(service.getMarkDowns(null)).toEqual([top]);
+    });
+
+    it('should return undefined while the markdowns are not loaded', () => {
+      expect(service.getMarkDowns(day)).toBeUndefined();
+    });
+  });
+
   describe('splitMarkDown', () => {
     it('should return empty array for empty markdown', async () => {
       const file = createMockMDFile('test.md', Date.UTC(2025, 1, 1));

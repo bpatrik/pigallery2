@@ -195,13 +195,13 @@ export class FilterService {
     filters.selectedFilters.forEach((f) => (f.options = []));
   }
 
-  private getStatistic(prefiltered: DirectoryContent): { date: Date, endDate: Date, dateStr: string, count: number, max: number }[] {
+  private getStatistic(prefiltered: DirectoryContent): { date: Date, time: number, endTime: number, dateStr: string, count: number, max: number }[] {
     if (!prefiltered ||
       !prefiltered.media ||
       prefiltered.media.length === 0) {
       return [];
     }
-    const ret: { date: Date, endDate: Date, dateStr: string, count: number, max: number }[] = [];
+    const ret: { date: Date, time: number, endTime: number, dateStr: string, count: number, max: number }[] = [];
     const minDate = prefiltered.media.reduce(
       (p, curr) => Math.min(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
       Number.MAX_VALUE - 1
@@ -277,7 +277,8 @@ export class FilterService {
         } else {
           dStr = 'HH';
         }
-        ret.push({date: getDate(ret.length), endDate: getDate(ret.length + 1), dateStr: dStr, count: 0, max: 0});
+        const date = getDate(ret.length);
+        ret.push({date, time: date.getTime(), endTime: getDate(ret.length + 1).getTime(), dateStr: dStr, count: 0, max: 0});
       }
 
       ret[key].count++;

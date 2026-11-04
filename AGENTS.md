@@ -142,7 +142,12 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 ### Frontend state (signals)
 
 State read in templates is a signal; derived state is `computed()`/`linkedSignal()`. HTTP, timers and router events stay RxJS,
-bridged with `toObservable()`/`toSignal()` (to await a signal: `firstValueFrom(toObservable(...))`). Pitfalls seen so far:
+bridged with `toObservable()`/`toSignal()` (to await a signal: `firstValueFrom(toObservable(...))`).
+Templates don't call methods: values a template needs, also per item of an `@for`, are computed in the component's `.ts`
+(e.g. a `computed()` that maps the list to `{item, link}` rows). A new pipe only for a transform that several templates use;
+never for logic used in one place.
+
+Pitfalls seen so far:
 
 - Effects run after the constructor and asynchronously; in specs run them with `TestBed.tick()`.
   `AuthenticationService` must not send requests from its constructor: the error interceptor injects it (NG0200).

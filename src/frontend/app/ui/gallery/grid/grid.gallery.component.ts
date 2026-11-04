@@ -18,8 +18,6 @@ import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
-import {MarkdownsForDatePipe} from '../../../pipes/MarkdownsForDatePipe';
-import {BlogService} from '../blog/blog.service';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -34,8 +32,7 @@ import {BlogService} from '../blog/blog.service';
     NgIconComponent,
     GalleryBlogComponent,
     GalleryPhotoComponent,
-    ParseIntPipe,
-    MarkdownsForDatePipe
+    ParseIntPipe
 ]
 })
 export class GalleryGridComponent
@@ -47,7 +44,6 @@ export class GalleryGridComponent
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
   private route = inject(ActivatedRoute);
-  blogService = inject(BlogService);
 
   readonly gridContainer = viewChild<ElementRef>('gridContainer');
   // Kept as a QueryList: the lightbox navigates on its changes (setGridPhotoQL).

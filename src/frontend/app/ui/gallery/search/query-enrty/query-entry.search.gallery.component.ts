@@ -28,7 +28,6 @@ import {
 import { DatePipe } from '@angular/common';
 import {NgIconComponent} from '@ng-icons/core';
 import {StringifySearchType} from '../../../../pipes/StringifySearchType';
-import {MatchingTypeDescriptionPipe} from '../../../../pipes/MatchingTypeDescriptionPipe';
 import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 
 @Component({
@@ -52,8 +51,7 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
     FormsModule,
     NgIconComponent,
     DatePipe,
-    StringifySearchType,
-    MatchingTypeDescriptionPipe
+    StringifySearchType
 ]
 })
 export class GallerySearchQueryEntryComponent
@@ -122,14 +120,20 @@ export class GallerySearchQueryEntryComponent
     return this.queryEntry as TextSearch;
   }
 
-  get MatchingTypes(): string[] {
+  // the matching types with their descriptions (shown as the option's tooltip)
+  private readonly textMatchingTypes = TextSearchMatchingTypes.values
+    .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, true)}));
+  private readonly negatableMatchingTypes = ['=', '!='] //normal negatable query
+    .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, false)}));
+
+  get MatchingTypes(): { value: string; description: string }[] {
     if (this.IsListQuery) {
       return [];
     }
     if (this.IsTextQuery) {
-      return TextSearchMatchingTypes.values;
+      return this.textMatchingTypes;
     }
-    return ['=', '!=']; //normal negatable query
+    return this.negatableMatchingTypes;
   }
 
   get SelectedMatchType(): string {

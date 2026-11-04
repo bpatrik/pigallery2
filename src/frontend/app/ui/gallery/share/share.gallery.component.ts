@@ -1,4 +1,4 @@
-import { Component, TemplateRef, effect, inject, input, untracked, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, computed, effect, inject, input, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -16,8 +16,6 @@ import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
-import {SharingUrlPipe} from '../../../pipes/SharingUrlPipe';
-import {RecursiveSharingPipe} from '../../../pipes/RecursiveSharingPipe';
 
 @Component({
     selector: 'app-gallery-share',
@@ -29,9 +27,7 @@ import {RecursiveSharingPipe} from '../../../pipes/RecursiveSharingPipe';
     FormsModule,
     CopyDirective,
     DatePipe,
-    StringifySearchQuery,
-    SharingUrlPipe,
-    RecursiveSharingPipe
+    StringifySearchQuery
 ]
 })
 export class GalleryShareComponent {
@@ -68,7 +64,15 @@ export class GalleryShareComponent {
   modalRef: BsModalRef;
   invalidSettings = $localize`Invalid settings`;
 
-  activeShares: ResponseSharingDTO[] = [];
+  private readonly activeShares = signal<ResponseSharingDTO[]>([]);
+  // the active shares with their link and whether they share the subdirectories too (a 'path/*' glob)
+  readonly activeShareRows = computed((): { share: ResponseSharingDTO; url: string; recursive: boolean }[] =>
+    (this.activeShares() ?? []).map(share => ({
+      share,
+      url: this.sharingService.getUrl(share),
+      recursive: share.directoryQuery?.matchType === TextSearchQueryMatchTypes.globMatch &&
+        !!share.directoryQuery.value?.endsWith('*')
+    })));
 
   text = {
     Yes: 'Yes',
@@ -89,7 +93,7 @@ export class GalleryShareComponent {
   }
 
   private async onContentChange(content: ContentWrapper): Promise<void> {
-    this.activeShares = [];
+    this.activeShares.set([]);
     this.enabled = !!(content?.directory || (content as any)?.searchResult);
     this.currentDir = '';
     this.currentQuery = null;
@@ -165,19 +169,19 @@ export class GalleryShareComponent {
   private async updateActiveSharesList() {
     try {
       if (!this.currentQuery) {
-        this.activeShares = [];
+        this.activeShares.set([]);
         return;
       }
       if (this.isDirectorySharing) {
         // list the shares of this folder with and without subfolders, independently of the switch
         const lists = await Promise.all([false, true].map(r =>
           this.sharingService.getSharingListForQuery(this.buildDirectoryQuery(r))));
-        this.activeShares = lists.flat();
+        this.activeShares.set(lists.flat());
         return;
       }
-      this.activeShares = await this.sharingService.getSharingListForQuery(this.currentQuery);
+      this.activeShares.set(await this.sharingService.getSharingListForQuery(this.currentQuery));
     } catch (e) {
-      this.activeShares = [];
+      this.activeShares.set([]);
       console.error(e);
     }
   }

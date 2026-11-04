@@ -22,7 +22,6 @@ import {RouterLink} from '@angular/router';
 import {LeafletModule} from '@bluehalo/ngx-leaflet';
 import {DurationPipe} from '../../../../pipes/DurationPipe';
 import {FileSizePipe} from '../../../../pipes/FileSizePipe';
-import {TextSearchLinkPipe} from '../../../../pipes/TextSearchLinkPipe';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
 @Component({
@@ -36,8 +35,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
     LeafletModule,
     DatePipe,
     DurationPipe,
-    FileSizePipe,
-    TextSearchLinkPipe
+    FileSizePipe
 ]
 })
 export class InfoPanelLightboxComponent {
@@ -123,8 +121,8 @@ export class InfoPanelLightboxComponent {
     return '1/' + Math.round(1 / f);
   });
 
-  // the faces and keywords of the media, null if it has none
-  public readonly keywords = computed((): { value: string; type: SearchQueryTypes }[] => {
+  // the faces and keywords of the media with their search links, null if it has none
+  public readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] => {
     const metadata = this.media().metadata as PhotoMetadata;
     if (
       !(metadata.keywords && metadata.keywords.length > 0) &&
@@ -151,7 +149,7 @@ export class InfoPanelLightboxComponent {
           type: SearchQueryTypes.keyword,
         })
       )
-    );
+    ).map(k => ({...k, link: SearchQueryUtils.urlifyExactMatch(k.type, k.value)}));
   });
 
   public readonly isPhoto = computed((): boolean => {
@@ -179,6 +177,12 @@ export class InfoPanelLightboxComponent {
       positionData.country
     ].filter(text => !!text);
   });
+
+  // the position parts with their search links
+  public readonly positionLinks = computed((): { text: string; link: string }[] => this.positionParts().map(text => ({
+    text,
+    link: SearchQueryUtils.urlifyExactMatch(SearchQueryTypes.position, text)
+  })));
 
   public readonly hasTextPositionData = computed((): boolean => this.positionParts().length > 0);
 

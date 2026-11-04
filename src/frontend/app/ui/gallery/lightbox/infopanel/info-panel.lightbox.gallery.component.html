@@ -223,7 +223,7 @@
       <div class="col-11 keywords clickable">
         @for (keyword of keywords; track keyword; let last = $last) {
           @if (searchEnabled) {
-            <a [routerLink]="['/search', (keyword.value | textSearchLink: keyword.type)]">
+            <a [routerLink]="['/search', keyword.link]">
               @switch (keyword.type) {
                 @case (SearchQueryTypes.keyword) {#}
                 @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}
@@ -254,8 +254,8 @@
                 <div class="details-main clickable" title="Click location parts to search for media from the same area"
                   i18n-title>
                   @if (searchEnabled && hasTextPositionData()) {
-                    @for (item of positionParts(); track $index; let i = $index; let isLast = $last) {
-                      <a [routerLink]="['/search', (item | textSearchLink: SearchQueryTypes.position)]">{{ item }}</a><!--
+                    @for (item of positionLinks(); track $index; let isLast = $last) {
+                      <a [routerLink]="['/search', item.link]">{{ item.text }}</a><!--
                       -->
                       @if (!isLast) {,}
                     }
