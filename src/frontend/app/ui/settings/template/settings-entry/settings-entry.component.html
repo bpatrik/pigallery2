@@ -54,7 +54,7 @@
               (ngModelChange)="onChange($event)"
               [disabled]="state.readonly || Disabled"
               class="form-select" [(ngModel)]="state.value" [ngModelOptions]="{standalone: true}">
-              @for (opt of getOptionsView(state); track opt.key) {
+              @for (opt of optionsView; track opt.key) {
                 <option [ngValue]="opt.key">{{opt.value}}
                 </option>
               }
@@ -403,7 +403,7 @@
                       class="form-select"
                       [(ngModel)]="link.type"
                       [ngModelOptions]="{standalone: true}">
-                      @for (opt of getOptionsView(link.__state.type); track opt.key) {
+                      @for (opt of navigationLinkTypeOptions; track opt.key) {
                         <option [ngValue]="opt.key">{{opt.value}}
                         </option>
                       }
@@ -488,7 +488,7 @@
                       class="form-select"
                       [(ngModel)]="item.role"
                       [ngModelOptions]="{standalone: true}">
-                      @for (opt of getOptionsView(item.__state.role); track opt.key) {
+                      @for (opt of userRoleOptions; track opt.key) {
                         <option [ngValue]="opt.key">{{opt.value}}
                         </option>
                       }
@@ -595,7 +595,7 @@
                     (ngModelChange)="onChange($event)"
                     [disabled]="state.readonly || Disabled"
                     class="form-select" [(ngModel)]="state.value[i]" [ngModelOptions]="{standalone: true}">
-                    @for (opt of getOptionsView(state); track opt.key) {
+                    @for (opt of optionsView; track opt.key) {
                       <option [ngValue]="opt.key">{{opt.value}}
                       </option>
                     }

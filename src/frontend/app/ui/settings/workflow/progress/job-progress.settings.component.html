@@ -1,4 +1,4 @@
-@if (Stopped) {
+@if (Stopped()) {
   <div class="row">
     <div class="col-md-2 col-12" i18n>
     Last run:
@@ -8,13 +8,13 @@
       {{progress().time.start | date:'medium'}} -  {{progress().time.end | date:'mediumTime'}}
     </div>
     <div class="col-md-2 col-4"
-      [title]="ProgressTitle">
+      [title]="ProgressTitle()">
       <ng-icon name="ionCheckmarkOutline" />
       {{progress().steps.processed + progress().steps.skipped}}/{{progress().steps.all}}
     </div>
     <div class="col-md-2 col-4" title="Status" i18n-title>
       <ng-icon name="ionPulseOutline" />
-      {{State}}
+      {{State()}}
     </div>
     <div class="col-md-2 col-4">
       <button class="btn btn-secondary float-end" (click)="openModal(template)">
@@ -23,7 +23,7 @@
     </div>
   </div>
 }
-@if (Running) {
+@if (Running()) {
   <div>
     <div class="input-group mb-1">
       @if (progress().state === JobProgressStates.running && progress().logs.length > 0) {
@@ -47,11 +47,11 @@
     </div>
     <div class="mb-1 row progress-row ">
       <div class="col-6 col-md-2 col-lg-1 text-md-right order-md-0 text-nowrap" title="time elapsed"
-      i18n-title>{{TimeElapsed| duration:':'}}</div>
+      i18n-title>{{TimeElapsed()| duration:':'}}</div>
       <div class="col-6 col-md-2 col-lg-1 order-md-2 text-end text-md-left  text-nowrap" title="duration"
-      i18n-title>{{TimeAll| duration:':'}}</div>
+      i18n-title>{{TimeAll()| duration:':'}}</div>
       <div class="progress col-md-8 col-lg-10 order-md-1"
-        [title]="ProgressTitle">
+        [title]="ProgressTitle()">
         @if (progress().steps.all >0) {
           <div
             class="progress-bar clickable d-inline-block progress-bar-success {{progress().state === JobProgressStates.cancelling ? 'bg-secondary' : ''}}"
@@ -80,7 +80,7 @@
 <!-- Modal -->
 <ng-template #template>
   <div class="modal-header">
-    <h5 class="modal-title" >{{Name}}</h5>
+    <h5 class="modal-title" >{{Name()}}</h5>
     <button type="button"  class="btn-close"  (click)="modalRef.hide()" data-dismiss="modal" aria-label="Close">
     </button>
   </div>

@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, viewChildren, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, viewChildren, ChangeDetectionStrategy, computed } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
-import {NotificationService} from '../../model/notification.service';
+import {CountedNotificationDTO, NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
 import {NavigationService} from '../../model/navigation.service';
 import { ViewportScroller, JsonPipe, DatePipe } from '@angular/common';
@@ -44,7 +44,7 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     StringifyEnum
 ]
 })
-export class AdminComponent implements OnInit, AfterViewInit {
+export class AdminComponent implements OnInit {
   private authService = inject(AuthenticationService);
   private navigation = inject(NavigationService);
   viewportScroller = inject(ViewportScroller);
@@ -54,7 +54,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
   readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
-  contents: readonly ISettingsComponent[] = [];
+  // the server notifications with their alert class and readable details
+  readonly notificationRows = computed((): { notification: CountedNotificationDTO; css: string; details: string }[] =>
+    this.notificationService.countedNotifications().map(notification => ({
+      notification,
+      css: this.getCss(notification.type),
+      details: notification.details ? NotificationService.formatDetails(notification.details) : null
+    })));
   configPriorities: { key: number; value: string; }[];
   configStyles: { key: number; value: string; }[];
   public readonly ConfigPriority = ConfigPriority;
@@ -69,10 +75,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
         .filter(s => !wc.__state[s].volatile);
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => (this.contents = this.settingsComponents()), 0);
-  }
-
   ngOnInit(): void {
     if (
       !this.authService.isAuthenticated() ||
@@ -84,7 +86,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.piTitleService.setTitle($localize`Admin`);
   }
 
-  public getCss(type: NotificationType): string {
+  private getCss(type: NotificationType): string {
     switch (type) {
       case NotificationType.error:
         return 'danger';
@@ -94,10 +96,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
         return 'info';
     }
     return 'info';
-  }
-
-  public formatDetails(details: unknown): string {
-    return NotificationService.formatDetails(details);
   }
 }
 

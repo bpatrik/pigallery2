@@ -29,6 +29,11 @@ import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
 import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
 
+interface OptionView {
+  key: number | string;
+  value: string | number;
+}
+
 interface IState {
   shouldHide(): boolean;
 
@@ -102,6 +107,10 @@ export class SettingsEntryComponent
   public type: string | object;
   public arrayType: string;
   public uiType: string;
+  // options of the select(s), static per state type, set in ngOnChanges
+  optionsView: OptionView[] = [];
+  navigationLinkTypeOptions: OptionView[] = [];
+  userRoleOptions: OptionView[] = [];
   newThemeModalRef: any;
   iconModal: {
     ref?: any,
@@ -289,6 +298,13 @@ export class SettingsEntryComponent
       this.uiType = 'EnumArray';
     }
 
+    this.optionsView = this.uiType === 'EnumType' || this.uiType === 'EnumArray' ?
+      this.getOptionsView(this.state) : [];
+    this.navigationLinkTypeOptions = this.arrayType === 'NavigationLinkConfig' ?
+      this.getOptionsView(this.newArrayItemState('type')) : [];
+    this.userRoleOptions = this.arrayType === 'UserConfig' ?
+      this.getOptionsView(this.newArrayItemState('role')) : [];
+
     this.placeholder = this.state.tags?.hint || this.state.default;
 
     this.title = '';
@@ -332,30 +348,27 @@ export class SettingsEntryComponent
     }
   }
 
-  getOptionsView(state: IState & {
-    optionsView?: {
-      key: number | string;
-      value: string | number
-    }[]
-  }) {
-    if (!state.optionsView) {
-      const eClass = state.isEnumType
-          ? state.type
-          : state.arrayType;
-      if (state.tags?.uiOptions && typeof eClass === 'object') {
-        // enum with a restricted set of options
-        state.optionsView = enumToTranslatedArray(eClass)
-          .filter(o => state.tags.uiOptions.includes(o.key));
-      } else if (state.tags?.uiOptions) {
-        state.optionsView = state.tags?.uiOptions.map(o => ({
-          key: o,
-          value: o + (state.tags?.unit ? state.tags?.unit : '')
-        }));
-      } else {
-        state.optionsView = enumToTranslatedArray(eClass);
-      }
+  // The state of a property of the array items. It is the same for every item, so a fresh item is used.
+  private newArrayItemState(property: string): IState {
+    return (new this.state.arrayType() as { __state: Record<string, IState> }).__state[property];
+  }
+
+  private getOptionsView(state: IState): OptionView[] {
+    const eClass = state.isEnumType
+        ? state.type
+        : state.arrayType;
+    if (state.tags?.uiOptions && typeof eClass === 'object') {
+      // enum with a restricted set of options
+      return enumToTranslatedArray(eClass)
+        .filter(o => state.tags.uiOptions.includes(o.key));
     }
-    return state.optionsView;
+    if (state.tags?.uiOptions) {
+      return state.tags?.uiOptions.map(o => ({
+        key: o,
+        value: o + (state.tags?.unit ? state.tags?.unit : '')
+      }));
+    }
+    return enumToTranslatedArray(eClass);
   }
 
   validate(): ValidationErrors {

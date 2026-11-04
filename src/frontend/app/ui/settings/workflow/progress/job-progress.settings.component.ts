@@ -1,4 +1,4 @@
-import {Component, TemplateRef, inject, input, linkedSignal, ChangeDetectionStrategy} from '@angular/core';
+import {Component, TemplateRef, inject, input, linkedSignal, ChangeDetectionStrategy, computed} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {timer} from 'rxjs';
@@ -40,7 +40,7 @@ export class JobProgressComponent {
     });
   }
 
-  get ProgressTitle(): string {
+  readonly ProgressTitle = computed<string>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
@@ -58,17 +58,17 @@ export class JobProgressComponent {
         ':' +
         progress.steps.all
     );
-  }
+  });
 
-  get Name(): string {
+  readonly Name = computed<string>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
     }
     return this.backendTextService.getJobName(progress.jobName);
-  }
+  });
 
-  get TimeAll(): number {
+  readonly TimeAll = computed<number>(() => {
     const progress = this.progress();
     if (!progress || progress.steps.processed === 0) {
       return 0;
@@ -78,46 +78,35 @@ export class JobProgressComponent {
             progress.steps.processed) *
         (progress.steps.all - progress.steps.skipped)
     );
-  }
+  });
 
-  get Running(): boolean {
+  readonly Running = computed<boolean>(() => {
     const progress = this.progress();
     return (
-        progress &&
+        !!progress &&
         (progress.state === JobProgressStates.running ||
             progress.state === JobProgressStates.cancelling)
     );
-  }
+  });
 
-  get Stopped(): boolean {
+  readonly Stopped = computed<boolean>(() => {
     const progress = this.progress();
     return (
-        progress &&
+        !!progress &&
         progress.state !== JobProgressStates.running &&
         progress.state !== JobProgressStates.cancelling
     );
-  }
+  });
 
-  get TimeLeft(): number {
-    const progress = this.progress();
-    if (!progress) {
-      return 0;
-    }
-    return (
-        (progress.time.end - progress.time.start) /
-        progress.steps.all
-    );
-  }
-
-  get TimeElapsed(): number {
+  readonly TimeElapsed = computed<number>(() => {
     const progress = this.progress();
     if (!progress) {
       return 0;
     }
     return this.timeCurrentCopy() - progress.time.start;
-  }
+  });
 
-  get State(): string {
+  readonly State = computed<string>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
@@ -138,7 +127,7 @@ export class JobProgressComponent {
       default:
         return 'unknown state';
     }
-  }
+  });
 
   openModal(template: TemplateRef<unknown>): void {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});

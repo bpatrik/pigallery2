@@ -2,7 +2,7 @@ import {Signal} from '@angular/core';
 
 export interface ISettingsComponent {
   HasAvailableSettings: boolean;
-  Name: string;
+  Name: Signal<string>;
   icon: Signal<string>;
   ConfigPath: Signal<string>;
   Changed: boolean;

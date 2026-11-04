@@ -3,7 +3,7 @@
     <div class="card-header">
       <h5 class="d-inline-block mb-0">
         <ng-icon [name]="icon()" />
-        {{ Name }}
+        {{ Name() }}
       </h5>
       @if (states().value.enabled !== undefined) {
         <div class="float-end p-0">
@@ -31,7 +31,7 @@
         @if (states().value.enabled === false) {
           <div class="panel-info"
             >
-            {{ Name }} <span i18n>config is not supported with these settings.</span>
+            {{ Name() }} <span i18n>config is not supported with these settings.</span>
           </div>
         }
         <div class="row mt-2">
@@ -88,33 +88,33 @@
           }
         </div>
       }
-      @for (ck of getKeys(rStates); track ck) {
+      @for (ck of rStates.keys; track ck) {
         @if (!(rStates.value.__state[ck].shouldHide && rStates.value.__state[ck].shouldHide())) {
           <!-- is array -->
-          @if (rStates.value.__state[ck].isConfigArrayType && isExpandableArrayConfig(rStates.value.__state[ck])) {
+          @if (rStates.value.__state[ck].isExpandableArrayConfig) {
             <div class="row">
               <div class="col-auto">
                 <h5>{{ rStates?.value.__state[ck].tags?.name || ck }}</h5>
               </div>
               <div class="col mt-2">
-                @for (entry of rStates.value.__state[ck].value; track $index; let i = $index) {
+                @for (entry of rStates.value.__state[ck].arrayEntries; track $index; let i = $index) {
                   <div class="row mt-2">
                     <hr/>
-                    <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: {value: rStates.value.__state[ck].value[i]}, confPath:confPath+'.'+ck+'.'+i }"
+                    <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: entry, confPath:confPath+'.'+ck+'.'+i }"
                      />
                   </div>
                 }
               </div>
             </div>
           }
-          @if (!rStates.value.__state[ck].isConfigArrayType || !isExpandableArrayConfig(rStates.value.__state[ck])) {
+          @if (!rStates.value.__state[ck].isExpandableArrayConfig) {
             <!-- simple entries or complex once's but with custom UI--->
-            @if ((ck!=='enabled' || !topLevel) && !isExpandableConfig(rStates.value.__state[ck])) {
+            @if ((ck!=='enabled' || !topLevel) && !rStates.value.__state[ck].isExpandableConfig) {
               <app-settings-entry [name]="confPath+'_'+ck"
                 [ngModel]="rStates?.value.__state[ck]" />
             }
             <!-- Config entries --->
-            @if (isExpandableConfig(rStates.value.__state[ck]) && rStates.value.__state[ck].value) {
+            @if (rStates.value.__state[ck].isExpandableConfig && rStates.value.__state[ck].value) {
               <!-- Sub category with header and menu item -->
               @if (topLevel && rStates?.value.__state[ck].tags?.uiIcon) {
                 <div class="card mt-2 mb-2"
@@ -141,7 +141,7 @@
                   <div class="col">
                     <hr/>
                   </div>
-                  @if (isExtension(rStates?.value.__state[ck])) {
+                  @if (rStates?.value.__state[ck].isExtension) {
                     <div class="col-auto">
                       <button (click)="removeExtension(rStates?.value.__state[ck])" class="btn float-end btn-danger ">
                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -173,21 +173,21 @@
 
     <ng-template #JobTemplate let-uiJob="uiJob">
       <div class="mb-2">
-        @for (job of uiJob; track job; let i = $index) {
-          @if (job.description  && settingsService.configStyle() == ConfigStyle.full) {
+        @for (row of uiJobRows().get(uiJob); track row.job) {
+          @if (row.job.description  && settingsService.configStyle() == ConfigStyle.full) {
             <div class="alert alert-secondary" role="alert"
               >
               <ng-icon size="1.3em" name="ionInformationCircleOutline" />
-              {{ job.description }}
+              {{ row.job.description }}
             </div>
           }
-          @if (!job.relevant || job.relevant(settingsService.settings())) {
+          @if (row.relevant) {
             <app-settings-job-button class="mt-2 mb-1 mb-md-0 mt-md-0 float-left me-2"
               [soloRun]="true"
               (jobError)="error.set($event)"
               [allowParallelRun]="false"
-              [danger]="job.job.includes('Reset') || job.job.includes('Delete')"
-            [jobName]="job.job" />
+              [danger]="row.danger"
+            [jobName]="row.job.job" />
           }
         }
 
@@ -196,11 +196,11 @@
 
     <ng-template #JobProcessTemplate let-uiJob="uiJob">
       <div>
-        @for (job of uiJob; track job) {
-          @if (getProgress(job) && !job.hideProgress && (!job.relevant || job.relevant(settingsService.settings()))) {
+        @for (row of uiJobRows().get(uiJob); track row.job) {
+          @if (row.progress && !row.job.hideProgress && row.relevant) {
             <hr class="mt-1"/>
             <app-settings-job-progress class="d-block mb-2"
-            [progress]="getProgress(job)" />
+            [progress]="row.progress" />
           }
         }
       </div>

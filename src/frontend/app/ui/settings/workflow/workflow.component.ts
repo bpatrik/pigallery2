@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren, ChangeDetectionStrategy } from '@angular/core';
+import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren, ChangeDetectionStrategy, computed } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -22,6 +22,7 @@ import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type Validation
 import {SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
 import {SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
+import {DynamicConfig} from '../../../../../common/entities/DynamicConfig';
 import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
@@ -91,6 +92,27 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   };
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
+  // keyed by job name, a missing key means an unknown job
+  readonly validJobs = computed<Record<string, boolean>>(() => {
+    const valid: Record<string, boolean> = Object.create(null);
+    for (const job of this.jobsService.availableJobs()) {
+      valid[job.Name] = true;
+    }
+    return valid;
+  });
+  // keyed by job name, only jobs with a non-empty config template are listed
+  readonly configTemplates = computed<Record<string, DynamicConfig[]>>(() => {
+    const templates: Record<string, DynamicConfig[]> = Object.create(null);
+    for (const job of this.jobsService.availableJobs()) {
+      const ct = this.jobsService.getConfigTemplate(job.Name);
+      if (ct) {
+        templates[job.Name] = ct;
+      }
+    }
+    return templates;
+  });
+  readonly availableJobOptions = computed((): { name: string; label: string }[] =>
+    this.jobsService.availableJobs().map(job => ({name: job.Name, label: this.backendTextService.getJobName(job.Name)})));
 
 
   error: string;

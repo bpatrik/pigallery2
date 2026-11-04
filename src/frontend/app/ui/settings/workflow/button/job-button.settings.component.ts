@@ -1,4 +1,4 @@
-import { Component, TemplateRef, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, inject, input, output, ChangeDetectionStrategy, computed } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -34,6 +34,8 @@ export class JobButtonComponent {
   readonly jobError = output<string>();
   private modalRef: BsModalRef;
   private defaultConfig: any;
+  readonly JobName = computed<string>(() => this.backendTextService.getJobName(this.jobName()));
+  readonly JobDescription = computed<string>(() => this.backendTextService.getJobDescription(this.jobName()));
 
   /**
    * The config input, or the job's default config if the input is not set.

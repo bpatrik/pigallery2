@@ -29,7 +29,8 @@ export class DirectorySearchListSettingsComponent {
   readonly changed = output<void>();
 
   readonly SearchQueryTypes = SearchQueryTypes;
-  readonly MatchingTypes = TextSearchMatchingTypes.values;
+  readonly MatchingTypes = TextSearchMatchingTypes.values
+    .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value)}));
 
   getMatchingType(d: DirectorySearch): string {
     return TextSearchMatchingTypes.get(d);
@@ -38,10 +39,6 @@ export class DirectorySearchListSettingsComponent {
   setMatchingType(d: DirectorySearch, value: string): void {
     TextSearchMatchingTypes.set(d, value);
     this.changed.emit();
-  }
-
-  getMatchingTypesDescription(type: string): string {
-    return TextSearchMatchingTypes.getDescription(type);
   }
 
   add(): void {

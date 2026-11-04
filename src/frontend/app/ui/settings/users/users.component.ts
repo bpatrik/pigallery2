@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, viewChild, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -11,7 +11,6 @@ import {SettingsService} from '../settings.service';
 
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
-import {StringifyRole} from '../../../pipes/StringifyRolePipe';
 import {UserSettingsDTO} from '../../../../../common/entities/UserSettingsDTO';
 import {DirectorySearchListSettingsComponent} from '../directory-search-list/directory-search-list.settings.component';
 import {
@@ -27,7 +26,7 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormsModule, NgIconComponent, ModalDirective, StringifyRole, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
+  imports: [FormsModule, NgIconComponent, ModalDirective, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
 })
 export class UsersComponent implements OnInit {
   private authService = inject(AuthenticationService);
@@ -41,14 +40,25 @@ export class UsersComponent implements OnInit {
   public readonly editModal = viewChild<ModalDirective>('editUserModal');
   public newUser = {} as UserDTO;
   public userRoles: { key: number; value: string }[] = [];
-  public users: UserDTO[] = [];
+  public readonly users = signal<UserDTO[]>([]);
+  // the users with what the current user may do with them
+  readonly userRows = computed((): { user: UserDTO; roleName: string; canDelete: boolean; canModify: boolean }[] => {
+    const currentUser = this.authService.user();
+    return this.users().map(user => ({
+      user,
+      roleName: UserRoles[user.role],
+      canDelete: this.canDeleteUser(currentUser, user),
+      canModify: this.canModifyUser(currentUser, user)
+    }));
+  });
   public error: string = null;
   public inProgress = false;
 
   public editUser: UserDTO = null;
   public editSettings: UserSettingsDTO = {};
   public newPassword = '';
-  public editOriginalUser: UserDTO = null;
+  public readonly editOriginalUser = signal<UserDTO>(null);
+  readonly canModifyRole = computed<boolean>(() => this.canModifyUserRole(this.authService.user(), this.editOriginalUser()));
 
   // Confirm password fields for validation
   public newUserPasswordConfirm: string = '';
@@ -82,8 +92,7 @@ export class UsersComponent implements OnInit {
     this.getUsersList();
   }
 
-  canModifyUser(user: UserDTO): boolean {
-    const currentUser = this.authService.user();
+  private canModifyUser(currentUser: UserDTO, user: UserDTO): boolean {
     if (!currentUser) {
       return false;
     }
@@ -91,8 +100,7 @@ export class UsersComponent implements OnInit {
     return currentUser.role >= user.role;
   }
 
-  canDeleteUser(user: UserDTO): boolean {
-    const currentUser = this.authService.user();
+  private canDeleteUser(currentUser: UserDTO, user: UserDTO): boolean {
     if (!currentUser) {
       return false;
     }
@@ -100,18 +108,15 @@ export class UsersComponent implements OnInit {
     return currentUser.name !== user.name && currentUser.role >= user.role;
   }
 
-  canModifyRole(user: UserDTO): boolean {
-    const currentUser = this.authService.user();
-    if (!currentUser) {
+  private canModifyUserRole(currentUser: UserDTO, user: UserDTO): boolean {
+    if (!currentUser || !user) {
       return false;
     }
 
     return currentUser.name !== user.name && currentUser.role >= user.role;
   }
 
-  get Enabled(): boolean {
-    return this.settingsService.settings().Users.authenticationRequired;
-  }
+  readonly Enabled = computed<boolean>(() => this.settingsService.settings().Users.authenticationRequired);
 
 
   initNewUser(): void {
@@ -158,9 +163,9 @@ export class UsersComponent implements OnInit {
 
   async openEditUser(user: UserDTO): Promise<void> {
     await this.getUsersList();
-    const fresh = this.users.find(u => u.id === user.id) || user;
+    const fresh = this.users().find(u => u.id === user.id) || user;
     this.editUser = { ...fresh };
-    this.editOriginalUser = Utils.clone(this.editUser);
+    this.editOriginalUser.set(Utils.clone(this.editUser));
     const defaultQuery: SearchQueryDTO = { type: SearchQueryTypes.any_text, value: '' } as TextSearch;
     this.editSettings = {
       overrideAllowBlockList: fresh.overrideAllowBlockList ?? false,
@@ -184,8 +189,8 @@ export class UsersComponent implements OnInit {
     try {
 
       // Save role if changed
-      if (this.editUser.role !== this.editOriginalUser?.role) {
-        if (!this.canModifyRole(this.editOriginalUser)) {
+      if (this.editUser.role !== this.editOriginalUser()?.role) {
+        if (!this.canModifyRole()) {
           this.notification.error($localize`Can't modify user role`);
           return;
         }
@@ -224,9 +229,9 @@ export class UsersComponent implements OnInit {
 
   private async getUsersList(): Promise<void> {
     try {
-      this.users = await this.userSettings.getUsers();
+      this.users.set(await this.userSettings.getUsers());
     } catch (err) {
-      this.users = [];
+      this.users.set([]);
       if ((err as ErrorDTO).code !== ErrorCodes.USER_MANAGEMENT_DISABLED) {
         throw err;
       }

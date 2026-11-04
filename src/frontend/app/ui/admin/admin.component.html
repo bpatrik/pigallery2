@@ -1,20 +1,20 @@
 <app-frame #frame>
   <div body class="container-fluid">
 
-    @if (notificationService.countedNotifications.length>0) {
+    @if (notificationRows().length>0) {
       <div class="card mb-4">
         <h5 class="card-header" i18n>Server notifications</h5>
         <div class="card-body">
-          @for (notification of notificationService.countedNotifications; track notification) {
-            <div class="alert alert-{{getCss(notification.type)}}" role="alert">
-              ({{notification.count}}) {{notification.message}}
-              @if (notification.details) {
-                <pre class="notification-details mt-2 mb-0">{{formatDetails(notification.details)}}</pre>
+          @for (row of notificationRows(); track row.notification) {
+            <div class="alert alert-{{row.css}}" role="alert">
+              ({{row.notification.count}}) {{row.notification.message}}
+              @if (row.notification.details) {
+                <pre class="notification-details mt-2 mb-0">{{row.details}}</pre>
               }
-              @if (notification.request) {
+              @if (row.notification.request) {
                 <br/>
-                Request: "{{notification.request.method}}", url: "{{notification.request.url}}", status code:
-                "{{notification.request.statusCode}}"
+                Request: "{{row.notification.request.method}}", url: "{{row.notification.request.url}}", status code:
+                "{{row.notification.request.statusCode}}"
               }
             </div>
           }
@@ -89,13 +89,13 @@
               <div class="card-body text-md-start text-center align-content-md-start align-content-center">
                 <h5 i18n="title of left card in settings page that contains settings contents" class="card-title">
                 Menu</h5>
-                @for (s of contents; track s) {
+                @for (s of settingsComponents(); track s) {
                   <div class="py-md-1 px-md-0"
                     [hidden]="!s.HasAvailableSettings">
                     <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
                       (click)="viewportScroller.scrollToAnchor(s.ConfigPath())"
                       >
-                      <ng-icon [name]="s.icon()" /> {{s.Name}}
+                      <ng-icon [name]="s.icon()" /> {{s.Name()}}
                     </button>
                     @for (n of s.nestedConfigs(); track n.id) {
                       <button class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"

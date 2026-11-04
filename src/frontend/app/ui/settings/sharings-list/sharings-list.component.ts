@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, computed, signal } from '@angular/core';
 import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {SettingsService} from '../settings.service';
 import {ShareService} from '../../gallery/share.service';
@@ -18,15 +18,18 @@ export class SharingsListComponent implements OnInit {
   settingsService = inject(SettingsService);
 
 
-  public shares: ResponseSharingDTO[] = [];
+  public readonly shares = signal<ResponseSharingDTO[]>([]);
+  // the shares with their link
+  readonly shareRows = computed((): { share: ResponseSharingDTO; url: string }[] =>
+    (this.shares() ?? []).map(share => ({
+      share,
+      url: this.sharingService.getUrl(share)
+    })));
+  readonly Enabled = computed<boolean>(() => this.settingsService.settings().Sharing.enabled);
 
 
   ngOnInit(): void {
     this.getSharingList();
-  }
-
-  get Enabled(): boolean {
-    return this.settingsService.settings().Sharing.enabled;
   }
 
   async deleteSharing(sharing: ResponseSharingDTO): Promise<void> {
@@ -36,9 +39,9 @@ export class SharingsListComponent implements OnInit {
 
   private async getSharingList(): Promise<void> {
     try {
-      this.shares = await this.sharingService.getSharingList();
+      this.shares.set(await this.sharingService.getSharingList());
     } catch (err) {
-      this.shares = [];
+      this.shares.set([]);
       throw err;
     }
   }

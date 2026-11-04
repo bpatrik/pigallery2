@@ -53,9 +53,24 @@ export interface RecursiveState extends ConfigState {
   onChange?: any;
   original?: any;
   shouldHide?: any;
+  // UI helpers precomputed by TemplateComponent.instrument()
+  keys?: any; // sorted keys of the sub configs
+  arrayEntries?: any; // {value, keys} per array item of an expandable config array
+  isExpandableConfig?: any;
+  isExpandableArrayConfig?: any;
+  isExtension?: any;
 
   [key: string]: RecursiveState;
 }
+
+export interface UiJobRow {
+  job: UiJob;
+  danger: boolean;
+  relevant: boolean;
+  progress: JobProgressDTO;
+}
+
+type UiJob = TAGS['uiJob'][number];
 
 @Component({
   selector: 'app-settings-template',
@@ -100,7 +115,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   public readonly nestedConfigs = computed(() => {
     const states = this.states();
     const nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
-    for (const key of this.getKeys(states)) {
+    for (const key of states.keys) {
       const st = states.value.__state[key];
       if (st.isConfigType && st.tags?.uiIcon) {
         nestedConfigs.push({
@@ -115,10 +130,61 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   });
   public readonly ConfigStyle = ConfigStyle;
   protected readonly name = computed<string>(() => this.states().tags?.name || this.ConfigPath());
-
-  get Name(): string {
-    return this.changed() ? this.name() + '*' : this.name();
-  }
+  public readonly Name = computed<string>(() => this.changed() ? this.name() + '*' : this.name());
+  /**
+   * All uiJob lists of the states tree, they only change when the states are re-derived.
+   */
+  private readonly uiJobLists = computed<UiJob[][]>(() => {
+    const lists: UiJob[][] = [];
+    const collect = (st: RecursiveState): void => {
+      if (st.tags?.uiJob) {
+        lists.push(st.tags.uiJob);
+      }
+      for (const k of st.keys || []) {
+        collect(st.value.__state[k]);
+      }
+      for (const e of st.arrayEntries || []) {
+        for (const k of e.keys) {
+          collect(e.value.__state[k]);
+        }
+      }
+    };
+    collect(this.states());
+    return lists;
+  });
+  /**
+   * The default config of each uiJob, it changes only when the available jobs are (re)loaded.
+   */
+  private readonly uiJobDefaultConfigs = computed<Map<string, Record<string, unknown>>>(() => {
+    const configs = new Map<string, Record<string, unknown>>();
+    for (const list of this.uiJobLists()) {
+      for (const job of list) {
+        configs.set(job.job, this.jobsService.getDefaultConfig(job.job));
+      }
+    }
+    return configs;
+  });
+  /**
+   * The job buttons and progress rows of each uiJob list (keyed by the list).
+   */
+  public readonly uiJobRows = computed<Map<UiJob[], UiJobRow[]>>(() => {
+    const settings = this.settingsService.settings();
+    const progress = this.jobsService.progress();
+    const configs = this.uiJobDefaultConfigs();
+    const rows = new Map<UiJob[], UiJobRow[]>();
+    for (const list of this.uiJobLists()) {
+      rows.set(list, list.map(job => {
+        const config = configs.get(job.job);
+        return {
+          job,
+          danger: job.job.includes('Reset') || job.job.includes('Delete'),
+          relevant: !job.relevant || job.relevant(settings),
+          progress: progress[JobDTOUtils.getHashName(job.job, config || {})]
+        };
+      }));
+    }
+    return rows;
+  });
 
   get Changed(): boolean {
     return this.changed();
@@ -215,6 +281,10 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     if (typeof st.value !== 'undefined') {
       st.original = Utils.clone(st.value);
     }
+    const isCustom = CustomSettingsEntries.iS(st);
+    st.isExpandableConfig = !!st.isConfigType && !isCustom;
+    st.isExpandableArrayConfig = !!st.isConfigArrayType && !isCustom;
+    st.isExtension = !!(st.isConfigType && st.value) && this.isExtension(st);
 
     if (st.isConfigType && st.value) {
       for (const k of Object.keys(st.value.__state)) {
@@ -227,6 +297,14 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
           this.instrument(st.value[i].__state[k], st);
         }
       }
+    }
+    // after the children, as sorting reads their flags
+    st.keys = st.isConfigType && st.value ? this.sortKeys(st.value.__state) : [];
+    // A snapshot of the items: edits inside them show up, but adding or removing items does not until
+    // the settings are reloaded. No UI does that for these arrays (the editable ones have custom entries).
+    if (st.isExpandableArrayConfig && st.value) {
+      st.arrayEntries = (st.value as { __state: Record<string, RecursiveState> }[])
+        .map(v => ({value: v, keys: this.sortKeys(v.__state)}));
     }
   }
 
@@ -263,18 +341,6 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     this.getSettings();
   }
 
-  /**
-   * main template should list it
-   * @param c
-   */
-  isExpandableConfig(c: ConfigState) {
-    return c.isConfigType && !CustomSettingsEntries.iS(c);
-  }
-
-  isExpandableArrayConfig(c: ConfigState) {
-    return c.isConfigArrayType && !CustomSettingsEntries.iS(c);
-  }
-
   public async save(): Promise<boolean> {
     this.inProgress.set(true);
     this.error.set('');
@@ -283,7 +349,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       await this.settingsService.updateSettings(state, this.ConfigPath());
       await this.getSettings();
       this.notification.success(
-        this.Name + ' ' + $localize`settings saved`,
+        this.Name() + ' ' + $localize`settings saved`,
         $localize`Success`
       );
       this.inProgress.set(false);
@@ -299,17 +365,11 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     return false;
   }
 
-  getKeys(states: any): string[] {
-    if (states.keys) {
-      return states.keys;
-    }
-    if (!states.value) {
-      return [];
-    }
-    const s = states.value.__state;
-    const keys = Object.keys(s).sort((a, b) => {
-      if ((this.isExpandableConfig(s[a]) || s[a].isConfigArrayType) !== (this.isExpandableConfig(s[b]) || s[b].isConfigArrayType)) {
-        if (this.isExpandableConfig(s[a]) || s[a].isConfigArrayType) {
+  // Expandable sub configs and arrays go last, the rest by priority and name.
+  private sortKeys(s: Record<string, RecursiveState>): string[] {
+    return Object.keys(s).sort((a, b) => {
+      if ((s[a].isExpandableConfig || s[a].isConfigArrayType) !== (s[b].isExpandableConfig || s[b].isConfigArrayType)) {
+        if (s[a].isExpandableConfig || s[a].isConfigArrayType) {
           return 1;
         } else {
           return -1;
@@ -326,19 +386,14 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       }
       return (s[a].tags?.name as string || a).localeCompare(s[b].tags?.name || b);
     });
-    states.keys = keys;
-    return states.keys;
   }
 
-  getProgress(uiJob: { job: string, config?: any }): JobProgressDTO {
-    if (!uiJob.config) {
-      uiJob.config = this.jobsService.getDefaultConfig(uiJob.job);
+  private isExtension(c: ConfigState): boolean {
+    const propPath = (c?.value as unknown as { __propPath?: string })?.__propPath;
+    if (typeof propPath !== 'string') {
+      return false;
     }
-    return this.jobsService.progress()[JobDTOUtils.getHashName(uiJob.job, uiJob.config || {})];
-  }
-
-  protected isExtension(c: ConfigState): boolean {
-    return (c?.value?.__propPath as any).substring(0, (c?.value?.__propPath as any).lastIndexOf('.')) == 'Extensions.extensions';
+    return propPath.substring(0, propPath.lastIndexOf('.')) == 'Extensions.extensions';
   }
 
   protected async removeExtension(c: ConfigState): Promise<void> {

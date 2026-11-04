@@ -19,8 +19,8 @@
           [ngModel]="getMatchingType(d)"
           [ngModelOptions]="{standalone: true}"
           (ngModelChange)="setMatchingType(d, $event)">
-          @for (mt of MatchingTypes; track mt) {
-            <option [ngValue]="mt" [title]="getMatchingTypesDescription(mt)">{{ mt }}</option>
+          @for (mt of MatchingTypes; track mt.value) {
+            <option [ngValue]="mt.value" [title]="mt.description">{{ mt.value }}</option>
           }
         </select>
       </div>

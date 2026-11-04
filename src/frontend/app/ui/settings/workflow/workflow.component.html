@@ -7,7 +7,7 @@
       <div class="card-header">
         <div class="d-flex justify-content-between">
           <div (click)="showDetails[schedule.name]=!showDetails[schedule.name]">
-            @if (!jobsService.isValidJob(schedule.jobName)) {
+            @if (!validJobs()[schedule.jobName]) {
               <span
                 triggers="mouseenter:mouseleave"
                 placement="bottom"
@@ -39,7 +39,7 @@
             <button class="btn btn-danger ms-0" (click)="remove(schedule)">
               <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
-            @if (jobsService.isValidJob(schedule.jobName)) {
+            @if (validJobs()[schedule.jobName]) {
               <app-settings-job-button class="ms-md-2 mt-2 mt-md-0"
                 (jobError)="error=$event"
                 [allowParallelRun]="schedule.allowParallelRun"
@@ -189,9 +189,9 @@
             </div>
           </div>
         </div>
-        @if (jobsService.getConfigTemplate(schedule.jobName)) {
+        @if (configTemplates()[schedule.jobName]) {
           <hr/>
-          @for (configEntry of jobsService.getConfigTemplate(schedule.jobName); track configEntry.id) {
+          @for (configEntry of configTemplates()[schedule.jobName]; track configEntry.id) {
             <div>
               @if (!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue) {
                 <div class="mb-1 row"
@@ -259,7 +259,8 @@
                           </select>
                         }
                         @case ('MediaPickDTO-array') {
-                          @for (mp of AsMediaPickDTOArray(schedule.config[configEntry.id]); track mp; let j = $index) {
+                          @let mediaPicks = AsMediaPickDTOArray(schedule.config[configEntry.id]);
+                          @for (mp of mediaPicks; track mp; let j = $index) {
                             <div class="mb-1 row"
                               [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
                               <label class="col-md-2 control-label"
@@ -351,12 +352,12 @@
                             </div>
                             <div class="row">
                               <button class="btn float-end"
-                                [class.btn-secondary]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length < 2"
-                                [class.btn-danger]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length >= 2"
-                                [disabled]="AsMediaPickDTOArray(schedule.config[configEntry.id]).length < 2"
+                                [class.btn-secondary]="mediaPicks.length < 2"
+                                [class.btn-danger]="mediaPicks.length >= 2"
+                                [disabled]="mediaPicks.length < 2"
                                 [id]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
                                 [name]="'list_btn_'+configEntry.id+'_'+i+'_'+j"
-                                (click)="removeFromArray(AsMediaPickDTOArray(schedule.config[configEntry.id]),j)">
+                                (click)="removeFromArray(mediaPicks,j)">
                                 <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                               </button>
                             </div>
@@ -423,9 +424,9 @@
             (change)="jobTypeChanged(newSchedule)"
             [(ngModel)]="newSchedule.jobName"
             name="newJobName" required>
-            @for (availableJob of jobsService.availableJobs(); track availableJob.Name) {
+            @for (availableJob of availableJobOptions(); track availableJob.name) {
               <option
-                [ngValue]="availableJob.Name">{{ backendTextService.getJobName(availableJob.Name) }}
+                [ngValue]="availableJob.name">{{ availableJob.label }}
               </option>
             }
           </select>
