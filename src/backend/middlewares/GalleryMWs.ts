@@ -34,7 +34,7 @@ export class GalleryMWs {
         return next();
       }
 
-      let rawQueryParam = req.params['searchQueryDTO'] as string;
+      const rawQueryParam = req.params['searchQueryDTO'] as string;
 
       let query: SearchQueryDTO;
       try {

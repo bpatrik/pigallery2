@@ -272,7 +272,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
         name: dir.name,
         path: dir.path
       });
-      let rootRow = await getCacheRow(dir);
+      const rootRow = await getCacheRow(dir);
       expect(rootRow!.cover!).to.deep.equal(saved!.cover!);
       expect(rootRow!.cover!).to.deep.equal(coverify(p2));
 
@@ -282,7 +282,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
         name: subDir2.name,
         path: subDir2.path
       });
-      let row2 = await getCacheRow(subDir2);
+      const row2 = await getCacheRow(subDir2);
       expect(row2!.cover!).to.deep.equal(saved!.cover!);
       expect(row2!.cover!).to.deep.equal(coverify(p4));
       expect(row2!.mediaCount).to.equal(1);

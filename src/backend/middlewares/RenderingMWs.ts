@@ -75,7 +75,7 @@ export class RenderingMWs {
 
     const shares = Utils.clone(req.resultPipe as SharingEntity[]);
     const rs = shares.map((s): ResponseSharingDTO => {
-      let ret = s as unknown as ResponseSharingDTO;
+      const ret = s as unknown as ResponseSharingDTO;
       ret.passwordProtected = Config.Sharing.passwordRequired || (typeof s.password === 'string' && s.password !== '');
       delete s.password;
       delete s.creator.password;

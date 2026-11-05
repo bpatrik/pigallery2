@@ -401,7 +401,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
       // Ensure there are valid cache entries
       await pm.getAll(DBTestHelper.defaultSession);
 
-      let validCacheCount = await connection.getRepository(ProjectedPersonCacheEntity)
+      const validCacheCount = await connection.getRepository(ProjectedPersonCacheEntity)
         .count({where: {valid: true}});
       expect(validCacheCount).to.be.equal(10);
 
