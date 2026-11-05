@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, linkedSignal, output, viewChild} from '@angular/core';
+import {Component, ElementRef, computed, inject, input, linkedSignal, output, viewChild} from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
@@ -10,7 +10,6 @@ import {LightboxService} from '../lightbox.service';
   selector: 'app-gallery-lightbox-media',
   styleUrl: './media.lightbox.gallery.component.css',
   templateUrl: './media.lightbox.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: []
 })
 export class GalleryLightboxMediaComponent {

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, OnDestroy, Signal, computed, effect, inject, input, signal, untracked, viewChild} from '@angular/core';
+import {Component, ElementRef, OnDestroy, Signal, computed, effect, inject, input, signal, untracked, viewChild} from '@angular/core';
 import {toSignal} from '@angular/core/rxjs-interop';
 import {Dimension, DimensionUtils} from '../../../model/IRenderable';
 import {FullScreenService} from '../fullscreen.service';
@@ -54,7 +54,6 @@ export interface LightboxGrid {
   },
   styleUrl: './lightbox.gallery.component.css',
   templateUrl: './lightbox.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryLightboxMediaComponent,
     NgIconComponent,

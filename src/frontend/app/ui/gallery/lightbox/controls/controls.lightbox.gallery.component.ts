@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, ElementRef, LOCALE_ID, OnDestroy, computed, effect, inject, input, model, output, signal, untracked, viewChild} from '@angular/core';
+import {Component, ElementRef, LOCALE_ID, OnDestroy, computed, effect, inject, input, model, output, signal, untracked, viewChild} from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
 import {GridMedia} from '../../grid/GridMedia';
@@ -30,7 +30,6 @@ import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/ges
   },
   styleUrls: ['./controls.lightbox.gallery.component.css', './inputrange.css'],
   templateUrl: './controls.lightbox.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     BsDropdownDirective,
