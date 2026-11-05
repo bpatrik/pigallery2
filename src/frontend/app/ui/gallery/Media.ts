@@ -34,7 +34,6 @@ export class Media extends MediaIcon {
       const size = this.getThumbnailSize();
       if (this.media.missingThumbnails) {
         for (const thSize of Config.Media.Photo.thumbnailSizes) {
-          // eslint-disable-next-line no-bitwise
           if (
               (this.media.missingThumbnails & MediaIcon.ThumbnailMap[thSize]) ===
               0 &&
@@ -54,7 +53,6 @@ export class Media extends MediaIcon {
   }
 
   isThumbnailAvailable(): boolean {
-    // eslint-disable-next-line no-bitwise
     return (
         (this.media.missingThumbnails &
             MediaIcon.ThumbnailMap[this.getThumbnailSize()]) ===

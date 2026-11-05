@@ -108,7 +108,6 @@ export class ExtensionConfigTemplateLoader {
     let template: { folder: string, template?: new() => unknown } = {folder: extFolder};
 
     if (fs.existsSync(configExtPath)) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const extCfg = require(configExtPath);
       if (typeof extCfg?.initConfig === 'function') {
         extCfg?.initConfig({

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {SQLConnection} from './database/SQLConnection';
 import {Logger} from '../Logger';
 import {LocationManager} from './database/LocationManager';

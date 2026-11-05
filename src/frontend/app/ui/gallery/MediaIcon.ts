@@ -25,7 +25,6 @@ export class MediaIcon {
   }
 
   isIconAvailable(): boolean {
-    // eslint-disable-next-line no-bitwise
     return (
       (this.media.missingThumbnails &
         MediaIcon.ThumbnailMap[Config.Media.Photo.iconSize]) ===
@@ -36,7 +35,6 @@ export class MediaIcon {
 
   isPhotoAvailable(renderWidth: number, renderHeight: number): boolean {
     const size = this.getMediaSize(renderWidth, renderHeight);
-    // eslint-disable-next-line no-bitwise
     return (
       (this.media.missingThumbnails &
         MediaIcon.ThumbnailMap[size]) === 0

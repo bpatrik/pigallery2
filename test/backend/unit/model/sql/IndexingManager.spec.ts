@@ -21,9 +21,7 @@ import {ClientSortingConfig} from '../../../../../src/common/config/public/Clien
 import {DiskManager} from '../../../../../src/backend/model/fileaccess/DiskManager';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const chai = require('chai');
 
 chai.use(deepEqualInAnyOrder);

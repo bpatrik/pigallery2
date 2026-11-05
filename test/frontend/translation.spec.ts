@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {ProjectPath} from '../../src/backend/ProjectPath';
 import {promises as fsp} from 'fs';
 import * as path from 'path';

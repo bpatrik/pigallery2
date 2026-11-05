@@ -19,7 +19,6 @@ import {MediaDTO} from '../../../../../src/common/entities/MediaDTO';
 import {Utils} from '../../../../../src/common/Utils';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const chai = require('chai');
 const {expect} = chai;
 

@@ -53,7 +53,6 @@ export class ConfigDiagnostics {
 
   static checkReadWritePermission(path: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      // eslint-disable-next-line no-bitwise
       fs.access(path, fs.constants.R_OK | fs.constants.W_OK, (err) => {
         if (err) {
           return reject(err);
@@ -151,7 +150,6 @@ export class ConfigDiagnostics {
 
   static async testSharp(): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing sharp package');
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const sharp = require('sharp');
     sharp();
   }

@@ -25,7 +25,6 @@ declare const it: any;
 
 
 const tmpDescribe = describe;
-// eslint-disable-next-line prefer-const
 describe = DBTestHelper.describe();
 
 describe('PersonManager', (sqlHelper: DBTestHelper) => {

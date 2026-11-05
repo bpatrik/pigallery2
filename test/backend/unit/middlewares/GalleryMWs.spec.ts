@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import * as path from 'path';
 import {expect} from 'chai';
 import {Config} from '../../../../src/common/config/private/Config';

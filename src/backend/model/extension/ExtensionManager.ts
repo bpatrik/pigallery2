@@ -22,7 +22,6 @@ import {ExtensionConfigTemplateLoader} from './ExtensionConfigTemplateLoader';
 import {Utils} from '../../../common/Utils';
 import {UIExtensionDTO} from '../../../common/entities/extension/IClientUIConfig';
 import {ExtensionConfigWrapper} from './ExtensionConfigWrapper';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const exec = util.promisify(require('child_process').exec);
 const LOG_TAG = '[ExtensionManager]';
 
@@ -303,14 +302,12 @@ export class ExtensionManager implements IObjectManager {
           cwd: extPath
         });
       }
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const pkg = require(packageJsonPath);
       if (pkg.name) {
         extName = pkg.name;
       }
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ext = require(serverExtPath);
     if (typeof ext?.init === 'function') {
       Logger.debug(LOG_TAG, 'Running init on extension: ' + folderName);
@@ -341,7 +338,6 @@ export class ExtensionManager implements IObjectManager {
 
     const serverExt = path.join(extObj.folder, 'server.js');
     if (fs.existsSync(serverExt)) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const ext = require(serverExt);
       if (typeof ext?.cleanUp === 'function') {
         Logger.debug(LOG_TAG, 'Running cleanUp on extension: ' + extObj.extensionName);

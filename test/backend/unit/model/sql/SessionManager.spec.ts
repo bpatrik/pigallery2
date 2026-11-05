@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import {expect} from 'chai';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';

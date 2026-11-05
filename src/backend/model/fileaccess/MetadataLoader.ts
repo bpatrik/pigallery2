@@ -141,7 +141,6 @@ export class MetadataLoader {
           metadata.contentIdentifier = (data.format.tags as any)['com.apple.quicktime.content.identifier'];
         }
 
-        // eslint-disable-next-line no-empty
       } catch (err) {
         Logger.silly(LOG_TAG, 'Error loading metadata for : ' + fullPath);
         Logger.silly(err);

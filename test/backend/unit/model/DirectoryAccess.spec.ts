@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import {expect} from 'chai';
 import * as path from 'path';
 import {DBTestHelper} from '../../DBTestHelper';
