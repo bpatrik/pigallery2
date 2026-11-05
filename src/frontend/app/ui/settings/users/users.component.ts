@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, viewChild, ChangeDetectionStrategy, computed, signal } from '@angular/core';
+import { Component, OnInit, inject, viewChild, computed, signal } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -25,7 +25,6 @@ import {GallerySearchFieldComponent} from '../../gallery/search/search-field/sea
   selector: 'app-settings-users',
   templateUrl: './users.component.html',
   styleUrl: './users.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgIconComponent, ModalDirective, GallerySearchFieldComponent, DirectorySearchListSettingsComponent]
 })
 export class UsersComponent implements OnInit {

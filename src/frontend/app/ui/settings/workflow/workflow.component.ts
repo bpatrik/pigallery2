@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren, ChangeDetectionStrategy, computed } from '@angular/core';
+import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren, computed, signal } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -49,7 +49,6 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
             multi: true,
         },
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     PopoverDirective,
     NgIconComponent,
@@ -71,7 +70,8 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
 
 
-  public schedules: JobScheduleConfig[] = [];
+  // set by writeValue (ngModel), not by an input, so it is a signal to refresh the view
+  public readonly schedules = signal<JobScheduleConfig[]>([]);
 
   public readonly jobModalQL = viewChildren<ModalDirective>('jobModal');
 
@@ -160,8 +160,8 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   remove(schedule: JobScheduleDTO): void {
-    this.schedules.splice(
-      this.schedules.indexOf(schedule),
+    this.schedules().splice(
+      this.schedules().indexOf(schedule),
       1
     );
   }
@@ -200,8 +200,8 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
       case JobTriggerType.after:
         schedule.trigger = new AfterJobTriggerConfig();
-        if (!(schedule.trigger as unknown as AfterJobTrigger).afterScheduleName && this.schedules.length > 1) {
-          (schedule.trigger as unknown as AfterJobTrigger).afterScheduleName = this.schedules.find(s => s.name !== schedule.name).name;
+        if (!(schedule.trigger as unknown as AfterJobTrigger).afterScheduleName && this.schedules().length > 1) {
+          (schedule.trigger as unknown as AfterJobTrigger).afterScheduleName = this.schedules().find(s => s.name !== schedule.name).name;
         }
         break;
     }
@@ -238,12 +238,12 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   public sortedSchedules(): JobScheduleDTO[] {
-    return (this.schedules || [])
+    return (this.schedules() || [])
       .slice()
       .sort((a: JobScheduleDTO, b: JobScheduleDTO) => {
         return (
-          this.getNextRunningDate(a, this.schedules) -
-          this.getNextRunningDate(b, this.schedules)
+          this.getNextRunningDate(a, this.schedules()) -
+          this.getNextRunningDate(b, this.schedules())
         );
       });
   }
@@ -270,14 +270,14 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   addNewJob(): void {
     // make unique job name
     const jobName = this.newSchedule.jobName;
-    const count = this.schedules.filter(
+    const count = this.schedules().filter(
       (s: JobScheduleDTO) => s.jobName === jobName
     ).length;
     this.newSchedule.name =
       count === 0
         ? jobName
         : this.backendTextService.getJobName(jobName) + ' ' + (count + 1);
-    this.schedules.push(this.newSchedule);
+    this.schedules().push(this.newSchedule);
 
     this.jobModalQL().at(0)!.hide();
     this.onChange(null); // trigger change detection after adding new job
@@ -332,11 +332,11 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   public writeValue(obj: JobScheduleConfig[]): void {
-    this.schedules = obj;
+    this.schedules.set(obj);
   }
 
   public registerOnChange(fn: (v: JobScheduleConfig[]) => void): void {
-    this.onChange = () => fn(this.schedules);
+    this.onChange = () => fn(this.schedules());
   }
 
   public registerOnTouched(fn: () => void): void {

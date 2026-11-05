@@ -1,4 +1,4 @@
-import {Component, OnInit, inject, viewChild, input, ChangeDetectionStrategy, computed, signal, DestroyRef} from '@angular/core';
+import {Component, OnInit, inject, viewChild, input, computed, signal, DestroyRef} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
@@ -76,7 +76,6 @@ type UiJob = TAGS['uiJob'][number];
   selector: 'app-settings-template',
   templateUrl: './template.component.html',
   styleUrl: './template.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent]
 })
 export class TemplateComponent implements OnInit, ISettingsComponent {
@@ -309,6 +308,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   }
 
   onOptionChange = () => {
+    this.settingsService.edits.update(e => e + 1);
     setTimeout(() => {
       const settingsSame = (state: RecursiveState): boolean => {
         if (typeof state === 'undefined') {

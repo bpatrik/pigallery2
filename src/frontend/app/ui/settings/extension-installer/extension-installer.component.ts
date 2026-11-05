@@ -1,4 +1,4 @@
-import { Component, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, viewChild, signal } from '@angular/core';
 import { ExtensionInstallerService } from './extension-installer.service';
 import { ExtensionListItem } from '../../../../../common/entities/extension/ExtensionListItem';
 import { NotificationService } from '../../../model/notification.service';
@@ -11,7 +11,6 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-extension-installer',
     templateUrl: './extension-installer.component.html',
     styleUrl: './extension-installer.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent, ModalDirective]
 })
 export class ExtensionInstallerComponent {
@@ -21,9 +20,9 @@ export class ExtensionInstallerComponent {
 
   public readonly extensionsModal = viewChild<ModalDirective>('extensionsModal');
 
-  public extensions: ExtensionListItem[] = [];
-  public loading = false;
-  public error: string | null = null;
+  public readonly extensions = signal<ExtensionListItem[]>([]);
+  public readonly loading = signal(false);
+  public readonly error = signal<string | null>(null);
 
   public openExtensionsModal(): void {
     this.extensionsModal().show();
@@ -31,17 +30,17 @@ export class ExtensionInstallerComponent {
   }
 
   public loadExtensions(): void {
-    this.loading = true;
-    this.error = null;
+    this.loading.set(true);
+    this.error.set(null);
 
     this.extensionService.getExtensions()
       .then(extensions => {
-        this.extensions = extensions;
-        this.loading = false;
+        this.extensions.set(extensions);
+        this.loading.set(false);
       })
       .catch(err => {
-        this.error = 'Failed to load extensions: ' + (err.message || err);
-        this.loading = false;
+        this.error.set('Failed to load extensions: ' + (err.message || err));
+        this.loading.set(false);
         this.notificationService.error('Failed to load extensions', err);
       });
   }
@@ -51,7 +50,7 @@ export class ExtensionInstallerComponent {
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
     try {
       await this.extensionService.installExtension(extension.id);
       extension.installed = true;
@@ -61,7 +60,7 @@ export class ExtensionInstallerComponent {
       this.notificationService.error(`Failed to install extension "${extension.name}"`, err);
     }finally {
 
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 }

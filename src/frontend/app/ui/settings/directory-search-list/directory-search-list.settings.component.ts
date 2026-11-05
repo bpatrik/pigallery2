@@ -1,4 +1,4 @@
-import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
@@ -13,7 +13,6 @@ import {TextSearchMatchingTypes} from '../../gallery/search/query-enrty/TextSear
 @Component({
   selector: 'app-settings-directory-search-list',
   templateUrl: './directory-search-list.settings.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgIconComponent, StringifySearchType]
 })
 export class DirectorySearchListSettingsComponent {

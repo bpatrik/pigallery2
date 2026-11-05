@@ -1,4 +1,4 @@
-import {Component, TemplateRef, inject, input, linkedSignal, ChangeDetectionStrategy, computed} from '@angular/core';
+import {Component, TemplateRef, inject, input, linkedSignal, computed} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {timer} from 'rxjs';
@@ -13,7 +13,6 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
     selector: 'app-settings-job-progress',
     templateUrl: './job-progress.settings.component.html',
     styleUrl: './job-progress.settings.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,

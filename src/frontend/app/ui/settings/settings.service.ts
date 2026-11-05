@@ -27,6 +27,9 @@ export class SettingsService {
   public readonly settings = signal<IWebConfigClassPrivate<TAGS> & WebConfig>(WebConfigClassBuilder.attachPrivateInterface(new WebConfig()));
   private fetchingSettings = false;
   public readonly statistic = signal<StatisticDTO>(null);
+  // Bumped on every edit of the settings forms. The forms edit the settings states in place, so the views
+  // that read another entry's value (hiding, disabling, theme lists) read this to refresh.
+  public readonly edits = signal(0);
 
   constructor() {
     this.getSettings().catch(console.error);
