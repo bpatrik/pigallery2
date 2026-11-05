@@ -1420,8 +1420,8 @@ export class ClientPhotoConfig {
   /**
    * Generates a map for bitwise operation from icon and normal thumbnails
    */
-  generateThumbnailMap(): { [key: number]: number } {
-    const m: { [key: number]: number } = {};
+  generateThumbnailMap(): Record<number, number> {
+    const m: Record<number, number> = {};
     [this.iconSize, ...this.thumbnailSizes.sort()].forEach((v, i) => {
       m[v] = Math.pow(2, i + 1);
     });

@@ -51,9 +51,7 @@ export class NotificationService {
   }
 
   groupNotifications(notifications: NotificationDTO[]): void {
-    const groups: {
-      [key: string]: { notification: NotificationDTO; count: number };
-    } = {};
+    const groups: Record<string, { notification: NotificationDTO; count: number }> = {};
     notifications.forEach((n) => {
       let key = n.message;
       if (n.details) {

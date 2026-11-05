@@ -26,10 +26,10 @@ export class QueryService {
   }
 
   // the query params of a gallery link (keeps the sharing key)
-  public readonly params = computed((): { [key: string]: string } => this.getParams());
+  public readonly params = computed((): Record<string, string> => this.getParams());
 
-  getParams(lightbox?: { media?: MediaDTO,map?:boolean}): { [key: string]: string } {
-    const query: { [key: string]: string } = {};
+  getParams(lightbox?: { media?: MediaDTO,map?:boolean}): Record<string, string> {
+    const query: Record<string, string> = {};
     if (lightbox?.media) {
       query[QueryParams.gallery.photo] = this.getMediaStringId(lightbox?.media);
     }
@@ -45,10 +45,8 @@ export class QueryService {
     return query;
   }
 
-  getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): {
-    [key: string]: any;
-  } {
-    const params: { [key: string]: any } = {};
+  getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): Record<string, any> {
+    const params: Record<string, any> = {};
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
         params[QueryParams.gallery.sharingKey_query] =

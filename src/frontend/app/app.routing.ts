@@ -16,7 +16,7 @@ export function galleryMatcherFunction(
   }
   const path = segments[0].path;
 
-  const posParams: { [key: string]: UrlSegment } = {};
+  const posParams: Record<string, UrlSegment> = {};
   if (path === 'gallery') {
     if (segments.length > 1) {
       posParams[QueryParams.gallery.directory] = segments[1];

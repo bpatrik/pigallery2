@@ -13,7 +13,7 @@ export class BlogService {
   private networkService = inject(NetworkService);
   private galleryService = inject(ContentService);
 
-  private cache: { [key: string]: string } = {};
+  private cache: Record<string, string> = {};
   // loads the markdown files of the content; a newer content cancels the older load
   private readonly markdownResource = resource({
     params: () => this.galleryService.sortedFilteredContent() ?? undefined,

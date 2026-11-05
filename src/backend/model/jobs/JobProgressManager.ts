@@ -8,9 +8,7 @@ export class JobProgressManager {
   private static readonly VERSION = 3;
   private db: {
     version: number;
-    progresses: {
-      [key: string]: { progress: JobProgressDTO; timestamp: number };
-    };
+    progresses: Record<string, { progress: JobProgressDTO; timestamp: number }>;
   } = {
     version: JobProgressManager.VERSION,
     progresses: {},
@@ -23,8 +21,8 @@ export class JobProgressManager {
     this.loadDB().catch(console.error);
   }
 
-  get Progresses(): { [key: string]: JobProgressDTO } {
-    const m: { [key: string]: JobProgressDTO } = {};
+  get Progresses(): Record<string, JobProgressDTO> {
+    const m: Record<string, JobProgressDTO> = {};
     for (const key of Object.keys(this.db.progresses)) {
       m[key] = this.db.progresses[key].progress;
       if (

@@ -112,7 +112,7 @@ export class ScheduledJobsService {
 
   protected async loadProgress(): Promise<void> {
     const prevPrg = this.progress();
-    const newPrg = await this.networkService.getJson<{ [key: string]: JobProgressDTO }>(
+    const newPrg = await this.networkService.getJson<Record<string, JobProgressDTO>>(
       '/admin/jobs/scheduled/progress'
     );
     this.progress.set(newPrg);

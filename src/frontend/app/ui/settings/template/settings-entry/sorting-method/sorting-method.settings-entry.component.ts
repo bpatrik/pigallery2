@@ -41,9 +41,7 @@ export class SortingMethodSettingsEntryComponent
   implements ControlValueAccessor, Validator, OnInit {
   private notificationService = inject(NotificationService);
 
-  readonly sortingByEnum = input<Record<string, number | string> & {
-    [k: number]: string;
-}>(undefined);
+  readonly sortingByEnum = input<Record<string, number | string> & Record<number, string>>(undefined);
 
   /**
    * The edited value (part of the settings tree), it is changed in place.

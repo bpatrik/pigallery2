@@ -83,7 +83,7 @@ export class ContentLoaderService {
     this.lastContentRequest = {type: 'directory', value: directoryName};
 
     // prepare server request
-    const params: { [key: string]: unknown } = {};
+    const params: Record<string, unknown> = {};
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
         params[QueryParams.gallery.sharingKey_query] =
@@ -159,7 +159,7 @@ export class ContentLoaderService {
       this.setContent({error: $localize`Directory not found`} as ContentWrapperWithError);
       return;
     }
-    const queryParams: { [key: string]: string } = {};
+    const queryParams: Record<string, string> = {};
     if (this.shareService.isSharing()) {
       queryParams[QueryParams.gallery.sharingKey_query] = this.shareService.getSharingKey();
     }

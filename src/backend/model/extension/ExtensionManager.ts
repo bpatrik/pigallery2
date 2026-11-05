@@ -32,7 +32,7 @@ export class ExtensionManager implements IObjectManager {
   public repository: ExtensionRepository = new ExtensionRepository();
 
   events: IExtensionEvents;
-  extObjects: { [key: string]: ExtensionObject<unknown> } = {};
+  extObjects: Record<string, ExtensionObject<unknown>> = {};
   router: express.Router;
 
   constructor() {

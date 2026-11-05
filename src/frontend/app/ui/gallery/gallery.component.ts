@@ -104,7 +104,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   );
   public isUploadOver = false;
   private $counter: Observable<number>;
-  private subscription: { [key: string]: Subscription } = {
+  private subscription: Record<string, Subscription> = {
     route: null,
     timer: null,
   };
@@ -229,7 +229,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
       const sharing = await this.shareService.currentSharing
         .pipe(take(1))
         .toPromise();
-      const qParams: { [key: string]: any } = {};
+      const qParams: Record<string, any> = {};
       qParams[QueryParams.gallery.sharingKey_query] =
         this.shareService.getSharingKey();
       const route = this.shareService.getDefaultRoute(sharing);

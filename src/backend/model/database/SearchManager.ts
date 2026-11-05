@@ -486,7 +486,7 @@ export class SearchManager {
 
   public async prepareAndBuildWhereQuery(
     queryIN: SearchQueryDTO, directoryOnly = false,
-    aliases: { [key: string]: string } = {}): Promise<Brackets> {
+    aliases: Record<string, string> = {}): Promise<Brackets> {
     let query = await this.prepareQuery(queryIN);
     if (directoryOnly) {
       query = this.filterDirectoryQuery(query);
@@ -516,7 +516,7 @@ export class SearchManager {
   public buildWhereQuery(
     query: SearchQueryDTO,
     directoryOnly = false,
-    aliases: { [key: string]: string } = {}
+    aliases: Record<string, string> = {}
   ): Brackets {
     const queryId = (query as SearchQueryDTOWithID).queryId;
     switch (query.type) {
@@ -582,7 +582,7 @@ export class SearchManager {
         );
 
         return new Brackets((q): unknown => {
-          const textParam: { [key: string]: number | string } = {};
+          const textParam: Record<string, number | string> = {};
           textParam['maxLat' + queryId] = maxLat;
           textParam['minLat' + queryId] = minLat;
           textParam['maxLon' + queryId] = maxLon;
@@ -672,7 +672,7 @@ export class SearchManager {
         return new Brackets((q): unknown => {
 
 
-          const textParam: { [key: string]: unknown } = {};
+          const textParam: Record<string, unknown> = {};
           if (min === max) {
             textParam['eql' + queryId] = min;
             q.where(
@@ -754,7 +754,7 @@ export class SearchManager {
             const from = new Date(to);
             from.setUTCDate(from.getUTCDate() - tq.daysLength);
 
-            const textParam: { [key: string]: unknown } = {};
+            const textParam: Record<string, unknown> = {};
             textParam['to' + queryId] = to.getTime();
             textParam['from' + queryId] = from.getTime();
             if (tq.negate) {
@@ -791,7 +791,7 @@ export class SearchManager {
           } else {
             // recurring
 
-            const textParam: { [key: string]: unknown } = {};
+            const textParam: Record<string, unknown> = {};
             textParam['diff' + queryId] = tq.daysLength;
             const addWhere = (duration: string, crossesDateBoundary: boolean) => {
 
@@ -968,7 +968,7 @@ export class SearchManager {
         return `${fieldName} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
       };
 
-      const textParam: { [key: string]: unknown } = {};
+      const textParam: Record<string, unknown> = {};
       textParam['text' + queryId] = createMatchString(
         (query as TextSearch).value
       );

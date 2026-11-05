@@ -26,12 +26,8 @@ import {ExtensionInstallerService} from '../extension-installer/extension-instal
 
 
 interface ConfigState {
-  value: {
-    [key: string]: RecursiveState;
-  };
-  default: {
-    [key: string]: RecursiveState;
-  };
+  value: Record<string, RecursiveState>;
+  default: Record<string, RecursiveState>;
   readonly?: boolean;
   tags?: TAGS;
   volatile?: boolean;

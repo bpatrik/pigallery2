@@ -14,8 +14,8 @@ export class AutoCompleteService {
   private galleryCacheService = inject(GalleryCacheService);
 
   private keywords: string[] = [];
-  private textSearchKeywordsMap: { [key: string]: SearchQueryTypes } = {};
-  private noACKeywordsMap: { [key: string]: SearchQueryTypes } = {}; // these commands do not have autocompete
+  private textSearchKeywordsMap: Record<string, SearchQueryTypes> = {};
+  private noACKeywordsMap: Record<string, SearchQueryTypes> = {}; // these commands do not have autocompete
 
   constructor() {
     this.keywords = Object.values(defaultQueryKeywords)

@@ -345,7 +345,7 @@ export class FilterService {
     for (const f of afilters.selectedFilters) {
 
       /* Update filter options */
-      const valueMap: { [key: string]: { name: string | number, count: number, selected: boolean } } = {};
+      const valueMap: Record<string, { name: string | number, count: number, selected: boolean }> = {};
       f.options.forEach((o) => {
         valueMap[o.name] = o;
         o.count = 0; // reset count so unknown options can be removed at the end

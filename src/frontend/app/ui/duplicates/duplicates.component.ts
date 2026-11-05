@@ -57,9 +57,7 @@ export class DuplicateComponent implements OnInit {
       if (dupls.length === 0) {
         return null;
       }
-      const dirFrequency: {
-        [key: string]: { count: number; dir: DirectoryPathDTO };
-      } = {};
+      const dirFrequency: Record<string, { count: number; dir: DirectoryPathDTO }> = {};
       dupls.forEach((d): void =>
           d.media.forEach((m): void => {
             const k = Utils.concatUrls(m.directory.path, m.directory.name);

@@ -13,7 +13,7 @@ import {AlbumCoverRestJob} from './jobs/AlbumCoverResetJob';
 
 export class JobRepository {
   private static instance: JobRepository = null;
-  availableJobs: { [key: string]: IJob } = {};
+  availableJobs: Record<string, IJob> = {};
 
   public static get Instance(): JobRepository {
     if (JobRepository.instance == null) {

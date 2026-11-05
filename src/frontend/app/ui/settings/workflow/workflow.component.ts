@@ -79,7 +79,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   public JobTriggerTypeMap: { key: number; value: string }[];
   public JobTriggerType = JobTriggerType;
   public periods: string[] = [];
-  public showDetails: { [key: string]: boolean } = {};
+  public showDetails: Record<string, boolean> = {};
   public JobProgressStates = JobProgressStates;
   public newSchedule: JobScheduleDTO = {
     name: '',

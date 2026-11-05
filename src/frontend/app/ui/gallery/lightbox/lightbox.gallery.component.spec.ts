@@ -56,8 +56,8 @@ class MockQueryService {
     return media.name;
   }
 
-  getParams(lightbox?: { media?: MediaDTO }): { [key: string]: string } {
-    const query: { [key: string]: string } = {};
+  getParams(lightbox?: { media?: MediaDTO }): Record<string, string> {
+    const query: Record<string, string> = {};
     if (lightbox?.media) {
       query[QueryParams.gallery.photo] = this.getMediaStringId(lightbox?.media);
     }

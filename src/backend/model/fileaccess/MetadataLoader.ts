@@ -187,7 +187,7 @@ export class MetadataLoader {
       creationDate: 0,
       fileSize: 0,
     };
-    const exifrOptions: {[key: string]: boolean} = {
+    const exifrOptions: Record<string, boolean> = {
       tiff: true,
       xmp: true,
       icc: false,

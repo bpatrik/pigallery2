@@ -23,7 +23,7 @@ export class MediaButtonModalComponent {
     return data ? this.initFormData(data) : {};
   });
 
-  readonly fieldLabels: { [key in IClientMediaFields]: string } = {
+  readonly fieldLabels: Record<IClientMediaFields, string> = {
     title: $localize`Title`,
     caption: $localize`Caption`,
     cameraData: $localize`Camera Data`,
