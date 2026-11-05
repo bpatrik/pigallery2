@@ -15,7 +15,7 @@
       @if (shareService.sharingIsValid()) {
         <form
           name="form" id="form" class="form-horizontal" #LoginForm="ngForm" (submit)="onLogin()">
-          <div class="error-message" [hidden]="loginError==false" i18n>Wrong password</div>
+          <div class="error-message" [hidden]="loginError()==false" i18n>Wrong password</div>
           <div class="input-group mb-3">
             <div class="input-group-text"><ng-icon name="ionLockClosedOutline" /></div>
             <input type="password"
@@ -33,7 +33,7 @@
             <div class="col-sm-12 controls d-grid gap-2">
               <button class="btn btn-primary btn-lg"
                 id="button-share-login"
-                [disabled]="!LoginForm.form.valid || inProgress"
+                [disabled]="!LoginForm.form.valid || inProgress()"
                 type="submit"
                 name="action" i18n>Enter
           </button>

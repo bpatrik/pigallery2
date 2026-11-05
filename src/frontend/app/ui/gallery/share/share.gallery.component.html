@@ -31,11 +31,11 @@
             class="form-control input-md"
             type="text"
             readonly
-            [disabled]="!shareForm.form.valid || !urlValid"
-            [ngModel]="shareForm.form.valid ? url: invalidSettings">
+            [disabled]="!shareForm.form.valid || !urlValid()"
+            [ngModel]="shareForm.form.valid ? url() : invalidSettings">
         </div>
         <div class="col-5 col-sm-3">
-          @if (!sharing) {
+          @if (!sharing()) {
             <button
               id="getShareButton" name="getShareButton"
               (click)="share()"
@@ -43,10 +43,10 @@
               class="btn btn-primary btn-block float-end"
             i18n>Share</button>
           }
-          @if (sharing) {
+          @if (sharing()) {
             <button
               id="copyButton" name="copyButton"
-              [appCopy]="url"
+              [appCopy]="url()"
               (copied)="onCopy()"
               [disabled]="!shareForm.form.valid"
               class="btn btn-primary btn-block float-end"
@@ -194,7 +194,7 @@
               <td>{{share.expires | date}}</td>
               <td>
                 <button (click)="deleteSharing(share)"
-                  [disabled]="share.sharingKey == sharing?.sharingKey"
+                  [disabled]="share.sharingKey == sharing()?.sharingKey"
                   class="btn btn-danger float-end">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>

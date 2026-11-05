@@ -1,7 +1,7 @@
 <app-frame>
 
   <div body class="container">
-    @if (renderedDirGroups) {
+    @if (renderedDirGroups()) {
       @if ( duplicateCount().photos >0) {
         <div class="alert alert-secondary" role="alert">
           Listing <strong>{{duplicateCount().pairs}}</strong> duplicates ({{duplicateCount().photos}} photos).
@@ -12,7 +12,7 @@
         No duplicates found
       </div>
       }
-      @for (group of renderedDirGroups; track group) {
+      @for (group of renderedDirGroups(); track group) {
         <div>
           <strong>{{group.name}}</strong>
           @for (pairs of group.duplicates; track pairs) {
@@ -43,7 +43,7 @@
         </div>
       }
     }
-    @if (!renderedDirGroups) {
+    @if (!renderedDirGroups()) {
       loading
     }
   </div>

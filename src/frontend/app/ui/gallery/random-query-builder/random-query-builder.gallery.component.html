@@ -19,11 +19,11 @@
                placeholder="link"
                class="form-control input-md"
                type="text"
-               [ngModel]="url">
+               [ngModel]="url()">
       </div>
       <div class="col-auto">
         <button id="copyButton" name="copyButton"
-                [appCopy]="url"
+                [appCopy]="url()"
                 (copied)="onCopy()"
                 class="btn btn-primary btn-block" i18n>Copy
         </button>

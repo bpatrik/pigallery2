@@ -1,4 +1,4 @@
-import {Component, ChangeDetectionStrategy} from '@angular/core';
+import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {GestureDirective, PanEvent, PinchEvent} from './gesture.directive';
 
@@ -11,7 +11,6 @@ import {GestureDirective, PanEvent, PinchEvent} from './gesture.directive';
          (doubleTap)="events.push('doubleTap')"
          (pan)="pans.push($event)"
          (pinch)="pinches.push($event)"></div>`,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [GestureDirective]
 })
 class HostComponent {

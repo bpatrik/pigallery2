@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, inject, viewChild, ChangeDetectionStrategy, computed, Signal } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, viewChild, computed, Signal } from '@angular/core';
 import {FacesService} from './faces.service';
 import {QueryService} from '../../model/query.service';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
@@ -12,7 +12,6 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
     selector: 'app-faces',
     templateUrl: './faces.component.html',
     styleUrl: './faces.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     FaceComponent,

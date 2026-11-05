@@ -1,4 +1,4 @@
-import { Component, OnDestroy, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, inject, signal } from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
 import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
 import {Subscription} from 'rxjs';
@@ -25,7 +25,6 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
   templateUrl: './search.gallery.component.html',
   styleUrl: './search.gallery.component.css',
   providers: [AutoCompleteService],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     GallerySearchFieldBaseComponent,
@@ -43,11 +42,8 @@ export class GallerySearchComponent implements OnDestroy {
   private modalService = inject(BsModalService);
   authenticationService = inject(AuthenticationService);
 
-  public searchQueryDTO: SearchQueryDTO = {
-    type: SearchQueryTypes.any_text,
-    value: '',
-  } as TextSearch;
-  public rawSearchText = '';
+  public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
+  public readonly rawSearchText = signal('');
   mouseOverAutoComplete = false;
   readonly SearchQueryTypes: typeof SearchQueryTypes;
   public readonly MetadataSearchQueryTypes: {
@@ -72,7 +68,7 @@ export class GallerySearchComponent implements OnDestroy {
       }
       const searchQuery: string = params[QueryParams.gallery.search.query];
       if (searchQuery) {
-        this.searchQueryDTO = SearchQueryUtils.parseURLifiedQuery(searchQuery);
+        this.searchQueryDTO.set(SearchQueryUtils.parseURLifiedQuery(searchQuery));
         this.onQueryChange();
       }
     });
@@ -86,7 +82,7 @@ export class GallerySearchComponent implements OnDestroy {
   }
 
   get HTMLSearchQuery(): string {
-    return SearchQueryUtils.urlify(this.searchQueryDTO);
+    return SearchQueryUtils.urlify(this.searchQueryDTO());
   }
 
   ngOnDestroy(): void {
@@ -120,20 +116,20 @@ export class GallerySearchComponent implements OnDestroy {
   }
 
   public onQueryChange(): void {
-    if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
+    if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText()), this.searchQueryDTO())) {
       return;
     }
 
-    this.rawSearchText = this.searchQueryParserService.stringify(
-      this.searchQueryDTO
-    );
+    this.rawSearchText.set(this.searchQueryParserService.stringify(
+      this.searchQueryDTO()
+    ));
   }
 
   validateRawSearchText(): void {
     try {
-      this.searchQueryDTO = this.searchQueryParserService.parse(
-        this.rawSearchText
-      );
+      this.searchQueryDTO.set(this.searchQueryParserService.parse(
+        this.rawSearchText()
+      ));
     } catch (e) {
       console.error(e);
     }
@@ -148,7 +144,7 @@ export class GallerySearchComponent implements OnDestroy {
   async saveSearch(): Promise<void> {
     await this.albumService.addSavedSearch(
       this.saveSearchName,
-      SearchQueryUtils.stripDefault(this.searchQueryDTO)
+      SearchQueryUtils.stripDefault(this.searchQueryDTO())
     );
     this.hideSaveSearchModal();
   }

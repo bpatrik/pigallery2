@@ -1,4 +1,4 @@
-import { Component, TemplateRef, computed, effect, inject, input, signal, untracked, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
@@ -21,7 +21,6 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     selector: 'app-gallery-share',
     templateUrl: './share.gallery.component.html',
     styleUrl: './share.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,
@@ -39,8 +38,8 @@ export class GalleryShareComponent {
 
   enabled = true;
   readonly dropDownItem = input(false);
-  url = '';
-  urlValid = false;
+  readonly url = signal('');
+  readonly urlValid = signal(false);
   showSharingList = false;
 
   input = {
@@ -57,7 +56,7 @@ export class GalleryShareComponent {
   sharingTarget = '';
   currentMediaCount = 0;
   currentMediaCountIsLowerBound = false;
-  sharing: ResponseSharingDTO = null;
+  readonly sharing = signal<ResponseSharingDTO>(null);
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
 
@@ -155,7 +154,7 @@ export class GalleryShareComponent {
       return;
     }
     this.currentQuery = this.buildDirectoryQuery();
-    if (this.sharing) {
+    if (this.sharing()) {
       await this.update();
     }
   }
@@ -203,42 +202,42 @@ export class GalleryShareComponent {
   }
 
   async update(): Promise<void> {
-    if (this.sharing == null || !this.currentQuery) {
+    if (this.sharing() == null || !this.currentQuery) {
       return;
     }
-    this.urlValid = false;
-    this.url = $localize`loading..`;
-    this.sharing = this.isDirectorySharing
+    this.urlValid.set(false);
+    this.url.set($localize`loading..`);
+    this.sharing.set(this.isDirectorySharing
       ? await this.sharingService.updateSharingByDirectory(
-        this.sharing.id,
+        this.sharing().id,
         this.currentQuery as DirectorySearch,
         this.input.password,
         this.calcValidity(),
         this.currentDir
       )
       : await this.sharingService.updateSharingByQuery(
-        this.sharing.id,
+        this.sharing().id,
         this.currentQuery,
         this.input.password,
         this.calcValidity()
-      );
-    this.urlValid = true;
-    this.url = this.sharingService.getUrl(this.sharing);
+      ));
+    this.urlValid.set(true);
+    this.url.set(this.sharingService.getUrl(this.sharing()));
     await this.updateActiveSharesList();
   }
 
   async get(): Promise<void> {
     if(Config.Sharing.passwordRequired && !this.input.password){
-      this.url = $localize`Set password.`;
+      this.url.set($localize`Set password.`);
       return;
     }
     if (!this.currentQuery) {
-      this.url = $localize`Invalid settings`;
+      this.url.set($localize`Invalid settings`);
       return;
     }
-    this.urlValid = false;
-    this.url = $localize`loading..`;
-    this.sharing = this.isDirectorySharing
+    this.urlValid.set(false);
+    this.url.set($localize`loading..`);
+    this.sharing.set(this.isDirectorySharing
       ? await this.sharingService.createSharingByDirectory(
         this.currentQuery as DirectorySearch,
         this.input.password,
@@ -249,16 +248,16 @@ export class GalleryShareComponent {
         this.currentQuery,
         this.input.password,
         this.calcValidity()
-      );
-    this.url = this.sharingService.getUrl(this.sharing);
-    this.urlValid = true;
+      ));
+    this.url.set(this.sharingService.getUrl(this.sharing()));
+    this.urlValid.set(true);
     await this.updateActiveSharesList();
   }
 
   async openModal(template: TemplateRef<unknown>): Promise<void> {
-    this.url = $localize`Click share to get a link.`;
-    this.urlValid = false;
-    this.sharing = null;
+    this.url.set($localize`Click share to get a link.`);
+    this.urlValid.set(false);
+    this.sharing.set(null);
     this.input.password = '';
     if (this.modalRef) {
       this.modalRef.hide();
@@ -273,12 +272,12 @@ export class GalleryShareComponent {
   public hideModal(): void {
     this.modalRef.hide();
     this.modalRef = null;
-    this.sharing = null;
+    this.sharing.set(null);
   }
 
   async share() {
     await this.get();
-    if (await copyToClipboard(this.url)) {
+    if (await copyToClipboard(this.url())) {
       this.onCopy();
     }
   }

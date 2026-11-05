@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {FacesService} from '../faces.service';
 import {SortByDirectionalTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
@@ -12,7 +12,6 @@ import {StringifySortingMethod} from '../../../pipes/StringifySortingMethod';
   selector: 'app-faces-navbar',
   styleUrl: './navigator.faces.component.css',
   templateUrl: './navigator.faces.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     BsDropdownDirective,

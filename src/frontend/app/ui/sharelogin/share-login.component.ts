@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
@@ -13,7 +13,6 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-share-login',
     templateUrl: './share-login.component.html',
     styleUrl: './share-login.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     LanguageComponent,
     IconComponent,
@@ -27,8 +26,8 @@ export class ShareLoginComponent implements OnInit {
   private navigation = inject(NavigationService);
 
   password: string;
-  loginError = false;
-  inProgress = false;
+  readonly loginError = signal(false);
+  readonly inProgress = signal(false);
   title: string;
 
   constructor() {
@@ -42,9 +41,9 @@ export class ShareLoginComponent implements OnInit {
   }
 
   async onLogin(): Promise<void> {
-    this.loginError = false;
+    this.loginError.set(false);
 
-    this.inProgress = true;
+    this.inProgress.set(true);
     try {
       await this.authService.shareLogin(this.password);
     } catch (error) {
@@ -52,11 +51,11 @@ export class ShareLoginComponent implements OnInit {
           (error && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) ||
           error === 'Unauthorized'
       ) {
-        this.loginError = true;
+        this.loginError.set(true);
       }
     }
 
-    this.inProgress = false;
+    this.inProgress.set(false);
   }
 }
 

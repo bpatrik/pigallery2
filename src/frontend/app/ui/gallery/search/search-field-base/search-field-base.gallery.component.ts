@@ -1,4 +1,4 @@
-import { Component, ElementRef, forwardRef, inject, input, output, viewChild, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ElementRef, forwardRef, inject, input, output, viewChild, signal, computed } from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteResult, AutoCompleteService, RenderableAutoCompleteItem,} from '../autocomplete.service';
 import {MetadataSearchQueryTypes, SearchQueryTypes,} from '../../../../../../common/entities/SearchQueryDTO';
@@ -25,7 +25,6 @@ import {NgIconComponent} from '@ng-icons/core';
       multi: true,
     },
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     NgIconComponent

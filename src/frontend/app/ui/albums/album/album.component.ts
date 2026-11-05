@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, input } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {Thumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -18,7 +18,6 @@ import {CssUrlPipe} from '../../../pipes/CssUrlPipe';
     selector: 'app-album',
     templateUrl: './album.component.html',
     styleUrl: './album.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     IconComponent,

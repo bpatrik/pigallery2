@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, input } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {PersonDTO} from '../../../../../common/entities/PersonDTO';
 import {PersonThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
@@ -15,7 +15,6 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     selector: 'app-face',
     templateUrl: './face.component.html',
     styleUrl: './face.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     NgIconComponent,

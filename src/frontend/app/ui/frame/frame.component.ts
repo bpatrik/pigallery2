@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewEncapsulation, computed, inject, input, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, ViewEncapsulation, computed, inject, input, viewChild } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
@@ -42,7 +42,6 @@ export interface NavbarLinkItem {
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.css',
   encapsulation: ViewEncapsulation.Emulated,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LoadingBarModule,
     RouterLink,

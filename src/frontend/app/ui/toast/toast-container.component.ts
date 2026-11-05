@@ -1,4 +1,4 @@
-import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject} from '@angular/core';
 import {NgIconComponent} from '@ng-icons/core';
 import {Toast, ToastPlacement, ToastService, ToastSummary, ToastType} from './toast.service';
 import {ToastCardComponent} from './toast-card.component';
@@ -18,7 +18,6 @@ export interface ToastEntry {
   selector: 'app-toast-container',
   templateUrl: './toast-container.component.html',
   styleUrls: ['./toast-container.component.css'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ToastCardComponent, NgIconComponent]
 })
 export class ToastContainerComponent {

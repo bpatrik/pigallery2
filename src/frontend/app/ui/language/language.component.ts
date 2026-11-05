@@ -1,4 +1,4 @@
-import { Component, computed, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, viewChild } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieHelper} from '../../model/cookie.helper';
@@ -11,7 +11,6 @@ import {NavigationService} from '../../model/navigation.service';
     selector: 'app-language',
     templateUrl: './language.component.html',
     styleUrl: './language.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     BsDropdownDirective,
     BsDropdownToggleDirective,

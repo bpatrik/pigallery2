@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -20,7 +20,6 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
   selector: 'app-albums',
   templateUrl: './albums.component.html',
   styleUrl: './albums.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
     AlbumComponent,
@@ -41,7 +40,7 @@ export class AlbumsComponent implements OnInit {
   private searchQueryParserService = inject(SearchQueryParserService);
 
   readonly container = viewChild<ElementRef>('container');
-  public size: number;
+  public readonly size = signal<number>(undefined);
   public savedSearch = {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
@@ -92,7 +91,7 @@ export class AlbumsComponent implements OnInit {
     const size = 220 + 5;
     // body - container margin
     const containerWidth = this.container().nativeElement.clientWidth - 30;
-    this.size = containerWidth / Math.round(containerWidth / size) - 5;
+    this.size.set(containerWidth / Math.round(containerWidth / size) - 5);
   }
 }
 

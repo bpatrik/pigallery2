@@ -11,7 +11,7 @@
     <div class="card-body">
       <h4 class="card-title" i18n>Please log in</h4>
       <form name="form" id="form" #LoginForm="ngForm" (submit)="onLogin()">
-        <div class="error-message" [hidden]="loginError==false" i18n>
+        <div class="error-message" [hidden]="loginError()==false" i18n>
           Wrong username or password
         </div>
 
@@ -65,7 +65,7 @@
                 <button class="btn  btn-lg"
                   [class.btn-outline-secondary]="oidcEnabled"
                   [class.btn-primary]="!oidcEnabled"
-                  [disabled]="!LoginForm.form.valid || inProgress"
+                  [disabled]="!LoginForm.form.valid || inProgress()"
                   type="submit"
                   name="action" i18n>Login
           </button>

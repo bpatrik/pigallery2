@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy, computed, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, computed, DestroyRef, signal } from '@angular/core';
 import {DuplicateService} from './duplicates.service';
 import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
@@ -32,7 +32,6 @@ interface GroupedDuplicate {
     },
     templateUrl: './duplicates.component.html',
     styleUrl: './duplicates.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     RouterLink,
@@ -108,7 +107,8 @@ export class DuplicateComponent implements OnInit {
     }
     return groups;
   });
-  renderedDirGroups: GroupedDuplicate[] = null;
+  // grows while rendering; its groups and pair lists are pushed to in place, so it is set to a new array after each step
+  readonly renderedDirGroups = signal<GroupedDuplicate[]>(null);
   renderedIndex = {
     group: -1,
     pairs: 0,
@@ -152,7 +152,7 @@ export class DuplicateComponent implements OnInit {
       return;
     }
     this.renderedIndex = {group: -1, pairs: 0};
-    this.renderedDirGroups = [];
+    this.renderedDirGroups.set([]);
     if (this.duplicateService.duplicates() === null) {
       return;
     }
@@ -181,23 +181,25 @@ export class DuplicateComponent implements OnInit {
       return;
     }
     if (this.shouldRenderMore()) {
+      const groups = this.renderedDirGroups();
       if (
-          this.renderedDirGroups.length === 0 ||
+          groups.length === 0 ||
           this.renderedIndex.pairs >=
           this.directoryGroups()[this.renderedIndex.group].duplicates.length
       ) {
-        this.renderedDirGroups.push({
+        groups.push({
           name: this.directoryGroups()[++this.renderedIndex.group].name,
           duplicates: [],
         });
         this.renderedIndex.pairs = 0;
       }
-      this.renderedDirGroups[this.renderedDirGroups.length - 1].duplicates.push(
+      groups[groups.length - 1].duplicates.push(
           this.directoryGroups()[this.renderedIndex.group].duplicates[
               this.renderedIndex.pairs++
               ]
       );
 
+      this.renderedDirGroups.set([...groups]);
       this.renderTimer = window.setTimeout(this.renderMore, 0);
     }
   };
