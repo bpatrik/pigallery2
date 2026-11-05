@@ -1,6 +1,7 @@
 import '../../../../common/config/public/Config';
 import {TestBed} from '@angular/core/testing';
-import {signal} from '@angular/core';
+import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
+import {provideRouter} from '@angular/router';
 import {FrameComponent} from './frame.component';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {NotificationService} from '../../model/notification.service';
@@ -11,10 +12,14 @@ import {GalleryService} from '../gallery/gallery.service';
 import {UploaderService} from '../gallery/uploader/uploader.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {Config} from '../../../../common/config/public/Config';
-import {NavigationLinkConfig, NavigationLinkTypes} from '../../../../common/config/public/ClientConfig';
+import {NavigationLinkConfig, NavigationLinkTypes, ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
+import {GallerySearchComponent} from '../gallery/search/search.gallery.component';
+import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
+import {LanguageComponent} from '../language/language.component';
+import {NgIconComponent} from '@ng-icons/core';
 
 describe('FrameComponent', () => {
   let component: FrameComponent;
@@ -92,5 +97,49 @@ describe('FrameComponent', () => {
 
     url.set('/search/' + encodeURIComponent(JSON.stringify({...searchQuery, value: 'Tihany'})));
     expect(activeLinks()['Balaton']).toBe(false);
+  });
+});
+
+describe('FrameComponent template', () => {
+  beforeEach(() => {
+    // the constructor asks for it; it needs window.matchMedia, which jsdom lacks
+    vi.spyOn(DeviceHelper, 'isTouchDevice').mockReturnValue(false);
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([]),
+        {
+          provide: AuthenticationService, useValue: {
+            user: signal<UserDTO>({name: 'Árvíztűrő Tükörfúrógép', role: UserRoles.Admin} as UserDTO),
+            isAdmin: signal(true)
+          }
+        },
+        {provide: NotificationService, useValue: {numberOfNotifications: 0}},
+        {provide: QueryService, useValue: {params: signal({})}},
+        {provide: NavigationService, useValue: {url: signal('/gallery')}},
+        {provide: ThemeService, useValue: {mode: signal(ThemeModes.light)}},
+        {provide: GalleryService, useValue: {autoPollInterval: 0}},
+        {provide: UploaderService, useValue: {canUpload: signal(false)}},
+      ]
+    });
+    // the child components are not under test
+    TestBed.overrideComponent(FrameComponent, {
+      remove: {imports: [GallerySearchComponent, GalleryShareComponent, LanguageComponent, NgIconComponent]},
+      add: {schemas: [NO_ERRORS_SCHEMA]}
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should not hide the always expanded navbar menu from assistive technology', async () => {
+    const fixture = TestBed.createComponent(FrameComponent);
+    fixture.componentRef.setInput('showSearch', true);
+    await fixture.whenStable();
+
+    const menu = (fixture.nativeElement as HTMLElement).querySelector('#navbarCollapse') as HTMLElement;
+    expect(menu.getAttribute('aria-hidden')).toBeNull();
+    expect(menu.style.display).not.toBe('none');
+    expect(menu.querySelector('app-gallery-search')).not.toBeNull();
   });
 });
