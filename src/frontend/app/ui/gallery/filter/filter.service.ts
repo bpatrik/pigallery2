@@ -225,9 +225,9 @@ export class FilterService {
 
     // finding the resolution
     let usedDiv = H;
-    for (let i = 0; i < divs.length; ++i) {
-      if (diff / divs[i] < 26) {
-        usedDiv = divs[i];
+    for (const div of divs) {
+      if (diff / div < 26) {
+        usedDiv = div;
         break;
       }
     }

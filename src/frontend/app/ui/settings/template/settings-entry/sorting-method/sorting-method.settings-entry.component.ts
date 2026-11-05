@@ -112,7 +112,6 @@ export class SortingMethodSettingsEntryComponent
     this.onChange();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private propagateChange = (_: SortingMethod): void => {
     //ignoring
   };

@@ -26,9 +26,7 @@ class MockMapService {
     return {url: ''};
   }
 
-  get ShortAttributions() {
-    return '';
-  }
+  readonly ShortAttributions = '';
 }
 
 class MockAuthenticationService {
@@ -96,7 +94,7 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
         fileSize: 4500000,
         duration: 3000,
       },
-    }));
+    }));
     fixture.detectChanges();
 
     const rows = fixture.nativeElement.querySelectorAll('.row');
@@ -110,7 +108,7 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
   });
 
   it('should not show companion video row for regular photos', () => {
-    fixture.componentRef.setInput('media', makePhoto());
+    fixture.componentRef.setInput('media', makePhoto());
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;

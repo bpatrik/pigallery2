@@ -101,7 +101,10 @@ export class ToastService {
     if (!this.authService.isAuthenticated()) {
       return {
         update: (): void => {
-        }, close: (): void => {
+          // nothing is shown, so there is nothing to update
+        },
+        close: (): void => {
+          // nothing is shown, so there is nothing to close
         }
       };
     }

@@ -26,19 +26,15 @@ class MockFullScreenService {
     return false;
   }
 
-  exitFullScreen() {
-  }
+  exitFullScreen = vi.fn();
 
-  showFullScreen() {
-  }
+  showFullScreen = vi.fn();
 }
 
 class MockOverlayService {
-  showOverlay() {
-  }
+  showOverlay = vi.fn();
 
-  hideOverlay() {
-  }
+  hideOverlay = vi.fn();
 }
 
 class MockWakeLockService {
@@ -72,11 +68,9 @@ class MockAuthenticationService {
 }
 
 class MockPiTitleService {
-  setMediaTitle() {
-  }
+  setMediaTitle = vi.fn();
 
-  setLastNonMedia() {
-  }
+  setLastNonMedia = vi.fn();
 }
 
 class MockNotificationService {
@@ -86,8 +80,7 @@ class MockNotificationService {
 // Finishes on the next timer tick, so fake-timer tests don't wait for the 200 ms animation
 function mockAnimate(): Animation {
   const animation = new EventTarget() as Animation;
-  animation.cancel = () => {
-  };
+  animation.cancel = vi.fn();
   setTimeout(() => animation.dispatchEvent(new Event('finish')), 0);
   return animation;
 }

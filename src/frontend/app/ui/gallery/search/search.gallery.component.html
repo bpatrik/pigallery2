@@ -4,7 +4,7 @@
     <app-gallery-search-field-base [(ngModel)]="rawSearchText"
       (ngModelChange)="validateRawSearchText()"
       class="search-field form-control p-0"
-      (search)="Search()"
+      (searchSubmit)="Search()"
       name="search-field" />
 
     <button class="btn btn-tertiary lh-0" type="button"
@@ -32,7 +32,7 @@
       <app-gallery-search-query-builder name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
         (ngModelChange)="onQueryChange()"
-        (search)="Search()" />
+        (searchSubmit)="Search()" />
 
     </form>
   </div>

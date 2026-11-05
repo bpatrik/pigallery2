@@ -12,8 +12,8 @@ export class PhotoFilterPipe implements PipeTransform {
       return null;
     }
     const ret = [];
-    for (let i = 0; i < mediaGroups.length; ++i) {
-      ret.push(...mediaGroups[i].media.filter((m: MediaDTO): boolean =>
+    for (const group of mediaGroups) {
+      ret.push(...group.media.filter((m: MediaDTO): boolean =>
           MediaDTOUtils.isPhoto(m)
       ) as PhotoDTO[]);
     }

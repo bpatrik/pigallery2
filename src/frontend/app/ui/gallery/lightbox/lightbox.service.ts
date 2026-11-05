@@ -1,4 +1,4 @@
-import {Injectable, inject, signal} from '@angular/core';
+import {Injectable, inject, OnDestroy, signal} from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
@@ -13,7 +13,7 @@ import {Utils} from '../../../../../common/Utils';
 @Injectable({
   providedIn: 'root'
 })
-export class LightboxService {
+export class LightboxService implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 

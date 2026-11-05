@@ -169,14 +169,14 @@ export interface IExtensionDB {
    * Adds SQL tables to typeorm
    * @param tables
    */
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   setExtensionTables(tables: Function[]): Promise<void>;
 
   /**
    * Exposes all tables. You can use this if you van to have a foreign key to a built-in table.
    * Use with caution. This exposes the app's internal working.
    */
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   _getAllTables(): Function[];
 }
 

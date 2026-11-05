@@ -51,7 +51,6 @@ class IndexingManagerTest extends IndexingManager {
 }
 
 // to help WebStorm to handle the test cases
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare let describe: any;
 declare const after: any;
 declare const it: any;

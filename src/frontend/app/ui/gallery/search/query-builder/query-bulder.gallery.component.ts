@@ -34,7 +34,7 @@ export class GallerySearchQueryBuilderComponent
   private searchQueryParserService = inject(SearchQueryParserService);
 
   public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
-  readonly search = output<void>();
+  readonly searchSubmit = output<void>();
   readonly placeholder = input($localize `Search`);
   public readonly rawSearchText = signal('');
 
@@ -122,7 +122,6 @@ export class GallerySearchQueryBuilderComponent
     this.propagateChange(this.searchQueryDTO());
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private propagateChange = (_: SearchQueryDTO): void => {
     // ignoring
   };

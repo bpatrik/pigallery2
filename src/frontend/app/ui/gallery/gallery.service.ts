@@ -1,4 +1,4 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, OnDestroy, inject, signal } from '@angular/core';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
@@ -7,7 +7,7 @@ import {QueryParams} from '../../../../common/QueryParams';
 @Injectable({
   providedIn: 'root'
 })
-export class GalleryService {
+export class GalleryService implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 

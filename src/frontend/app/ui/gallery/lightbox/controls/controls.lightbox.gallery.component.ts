@@ -389,10 +389,11 @@ export class ControlsLightboxComponent implements OnDestroy {
         case LightBoxTitleTexts.persons:
           retTexts.push(m.metadata?.faces?.map(f => f.name)?.join(', '));
           break;
-        case LightBoxTitleTexts.date:
+        case LightBoxTitleTexts.date: {
           const isThisYear = MediaDTOUtils.createdThisYear(m);
           retTexts.push(formatDate(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), isThisYear ? 'MMMM d' : 'longDate', this.locale, 'UTC'));
           break;
+        }
         case LightBoxTitleTexts.location:
           if (!m.metadata?.positionData) {
             break;

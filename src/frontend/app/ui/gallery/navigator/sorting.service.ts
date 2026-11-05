@@ -272,8 +272,8 @@ export class GallerySortingService {
     }
 
     // sort groups
-    for (let i = 0; i < c.mediaGroups.length; ++i) {
-      this.sortMedia(sorting, c.mediaGroups[i].media);
+    for (const group of c.mediaGroups) {
+      this.sortMedia(sorting, group.media);
     }
 
     return c;

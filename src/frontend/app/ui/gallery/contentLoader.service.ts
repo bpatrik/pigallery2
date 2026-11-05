@@ -130,7 +130,7 @@ export class ContentLoaderService {
       return;
     }
 
-    if (!!cw?.directory) {
+    if (cw?.directory) {
       this.notFoundDirectories.clear();
       this.galleryCacheService.setDirectory(cw); // save it before adding references
     }

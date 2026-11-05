@@ -20,8 +20,7 @@ class MockThumbnailManagerService {
       Src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
       Error: false,
       loading: false,
-      destroy() {
-      },
+      destroy: vi.fn(),
     };
   }
 }
@@ -37,11 +36,9 @@ class MockExtensionService {
 }
 
 class MockMediaButtonModalService {
-  showModal() {
-  }
+  showModal = vi.fn();
 
-  executeButtonAction() {
-  }
+  executeButtonAction = vi.fn();
 }
 
 function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {

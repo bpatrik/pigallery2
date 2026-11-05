@@ -9,9 +9,8 @@ import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes
 import {TestHelper} from '../../../../TestHelper';
 
 // to help WebStorm to handle the test cases
-declare let describe: any;
 declare const after: any;
-describe = DBTestHelper.describe();
+const describe = DBTestHelper.describe();
 
 describe('SharingManager', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);

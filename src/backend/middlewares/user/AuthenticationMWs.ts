@@ -66,6 +66,7 @@ export class AuthenticationMWs {
     try {
       user = await AuthenticationMWs.getSharingUser(req);
     } catch {
+      // no sharing user, handled below
     }
 
     // no sharing user yet (eg.: its password protected)

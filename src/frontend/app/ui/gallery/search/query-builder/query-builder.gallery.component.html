@@ -1,6 +1,6 @@
 <app-gallery-search-field-base [(ngModel)]="rawSearchText" [ngModelOptions]="{standalone: true}"
                                (ngModelChange)="validateRawSearchText()"
-                               (search)="search.emit()"
+                               (searchSubmit)="searchSubmit.emit()"
                                [placeholder]="placeholder()"
                                class="rounded-2"
                                name="form-search-field" />

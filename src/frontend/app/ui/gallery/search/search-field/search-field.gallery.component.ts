@@ -41,7 +41,7 @@ export class GallerySearchFieldComponent
   private modalService = inject(BsModalService);
   router = inject(Router);
 
-  readonly search = output<void>();
+  readonly searchSubmit = output<void>();
   readonly placeholder = input<string>(undefined);
   public readonly rawSearchText = signal('');
   public readonly searchQueryDTO = signal<SearchQueryDTO>(undefined);
@@ -124,7 +124,6 @@ export class GallerySearchFieldComponent
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private propagateChange = (_: SearchQueryDTO): void => {
     //ignoring
   };

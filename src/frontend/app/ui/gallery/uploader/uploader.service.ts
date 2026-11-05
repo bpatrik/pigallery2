@@ -96,10 +96,7 @@ export class UploaderService {
       this.notificationService.error($localize`Upload is not supported for this directory.`);
       return;
     }
-    const files = [];
-    for (let i = 0; i < filesIn.length; i++) {
-      files.push(filesIn[i]);
-    }
+    const files = Array.from(filesIn);
     const dirDto = this.contentLoaderService.content().directory;
     const directory = Utils.concatUrls(dirDto.path, dirDto.name);
     const supportedFiles = files.filter(f =>

@@ -58,7 +58,6 @@ export class RenderingMWs {
       return next();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {password, creator, ...sharing} = req.resultPipe as SharingEntity;
     (sharing as ResponseSharingDTO).passwordProtected = Config.Sharing.passwordRequired || (typeof password === 'string' && password !== '');
     RenderingMWs.renderMessage(res, sharing);

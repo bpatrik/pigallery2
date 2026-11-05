@@ -86,8 +86,7 @@ class MockCacheService {
     return null;
   }
 
-  setThemeMode() {
-  }
+  setThemeMode = vi.fn();
 }
 
 class MockBlogService{

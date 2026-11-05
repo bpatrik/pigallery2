@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
+import { Component, ElementRef, OnChanges, OnDestroy, OnInit, type SimpleChanges, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -61,7 +61,7 @@ import {QueryService} from '../../../../model/query.service';
     NgIconComponent
 ]
 })
-export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
+export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit {
   fullScreenService = inject(FullScreenService);
   private thumbnailService = inject(ThumbnailManagerService);
   mapService = inject(MapService);
@@ -167,8 +167,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
     this.setUpPathLayers();
     this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
     this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));
-    for (let i = 0; i < this.mapService.Layers.length; ++i) {
-      const l = this.mapService.Layers[i];
+    for (const l of this.mapService.Layers) {
       const tl = tileLayer(l.url, {attribution: this.mapService.Attributions});
       if (l.url === this.mapService.MapLayer.url) {
         this.defLayer = tl;

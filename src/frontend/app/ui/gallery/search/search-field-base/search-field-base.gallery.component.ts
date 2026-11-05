@@ -36,7 +36,7 @@ export class GallerySearchFieldBaseComponent
   router = inject(Router);
 
   readonly placeholder = input($localize `Search`);
-  readonly search = output<void>();
+  readonly searchSubmit = output<void>();
 
   readonly searchField = viewChild<ElementRef>('SearchField');
   readonly searchHintField = viewChild<ElementRef>('SearchHintField');
@@ -174,7 +174,7 @@ export class GallerySearchFieldBaseComponent
     this.applyAutoComplete(item);
 
     if (!item.notSearchable) {
-      this.search.emit();
+      this.searchSubmit.emit();
     }
   }
 
@@ -202,7 +202,7 @@ export class GallerySearchFieldBaseComponent
       this.autoCompleteRenders().length === 0 ||
       this.highlightedAutoCompleteItem() === -1
     ) {
-      this.search.emit();
+      this.searchSubmit.emit();
       return false;
     }
     // search selected autocomplete
@@ -299,11 +299,11 @@ export class GallerySearchFieldBaseComponent
     ));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private propagateChange = (_: string): void => {
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private propagateTouch = (_: never): void => {
   };
 
