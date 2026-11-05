@@ -7,15 +7,15 @@
     }
 
     @if (CanCreateAlbum) {
-      <div class="add-saved-search btn btn-secondary"
+      <button type="button" class="add-saved-search btn btn-secondary"
         [style.width.px]="size()"
         [style.height.px]="size()"
         (click)="openModal(modal)">
-        <div class="text">
+        <span class="text d-block">
           <ng-icon name="ionAddOutline" class="mb-2" />
           <span i18n>Add saved search</span>
-        </div>
-      </div>
+        </span>
+      </button>
     }
 
     @if (albumsService.albums() && albumsService.albums().length === 0) {

@@ -6,7 +6,10 @@
       class="card bg-body-tertiary mt-2 mb-2  no-changed-settings {{shouldIdent(schedule,sortedList[i-1])? 'ms-4' : ''}}">
       <div class="card-header">
         <div class="d-flex justify-content-between">
-          <div (click)="showDetails[schedule.name]=!showDetails[schedule.name]">
+          <div role="button" tabindex="0" [attr.aria-expanded]="!!showDetails[schedule.name]"
+            (click)="toggleDetails(schedule.name)"
+            (keydown.enter)="toggleDetails(schedule.name)"
+            (keydown.space)="$event.preventDefault(); toggleDetails(schedule.name)">
             @if (!validJobs()[schedule.jobName]) {
               <span
                 triggers="mouseenter:mouseleave"
@@ -60,7 +63,7 @@
               </div>
             }
             <div class="mb-1 row">
-              <label class="col-md-2 control-label" i18n>Job:</label>
+              <span class="col-md-2 control-label" i18n>Job:</span>
               <div class="col-md-4">
                 {{ backendTextService.getJobName(schedule.jobName) }}
               </div>

@@ -16,13 +16,13 @@
   <div [class.dim-controls]="controllersDimmed()"
     class="controls controls-top">
     <div class="controls-background rounded-start-bottom">
-      <div class="highlight control-button" (click)="toggleInfoPanel.emit()"
+      <div role="button" tabindex="-1" class="highlight control-button" (click)="toggleInfoPanel.emit()"
         title="info key: i" i18n-title>
         <ng-icon name="ionInformationOutline" />
       </div>
 
       @if (fullScreenService.fullScreenEnabled()) {
-        <div
+        <div role="button" tabindex="-1"
           class="highlight control-button"
           (click)="toggleFullScreen.emit()"
           title="toggle fullscreen, key: f" i18n-title>
@@ -32,7 +32,7 @@
       }
 
       @if (!fullScreenService.fullScreenEnabled()) {
-        <div
+        <div role="button" tabindex="-1"
           class="highlight control-button"
           (click)="toggleFullScreen.emit()"
           title="toggle fullscreen, key: f" i18n-title>
@@ -145,7 +145,7 @@
                 </ul>
               </div>
 
-              <div class="highlight control-button"
+              <div role="button" tabindex="-1" class="highlight control-button"
                 (click)="closeLightbox()"
                 title="close, key: Escape" i18n-title>
                 <ng-icon size="1.2em" name="ionCloseOutline" />
@@ -153,7 +153,7 @@
             </div>
           </div>
 
-          <div id="swipeable-container"
+          <div id="swipeable-container" role="presentation"
             [class.hide-cursor]="controllersDimmed()"
             appGesture
             (swipeLeft)="zoom() === 1 && nextPhoto.emit()"
@@ -214,14 +214,14 @@
           </div>
 
           @if (navigation().hasPrev && zoom() === 1) {
-            <div [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-left highlight rounded-end"
+            <div role="button" tabindex="-1" [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-left highlight rounded-end"
               title="key: left arrow" id="leftArrow" i18n-title
               (click)="previousPhoto.emit()">
               <ng-icon name="ionChevronBackOutline" />
             </div>
           }
           @if (navigation().hasNext && zoom() === 1) {
-            <div [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-right highlight rounded-start"
+            <div role="button" tabindex="-1" [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-right highlight rounded-start"
               title="key: right arrow" id="rightArrow" i18n-title
               (click)="nextMediaManuallyTriggered()">
               <ng-icon name="ionChevronForwardOutline" />

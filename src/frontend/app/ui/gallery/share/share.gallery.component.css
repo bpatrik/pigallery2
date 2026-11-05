@@ -24,12 +24,13 @@ a.dropdown-item ng-icon, button.dropdown-item ng-icon, div.dropdown-item ng-icon
   margin-right: 0.5rem;
 }
 
-a.list-shares-button {
+.list-shares-button {
   cursor: pointer;
   color: inherit;
+  text-decoration: none;
 }
 
-a.list-shares-button:hover {
+.list-shares-button:hover {
   text-decoration: underline;
 }
 

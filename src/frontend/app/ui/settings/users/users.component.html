@@ -140,30 +140,30 @@
             </div>
             @if (editSettings.overrideAllowBlockList) {
               <div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Allowed query</label>
+                <div class="mb-3" role="group" aria-labelledby="allowQueryLabel">
+                  <span class="form-label d-inline-block" id="allowQueryLabel" i18n>Allowed query</span>
                   <app-gallery-search-field name="allowQuery"
                     [(ngModel)]="editSettings.allowQuery"
                     i18n-placeholder
                     placeholder="Allowed query" />
                   <small class="text-muted" i18n>Only items matching this query will be visible.</small>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Blocked query</label>
+                <div class="mb-3" role="group" aria-labelledby="blockQueryLabel">
+                  <span class="form-label d-inline-block" id="blockQueryLabel" i18n>Blocked query</span>
                   <app-gallery-search-field name="blockQuery"
                     [(ngModel)]="editSettings.blockQuery"
                     placeholder="Blocked query"
                     i18n-placeholder />
                   <small class="text-muted" i18n>Items matching this query will be hidden.</small>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Allowed directories</label>
+                <div class="mb-3" role="group" aria-labelledby="allowDirectoryListLabel">
+                  <span class="form-label d-inline-block" id="allowDirectoryListLabel" i18n>Allowed directories</span>
                   <app-settings-directory-search-list idName="allowDirectoryList"
                     [list]="editSettings.allowDirectoryList" />
                   <div><small class="text-muted" i18n>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</small></div>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Blocked directories</label>
+                <div class="mb-3" role="group" aria-labelledby="blockDirectoryListLabel">
+                  <span class="form-label d-inline-block" id="blockDirectoryListLabel" i18n>Blocked directories</span>
                   <app-settings-directory-search-list idName="blockDirectoryList"
                     [list]="editSettings.blockDirectoryList" />
                   <div><small class="text-muted" i18n>Directories (and their content) matching any of these will be hidden.</small></div>

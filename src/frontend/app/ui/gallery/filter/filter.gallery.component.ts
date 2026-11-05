@@ -83,6 +83,11 @@ export class GalleryFilterComponent implements OnInit, OnDestroy {
     return true;
   }
 
+  toggleOption(option: FilterOption): void {
+    option.selected = !option.selected;
+    this.filterService.onFilterChange();
+  }
+
   toggleSelectOnly(
       filter: SelectedFilter,
       option: FilterOption,

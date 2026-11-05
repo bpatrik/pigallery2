@@ -7,7 +7,7 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">{{ modalData().button.popup?.header || modalData().button.name }}</h4>
-          <button type="button" class="btn-close" (click)="closeModal()"></button>
+          <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close" i18n-aria-label></button>
         </div>
         <div class="modal-body">
           <!-- Media info -->
@@ -97,7 +97,7 @@
       </div>
     }
     @if (modalData()?.visible) {
-      <div class="modal-backdrop fade"
+      <div class="modal-backdrop fade" role="presentation"
         [class.show]="modalData()?.visible"
       (click)="closeModal()"></div>
     }

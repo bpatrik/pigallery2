@@ -1010,7 +1010,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <target>帧数</target>
       </trans-unit>
@@ -1374,7 +1374,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
-          <context context-type="linenumber">144</context>
+          <context context-type="linenumber">142</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -3478,11 +3478,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-builder/query-bulder.gallery.component.ts</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search-field-base/search-field-base.gallery.component.ts</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
@@ -3514,7 +3514,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/navigator/navigator.faces.component.html</context>
@@ -3534,7 +3534,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">32</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <target>人脸</target>
       </trans-unit>
@@ -3931,7 +3931,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <target>管理员</target>
       </trans-unit>
@@ -4047,7 +4047,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">30,31</context>
+          <context context-type="linenumber">33,34</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
@@ -4183,7 +4183,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.ts</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -4219,7 +4219,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">33</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/gallery-statistic/gallery-statistic.component.html</context>
@@ -4243,7 +4243,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">29</context>
+          <context context-type="linenumber">28</context>
         </context-group>
         <target>标题</target>
       </trans-unit>
@@ -4255,7 +4255,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">28</context>
+          <context context-type="linenumber">27</context>
         </context-group>
         <target>Title</target>
       </trans-unit>
@@ -4271,7 +4271,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">39</context>
         </context-group>
         <target>关键词</target>
       </trans-unit>
@@ -4632,15 +4632,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">310</context>
+          <context context-type="linenumber">313</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">361</context>
+          <context context-type="linenumber">364</context>
         </context-group>
         <target>删除</target>
       </trans-unit>
@@ -5064,7 +5064,7 @@
         <source>Select only this</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.html</context>
-          <context context-type="linenumber">123,124</context>
+          <context context-type="linenumber">127,128</context>
         </context-group>
         <target>只选择这个</target>
       </trans-unit>
@@ -5072,7 +5072,7 @@
         <source>Nothing to filter</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.html</context>
-          <context context-type="linenumber">137,138</context>
+          <context context-type="linenumber">141,142</context>
         </context-group>
         <target>没有什么可以过滤的</target>
       </trans-unit>
@@ -5080,7 +5080,7 @@
         <source>Reset</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.html</context>
-          <context context-type="linenumber">145,146</context>
+          <context context-type="linenumber">149,150</context>
         </context-group>
         <target>重置</target>
       </trans-unit>
@@ -5088,7 +5088,7 @@
         <source>unknown</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.ts</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>未知</target>
       </trans-unit>
@@ -5184,11 +5184,43 @@
         </context-group>
         <target>结果太多无法显示. 请改善你的搜索条件.</target>
       </trans-unit>
+      <trans-unit id="7819314041543176992" datatype="html">
+        <source>Close</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
+          <context context-type="linenumber">176,177</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
+          <context context-type="linenumber">444,445</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <target>关闭</target>
+      </trans-unit>
       <trans-unit id="8282018551586977212" datatype="html">
         <source>Camera Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">30</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>Camera Data</target>
       </trans-unit>
@@ -5196,7 +5228,7 @@
         <source>Position Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <target>Position Data</target>
       </trans-unit>
@@ -5204,7 +5236,7 @@
         <source>Creation Date</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">34</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <target>Creation Date</target>
       </trans-unit>
@@ -5212,7 +5244,7 @@
         <source>Creation Date Offset</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">35</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <target>Creation Date Offset</target>
       </trans-unit>
@@ -5220,7 +5252,7 @@
         <source>Bit Rate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>Bit Rate</target>
       </trans-unit>
@@ -5228,7 +5260,7 @@
         <source>Duration</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">37</context>
+          <context context-type="linenumber">36</context>
         </context-group>
         <target>Duration</target>
       </trans-unit>
@@ -5236,7 +5268,7 @@
         <source>File Size</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">38</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <target>File Size</target>
       </trans-unit>
@@ -5412,15 +5444,15 @@
         <source>Home</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">359</context>
+          <context context-type="linenumber">358</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">171</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target>主页</target>
       </trans-unit>
@@ -5760,7 +5792,7 @@
         <source>The photo is not available anymore. Showing the first one.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">329</context>
+          <context context-type="linenumber">328</context>
         </context-group>
         <target>The photo is not available anymore. Showing the first one.</target>
       </trans-unit>
@@ -5768,7 +5800,7 @@
         <source>Sport</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">208</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <target>运动</target>
       </trans-unit>
@@ -5776,7 +5808,7 @@
         <source>Transportation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">211</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <target>运输</target>
       </trans-unit>
@@ -5784,11 +5816,11 @@
         <source>Other paths</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">214</context>
+          <context context-type="linenumber">212</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">237</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <target>其他路径</target>
       </trans-unit>
@@ -5807,6 +5839,14 @@
           <context context-type="linenumber">770</context>
         </context-group>
         <target>经度</target>
+      </trans-unit>
+      <trans-unit id="5655563590612634199" datatype="html">
+        <source>Open the map</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.gallery.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>Open the map</target>
       </trans-unit>
       <trans-unit id="6560708001470959956" datatype="html">
         <source>street</source>
@@ -5924,7 +5964,7 @@
         <source>key: alt + up</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">156</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <target>快捷键: alt + up</target>
       </trans-unit>
@@ -6032,11 +6072,11 @@
         <source>Url has been copied to clipboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.ts</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/random-query-builder/random-query-builder.gallery.component.ts</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>网址已复制到剪贴板</target>
       </trans-unit>
@@ -6156,11 +6196,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">321,322</context>
+          <context context-type="linenumber">324,325</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">373,374</context>
+          <context context-type="linenumber">376,377</context>
         </context-group>
         <target>添加</target>
       </trans-unit>
@@ -6364,7 +6404,7 @@
         <source>Insert</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search-field-base/search-field-base.gallery.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <target>插入</target>
       </trans-unit>
@@ -6576,15 +6616,23 @@
         </context-group>
         <target>Copy link</target>
       </trans-unit>
+      <trans-unit id="3302121187449737262" datatype="html">
+        <source>Search query</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <target>Search query</target>
+      </trans-unit>
       <trans-unit id="1625809888219597132" datatype="html">
         <source>Invalid settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">236</context>
+          <context context-type="linenumber">238</context>
         </context-group>
         <target>无效设置</target>
       </trans-unit>
@@ -6592,7 +6640,7 @@
         <source>Yes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">83</context>
+          <context context-type="linenumber">120</context>
         </context-group>
         <target>是</target>
       </trans-unit>
@@ -6600,27 +6648,19 @@
         <source>No</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>否</target>
-      </trans-unit>
-      <trans-unit id="3302121187449737262" datatype="html">
-        <source>Search query</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">108</context>
-        </context-group>
-        <target>Search query</target>
       </trans-unit>
       <trans-unit id="765974048716015903" datatype="html">
         <source>loading..</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">210</context>
+          <context context-type="linenumber">212</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">242</context>
         </context-group>
         <target>正在加载..</target>
       </trans-unit>
@@ -6628,7 +6668,7 @@
         <source>Set password.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">232</context>
+          <context context-type="linenumber">234</context>
         </context-group>
         <target>Set password.</target>
       </trans-unit>
@@ -6636,7 +6676,7 @@
         <source>Click share to get a link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">259</context>
+          <context context-type="linenumber">261</context>
         </context-group>
         <target>点击分享即可获取链接.</target>
       </trans-unit>
@@ -6644,7 +6684,7 @@
         <source>Sharing link has been copied to clipboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">270</context>
+          <context context-type="linenumber">272</context>
         </context-group>
         <target>共享链接已复制到剪贴板</target>
       </trans-unit>
@@ -6704,7 +6744,7 @@
         <source>Some files were skipped due to unsupported format.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">106</context>
         </context-group>
         <target>Some files were skipped due to unsupported format.</target>
       </trans-unit>
@@ -6712,7 +6752,7 @@
         <source>Queued</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <target>Queued</target>
       </trans-unit>
@@ -6723,7 +6763,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <target>
           Files already exist: 
@@ -6734,7 +6774,7 @@
         <source>File already exists</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>File already exists</target>
       </trans-unit>
@@ -6742,7 +6782,7 @@
         <source>Upload canceled.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">333</context>
+          <context context-type="linenumber">330</context>
         </context-group>
         <target>Upload canceled.</target>
       </trans-unit>
@@ -6753,7 +6793,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">333</context>
         </context-group>
         <target>
           Uploaded files: 
@@ -6764,7 +6804,7 @@
         <source>Upload completed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">333</context>
         </context-group>
         <target>Upload completed.</target>
       </trans-unit>
@@ -6776,7 +6816,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">339</context>
+          <context context-type="linenumber">336</context>
         </context-group>
         <target>
           Uploaded: , failed: 
@@ -6788,7 +6828,7 @@
         <source>Upload completed with errors</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">340</context>
+          <context context-type="linenumber">337</context>
         </context-group>
         <target>Upload completed with errors</target>
       </trans-unit>
@@ -6799,7 +6839,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">339</context>
         </context-group>
         <target>
           Failed files: 
@@ -6810,7 +6850,7 @@
         <source>Upload failed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">339</context>
         </context-group>
         <target>Upload failed.</target>
       </trans-unit>
@@ -6946,34 +6986,6 @@
         </context-group>
         <target>Installed</target>
       </trans-unit>
-      <trans-unit id="7819314041543176992" datatype="html">
-        <source>Close</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
-          <context context-type="linenumber">94,95</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
-          <context context-type="linenumber">84,85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
-          <context context-type="linenumber">176,177</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">441,442</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-        <target>关闭</target>
-      </trans-unit>
       <trans-unit id="1102717806459547726" datatype="html">
         <source>Refresh</source>
         <context-group purpose="location">
@@ -7018,7 +7030,7 @@
         <source>Job failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/scheduled-jobs.service.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>失败任务</target>
       </trans-unit>
@@ -7026,7 +7038,7 @@
         <source>Job finished</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/scheduled-jobs.service.ts</context>
-          <context context-type="linenumber">140</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <target>任务完成</target>
       </trans-unit>
@@ -7211,7 +7223,7 @@
         <source>default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
-          <context context-type="linenumber">224</context>
+          <context context-type="linenumber">226</context>
         </context-group>
         <target>默认</target>
       </trans-unit>
@@ -7219,7 +7231,7 @@
         <source>readonly</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
-          <context context-type="linenumber">312</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <target>只读</target>
       </trans-unit>
@@ -7227,7 +7239,7 @@
         <source>default value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
-          <context context-type="linenumber">314</context>
+          <context context-type="linenumber">318</context>
         </context-group>
         <target>默认值</target>
       </trans-unit>
@@ -7267,7 +7279,7 @@
         <source>Can't save: invalid form.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">199</context>
+          <context context-type="linenumber">194</context>
         </context-group>
         <target>Can't save: invalid form.</target>
       </trans-unit>
@@ -7275,7 +7287,7 @@
         <source>Can't save: not changed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">197</context>
         </context-group>
         <target>Can't save: not changed.</target>
       </trans-unit>
@@ -7283,7 +7295,7 @@
         <source>Can't save: saving in progress.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">205</context>
+          <context context-type="linenumber">200</context>
         </context-group>
         <target>Can't save: saving in progress.</target>
       </trans-unit>
@@ -7291,7 +7303,7 @@
         <source>Click to save.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">207</context>
+          <context context-type="linenumber">202</context>
         </context-group>
         <target>Click to save.</target>
       </trans-unit>
@@ -7299,7 +7311,7 @@
         <source>settings saved</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">352</context>
+          <context context-type="linenumber">351</context>
         </context-group>
         <target>设置已保存</target>
       </trans-unit>
@@ -7307,15 +7319,15 @@
         <source>Success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">353</context>
+          <context context-type="linenumber">352</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">407</context>
+          <context context-type="linenumber">406</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">426</context>
+          <context context-type="linenumber">425</context>
         </context-group>
         <target>成功</target>
       </trans-unit>
@@ -7323,7 +7335,7 @@
         <source>Extension deleted successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">406</context>
+          <context context-type="linenumber">405</context>
         </context-group>
         <target>Extension deleted successfully</target>
       </trans-unit>
@@ -7331,7 +7343,7 @@
         <source>Failed to delete extension</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">411</context>
+          <context context-type="linenumber">410</context>
         </context-group>
         <target>Failed to delete extension</target>
       </trans-unit>
@@ -7339,7 +7351,7 @@
         <source>Extension reloaded successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">425</context>
+          <context context-type="linenumber">424</context>
         </context-group>
         <target>Extension reloaded successfully</target>
       </trans-unit>
@@ -7347,7 +7359,7 @@
         <source>Failed to reload extension</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">430</context>
+          <context context-type="linenumber">429</context>
         </context-group>
         <target>Failed to reload extension</target>
       </trans-unit>
@@ -7567,11 +7579,11 @@
         <source>Passwords do not match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <target>Passwords do not match</target>
       </trans-unit>
@@ -7579,11 +7591,11 @@
         <source>User creation error!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <target>用户创建错误！</target>
       </trans-unit>
@@ -7591,7 +7603,7 @@
         <source>Can't modify user role</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">194</context>
+          <context context-type="linenumber">193</context>
         </context-group>
         <target>Can't modify user role</target>
       </trans-unit>
@@ -7599,11 +7611,11 @@
         <source>Could not save user settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">202</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">225</context>
+          <context context-type="linenumber">224</context>
         </context-group>
         <target>Could not save user settings</target>
       </trans-unit>
@@ -7611,7 +7623,7 @@
         <source>User settings saved successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">218</context>
+          <context context-type="linenumber">217</context>
         </context-group>
         <target>User settings saved successfully</target>
       </trans-unit>
@@ -7671,7 +7683,7 @@
         <source>Job started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/button/job-button.settings.component.ts</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <target>任务开始</target>
       </trans-unit>
@@ -7679,7 +7691,7 @@
         <source>Stopping job</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/button/job-button.settings.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">122</context>
         </context-group>
         <target>停止任务</target>
       </trans-unit>
@@ -7767,7 +7779,7 @@
         <source>processed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">49</context>
+          <context context-type="linenumber">48</context>
         </context-group>
         <target>已处理</target>
       </trans-unit>
@@ -7775,7 +7787,7 @@
         <source>skipped</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">52</context>
         </context-group>
         <target>已跳过</target>
       </trans-unit>
@@ -7783,7 +7795,7 @@
         <source>all</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">57</context>
+          <context context-type="linenumber">56</context>
         </context-group>
         <target>全部</target>
       </trans-unit>
@@ -7791,7 +7803,7 @@
         <source>running</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <target>运行中</target>
       </trans-unit>
@@ -7799,7 +7811,7 @@
         <source>cancelling</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">118</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <target>取消中</target>
       </trans-unit>
@@ -7807,7 +7819,7 @@
         <source>canceled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">120</context>
+          <context context-type="linenumber">119</context>
         </context-group>
         <target>已取消</target>
       </trans-unit>
@@ -7815,7 +7827,7 @@
         <source>interrupted</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">122</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>已中断</target>
       </trans-unit>
@@ -7823,7 +7835,7 @@
         <source>finished</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <target>已完成</target>
       </trans-unit>
@@ -7831,7 +7843,7 @@
         <source>failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <target>已失败</target>
       </trans-unit>
@@ -7839,11 +7851,11 @@
         <source>every</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">25,26</context>
+          <context context-type="linenumber">28,29</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <target>每一个</target>
       </trans-unit>
@@ -7851,7 +7863,7 @@
         <source>after</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">33,34</context>
+          <context context-type="linenumber">36,37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
@@ -7863,7 +7875,7 @@
         <source>Job:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">66,67</context>
         </context-group>
         <target>任务:</target>
       </trans-unit>
@@ -7871,7 +7883,7 @@
         <source>Periodicity:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">77,78</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
         <target>周期性:</target>
       </trans-unit>
@@ -7879,7 +7891,7 @@
         <source>Set the time to run the job. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">92,93</context>
+          <context context-type="linenumber">95,96</context>
         </context-group>
         <target>设置运行任务的时间.</target>
       </trans-unit>
@@ -7887,7 +7899,7 @@
         <source>After:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">101,102</context>
+          <context context-type="linenumber">104,105</context>
         </context-group>
         <target>后:</target>
       </trans-unit>
@@ -7895,7 +7907,7 @@
         <source>The job will run after that job finishes. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">119,120</context>
+          <context context-type="linenumber">122,123</context>
         </context-group>
         <target>这个任务会在那个任务完成后运行.</target>
       </trans-unit>
@@ -7903,11 +7915,11 @@
         <source>At:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">129,130</context>
+          <context context-type="linenumber">132,133</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">142,143</context>
+          <context context-type="linenumber">145,146</context>
         </context-group>
         <target>在:</target>
       </trans-unit>
@@ -7915,7 +7927,7 @@
         <source>Allow parallel run</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">168,169</context>
+          <context context-type="linenumber">171,172</context>
         </context-group>
         <target>允许并行运行</target>
       </trans-unit>
@@ -7923,7 +7935,7 @@
         <source>Enables the job to start even if another job is already running. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">185,186</context>
+          <context context-type="linenumber">188,189</context>
         </context-group>
         <target>即使其他任务已在运行, 也能使任务启动.</target>
       </trans-unit>
@@ -7931,7 +7943,7 @@
         <source> Search query to list photos and videos. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">281</context>
+          <context context-type="linenumber">284</context>
         </context-group>
         <target>搜索查询以列出照片和视频.</target>
       </trans-unit>
@@ -7939,7 +7951,7 @@
         <source>Sort by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">289,290</context>
+          <context context-type="linenumber">292,293</context>
         </context-group>
         <target>排序方式</target>
       </trans-unit>
@@ -7947,7 +7959,7 @@
         <source> Sorts the photos and videos by this. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">328</context>
+          <context context-type="linenumber">331</context>
         </context-group>
         <target>按此对照片和视频进行排序.</target>
       </trans-unit>
@@ -7955,7 +7967,7 @@
         <source>Pick</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">336,337</context>
+          <context context-type="linenumber">339,340</context>
         </context-group>
         <target>挑选</target>
       </trans-unit>
@@ -7963,7 +7975,7 @@
         <source> Number of photos and videos to pick. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">348</context>
+          <context context-type="linenumber">351</context>
         </context-group>
         <target>可供选择的照片和视频数量.</target>
       </trans-unit>
@@ -7971,7 +7983,7 @@
         <source>';' separated integers. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">383,384</context>
+          <context context-type="linenumber">386,387</context>
         </context-group>
         <target>';'</target>
       </trans-unit>
@@ -7979,7 +7991,7 @@
         <source>Add Job</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">407,408</context>
+          <context context-type="linenumber">410,411</context>
         </context-group>
         <target>添加任务</target>
       </trans-unit>
@@ -7987,7 +7999,7 @@
         <source>Add new job</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">417,418</context>
+          <context context-type="linenumber">420,421</context>
         </context-group>
         <target>添加新任务</target>
       </trans-unit>
@@ -7995,7 +8007,7 @@
         <source>Select a job to schedule. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">435,436</context>
+          <context context-type="linenumber">438,439</context>
         </context-group>
         <target>选择要安排的任务.</target>
       </trans-unit>
@@ -8003,7 +8015,7 @@
         <source>Add Job </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">445</context>
+          <context context-type="linenumber">448</context>
         </context-group>
         <target>添加任务</target>
       </trans-unit>

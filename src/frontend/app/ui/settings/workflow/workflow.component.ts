@@ -158,6 +158,10 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     this.jobsService.unsubscribeFromProgress();
   }
 
+  toggleDetails(scheduleName: string): void {
+    this.showDetails[scheduleName] = !this.showDetails[scheduleName];
+  }
+
   remove(schedule: JobScheduleDTO): void {
     this.schedules().splice(
       this.schedules().indexOf(schedule),

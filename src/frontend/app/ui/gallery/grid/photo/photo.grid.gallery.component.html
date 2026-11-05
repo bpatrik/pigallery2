@@ -1,4 +1,6 @@
-<div #photoContainer class="photo-container rounded" (mouseover)="mouseOver()" (mouseout)="mouseOut()">
+<div #photoContainer class="photo-container rounded"
+  (mouseenter)="mouseOver()" (mouseleave)="mouseOut()"
+  (focusin)="mouseOver()" (focusout)="mouseOut()">
 
 
   @if (thumbnail.Available) {
