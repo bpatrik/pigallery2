@@ -17,7 +17,7 @@ export enum ThumbnailLoadingPriority {
 export class ThumbnailLoaderService {
   private galleryCacheService = inject(GalleryCacheService);
 
-  que: Array<ThumbnailTask> = [];
+  que: ThumbnailTask[] = [];
   runningRequests = 0;
 
   run = (): void => {
@@ -213,7 +213,7 @@ export interface ThumbnailTaskEntity {
 
 interface ThumbnailTask {
   inProgress: boolean;
-  taskEntities: Array<ThumbnailTaskEntity>;
+  taskEntities: ThumbnailTaskEntity[];
   path: string;
   onLoaded: () => void;
 }

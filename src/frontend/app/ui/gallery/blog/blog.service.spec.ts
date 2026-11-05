@@ -500,7 +500,7 @@ This is dated.`;
     const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3)];
 
     it('should place undated section at top when not search result', () => {
-      const sections: Array<{ date: Date | null; text: string }> = [{date: null, text: '# Test'}];
+      const sections: { date: Date | null; text: string }[] = [{date: null, text: '# Test'}];
       const firstMedia = Date.UTC(2025, 1, 1);
 
       const result = (service as any).groupSectionsByDate(sections, file, dates, firstMedia);
@@ -510,7 +510,7 @@ This is dated.`;
     });
 
     it('should place undated section at file date group when search result', () => {
-      const sections: Array<{ date: Date | null; text: string }> = [{date: null, text: '# Test'}];
+      const sections: { date: Date | null; text: string }[] = [{date: null, text: '# Test'}];
       const firstMedia = Date.UTC(2025, 0, 1); // Different from file.date
 
       const result = (service as any).groupSectionsByDate(sections, file, dates, firstMedia);

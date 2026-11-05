@@ -280,7 +280,7 @@ export class GalleryCacheService {
   public setAutoComplete(
       text: string,
       type: SearchQueryTypes,
-      items: Array<IAutoCompleteItem>
+      items: IAutoCompleteItem[]
   ): void {
     if (Config.Gallery.enableCache === false) {
       return;
@@ -289,7 +289,7 @@ export class GalleryCacheService {
         GalleryCacheService.AUTO_COMPLETE_PREFIX +
         text +
         (type ? '_' + type : '');
-    const tmp: CacheItem<Array<IAutoCompleteItem>> = {
+    const tmp: CacheItem<IAutoCompleteItem[]> = {
       timestamp: Date.now(),
       item: items,
     };

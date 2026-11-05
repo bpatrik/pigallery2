@@ -89,8 +89,8 @@ export class SearchManager {
   }
 
   private static autoCompleteItemsUnique(
-    array: Array<AutoCompleteItem>
-  ): Array<AutoCompleteItem> {
+    array: AutoCompleteItem[]
+  ): AutoCompleteItem[] {
     const a = array.concat();
     for (let i = 0; i < a.length; ++i) {
       for (let j = i + 1; j < a.length; ++j) {
@@ -139,8 +139,8 @@ export class SearchManager {
       q.limit(Config.Search.AutoComplete.ItemsPerCategory.keyword);
       (await q.getRawMany())
         .map(
-          (r): Array<string> =>
-            (r.metadataKeywords as string).split(',') as Array<string>
+          (r): string[] =>
+            (r.metadataKeywords as string).split(',') as string[]
         )
         .forEach((keywords): void => {
           acList.push(
@@ -230,8 +230,8 @@ export class SearchManager {
       )
         .filter((pm): boolean => !!pm)
         .map(
-          (pm): Array<string> =>
-            [pm.city || '', pm.country || '', pm.state || ''] as Array<string>
+          (pm): string[] =>
+            [pm.city || '', pm.country || '', pm.state || ''] as string[]
         )
         .forEach((positions): void => {
           acList.push(
@@ -1390,7 +1390,7 @@ export class SearchManager {
   private encapsulateAutoComplete(
     values: string[],
     type: SearchQueryTypes
-  ): Array<AutoCompleteItem> {
+  ): AutoCompleteItem[] {
     const res: AutoCompleteItem[] = [];
     values.forEach((value): void => {
       res.push(new AutoCompleteItem(value, type));

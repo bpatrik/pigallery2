@@ -15,7 +15,7 @@ export class NetworkService {
   private versionService = inject(VersionService);
 
   readonly apiBaseUrl = Config.Server.getApiUrl();
-  private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
+  private globalErrorHandlers: ((error: ErrorDTO) => boolean)[] = [];
 
   public static buildUrl(url: string, data?: Record<string, unknown>): string {
     if (data) {
