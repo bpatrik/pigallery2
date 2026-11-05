@@ -216,6 +216,9 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       return;
     }
     this.getSettings();
+    // the card's jobs show their progress, also when the Jobs card (that subscribes too) is hidden
+    this.jobsService.subscribeToProgress();
+    this.destroyRef.onDestroy(() => this.jobsService.unsubscribeFromProgress());
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
     this.form().valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
