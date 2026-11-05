@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, effect, inject, input, untracked, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnChanges, OnDestroy, type SimpleChanges, effect, inject, input, signal, untracked, viewChild } from '@angular/core';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {Dimension} from '../../../../model/IRenderable';
 import {FullScreenService} from '../../fullscreen.service';
@@ -56,7 +56,6 @@ import {QueryService} from '../../../../model/query.service';
   },
   styleUrl: './lightbox.map.gallery.component.css',
   templateUrl: './lightbox.map.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LeafletModule,
     NgIconComponent
@@ -75,21 +74,21 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   readonly gpxFiles = input<FileDTO[]>(undefined);
   // read only when the lightbox opens or closes, so the parent is not measured on every change detection
   readonly getParentDimension = input<() => Dimension>(undefined);
-  public lightboxDimension: Dimension = {
+  public readonly lightboxDimension = signal<Dimension>({
     top: 0,
     left: 0,
     width: 0,
     height: 0,
-  } as Dimension;
-  public mapDimension: Dimension = {
+  } as Dimension);
+  public readonly mapDimension = signal<Dimension>({
     top: 0,
     left: 0,
     width: 0,
     height: 0,
-  } as Dimension;
-  public visible = false;
-  public controllersVisible = false;
-  public opacity = 1.0;
+  } as Dimension);
+  public readonly visible = signal(false);
+  public readonly controllersVisible = signal(false);
+  public readonly opacity = signal(1.0);
   readonly elementRef = viewChild<ElementRef>('root');
   public mapOptions: MapOptions = {
     zoom: 2,
@@ -260,7 +259,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
   // Side effect: redraws the Leaflet layers.
   ngOnChanges(changes: SimpleChanges): void {
-    if (this.visible === false) {
+    if (this.visible() === false) {
       return;
     }
     if (changes['photos'] || changes['gpxFiles']) {
@@ -270,18 +269,18 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
 
 
   async onResize(): Promise<void> {
-    this.lightboxDimension = {
+    this.lightboxDimension.set({
       top: 0,
       left: 0,
       width: GalleryMapLightboxComponent.getScreenWidth(),
       height: GalleryMapLightboxComponent.getScreenHeight(),
-    } as Dimension;
-    this.mapDimension = {
+    } as Dimension);
+    this.mapDimension.set({
       top: 0,
       left: 0,
       width: GalleryMapLightboxComponent.getScreenWidth(),
       height: GalleryMapLightboxComponent.getScreenHeight(),
-    } as Dimension;
+    } as Dimension);
     await Utils.wait(0);
     this.leafletMap.invalidateSize();
   }
@@ -442,7 +441,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   }
 
   onKeyPress(event: KeyboardEvent): void {
-    if (this.visible !== true) {
+    if (this.visible() !== true) {
       return;
     }
     switch (event.key) {
@@ -501,43 +500,44 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
   }
 
   private async show(): Promise<void> {
-    if (this.visible === true) {
+    if (this.visible() === true) {
       return;
     }
     this.clearMap();
-    this.visible = true;
-    this.opacity = 1.0;
-    this.lightboxDimension = Utils.clone(this.getParentDimension()());
-    this.lightboxDimension.top -= PageHelper.ScrollY;
-    this.mapDimension = {
+    this.visible.set(true);
+    this.opacity.set(1.0);
+    const from = Utils.clone(this.getParentDimension()());
+    from.top -= PageHelper.ScrollY;
+    this.lightboxDimension.set(from);
+    this.mapDimension.set({
       top: 0,
       left: 0,
       width: GalleryMapLightboxComponent.getScreenWidth(),
       height: GalleryMapLightboxComponent.getScreenHeight(),
-    } as Dimension;
+    } as Dimension);
     this.showImages();
     //  this.centerMap();
     PageHelper.hideScrollY('map-lightbox');
     await Utils.wait(0);
-    this.lightboxDimension = {
+    this.lightboxDimension.set({
       top: 0,
       left: 0,
       width: GalleryMapLightboxComponent.getScreenWidth(),
       height: GalleryMapLightboxComponent.getScreenHeight(),
-    } as Dimension;
+    } as Dimension);
     await Utils.wait(350);
     this.leafletMap.invalidateSize();
     this.centerMap();
-    this.controllersVisible = true;
+    this.controllersVisible.set(true);
   }
 
   private hide(): void {
-    if (this.visible === false) {
+    if (this.visible() === false) {
       this.clearMap();
       return;
     }
     this.fullScreenService.exitFullScreen();
-    this.controllersVisible = false;
+    this.controllersVisible.set(false);
     const to = this.getParentDimension()();
 
     // if target image out of screen -> scroll to there
@@ -549,12 +549,13 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy {
       PageHelper.ScrollY = to?.top;
     }
 
-    this.lightboxDimension = this.getParentDimension()();
-    this.lightboxDimension.top -= PageHelper.ScrollY;
+    const lightboxTo = Utils.clone(this.getParentDimension()());
+    lightboxTo.top -= PageHelper.ScrollY;
+    this.lightboxDimension.set(lightboxTo);
     PageHelper.showScrollY('map-lightbox');
-    this.opacity = 0.0;
+    this.opacity.set(0.0);
     setTimeout((): void => {
-      this.visible = false;
+      this.visible.set(false);
       this.clearMap();
       this.leafletMap.setZoom(2);
     }, 500);
