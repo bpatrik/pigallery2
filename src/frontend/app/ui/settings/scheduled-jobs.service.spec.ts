@@ -1,10 +1,11 @@
+import type {Mock} from 'vitest';
 import {TestBed} from '@angular/core/testing';
 import {ScheduledJobsService} from './scheduled-jobs.service';
 import {NetworkService} from '../../model/network/network.service';
 import {NotificationService} from '../../model/notification.service';
 import {BackendtextService} from '../../model/backendtext.service';
 import {JobProgressDTO, JobProgressStates} from '../../../../common/entities/job/JobProgressDTO';
-import {JobDTOUtils} from '../../../../common/entities/job/JobDTO';
+import {JobDTO, JobDTOUtils} from '../../../../common/entities/job/JobDTO';
 
 describe('ScheduledJobsService', () => {
 
@@ -17,10 +18,19 @@ describe('ScheduledJobsService', () => {
     time: {start: 0, end: 1000},
   });
 
+  // the calls of an url
+  const callsOf = (networkService: { getJson: Mock }, url: string): number =>
+    networkService.getJson.mock.calls.filter(([u]) => u === url).length;
+
   const setUp = () => {
     let serverProgress: Record<string, JobProgressDTO> = {};
+    const availableJobs: JobDTO[] = [{
+      Name: 'Indexing',
+      ConfigTemplate: [{id: 'indexChangesOnly', defaultValue: true}]
+    } as JobDTO];
     const networkService = {
-      getJson: vi.fn().mockImplementation(() => Promise.resolve(serverProgress)),
+      getJson: vi.fn().mockImplementation((url: string) =>
+        Promise.resolve(url === '/admin/jobs/available' ? availableJobs : serverProgress)),
       postJson: vi.fn().mockResolvedValue(undefined),
     };
     const notification = {success: vi.fn(), warning: vi.fn()};
@@ -76,14 +86,14 @@ describe('ScheduledJobsService', () => {
     const {service, networkService} = setUp();
     service.subscribeToProgress();
     await vi.advanceTimersByTimeAsync(0);
-    expect(networkService.getJson).toHaveBeenCalledTimes(1);
+    expect(callsOf(networkService, '/admin/jobs/scheduled/progress')).toBe(1);
 
     await vi.advanceTimersByTimeAsync(15000);
-    expect(networkService.getJson).toHaveBeenCalledTimes(2);
+    expect(callsOf(networkService, '/admin/jobs/scheduled/progress')).toBe(2);
 
     service.unsubscribeFromProgress();
     await vi.advanceTimersByTimeAsync(60000);
-    expect(networkService.getJson).toHaveBeenCalledTimes(2);
+    expect(callsOf(networkService, '/admin/jobs/scheduled/progress')).toBe(2);
   });
 
   it('should track starting jobs and add a placeholder progress immutably', async () => {
@@ -105,5 +115,41 @@ describe('ScheduledJobsService', () => {
     expect(before).toEqual({});
     expect(service.progress()[JobDTOUtils.getHashName('Indexing', undefined)].state)
       .toBe(JobProgressStates.running);
+  });
+  it('should count a job finished when it is gone from the new progress', async () => {
+    const {service, networkService, notification} = setUp();
+    const finished: string[] = [];
+    service.onJobFinish.subscribe(n => finished.push(n));
+    // keep the reload right after the start pending, so only the placeholder progress is known
+    networkService.getJson.mockReturnValueOnce(new Promise(() => undefined));
+    await service.start('Indexing');
+
+    // a quick job is already done and dropped from the server's progress
+    await service.forceUpdate();
+
+    const hashName = JobDTOUtils.getHashName('Indexing', undefined);
+    expect(service.progress()).toEqual({});
+    expect(finished).toEqual([hashName]);
+    expect(notification.success).toHaveBeenCalledTimes(1);
+    expect(notification.warning).not.toHaveBeenCalled();
+  });
+  it('should load the jobs for the first subscriber, so the progress is found by the default config', async () => {
+    const {service, networkService} = setUp();
+    const available = '/admin/jobs/available';
+    expect(service.getDefaultConfig('Indexing')).toBeNull();
+
+    service.subscribeToProgress();
+    service.subscribeToProgress();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(callsOf(networkService, available)).toBe(1);
+    expect(service.getDefaultConfig('Indexing')).toEqual({indexChangesOnly: true});
+
+    // a new first subscriber (e.g. the settings are reopened) reloads them
+    service.unsubscribeFromProgress();
+    service.unsubscribeFromProgress();
+    service.subscribeToProgress();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(callsOf(networkService, available)).toBe(2);
+    service.unsubscribeFromProgress();
   });
 });

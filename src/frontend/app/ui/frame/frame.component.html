@@ -10,7 +10,7 @@
         <app-icon class="d-inline-block align-top me-1" [width]="30" [height]="30" />
         <strong class="d-none d-lg-inline-block">{{ title }}</strong>
       </a>
-      <div class="collapse navbar-collapse text-center" id="navbarCollapse" [collapse]="collapsed">
+      <div class="collapse navbar-collapse text-center" id="navbarCollapse">
         <ul class="navbar-nav mb-0 me-2 text-lg-start d-none d-md-flex">
           @for (item of navbarLinkItems(); track item.link) {
             @if (item.link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {

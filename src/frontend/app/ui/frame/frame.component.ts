@@ -15,7 +15,6 @@ import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {LoadingBarModule} from '@ngx-loading-bar/core';
 import {IconComponent} from '../../icon.component';
-import {CollapseDirective} from 'ngx-bootstrap/collapse';
 
 import {GallerySearchComponent} from '../gallery/search/search.gallery.component';
 import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
@@ -46,7 +45,6 @@ export interface NavbarLinkItem {
     LoadingBarModule,
     RouterLink,
     IconComponent,
-    CollapseDirective,
     GallerySearchComponent,
     GalleryShareComponent,
     NgIconComponent,
@@ -72,7 +70,6 @@ export class FrameComponent {
   public readonly isAdmin = this.authService.isAdmin;
   public readonly authenticationRequired = Config.Users.authenticationRequired;
   public readonly title = Config.Server.applicationTitle;
-  public collapsed = true;
   public readonly navbarLinks = Config.Gallery.NavBar.links;
   public readonly NavigationLinkTypes = NavigationLinkTypes;
   public readonly stringify = JSON.stringify;

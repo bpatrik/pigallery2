@@ -151,7 +151,6 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
   ngOnInit(): void {
     this.jobsService.subscribeToProgress();
-    this.jobsService.getAvailableJobs().catch(console.error);
     this.jobsService.getAvailableMessengers().catch(console.error);
   }
 

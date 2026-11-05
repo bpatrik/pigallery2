@@ -118,6 +118,34 @@ describe('UploadRouter', () => {
       fs.existsSync(savedPath).should.be.true;
     });
 
+    it('should keep the accented letters of the file name', async () => {
+      const loginRes = await login(server);
+      const res = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/Nyaralás')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.from('test image 3'), 'Árvíztűrő tükörfúrógép_ő.jpg')
+        .attach('files', Buffer.from('test image 4'), 'plain-ascii_name.jpg');
+
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+      res.body.result.should.be.an('array').with.lengthOf(0);
+      fs.readdirSync(path.join(testDir, 'Nyaralás')).sort()
+        .should.deep.equal(['plain-ascii_name.jpg', 'Árvíztűrő tükörfúrógép_ő.jpg'].sort());
+    });
+
+    it('should report a file error with the accented file name', async () => {
+      const loginRes = await login(server);
+      const res = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.from('test exe'), 'Hévíz_tó.exe');
+
+      res.should.have.status(200);
+      res.body.result.should.be.an('array').with.lengthOf(1);
+      // the client matches the errors to its files by this name
+      res.body.result[0].filename.should.equal('Hévíz_tó.exe');
+    });
+
     it('should return error for unsupported file', async () => {
       const loginRes = await login(server);
       const res = await request.execute(server.Server)
