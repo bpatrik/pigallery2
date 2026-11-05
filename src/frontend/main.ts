@@ -1,6 +1,7 @@
 import {HttpClient, provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {errorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigationErrorHandler, withPreloading} from '@angular/router';
+import {provideBrowserGlobalErrorListeners} from '@angular/core';
 import {bootstrapApplication} from '@angular/platform-browser';
 import {routes} from './app/app.routing';
 import {provideIcons} from '@ng-icons/core';
@@ -30,6 +31,8 @@ export class CustomUrlSerializer implements UrlSerializer {
 
 bootstrapApplication(AppComponent, {
   providers: [
+    // Uncaught errors and unhandled promise rejections go to Angular's ErrorHandler, like in a new Angular app
+    provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withPreloading(PreloadMarkedRoutes), withNavigationErrorHandler(reloadOnChunkLoadError)),
     provideIcons(appIcons),
     provideMarkdown({loader: HttpClient}),
