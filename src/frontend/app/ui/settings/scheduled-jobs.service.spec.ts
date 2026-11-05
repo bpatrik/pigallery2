@@ -106,4 +106,21 @@ describe('ScheduledJobsService', () => {
     expect(service.progress()[JobDTOUtils.getHashName('Indexing', undefined)].state)
       .toBe(JobProgressStates.running);
   });
+  it('should count a job finished when it is gone from the new progress', async () => {
+    const {service, networkService, notification} = setUp();
+    const finished: string[] = [];
+    service.onJobFinish.subscribe(n => finished.push(n));
+    // keep the reload right after the start pending, so only the placeholder progress is known
+    networkService.getJson.mockReturnValueOnce(new Promise(() => undefined));
+    await service.start('Indexing');
+
+    // a quick job is already done and dropped from the server's progress
+    await service.forceUpdate();
+
+    const hashName = JobDTOUtils.getHashName('Indexing', undefined);
+    expect(service.progress()).toEqual({});
+    expect(finished).toEqual([hashName]);
+    expect(notification.success).toHaveBeenCalledTimes(1);
+    expect(notification.warning).not.toHaveBeenCalled();
+  });
 });
