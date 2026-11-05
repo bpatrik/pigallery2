@@ -24,7 +24,6 @@ declare let describe: any;
 declare const after: any;
 declare const before: any;
 declare const beforeEach: any;
-declare const afterEach: any;
 declare const it: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it os IDE plays nicely (recognize the test)

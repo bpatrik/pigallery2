@@ -8,7 +8,6 @@ import {SQLConnection} from '../../../../src/backend/model/database/SQLConnectio
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
 import {SuperAgentStatic} from 'superagent';
-import {RouteTestingHelper} from './RouteTestingHelper';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";

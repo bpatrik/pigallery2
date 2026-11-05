@@ -1,6 +1,5 @@
 import {GridMedia} from './GridMedia';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {Config} from '../../../../../common/config/public/Config';
 
 describe('GridMedia', () => {
 

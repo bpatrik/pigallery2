@@ -198,7 +198,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     try {
       await ObjectManagers.getInstance().IndexingManager.indexDirectory('.');
       notFailed = true;
-    } catch (e) {
+    } catch {
       // it expected to fail
     }
     if (notFailed) {
@@ -215,9 +215,9 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
     const parent = TestHelper.getRandomizedDirectoryEntry(null, 'parent');
     const subDir1 = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir');
-    const p1 = TestHelper.getRandomizedPhotoEntry(subDir1, 'subPhoto1', 0, 5);
+    TestHelper.getRandomizedPhotoEntry(subDir1, 'subPhoto1', 0, 5);
     const subDir2 = TestHelper.getRandomizedDirectoryEntry(parent, 'SUBDIR');
-    const p2 = TestHelper.getRandomizedPhotoEntry(subDir2, 'subPhoto2', 0, 3);
+    TestHelper.getRandomizedPhotoEntry(subDir2, 'subPhoto2', 0, 3);
 
 
     DirectoryDTOUtils.removeReferences(parent);
@@ -244,9 +244,9 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const parent1 = TestHelper.getRandomizedDirectoryEntry(null, 'parent');
     const parent2 = TestHelper.getRandomizedDirectoryEntry(null, 'PARENT');
     const subDir1 = TestHelper.getRandomizedDirectoryEntry(parent1, 'subDir');
-    const p1 = TestHelper.getRandomizedPhotoEntry(subDir1, 'subPhoto1', 0);
+    TestHelper.getRandomizedPhotoEntry(subDir1, 'subPhoto1', 0);
     const subDir2 = TestHelper.getRandomizedDirectoryEntry(parent2, 'subDir2');
-    const p2 = TestHelper.getRandomizedPhotoEntry(subDir2, 'subPhoto2', 0);
+    TestHelper.getRandomizedPhotoEntry(subDir2, 'subPhoto2', 0);
 
 
     DirectoryDTOUtils.removeReferences(parent1);
@@ -342,16 +342,16 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const subDir1 = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir');
     await saveToDBAndCheck(parent);
 
-    const p1 = TestHelper.getRandomizedPhotoEntry(subDir1, 'subPhoto1', 0, 3);
+    TestHelper.getRandomizedPhotoEntry(subDir1, 'subPhoto1', 0, 3);
     await saveToDBAndCheck(subDir1);
 
     const subDir2 = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir2');
     await saveToDBAndCheck(parent);
 
-    const p2 = TestHelper.getRandomizedPhotoEntry(subDir2, 'subPhoto2', 0, 2);
+    TestHelper.getRandomizedPhotoEntry(subDir2, 'subPhoto2', 0, 2);
     await saveToDBAndCheck(subDir2);
 
-    const p = TestHelper.getRandomizedPhotoEntry(parent, 'photo', 0, 5);
+    TestHelper.getRandomizedPhotoEntry(parent, 'photo', 0, 5);
     await saveToDBAndCheck(parent);
 
 
@@ -364,12 +364,12 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry(null, 'parentDir');
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 2);
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 2);
 
     const subDir = TestHelper.getRandomizedDirectoryEntry(null, 'subDir');
     subDir.path = DiskManager.pathFromParent(parent);
-    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0, 5);
-    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0, 3);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0, 5);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0, 3);
     Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false)];
 
     DirectoryDTOUtils.removeReferences(subDir);
@@ -401,7 +401,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry(null, '.');
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1');
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo1');
 
     const subDir = TestHelper.getRandomizedDirectoryEntry(null, 'subDir');
     subDir.path = DiskManager.pathFromParent(parent);
@@ -439,12 +439,12 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry(null, '.');
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 4);
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 3);
-    const gpx = TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 4);
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 3);
+    TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
     const subDir = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir');
-    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0, 5);
-    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0, 3);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 0, 5);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 0, 3);
 
     DirectoryDTOUtils.removeReferences(parent);
     await im.saveToDB(Utils.clone(parent) as ParentDirectoryDTO);
@@ -502,9 +502,9 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry();
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 3);
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 4);
-    const gpx = TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 3);
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 4);
+    TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
     DirectoryDTOUtils.removeReferences(parent);
     Config.MetaFile.gpx = true;
     Config.MetaFile.markdown = true;
@@ -532,16 +532,16 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
     const parent = TestHelper.getRandomizedDirectoryEntry();
     parent.name = 'parent';
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent);
+    TestHelper.getRandomizedPhotoEntry(parent);
     const subDir = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir');
     subDir.name = 'subDir';
-    const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 5, 5);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 5, 5);
 
     DirectoryDTOUtils.removeReferences(parent);
     await im.saveToDB(Utils.clone(parent) as ParentDirectoryDTO);
 
-    const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 2, 2);
-    const sp3 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto3', 3, 3);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 2, 2);
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto3', 3, 3);
 
     DirectoryDTOUtils.removeReferences(subDir);
     await im.saveToDB(Utils.clone(subDir) as ParentDirectoryDTO);
@@ -570,9 +570,9 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     Config.MetaFile.markdown = true;
     Config.MetaFile.pg2conf = true;
     const parent = TestHelper.getRandomizedDirectoryEntry();
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 2);
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 3);
-    const gpx = TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 2);
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 3);
+    TestHelper.getRandomizedGPXEntry(parent, 'GPX1');
     const subDir = TestHelper.getRandomizedDirectoryEntry(parent, 'subDir');
     const sp1 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 1, 5);
     const sp2 = TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto2', 1, 3);
@@ -604,8 +604,8 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     const session = DBTestHelper.defaultSession;
 
     const parent = TestHelper.getRandomizedDirectoryEntry();
-    const p1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 3);
-    const p2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 4);
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 2, 3);
+    TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 4);
 
     DirectoryDTOUtils.removeReferences(parent);
     await im.saveToDB(Utils.clone(parent) as ParentDirectoryDTO);
@@ -713,7 +713,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
         return Promise.resolve(indexedTime) as unknown as Promise<ParentDirectoryDTO>;
       };
 
-      ObjectManagers.getInstance().IndexingManager.indexDirectory = (...args) => {
+      ObjectManagers.getInstance().IndexingManager.indexDirectory = () => {
         return Promise.resolve('indexing') as any;
       };
 

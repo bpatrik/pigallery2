@@ -94,7 +94,7 @@ export class SQLConnection {
     try {
       await getConnection('test').destroy();
       // eslint-disable-next-line no-empty
-    } catch (err) {
+    } catch {
     }
     const options = this.getDriver(config);
     options.name = 'test';
@@ -229,7 +229,7 @@ export class SQLConnection {
     try {
       version = (await connection.getRepository(VersionEntity).find())[0];
       // eslint-disable-next-line no-empty
-    } catch (ex) {
+    } catch {
     }
     if (version && version.version === DataStructureVersion) {
       return;
@@ -256,7 +256,7 @@ export class SQLConnection {
           .map(c => 'user.' + c.propertyName))
         .getMany();
       // eslint-disable-next-line no-empty
-    } catch (ex) {
+    } catch {
     }
     await connection.dropDatabase();
     await connection.synchronize();

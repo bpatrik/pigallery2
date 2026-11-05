@@ -388,7 +388,7 @@ export class SettingsEntryComponent
     return {required: true};
   }
 
-  public onChange = (value: unknown): void => {
+  public onChange = (_value: unknown): void => {
     // empty
   };
 

@@ -254,7 +254,7 @@ export interface IExtensionObject<C = void> {
   ui: IUIExtension<C>;
 }
 
-export interface IUIExtension<C> {
+export interface IUIExtension<_C> {
   /**
    * Adds a new button on to UI to all media (photo, video).
    * Implement the server-side click action in the serverSB function.

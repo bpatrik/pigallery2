@@ -38,7 +38,7 @@ export class CustomSettingsEntries {
             if (s?.arrayType) {
               return s?.arrayType == e.c;
             }
-          } catch (e) {
+          } catch {
             // do nothing
           }
           if (s?.type) {
@@ -50,7 +50,7 @@ export class CustomSettingsEntries {
           c = ent.name;
         }
       }
-    } catch (e) {
+    } catch {
       // no action
     }
     return c;

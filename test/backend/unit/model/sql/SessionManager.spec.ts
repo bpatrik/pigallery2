@@ -166,7 +166,6 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
 
       // Clone the original queries for later comparison
       const originalAllowQuery = JSON.parse(JSON.stringify(user.allowQuery));
-      const originalBlockQuery = JSON.parse(JSON.stringify(user.blockQuery));
 
       // Mock the SearchManager.prepareAndBuildWhereQuery method
       const mockProjectionQuery = new Brackets(qb => qb.where('complex combined query'));
@@ -219,7 +218,6 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
         matchType: TextSearchQueryMatchTypes.exact_match
       } as TextSearch;
       // Mock the SearchManager.prepareAndBuildWhereQuery method
-      const mockProjectionQuery = new Brackets(qb => qb.where('directory.path = :path', {path: '/allowed/path'}));
  /*     ObjectManagers.getInstance().SearchManager = {
         prepareAndBuildWhereQuery: (query: any) => {
           return Promise.resolve(mockProjectionQuery);

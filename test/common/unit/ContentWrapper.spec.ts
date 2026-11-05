@@ -441,7 +441,7 @@ describe('ContentWrapper', () => {
       const dir1 = TestHelper.getDirectoryEntry();
       const dir2 = TestHelper.getDirectoryEntry();
       const p1 = TestHelper.getPhotoEntry(dir1);
-      const p2 = TestHelper.getPhotoEntry(dir2);
+      TestHelper.getPhotoEntry(dir2);
 
       const sr1 = {
         searchQuery: { type: SearchQueryTypes.any_text, value: '' } as TextSearch,

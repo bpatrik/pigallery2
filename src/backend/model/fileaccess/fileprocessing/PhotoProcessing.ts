@@ -62,7 +62,7 @@ export class PhotoProcessing {
     try {
       await fsp.access(thPath, fsConstants.R_OK);
       return thPath;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 
@@ -232,7 +232,7 @@ export class PhotoProcessing {
 
     try {
       await fsp.access(origFilePath, fsConstants.R_OK);
-    } catch (e) {
+    } catch {
       return false;
     }
 
@@ -251,7 +251,7 @@ export class PhotoProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return true;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
     return false;
@@ -271,7 +271,7 @@ export class PhotoProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return outPath;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 
@@ -323,7 +323,7 @@ export class PhotoProcessing {
     try {
       await fsp.access(hashedOutPath, fsConstants.R_OK);
       return hashedOutPath;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 

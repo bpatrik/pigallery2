@@ -56,7 +56,7 @@ export class ContentLoaderService {
               interval * 1000
             ).pipe(
               filter(() => this.ongoingContentRequest === null),
-              switchMap(i => from(this.reloadCurrentContent()))
+              switchMap(() => from(this.reloadCurrentContent()))
             )
           )
         );

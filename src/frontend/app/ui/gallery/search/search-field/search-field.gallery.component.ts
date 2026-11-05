@@ -71,7 +71,7 @@ export class GallerySearchFieldComponent
         ), obj)) {
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
     this.searchQueryDTO.set(obj);
@@ -103,7 +103,7 @@ export class GallerySearchFieldComponent
         this.onChange();
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
     this.rawSearchText.set(this.searchQueryParserService.stringify(

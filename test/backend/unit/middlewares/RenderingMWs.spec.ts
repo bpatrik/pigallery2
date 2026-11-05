@@ -22,7 +22,7 @@ describe('RenderingMWs', () => {
     let errors: Error[];
 
     const listen = (app: express.Express): Promise<void> => {
-      app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+      app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
         errors.push(err);
         res.status(500).end();
       });

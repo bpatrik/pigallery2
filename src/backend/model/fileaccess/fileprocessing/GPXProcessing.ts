@@ -45,7 +45,7 @@ export class GPXProcessing {
 
     try {
       await fsp.access(origFilePath, fsConstants.R_OK);
-    } catch (e) {
+    } catch {
       return false;
     }
 
@@ -63,7 +63,7 @@ export class GPXProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return true;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
     return false;
@@ -79,7 +79,7 @@ export class GPXProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return outPath;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 

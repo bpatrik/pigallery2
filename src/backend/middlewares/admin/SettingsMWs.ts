@@ -6,9 +6,7 @@ import {ConfigClassBuilder} from 'typeconfig/node';
 import {TAGS} from '../../../common/config/public/ClientConfig';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {ExtensionConfigWrapper} from '../../model/extension/ExtensionConfigWrapper';
-import {Logger} from '../../Logger';
 
-const LOG_TAG = '[SettingsMWs]';
 
 
 export class SettingsMWs {

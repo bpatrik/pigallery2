@@ -151,7 +151,7 @@ export class FrameComponent {
       const rawUrl = url.substring('/search/'.length);
       const sq = JSON.parse(decodeURIComponent(rawUrl)) as SearchQueryDTO;
       return sq.type == searchQuery.type && Utils.equalsFilter(sq, searchQuery);
-    } catch (e) {
+    } catch {
       // ignored
     }
     return false;

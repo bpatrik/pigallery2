@@ -8,7 +8,7 @@ export class FFmpegFactory {
       ffmpeg.setFfmpegPath(ffmpegPath);
       const ffprobePath = require('ffprobe-static');
       ffmpeg.setFfprobePath(ffprobePath.path);
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
     return ffmpeg;

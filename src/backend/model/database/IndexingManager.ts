@@ -23,7 +23,6 @@ import {PersonJunctionTable} from './enitites/person/PersonJunctionTable';
 import {MDFileEntity} from './enitites/MDFileEntity';
 import {MDFileDTO} from '../../../common/entities/MDFileDTO';
 import {DiskManager} from '../fileaccess/DiskManager';
-import {ProjectedDirectoryCacheEntity} from './enitites/ProjectedDirectoryCacheEntity';
 
 const LOG_TAG = '[IndexingManager]';
 
@@ -230,7 +229,6 @@ export class IndexingManager {
     scannedDirectory: ParentDirectoryDTO
   ): Promise<number> {
     const directoryRepository = connection.getRepository(DirectoryEntity);
-    const projDirCacheRep = connection.getRepository(ProjectedDirectoryCacheEntity);
 
     const currentDir: DirectoryEntity = await directoryRepository
       .createQueryBuilder('directory')

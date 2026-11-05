@@ -78,7 +78,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       timeStamp: Date.now()
     };
 
-    const saved = await sm.createSharing(sharing);
+    await sm.createSharing(sharing);
     const found = await sm.findOne('testKey');
 
     expect(found.id).to.not.equals(null);

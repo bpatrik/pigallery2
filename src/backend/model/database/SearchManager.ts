@@ -32,7 +32,6 @@ import {FileEntity} from './enitites/FileEntity';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {GroupSortByTypes, SortByTypes, SortingMethod} from '../../../common/entities/SortingMethods';
 import {SessionContext} from '../SessionContext';
-import {GalleryManager} from './GalleryManager';
 import * as path from 'path';
 
 export class SearchManager {

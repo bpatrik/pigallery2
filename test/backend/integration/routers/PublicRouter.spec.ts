@@ -31,7 +31,6 @@ describe('PublicRouter', () => {
     password: 'test',
     role: UserRoles.User
   };
-  const {password: pass, ...expectedUser} = testUser;
 
   let server: Server;
   const setUp = async () => {

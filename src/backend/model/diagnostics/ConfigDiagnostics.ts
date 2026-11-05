@@ -72,7 +72,7 @@ export class ConfigDiagnostics {
         await this.checkReadWritePermission(
           SQLConnection.getSQLiteDB(databaseConfig)
         );
-      } catch (e) {
+      } catch {
         throw new Error(
           'Cannot read or write sqlite storage file: ' +
           SQLConnection.getSQLiteDB(databaseConfig)
@@ -320,7 +320,7 @@ export class ConfigDiagnostics {
       try {
         ConfigDiagnostics.testNavigationLink(l);
         return true;
-      } catch (e) {
+      } catch {
         return false;
       }
     });

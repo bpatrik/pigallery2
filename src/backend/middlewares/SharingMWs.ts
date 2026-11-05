@@ -109,7 +109,7 @@ export class SharingMWs {
         try {
           await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
           sharingKey = this.generateKey(Config.Sharing.sharingKeyLength);
-        } catch (err) {
+        } catch {
           break;
         }
       }

@@ -77,13 +77,13 @@
           [min]="ActiveFilters.dateFilter.minDate"
           [(ngModel)]="ActiveFilters.dateFilter.minFilter"
           step="60"
-          (change)="newMinDate($event); filterService.onFilterChange()"/>
+          (change)="newMinDate(); filterService.onFilterChange()"/>
           <input type="range"
             step="60"
             [max]="ActiveFilters.dateFilter.maxDate"
             [min]="ActiveFilters.dateFilter.minDate"
             [(ngModel)]="ActiveFilters.dateFilter.maxFilter"
-            (change)="newMaxDate($event); filterService.onFilterChange()"/>
+            (change)="newMaxDate(); filterService.onFilterChange()"/>
 
           </div>
           <div class="col-md-1-half col-12  d-table">

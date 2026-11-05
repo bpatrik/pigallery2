@@ -114,7 +114,6 @@ describe('InfoPanelLightboxComponent - Live Photo', () => {
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
-    const videocamIcons = el.querySelectorAll('ng-icon[name="ionVideocamOutline"]');
     // Should not have a videocam icon in the file info area
     // (videocam may appear in other sections for regular videos)
     const fileInfoRows = el.querySelectorAll('.row[title="File information and properties"], .row[title="Companion video"]');

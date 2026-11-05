@@ -318,7 +318,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     return null;
   }
 
-  public onChange = (value: unknown): void => {
+  public onChange = (_value: unknown): void => {
     // empty
   };
 

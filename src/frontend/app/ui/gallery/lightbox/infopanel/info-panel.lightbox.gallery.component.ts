@@ -8,9 +8,9 @@ import {QueryService} from '../../../../model/query.service';
 import {MapService} from '../../map/map.service';
 import {MarkerFactory} from '../../map/MarkerFactory';
 import {
-  ANDSearchQuery,
-  type DistanceSearch, type DateSearch,
-  SearchQueryTypes,
+  type DistanceSearch,
+  type DateSearch,
+  SearchQueryTypes
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';

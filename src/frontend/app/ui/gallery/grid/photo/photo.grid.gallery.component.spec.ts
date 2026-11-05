@@ -59,7 +59,6 @@ function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
 }
 
 describe('GalleryPhotoComponent - Live Photo badge', () => {
-  let component: GalleryPhotoComponent;
   let fixture: ComponentFixture<GalleryPhotoComponent>;
 
   beforeEach(async () => {
@@ -75,7 +74,6 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalleryPhotoComponent);
-    component = fixture.componentInstance;
   });
 
   it('should render the LIVE badge for paired Live Photos', () => {

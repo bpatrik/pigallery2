@@ -29,7 +29,7 @@ import {GridSizes} from '../../../../common/entities/GridSizes';
 import {PhotoDTO} from '../../../../common/entities/PhotoDTO';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
-import {UploaderService, UploadProgress} from './uploader/uploader.service';
+import {UploaderService} from './uploader/uploader.service';
 import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {provideIcons} from '@ng-icons/core';
@@ -91,7 +91,7 @@ class MockCacheService {
 }
 
 class MockBlogService{
-  getMarkDowns(date: Date): GroupedMarkdown[] {
+  getMarkDowns(): GroupedMarkdown[] {
     return [];
   }
 }
@@ -107,11 +107,6 @@ class MockPiTitleService {
   setSearchTitle = vi.fn();
   setDirectoryTitle = vi.fn();
 }
-
-class MockRouter {
-  navigate = vi.fn().mockReturnValue(Promise.resolve(true));
-}
-
 
 class MockUploaderService{
   public uploadProgress: unknown[] = [];
@@ -260,9 +255,9 @@ describe('GalleryComponent', () => {
 
       // These should not throw errors due to the null checks in the template
       expect(() => {
-        const hasError = component.ContentWrapper?.error;
-        const hasDirectory = component.ContentWrapper?.directory;
-        const hasSearchResult = component.ContentWrapper?.searchResult;
+        void component.ContentWrapper?.error;
+        void component.ContentWrapper?.directory;
+        void component.ContentWrapper?.searchResult;
       }).not.toThrow();
     });
 

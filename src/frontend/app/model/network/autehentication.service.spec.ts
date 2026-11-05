@@ -6,7 +6,6 @@ import {UserDTO} from '../../../../common/entities/UserDTO';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from './authentication.service';
 import {NetworkService} from './network.service';
-import {ErrorDTO} from '../../../../common/entities/Error';
 import {VersionService} from '../version.service';
 import {ShareService} from '../../ui/gallery/share.service';
 import {NavigationService} from '../navigation.service';
@@ -14,7 +13,7 @@ import {PublicSharingDTO} from '../../../../common/entities/SharingDTO';
 import {Config} from '../../../../common/config/public/Config';
 
 class MockUserService {
-  public login(credential: LoginCredential): Promise<UserDTO> {
+  public login(): Promise<UserDTO> {
     return Promise.resolve({name: 'testUserName'} as UserDTO);
   }
 
@@ -28,7 +27,7 @@ class MockUserService {
 }
 
 class MockNetworkService {
-  addGlobalErrorHandler(fn: (error: ErrorDTO) => boolean): void {
+  addGlobalErrorHandler(): void {
     // mock fn
   }
 }
@@ -36,7 +35,7 @@ class MockNetworkService {
 class MockShareService {
   readonly routeRecognized = signal(true);
 
-  onNewUser(user: any): Promise<void> {
+  onNewUser(): Promise<void> {
     return Promise.resolve();
   }
 

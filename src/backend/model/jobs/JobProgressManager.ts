@@ -54,7 +54,7 @@ export class JobProgressManager {
   private async loadDB(): Promise<void> {
     try {
       await fsp.access(this.dbPath);
-    } catch (e) {
+    } catch {
       return;
     }
     const data = await fsp.readFile(this.dbPath, 'utf8');

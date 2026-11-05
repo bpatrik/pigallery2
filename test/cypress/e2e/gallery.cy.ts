@@ -122,7 +122,7 @@ describe('Gallery', () => {
 
   it('Gallery should auto open lightbox for IMG_5910.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
@@ -137,7 +137,7 @@ describe('Gallery', () => {
   });
   it('Gallery should auto open lightbox for IMG_1252.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
@@ -155,7 +155,7 @@ describe('Gallery', () => {
 describe('Gallery - dont wait for content load', () => {
   it('Gallery should auto open lightbox for IMG_5910.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
@@ -181,7 +181,7 @@ describe('Gallery - dont wait for content load', () => {
   });
   it('Gallery should auto open lightbox for IMG_1252.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
