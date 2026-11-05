@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, computed, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, inject, viewChild, input, signal } from '@angular/core';
 import {type Dimension, IRenderable} from '../../../../model/IRenderable';
 import {GridMedia} from '../GridMedia';
 import {RouterLink} from '@angular/router';
@@ -27,7 +27,6 @@ export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaBut
   selector: 'app-gallery-grid-photo',
   templateUrl: './photo.grid.gallery.component.html',
   styleUrl: './photo.grid.gallery.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryPhotoLoadingComponent,
     NgIconComponent,
@@ -48,7 +47,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   readonly container = viewChild<ElementRef>('photoContainer');
 
   thumbnail: Thumbnail;
-  infoBarVisible = false;
+  readonly infoBarVisible = signal(false);
   animationTimer: number = null;
 
   readonly SearchQueryTypes: typeof SearchQueryTypes = SearchQueryTypes;
@@ -257,7 +256,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   }
 
   mouseOver(): void {
-    this.infoBarVisible = true;
+    this.infoBarVisible.set(true);
     if (this.animationTimer != null) {
       clearTimeout(this.animationTimer);
       this.animationTimer = null;
@@ -270,7 +269,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     }
     this.animationTimer = window.setTimeout((): void => {
       this.animationTimer = null;
-      this.infoBarVisible = false;
+      this.infoBarVisible.set(false);
     }, 500);
   }
 

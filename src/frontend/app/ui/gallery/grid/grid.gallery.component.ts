@@ -1,4 +1,4 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, OnChanges, OnDestroy, afterNextRender, computed, effect, inject, input, signal, untracked, viewChild, viewChildren} from '@angular/core';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, Injector, OnChanges, OnDestroy, afterNextRender, computed, effect, inject, input, signal, untracked, viewChild, viewChildren} from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import type {LightboxGrid, LightboxGridTile} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -25,7 +25,6 @@ import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
   },
   templateUrl: './grid.gallery.component.html',
   styleUrl: './grid.gallery.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     GalleryBlogComponent,
@@ -51,11 +50,12 @@ export class GalleryGridComponent
   readonly media = computed((): MediaDTO[] => this.mediaGroups()?.flatMap(g => g.media) ?? null);
   readonly mediaToRender = signal<GridMediaGroup[]>([]);
   containerWidth = 0;
-  containerMinHeight = 0; // used to fix container height while updating photos to prevent flickering
+  readonly containerMinHeight = signal(0); // used to fix container height while updating photos to prevent flickering
+  readonly pinnedWidth = signal<number>(null); // keeps the grid width while a resize is waiting to rerender
   screenHeight = 0;
   isAfterViewInit = false;
   public IMAGE_MARGIN = 2;
-  public renderDelayTimer: number = null; // delays render on resize
+  private renderDelayTimer: number = null; // delays render on resize
   public readonly GroupByTypes = GroupByTypes;
   public readonly blogOpen = Config.Gallery.InlineBlogStartsOpen;
   private TARGET_COL_COUNT = 5;
@@ -77,13 +77,13 @@ export class GalleryGridComponent
       return;
     }
 
-    this.containerMinHeight = Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer().nativeElement.clientHeight); // reduce flickering
+    this.containerMinHeight.set(Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer().nativeElement.clientHeight)); // reduce flickering
     setTimeout(() => {
       this.updateContainerDimensions();
       this.mergeNewPhotos();
       this.renderMinimalPhotos();
       setTimeout(() => {
-        this.containerMinHeight = 0; // remove min height after new photos are rendered
+        this.containerMinHeight.set(0); // remove min height after new photos are rendered
       }, 0);
     }, 0);
   }
@@ -147,8 +147,10 @@ export class GalleryGridComponent
       clearTimeout(this.renderDelayTimer);
       this.renderDelayTimer = null;
     }
+    this.pinnedWidth.set(this.containerWidth);
     this.renderDelayTimer = window.setTimeout(() => {
       this.renderDelayTimer = null;
+      this.pinnedWidth.set(null);
       // render the same amount of images after resize
       const renderedCount = this.getNumberOfRenderedMedia();
       // do not rerender if container is not changes

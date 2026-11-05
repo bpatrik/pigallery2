@@ -10,7 +10,7 @@
 
   @if (!thumbnail.Available) {
     <app-gallery-grid-photo-loading [error]="thumbnail.Error"
-      [animate]="thumbnail.loading"
+      [animate]="thumbnail.Loading"
        />
   }
 
@@ -51,7 +51,7 @@
 
 
   <!--Info box -->
-  @if (infoBarVisible) {
+  @if (infoBarVisible()) {
     <div class="info rounded-bottom"
       >
       <div class="photo-name">{{title()}}</div>

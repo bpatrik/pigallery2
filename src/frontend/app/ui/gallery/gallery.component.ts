@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, linkedSignal, signal, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -45,7 +45,6 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
   },
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryLightboxComponent,
     FrameComponent,
@@ -79,9 +78,9 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   readonly grid = viewChild(GalleryGridComponent);
 
-  public showSearchBar = false;
-  public showShare = false;
-  public showRandomPhotoBuilder = false;
+  public readonly showSearchBar = signal(false);
+  public readonly showShare = signal(false);
+  public readonly showRandomPhotoBuilder = signal(false);
   public blogOpen = Config.Gallery.TopBlogStartsOpen;
 
   config = Config;
@@ -170,13 +169,13 @@ export class GalleryComponent implements OnInit, OnDestroy {
     if (!this.authService.isAuthenticated()) {
       return this.navigation.toLogin();
     }
-    this.showSearchBar = this.authService.canSearch();
-    this.showShare =
+    this.showSearchBar.set(this.authService.canSearch());
+    this.showShare.set(
       Config.Sharing.enabled &&
-      this.authService.isAuthorized(UserRoles.User);
-    this.showRandomPhotoBuilder =
+      this.authService.isAuthorized(UserRoles.User));
+    this.showRandomPhotoBuilder.set(
       Config.RandomPhoto.enabled &&
-      this.authService.isAuthorized(UserRoles.User);
+      this.authService.isAuthorized(UserRoles.User));
     this.subscription.route = this.route.params.subscribe(this.onRoute);
 
     if (this.shareService.isSharing()) {

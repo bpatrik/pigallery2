@@ -1,5 +1,5 @@
 <app-gallery-lightbox [grid]="grid()" />
-<app-frame [showSearch]="showSearchBar" [showShare]="showShare">
+<app-frame [showSearch]="showSearchBar()" [showShare]="showShare()">
 
   <ng-container navbar>
     @if (countDown(); as countDown) {
@@ -17,12 +17,12 @@
   </ng-container>
 
   <ng-container navbar-menu>
-    @if (showRandomPhotoBuilder) {
+    @if (showRandomPhotoBuilder()) {
       <li role="menuitem">
         <app-gallery-random-query-builder />
       </li>
     }
-    @if (showRandomPhotoBuilder) {
+    @if (showRandomPhotoBuilder()) {
       <li role="menuitem">
         <app-gallery-photo-frame-builder />
       </li>

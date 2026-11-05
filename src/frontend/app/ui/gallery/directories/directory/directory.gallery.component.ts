@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, input } from '@angular/core';
 import {SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
 import {RouterLink} from '@angular/router';
 import {Utils} from '../../../../../../common/Utils';
@@ -14,7 +14,6 @@ import {CssUrlPipe} from '../../../../pipes/CssUrlPipe';
     selector: 'app-gallery-directory',
     templateUrl: './directory.gallery.component.html',
     styleUrl: './directory.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
     IconComponent,

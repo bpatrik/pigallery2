@@ -193,7 +193,7 @@ describe('GalleryPhotoComponent - search links', () => {
 
   const showInfo = (metadata: Partial<PhotoMetadata>): string[] => {
     fixture.componentRef.setInput('gridMedia', makeGridMedia({metadata: {size: {width: 4032, height: 3024}, ...metadata}} as any));
-    fixture.componentInstance.infoBarVisible = true;
+    fixture.componentInstance.infoBarVisible.set(true);
     fixture.detectChanges();
     return Array.from(fixture.nativeElement.querySelectorAll('.info a'))
       .map((a: HTMLAnchorElement) => a.getAttribute('href'));

@@ -208,9 +208,9 @@ describe('GalleryComponent', () => {
   });
 
   it('should initialize with default values', () => {
-    expect(component.showSearchBar).toBe(false);
-    expect(component.showShare).toBe(false);
-    expect(component.showRandomPhotoBuilder).toBe(false);
+    expect(component.showSearchBar()).toBe(false);
+    expect(component.showShare()).toBe(false);
+    expect(component.showRandomPhotoBuilder()).toBe(false);
     expect(component.blogOpen).toBe(Config.Gallery.TopBlogStartsOpen);
     expect(component.mapEnabled).toBe(Config.Map.enabled);
   });
@@ -437,33 +437,33 @@ describe('GalleryComponent', () => {
     it('should set showSearchBar based on authentication', async () => {
       mockAuthService.canSearch.mockReturnValue(true);
       await component.ngOnInit();
-      expect(component.showSearchBar).toBe(true);
+      expect(component.showSearchBar()).toBe(true);
 
       mockAuthService.canSearch.mockReturnValue(false);
       await component.ngOnInit();
-      expect(component.showSearchBar).toBe(false);
+      expect(component.showSearchBar()).toBe(false);
     });
 
     it('should set showShare based on config and authorization', async () => {
       Config.Sharing.enabled = true;
       mockAuthService.isAuthorized.mockReturnValue(true);
       await component.ngOnInit();
-      expect(component.showShare).toBe(true);
+      expect(component.showShare()).toBe(true);
 
       Config.Sharing.enabled = false;
       await component.ngOnInit();
-      expect(component.showShare).toBe(false);
+      expect(component.showShare()).toBe(false);
     });
 
     it('should set showRandomPhotoBuilder based on config and authorization', async () => {
       Config.RandomPhoto.enabled = true;
       mockAuthService.isAuthorized.mockReturnValue(true);
       await component.ngOnInit();
-      expect(component.showRandomPhotoBuilder).toBe(true);
+      expect(component.showRandomPhotoBuilder()).toBe(true);
 
       Config.RandomPhoto.enabled = false;
       await component.ngOnInit();
-      expect(component.showRandomPhotoBuilder).toBe(false);
+      expect(component.showRandomPhotoBuilder()).toBe(false);
     });
   });
 

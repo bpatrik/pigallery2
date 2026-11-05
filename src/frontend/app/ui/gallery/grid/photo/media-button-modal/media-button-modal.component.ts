@@ -1,4 +1,4 @@
-import { Component, computed, inject, ChangeDetectionStrategy, linkedSignal } from '@angular/core';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
 
 import {FormsModule} from '@angular/forms';
@@ -11,7 +11,6 @@ import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../co
   },
   templateUrl: './media-button-modal.component.html',
   styleUrl: './media-button-modal.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule]
 })
 export class MediaButtonModalComponent {

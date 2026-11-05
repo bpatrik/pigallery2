@@ -1,5 +1,5 @@
-<div #gridContainer [style.min-height]="containerMinHeight+'px'"
-  [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
+<div #gridContainer [style.min-height.px]="containerMinHeight()"
+  [style.width.px]="pinnedWidth()">
   @if (mediaToRender().length > 0) {
     <!-- by index: a group gets a new object when its media changes, its unchanged tiles are kept -->
     @for (group of mediaToRender(); track $index) {
