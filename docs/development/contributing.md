@@ -80,13 +80,13 @@ Backend structure:
 ```
 ## Case-study: Listing a directory
 
-Scenario: Web UI wants to show the `/demoDir` directory, usind SQL database with low reindexing severity.
+Scenario: Web UI wants to show the `/demoDir` directory, using SQL database with low reindexing severity.
 
 Client side:
 1. Navigating to `http://<domain>/demoDir` 
 2. URL changed: [gallery.component.ts]: `onRoute` triggered
 3. Calling: [gallery.component.ts]: `galleryService.loadDirectory('/demoDir')`
-4. Loding data from local_storage: [gallery.service.ts]: `galleryCacheService.getDirectory('/demoDir')`
+4. Loading data from local_storage: [gallery.service.ts]: `galleryCacheService.getDirectory('/demoDir')`
 5. Make a call to backend if the content changed [gallery.service.ts]: `networkService.getJson<ContentWrapperWithError>('/gallery/content/' + '/testDir', params)`
     * params contains last modification and last scanned date that is know from the local_storage cache
 
@@ -99,15 +99,15 @@ https://github.com/bpatrik/pigallery2/blob/b79d62840c7496b5068d6af73f10d95b9ac48
     * On fail return with error
 8. Normalizing `directory` path parameter (in this case `/testDir`): [AuthenticationMWs.ts]: `AuthenticationMWs.normalizePathParam('directory')`
     * Makes sure that path does not go out of the allowed paths (gallery itself)
-9. Cheking if the path exists and the User has rights to access it: [AuthenticationMWs.ts]:`AuthenticationMWs.authorisePath('directory', true)`
-    * returns 403 if not accessable
+9. Checking if the path exists and the User has rights to access it: [AuthenticationMWs.ts]:`AuthenticationMWs.authorisePath('directory', true)`
+    * returns 403 if not accessible
 10. Injecting gallery version to the HTTP header: [VersionMWs.ts]:`VersionMWs.injectGalleryVersion`
     * gallery version is a hash that represents the current gallery status (latest modified date, number of photos/videos, etc)
 11. Getting the content of `/testDir`   [GalleryMWs]: GalleryMWs.listDirectory
     1. If the last modificatoin and scan date of `/testDir` equals with what the client have sent, returning empty result to the client (skipping the rest)
     2. If last modification date is different from what the client knew, reindexing `/testDir`: `IndexingManager.indexDirectory(relativeDirectoryName)`
-        * Scans a directory, asyncronously saves it to DB, while directly retourns with raw results from `DiskManagerWorker.ts`
-    3. If Last scan heppened a while ago, reindex it asyncronously and return data from DB
+        * Scans a directory, asynchronously saves it to DB, while directly retourns with raw results from `DiskManagerWorker.ts`
+    3. If Last scan heppened a while ago, reindex it asynchronously and return data from DB
 12. Attaching Thumbnails data to the photos/videos: [ThumbnailGeneratorMWs]: `ThumbnailGeneratorMWs.addThumbnailInformation`
     * Checks if a photo already has a generated thumbnail image 
 13. Removes empty properties and circular dependencies: [GalleryMWs.ts]: `GalleryMWs.cleanUpGalleryResults`
