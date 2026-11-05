@@ -27,7 +27,7 @@
               <div class="row">
                 @for (type of sortingByTypes; track type) {
                   <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                    [class.active]="facesService.sorting().method == type.key"
+                    [class.active]="facesService.sorting().method === type.key"
                     (click)="setSortingBy(type.key)">
                     <div class="me-2 d-inline-block">
                       <app-sorting-method-icon [method]="type.key" />
@@ -38,7 +38,7 @@
 
                 <hr>
                   <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                    [class.active]="facesService.sorting().ascending == true"
+                    [class.active]="facesService.sorting().ascending === true"
                     (click)="setSortingAscending(true)">
                     <div class="me-2 d-inline-block">
                       <ng-icon name="ionArrowUpOutline" />
@@ -47,7 +47,7 @@
                   </div>
 
                   <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                    [class.active]="facesService.sorting().ascending == false"
+                    [class.active]="facesService.sorting().ascending === false"
                     (click)="setSortingAscending(false)">
                     <div class="me-2 d-inline-block">
                       <ng-icon name="ionArrowDownOutline" />

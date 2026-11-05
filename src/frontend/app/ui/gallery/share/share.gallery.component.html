@@ -194,7 +194,7 @@
               <td>{{share.expires | date}}</td>
               <td>
                 <button (click)="deleteSharing(share)"
-                  [disabled]="share.sharingKey == sharing()?.sharingKey"
+                  [disabled]="share.sharingKey === sharing()?.sharingKey"
                   class="btn btn-danger float-end">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>

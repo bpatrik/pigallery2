@@ -75,7 +75,7 @@
 
     <ng-template #Recursion let-rStates="rStates" let-topLevel="topLevel" let-skipJobs="skipJobs"
       let-confPath="confPath">
-      @if (rStates.description && settingsService.configStyle() == ConfigStyle.full) {
+      @if (rStates.description && settingsService.configStyle() === ConfigStyle.full) {
         <div class="alert alert-secondary" role="alert"
           >
           <ng-icon size="1.3em" name="ionInformationCircleOutline" />
@@ -174,7 +174,7 @@
     <ng-template #JobTemplate let-uiJob="uiJob">
       <div class="mb-2">
         @for (row of uiJobRows().get(uiJob); track row.job) {
-          @if (row.job.description  && settingsService.configStyle() == ConfigStyle.full) {
+          @if (row.job.description  && settingsService.configStyle() === ConfigStyle.full) {
             <div class="alert alert-secondary" role="alert"
               >
               <ng-icon size="1.3em" name="ionInformationCircleOutline" />

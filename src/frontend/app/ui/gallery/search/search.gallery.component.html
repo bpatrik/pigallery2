@@ -42,7 +42,7 @@
         @if (CanCreateAlbum) {
           <button
             class="btn btn-secondary me-2" type="button"
-            [disabled]="rawSearchText() == ''"
+            [disabled]="rawSearchText() === ''"
             (click)="openSaveSearchModal(saveSearchModal)">
             <ng-icon name="ionSaveOutline" class="me-1" />
             <ng-container i18n>Save</ng-container>
@@ -84,11 +84,11 @@
         </div>
         <div class="btn-group float-end row mt-2" role="group" style="display: block">
           <div class="pe-0">
-            <app-saved-search-popup-btn [disabled]="saveSearchName == ''"
+            <app-saved-search-popup-btn [disabled]="saveSearchName === ''"
               class="me-2"
               [savedSearchDTO]="{name:saveSearchName, searchQuery:searchQueryDTO()}" />
             <button class="btn btn-primary" type="button"
-              [disabled]="saveSearchName == ''"
+              [disabled]="saveSearchName === ''"
               (click)="saveSearch()">
               <ng-icon name="ionSaveOutline" class="me-1" />
               <ng-container i18n>Save as album</ng-container>

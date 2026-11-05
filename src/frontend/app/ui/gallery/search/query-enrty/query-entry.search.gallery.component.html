@@ -14,7 +14,7 @@
           }
         </select>
       </div>
-      @if (queryEntry().type == SearchQueryTypes.SOME_OF) {
+      @if (queryEntry().type === SearchQueryTypes.SOME_OF) {
         <label class="col-4 col-sm-auto control-label" [for]="'someOfMinValue'+id()">
           <ng-container i18n>At least this many</ng-container>
         (1-{{AsListQuery.list.length}}):</label>
@@ -31,7 +31,7 @@
             required="required">
           </div>
         }
-        @if (queryEntry().type != SearchQueryTypes.SOME_OF) {
+        @if (queryEntry().type !== SearchQueryTypes.SOME_OF) {
           <div class="col"></div>
         }
         <button
@@ -276,7 +276,7 @@
                                               <span class="input-group-text" i18n>days</span>
                                             </div>
                                             <div class="input-group col-md-6">
-                                              @if (AsDatePatternQuery.frequency == DatePatternFrequency.days_ago || AsDatePatternQuery.frequency == DatePatternFrequency.weeks_ago || AsDatePatternQuery.frequency == DatePatternFrequency.months_ago || AsDatePatternQuery.frequency == DatePatternFrequency.years_ago) {
+                                              @if (AsDatePatternQuery.frequency === DatePatternFrequency.days_ago || AsDatePatternQuery.frequency === DatePatternFrequency.weeks_ago || AsDatePatternQuery.frequency === DatePatternFrequency.months_ago || AsDatePatternQuery.frequency === DatePatternFrequency.years_ago) {
                                                 <input
                                                   [id]="'agoNumber'+id()"
                                                   [name]="'agoNumber'+id()"

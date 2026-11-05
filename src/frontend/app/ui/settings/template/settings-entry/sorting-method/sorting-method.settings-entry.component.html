@@ -15,7 +15,7 @@
     role="menu" aria-labelledby="button-alignment">
     @for (type of sortingByTypes; track type) {
       <div class="dropdown-item " role="menuitem"
-        [class.active]="sortingMethod()?.method == type.key"
+        [class.active]="sortingMethod()?.method === type.key"
         (click)="setSortingBy(type.key)">
         <div class="me-2 d-inline-block">
           <app-sorting-method-icon [method]="type.key" />
@@ -27,7 +27,7 @@
     @if (isBidirectional()) {
       <hr>
         <div class="dropdown-item " role="menuitem"
-          [class.active]="sortingMethod()?.ascending == true"
+          [class.active]="sortingMethod()?.ascending === true"
           (click)="setSortingAscending(true)">
           <div class="me-2 d-inline-block">
             <ng-icon name="ionArrowUpOutline" />
@@ -35,7 +35,7 @@
           <div class="d-inline-block" i18n>ascending</div>
         </div>
         <div class="dropdown-item" role="menuitem"
-          [class.active]="sortingMethod()?.ascending == false"
+          [class.active]="sortingMethod()?.ascending === false"
           (click)="setSortingAscending(false)">
           <div class="me-2 d-inline-block">
             <ng-icon name="ionArrowDownOutline" />

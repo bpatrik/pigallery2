@@ -130,7 +130,7 @@
       </div>
       <div class="card-body text-secondary">
         @for (log of progress().logs; track log; let i = $index) {
-          @if ((i==0 && log.id > 0) || ( i> 0  && progress().logs[i-1].id+1!=log.id)) {
+          @if ((i===0 && log.id > 0) || ( i> 0  && progress().logs[i-1].id+1!==log.id)) {
             <p class="card-text">
               ...
             </p>

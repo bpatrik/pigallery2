@@ -156,9 +156,9 @@
           <div id="swipeable-container"
             [class.hide-cursor]="controllersDimmed()"
             appGesture
-            (swipeLeft)="zoom() == 1 && nextPhoto.emit()"
-            (swipeRight)="zoom() == 1 && previousPhoto.emit()"
-            (swipeUp)="zoom() == 1 && closed.emit()"
+            (swipeLeft)="zoom() === 1 && nextPhoto.emit()"
+            (swipeRight)="zoom() === 1 && previousPhoto.emit()"
+            (swipeUp)="zoom() === 1 && closed.emit()"
             (doubleTap)="doubleTap()"
             (pan)="pan($event)"
             (pinch)="pinch($event)"
@@ -213,14 +213,14 @@
 
           </div>
 
-          @if (navigation().hasPrev && zoom() == 1) {
+          @if (navigation().hasPrev && zoom() === 1) {
             <div [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-left highlight rounded-end"
               title="key: left arrow" id="leftArrow" i18n-title
               (click)="previousPhoto.emit()">
               <ng-icon name="ionChevronBackOutline" />
             </div>
           }
-          @if (navigation().hasNext && zoom() == 1) {
+          @if (navigation().hasNext && zoom() === 1) {
             <div [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-right highlight rounded-start"
               title="key: right arrow" id="rightArrow" i18n-title
               (click)="nextMediaManuallyTriggered()">
@@ -261,7 +261,7 @@
               </div>
             }
 
-            @if (zoom() == 1 && isPhoto()) {
+            @if (zoom() === 1 && isPhoto()) {
               <div [class.dim-controls]="controllersDimmed()" class="controls controls-playback"
                 >
                 <div class="controls-background rounded-start-top pe-1 pb-1">
