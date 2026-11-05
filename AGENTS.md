@@ -141,6 +141,8 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 
 ### Frontend state (signals)
 
+The app is zoneless and every component is `OnPush`: a view only updates after a signal change, a template/host event
+or an input change. A plain field set from a timer, promise or third-party callback never renders.
 State read in templates is a signal; derived state is `computed()`/`linkedSignal()`. HTTP, timers and router events stay RxJS,
 bridged with `toObservable()`/`toSignal()` (to await a signal: `firstValueFrom(toObservable(...))`).
 Templates don't call methods: values a template needs, also per item of an `@for`, are computed in the component's `.ts`
