@@ -63,7 +63,7 @@ export enum LightBoxTitleTexts {
 
 }
 
-export type TAGS = {
+export interface TAGS {
   client?: true,
   priority?: ConfigPriority,
   name?: string,
@@ -90,7 +90,7 @@ export type TAGS = {
     server?: boolean,
     db?: boolean
   }
-};
+}
 
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class AutoCompleteItemsPerCategoryConfig {
