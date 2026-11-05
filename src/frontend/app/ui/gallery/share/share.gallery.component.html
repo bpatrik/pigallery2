@@ -1,7 +1,7 @@
 @if (!dropDownItem()) {
   <button id="shareButton" class="nav-link btn  btn-link"
     style="white-space:nowrap"
-    type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
+    type="button" [disabled]="!enabled()" (click)="openModal(shareModal)">
     <ng-icon name="ionShareSocialOutline" class="me-1" />
     <ng-container i18n>Share</ng-container>
   </button>
@@ -64,39 +64,39 @@
             name="sharing-dir"
             id="sharing-dir"
             class="full-width form-control"
-            [ngModel]="galleryService.isSearchResult() ? (currentQuery | searchQuery) : sharingTarget">
+            [ngModel]="galleryService.isSearchResult() ? (currentQuery() | searchQuery) : sharingTarget()">
         </div>
       </div>
 
       <div class="row mt-2">
         <div class="col-12">
           <small class="text-muted">
-            <span i18n>Sharing</span>&nbsp;@if (currentMediaCountIsLowerBound) {
+            <span i18n>Sharing</span>&nbsp;@if (currentMediaCountIsLowerBound()) {
             <span
             i18n>at least</span>&nbsp;
           }
-          <span class="fw-bold">{{ sharedMediaCount }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;
-          @if (isDirectorySharing) {
-            @if (input.recursive) {
+          <span class="fw-bold">{{ sharedMediaCount() }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;
+          @if (isDirectorySharing()) {
+            @if (recursive()) {
               <span i18n>Subfolders are shared too.</span>
             }
-            @if (!input.recursive) {
+            @if (!recursive()) {
               <span i18n>Subfolders are not shared.</span>
             }
           }
-          @if (!isDirectorySharing) {
+          @if (!isDirectorySharing()) {
             <span i18n>Only folders that contain shared photos can be opened.</span>
           }
         </small>
       </div>
     </div>
 
-    @if (isDirectorySharing) {
+    @if (isDirectorySharing()) {
       <div class="row mt-2">
         <div class="col-12">
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="share-recursive" name="share-recursive"
-              [(ngModel)]="input.recursive" (ngModelChange)="onRecursiveChange()">
+              [(ngModel)]="recursive" (ngModelChange)="onRecursiveChange()">
             <label class="form-check-label" for="share-recursive" i18n>Include subfolders</label>
           </div>
         </div>
