@@ -72,8 +72,9 @@ export class GallerySearchQueryBuilderComponent
     this.onChange();
   }
 
-  validate(): ValidationErrors {
-    return {required: true};
+  // the field has no constraints, so it is always valid
+  validate(): ValidationErrors | null {
+    return null;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-empty-function

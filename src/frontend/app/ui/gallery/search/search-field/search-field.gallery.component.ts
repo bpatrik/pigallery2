@@ -92,8 +92,9 @@ export class GallerySearchFieldComponent
     this.propagateChange(this.searchQueryDTO());
   }
 
-  validate(): ValidationErrors {
-    return {required: true};
+  // the field has no constraints, so it is always valid
+  validate(): ValidationErrors | null {
+    return null;
   }
 
   onQueryChange(): void {

@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, NgForm, NgModel} from '@angular/forms';
 import {provideRouter} from '@angular/router';
 import {NgIconsModule} from '@ng-icons/core';
 import {ionTrashOutline} from '@ng-icons/ionicons';
@@ -62,6 +62,17 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
 
     fixture = TestBed.createComponent(HostComponent);
     host = fixture.componentInstance;
+  });
+
+  it('should keep the search form and its fields valid', async () => {
+    host.query = {type: SearchQueryTypes.any_text, value: 'Őszi kirándulás'} as TextSearch;
+    await render();
+
+    const models = fixture.debugElement.queryAll(By.directive(NgModel)).map((d) => d.injector.get(NgModel));
+    // the host's query, the builder's search text and the entry's fields
+    expect(models.length).toBeGreaterThan(2);
+    expect(models.filter((m) => !m.valid).map((m) => m.name)).toEqual([]);
+    expect(fixture.debugElement.query(By.directive(NgForm)).injector.get(NgForm).valid).toBe(true);
   });
 
   it('should populate the search text when dates are picked', async () => {

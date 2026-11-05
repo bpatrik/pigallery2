@@ -232,8 +232,9 @@ export class GallerySearchFieldBaseComponent
     this.propagateChange(this.rawSearchText());
   }
 
-  validate(): ValidationErrors {
-    return {required: true};
+  // the field has no constraints, so it is always valid
+  validate(): ValidationErrors | null {
+    return null;
   }
 
   Scrolled(): void {
