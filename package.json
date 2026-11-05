@@ -131,8 +131,7 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
     "vitest": "4.1.12",
-    "xlf-google-translate": "1.0.1",
-    "zone.js": "0.15.1"
+    "xlf-google-translate": "1.0.1"
   },
   "optionalDependencies": {
     "ffmpeg-static": "5.2.0",

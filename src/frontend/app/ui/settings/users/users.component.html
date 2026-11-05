@@ -1,4 +1,4 @@
-@if (Enabled) {
+@if (Enabled()) {
   <div class="row mt-2">
     <div class="col-auto">
       <h5 i18n>User list</h5>
@@ -17,25 +17,25 @@
       </tr>
     </thead>
     <tbody>
-      @for (user of users; track user.id) {
+      @for (row of userRows(); track row.user.id) {
         <tr>
-          <td>{{ user.name }}</td>
+          <td>{{ row.user.name }}</td>
           <td>
-            {{ user.role | stringifyRole }}
+            {{ row.roleName }}
           </td>
           <td>
-            <button [disabled]="!canDeleteUser(user)" (click)="deleteUser(user)"
-              [class]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
+            <button [disabled]="!row.canDelete" (click)="deleteUser(row.user)"
+              [class]="row.canDelete ? 'btn-danger':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
-            <button [disabled]="!canModifyUser(user)" (click)="openEditUser(user)"
-              [class]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
+            <button [disabled]="!row.canModify" (click)="openEditUser(row.user)"
+              [class]="row.canModify ? 'btn-primary':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionPencil" title="Edit" i18n-title />
             </button>
-            @if (user.oidcSubject) {
-              <button (click)="unlinkOidc(user)"
+            @if (row.user.oidcSubject) {
+              <button (click)="unlinkOidc(row.user)"
                 class="btn btn-warning float-end ms-2">
                 <ng-icon name="ionUnlinkOutline" title="Unlink OIDC account" i18n-title />
               </button>
@@ -110,7 +110,7 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label" for="editRole" i18n>Role</label>
-              <select id="editRole" [disabled]="!canModifyRole(editOriginalUser)" class="form-select"
+              <select id="editRole" [disabled]="!canModifyRole()" class="form-select"
                 [(ngModel)]="editUser.role" name="editRole" required>
                 @for (repository of userRoles; track repository) {
                   <option [value]="repository.key">{{ repository.value }}</option>

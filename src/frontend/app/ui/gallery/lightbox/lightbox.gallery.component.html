@@ -1,26 +1,26 @@
 <div [hidden]="!isVisible()" #root>
 
   <div class="blackCanvas"
-    [style.opacity]="blackCanvasOpacity">
+    [style.opacity]="blackCanvasOpacity()">
   </div>
 
   <div class="lightbox" #lightbox>
-    <app-gallery-lightbox-media [gridMedia]="activePhoto ? activePhoto.gridMedia() : null"
-      [nextGridMedia]="NexGridMedia"
-      [loadMedia]="!animating"
-      [zoom]="controls()?.Zoom ?? 1"
-      [drag]="controls()?.drag ?? {x:0,y:0}"
-      [windowAspect]="photoFrameDim.aspect"
+    <app-gallery-lightbox-media [gridMedia]="activePhoto()"
+      [nextGridMedia]="nextGridMedia()"
+      [loadMedia]="!animating()"
+      [zoom]="zoom()"
+      [drag]="drag()"
+      [windowAspect]="photoFrameDim().aspect"
       (videoSourceError)="onVideoSourceError()"
       #photo />
 
-    @if (videoSourceError && activePhoto) {
+    @if (videoSourceError() && activePhoto()) {
       <div class="container h-100 flex-column">
         <div class="row justify-content-center align-items-center h-100">
           <div class="col-md-8 text-white text-center">
             <ng-icon name="ionWarningOutline" class="h2 me-2 align-bottom" /><span class="h2" i18n>Error during loading the video.</span>
             <br/>
-            @if (activePhoto.gridMedia().isVideoTranscodingNeeded()) {
+            @if (videoTranscodingNeeded()) {
               <ng-container i18n>
             Most likely the video is not transcoded.
             It can be done in the settings.
@@ -34,26 +34,28 @@
     }
 
     @if (isOpen()) {
-      <app-lightbox-controls #controls
-        [activePhoto]="activePhoto"
-        [slideShowRunning]="slideShowRunning"
+      <app-lightbox-controls
+        [activePhoto]="activePhoto()"
+        [slideShowRunning]="slideShowRunning()"
+        [(zoom)]="zoom"
+        [(drag)]="drag"
         (closed)="hide()"
-        [navigation]="navigation"
+        [navigation]="navigation()"
         (nextPhoto)="nextImage()"
         (previousPhoto)="prevImage()"
         (toggleInfoPanel)="toggleInfoPanel()"
         (toggleFullScreen)="toggleFullscreen()"
-        [photoFrameDim]="photoFrameDim"
+        [photoFrameDim]="photoFrameDim()"
         [mediaElement]="mediaElement()" />
     }
   </div>
 
   <!-- the info panel has a map, so it loads leaflet: prefetched when the browser is idle -->
-  @defer (when activePhoto && infoPanelVisible; prefetch on idle) {
-    @if (activePhoto && infoPanelVisible) {
+  @defer (when activePhoto() && infoPanelVisible(); prefetch on idle) {
+    @if (activePhoto() && infoPanelVisible()) {
       <app-info-panel id="info-panel"
-        [style.width.px]="infoPanelWidth"
-        [media]="activePhoto.gridMedia().media"
+        [style.width.px]="infoPanelWidth()"
+        [media]="activePhoto().media"
         (closed)="hideInfoPanel()" />
     }
   } @error {

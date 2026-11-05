@@ -53,6 +53,9 @@ export default tseslint.config(
     rules: {
       "@angular-eslint/prefer-inject": "error",
       "@angular-eslint/prefer-output-readonly": "error",
+      "@angular-eslint/prefer-signals": "error",
+      // OnPush is the default since Angular 22, so components must not set changeDetection at all
+      "@angular-eslint/prefer-on-push-component-change-detection": ["error", {allowExplicitOnPush: false}],
     },
   },
   {

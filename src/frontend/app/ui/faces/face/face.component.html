@@ -8,7 +8,7 @@
 
     @if (thumbnail && thumbnail.Available) {
       <div class="photo"
-      [style.background-image]="getSanitizedThUrl()"></div>
+      [style.background-image]="thumbnail.Src | cssUrl"></div>
     }
 
     @if (!thumbnail || !thumbnail.Available) {
@@ -22,8 +22,8 @@
     <ng-icon class="star"
       [name]="person().isFavourite ? 'ionStar' : 'ionStarOutline'"
       [class.favourite]="person().isFavourite"
-      [class.clickable]="CanUpdate"
-      (click)="CanUpdate && toggleFavourite($event)"
+      [class.clickable]="canUpdate()"
+      (click)="canUpdate() && toggleFavourite($event)"
      />
     {{person().name}} ({{person().cache?.count}})
 

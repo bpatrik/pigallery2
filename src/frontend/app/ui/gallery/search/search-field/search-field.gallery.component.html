@@ -1,6 +1,6 @@
 <div class="input-group">
 
-  <app-gallery-search-field-base [(ngModel)]="rawSearchText"
+  <app-gallery-search-field-base [(ngModel)]="rawSearchText" [ngModelOptions]="{standalone: true}"
                                  (ngModelChange)="validateRawSearchText()"
                                  class="search-field col p-0 rounded-start-2"
                                  (search)="search.emit()"

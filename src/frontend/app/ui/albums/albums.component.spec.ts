@@ -1,4 +1,5 @@
 import {TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {AlbumsComponent} from './albums.component';
 import {AlbumsService} from './albums.service';
@@ -12,7 +13,7 @@ describe('AlbumsComponent - IsSearchQueryEmpty', () => {
   let component: AlbumsComponent;
 
   beforeEach(() => {
-    const albumsService = {getAlbums: () => Promise.resolve()} as unknown as AlbumsService;
+    const albumsService = {albums: signal(null), getAlbums: () => Promise.resolve()} as unknown as AlbumsService;
     TestBed.configureTestingModule({
       providers: [
         {provide: AlbumsService, useValue: albumsService},

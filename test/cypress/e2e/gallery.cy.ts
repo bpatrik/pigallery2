@@ -36,6 +36,32 @@ describe('Gallery', () => {
   });
 
 
+  it('Gallery should keep the sorting and the grid size of a folder', () => {
+    cy.wait('@getContent');
+    // sort by name, descending
+    cy.get('app-gallery-navbar #button-alignment').click({scrollBehavior: false});
+    cy.get('#sorting-dropdown .sorting-grouping-item').contains('name').first().click({scrollBehavior: false});
+    cy.get('#sorting-dropdown .sorting-grouping-item').contains('descending').first().click({scrollBehavior: false});
+    cy.get('body').click(0, 0, {scrollBehavior: false});
+    cy.get('app-gallery-grid .photo-container > img').first().should('have.attr', 'alt', 'wild-3.jpg');
+    // the largest grid size
+    cy.get('app-gallery-navbar #button-grid-size').click({scrollBehavior: false});
+    cy.get('#grid-size-dropdown .sorting-grouping-item').last().click({scrollBehavior: false});
+    cy.get('app-gallery-navbar #button-grid-size').should('have.class', 'btn-secondary');
+
+    // another folder has its own sorting and grid size
+    cy.get('app-gallery-directory a[href="/gallery/dupl"]').first().click({scrollBehavior: false});
+    cy.location('pathname').should('eq', '/gallery/dupl');
+    cy.get('app-gallery-navbar #button-alignment').should('have.class', 'btn-outline-secondary');
+    cy.get('app-gallery-navbar #button-grid-size').should('have.class', 'btn-outline-secondary');
+
+    // back to the first folder: both are kept
+    cy.get('app-gallery-navbar a').contains('Home').click({scrollBehavior: false});
+    cy.get('app-gallery-grid .photo-container > img').first().should('have.attr', 'alt', 'wild-3.jpg');
+    cy.get('app-gallery-navbar #button-alignment').should('have.class', 'btn-secondary');
+    cy.get('app-gallery-navbar #button-grid-size').should('have.class', 'btn-secondary');
+  });
+
   it('Gallery should show infobar over photo', () => {
     cy.wait('@getContent');
     // contains a folder

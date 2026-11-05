@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -7,7 +7,6 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {FrameComponent} from '../frame/frame.component';
-import { AsyncPipe } from '@angular/common';
 import {AlbumComponent} from './album/album.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {FormsModule} from '@angular/forms';
@@ -21,15 +20,13 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
   selector: 'app-albums',
   templateUrl: './albums.component.html',
   styleUrl: './albums.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
     AlbumComponent,
     NgIconComponent,
     FormsModule,
     GallerySearchQueryBuilderComponent,
-    SavedSearchPopupComponent,
-    AsyncPipe
+    SavedSearchPopupComponent
 ]
 })
 export class AlbumsComponent implements OnInit {
@@ -43,7 +40,7 @@ export class AlbumsComponent implements OnInit {
   private searchQueryParserService = inject(SearchQueryParserService);
 
   readonly container = viewChild<ElementRef>('container');
-  public size: number;
+  public readonly size = signal<number>(undefined);
   public savedSearch = {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
@@ -55,7 +52,7 @@ export class AlbumsComponent implements OnInit {
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.user.getValue().role >= UserRoles.Admin;
+    return this.authenticationService.user().role >= UserRoles.Admin;
   }
 
   get IsSearchQueryEmpty(): boolean {
@@ -94,7 +91,7 @@ export class AlbumsComponent implements OnInit {
     const size = 220 + 5;
     // body - container margin
     const containerWidth = this.container().nativeElement.clientWidth - 30;
-    this.size = containerWidth / Math.round(containerWidth / size) - 5;
+    this.size.set(containerWidth / Math.round(containerWidth / size) - 5);
   }
 }
 

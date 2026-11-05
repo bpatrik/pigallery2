@@ -1,4 +1,4 @@
-import { Component, forwardRef, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, forwardRef, inject, input, output, signal } from '@angular/core';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../../common/entities/SearchQueryDTO';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {SearchQueryParserService} from '../search-query-parser.service';
@@ -23,7 +23,6 @@ import { GallerySearchQueryEntryComponent } from '../query-enrty/query-entry.sea
             multi: true,
         },
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         GallerySearchFieldBaseComponent,
         FormsModule,
@@ -34,13 +33,10 @@ export class GallerySearchQueryBuilderComponent
     implements ControlValueAccessor, Validator {
   private searchQueryParserService = inject(SearchQueryParserService);
 
-  public searchQueryDTO: SearchQueryDTO = {
-    type: SearchQueryTypes.any_text,
-    value: '',
-  } as TextSearch;
+  public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
   readonly search = output<void>();
   readonly placeholder = input($localize `Search`);
-  public rawSearchText = '';
+  public readonly rawSearchText = signal('');
 
   /**
    * Utils.equalsFilter only checks the keys of its second argument,
@@ -56,12 +52,12 @@ export class GallerySearchQueryBuilderComponent
 
     try {
       const newDTO = this.searchQueryParserService.parse(
-          this.rawSearchText
+          this.rawSearchText()
       );
-      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryDTO, newDTO)) {
+      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryDTO(), newDTO)) {
         return;
       }
-      this.searchQueryDTO = newDTO;
+      this.searchQueryDTO.set(newDTO);
       this.onChange();
     } catch (e) {
       console.error(e);
@@ -69,10 +65,10 @@ export class GallerySearchQueryBuilderComponent
   }
 
   resetQuery(): void {
-    this.searchQueryDTO = {
+    this.searchQueryDTO.set({
       value: '',
       type: SearchQueryTypes.any_text,
-    } as TextSearch;
+    } as TextSearch);
     this.onChange();
   }
 
@@ -87,19 +83,19 @@ export class GallerySearchQueryBuilderComponent
   public writeValue(obj: SearchQueryDTO): void {
     try {
       // do not trigger change if nothing changed
-      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryDTO, obj) &&
+      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryDTO(), obj) &&
           GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryParserService.parse(
-              this.rawSearchText
+              this.rawSearchText()
           ), obj)) {
         return;
       }
     } catch (e) {
       // if cant parse they are not the same
     }
-    this.searchQueryDTO = obj;
-    this.rawSearchText = this.searchQueryParserService.stringify(
-        this.searchQueryDTO
-    );
+    this.searchQueryDTO.set(obj);
+    this.rawSearchText.set(this.searchQueryParserService.stringify(
+        this.searchQueryDTO()
+    ));
   }
 
   registerOnChange(fn: (_: SearchQueryDTO) => void): void {
@@ -112,17 +108,17 @@ export class GallerySearchQueryBuilderComponent
 
   public onChange(): void {
     try {
-      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
-        this.propagateChange(this.searchQueryDTO);
+      if (GallerySearchQueryBuilderComponent.isSameQuery(this.searchQueryParserService.parse(this.rawSearchText()), this.searchQueryDTO())) {
+        this.propagateChange(this.searchQueryDTO());
         return;
       }
     } catch (e) {
       // if cant parse they are not the same
     }
-    this.rawSearchText = this.searchQueryParserService.stringify(
-        this.searchQueryDTO
-    );
-    this.propagateChange(this.searchQueryDTO);
+    this.rawSearchText.set(this.searchQueryParserService.stringify(
+        this.searchQueryDTO()
+    ));
+    this.propagateChange(this.searchQueryDTO());
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,6 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';
-import {BehaviorSubject} from 'rxjs';
 import {UserService} from './user.service';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {Config} from '../../../../common/config/public/Config';
@@ -14,23 +13,26 @@ export class AuthenticationService {
   private userService = inject(UserService);
   private shareService = inject(ShareService);
 
-  public readonly user: BehaviorSubject<UserDTO>;
+  private readonly currentUser = signal<UserDTO | null>(null);
+  public readonly user = this.currentUser.asReadonly();
+  public readonly isAuthenticated = computed((): boolean =>
+    Config.Users.authenticationRequired === false || !!this.user()
+  );
+  public readonly isAdmin = computed((): boolean => this.isAuthorized(UserRoles.Admin));
 
   constructor() {
     const networkService = inject(NetworkService);
-
-    this.user = new BehaviorSubject(null);
 
     // Picking up the session. Its cookie is httpOnly, so JS can't check if it exists: always ask the server.
     if (this.isAuthenticated() === false) {
       const injectedUser = getInjectedUser();
       if (typeof injectedUser !== 'undefined') {
-        this.user.next(injectedUser);
+        this.currentUser.set(injectedUser);
       }
       this.getSessionUser().catch(console.error);
     } else {
       if (Config.Users.authenticationRequired === false) {
-        this.user.next({
+        this.currentUser.set({
           name: UserRoles[Config.Users.unAuthenticatedUserRole],
           role: Config.Users.unAuthenticatedUserRole,
         } as UserDTO);
@@ -39,7 +41,7 @@ export class AuthenticationService {
 
     networkService.addGlobalErrorHandler((error: ErrorDTO) => {
       if (error.code === ErrorCodes.NOT_AUTHENTICATED) {
-        this.user.next(null);
+        this.currentUser.set(null);
         return true;
       }
       if (error.code === ErrorCodes.NOT_AUTHORISED) {
@@ -49,40 +51,36 @@ export class AuthenticationService {
       return false;
     });
 
-    // TODO: refactor architecture remove shareService dependency
-    window.setTimeout(() => {
-      this.user.subscribe((u) => {
-        this.shareService.onNewUser(u);
-      });
-    }, 0);
+    // The sharing of a sharing user (or the one a logged-in user opened) depends on the user.
+    // It waits for the sharing key of the route, as the user's own key overrides it.
+    // An effect also runs after this constructor: loading the sharing calls the error interceptor, which injects this service.
+    effect(() => {
+      if (!this.shareService.routeRecognized()) {
+        return;
+      }
+      const user = this.user();
+      untracked(() => this.shareService.onNewUser(user).catch(console.error));
+    });
   }
 
   public async login(credential: LoginCredential): Promise<UserDTO> {
     const user = await this.userService.login(credential);
-    this.user.next(user);
+    this.currentUser.set(user);
     return user;
   }
 
   public async shareLogin(password: string): Promise<UserDTO> {
     const user = await this.userService.shareLogin(password);
-    this.user.next(user);
+    this.currentUser.set(user);
     return user;
   }
 
-  public isAuthenticated(): boolean {
-    if (Config.Users.authenticationRequired === false) {
-      return true;
-    }
-    return !!this.user.value;
-  }
-
   public isAuthorized(role: UserRoles): boolean {
-    return this.user.value && this.user.value.role >= role;
+    const user = this.user();
+    return !!user && user.role >= role;
   }
 
-  public canSearch(): boolean {
-    return Config.Search.enabled && this.isAuthorized(UserRoles.Guest);
-  }
+  public readonly canSearch = computed((): boolean => Config.Search.enabled && this.isAuthorized(UserRoles.Guest));
 
   public async logout(reason?: ErrorCodes): Promise<void> {
     await this.userService.logout();
@@ -93,11 +91,11 @@ export class AuthenticationService {
         // There is no login for this sharing (anyone with the link is logged in),
         // so logging out leaves the sharing and goes to the normal login.
         this.shareService.dropSharing();
-        this.user.next(null);
+        this.currentUser.set(null);
         return;
       }
     }
-    this.user.next(null);
+    this.currentUser.set(null);
     // even on logout try to get sharing user if it's a sharing
     if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {
       await this.getSessionUser();
@@ -106,7 +104,7 @@ export class AuthenticationService {
 
   private async getSessionUser(): Promise<void> {
     try {
-      this.user.next(await this.userService.getSessionUser());
+      this.currentUser.set(await this.userService.getSessionUser());
     } catch (error) {
       console.error(error);
     }

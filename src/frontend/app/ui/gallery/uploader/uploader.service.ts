@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject } from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
 import {Subscription} from 'rxjs';
 import {NetworkService} from '../../../model/network/network.service';
@@ -72,11 +72,11 @@ export class UploaderService {
     });
   }
 
-  public canUpload(): boolean {
-    const dir = this.contentLoaderService.content.value.directory;
+  public readonly canUpload = computed((): boolean => {
+    const dir = this.contentLoaderService.content().directory;
     if (!Config.Upload.enabled ||
       !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < Config.Upload.minimumRole ||
+      this.authService.user().role < Config.Upload.minimumRole ||
       !dir) {
       return false;
     }
@@ -88,7 +88,7 @@ export class UploaderService {
     }
 
     return true;
-  }
+  });
 
 
   public async uploadFiles(filesIn: FileList | File[]): Promise<void> {
@@ -100,7 +100,7 @@ export class UploaderService {
     for (let i = 0; i < filesIn.length; i++) {
       files.push(filesIn[i]);
     }
-    const dirDto = this.contentLoaderService.content.value.directory;
+    const dirDto = this.contentLoaderService.content().directory;
     const directory = Utils.concatUrls(dirDto.path, dirDto.name);
     const supportedFiles = files.filter(f =>
       UploadUtils.isUploadableExtension(UploadUtils.getExtension(f.name), Config.Upload.blockedExtensions));
@@ -119,7 +119,7 @@ export class UploaderService {
 
     for (const f of supportedFiles) {
       // Check if the file already exists in the current directory
-      const dir = this.contentLoaderService.content.value.directory;
+      const dir = this.contentLoaderService.content().directory;
       let fileExists = false;
       if (dir) {
         fileExists = (dir.media && dir.media.some(m => m.name === f.name)) ||

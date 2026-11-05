@@ -1,7 +1,6 @@
-import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, input } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {PersonDTO} from '../../../../../common/entities/PersonDTO';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
 import {PersonThumbnail, ThumbnailManagerService,} from '../../gallery/thumbnailManager.service';
 import {FacesService} from '../faces.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -9,21 +8,21 @@ import {Config} from '../../../../../common/config/public/Config';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
 
 import { NgIconComponent } from '@ng-icons/core';
+import {CssUrlPipe} from '../../../pipes/CssUrlPipe';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
 @Component({
     selector: 'app-face',
     templateUrl: './face.component.html',
     styleUrl: './face.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
-    NgIconComponent
+    NgIconComponent,
+    CssUrlPipe
 ]
 })
 export class FaceComponent implements OnInit, OnDestroy {
   private thumbnailService = inject(ThumbnailManagerService);
-  private sanitizer = inject(DomSanitizer);
   private faceService = inject(FacesService);
   authenticationService = inject(AuthenticationService);
 
@@ -33,12 +32,10 @@ export class FaceComponent implements OnInit, OnDestroy {
   public thumbnail: PersonThumbnail = null;
   public searchQueryDTOstr: string;
 
-  get CanUpdate(): boolean {
-    return (
-        this.authenticationService.user.getValue().role >=
-        Config.Faces.writeAccessMinRole
-    );
-  }
+  public readonly canUpdate = computed((): boolean =>
+    this.authenticationService.user().role >=
+    Config.Faces.writeAccessMinRole
+  );
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getPersonThumbnail(this.person());
@@ -47,16 +44,6 @@ export class FaceComponent implements OnInit, OnDestroy {
       value: this.person().name,
       matchType: TextSearchQueryMatchTypes.exact_match,
     } as TextSearch);
-  }
-
-  getSanitizedThUrl(): SafeStyle {
-    return this.sanitizer.bypassSecurityTrustStyle(
-        'url(' +
-        this.thumbnail.Src.replace(/\(/g, '%28')
-            .replace(/'/g, '%27')
-            .replace(/\)/g, '%29') +
-        ')'
-    );
   }
 
   ngOnDestroy(): void {

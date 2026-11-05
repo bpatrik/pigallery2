@@ -3,15 +3,12 @@ import {provideIcons} from '@ng-icons/core';
 import {ToastContainerComponent} from './toast-container.component';
 import {ToastService} from './toast.service';
 import {appIcons} from '../../icons';
-import {BehaviorSubject} from 'rxjs';
+import {computed, signal} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 
 class MockToastAuthenticationService {
-  user = new BehaviorSubject<unknown>({name: 'admin'});
-
-  isAuthenticated(): boolean {
-    return !!this.user.value;
-  }
+  readonly user = signal<unknown>({name: 'admin'});
+  readonly isAuthenticated = computed((): boolean => !!this.user());
 }
 
 describe('ToastContainerComponent', () => {

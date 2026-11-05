@@ -1,4 +1,4 @@
-import {Component, forwardRef, input, output, ChangeDetectionStrategy} from '@angular/core';
+import {Component, forwardRef, input, output, signal} from '@angular/core';
 import {
   DatePatternFrequency,
   DatePatternSearch,
@@ -46,7 +46,6 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
       multi: true,
     },
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FormsModule,
     NgIconComponent,
@@ -56,7 +55,7 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 })
 export class GallerySearchQueryEntryComponent
   implements ControlValueAccessor, Validator {
-  public queryEntry: SearchQueryDTO;
+  public readonly queryEntry = signal<SearchQueryDTO>(undefined);
   public SearchQueryTypesEnum: { value: string; key: SearchQueryTypes }[];
   public SearchQueryTypes = SearchQueryTypes;
   public DatePatternFrequency = DatePatternFrequency;
@@ -64,7 +63,7 @@ export class GallerySearchQueryEntryComponent
   readonly delete = output<void>();
   readonly id = input('NA');
 
-  public locationInputText: string = '';
+  public readonly locationInputText = signal<string>('');
 
   constructor() {
     this.SearchQueryTypesEnum = Utils.enumToArray(SearchQueryTypes);
@@ -76,58 +75,64 @@ export class GallerySearchQueryEntryComponent
 
   get IsTextQuery(): boolean {
     return (
-      this.queryEntry && TextSearchQueryTypes.includes(this.queryEntry.type)
+      this.queryEntry() && TextSearchQueryTypes.includes(this.queryEntry().type)
     );
   }
 
   get IsListQuery(): boolean {
     return (
-      this.queryEntry && ListSearchQueryTypes.includes(this.queryEntry.type)
+      this.queryEntry() && ListSearchQueryTypes.includes(this.queryEntry().type)
     );
   }
 
   get IsRangeQuery(): boolean {
     return (
-      this.queryEntry && (RangeSearchQueryTypes.includes(this.queryEntry.type))
+      this.queryEntry() && (RangeSearchQueryTypes.includes(this.queryEntry().type))
     );
   }
 
   get AsListQuery(): SearchListQuery {
-    return this.queryEntry as SearchListQuery;
+    return this.queryEntry() as SearchListQuery;
   }
 
   public get AsRangeQuery(): RangeSearch {
-    return this.queryEntry as RangeSearch;
+    return this.queryEntry() as RangeSearch;
   }
 
   get AsOrientationQuery(): OrientationSearch {
-    return this.queryEntry as OrientationSearch;
+    return this.queryEntry() as OrientationSearch;
   }
 
   get AsDatePatternQuery(): DatePatternSearch {
-    return this.queryEntry as DatePatternSearch;
+    return this.queryEntry() as DatePatternSearch;
   }
 
   get AsDistanceQuery(): DistanceSearch {
-    return this.queryEntry as DistanceSearch;
+    return this.queryEntry() as DistanceSearch;
   }
 
   get AsSomeOfQuery(): SomeOfSearchQuery {
-    return this.queryEntry as SomeOfSearchQuery;
+    return this.queryEntry() as SomeOfSearchQuery;
   }
 
   get AsTextQuery(): TextSearch {
-    return this.queryEntry as TextSearch;
+    return this.queryEntry() as TextSearch;
   }
 
-  get MatchingTypes(): string[] {
+  // the matching types with their descriptions (shown as the option's tooltip)
+  private readonly textMatchingTypes = TextSearchMatchingTypes.values
+    .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, true)}));
+  private readonly negatableMatchingTypes = ['=', '!='] //normal negatable query
+    .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, false)}));
+
+  get MatchingTypes(): { value: string; description: string }[] {
     if (this.IsListQuery) {
       return [];
     }
     if (this.IsTextQuery) {
-      return TextSearchMatchingTypes.values;
+      return this.textMatchingTypes;
     }
-    return ['=', '!=']; //normal negatable query
+    return this.negatableMatchingTypes;
   }
 
   get SelectedMatchType(): string {
@@ -143,10 +148,6 @@ export class GallerySearchQueryEntryComponent
       return;
     }
     TextSearchMatchingTypes.set(this.AsTextQuery, value);
-  }
-
-  getMatchingTypesDescription(type: string) {
-    return TextSearchMatchingTypes.getDescription(type, this.IsTextQuery);
   }
 
   validate(control: UntypedFormControl): ValidationErrors {
@@ -176,13 +177,13 @@ export class GallerySearchQueryEntryComponent
     if (!this.IsTextQuery) {
       delete this.AsTextQuery.value;
     }
-    if (this.queryEntry.type === SearchQueryTypes.distance) {
+    if (this.queryEntry().type === SearchQueryTypes.distance) {
       this.AsDistanceQuery.distance = 1;
       // Initialize location input text
       if (this.AsDistanceQuery.from?.GPSData) {
-        this.locationInputText = `${this.AsDistanceQuery.from.GPSData.latitude}, ${this.AsDistanceQuery.from.GPSData.longitude}`;
+        this.locationInputText.set(`${this.AsDistanceQuery.from.GPSData.latitude}, ${this.AsDistanceQuery.from.GPSData.longitude}`);
       } else {
-        this.locationInputText = this.AsDistanceQuery.from?.value || '';
+        this.locationInputText.set(this.AsDistanceQuery.from?.value || '');
       }
     } else {
       delete this.AsDistanceQuery.from;
@@ -199,14 +200,14 @@ export class GallerySearchQueryEntryComponent
 
     }
 
-    if (this.queryEntry.type === SearchQueryTypes.orientation) {
+    if (this.queryEntry().type === SearchQueryTypes.orientation) {
       this.AsOrientationQuery.landscape = true;
     } else {
       delete this.AsOrientationQuery.landscape;
     }
 
 
-    if (this.queryEntry.type === SearchQueryTypes.date_pattern) {
+    if (this.queryEntry().type === SearchQueryTypes.date_pattern) {
       this.AsDatePatternQuery.daysLength = 0;
       this.AsDatePatternQuery.frequency = DatePatternFrequency.every_year;
     } else {
@@ -264,7 +265,7 @@ export class GallerySearchQueryEntryComponent
       this.AsDistanceQuery.from = {value: value};
     }
 
-    this.locationInputText = value;
+    this.locationInputText.set(value);
     this.onChange();
   }
 
@@ -282,15 +283,15 @@ export class GallerySearchQueryEntryComponent
   }
 
   public writeValue(obj: SearchQueryDTO): void {
-    this.queryEntry = obj;
+    this.queryEntry.set(obj);
 
     // Initialize location input text if this is a distance search
     if (obj?.type === SearchQueryTypes.distance) {
       const distanceSearch = obj as DistanceSearch;
       if (distanceSearch.from?.GPSData) {
-        this.locationInputText = `${distanceSearch.from.GPSData.latitude}, ${distanceSearch.from.GPSData.longitude}`;
+        this.locationInputText.set(`${distanceSearch.from.GPSData.latitude}, ${distanceSearch.from.GPSData.longitude}`);
       } else {
-        this.locationInputText = distanceSearch.from?.value || '';
+        this.locationInputText.set(distanceSearch.from?.value || '');
       }
     }
   }
@@ -304,7 +305,7 @@ export class GallerySearchQueryEntryComponent
   }
 
   public onChange(): void {
-    this.propagateChange(this.queryEntry);
+    this.propagateChange(this.queryEntry());
   }
 
 

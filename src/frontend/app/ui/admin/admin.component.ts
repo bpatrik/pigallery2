@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, viewChildren, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, viewChildren, computed } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserRoles} from '../../../../common/entities/UserDTO';
-import {NotificationService} from '../../model/notification.service';
+import {CountedNotificationDTO, NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
 import {NavigationService} from '../../model/navigation.service';
-import { ViewportScroller, AsyncPipe, JsonPipe, DatePipe } from '@angular/common';
+import { ViewportScroller, JsonPipe, DatePipe } from '@angular/common';
 import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
@@ -27,7 +27,6 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     selector: 'app-admin',
     templateUrl: './admin.component.html',
     styleUrl: './admin.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     PopoverDirective,
@@ -40,12 +39,11 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     UsersComponent,
     SharingsListComponent,
     ExtensionInstallerComponent,
-    AsyncPipe,
     DatePipe,
     StringifyEnum
 ]
 })
-export class AdminComponent implements OnInit, AfterViewInit {
+export class AdminComponent implements OnInit {
   private authService = inject(AuthenticationService);
   private navigation = inject(NavigationService);
   viewportScroller = inject(ViewportScroller);
@@ -55,7 +53,13 @@ export class AdminComponent implements OnInit, AfterViewInit {
 
   readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
   readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
-  contents: readonly ISettingsComponent[] = [];
+  // the server notifications with their alert class and readable details
+  readonly notificationRows = computed((): { notification: CountedNotificationDTO; css: string; details: string }[] =>
+    this.notificationService.countedNotifications().map(notification => ({
+      notification,
+      css: this.getCss(notification.type),
+      details: notification.details ? NotificationService.formatDetails(notification.details) : null
+    })));
   configPriorities: { key: number; value: string; }[];
   configStyles: { key: number; value: string; }[];
   public readonly ConfigPriority = ConfigPriority;
@@ -70,14 +74,10 @@ export class AdminComponent implements OnInit, AfterViewInit {
         .filter(s => !wc.__state[s].volatile);
   }
 
-  ngAfterViewInit(): void {
-    setTimeout(() => (this.contents = this.settingsComponents()), 0);
-  }
-
   ngOnInit(): void {
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < UserRoles.Admin
+      this.authService.user().role < UserRoles.Admin
     ) {
       this.navigation.toLogin();
       return;
@@ -85,7 +85,7 @@ export class AdminComponent implements OnInit, AfterViewInit {
     this.piTitleService.setTitle($localize`Admin`);
   }
 
-  public getCss(type: NotificationType): string {
+  private getCss(type: NotificationType): string {
     switch (type) {
       case NotificationType.error:
         return 'danger';
@@ -95,10 +95,6 @@ export class AdminComponent implements OnInit, AfterViewInit {
         return 'info';
     }
     return 'info';
-  }
-
-  public formatDetails(details: unknown): string {
-    return NotificationService.formatDetails(details);
   }
 }
 

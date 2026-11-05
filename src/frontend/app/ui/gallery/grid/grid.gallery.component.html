@@ -1,10 +1,11 @@
-<div #gridContainer [style.min-height]="containerMinHeight+'px'"
-  [style.width]="renderDelayTimer ? containerWidth+'px' : ''">
-  @if (mediaToRender?.length > 0) {
-    @for (group of mediaToRender; track group) {
+<div #gridContainer [style.min-height.px]="containerMinHeight()"
+  [style.width.px]="pinnedWidth()">
+  @if (mediaToRender().length > 0) {
+    <!-- by index: a group gets a new object when its media changes, its unchanged tiles are kept -->
+    @for (group of mediaToRender(); track $index) {
       <div class="d-inline-block media-group">
         @if (group.name) {
-          @switch (sortingService.grouping.value.method) {
+          @switch (sortingService.grouping().method) {
             @case (GroupByTypes.Rating) {
               <div class="mt-4 mb-3">
                 <h6 class="ms-2">
@@ -26,7 +27,7 @@
             }
           }
         }
-        @if (group.date && (blogService.getMarkDowns(group.date) | async)?.length > 0) {
+        @if (group.date) {
           <app-gallery-blog [date]="group.date"
             [open]="blogOpen" />
         }

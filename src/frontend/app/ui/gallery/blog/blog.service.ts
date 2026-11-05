@@ -1,9 +1,9 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, linkedSignal, resource } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
 import {ContentService} from '../content.service';
-import {map, mergeMap, Observable, shareReplay} from 'rxjs';
+import {GroupedDirectoryContent} from '../navigator/sorting.service';
 import {filterMDFiles} from '../../../pipes/MDFilesFilterPipe';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {Config} from '../../../../../common/config/public/Config';
@@ -13,42 +13,49 @@ export class BlogService {
   private networkService = inject(NetworkService);
   private galleryService = inject(ContentService);
 
-  public groupedMarkdowns: Observable<GroupedMarkdown[]>;
   private cache: { [key: string]: string } = {};
+  // loads the markdown files of the content; a newer content cancels the older load
+  private readonly markdownResource = resource({
+    params: () => this.galleryService.sortedFilteredContent() ?? undefined,
+    loader: ({params: content}) => this.loadMarkdowns(content)
+  });
+  // keeps the last loaded markdowns (that were read) while the next ones load; undefined until the first load
+  public readonly groupedMarkdowns = linkedSignal<GroupedMarkdown[], GroupedMarkdown[]>({
+    source: () => this.markdownResource.hasValue() ? this.markdownResource.value() : undefined,
+    computation: (markdowns, previous) => markdowns ?? previous?.value
+  });
 
-  constructor() {
-
-    this.groupedMarkdowns = this.galleryService.sortedFilteredContent.pipe(
-      mergeMap(async content => {
-        if (!content) {
-          return [];
-        }
-        const dates = content.mediaGroups.map(g => g.date)
-          .filter(d => !!d).map(d => d.getTime());
+  private async loadMarkdowns(content: GroupedDirectoryContent): Promise<GroupedMarkdown[]> {
+    const dates = content.mediaGroups.map(g => g.date)
+      .filter(d => !!d).map(d => d.getTime());
 
 
-        let firstMedia = Number.MAX_SAFE_INTEGER;
-        if (content.mediaGroups.length > 0) {
-          firstMedia = content.mediaGroups[0].media.reduce((p, m) =>
-            Math.min(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), p), Number.MAX_SAFE_INTEGER);
-        }
+    let firstMedia = Number.MAX_SAFE_INTEGER;
+    if (content.mediaGroups.length > 0) {
+      firstMedia = content.mediaGroups[0].media.reduce((p, m) =>
+        Math.min(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), p), Number.MAX_SAFE_INTEGER);
+    }
 
-        const files = (filterMDFiles(content.metaFile) || [])
-          .map(f => this.splitMarkDown(f, dates, firstMedia));
+    const files = (filterMDFiles(content.metaFile) || [])
+      .map(f => this.splitMarkDown(f, dates, firstMedia));
 
-        return (await Promise.all(files)).flat();
-      }), shareReplay(1));
+    return (await Promise.all(files)).flat();
   }
 
-  getMarkDowns(date: Date): Observable<GroupedMarkdown[]> {
-    const utcDate = date ? date.getTime() : undefined;
-    return this.groupedMarkdowns.pipe(map(gm => {
-      if (!date) {
-        return gm.filter(g => !g.date);
-      }
-      return gm.filter(g => g.date == utcDate);
-    }));
-
+  /**
+   * The markdowns of a date group. Without a date, the ones that go to the top.
+   * Undefined while the markdowns are not loaded.
+   */
+  getMarkDowns(date: Date): GroupedMarkdown[] {
+    const markdowns = this.groupedMarkdowns();
+    if (!markdowns) {
+      return undefined;
+    }
+    if (!date) {
+      return markdowns.filter(g => !g.date);
+    }
+    const utcDate = date.getTime();
+    return markdowns.filter(g => g.date == utcDate);
   }
 
   /**

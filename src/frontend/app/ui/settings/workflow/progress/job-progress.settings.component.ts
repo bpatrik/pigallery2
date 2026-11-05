@@ -1,6 +1,7 @@
-import { Component, OnChanges, OnDestroy, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import {Component, TemplateRef, inject, input, linkedSignal, computed} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {JobProgressDTO, JobProgressStates,} from '../../../../../../common/entities/job/JobProgressDTO';
-import {Subscription, timer} from 'rxjs';
+import {timer} from 'rxjs';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {BackendtextService} from '../../../../model/backendtext.service';
 import { DecimalPipe, DatePipe } from '@angular/common';
@@ -12,7 +13,6 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
     selector: 'app-settings-job-progress',
     templateUrl: './job-progress.settings.component.html',
     styleUrl: './job-progress.settings.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,
@@ -21,17 +21,25 @@ import { DurationPipe } from '../../../../pipes/DurationPipe';
     DurationPipe
 ]
 })
-export class JobProgressComponent implements OnDestroy, OnChanges {
+export class JobProgressComponent {
   private modalService = inject(BsModalService);
   backendTextService = inject(BackendtextService);
 
   readonly progress = input<JobProgressDTO>(undefined);
   JobProgressStates = JobProgressStates;
-  timeCurrentCopy: number;
   modalRef: BsModalRef;
-  private timerSub: Subscription;
+  // Reset to the job's last reported time on every new progress, then ticks forward every second.
+  private readonly timeCurrentCopy = linkedSignal<number>(() => this.progress()?.time.end);
 
-  get ProgressTitle(): string {
+  constructor() {
+    timer(0, 1000).pipe(takeUntilDestroyed()).subscribe(() => {
+      if (this.progress()) {
+        this.timeCurrentCopy.update(t => t + 1000);
+      }
+    });
+  }
+
+  readonly ProgressTitle = computed<string>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
@@ -49,17 +57,17 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
         ':' +
         progress.steps.all
     );
-  }
+  });
 
-  get Name(): string {
+  readonly Name = computed<string>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
     }
     return this.backendTextService.getJobName(progress.jobName);
-  }
+  });
 
-  get TimeAll(): number {
+  readonly TimeAll = computed<number>(() => {
     const progress = this.progress();
     if (!progress || progress.steps.processed === 0) {
       return 0;
@@ -69,46 +77,35 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
             progress.steps.processed) *
         (progress.steps.all - progress.steps.skipped)
     );
-  }
+  });
 
-  get Running(): boolean {
+  readonly Running = computed<boolean>(() => {
     const progress = this.progress();
     return (
-        progress &&
+        !!progress &&
         (progress.state === JobProgressStates.running ||
             progress.state === JobProgressStates.cancelling)
     );
-  }
+  });
 
-  get Stopped(): boolean {
+  readonly Stopped = computed<boolean>(() => {
     const progress = this.progress();
     return (
-        progress &&
+        !!progress &&
         progress.state !== JobProgressStates.running &&
         progress.state !== JobProgressStates.cancelling
     );
-  }
+  });
 
-  get TimeLeft(): number {
+  readonly TimeElapsed = computed<number>(() => {
     const progress = this.progress();
     if (!progress) {
       return 0;
     }
-    return (
-        (progress.time.end - progress.time.start) /
-        progress.steps.all
-    );
-  }
+    return this.timeCurrentCopy() - progress.time.start;
+  });
 
-  get TimeElapsed(): number {
-    const progress = this.progress();
-    if (!progress) {
-      return 0;
-    }
-    return this.timeCurrentCopy - progress.time.start;
-  }
-
-  get State(): string {
+  readonly State = computed<string>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
@@ -129,33 +126,12 @@ export class JobProgressComponent implements OnDestroy, OnChanges {
       default:
         return 'unknown state';
     }
-  }
+  });
 
   openModal(template: TemplateRef<unknown>): void {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
   }
 
-  // Side effect: starts the timer that counts the elapsed job time.
-  ngOnChanges(): void {
-    const progress = this.progress();
-    if (!progress) {
-      return;
-    }
-    this.timeCurrentCopy = progress.time.end;
-    if (!this.timerSub) {
-      this.timerSub = timer(0, 1000).subscribe(() => {
-        if (this.progress()) {
-          this.timeCurrentCopy += 1000;
-        }
-      });
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.timerSub) {
-      this.timerSub.unsubscribe();
-    }
-  }
 }
 
 

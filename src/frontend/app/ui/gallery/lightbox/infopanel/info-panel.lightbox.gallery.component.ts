@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, output, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, output, input } from '@angular/core';
 import {CameraMetadata, PhotoDTO, PhotoMetadata, PositionMetaData,} from '../../../../../../common/entities/PhotoDTO';
 import {Config} from '../../../../../../common/config/public/Config';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../../common/entities/MediaDTO';
@@ -11,8 +11,6 @@ import {
   ANDSearchQuery,
   type DistanceSearch, type DateSearch,
   SearchQueryTypes,
-  type TextSearch,
-  TextSearchQueryMatchTypes,
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';
@@ -30,7 +28,6 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
   selector: 'app-info-panel',
   styleUrl: './info-panel.lightbox.gallery.component.css',
   templateUrl: './info-panel.lightbox.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     RouterLink,
@@ -40,7 +37,7 @@ import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
     FileSizePipe
 ]
 })
-export class InfoPanelLightboxComponent implements OnInit {
+export class InfoPanelLightboxComponent {
   queryService = inject(QueryService);
   contentLoaderService = inject(ContentLoaderService);
   mapService = inject(MapService);
@@ -52,7 +49,6 @@ export class InfoPanelLightboxComponent implements OnInit {
 
   public readonly mapEnabled: boolean;
   public readonly searchEnabled: boolean;
-  public keywords: { value: string; type: SearchQueryTypes }[] = null;
   public readonly SearchQueryTypes: typeof SearchQueryTypes = SearchQueryTypes;
 
   public baseLayer: TileLayer;
@@ -62,8 +58,8 @@ export class InfoPanelLightboxComponent implements OnInit {
     }
     return [
       marker({
-        lat: this.PositionData.GPSData.latitude,
-        lng: this.PositionData.GPSData.longitude,
+        lat: this.positionData().GPSData.latitude,
+        lng: this.positionData().GPSData.longitude,
       } as LatLngLiteral, {icon: MarkerFactory.defIcon}),
     ];
   });
@@ -71,7 +67,7 @@ export class InfoPanelLightboxComponent implements OnInit {
   constructor() {
     this.mapEnabled = Config.Map.enabled;
     this.searchEnabled = this.authService.canSearch();
-    if (this.themeService.darkMode.value) {
+    if (this.themeService.darkMode()) {
       this.baseLayer = tileLayer(this.mapService.DarkMapLayer.url, {
         attribution: this.mapService.ShortAttributions,
       });
@@ -82,23 +78,13 @@ export class InfoPanelLightboxComponent implements OnInit {
     }
   }
 
-  get FullPath(): string {
-    return Utils.concatUrls(
-      this.media().directory.path,
-      this.media().directory.name,
-      this.media().name
-    );
-  }
+  public readonly directoryPath = computed((): string => Utils.concatUrls(
+    this.media().directory.path,
+    this.media().directory.name
+  ));
 
-  get DirectoryPath(): string {
-    return Utils.concatUrls(
-      this.media().directory.path,
-      this.media().directory.name
-    );
-  }
-
-  get DirectoryPathStr(): string {
-    const p = this.DirectoryPath;
+  public readonly directoryPathStr = computed((): string => {
+    const p = this.directoryPath();
     if (p === '.') {
       return $localize`Home`;
     }
@@ -106,137 +92,137 @@ export class InfoPanelLightboxComponent implements OnInit {
       return '...' + p.slice(-22);
     }
     return p;
-  }
+  });
 
-  get VideoData(): VideoMetadata {
+  public readonly videoData = computed((): VideoMetadata => {
     if (typeof (this.media() as VideoDTO).metadata.bitRate === 'undefined') {
       return null;
     }
     return (this.media() as VideoDTO).metadata;
-  }
+  });
 
-  get Rating(): number {
-    return (this.media() as PhotoDTO).metadata.rating;
-  }
+  public readonly rating = computed((): number => (this.media() as PhotoDTO).metadata.rating);
+  // the filled and the empty stars of the rating
+  public readonly ratingStars = computed((): { filled: undefined[], empty: undefined[] } => ({
+    filled: new Array(this.rating()),
+    empty: new Array(5 - this.rating())
+  }));
 
-  get PositionData(): PositionMetaData {
-    return (this.media() as PhotoDTO).metadata.positionData;
-  }
+  public readonly positionData = computed((): PositionMetaData => (this.media() as PhotoDTO).metadata.positionData);
 
-  get CameraData(): CameraMetadata {
-    return (this.media() as PhotoDTO).metadata.cameraData;
-  }
+  public readonly cameraData = computed((): CameraMetadata => (this.media() as PhotoDTO).metadata.cameraData);
 
-  ngOnInit(): void {
-    const metadata = this.media().metadata as PhotoMetadata;
-    if (
-      (metadata.keywords && metadata.keywords.length > 0) ||
-      (metadata.faces && metadata.faces.length > 0)
-    ) {
-      this.keywords = [];
-      if (Config.Faces.enabled) {
-        const names: string[] = (metadata.faces || []).map(
-          (f): string => f.name
-        );
-        this.keywords = names
-          .filter((name, index): boolean => names.indexOf(name) === index)
-          .map((n): { type: SearchQueryTypes; value: string } => ({
-            value: n,
-            type: SearchQueryTypes.person,
-          }));
-      }
-      this.keywords = this.keywords.concat(
-        (metadata.keywords || []).map(
-          (k): { type: SearchQueryTypes; value: string } => ({
-            value: k,
-            type: SearchQueryTypes.keyword,
-          })
-        )
-      );
-    }
-  }
-
-  isPhoto(): boolean {
-    const media = this.media();
-    return media && MediaDTOUtils.isPhoto(media);
-  }
-
-  isLivePhoto(): boolean {
-    return !!this.media()?.liveVideoPath;
-  }
-
-  calcMpx(): string {
-    return (
-      (this.media().metadata.size.width * this.media().metadata.size.height) /
-      1000000
-    ).toFixed(2);
-  }
-
-  isThisYear(): boolean {
-    return MediaDTOUtils.createdThisYear(this.media());
-  }
-
-  toFraction(f: number): string | number {
+  public readonly exposure = computed((): string | number => {
+    const f = this.cameraData()?.exposure;
     if (f > 1) {
       return f;
     }
     return '1/' + Math.round(1 / f);
-  }
+  });
 
-  hasTextPositionData(): boolean {
-    return this.getPositionParts().length > 0;
-  }
+  // the faces and keywords of the media with their search links, null if it has none
+  public readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] => {
+    const metadata = this.media().metadata as PhotoMetadata;
+    if (
+      !(metadata.keywords && metadata.keywords.length > 0) &&
+      !(metadata.faces && metadata.faces.length > 0)
+    ) {
+      return null;
+    }
+    let keywords: { value: string; type: SearchQueryTypes }[] = [];
+    if (Config.Faces.enabled) {
+      const names: string[] = (metadata.faces || []).map(
+        (f): string => f.name
+      );
+      keywords = names
+        .filter((name, index): boolean => names.indexOf(name) === index)
+        .map((n): { type: SearchQueryTypes; value: string } => ({
+          value: n,
+          type: SearchQueryTypes.person,
+        }));
+    }
+    return keywords.concat(
+      (metadata.keywords || []).map(
+        (k): { type: SearchQueryTypes; value: string } => ({
+          value: k,
+          type: SearchQueryTypes.keyword,
+        })
+      )
+    ).map(k => ({...k, link: SearchQueryUtils.urlifyExactMatch(k.type, k.value)}));
+  });
 
-  hasGPS(): boolean {
-    return !!(
-      (this.media() as PhotoDTO).metadata.positionData &&
-      (this.media() as PhotoDTO).metadata.positionData.GPSData &&
-      (this.media() as PhotoDTO).metadata.positionData.GPSData.latitude &&
-      (this.media() as PhotoDTO).metadata.positionData.GPSData.longitude
-    );
-  }
+  public readonly isPhoto = computed((): boolean => {
+    const media = this.media();
+    return media && MediaDTOUtils.isPhoto(media);
+  });
 
-  getPositionText(): string {
-    return this.getPositionParts().join(', ').trim(); //Filter removes empty elements, join concats the values separated by ', '
-  }
+  public readonly isLivePhoto = computed((): boolean => !!this.media()?.liveVideoPath);
 
-  getPositionParts(): string[] {
-    if (!this.PositionData) {
+  public readonly mpx = computed((): string => (
+    (this.media().metadata.size.width * this.media().metadata.size.height) /
+    1000000
+  ).toFixed(2));
+
+  public readonly isThisYear = computed((): boolean => MediaDTOUtils.createdThisYear(this.media()));
+
+  public readonly positionParts = computed((): string[] => {
+    const positionData = this.positionData();
+    if (!positionData) {
       return [];
     }
     return [
-      this.PositionData.city,
-      this.PositionData.state,
-      this.PositionData.country
+      positionData.city,
+      positionData.state,
+      positionData.country
     ].filter(text => !!text);
-  }
+  });
 
-  close(): void {
-    this.closed.emit();
-  }
+  // the position parts with their search links
+  public readonly positionLinks = computed((): { text: string; link: string }[] => this.positionParts().map(text => ({
+    text,
+    link: SearchQueryUtils.urlifyExactMatch(SearchQueryTypes.position, text)
+  })));
 
-  getTextSearchQuery(name: string, type: SearchQueryTypes): string {
-    return SearchQueryUtils.urlify({
-      type,
-      matchType: TextSearchQueryMatchTypes.exact_match,
-      value: name,
-    } as TextSearch);
-  }
+  public readonly hasTextPositionData = computed((): boolean => this.positionParts().length > 0);
 
-  getDistanceSearchQuery(): string {
+  public readonly hasGPS = computed((): boolean => !!(
+    (this.media() as PhotoDTO).metadata.positionData &&
+    (this.media() as PhotoDTO).metadata.positionData.GPSData &&
+    (this.media() as PhotoDTO).metadata.positionData.GPSData.latitude &&
+    (this.media() as PhotoDTO).metadata.positionData.GPSData.longitude
+  ));
+
+  //Filter removes empty elements, join concats the values separated by ', '
+  public readonly positionText = computed((): string => this.positionParts().join(', ').trim());
+
+  // the GPS coordinates as shown, only set if the media has GPS data
+  public readonly gpsText = computed((): { latitude: string, longitude: string } => {
+    if (!this.hasGPS()) {
+      return null;
+    }
+    return {
+      latitude: this.positionData().GPSData.latitude.toFixed(6),
+      longitude: this.positionData().GPSData.longitude.toFixed(6)
+    };
+  });
+
+  public readonly distanceSearchQuery = computed((): string => {
+    if (!this.hasGPS()) {
+      return null;
+    }
     return SearchQueryUtils.urlify({
       type: SearchQueryTypes.distance,
       from: {
         GPSData: {
-          latitude: this.PositionData.GPSData.latitude,
-          longitude: this.PositionData.GPSData.longitude
+          latitude: this.positionData().GPSData.latitude,
+          longitude: this.positionData().GPSData.longitude
         }
       },
       distance: 1 // 1km radius
     } as DistanceSearch);
-  }
+  });
 
-  getDateSearchQuery(): string {
+  public readonly dateSearchQuery = computed((): string => {
     // Search for photos taken on the same date (within 24 hours)
     const creationDate = new Date(this.media().metadata.creationDate);
     const startOfDay = new Date(creationDate);
@@ -249,6 +235,10 @@ export class InfoPanelLightboxComponent implements OnInit {
       min: startOfDay.getTime(),
       max: endOfDay.getTime()
     } as DateSearch);
+  });
+
+  close(): void {
+    this.closed.emit();
   }
 
 }

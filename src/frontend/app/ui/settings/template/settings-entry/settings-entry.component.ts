@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnChanges, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, forwardRef, OnChanges, TemplateRef, inject, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
@@ -28,6 +28,11 @@ import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
 import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
+
+interface OptionView {
+  key: number | string;
+  value: string | number;
+}
 
 interface IState {
   shouldHide(): boolean;
@@ -65,7 +70,6 @@ interface IState {
             multi: true,
         },
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     GallerySearchFieldComponent,
     FormsModule,
@@ -90,7 +94,8 @@ export class SettingsEntryComponent
   placeholder: string;
   allowSpaces = false;
   description: string;
-  state: IState;
+  // set by writeValue (ngModel), not by an input, so it is a signal to refresh the view
+  readonly state = signal<IState>(null);
   isNumberArray = false;
   isNumber = false;
   HTMLInputType = 'text';
@@ -98,10 +103,14 @@ export class SettingsEntryComponent
   idName: string;
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
-  readonly newDirectorySearch = () => new this.state.arrayType();
+  readonly newDirectorySearch = () => new (this.state().arrayType)();
   public type: string | object;
   public arrayType: string;
   public uiType: string;
+  // options of the select(s), static per state type, set in ngOnChanges
+  optionsView: OptionView[] = [];
+  navigationLinkTypeOptions: OptionView[] = [];
+  userRoleOptions: OptionView[] = [];
   newThemeModalRef: any;
   iconModal: {
     ref?: any,
@@ -117,12 +126,12 @@ export class SettingsEntryComponent
       return false;
     }
 
-    if (this.state.isConfigArrayType) {
-      for (let i = 0; i < this.state.value?.length; ++i) {
-        for (const k of Object.keys(this.state.value[i].__state)) {
+    if (this.state().isConfigArrayType) {
+      for (let i = 0; i < this.state().value?.length; ++i) {
+        for (const k of Object.keys(this.state().value[i].__state)) {
           if (!Utils.equalsFilter(
-              this.state.value[i]?.__state[k]?.value,
-              this.state.default[i] ? this.state.default[i][k] : undefined,
+              this.state().value[i]?.__state[k]?.value,
+              this.state().default[i] ? this.state().default[i][k] : undefined,
               ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
 
             return true;
@@ -131,7 +140,7 @@ export class SettingsEntryComponent
       }
       return false;
     }
-    return !Utils.equalsFilter(this.state.value, this.state.default);
+    return !Utils.equalsFilter(this.state().value, this.state().default);
   }
 
 
@@ -139,81 +148,83 @@ export class SettingsEntryComponent
     if (this.Disabled) {
       return true;
     }
-    return Utils.equalsFilter(this.state.value, this.state.original);
+    return Utils.equalsFilter(this.state().value, this.state().original);
   }
 
   get shouldHide(): boolean {
-    return this.state.shouldHide && this.state.shouldHide();
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    return this.state().shouldHide && this.state().shouldHide();
   }
 
   get defaultStr(): string {
     if (this.type === 'SearchQuery') {
       return (
-          '\'' + this.searchQueryParserService.stringify(this.state.default) + '\''
+          '\'' + this.searchQueryParserService.stringify(this.state().default) + '\''
       );
     }
 
-    if (this.state.type === 'array' && this.state.arrayType === 'string') {
-      return (this.state.default || []).join(';');
+    if (this.state().type === 'array' && this.state().arrayType === 'string') {
+      return (this.state().default || []).join(';');
     }
 
-    return this.state.default;
+    return this.state().default;
   }
 
 
   get StringValue(): string {
     if (
-        this.state.type === 'array' &&
-        (this.state.arrayType === 'string' || this.isNumberArray)
+        this.state().type === 'array' &&
+        (this.state().arrayType === 'string' || this.isNumberArray)
     ) {
-      return (this.state.value || []).join(';');
+      return (this.state().value || []).join(';');
     }
 
-    if (this.state.isConfigType) {
-      return JSON.stringify(this.state.value.toJSON());
+    if (this.state().isConfigType) {
+      return JSON.stringify(this.state().value.toJSON());
     }
 
-    if (typeof this.state.value === 'object') {
-      return JSON.stringify(this.state.value);
+    if (typeof this.state().value === 'object') {
+      return JSON.stringify(this.state().value);
     }
 
-    return this.state.value;
+    return this.state().value;
   }
 
   set StringValue(value: string) {
     if (
-        this.state.type === 'array' &&
-        (this.state.arrayType === 'string' || this.isNumberArray)
+        this.state().type === 'array' &&
+        (this.state().arrayType === 'string' || this.isNumberArray)
     ) {
       value = value.replace(new RegExp(',', 'g'), ';');
       if (!this.allowSpaces) {
         value = value.replace(new RegExp(' ', 'g'), ';');
       }
-      this.state.value = value.split(';').filter((v: string) => v !== '');
+      this.state().value = value.split(';').filter((v: string) => v !== '');
       if (this.isNumberArray) {
-        this.state.value = this.state.value
+        this.state().value = this.state().value
             .map((v: string) => parseFloat(v))
             .filter((v: number) => !isNaN(v));
       }
       return;
     }
-    if (typeof this.state.value === 'object') {
-      this.state.value = JSON.parse(value);
+    if (typeof this.state().value === 'object') {
+      this.state().value = JSON.parse(value);
       return;
     }
 
-    this.state.value = value;
+    this.state().value = value;
     if (this.isNumber) {
-      this.state.value = parseFloat(value);
+      this.state().value = parseFloat(value);
     }
 
   }
 
   get AvailableThemes() {
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
     return [{
       key: 'default',
       value: $localize`default`
-    }, ...(this.state.rootConfig as any).__state.availableThemes.value
+    }, ...(this.state().rootConfig as any).__state.availableThemes.value
         .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
   }
 
@@ -221,55 +232,57 @@ export class SettingsEntryComponent
   get SelectedThemeSettings(): {
     theme: string
   } {
-    return (this.state.value as ThemeConfig[]).find(th => th.name === (this.state.rootConfig as any).__state.selectedTheme.value) || {theme: 'N/A'};
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    return (this.state().value as ThemeConfig[]).find(th => th.name === (this.state().rootConfig as any).__state.selectedTheme.value) || {theme: 'N/A'};
   }
 
   get Disabled() {
-    if (!this.state?.tags?.uiDisabled) {
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    if (!this.state()?.tags?.uiDisabled) {
       return false;
     }
-    return this.state.tags.uiDisabled(this.state.rootConfig, this.settingsService.settings.value);
+    return this.state().tags.uiDisabled(this.state().rootConfig, this.settingsService.settings());
   }
 
-  // Derives the editor from this.state, which is set by writeValue, not by an input.
+  // Derives the editor from this.state(), which is set by writeValue, not by an input.
   ngOnChanges(): void {
-    if (!this.state) {
+    if (!this.state()) {
       return;
     }
 
     // cache type overrides
-    this.type = this.state.tags?.uiType || this.state.type;
+    this.type = this.state().tags?.uiType || this.state().type;
     this.arrayType = null;
-    if (this.state.arrayType === MapLayers) {
+    if (this.state().arrayType === MapLayers) {
       this.arrayType = 'MapLayers';
-    } else if (this.state.arrayType === NavigationLinkConfig) {
+    } else if (this.state().arrayType === NavigationLinkConfig) {
       this.arrayType = 'NavigationLinkConfig';
-    } else if (this.state.arrayType === MapPathGroupConfig) {
+    } else if (this.state().arrayType === MapPathGroupConfig) {
       this.arrayType = 'MapPathGroupConfig';
-    } else if (this.state.arrayType === MapPathGroupThemeConfig) {
+    } else if (this.state().arrayType === MapPathGroupThemeConfig) {
       this.arrayType = 'MapPathGroupThemeConfig';
-    } else if (this.state.arrayType === UserConfig) {
+    } else if (this.state().arrayType === UserConfig) {
       this.arrayType = 'UserConfig';
-    } else if (this.state.arrayType === ServerExtensionsEntryConfig) {
+    } else if (this.state().arrayType === ServerExtensionsEntryConfig) {
       this.arrayType = 'ServerExtensionsEntryConfig';
-    } else if (this.state.arrayType === JobScheduleConfig) {
+    } else if (this.state().arrayType === JobScheduleConfig) {
       this.arrayType = 'JobScheduleConfig';
     } else {
-      this.arrayType = this.state.arrayType;
+      this.arrayType = this.state().arrayType;
     }
 
-    if (this.state.tags?.uiOptions) {
-      this.state.isEnumType = true;
+    if (this.state().tags?.uiOptions) {
+      this.state().isEnumType = true;
     }
     this.uiType = this.arrayType;
-    if (CustomSettingsEntries.iS(this.state)) {
-      this.uiType = CustomSettingsEntries.getFullName(this.state);
+    if (CustomSettingsEntries.iS(this.state())) {
+      this.uiType = CustomSettingsEntries.getFullName(this.state());
     }
-    if (!this.state.isEnumType &&
-        !this.state.isEnumArrayType &&
+    if (!this.state().isEnumType &&
+        !this.state().isEnumArrayType &&
         this.type !== 'boolean' &&
         this.type !== 'SearchQuery' &&
-        !CustomSettingsEntries.iS(this.state) &&
+        !CustomSettingsEntries.iS(this.state()) &&
         this.arrayType !== 'MapLayers' &&
         this.arrayType !== 'NavigationLinkConfig' &&
         this.arrayType !== 'MapPathGroupConfig' &&
@@ -279,92 +292,96 @@ export class SettingsEntryComponent
         this.arrayType !== 'UserConfig') {
       this.uiType = 'StringInput';
     }
-    if (this.type === this.state.tags?.uiType) {
-      this.uiType = this.state.tags?.uiType;
-    } else if (this.state.isEnumType) {
+    if (this.type === this.state().tags?.uiType) {
+      this.uiType = this.state().tags?.uiType;
+    } else if (this.state().isEnumType) {
       this.uiType = 'EnumType';
     } else if (this.type === 'boolean') {
       this.uiType = 'Boolean';
-    } else if (this.state.isEnumArrayType) {
+    } else if (this.state().isEnumArrayType) {
       this.uiType = 'EnumArray';
     }
 
-    this.placeholder = this.state.tags?.hint || this.state.default;
+    this.optionsView = this.uiType === 'EnumType' || this.uiType === 'EnumArray' ?
+      this.getOptionsView(this.state()) : [];
+    this.navigationLinkTypeOptions = this.arrayType === 'NavigationLinkConfig' ?
+      this.getOptionsView(this.newArrayItemState('type')) : [];
+    this.userRoleOptions = this.arrayType === 'UserConfig' ?
+      this.getOptionsView(this.newArrayItemState('role')) : [];
+
+    this.placeholder = this.state().tags?.hint || this.state().default;
 
     this.title = '';
-    if (this.state.readonly) {
+    if (this.state().readonly) {
       this.title = $localize`readonly` + ', ';
     }
     this.title += $localize`default value` + ': ' + this.defaultStr;
-    this.name = this.state?.tags?.name;
+    this.name = this.state()?.tags?.name;
     if (this.name) {
       this.idName =
           this.GUID + this.name.toLowerCase().replace(new RegExp(' ', 'gm'), '-');
     }
     this.isNumberArray =
-        this.state.arrayType === 'unsignedInt' ||
-        this.state.arrayType === 'integer' ||
-        this.state.arrayType === 'float' ||
-        this.state.arrayType === 'positiveFloat';
+        this.state().arrayType === 'unsignedInt' ||
+        this.state().arrayType === 'integer' ||
+        this.state().arrayType === 'float' ||
+        this.state().arrayType === 'positiveFloat';
     this.isNumber =
-        this.state.type === 'unsignedInt' ||
-        this.state.type === 'integer' ||
-        this.state.type === 'float' ||
-        this.state.type === 'positiveFloat';
+        this.state().type === 'unsignedInt' ||
+        this.state().type === 'integer' ||
+        this.state().type === 'float' ||
+        this.state().type === 'positiveFloat';
 
 
     if (this.isNumber) {
       this.HTMLInputType = 'number';
-    } else if (this.state.type === 'password') {
+    } else if (this.state().type === 'password') {
       this.HTMLInputType = 'password';
     } else {
       this.HTMLInputType = 'text';
     }
-    this.description = this.description || this.state.description;
-    if (this.state.tags) {
+    this.description = this.description || this.state().description;
+    if (this.state().tags) {
       if (typeof this.dockerWarning === 'undefined') {
-        this.dockerWarning = this.state.tags.dockerSensitive && this.settingsService.settings.value.Environment.isDocker;
+        this.dockerWarning = this.state().tags.dockerSensitive && this.settingsService.settings().Environment.isDocker;
       }
-      this.name = this.name || this.state.tags.name;
-      this.allowSpaces = this.allowSpaces || this.state.tags.uiAllowSpaces;
-      this.required = this.required || !this.state.tags.uiOptional;
-      this.experimental = this.state.tags.experimental;
+      this.name = this.name || this.state().tags.name;
+      this.allowSpaces = this.allowSpaces || this.state().tags.uiAllowSpaces;
+      this.required = this.required || !this.state().tags.uiOptional;
+      this.experimental = this.state().tags.experimental;
     }
   }
 
-  getOptionsView(state: IState & {
-    optionsView?: {
-      key: number | string;
-      value: string | number
-    }[]
-  }) {
-    if (!state.optionsView) {
-      const eClass = state.isEnumType
-          ? state.type
-          : state.arrayType;
-      if (state.tags?.uiOptions && typeof eClass === 'object') {
-        // enum with a restricted set of options
-        state.optionsView = enumToTranslatedArray(eClass)
-          .filter(o => state.tags.uiOptions.includes(o.key));
-      } else if (state.tags?.uiOptions) {
-        state.optionsView = state.tags?.uiOptions.map(o => ({
-          key: o,
-          value: o + (state.tags?.unit ? state.tags?.unit : '')
-        }));
-      } else {
-        state.optionsView = enumToTranslatedArray(eClass);
-      }
+  // The state of a property of the array items. It is the same for every item, so a fresh item is used.
+  private newArrayItemState(property: string): IState {
+    return (new (this.state().arrayType)() as { __state: Record<string, IState> }).__state[property];
+  }
+
+  private getOptionsView(state: IState): OptionView[] {
+    const eClass = state.isEnumType
+        ? state.type
+        : state.arrayType;
+    if (state.tags?.uiOptions && typeof eClass === 'object') {
+      // enum with a restricted set of options
+      return enumToTranslatedArray(eClass)
+        .filter(o => state.tags.uiOptions.includes(o.key));
     }
-    return state.optionsView;
+    if (state.tags?.uiOptions) {
+      return state.tags?.uiOptions.map(o => ({
+        key: o,
+        value: o + (state.tags?.unit ? state.tags?.unit : '')
+      }));
+    }
+    return enumToTranslatedArray(eClass);
   }
 
   validate(): ValidationErrors {
     if (
         !this.required ||
-        (this.state &&
-            typeof this.state.value !== 'undefined' &&
-            this.state.value !== null &&
-            this.state.value !== '')
+        (this.state() &&
+            typeof this.state().value !== 'undefined' &&
+            this.state().value !== null &&
+            this.state().value !== '')
     ) {
       return null;
     }
@@ -381,7 +398,7 @@ export class SettingsEntryComponent
   newThemeName: string;
 
   public writeValue(obj: IState): void {
-    this.state = obj;
+    this.state.set(obj);
     this.ngOnChanges();
   }
 
@@ -394,18 +411,18 @@ export class SettingsEntryComponent
   }
 
   AddNew(): void {
-    this.state.value = this.state.value || [];
-    if (this.state.type === 'array') {
-      if (this.state.isConfigArrayType && this.state.arrayType) {
-        this.state.value.push(new this.state.arrayType());
+    this.state().value = this.state().value || [];
+    if (this.state().type === 'array') {
+      if (this.state().isConfigArrayType && this.state().arrayType) {
+        this.state().value.push(new (this.state().arrayType)());
         return;
       }
-      this.state.value.push(this.state.value[this.state.value.length - 1]);
+      this.state().value.push(this.state().value[this.state().value.length - 1]);
     }
   }
 
   remove(i: number): void {
-    (this.state.value as unknown[]).splice(i, 1);
+    (this.state().value as unknown[]).splice(i, 1);
     this.onChange(null);
   }
 
@@ -413,27 +430,27 @@ export class SettingsEntryComponent
    * MapLayer function
    */
   addNewLayer(): void {
-    this.state.value.push({
-      name: 'Layer-' + this.state.value.length,
+    this.state().value.push({
+      name: 'Layer-' + this.state().value.length,
       url: '',
     });
   }
 
   removeLayer(layer: MapLayers): void {
-    this.state.value.splice(
-        this.state.value.indexOf(layer),
+    this.state().value.splice(
+        this.state().value.indexOf(layer),
         1
     );
   }
 
 
   addNewTheme(): void {
-    const availableThemes = (this.state.rootConfig as any).__state.availableThemes;
+    const availableThemes = (this.state().rootConfig as any).__state.availableThemes;
     if (!this.newThemeName ||
         (availableThemes.value as ThemeConfig[]).find(th => th.name === this.newThemeName)) {
       return;
     }
-    this.state.value = this.newThemeName;
+    this.state().value = this.newThemeName;
     availableThemes.value.push(new availableThemes.arrayType(this.newThemeName, ''));
     this.newThemeName = '';
     this.onChange(null);
@@ -442,10 +459,10 @@ export class SettingsEntryComponent
 
 
   removeTheme(): void {
-    const availableThemes = (this.state.rootConfig as any).__state.availableThemes;
-    const i = (availableThemes.value as ThemeConfig[]).findIndex(th => th.name === this.state.value);
+    const availableThemes = (this.state().rootConfig as any).__state.availableThemes;
+    const i = (availableThemes.value as ThemeConfig[]).findIndex(th => th.name === this.state().value);
     if (i >= 0) {
-      this.state.value = 'default';
+      this.state().value = 'default';
       availableThemes.value.splice(i, 1);
       this.onChange(null);
     }
@@ -493,8 +510,8 @@ export class SettingsEntryComponent
       try {
         const wb = doc.documentElement.getAttribute('viewBox');
         const items = doc.documentElement.innerHTML;
-        this.state.value.items = items;
-        this.state.value.viewBox = wb;
+        this.state().value.items = items;
+        this.state().value.viewBox = wb;
       } catch (e) {
         console.error(e);
         if (this.iconModal) {

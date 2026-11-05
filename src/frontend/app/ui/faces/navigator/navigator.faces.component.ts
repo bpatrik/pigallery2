@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {FacesService} from '../faces.service';
 import {SortByDirectionalTypes} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
@@ -12,7 +12,6 @@ import {StringifySortingMethod} from '../../../pipes/StringifySortingMethod';
   selector: 'app-faces-navbar',
   styleUrl: './navigator.faces.component.css',
   templateUrl: './navigator.faces.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     BsDropdownDirective,
@@ -27,6 +26,7 @@ export class FacesNavigatorComponent {
 
   public readonly sortingByTypes: { key: number; value: string }[] = [];
   public readonly config = Config;
+  public readonly isDefaultSorting = this.facesService.isDefaultSorting;
 
   constructor() {
     this.sortingByTypes = [
@@ -35,20 +35,16 @@ export class FacesNavigatorComponent {
     ];
   }
 
-  isDefaultSorting(): boolean {
-    return this.facesService.isDefaultSorting();
-  }
-
   setSortingBy(sorting: number): void {
     this.facesService.setSorting({
       method: sorting,
-      ascending: this.facesService.sorting.value.ascending
+      ascending: this.facesService.sorting().ascending
     });
   }
 
   setSortingAscending(asc: boolean) {
     this.facesService.setSorting({
-      method: this.facesService.sorting.value.method,
+      method: this.facesService.sorting().method,
       ascending: asc
     });
   }

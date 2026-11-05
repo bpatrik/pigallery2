@@ -1,4 +1,4 @@
-import {Component, ChangeDetectionStrategy} from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {provideIcons} from '@ng-icons/core';
 import {ToastCardComponent} from './toast-card.component';
@@ -6,17 +6,16 @@ import {appIcons} from '../../icons';
 
 @Component({
   template: `
-    <app-toast-card icon="ionCloudUploadOutline" [color]="color" [wrap]="false" [progress]="progress">
+    <app-toast-card icon="ionCloudUploadOutline" [color]="color()" [wrap]="false" [progress]="progress()">
       <span toastTitle>Balaton_naplemente.jpg</span>
-      <span>{{ progress }}%</span>
+      <span>{{ progress() }}%</span>
       <button toastAction>x</button>
     </app-toast-card>`,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ToastCardComponent]
 })
 class HostComponent {
-  color = 'primary';
-  progress = 45;
+  readonly color = signal('primary');
+  readonly progress = signal(45);
 }
 
 describe('ToastCardComponent', () => {
@@ -41,8 +40,8 @@ describe('ToastCardComponent', () => {
     expect(bar.style.width).toBe('45%');
     expect(bar.classList).toContain('bg-primary');
     expect(bar.classList).not.toContain('countdown');
-    fixture.componentInstance.progress = 100;
-    fixture.componentInstance.color = 'success';
+    fixture.componentInstance.progress.set(100);
+    fixture.componentInstance.color.set('success');
     fixture.detectChanges();
     expect(bar.style.width).toBe('100%');
     expect(card.querySelector('.toast-icon').classList).toContain('text-success');

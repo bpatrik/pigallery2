@@ -6,7 +6,8 @@
       </div>
       @if (showStatistic) {
         <div class="col-md-9 col-12 date-frequency">
-          @for (freq of filterService.statistic; track freq; let length = $count) {
+          @for (freq of filterService.statistic(); track freq; let length = $count) {
+            @let outOfRange = freq.endTime < ActiveFilters.dateFilter.minFilter || freq.time > ActiveFilters.dateFilter.maxFilter;
             <div class="d-inline-block date-frequency-column"
               [style.width.%]="(1/length)*100"
               container="body"
@@ -19,8 +20,8 @@
                 }
               </div>
               <div class="text-bg-primary text-center  border border-primary"
-                [class.text-bg-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
-                [class.border-secondary]="freq.endDate.getTime()<ActiveFilters.dateFilter.minFilter || freq.date.getTime()>ActiveFilters.dateFilter.maxFilter "
+                [class.text-bg-secondary]="outOfRange"
+                [class.border-secondary]="outOfRange"
                 [style.height.%]="(freq.count/freq.max)*100">
                 @if (freq.count >= freq.max/2) {
                   <div class="d-none d-lg-block">{{freq.count}}</div>
@@ -37,7 +38,7 @@
 
     </div>
     <div class="row">
-      @if (filterService.statistic.length>1) {
+      @if (filterService.statistic().length>1) {
         <div class="position-absolute w-auto start-50">
           <div class="text-md-center">
             <ng-icon [name]="!showStatistic ? 'ionChevronUpOutline' : 'ionChevronDownOutline'"
@@ -110,7 +111,7 @@
               <div class="filter-column">
                 @if (filter.options.length > 0) {
                   <ul class="list-group">
-                    @for (option of filter.options; track option.name) {
+                    @for (option of filter.options; track option.name; let j = $index) {
                       <li
                         [class.unselected]="!option.selected"
                         (click)="option.selected = !option.selected; filterService.onFilterChange()"
@@ -120,7 +121,7 @@
                             class="pin"
                             (click)="toggleSelectOnly(filter, option, $event)"
                             title="Select only this"
-                            [class]="isOnlySelected(filter,option) ? 'filter-only-selected' : 'filter-pin'"
+                            [class]="onlySelected()[i][j] ? 'filter-only-selected' : 'filter-pin'"
                           i18n-title />
                           {{option.name === undefined ? unknownText : option.name}}
                         </div>

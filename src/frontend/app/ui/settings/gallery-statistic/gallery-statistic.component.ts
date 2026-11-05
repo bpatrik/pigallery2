@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import {SettingsService} from '../settings.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FileSizePipe } from '../../../pipes/FileSizePipe';
@@ -7,7 +7,6 @@ import { FileSizePipe } from '../../../pipes/FileSizePipe';
     selector: 'app-settings-gallery-statistic',
     templateUrl: './gallery-statistic.component.html',
     styleUrl: './gallery-statistic.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent, FileSizePipe]
 })
 export class GalleryStatisticComponent {

@@ -1,5 +1,4 @@
-import { Injectable, inject } from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import { Injectable, inject, signal } from '@angular/core';
 import {GridMedia} from '../../GridMedia';
 import {IClientMediaButtonConfigWithBaseApiPath} from '../photo.grid.gallery.component';
 import {NotificationService} from '../../../../../model/notification.service';
@@ -21,15 +20,12 @@ export class MediaButtonModalService {
   private networkService = inject(NetworkService);
   private contentLoader = inject(ContentLoaderService);
 
-  private modalData$ = new BehaviorSubject<MediaButtonModalData | null>(null);
+  private readonly _modalData = signal<MediaButtonModalData | null>(null);
+  readonly modalData = this._modalData.asReadonly();
   private savedModalValues: Record<string, string | number | boolean> = {};
 
-  get modalData() {
-    return this.modalData$.asObservable();
-  }
-
   showModal(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia): void {
-    this.modalData$.next({
+    this._modalData.set({
       button,
       media,
       visible: true
@@ -37,7 +33,7 @@ export class MediaButtonModalService {
   }
 
   hideModal(): void {
-    this.modalData$.next(null);
+    this._modalData.set(null);
   }
 
   async executeButtonAction(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia, formData?: {

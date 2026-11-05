@@ -1,4 +1,4 @@
-import {Component, input, ChangeDetectionStrategy} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {NgIconComponent} from '@ng-icons/core';
 
 /**
@@ -15,7 +15,6 @@ import {NgIconComponent} from '@ng-icons/core';
   host: {
     '[class.single-line]': '!wrap()'
   },
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [NgIconComponent]
 })
 export class ToastCardComponent {

@@ -1,7 +1,8 @@
 import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
+import {computed, signal} from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import {UploaderService} from './uploader.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -22,16 +23,13 @@ class MockNetworkService {
 }
 
 class MockContentLoaderService {
-  content = new BehaviorSubject({directory: {path: '.', name: 'Balaton', media: [{name: 'exists.jpg'}], metaFile: []}});
+  readonly content = signal({directory: {path: '.', name: 'Balaton', media: [{name: 'exists.jpg'}], metaFile: []}});
   reloadCurrentContent = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockAuthenticationService {
-  user = new BehaviorSubject({name: 'admin', role: UserRoles.Admin});
-
-  isAuthenticated(): boolean {
-    return !!this.user.value;
-  }
+  readonly user = signal({name: 'admin', role: UserRoles.Admin});
+  readonly isAuthenticated = computed((): boolean => !!this.user());
 }
 
 describe('UploaderService', () => {

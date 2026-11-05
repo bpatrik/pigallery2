@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, effect, inject, untracked } from '@angular/core';
 import {ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {Utils} from '../../../../common/Utils';
 import {Config} from '../../../../common/config/public/Config';
@@ -47,21 +47,29 @@ export class GalleryCacheService {
       GalleryCacheService.deleteCache();
     }
 
-    const onNewVersion = (ver: string) => {
-      if (
-          ver !== null &&
-          localStorage.getItem(GalleryCacheService.VERSION) !== ver
-      ) {
-        GalleryCacheService.deleteCache();
-        localStorage.setItem(GalleryCacheService.VERSION, ver);
-      }
-    };
-    this.versionService.version.subscribe(onNewVersion);
-    onNewVersion(this.versionService.version.value);
+    // later versions are checked by VersionService.onNewVersion
+    GalleryCacheService.checkVersion(this.versionService.version());
 
     // The cached content depends on what the user can see (e.g.: allow/block lists, sharing).
     // The server can answer 'not modified' to a different user, so the cache should not be reused.
-    authService.user.subscribe((user) => GalleryCacheService.onUser(user));
+    effect(() => {
+      const user = authService.user();
+      untracked(() => GalleryCacheService.onUser(user));
+    });
+  }
+
+  /**
+   * Clears the cache if the server's data version changed since it was stored.
+   * Called synchronously by VersionService, so no stale content is served after a new version arrives.
+   */
+  public static checkVersion(ver: string): void {
+    if (
+        ver !== null &&
+        localStorage.getItem(GalleryCacheService.VERSION) !== ver
+    ) {
+      GalleryCacheService.deleteCache();
+      localStorage.setItem(GalleryCacheService.VERSION, ver);
+    }
   }
 
   private static onUser(user: UserDTO): void {
@@ -404,7 +412,7 @@ export class GalleryCacheService {
       localStorage.setItem('currentUser', currentUserStr);
       localStorage.setItem(
           GalleryCacheService.VERSION,
-          this.versionService.version.value
+          this.versionService.version()
       );
     } catch (e) {
       // ignoring errors

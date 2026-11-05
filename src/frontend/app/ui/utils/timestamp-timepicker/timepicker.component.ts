@@ -1,11 +1,10 @@
-import {Component, computed, input, model, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, input, model} from '@angular/core';
 import { TimepickerComponent } from 'ngx-bootstrap/timepicker';
 import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-timestamp-timepicker',
     templateUrl: './timepicker.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TimepickerComponent, FormsModule]
 })
 export class TimeStampTimePickerComponent {

@@ -1,4 +1,4 @@
-import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren, ChangeDetectionStrategy } from '@angular/core';
+import { Component, forwardRef, OnDestroy, OnInit, inject, viewChildren, computed, signal } from '@angular/core';
 import {ModalDirective} from 'ngx-bootstrap/modal';
 import {
   AfterJobTrigger,
@@ -22,7 +22,8 @@ import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type Validation
 import {SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {MediaPickDTO} from '../../../../../common/entities/MediaPickDTO';
 import {SearchQueryTypes, TextSearch} from '../../../../../common/entities/SearchQueryDTO';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import {DynamicConfig} from '../../../../../common/entities/DynamicConfig';
+import { DatePipe } from '@angular/common';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { NgIconComponent } from '@ng-icons/core';
 import { JobButtonComponent } from './button/job-button.settings.component';
@@ -48,7 +49,6 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
             multi: true,
         },
     ],
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     PopoverDirective,
     NgIconComponent,
@@ -60,7 +60,6 @@ import { JobProgressComponent } from './progress/job-progress.settings.component
     SortingMethodSettingsEntryComponent,
     JobProgressComponent,
     ModalDirective,
-    AsyncPipe,
     DatePipe
 ]
 })
@@ -71,7 +70,8 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
 
 
-  public schedules: JobScheduleConfig[] = [];
+  // set by writeValue (ngModel), not by an input, so it is a signal to refresh the view
+  public readonly schedules = signal<JobScheduleConfig[]>([]);
 
   public readonly jobModalQL = viewChildren<ModalDirective>('jobModal');
 
@@ -92,6 +92,27 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   };
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
+  // keyed by job name, a missing key means an unknown job
+  readonly validJobs = computed<Record<string, boolean>>(() => {
+    const valid: Record<string, boolean> = Object.create(null);
+    for (const job of this.jobsService.availableJobs()) {
+      valid[job.Name] = true;
+    }
+    return valid;
+  });
+  // keyed by job name, only jobs with a non-empty config template are listed
+  readonly configTemplates = computed<Record<string, DynamicConfig[]>>(() => {
+    const templates: Record<string, DynamicConfig[]> = Object.create(null);
+    for (const job of this.jobsService.availableJobs()) {
+      const ct = this.jobsService.getConfigTemplate(job.Name);
+      if (ct) {
+        templates[job.Name] = ct;
+      }
+    }
+    return templates;
+  });
+  readonly availableJobOptions = computed((): { name: string; label: string }[] =>
+    this.jobsService.availableJobs().map(job => ({name: job.Name, label: this.backendTextService.getJobName(job.Name)})));
 
 
   error: string;
@@ -139,14 +160,14 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   remove(schedule: JobScheduleDTO): void {
-    this.schedules.splice(
-      this.schedules.indexOf(schedule),
+    this.schedules().splice(
+      this.schedules().indexOf(schedule),
       1
     );
   }
 
   jobTypeChanged(schedule: JobScheduleDTO): void {
-    const job = this.jobsService.availableJobs.value.find(
+    const job = this.jobsService.availableJobs().find(
       (t) => t.Name === schedule.jobName
     );
     schedule.config = schedule.config || {};
@@ -179,8 +200,8 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
       case JobTriggerType.after:
         schedule.trigger = new AfterJobTriggerConfig();
-        if (!(schedule.trigger as unknown as AfterJobTrigger).afterScheduleName && this.schedules.length > 1) {
-          (schedule.trigger as unknown as AfterJobTrigger).afterScheduleName = this.schedules.find(s => s.name !== schedule.name).name;
+        if (!(schedule.trigger as unknown as AfterJobTrigger).afterScheduleName && this.schedules().length > 1) {
+          (schedule.trigger as unknown as AfterJobTrigger).afterScheduleName = this.schedules().find(s => s.name !== schedule.name).name;
         }
         break;
     }
@@ -217,24 +238,24 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   public sortedSchedules(): JobScheduleDTO[] {
-    return (this.schedules || [])
+    return (this.schedules() || [])
       .slice()
       .sort((a: JobScheduleDTO, b: JobScheduleDTO) => {
         return (
-          this.getNextRunningDate(a, this.schedules) -
-          this.getNextRunningDate(b, this.schedules)
+          this.getNextRunningDate(a, this.schedules()) -
+          this.getNextRunningDate(b, this.schedules())
         );
       });
   }
 
   prepareNewJob(): void {
-    const jobName = this.jobsService.availableJobs.value[0].Name;
+    const jobName = this.jobsService.availableJobs()[0].Name;
     this.newSchedule = new JobScheduleConfig('new job',
       jobName,
       new NeverJobTriggerConfig());
 
     // setup job specific config
-    const job = this.jobsService.availableJobs.value.find(
+    const job = this.jobsService.availableJobs().find(
       (t) => t.Name === jobName
     );
     this.newSchedule.config = this.newSchedule.config || {};
@@ -249,14 +270,14 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   addNewJob(): void {
     // make unique job name
     const jobName = this.newSchedule.jobName;
-    const count = this.schedules.filter(
+    const count = this.schedules().filter(
       (s: JobScheduleDTO) => s.jobName === jobName
     ).length;
     this.newSchedule.name =
       count === 0
         ? jobName
         : this.backendTextService.getJobName(jobName) + ' ' + (count + 1);
-    this.schedules.push(this.newSchedule);
+    this.schedules().push(this.newSchedule);
 
     this.jobModalQL().at(0)!.hide();
     this.onChange(null); // trigger change detection after adding new job
@@ -311,11 +332,11 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
   public writeValue(obj: JobScheduleConfig[]): void {
-    this.schedules = obj;
+    this.schedules.set(obj);
   }
 
   public registerOnChange(fn: (v: JobScheduleConfig[]) => void): void {
-    this.onChange = () => fn(this.schedules);
+    this.onChange = () => fn(this.schedules());
   }
 
   public registerOnTouched(fn: () => void): void {

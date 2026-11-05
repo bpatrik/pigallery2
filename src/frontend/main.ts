@@ -1,4 +1,3 @@
-import {provideZoneChangeDetection} from '@angular/core';
 import {HttpClient, provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {errorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigationErrorHandler, withPreloading} from '@angular/router';
@@ -31,7 +30,6 @@ export class CustomUrlSerializer implements UrlSerializer {
 
 bootstrapApplication(AppComponent, {
   providers: [
-    provideZoneChangeDetection(),
     provideRouter(routes, withPreloading(PreloadMarkedRoutes), withNavigationErrorHandler(reloadOnChunkLoadError)),
     provideIcons(appIcons),
     provideMarkdown({loader: HttpClient}),

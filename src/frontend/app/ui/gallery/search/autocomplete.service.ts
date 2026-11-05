@@ -3,7 +3,6 @@ import {NetworkService} from '../../../model/network/network.service';
 import {IAutoCompleteItem} from '../../../../../common/entities/AutoCompleteItem';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {SearchQueryParserService} from './search-query-parser.service';
-import {BehaviorSubject} from 'rxjs';
 import {SearchQueryTypes, TextSearchQueryTypes,} from '../../../../../common/entities/SearchQueryDTO';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {defaultQueryKeywords, SearchQueryParser} from '../../../../../common/SearchQueryParser';
@@ -116,20 +115,17 @@ export class AutoCompleteService {
   public autoComplete(text: {
     current: string;
     prev: string;
-  }): BehaviorSubject<RenderableAutoCompleteItem[]> {
-    const items: BehaviorSubject<RenderableAutoCompleteItem[]> =
-      new BehaviorSubject(
-        this.sortResults(text.current, this.getQueryKeywords(text))
-      );
+  }): AutoCompleteResult {
+    const items: RenderableAutoCompleteItem[] =
+      this.sortResults(text.current, this.getQueryKeywords(text));
 
     const prefixType = this.getTypeFromPrefix(text.current);
     const searchText = this.getPrefixLessSearchText(text.current);
     if (searchText === '' || searchText === '.' || prefixType.noAc) {
-      return items;
+      return {items, more: null};
     }
 
-    this.typedAutoComplete(searchText, text.current, prefixType.type, items);
-    return items;
+    return this.typedAutoComplete(searchText, text.current, prefixType.type, items);
   }
 
   public getPrefixLessSearchText(text: string): string {
@@ -148,9 +144,15 @@ export class AutoCompleteService {
     text: string,
     fullText: string,
     type: SearchQueryTypes,
-    items?: BehaviorSubject<RenderableAutoCompleteItem[]>
-  ): BehaviorSubject<RenderableAutoCompleteItem[]> {
-    items = items || new BehaviorSubject([]);
+    items: RenderableAutoCompleteItem[]
+  ): AutoCompleteResult {
+    const merge = (ret: IAutoCompleteItem[]): RenderableAutoCompleteItem[] =>
+      this.sortResults(
+        fullText,
+        ret
+          .map((i) => this.ACItemToRenderable(i, fullText))
+          .concat(items)
+      );
 
     const cached = this.galleryCacheService.getAutoComplete(text, type);
     try {
@@ -159,33 +161,19 @@ export class AutoCompleteService {
         if (type) {
           acParams[QueryParams.gallery.search.type] = type;
         }
-        this.networkService
+        const more = this.networkService
           .getJson<IAutoCompleteItem[]>('/autocomplete/' + encodeURIComponent(text), acParams)
           .then((ret) => {
             this.galleryCacheService.setAutoComplete(text, type, ret);
-            items.next(
-              this.sortResults(
-                fullText,
-                ret
-                  .map((i) => this.ACItemToRenderable(i, fullText))
-                  .concat(items.value)
-              )
-            );
+            return merge(ret);
           });
-      } else {
-        items.next(
-          this.sortResults(
-            fullText,
-            cached
-              .map((i) => this.ACItemToRenderable(i, fullText))
-              .concat(items.value)
-          )
-        );
+        return {items, more};
       }
+      return {items: merge(cached), more: null};
     } catch (e) {
       console.error(e);
     }
-    return items;
+    return {items, more: null};
   }
 
   /**
@@ -391,6 +379,15 @@ export class AutoCompleteService {
 
     return Object.values(ret);
   }
+}
+
+/**
+ * items: available right away (keywords and cached results),
+ * more: all items once the server answered (null if no server call is needed)
+ */
+export interface AutoCompleteResult {
+  items: RenderableAutoCompleteItem[];
+  more: Promise<RenderableAutoCompleteItem[]> | null;
 }
 
 export interface RenderableAutoCompleteItem extends IAutoCompleteItem {

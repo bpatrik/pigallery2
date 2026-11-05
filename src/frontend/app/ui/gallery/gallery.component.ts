@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {ContentService} from './content.service';
@@ -45,7 +45,6 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
   },
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GalleryLightboxComponent,
     FrameComponent,
@@ -79,28 +78,35 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   readonly grid = viewChild(GalleryGridComponent);
 
-  public showSearchBar = false;
-  public showShare = false;
-  public showRandomPhotoBuilder = false;
+  public readonly showSearchBar = signal(false);
+  public readonly showShare = signal(false);
+  public readonly showRandomPhotoBuilder = signal(false);
   public blogOpen = Config.Gallery.TopBlogStartsOpen;
 
   config = Config;
-  public isPhotoWithLocation = false;
-  public countDown: {
+  // the remaining time of the sharing; hours, minutes and seconds are two digits
+  public readonly countDown = signal<{
     day: number;
-    hour: number;
-    minute: number;
-    second: number;
-  } = null;
+    hour: string;
+    minute: string;
+    second: string;
+  }>(null);
   public readonly mapEnabled: boolean;
-  public directoryContent: GroupedDirectoryContent;
+  // keeps showing the previous content while the next one loads
+  public readonly directoryContent = linkedSignal<GroupedDirectoryContent, GroupedDirectoryContent>({
+    source: this.contentService.sortedFilteredContent,
+    computation: (content, previous) => content ?? previous?.value
+  });
+  public readonly isPhotoWithLocation = computed((): boolean =>
+    !!this.directoryContent()?.mediaGroups.some((mediaGroup) =>
+      mediaGroup.media.some((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude)
+    )
+  );
   public isUploadOver = false;
   private $counter: Observable<number>;
   private subscription: { [key: string]: Subscription } = {
-    content: null,
     route: null,
     timer: null,
-    sorting: null,
   };
 
   constructor() {
@@ -109,24 +115,24 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   get ContentWrapper(): ContentWrapperWithError {
-    return this.contentLoader.content.value;
+    return this.contentLoader.content();
   }
 
   get ShowMarkDown(): boolean {
-    return this.config.MetaFile.markdown && this.directoryContent?.metaFile && filterMDFiles(this.directoryContent.metaFile).length > 0;
+    return this.config.MetaFile.markdown && this.directoryContent()?.metaFile && filterMDFiles(this.directoryContent().metaFile).length > 0;
   }
 
   get ShowMap(): boolean {
-    return (this.isPhotoWithLocation || filterGPXFiles(this.directoryContent?.metaFile)?.length > 0) && this.mapEnabled;
+    return (this.isPhotoWithLocation() || filterGPXFiles(this.directoryContent()?.metaFile)?.length > 0) && this.mapEnabled;
   }
 
   updateTimer(t: number): void {
-    if (this.shareService.sharingSubject.value == null) {
+    if (this.shareService.sharing() == null) {
       return;
     }
     // if the timer is longer than 10 years, just do not show it
     if (
-      (this.shareService.sharingSubject.value.expires - Date.now()) /
+      (this.shareService.sharing().expires - Date.now()) /
       1000 /
       86400 /
       365 >
@@ -136,30 +142,25 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
 
     t = Math.floor(
-      (this.shareService.sharingSubject.value.expires - Date.now()) / 1000
+      (this.shareService.sharing().expires - Date.now()) / 1000
     );
-    this.countDown = {} as any;
-    this.countDown.day = Math.floor(t / 86400);
-    t -= this.countDown.day * 86400;
-    this.countDown.hour = Math.floor(t / 3600) % 24;
-    t -= this.countDown.hour * 3600;
-    this.countDown.minute = Math.floor(t / 60) % 60;
-    t -= this.countDown.minute * 60;
-    this.countDown.second = t % 60;
+    const day = Math.floor(t / 86400);
+    t -= day * 86400;
+    const hour = Math.floor(t / 3600) % 24;
+    t -= hour * 3600;
+    const minute = Math.floor(t / 60) % 60;
+    t -= minute * 60;
+    const second = t % 60;
+    const twoDigits = (n: number): string => ('0' + n).slice(-2);
+    this.countDown.set({day, hour: twoDigits(hour), minute: twoDigits(minute), second: twoDigits(second)});
   }
 
   ngOnDestroy(): void {
-    if (this.subscription.content !== null) {
-      this.subscription.content.unsubscribe();
-    }
     if (this.subscription.route !== null) {
       this.subscription.route.unsubscribe();
     }
     if (this.subscription.timer !== null) {
       this.subscription.timer.unsubscribe();
-    }
-    if (this.subscription.sorting !== null) {
-      this.subscription.sorting.unsubscribe();
     }
   }
 
@@ -168,17 +169,13 @@ export class GalleryComponent implements OnInit, OnDestroy {
     if (!this.authService.isAuthenticated()) {
       return this.navigation.toLogin();
     }
-    this.showSearchBar = this.authService.canSearch();
-    this.showShare =
+    this.showSearchBar.set(this.authService.canSearch());
+    this.showShare.set(
       Config.Sharing.enabled &&
-      this.authService.isAuthorized(UserRoles.User);
-    this.showRandomPhotoBuilder =
+      this.authService.isAuthorized(UserRoles.User));
+    this.showRandomPhotoBuilder.set(
       Config.RandomPhoto.enabled &&
-      this.authService.isAuthorized(UserRoles.User);
-    this.subscription.content = this.contentService.sortedFilteredContent
-      .subscribe((dc: GroupedDirectoryContent) => {
-        this.onContentChange(dc);
-      });
+      this.authService.isAuthorized(UserRoles.User));
     this.subscription.route = this.route.params.subscribe(this.onRoute);
 
     if (this.shareService.isSharing()) {
@@ -251,28 +248,6 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
     this.piTitleService.setDirectoryTitle(directoryName);
     this.contentLoader.loadDirectory(directoryName);
-  };
-
-  private onContentChange = (content: GroupedDirectoryContent): void => {
-    if (!content) {
-      return;
-    }
-    this.directoryContent = content;
-
-    // enforce change detection on grid
-    this.directoryContent.mediaGroups = this.directoryContent.mediaGroups?.slice();
-    this.isPhotoWithLocation = false;
-
-    for (const mediaGroup of content.mediaGroups) {
-
-      if (
-        mediaGroup.media
-          .findIndex((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude) !== -1
-      ) {
-        this.isPhotoWithLocation = true;
-        break;
-      }
-    }
   };
 
 }

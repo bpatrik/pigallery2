@@ -1,4 +1,4 @@
-import { Component, TemplateRef, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, inject, input, output, computed } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
 import {ErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
@@ -14,7 +14,6 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-settings-job-button',
     templateUrl: './job-button.settings.component.html',
     styleUrl: './job-button.settings.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent]
 })
 export class JobButtonComponent {
@@ -34,6 +33,8 @@ export class JobButtonComponent {
   readonly jobError = output<string>();
   private modalRef: BsModalRef;
   private defaultConfig: any;
+  readonly JobName = computed<string>(() => this.backendTextService.getJobName(this.jobName()));
+  readonly JobDescription = computed<string>(() => this.backendTextService.getJobDescription(this.jobName()));
 
   /**
    * The config input, or the job's default config if the input is not set.
@@ -61,7 +62,7 @@ export class JobButtonComponent {
   }
 
   get Progress(): OnTimerJobProgressDTO {
-    return this.jobsService.progress.value[
+    return this.jobsService.progress()[
       JobDTOUtils.getHashName(this.jobName(), this.Config)
       ];
   }

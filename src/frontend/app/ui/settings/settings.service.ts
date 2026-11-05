@@ -1,5 +1,4 @@
-import { Injectable, inject } from '@angular/core';
-import {BehaviorSubject, first} from 'rxjs';
+import {Injectable, inject, signal} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 
 import {WebConfig} from '../../../../common/config/private/WebConfig';
@@ -23,30 +22,26 @@ export class SettingsService {
   private networkService = inject(NetworkService);
   private jobsService = inject(ScheduledJobsService);
 
-  public configPriority = ConfigPriority.basic;
-  public configStyle = ConfigStyle.full;
-  public settings: BehaviorSubject<IWebConfigClassPrivate<TAGS> & WebConfig>;
+  public readonly configPriority = signal<ConfigPriority>(ConfigPriority.basic);
+  public readonly configStyle = signal<ConfigStyle>(ConfigStyle.full);
+  public readonly settings = signal<IWebConfigClassPrivate<TAGS> & WebConfig>(WebConfigClassBuilder.attachPrivateInterface(new WebConfig()));
   private fetchingSettings = false;
-  public statistic: BehaviorSubject<StatisticDTO>;
+  public readonly statistic = signal<StatisticDTO>(null);
+  // Bumped on every edit of the settings forms. The forms edit the settings states in place, so the views
+  // that read another entry's value (hiding, disabling, theme lists) read this to refresh.
+  public readonly edits = signal(0);
 
   constructor() {
-    this.statistic = new BehaviorSubject(null);
-    this.settings = new BehaviorSubject<IWebConfigClassPrivate<TAGS> & WebConfig>(WebConfigClassBuilder.attachPrivateInterface(new WebConfig()));
     this.getSettings().catch(console.error);
 
     if (CookieHelper.get(CookieNames.configPriority) != null) {
-      this.configPriority =
-          parseInt(CookieHelper.get(CookieNames.configPriority));
+      this.configPriority.set(parseInt(CookieHelper.get(CookieNames.configPriority)));
     }
     if (CookieHelper.get(CookieNames.configStyle) != null) {
-      this.configStyle =
-          parseInt(CookieHelper.get(CookieNames.configStyle));
+      this.configStyle.set(parseInt(CookieHelper.get(CookieNames.configStyle)));
     }
 
-
-    this.settings.pipe(first()).subscribe(() => {
-      this.loadStatistic();
-    });
+    this.loadStatistic().catch(console.error);
     this.jobsService.onJobFinish.subscribe((jobName: string) => {
       if (
           jobName === DefaultsJobs[DefaultsJobs.Indexing] ||
@@ -68,7 +63,7 @@ export class SettingsService {
       wcg.load(
           await this.networkService.getJson<Promise<WebConfig>>('/settings')
       );
-      this.settings.next(wcg);
+      this.settings.set(wcg);
     } catch (e) {
       console.error(e);
     }
@@ -84,19 +79,19 @@ export class SettingsService {
     // save it for some years
     CookieHelper.set(
         CookieNames.configPriority,
-        this.configPriority.toString(),
+        this.configPriority().toString(),
         365 * 50
     );
     // save it for some years
     CookieHelper.set(
         CookieNames.configStyle,
-        this.configStyle.toString(),
+        this.configStyle().toString(),
         365 * 50
     );
   }
 
   async loadStatistic(): Promise<void> {
-    this.statistic.next(
+    this.statistic.set(
         await this.networkService.getJson<StatisticDTO>('/admin/statistic')
     );
   }

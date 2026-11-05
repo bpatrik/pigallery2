@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import {Injectable, computed, inject} from '@angular/core';
 import {ShareService} from '../ui/gallery/share.service';
 import {MediaDTO} from '../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../common/QueryParams';
@@ -24,6 +24,9 @@ export class QueryService {
       return media.name;
     }
   }
+
+  // the query params of a gallery link (keeps the sharing key)
+  public readonly params = computed((): { [key: string]: string } => this.getParams());
 
   getParams(lightbox?: { media?: MediaDTO,map?:boolean}): { [key: string]: string } {
     const query: { [key: string]: string } = {};

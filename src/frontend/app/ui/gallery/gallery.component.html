@@ -1,28 +1,28 @@
-<app-gallery-lightbox #lightbox />
-<app-frame [showSearch]="showSearchBar" [showShare]="showShare">
+<app-gallery-lightbox [grid]="grid()" />
+<app-frame [showSearch]="showSearchBar()" [showShare]="showShare()">
 
   <ng-container navbar>
-    @if (countDown) {
+    @if (countDown(); as countDown) {
       <li class="nav-item navbar-text me-2">
         <span>
           <ng-container i18n>Link availability</ng-container>
           : {{ countDown.day }}
           <ng-container i18n>days</ng-container>
           ,
-          {{ ("0" + countDown.hour).slice(-2) }}:{{ ("0" + countDown.minute).slice(-2) }}
-          :{{ ("0" + countDown.second).slice(-2) }}
+          {{ countDown.hour }}:{{ countDown.minute }}
+          :{{ countDown.second }}
         </span>
       </li>
     }
   </ng-container>
 
   <ng-container navbar-menu>
-    @if (showRandomPhotoBuilder) {
+    @if (showRandomPhotoBuilder()) {
       <li role="menuitem">
         <app-gallery-random-query-builder />
       </li>
     }
-    @if (showRandomPhotoBuilder) {
+    @if (showRandomPhotoBuilder()) {
       <li role="menuitem">
         <app-gallery-photo-frame-builder />
       </li>
@@ -48,7 +48,7 @@
       </div>
         }
         <app-gallery-directories class="directories"
-        [directories]="directoryContent?.directories || []" />
+        [directories]="directoryContent()?.directories || []" />
         @if (ShowMarkDown || ShowMap) {
           <div class="blog-map-row">
             @if (ShowMarkDown) {
@@ -60,8 +60,8 @@
               @defer (on viewport; prefetch on idle) {
                 <app-gallery-map class="rounded"
                   [class.rounded-start-0]="ShowMarkDown"
-                  [photos]="directoryContent?.mediaGroups | photosOnly"
-                [gpxFiles]="directoryContent?.metaFile | gpxFiles" />
+                  [photos]="directoryContent()?.mediaGroups | photosOnly"
+                [gpxFiles]="directoryContent()?.metaFile | gpxFiles" />
               } @placeholder {
                 <div class="gallery-map-placeholder"></div>
               } @error {
@@ -70,8 +70,7 @@
             }
           </div>
         }
-        <app-gallery-grid [mediaGroups]="directoryContent?.mediaGroups"
-        [lightbox]="lightbox" />
+        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups" />
       }
     </div>
   }

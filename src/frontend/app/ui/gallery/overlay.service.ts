@@ -1,21 +1,17 @@
 import {Injectable} from '@angular/core';
-import {Event} from '../../../../common/event/Event';
 import {PageHelper} from '../../model/page.helper';
 
 @Injectable({providedIn: 'root'})
 export class OverlayService {
-  OnOverlayChange = new Event<boolean>();
   private scrollWidth: number = null;
 
   public showOverlay(requester:string): void {
     // disable scrolling
     PageHelper.hideScrollY(requester);
-    this.OnOverlayChange.trigger(true);
   }
 
   public hideOverlay(requester:string): void {
     PageHelper.showScrollY(requester);
-    this.OnOverlayChange.trigger(false);
   }
 
   getScrollbarWidth(): number {

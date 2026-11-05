@@ -8,7 +8,7 @@ import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../../../icons';
 
 class MockLightboxService {
-  loopVideos = false;
+  loopVideos = () => false;
 }
 
 function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
@@ -58,7 +58,6 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
     } as any));
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
@@ -69,7 +68,6 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
   it('should not render live-photo-container for a regular photo', () => {
     fixture.componentRef.setInput('gridMedia', makeGridMedia());
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
     fixture.detectChanges();
 
     const el: HTMLElement = fixture.nativeElement;
@@ -82,31 +80,29 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
     } as any));
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
 
-    expect(component.liveVideoSrc).toBeTruthy();
-    expect(component.liveVideoSrc).toContain('IMG_001_HEVC.MOV');
+    expect(component.liveVideoSrc()).toBeTruthy();
+    expect(component.liveVideoSrc()).toContain('IMG_001_HEVC.MOV');
   });
 
   it('should not set liveVideoSrc for a regular photo', () => {
     fixture.componentRef.setInput('gridMedia', makeGridMedia());
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
 
-    expect(component.liveVideoSrc).toBeNull();
+    expect(component.liveVideoSrc()).toBeNull();
   });
 
   it('should toggle liveVideoPlaying via startLiveVideo/stopLiveVideo', () => {
-    expect(component.liveVideoPlaying).toBe(false);
+    expect(component.liveVideoPlaying()).toBe(false);
     // liveVideo ViewChild is null in unit tests (no real DOM video),
     // so startLiveVideo returns early, but liveVideoPlaying is set first
     component.startLiveVideo();
     // Without a real video element, the method returns early before setting the flag
     // Test the flag directly
-    component.liveVideoPlaying = true;
-    expect(component.liveVideoPlaying).toBe(true);
-    component.liveVideoPlaying = false;
-    expect(component.liveVideoPlaying).toBe(false);
+    component.liveVideoPlaying.set(true);
+    expect(component.liveVideoPlaying()).toBe(true);
+    component.liveVideoPlaying.set(false);
+    expect(component.liveVideoPlaying()).toBe(false);
   });
 
   it('should have pointer-events:none on live-photo-container', () => {
@@ -114,7 +110,6 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
     } as any));
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
     fixture.detectChanges();
 
     const container = fixture.nativeElement.querySelector('.live-photo-container');
@@ -128,11 +123,60 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
       liveVideoPath: 'photos/IMG_001_HEVC.MOV',
     } as any));
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
     fixture.detectChanges();
 
     const badge = fixture.nativeElement.querySelector('.live-photo-badge');
     expect(badge).not.toBeNull();
     expect(badge.textContent.trim()).toBe('LIVE');
+  });
+  it('should start over when the media changes, so the previous photo never shows for the new one', () => {
+    const first = makeGridMedia({name: 'first.jpg'} as any);
+    first.getBestSizedMediaPath = () => 'data:image/gif;base64,Zmlyc3Q=';
+    const second = makeGridMedia({name: 'second.jpg'} as any);
+    second.getBestSizedMediaPath = () => 'data:image/gif;base64,c2Vjb25k';
+    fixture.componentRef.setInput('gridMedia', first);
+    fixture.componentRef.setInput('loadMedia', true);
+    fixture.detectChanges();
+    const firstImg: HTMLImageElement = fixture.nativeElement.querySelector('img[alt="first.jpg"]');
+    expect(firstImg).not.toBeNull();
+    component.onImageLoad();
+    fixture.detectChanges();
+    expect(component.showThumbnail()).toBe(false);
+    expect(component.isRenderedMediaLoaded()).toBe(true);
+
+    fixture.componentRef.setInput('gridMedia', second);
+    fixture.detectChanges();
+
+    // the thumbnail shows again until the new photo loads, in a new <img>
+    expect(component.showThumbnail()).toBe(true);
+    expect(component.photoSrc()).toBe('data:image/gif;base64,c2Vjb25k');
+    const secondImg: HTMLImageElement = fixture.nativeElement.querySelector('img[alt="second.jpg"]');
+    expect(secondImg).not.toBeNull();
+    expect(secondImg).not.toBe(firstImg);
+    expect(firstImg.isConnected).toBe(false);
+    expect(fixture.nativeElement.querySelector('img[alt="first.jpg"]')).toBeNull();
+  });
+
+  it('should load the original photo when zoomed in', () => {
+    const gridMedia = makeGridMedia();
+    gridMedia.getBestSizedMediaPath = () => 'best';
+    gridMedia.getOriginalMediaPath = () => 'original';
+    fixture.componentRef.setInput('gridMedia', gridMedia);
+    fixture.componentRef.setInput('loadMedia', true);
+    expect(component.photoSrc()).toBe('best');
+
+    fixture.componentRef.setInput('zoom', 2);
+    expect(component.photoSrc()).toBe('original');
+    fixture.componentRef.setInput('zoom', 1);
+    expect(component.photoSrc()).toBe('original');
+  });
+
+  it('should compute the image transform from the zoom and the drag', () => {
+    expect(component.imageTransform()).toBe('scale(1) translate(calc(-50% + 0px), calc(-50% + 0px))');
+
+    fixture.componentRef.setInput('zoom', 2);
+    fixture.componentRef.setInput('drag', {x: 10, y: -20});
+
+    expect(component.imageTransform()).toBe('scale(2) translate(calc(-25% + 5px), calc(-25% + -10px))');
   });
 });

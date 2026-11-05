@@ -1,20 +1,20 @@
 <app-frame #frame>
   <div body class="container-fluid">
 
-    @if (notificationService.countedNotifications.length>0) {
+    @if (notificationRows().length>0) {
       <div class="card mb-4">
         <h5 class="card-header" i18n>Server notifications</h5>
         <div class="card-body">
-          @for (notification of notificationService.countedNotifications; track notification) {
-            <div class="alert alert-{{getCss(notification.type)}}" role="alert">
-              ({{notification.count}}) {{notification.message}}
-              @if (notification.details) {
-                <pre class="notification-details mt-2 mb-0">{{formatDetails(notification.details)}}</pre>
+          @for (row of notificationRows(); track row.notification) {
+            <div class="alert alert-{{row.css}}" role="alert">
+              ({{row.notification.count}}) {{row.notification.message}}
+              @if (row.notification.details) {
+                <pre class="notification-details mt-2 mb-0">{{row.details}}</pre>
               }
-              @if (notification.request) {
+              @if (row.notification.request) {
                 <br/>
-                Request: "{{notification.request.method}}", url: "{{notification.request.url}}", status code:
-                "{{notification.request.statusCode}}"
+                Request: "{{row.notification.request.method}}", url: "{{row.notification.request.url}}", status code:
+                "{{row.notification.request.statusCode}}"
               }
             </div>
           }
@@ -33,7 +33,7 @@
             class="version"
             href="https://github.com/bpatrik/pigallery2/releases">
             <span
-              i18n>App version:</span>&nbsp;<span>{{'v' + ((settingsService.settings | async).Environment.appVersion || '----')}}</span>
+              i18n>App version:</span>&nbsp;<span>{{'v' + (settingsService.settings().Environment.appVersion || '----')}}</span>
             </a>
           </div>
           <div class="mb-1">
@@ -43,17 +43,17 @@
                 dropdownToggle
                 id="config-priority"
                 class="btn btn-danger dropdown-toggle"
-                [class.btn-secondary]="settingsService.configPriority === ConfigPriority.basic"
-                [class.btn-warning]="settingsService.configPriority === ConfigPriority.advanced"
-                [class.btn-danger]="settingsService.configPriority === ConfigPriority.underTheHood"
+                [class.btn-secondary]="settingsService.configPriority() === ConfigPriority.basic"
+                [class.btn-warning]="settingsService.configPriority() === ConfigPriority.advanced"
+                [class.btn-danger]="settingsService.configPriority() === ConfigPriority.underTheHood"
                 data-bs-toggle="dropdown" aria-expanded="false">
-                {{ConfigPriority[settingsService.configPriority] | stringifyEnum}}
+                {{ConfigPriority[settingsService.configPriority()] | stringifyEnum}}
               </button>
               <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 @for (cp of configPriorities; track cp) {
                   <li>
                     <button class="dropdown-item"
-                    (click)="settingsService.configPriority = cp.key; settingsService.configSetupChanged()">{{cp.value}}</button>
+                    (click)="settingsService.configPriority.set(cp.key); settingsService.configSetupChanged()">{{cp.value}}</button>
                   </li>
                 }
               </ul>
@@ -63,16 +63,16 @@
                 dropdownToggle
                 id="config-style"
                 class="btn dropdown-toggle"
-                [class.btn-secondary]="settingsService.configStyle == ConfigStyle.full"
-                [class.btn-primary]="settingsService.configStyle == ConfigStyle.compact"
+                [class.btn-secondary]="settingsService.configStyle() == ConfigStyle.full"
+                [class.btn-primary]="settingsService.configStyle() == ConfigStyle.compact"
                 data-bs-toggle="dropdown" aria-expanded="false">
-                {{ConfigStyle[settingsService.configStyle] | stringifyEnum}}
+                {{ConfigStyle[settingsService.configStyle()] | stringifyEnum}}
               </button>
               <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 @for (cp of configStyles; track cp) {
                   <li>
                     <button class="dropdown-item"
-                    (click)="settingsService.configStyle = cp.key; settingsService.configSetupChanged()">{{cp.value}}</button>
+                    (click)="settingsService.configStyle.set(cp.key); settingsService.configSetupChanged()">{{cp.value}}</button>
                   </li>
                 }
               </ul>
@@ -89,15 +89,15 @@
               <div class="card-body text-md-start text-center align-content-md-start align-content-center">
                 <h5 i18n="title of left card in settings page that contains settings contents" class="card-title">
                 Menu</h5>
-                @for (s of contents; track s) {
+                @for (s of settingsComponents(); track s) {
                   <div class="py-md-1 px-md-0"
                     [hidden]="!s.HasAvailableSettings">
                     <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
                       (click)="viewportScroller.scrollToAnchor(s.ConfigPath())"
                       >
-                      <ng-icon [name]="s.icon" /> {{s.Name}}
+                      <ng-icon [name]="s.icon()" /> {{s.Name()}}
                     </button>
-                    @for (n of s.nestedConfigs; track n) {
+                    @for (n of s.nestedConfigs(); track n.id) {
                       <button class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"
                         [hidden]="!n.visible()"
                         (click)="viewportScroller.scrollToAnchor(n.id)">
@@ -141,7 +141,7 @@
         <div class="col-12">
           <div class="text-end">
             <ng-container i18n>Up time</ng-container><!--
-            -->: {{(settingsService.settings | async).Environment.upTime | date:'medium'}}
+            -->: {{settingsService.settings().Environment.upTime | date:'medium'}}
           </div>
         </div>
       </div>
@@ -149,13 +149,13 @@
     </div>
   </app-frame>
   <ng-template #popTemplate>
-    <span i18n>Application version</span>: v{{(settingsService.settings | async).Environment.appVersion}}
-    @if ((settingsService.settings | async).Environment.buildTime) {
+    <span i18n>Application version</span>: v{{settingsService.settings().Environment.appVersion}}
+    @if (settingsService.settings().Environment.buildTime) {
       <br/>
-      <span i18n>Built at</span>: {{(settingsService.settings | async).Environment.buildTime | date:'medium' }}
+      <span i18n>Built at</span>: {{settingsService.settings().Environment.buildTime | date:'medium' }}
     }
-    @if ((settingsService.settings | async).Environment.buildCommitHash) {
+    @if (settingsService.settings().Environment.buildCommitHash) {
       <br/>
-      <span i18n>Git commit</span>: {{(settingsService.settings | async).Environment.buildCommitHash}}
+      <span i18n>Git commit</span>: {{settingsService.settings().Environment.buildCommitHash}}
     }
   </ng-template>

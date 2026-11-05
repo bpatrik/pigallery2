@@ -384,6 +384,16 @@ export const SearchQueryUtils = {
     return JSON.stringify(shorten(query));
   },
   /**
+   * The urlified exact match text search (e.g. for a keyword, a person or a place link)
+   */
+  urlifyExactMatch: (type: SearchQueryTypes, value: string): string => {
+    return SearchQueryUtils.urlify({
+      type,
+      matchType: TextSearchQueryMatchTypes.exact_match,
+      value,
+    } as TextSearch);
+  },
+  /**
    * Pareses the shortened urls and returns with the original SearchQueryDTO
    * @param urlQuery
    */

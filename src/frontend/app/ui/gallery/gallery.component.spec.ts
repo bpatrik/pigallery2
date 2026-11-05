@@ -1,7 +1,7 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute, provideRouter} from '@angular/router';
-import {BehaviorSubject, Observable, of} from 'rxjs';
-import {ChangeDetectorRef} from '@angular/core';
+import {BehaviorSubject, of} from 'rxjs';
+import {ChangeDetectorRef, signal} from '@angular/core';
 import {provideHttpClient, withXhr} from '@angular/common/http';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 
@@ -12,7 +12,7 @@ import {AuthenticationService} from '../../model/network/authentication.service'
 import {ShareService} from './share.service';
 import {NavigationService} from '../../model/navigation.service';
 import {FilterService} from './filter/filter.service';
-import {GallerySortingService} from './navigator/sorting.service';
+import {GallerySortingService, GroupedDirectoryContent} from './navigator/sorting.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {Config} from '../../../../common/config/public/Config';
 import {LeafletMarkerClusterModule} from '@bluehalo/ngx-leaflet-markercluster';
@@ -25,6 +25,8 @@ import {NotificationService} from '../../model/notification.service';
 import {GalleryNavigatorService} from './navigator/navigator.service';
 import {MediaButtonModalService} from './grid/photo/media-button-modal/media-button-modal.service';
 import {SortingMethod} from '../../../../common/entities/SortingMethods';
+import {GridSizes} from '../../../../common/entities/GridSizes';
+import {PhotoDTO} from '../../../../common/entities/PhotoDTO';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
 import {UploaderService, UploadProgress} from './uploader/uploader.service';
@@ -36,31 +38,32 @@ import {appIcons} from '../../icons';
 
 // Mock services
 class MockContentLoaderService {
-  content = new BehaviorSubject<ContentWrapperWithError>({} as ContentWrapperWithError);
+  readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
   loadDirectory = vi.fn();
   search = vi.fn().mockReturnValue(Promise.resolve());
 
   constructor(private initialContent: ContentWrapperWithError = null) {
     if (initialContent) {
-      this.content.next(initialContent);
+      this.content.set(initialContent);
     }
   }
 }
 
 class MockContentService {
-  sortedFilteredContent = new BehaviorSubject(null);
+  readonly sortedFilteredContent = signal<GroupedDirectoryContent>(null);
 }
 
 class MockAuthenticationService {
-  user = new BehaviorSubject(null); // Add this line
+  readonly user = signal(null);
   isAuthenticated = vi.fn().mockReturnValue(true);
   canSearch = vi.fn().mockReturnValue(true);
   isAuthorized = vi.fn().mockReturnValue(true);
+  isAdmin = vi.fn().mockReturnValue(false);
   logout = vi.fn(); // Also add logout method if needed
 }
 
 class MockShareService {
-  sharingSubject = new BehaviorSubject(null);
+  readonly sharing = signal(null);
   currentSharing = new BehaviorSubject(null);
 
   wait = vi.fn().mockReturnValue(Promise.resolve());
@@ -69,12 +72,13 @@ class MockShareService {
 }
 
 class MockNavigationService {
+  readonly url = signal('/gallery');
   toLogin = vi.fn().mockReturnValue(Promise.resolve(true));
   toGallery = vi.fn().mockReturnValue(Promise.resolve(true));
 }
 
 class MockFilterService {
-  applyFilters = vi.fn().mockReturnValue(of(null));
+  readonly filteredContent = signal({content: null, filters: {areFiltersActive: false}});
 }
 
 class MockCacheService {
@@ -87,16 +91,15 @@ class MockCacheService {
 }
 
 class MockBlogService{
-  getMarkDowns(date: Date): Observable<GroupedMarkdown[]>{
-    return of([]);
+  getMarkDowns(date: Date): GroupedMarkdown[] {
+    return [];
   }
 }
 
 
 class MockGallerySortingService {
-  sorting = new BehaviorSubject({} as SortingMethod);
-  grouping = new BehaviorSubject({} as SortingMethod);
-  applySorting = vi.fn().mockReturnValue(of(null));
+  readonly sorting = signal({} as SortingMethod);
+  readonly grouping = signal({} as SortingMethod);
   isDefaultSortingAndGrouping = vi.fn().mockReturnValue(of(true));
 }
 
@@ -116,7 +119,7 @@ class MockUploaderService{
 
 // the map reads the dark mode; the real service needs window.matchMedia, which jsdom lacks
 class MockThemeService {
-  darkMode = new BehaviorSubject(false);
+  readonly darkMode = signal(false);
 }
 
 
@@ -127,6 +130,9 @@ describe('GalleryComponent', () => {
   let mockAuthService: MockAuthenticationService;
   let mockShareService: MockShareService;
   let mockCacheService: MockCacheService;
+
+  const setSortedContent = (content: GroupedDirectoryContent): void =>
+    (TestBed.inject(ContentService) as unknown as MockContentService).sortedFilteredContent.set(content);
 
   const setUp = async () => {
     // Reset Config to default state
@@ -150,7 +156,7 @@ describe('GalleryComponent', () => {
         {provide: ContentService, useClass: MockContentService},
         {provide: AuthenticationService, useValue: mockAuthService},
         {provide: ShareService, useValue: mockShareService},
-        {provide: NavigationService, useValue: MockNavigationService},
+        {provide: NavigationService, useClass: MockNavigationService},
         {provide: FilterService, useClass: MockFilterService},
         {provide: GallerySortingService, useClass: MockGallerySortingService},
         {provide: PiTitleService, useClass: MockPiTitleService},
@@ -159,25 +165,17 @@ describe('GalleryComponent', () => {
         {provide: ThemeService, useClass: MockThemeService},
         {provide: FullScreenService, useValue: {mock: vi.fn()}},
         {provide: OverlayService, useValue: {mock: vi.fn()}},
-        {provide: QueryService, useValue: {getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
+        {provide: QueryService, useValue: {params: signal({}), getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
         {provide: NotificationService, useValue: {mock: vi.fn()}},
         {
           provide: GalleryNavigatorService, useValue: {
             isDefaultGridSize: () => true,
-            girdSize: {
-              subscribe: () => {
-              },
-              unsubscribe: () => {
-              }
-            }
+            girdSize: signal(GridSizes.medium)
           }
         },
         {
           provide: MediaButtonModalService, useValue: {
-            modalData: {
-              subscribe: () => {
-              }
-            }
+            modalData: signal(null)
           }
         },
         {provide: SearchQueryParserService, useValue: {stringify: () => ''}},
@@ -210,9 +208,9 @@ describe('GalleryComponent', () => {
   });
 
   it('should initialize with default values', () => {
-    expect(component.showSearchBar).toBe(false);
-    expect(component.showShare).toBe(false);
-    expect(component.showRandomPhotoBuilder).toBe(false);
+    expect(component.showSearchBar()).toBe(false);
+    expect(component.showShare()).toBe(false);
+    expect(component.showRandomPhotoBuilder()).toBe(false);
     expect(component.blogOpen).toBe(Config.Gallery.TopBlogStartsOpen);
     expect(component.mapEnabled).toBe(Config.Map.enabled);
   });
@@ -221,13 +219,13 @@ describe('GalleryComponent', () => {
     it('should return the current content from contentLoader', () => {
       const testContent = {} as ContentWrapperWithError;
       testContent.directory = {name: 'test', path: 'test'} as any;
-      mockContentLoader.content.next(testContent);
+      mockContentLoader.content.set(testContent);
 
       expect(component.ContentWrapper).toBe(testContent);
     });
 
     it('should return null when contentLoader has no content', () => {
-      mockContentLoader.content.next(null);
+      mockContentLoader.content.set(null);
       expect(component.ContentWrapper).toBeNull();
     });
   });
@@ -249,7 +247,7 @@ describe('GalleryComponent', () => {
 
     it('should handle null ContentWrapper gracefully', () => {
       // Simulate the scenario when cache is disabled and ContentWrapper is null
-      mockContentLoader.content.next(null);
+      mockContentLoader.content.set(null);
       fixture.detectChanges();
 
       expect(component.ContentWrapper).toBeNull();
@@ -257,7 +255,7 @@ describe('GalleryComponent', () => {
     });
 
     it('should not crash when accessing ContentWrapper properties with null value', () => {
-      mockContentLoader.content.next(null);
+      mockContentLoader.content.set(null);
       fixture.detectChanges();
 
       // These should not throw errors due to the null checks in the template
@@ -269,7 +267,7 @@ describe('GalleryComponent', () => {
     });
 
     it('should render template correctly with null ContentWrapper', () => {
-      mockContentLoader.content.next(null);
+      mockContentLoader.content.set(null);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -286,7 +284,7 @@ describe('GalleryComponent', () => {
     it('should show main content when ContentWrapper is not null', () => {
       const contentWrapper = {} as ContentWrapperWithError;
       contentWrapper.directory = {name: 'test', path: 'test'} as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -299,7 +297,7 @@ describe('GalleryComponent', () => {
     it('should display error message when ContentWrapper has error', () => {
       const contentWrapper = {} as ContentWrapperWithError;
       contentWrapper.error = 'Test error message';
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -311,7 +309,7 @@ describe('GalleryComponent', () => {
     it('should not show error alert when there is no error', () => {
       const contentWrapper = {} as ContentWrapperWithError;
       contentWrapper.directory = {name: 'test', path: 'test'} as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -330,13 +328,13 @@ describe('GalleryComponent', () => {
         media: [],
         metaFile: []
       } as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
 
-      component.directoryContent = {
+      setSortedContent({
         directories: [],
         mediaGroups: [],
         metaFile: []
-      };
+      });
 
       fixture.detectChanges();
 
@@ -352,7 +350,7 @@ describe('GalleryComponent', () => {
         directories: [],
         resultOverflow: false
       } as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -367,7 +365,7 @@ describe('GalleryComponent', () => {
         directories: [],
         resultOverflow: true
       } as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -385,7 +383,7 @@ describe('GalleryComponent', () => {
         path: 'test',
         isPartial: true
       } as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -400,7 +398,7 @@ describe('GalleryComponent', () => {
         path: 'test',
         isPartial: false
       } as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -411,7 +409,7 @@ describe('GalleryComponent', () => {
     it('should not show spinner when there is an error', () => {
       const contentWrapper = {} as ContentWrapperWithError;
       contentWrapper.error = 'Test error';
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -426,7 +424,7 @@ describe('GalleryComponent', () => {
         directories: [],
         resultOverflow: false
       } as any;
-      mockContentLoader.content.next(contentWrapper);
+      mockContentLoader.content.set(contentWrapper);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -439,33 +437,33 @@ describe('GalleryComponent', () => {
     it('should set showSearchBar based on authentication', async () => {
       mockAuthService.canSearch.mockReturnValue(true);
       await component.ngOnInit();
-      expect(component.showSearchBar).toBe(true);
+      expect(component.showSearchBar()).toBe(true);
 
       mockAuthService.canSearch.mockReturnValue(false);
       await component.ngOnInit();
-      expect(component.showSearchBar).toBe(false);
+      expect(component.showSearchBar()).toBe(false);
     });
 
     it('should set showShare based on config and authorization', async () => {
       Config.Sharing.enabled = true;
       mockAuthService.isAuthorized.mockReturnValue(true);
       await component.ngOnInit();
-      expect(component.showShare).toBe(true);
+      expect(component.showShare()).toBe(true);
 
       Config.Sharing.enabled = false;
       await component.ngOnInit();
-      expect(component.showShare).toBe(false);
+      expect(component.showShare()).toBe(false);
     });
 
     it('should set showRandomPhotoBuilder based on config and authorization', async () => {
       Config.RandomPhoto.enabled = true;
       mockAuthService.isAuthorized.mockReturnValue(true);
       await component.ngOnInit();
-      expect(component.showRandomPhotoBuilder).toBe(true);
+      expect(component.showRandomPhotoBuilder()).toBe(true);
 
       Config.RandomPhoto.enabled = false;
       await component.ngOnInit();
-      expect(component.showRandomPhotoBuilder).toBe(false);
+      expect(component.showRandomPhotoBuilder()).toBe(false);
     });
   });
 
@@ -480,22 +478,22 @@ describe('GalleryComponent', () => {
   describe('ShowMarkDown getter', () => {
     it('should return true when markdown is enabled and metaFile has MD files', () => {
       Config.MetaFile.markdown = true;
-      component.directoryContent = {
+      setSortedContent({
         directories: [],
         mediaGroups: [],
         metaFile: [{name: 'README.md'} as any]
-      };
+      });
 
       expect(component.ShowMarkDown).toBe(true);
     });
 
     it('should return false when markdown is disabled', () => {
       Config.MetaFile.markdown = false;
-      component.directoryContent = {
+      setSortedContent({
         directories: [],
         mediaGroups: [],
         metaFile: [{name: 'README.md'} as any]
-      };
+      });
 
       expect(component.ShowMarkDown).toBe(false);
     });
@@ -503,14 +501,22 @@ describe('GalleryComponent', () => {
 
   describe('ShowMap getter', () => {
     it('should return true when photos have GPS data and map is enabled', () => {
-      component.isPhotoWithLocation = true;
+      setSortedContent({
+        directories: [],
+        metaFile: [],
+        mediaGroups: [{name: '', media: [{metadata: {positionData: {GPSData: {latitude: 47.5, longitude: 19.04}}}} as PhotoDTO]}]
+      });
       expect(component.ShowMap).toBe(true);
     });
 
     it('should return false when map is disabled', () => {
       const originalMapEnabled = component.mapEnabled;
       (component as any).mapEnabled = false;
-      component.isPhotoWithLocation = true;
+      setSortedContent({
+        directories: [],
+        metaFile: [],
+        mediaGroups: [{name: '', media: [{metadata: {positionData: {GPSData: {latitude: 47.5, longitude: 19.04}}}} as PhotoDTO]}]
+      });
 
       expect(component.ShowMap).toBe(false);
 

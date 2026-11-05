@@ -1,5 +1,4 @@
-import {Injectable} from '@angular/core';
-import {Event} from '../../../../common/event/Event';
+import {Injectable, signal} from '@angular/core';
 
 
 declare const document: {
@@ -7,13 +6,22 @@ declare const document: {
   mozFullScreenElement: boolean;
   webkitFullscreenElement: boolean;
   exitFullscreen: () => void;
+  addEventListener: (type: string, listener: () => void) => void;
   mozCancelFullScreen: () => void;
   webkitExitFullscreen: () => void;
 };
 
 @Injectable({providedIn: 'root'})
 export class FullScreenService {
-  OnFullScreenChange = new Event<boolean>();
+  private readonly fullScreen = signal(this.isFullScreenEnabled());
+  // follows the browser, also when the user leaves the full screen with Escape
+  public readonly fullScreenEnabled = this.fullScreen.asReadonly();
+
+  constructor() {
+    for (const type of ['fullscreenchange', 'mozfullscreenchange', 'webkitfullscreenchange']) {
+      document.addEventListener(type, (): void => this.fullScreen.set(this.isFullScreenEnabled()));
+    }
+  }
 
   public isFullScreenEnabled(): boolean {
     return !!(
@@ -37,7 +45,6 @@ export class FullScreenService {
     } else if ((element as unknown as Record<string, () => void>).msRequestFullscreen) {
       (element as unknown as Record<string, () => void>).msRequestFullscreen();
     }
-    this.OnFullScreenChange.trigger(true);
   }
 
   public exitFullScreen(): void {
@@ -52,6 +59,5 @@ export class FullScreenService {
     } else if (document.webkitExitFullscreen) {
       document.webkitExitFullscreen();
     }
-    this.OnFullScreenChange.trigger(false);
   }
 }

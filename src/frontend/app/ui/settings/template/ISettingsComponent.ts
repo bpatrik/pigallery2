@@ -2,9 +2,9 @@ import {Signal} from '@angular/core';
 
 export interface ISettingsComponent {
   HasAvailableSettings: boolean;
-  Name: string;
-  icon: string;
+  Name: Signal<string>;
+  icon: Signal<string>;
   ConfigPath: Signal<string>;
   Changed: boolean;
-  nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[];
+  nestedConfigs: Signal<{ id: string, name: string, visible: () => boolean, icon: string }[]>;
 }

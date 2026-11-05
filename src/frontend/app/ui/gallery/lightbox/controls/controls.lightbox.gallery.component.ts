@@ -1,7 +1,7 @@
-import { Component, ElementRef, LOCALE_ID, OnChanges, OnDestroy, inject, input, output, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ElementRef, LOCALE_ID, OnDestroy, computed, effect, inject, input, model, output, signal, untracked, viewChild} from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
-import {GalleryPhotoComponent} from '../../grid/photo/photo.grid.gallery.component';
+import {GridMedia} from '../../grid/GridMedia';
 import {interval, Subscription} from 'rxjs';
 import {filter, skip} from 'rxjs/operators';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
@@ -30,7 +30,6 @@ import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/ges
   },
   styleUrls: ['./controls.lightbox.gallery.component.css', './inputrange.css'],
   templateUrl: './controls.lightbox.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent,
     BsDropdownDirective,
@@ -41,7 +40,7 @@ import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/ges
     GestureDirective
 ]
 })
-export class ControlsLightboxComponent implements OnDestroy, OnChanges {
+export class ControlsLightboxComponent implements OnDestroy {
   lightboxService = inject(LightboxService);
   fullScreenService = inject(FullScreenService);
   private authService = inject(AuthenticationService);
@@ -49,87 +48,83 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
 
   readonly MAX_ZOOM = 10;
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
-  readonly root = viewChild<ElementRef>('root');
   readonly closed = output();
   readonly toggleInfoPanel = output();
   readonly toggleFullScreen = output();
   readonly nextPhoto = output();
   readonly previousPhoto = output();
-  readonly navigation = input({ hasPrev: true, hasNext: true });
-  readonly activePhoto = input<GalleryPhotoComponent>(undefined);
+  readonly navigation = input({hasPrev: true, hasNext: true});
+  readonly activePhoto = input<GridMedia>(undefined);
   readonly mediaElement = input<GalleryLightboxMediaComponent>(undefined);
-  readonly photoFrameDim = input({ width: 1, height: 1, aspect: 1 });
-  readonly slideShowRunning = input<boolean>(undefined);
+  readonly photoFrameDim = input({width: 1, height: 1, aspect: 1});
+  readonly slideShowRunning = input<boolean>(false);
+  readonly zoom = model(1);
+  readonly drag = model({x: 0, y: 0});
   public readonly facesEnabled = Config.Faces.enabled;
-  public zoom = 1;
   public playBackDurations = [1, 2, 5, 10, 15, 20, 30, 60];
-  public controllersDimmed = false;
-  public drag = {x: 0, y: 0};
-  public SearchQueryTypes = SearchQueryTypes;
-  public faceContainerDim = {width: 0, height: 0};
+  public readonly controllersDimmed = signal(this.lightboxService.controllersDimmed());
   public searchEnabled: boolean;
+
+  readonly topLeftTitle = computed((): string => this.getText(this.lightboxService.topLeftTitle()));
+  readonly topLeftSubtitle = computed((): string => this.getText(this.lightboxService.topLeftSubtitle()));
+  readonly bottomLeftTitle = computed((): string => this.getText(this.lightboxService.bottomLeftTitle()));
+  readonly bottomLeftSubtitle = computed((): string => this.getText(this.lightboxService.bottomLeftSubtitle()));
+  readonly isPhoto = computed((): boolean => !!this.activePhoto()?.isPhoto());
+  readonly isVideo = computed((): boolean => !!this.activePhoto()?.isVideo());
+  readonly originalMediaPath = computed((): string => this.activePhoto()?.getOriginalMediaPath() ?? null);
+  // the faces with their position in % of the photo and their search link
+  readonly faces = computed(() => {
+    const photo = this.activePhoto()?.Photo;
+    if (!photo?.metadata?.faces) {
+      return [];
+    }
+    const size = photo.metadata.size;
+    return photo.metadata.faces.map(face => ({
+      name: face.name,
+      query: SearchQueryUtils.urlify({
+        type: SearchQueryTypes.person,
+        matchType: TextSearchQueryMatchTypes.exact_match,
+        value: face.name,
+      } as TextSearch),
+      top: face.box.top / size.height * 100,
+      left: face.box.left / size.width * 100,
+      height: face.box.height / size.height * 100,
+      width: face.box.width / size.width * 100,
+    }));
+  });
+  // the size of the photo on the screen, without zoom
+  readonly faceContainerDim = computed((): { width: number, height: number } => {
+    const activePhoto = this.activePhoto();
+    const frame = this.photoFrameDim();
+    if (!activePhoto) {
+      return {width: 0, height: 0};
+    }
+    const photoAspect = MediaDTOUtils.calcAspectRatio(activePhoto.media);
+    if (photoAspect < frame.aspect) {
+      return {width: frame.height * photoAspect, height: frame.height};
+    }
+    return {width: frame.width, height: frame.width / photoAspect};
+  });
+
   private ctx: CanvasRenderingContext2D;
   private visibilityTimer: number = null;
   private timerSub: Subscription;
-  private prevDrag = {x: 0, y: 0};
-  private prevZoom = 1;
+  // the drag and the zoom when the current pan or pinch started
+  private panStart: { x: number, y: number } = null;
+  private pinchStart: number = null;
 
   constructor() {
-    this.controllersDimmed = this.lightboxService.controllersDimmed;
     this.searchEnabled = this.authService.canSearch();
-    if(this.playBackDurations.indexOf(this.lightboxService.slideshowSpeed) === -1) {
-      this.playBackDurations.push(this.lightboxService.slideshowSpeed);
+    const speed = this.lightboxService.slideshowSpeed();
+    if (this.playBackDurations.indexOf(speed) === -1) {
+      this.playBackDurations.push(speed);
       this.playBackDurations.sort((a, b) => a - b);
     }
-  }
-
-
-  public get Zoom(): number {
-    return this.zoom;
-  }
-
-  public set Zoom(zoom: number) {
-    const activePhoto = this.activePhoto();
-    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
-      return;
-    }
-    if (zoom < 1) {
-      zoom = 1;
-    }
-    if (zoom > this.MAX_ZOOM) {
-      zoom = this.MAX_ZOOM;
-    }
-    if (this.zoom === zoom) {
-      return;
-    }
-    this.stopSlideShow();
-    this.drag.x = (this.drag.x / this.zoom) * zoom;
-    this.drag.y = (this.drag.y / this.zoom) * zoom;
-    this.prevDrag.x = this.drag.x;
-    this.prevDrag.y = this.drag.y;
-    this.zoom = zoom;
-    this.showControls();
-    this.checkZoomAndDrag();
-  }
-
-  get TopLeftTitle(): string {
-    return this.getText(this.lightboxService.topLeftTitle);
-  }
-
-  get TopLeftSubtitle(): string {
-    return this.getText(this.lightboxService.topLeftSubtitle);
-  }
-
-  get BottomLeftTitle(): string {
-    return this.getText(this.lightboxService.bottomLeftTitle);
-  }
-
-  get BottomLeftSubtitle(): string {
-    return this.getText(this.lightboxService.bottomLeftSubtitle);
-  }
-
-  public containerWidth(): void {
-    return this.root().nativeElement.width;
+    // the slideshow timer
+    effect((): void => {
+      const running = this.slideShowRunning();
+      untracked((): void => running ? this.runSlideShow() : this.stopSlideShow());
+    });
   }
 
   ngOnDestroy(): void {
@@ -141,31 +136,41 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
-  // Side effect: resizes the face overlay and restarts the slideshow timer.
-  ngOnChanges(): void {
-    this.updateFaceContainerDim();
-    if (this.slideShowRunning()) {
-      this.runSlideShow();
+  setZoom(zoom: number): void {
+    const activePhoto = this.activePhoto();
+    if (!activePhoto || activePhoto.isVideo()) {
+      return;
     }
+    zoom = Math.min(Math.max(Number(zoom), 1), this.MAX_ZOOM);
+    const prevZoom = this.zoom();
+    if (prevZoom === zoom) {
+      return;
+    }
+    this.pauseClicked();
+    const scale = (d: { x: number, y: number }) => ({x: (d.x / prevZoom) * zoom, y: (d.y / prevZoom) * zoom});
+    this.zoom.set(zoom);
+    this.drag.set(this.fixDrag(scale(this.drag())));
+    if (this.panStart) {
+      this.panStart = this.fixDrag(scale(this.panStart));
+    }
+    this.showControls();
   }
 
   pan($event: PanEvent): void {
     const activePhoto = this.activePhoto();
-    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
+    if (!activePhoto || activePhoto.isVideo()) {
       return;
     }
-    if (this.zoom === 1) {
+    if (this.zoom() === 1) {
       return;
     }
-    this.drag.x = this.prevDrag.x + $event.deltaX;
-    this.drag.y = this.prevDrag.y + $event.deltaY;
+    if (this.panStart === null) {
+      this.panStart = this.drag();
+    }
+    this.drag.set(this.fixDrag({x: this.panStart.x + $event.deltaX, y: this.panStart.y + $event.deltaY}));
     this.showControls();
-    this.checkZoomAndDrag();
     if ($event.isFinal) {
-      this.prevDrag = {
-        x: this.drag.x,
-        y: this.drag.y,
-      };
+      this.panStart = null;
     }
   }
 
@@ -183,7 +188,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         this.nextMediaManuallyTriggered();
       }
     }
-    if (activePhoto.gridMedia().isVideo()) {
+    if (activePhoto.isVideo()) {
       return;
     }
     if ($event.deltaY < 0) {
@@ -195,42 +200,37 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
 
   pinch($event: PinchEvent): void {
     const activePhoto = this.activePhoto();
-    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
+    if (!activePhoto || activePhoto.isVideo()) {
       return;
     }
     this.showControls();
-    this.Zoom = this.prevZoom * $event.scale;
+    if (this.pinchStart === null) {
+      this.pinchStart = this.zoom();
+    }
+    this.setZoom(this.pinchStart * $event.scale);
     if ($event.isFinal) {
-      this.prevZoom = this.zoom;
+      this.pinchStart = null;
     }
   }
 
   doubleTap(): void {
     const activePhoto = this.activePhoto();
-    if (!activePhoto || activePhoto.gridMedia().isVideo()) {
+    if (!activePhoto || activePhoto.isVideo()) {
       return;
     }
 
     this.showControls();
-    if (this.zoom > 1) {
-      this.Zoom = 1;
-      this.prevZoom = this.zoom;
-      return;
-    } else {
-      this.Zoom = 5;
-      this.prevZoom = this.zoom;
-      return;
-    }
+    this.setZoom(this.zoom() > 1 ? 1 : 5);
   }
 
   zoomIn(): void {
     this.showControls();
-    this.Zoom = this.zoom + this.zoom / 10;
+    this.setZoom(this.zoom() + this.zoom() / 10);
   }
 
   zoomOut(): void {
     this.showControls();
-    this.Zoom = this.zoom - this.zoom / 10;
+    this.setZoom(this.zoom() - this.zoom() / 10);
   }
 
   onKeyPress(event: KeyboardEvent): void {
@@ -262,23 +262,23 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         break;
       case 'c':
       case 'C':
-        this.lightboxService.captionAlwaysOn = !this.lightboxService.captionAlwaysOn;
+        this.lightboxService.setCaptionAlwaysOn(!this.lightboxService.captionAlwaysOn());
         break;
       case 'a':
       case 'A':
-        this.lightboxService.facesAlwaysOn = !this.lightboxService.facesAlwaysOn;
+        this.lightboxService.setFacesAlwaysOn(!this.lightboxService.facesAlwaysOn());
         break;
       case 'l':
       case 'L':
-        this.lightboxService.loopVideos = !this.lightboxService.loopVideos;
+        this.lightboxService.setLoopVideos(!this.lightboxService.loopVideos());
         break;
       case 'd':
       case 'D':
-        if (event.shiftKey) {
+        if (event.shiftKey && activePhoto) {
           const link = document.createElement('a');
           link.setAttribute('type', 'hidden');
-          link.href = this.activePhoto().gridMedia().getOriginalMediaPath();
-          link.download = this.activePhoto().gridMedia().media.name;
+          link.href = activePhoto.getOriginalMediaPath();
+          link.download = activePhoto.media.name;
           document.body.appendChild(link);
           link.click();
           link.remove();
@@ -288,24 +288,23 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
         this.closed.emit();
         break;
       case ' ': // space
-        if (activePhoto && activePhoto.gridMedia().isVideo()) {
+        if (activePhoto && activePhoto.isVideo()) {
           this.mediaElement().playPause();
         }
         break;
     }
   }
 
-  public runSlideShow(): void {
+  private runSlideShow(): void {
     //timer already running, do not reset it.
     if (this.timerSub) {
       return;
     }
-    this.stopSlideShow();
     this.drawSliderProgress(0);
     this.timerSub = interval(100)
       .pipe(filter((t) => {
         this.drawSliderProgress(t);
-        return t % (this.lightboxService.slideshowSpeed * 10) === 0; // ticks every 100 ms
+        return t % (this.lightboxService.slideshowSpeed() * 10) === 0; // ticks every 100 ms
       }))
       .pipe(skip(1)) // do not skip to next photo right away
       .subscribe(this.showNextMedia);
@@ -315,7 +314,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.showControls();
   }
 
-  public stopSlideShow(): void {
+  private stopSlideShow(): void {
     if (this.timerSub != null) {
       this.timerSub.unsubscribe();
       this.timerSub = null;
@@ -323,20 +322,14 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.ctx = null;
   }
 
-  playClicked() {
-    this.lightboxService.playback = true;
+  playClicked(): void {
+    this.lightboxService.setPlayback(true);
   }
 
-  pauseClicked() {
-    this.lightboxService.playback = false;
-  }
-
-  resetZoom(): void {
-    this.Zoom = 1;
-  }
-
-  onResize(): void {
-    this.checkZoomAndDrag();
+  pauseClicked(): void {
+    if (this.slideShowRunning()) {
+      this.lightboxService.setPlayback(false);
+    }
   }
 
   public closeLightbox(): void {
@@ -344,21 +337,13 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     this.closed.emit();
   }
 
-  getPersonSearchQuery(name: string): string {
-    return SearchQueryUtils.urlify({
-      type: SearchQueryTypes.person,
-      matchType: TextSearchQueryMatchTypes.exact_match,
-      value: name,
-    } as TextSearch);
-  }
-
-  nextMediaManuallyTriggered() {
+  nextMediaManuallyTriggered(): void {
     this.resetSlideshowTimer();
     this.nextPhoto.emit();
   }
 
-  getText(type: LightBoxTitleTexts[]): string {
-    const gridMedia = this.activePhoto()?.gridMedia();
+  private getText(type: LightBoxTitleTexts[]): string {
+    const gridMedia = this.activePhoto();
     if (!gridMedia?.media) {
       return null;
     }
@@ -465,27 +450,19 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
       return;
     }
     // do not skip video if its playing
-    const activePhoto = this.activePhoto();
-    if (
-      activePhoto &&
-      activePhoto.gridMedia().isVideo() &&
-      !mediaElement.Paused
-    ) {
+    if (this.isVideo() && !mediaElement.paused()) {
       return;
     }
     this.nextPhoto.emit();
   };
 
-  private drawSliderProgress(t: number) {
+  private drawSliderProgress(t: number): void {
     let p = 0;
 
     // Video is a special snowflake. It won't go to next media if a video is playing
-    const activePhoto = this.activePhoto();
-    if (!(activePhoto &&
-      activePhoto.gridMedia().isVideo() &&
-      !this.mediaElement().Paused)) {
-      p = (t % (this.lightboxService.slideshowSpeed * 10)) / this.lightboxService.slideshowSpeed / 10;  // ticks every 100 ms
-
+    if (!(this.isVideo() && !this.mediaElement().paused())) {
+      const speed = this.lightboxService.slideshowSpeed();
+      p = (t % (speed * 10)) / speed / 10;  // ticks every 100 ms
     }
     const canvas = this.canvas();
     if (!canvas) {
@@ -512,64 +489,38 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
     }
   }
 
-  private checkZoomAndDrag(): void {
-    const fixDrag = (drag: { x: number; y: number }) => {
-      if (this.zoom === 1) {
-        drag.y = 0;
-        drag.x = 0;
-        return;
-      }
-      const activePhoto = this.activePhoto();
-      if (!activePhoto) {
-        return;
-      }
+  // keeps the zoomed photo on the screen
+  private fixDrag(drag: { x: number; y: number }): { x: number; y: number } {
+    const zoom = this.zoom();
+    if (zoom === 1) {
+      return {x: 0, y: 0};
+    }
+    const activePhoto = this.activePhoto();
+    if (!activePhoto) {
+      return drag;
+    }
 
-      const photoAspect = MediaDTOUtils.calcAspectRatio(
-        activePhoto.gridMedia().media
-      );
-      const widthFilled = photoAspect > this.photoFrameDim().aspect;
-      const divWidth = this.photoFrameDim().width;
-      const divHeight = this.photoFrameDim().height;
-      const size = {
-        width: (widthFilled ? divWidth : divHeight * photoAspect) * this.zoom,
-        height: (widthFilled ? divWidth / photoAspect : divHeight) * this.zoom,
-      };
-
-      const widthDrag = Math.abs(divWidth - size.width) / 2;
-      const heightDrag = Math.abs(divHeight - size.height) / 2;
-
-      if (divWidth > size.width) {
-        drag.x = 0;
-      }
-      if (divHeight > size.height) {
-        drag.y = 0;
-      }
-
-      if (drag.x < -widthDrag) {
-        drag.x = -widthDrag;
-      }
-      if (drag.x > widthDrag) {
-        drag.x = widthDrag;
-      }
-      if (drag.y < -heightDrag) {
-        drag.y = -heightDrag;
-      }
-      if (drag.y > heightDrag) {
-        drag.y = heightDrag;
-      }
+    const frame = this.photoFrameDim();
+    const photoAspect = MediaDTOUtils.calcAspectRatio(activePhoto.media);
+    const widthFilled = photoAspect > frame.aspect;
+    const divWidth = frame.width;
+    const divHeight = frame.height;
+    const size = {
+      width: (widthFilled ? divWidth : divHeight * photoAspect) * zoom,
+      height: (widthFilled ? divWidth / photoAspect : divHeight) * zoom,
     };
-    if (this.zoom < 1) {
-      this.zoom = 1;
-    }
-    if (this.zoom > this.MAX_ZOOM) {
-      this.zoom = this.MAX_ZOOM;
-    }
-    fixDrag(this.drag);
-    fixDrag(this.prevDrag);
+
+    const widthDrag = Math.abs(divWidth - size.width) / 2;
+    const heightDrag = Math.abs(divHeight - size.height) / 2;
+    const clamp = (v: number, max: number) => Math.min(Math.max(v, -max), max);
+    return {
+      x: divWidth > size.width ? 0 : clamp(drag.x, widthDrag),
+      y: divHeight > size.height ? 0 : clamp(drag.y, heightDrag),
+    };
   }
 
   private showControls(): void {
-    this.controllersDimmed = false;
+    this.controllersDimmed.set(false);
     if (this.visibilityTimer != null) {
       clearTimeout(this.visibilityTimer);
     }
@@ -577,26 +528,7 @@ export class ControlsLightboxComponent implements OnDestroy, OnChanges {
   }
 
   private hideControls = () => {
-    this.controllersDimmed = true;
+    this.controllersDimmed.set(true);
   };
-
-  private updateFaceContainerDim(): void {
-    const activePhoto = this.activePhoto();
-    if (!activePhoto) {
-      return;
-    }
-
-    const photoAspect = MediaDTOUtils.calcAspectRatio(
-      activePhoto.gridMedia().media
-    );
-
-    if (photoAspect < this.photoFrameDim().aspect) {
-      this.faceContainerDim.height = this.photoFrameDim().height;
-      this.faceContainerDim.width = this.photoFrameDim().height * photoAspect;
-    } else {
-      this.faceContainerDim.height = this.photoFrameDim().width / photoAspect;
-      this.faceContainerDim.width = this.photoFrameDim().width;
-    }
-  }
 
 }

@@ -1,14 +1,14 @@
-<div [hidden]="!visible" #root>
+<div [hidden]="!visible()" #root>
 
   <div class="lightbox"
-    [style.width.px]="lightboxDimension.width"
-    [style.height.px]="lightboxDimension.height"
-    [style.top.px]="lightboxDimension.top"
-    [style.left.px]="lightboxDimension.left"
-    [style.opacity]="opacity">
+    [style.width.px]="lightboxDimension().width"
+    [style.height.px]="lightboxDimension().height"
+    [style.top.px]="lightboxDimension().top"
+    [style.left.px]="lightboxDimension().left"
+    [style.opacity]="opacity()">
     <div
-      [style.width.px]="mapDimension.width"
-      [style.height.px]="mapDimension.height"
+      [style.width.px]="mapDimension().width"
+      [style.height.px]="mapDimension().height"
 
       leaflet
       [leafletOptions]="mapOptions"
@@ -18,18 +18,18 @@
   </div>
 
 
-  @if (controllersVisible) {
+  @if (controllersVisible()) {
     <div id="controllers-container">
       <div id="controls" class="controls-top">
         <div class="controls-background rounded-start-bottom">
-          @if (fullScreenService.isFullScreenEnabled()) {
+          @if (fullScreenService.fullScreenEnabled()) {
             <div class="highlight control-button"
               (click)="fullScreenService.exitFullScreen()" title="toggle fullscreen, key: f" i18n-title>
               <ng-icon size="0.9em"
               name="ionContractOutline" />
             </div>
           }
-          @if (!fullScreenService.isFullScreenEnabled()) {
+          @if (!fullScreenService.fullScreenEnabled()) {
             <div class="highlight control-button"
               (click)="fullScreenService.showFullScreen(root)" title="toggle fullscreen, key: f" i18n-title>
               <ng-icon size="0.9em"

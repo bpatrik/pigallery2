@@ -1,4 +1,4 @@
-import {Component, computed, inject, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject} from '@angular/core';
 import {NgIconComponent} from '@ng-icons/core';
 import {Toast, ToastPlacement, ToastService, ToastSummary, ToastType} from './toast.service';
 import {ToastCardComponent} from './toast-card.component';
@@ -10,13 +10,14 @@ export interface ToastEntry {
   group?: string;
   summary?: ToastSummary;
   expanded?: boolean;
+  icon: string;
+  color: string;
 }
 
 @Component({
   selector: 'app-toast-container',
   templateUrl: './toast-container.component.html',
   styleUrls: ['./toast-container.component.css'],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ToastCardComponent, NgIconComponent]
 })
 export class ToastContainerComponent {
@@ -52,11 +53,11 @@ export class ToastContainerComponent {
     };
   });
 
-  color(item: { type: ToastType, color?: string }): string {
+  private color(item: { type: ToastType, color?: string }): string {
     return item.color || this.COLORS[item.type];
   }
 
-  icon(item: { type: ToastType, icon?: string }): string {
+  private icon(item: { type: ToastType, icon?: string }): string {
     return item.icon || this.ICONS[item.type];
   }
 
@@ -83,7 +84,7 @@ export class ToastContainerComponent {
     for (const toast of toasts) {
       const group = toast.group && this.toastService.getGroup(toast.group);
       if (!group) {
-        entries.push({key: 't' + toast.id, toast});
+        entries.push(this.toastEntry(toast));
         continue;
       }
       if (doneGroups.has(toast.group)) {
@@ -93,21 +94,28 @@ export class ToastContainerComponent {
       // the whole group goes where its first toast is
       const members = toasts.filter((t) => t.group === toast.group);
       if (members.length <= group.collapseAfter) {
-        entries.push(...members.map((t) => ({key: 't' + t.id, toast: t})));
+        entries.push(...members.map((t) => this.toastEntry(t)));
         continue;
       }
       const expanded = this.toastService.isExpanded(toast.group);
       const visible = expanded ? members : members.slice(0, group.visibleWhenCollapsed);
       const hidden = expanded ? [] : members.slice(group.visibleWhenCollapsed);
+      const groupSummary = group.summary(members, hidden, expanded);
       const summary: ToastEntry = {
         key: 'g' + toast.group,
         group: toast.group,
-        summary: group.summary(members, hidden, expanded),
-        expanded
+        summary: groupSummary,
+        expanded,
+        icon: this.icon(groupSummary),
+        color: this.color(groupSummary)
       };
-      const visibleEntries = visible.map((t) => ({key: 't' + t.id, toast: t}));
+      const visibleEntries = visible.map((t) => this.toastEntry(t));
       entries.push(...(summaryFirst ? [summary, ...visibleEntries] : [...visibleEntries, summary]));
     }
     return entries;
+  }
+
+  private toastEntry(toast: Toast): ToastEntry {
+    return {key: 't' + toast.id, toast, icon: this.icon(toast), color: this.color(toast)};
   }
 }
