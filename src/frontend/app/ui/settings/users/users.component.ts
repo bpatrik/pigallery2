@@ -60,8 +60,8 @@ export class UsersComponent implements OnInit {
   readonly canModifyRole = computed<boolean>(() => this.canModifyUserRole(this.authService.user(), this.editOriginalUser()));
 
   // Confirm password fields for validation
-  public newUserPasswordConfirm: string = '';
-  public confirmNewPassword: string = '';
+  public newUserPasswordConfirm = '';
+  public confirmNewPassword = '';
 
   get newUserPasswordsMismatch(): boolean {
     return !!this.newUser?.password && this.newUserPasswordConfirm !== this.newUser.password;
