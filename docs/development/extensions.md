@@ -110,4 +110,4 @@ Here is their flow:
 
 ### Publishing your extension
 
-Add a new row to the https://github.com/bpatrik/pigallery2/blob/master/extension/REPOSITORY.md to publish your extension. Pigellery2 reads the online version of the file to chek for available extensions (no need to rebuidl the app).
+Add a new row to the https://github.com/bpatrik/pigallery2/blob/master/extension/REPOSITORY.md to publish your extension. Pigellery2 reads the online version of the file to check for available extensions (no need to rebuidl the app).
