@@ -172,6 +172,9 @@ Pitfalls seen so far:
 - Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
 - Add or adjust tests under `test/` for behaviour changes.
+- Fix bugs test-first (TDD): write a test that reproduces the bug, see it fail, then fix it.
+  If a reproducing test isn't reasonably feasible (e.g. needs real hardware, timing or a browser-only quirk),
+  don't sink time into it: fix the bug and say why there's no test.
 - New UI strings must use Angular i18n (`i18n` attributes / `$localize`); `npm run merge-new-translation` updates the `.xlf` files.
 - Support non-ASCII text everywhere: accented and other Unicode characters in file/folder names, paths, URLs,
   metadata (keywords, captions, person names) and search, on both SQLite and MySQL.
