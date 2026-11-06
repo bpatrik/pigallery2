@@ -1,9 +1,7 @@
 import sharp from 'sharp';
 import {Metadata, Sharp, SharpOptions} from 'sharp';
 import {Logger} from '../../Logger';
-import {FfmpegCommand, FfprobeData} from 'fluent-ffmpeg';
-import {FFmpegFactory} from '../FFmpegFactory';
-import * as path from 'path';
+import {FFmpeg} from '../FFmpeg';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 
 
@@ -67,64 +65,46 @@ export interface SvgRendererInput extends RendererInput {
 
 export class VideoRendererFactory {
   public static build(): (input: MediaRendererInput) => Promise<void> {
-    const ffmpeg = FFmpegFactory.get();
-    return (input: MediaRendererInput): Promise<void> => {
-      return new Promise((resolve, reject): void => {
-        Logger.silly('[FFmpeg] rendering thumbnail: ' + input.mediaPath);
+    return async (input: MediaRendererInput): Promise<void> => {
+      Logger.silly('[FFmpeg] rendering thumbnail: ' + input.mediaPath);
+      const data = await FFmpeg.probe(input.mediaPath);
 
-        ffmpeg(input.mediaPath).ffprobe((err: Error, data: FfprobeData): void => {
-          if (!!err || data === null) {
-            return reject('[FFmpeg] ' + err.toString());
-          }
+      let width = null;
+      let height = null;
+      for (const stream of data.streams) {
+        if (stream.width && stream.height && !isNaN(stream.width) && !isNaN(stream.height)) {
+          width = stream.width;
+          height = stream.height;
+          break;
+        }
+      }
+      if (!width || !height || isNaN(width) || isNaN(height)) {
+        throw new Error(`[FFmpeg] Can not read video dimension. Found: ${width}x${height}`);
+      }
+      const duration = parseFloat(data.format.duration);
+      if (isNaN(duration)) {
+        throw new Error('[FFmpeg] Can not read video duration: ' + input.mediaPath);
+      }
 
-          let width = null;
-          let height = null;
-          for (const stream of data.streams) {
-            if (stream.width && stream.height && !isNaN(stream.width) && !isNaN(stream.height)) {
-              width = stream.width;
-              height = stream.height;
-              break;
-            }
-          }
-          if (!width || !height || isNaN(width) || isNaN(height)) {
-            return reject(`[FFmpeg] Can not read video dimension. Found: ${{width}}x${{height}}`);
-          }
-          const command: FfmpegCommand = ffmpeg(input.mediaPath);
-          const fileName = path.basename(input.outPath);
-          const folder = path.dirname(input.outPath);
-          let executedCmd = '';
-          command
-            .on('start', (cmd): void => {
-              executedCmd = cmd;
-            })
-            .on('end', (): void => {
-              resolve();
-            })
-            .on('error', (e): void => {
-              reject('[FFmpeg] ' + e.toString() + ' executed: ' + executedCmd);
-            })
-            .outputOptions(['-qscale:v 50']);
-          if (input.makeSquare === false) {
-            const newSize =
-              width < height
-                ? Math.min(input.size, width) + 'x?'
-                : '?x' + Math.min(input.size, height);
-            command.takeScreenshots({
-              timemarks: ['10%'],
-              size: newSize,
-              filename: fileName,
-              folder,
-            });
-          } else {
-            command.takeScreenshots({
-              timemarks: ['10%'],
-              size: input.size + 'x' + input.size,
-              filename: fileName,
-              folder,
-            });
-          }
-        });
-      });
+      let scale: string;
+      if (input.makeSquare === false) {
+        // keeps the aspect ratio with an even size, and does not upscale
+        scale = width < height
+          ? 'scale=w=' + Math.min(input.size, width) + ':h=trunc(ow/a/2)*2'
+          : 'scale=w=trunc(oh*a/2)*2:h=' + Math.min(input.size, height);
+      } else {
+        scale = 'scale=w=' + input.size + ':h=' + input.size;
+      }
+
+      await FFmpeg.run([
+        '-ss', '' + (10 / 100) * duration, // frame at 10%
+        '-i', input.mediaPath,
+        '-y',
+        '-vf', scale,
+        '-frames:v', '1',
+        '-qscale:v', '50',
+        input.outPath
+      ]);
     };
   }
 }

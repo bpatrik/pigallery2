@@ -109,5 +109,3 @@ export class FFmpeg {
     });
   }
 }
-
-const path = (bin: string): string => bin.split(/[\\/]/).pop();
