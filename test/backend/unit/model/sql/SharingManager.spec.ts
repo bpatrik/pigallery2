@@ -9,6 +9,7 @@ import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {TestHelper} from '../../../../TestHelper';
+import {UserManager} from '../../../../../src/backend/model/database/UserManager';
 
 chai.use(chaiAsPromised);
 
@@ -415,6 +416,25 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       expect((await sm.listAll()).map(s => s.sharingKey)).to.deep.equal(['Kulcs_ő']);
       await sm.deleteSharing('Kulcs_ő');
       expect(await sm.listAll()).to.deep.equal([]);
+    });
+
+    it('should delete the sharings of a deleted user', async () => {
+      const sm = new SharingManager();
+      await create('Kulcs_ő');
+      const conn = await SQLConnection.getConnection();
+      const other = await conn.getRepository(UserEntity).save({name: 'Ödön', password: '', role: UserRoles.User});
+      await sm.createSharing({
+        id: null,
+        sharingKey: 'other_key',
+        searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
+        password: null,
+        creator: other,
+        expires: Date.now() + 100000,
+        timeStamp: Date.now()
+      });
+      await new UserManager().deleteUser(creator.id);
+      const left = await sm.listAll();
+      expect(left.map(s => ({key: s.sharingKey, creator: s.creator.name}))).to.deep.equal([{key: 'other_key', creator: 'Ödön'}]);
     });
 
     it('should not update any sharing without an id or creator', async () => {
