@@ -1,6 +1,6 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:22-trixie AS builder
+FROM node:26-trixie AS builder
 
 
 ENV SHARP_FORCE_GLOBAL_LIBVIPS=1
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 gi
 COPY pigallery2-release /app
 WORKDIR /app
 # building sharp based on debian's vips
-RUN npm install --no-package-lock node-addon-api@8.5.0 node-gyp@11.5.0  && \
+RUN npm install --no-package-lock node-addon-api@8.9.2 node-gyp@13.1.0  && \
    mkdir -p /app/data/config && \
    mkdir -p /app/data/db && \
    mkdir -p /app/data/images && \
@@ -25,7 +25,7 @@ RUN npm install --no-package-lock node-addon-api@8.5.0 node-gyp@11.5.0  && \
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:22-trixie-slim AS main
+FROM node:26-trixie-slim AS main
 WORKDIR /app
 ENV NODE_ENV=production \
     # overrides only the default value of the settings (the actualy value can be overwritten through config.json)

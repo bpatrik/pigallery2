@@ -10,7 +10,7 @@ available tags:
 
 **Note**: Some changes may require database reset or config changes, see [#317](https://github.com/bpatrik/pigallery2/issues/317) (If you want to reduce the frequency of those, use stable builds (`latest`)
 
-We support multiple architectures, including `amd64`, `arm64v8`, `arm32v7` (deprecated [see](https://github.com/bpatrik/pigallery2/issues/1027)).
+We support the `amd64` and `arm64v8` architectures. 32-bit ARM (`arm32v7`) images are no longer built, as Node.js dropped official support for it; use a 64-bit OS on your Raspberry Pi to run the `arm64v8` image ([see](https://github.com/bpatrik/pigallery2/issues/1027)).
 
 It contains all necessary dependencies, auto-restarts on reboot, supports HTTPS, and is easy to upgrade.
 

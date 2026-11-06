@@ -41,7 +41,7 @@
     "adm-zip": "0.6.1",
     "archiver": "7.0.1",
     "bcrypt": "6.0.0",
-    "better-sqlite3": "11.10.0",
+    "better-sqlite3": "12.11.1",
     "cookie-parser": "1.4.7",
     "cookie-session": "2.1.1",
     "ejs": "3.1.10",
@@ -97,7 +97,7 @@
     "@types/leaflet.markercluster": "1.5.5",
     "@types/mocha": "10.0.10",
     "@types/multer": "1.4.12",
-    "@types/node": "22.16.5",
+    "@types/node": "26.6.6",
     "@types/node-geocoder": "4.2.6",
     "@types/nodemailer": "6.4.17",
     "@types/openid-client": "3.1.6",
@@ -139,6 +139,18 @@
     "mysql2": "3.24.6"
   },
   "engines": {
-    "node": ">=22.22.3 <24.0"
+    "node": "^24.15.0 || ^26.12.0"
+  },
+  "allowScripts": {
+    "better-sqlite3": true,
+    "bcrypt": true,
+    "sharp": true,
+    "ffmpeg-static": true,
+    "cypress": true,
+    "esbuild": true,
+    "lmdb": true,
+    "msgpackr-extract": true,
+    "@parcel/watcher": true,
+    "es5-ext": false
   }
 }
