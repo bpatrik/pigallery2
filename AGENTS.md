@@ -165,6 +165,8 @@ Pitfalls seen so far:
 - Avoid heavy queries, N+1 queries and loading full tables on the server; prefer projections and pagination.
 - Keep TypeORM queries portable between SQLite and MySQL.
 - Changed any TypeORM entity? Bump `DataStructureVersion` in `src/common/DataStructureVersion.ts`.
+- sharp's `config.libvips` must not exceed the oldest libvips of the Alpine and Debian images (they build sharp against
+  the distro libvips). `ConfigDiagnostics.testSharp` fails the Docker build otherwise.
 - Every `@ConfigProperty` needs an explicit `type` (and `arrayType` for arrays): the frontend is built without decorator metadata,
   so typeconfig can't infer it there. `test/common/unit/config/ConfigTypes.spec.ts` checks this and snapshots the resolved types;
   after an intended config change, regenerate the snapshot with `UPDATE_CONFIG_SNAPSHOT=true`.

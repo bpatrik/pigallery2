@@ -132,6 +132,52 @@ export class ConfigDiagnostics {
     Logger.debug(LOG_TAG, 'Testing sharp package');
     const sharp = require('sharp');
     sharp();
+    ConfigDiagnostics.testLibvipsVersion(ConfigDiagnostics.getSharpPackageJson().config.libvips, sharp.versions.vips);
+  }
+
+  /**
+   * sharp 0.35+ has an `exports` map without './package.json', so `require('sharp/package.json')` would throw.
+   */
+  private static getSharpPackageJson(): { config: { libvips: string } } {
+    let dir = path.dirname(require.resolve('sharp'));
+    while (dir !== path.dirname(dir)) {
+      const pkgPath = path.join(dir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkg.name === 'sharp') {
+          return pkg;
+        }
+      }
+      dir = path.dirname(dir);
+    }
+    throw new Error('Cannot find the package.json of sharp');
+  }
+
+  /**
+   * The Docker images compile sharp against the distro's libvips (SHARP_FORCE_GLOBAL_LIBVIPS),
+   * which skips sharp's own version check. A too-new sharp would then break at runtime.
+   * @param required sharp's `config.libvips`, e.g. '>=8.16.1'
+   * @param loaded the libvips sharp runs with (`sharp.versions.vips`)
+   */
+  static testLibvipsVersion(required: string, loaded: string): void {
+    const parse = (v: string): number[] => {
+      const m = /(\d+)\.(\d+)\.(\d+)/.exec(v || '');
+      if (!m) {
+        throw new Error('Cannot read libvips version: "' + v + '"');
+      }
+      return m.slice(1).map(n => parseInt(n, 10));
+    };
+    const req = parse(required);
+    const got = parse(loaded);
+    for (let i = 0; i < req.length; ++i) {
+      if (got[i] > req[i]) {
+        return;
+      }
+      if (got[i] < req[i]) {
+        throw new Error('sharp needs libvips ' + required + ', but it runs with libvips ' + loaded + '.' +
+          ' Use a sharp version that supports this libvips, or install a newer libvips.');
+      }
+    }
   }
 
   static async testTempFolder(folder: string): Promise<void> {
@@ -419,16 +465,10 @@ export class ConfigDiagnostics {
     } catch (ex) {
       const err: Error = ex;
 
-      Logger.warn(
+      Logger.error(
         LOG_TAG,
-        '[Thumbnail hardware acceleration] module error: ',
+        'The \'sharp\' node module is missing or does not work, so photos cannot be processed:',
         err.toString()
-      );
-      Logger.warn(
-        LOG_TAG,
-        'Thumbnail hardware acceleration is not possible.' +
-        ' \'sharp\' node module is not found.' +
-        ' Falling back temporally to JS based thumbnail generation'
       );
       process.exit(1);
     }
