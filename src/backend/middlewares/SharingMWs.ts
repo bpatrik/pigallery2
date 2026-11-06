@@ -105,12 +105,11 @@ export class SharingMWs {
       let sharingKey = SharingMWs.generateKey(Config.Sharing.sharingKeyLength);
 
       // create one not yet used
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         try {
           await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
           sharingKey = this.generateKey(Config.Sharing.sharingKeyLength);
-        } catch (err) {
+        } catch {
           break;
         }
       }

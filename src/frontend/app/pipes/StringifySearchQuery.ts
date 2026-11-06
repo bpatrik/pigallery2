@@ -9,7 +9,7 @@ export class StringifySearchQuery implements PipeTransform {
   private searchQueryParserService = inject(SearchQueryParserService);
 
 
-  transform(query: SearchQueryDTO): string {
+  transform(query: SearchQueryDTO | null | undefined): string {
     if (!query) {
       return '';
     }

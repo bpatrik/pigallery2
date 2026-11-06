@@ -6,7 +6,7 @@ import {TextSearch, TextSearchQueryMatchTypes} from '../../../../../../common/en
 export class TextSearchMatchingTypes {
   public static readonly values = ['~', '!~', '=', '!=', 'glob', '!glob'];
 
-  public static get(query: TextSearch): string {
+  public static get(query: TextSearch): string | undefined {
     if (query.matchType === TextSearchQueryMatchTypes.exact_match) {
       if (query.negate) {
         return '!=';
@@ -27,6 +27,7 @@ export class TextSearchMatchingTypes {
         return 'glob';
       }
     }
+    return undefined;
   }
 
   public static set(query: TextSearch, value: string): void {
@@ -40,7 +41,7 @@ export class TextSearchMatchingTypes {
     }
   }
 
-  public static getDescription(type: string, isTextQuery = true): string {
+  public static getDescription(type: string, isTextQuery = true): string | undefined {
     switch (type) {
       case '=':
         if (isTextQuery) {
@@ -59,5 +60,6 @@ export class TextSearchMatchingTypes {
       case '!glob':
         return $localize`Negative glob match`;
     }
+    return undefined;
   }
 }

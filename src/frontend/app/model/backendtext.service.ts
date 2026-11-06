@@ -5,7 +5,7 @@ import {DefaultsJobs} from '../../../common/entities/job/JobDTO';
 @Injectable({providedIn: 'root'})
 export class BackendtextService {
 
-  public get(id: backendText | string): string {
+  public get(id: backendText | string): string | null {
     if (typeof id === 'string') {
       return id;
     }
@@ -51,9 +51,9 @@ export class BackendtextService {
     }
   }
 
-  public getJobName(job: DefaultsJobs | string): string {
+  public getJobName(job: DefaultsJobs | string): string | null {
     if (typeof job === 'string') {
-      job = DefaultsJobs[job as any];
+      job = DefaultsJobs[job as keyof typeof DefaultsJobs];
     }
     switch (job as DefaultsJobs) {
       case DefaultsJobs.Indexing:
@@ -83,9 +83,9 @@ export class BackendtextService {
     }
   }
 
-  public getJobDescription(job: DefaultsJobs | string): string {
+  public getJobDescription(job: DefaultsJobs | string): string | null {
     if (typeof job === 'string') {
-      job = DefaultsJobs[job as any];
+      job = DefaultsJobs[job as keyof typeof DefaultsJobs];
     }
     const notNeeded = ' --' + $localize`It is not necessary to run this job explicitly as the app can do this on-the-file while navigation the gallery. This only speeds up the navigation speed in the app.`;
     switch (job as DefaultsJobs) {

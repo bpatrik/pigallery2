@@ -4,9 +4,11 @@ on:
     branches:
       - master
       - experimental
+  # Other branches: run manually (workflow_dispatch) or open a PR
   push:
     branches:
-      - '**'
+      - master
+      - experimental
     tags:
       - '*.*'
   workflow_dispatch:

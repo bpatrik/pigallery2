@@ -51,7 +51,7 @@ export const GroupSortByTypes = {
 
 export interface SortingMethod {
   method: SortByDirectionalTypes | SortByBasicTypes;
-  ascending: boolean;
+  ascending: boolean | null; // null: the method has no direction (e.g. random)
 }
 
 export interface GroupingMethod {

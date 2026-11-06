@@ -1,7 +1,8 @@
 import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
+import {computed, signal} from '@angular/core';
 import {HttpEventType} from '@angular/common/http';
-import {BehaviorSubject, Subject} from 'rxjs';
+import {Subject} from 'rxjs';
 import {UploaderService} from './uploader.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -22,15 +23,15 @@ class MockNetworkService {
 }
 
 class MockContentLoaderService {
-  content = new BehaviorSubject({directory: {path: '.', name: 'Balaton', media: [{name: 'exists.jpg'}], metaFile: []}});
+  readonly content = signal({directory: {path: '.', name: 'Balaton', media: [{name: 'exists.jpg'}], metaFile: []}});
   reloadCurrentContent = vi.fn().mockResolvedValue(undefined);
 }
 
 class MockAuthenticationService {
-  user = new BehaviorSubject({name: 'admin', role: UserRoles.Admin});
-
-  isAuthenticated(): boolean {
-    return !!this.user.value;
+  readonly user = signal({name: 'admin', role: UserRoles.Admin});
+  readonly isAuthenticated = computed((): boolean => !!this.user());
+  isAuthorized(role: UserRoles): boolean {
+    return this.user().role >= role;
   }
 }
 
@@ -47,7 +48,7 @@ describe('UploaderService', () => {
     network.requests[i].complete();
   };
   const fail = (i: number): void => network.requests[i].error({message: 'Disk full'});
-  const toast = (title: string) => toasts.toasts().find((t) => t.title === title);
+  const toast = (title: string) => toasts.toasts().find((t) => t.title === title)!;
 
   beforeEach(() => {
     uploadEnabled = Config.Upload.enabled;
@@ -114,7 +115,7 @@ describe('UploaderService', () => {
     vi.useFakeTimers();
     service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
     await vi.advanceTimersByTimeAsync(0);
-    toast('Hévíz.jpg').onCancel();
+    toast('Hévíz.jpg').onCancel!();
     expect(toast('Hévíz.jpg')).toBeUndefined();
     finish(0);
     expect(network.requests.length).toBe(1);
@@ -126,7 +127,7 @@ describe('UploaderService', () => {
     service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
     await vi.advanceTimersByTimeAsync(0);
     network.requests[0].next({type: HttpEventType.UploadProgress, loaded: 30, total: 100});
-    toast('Tihany.jpg').onCancel();
+    toast('Tihany.jpg').onCancel!();
     expect(network.requests[0].observed).toBe(false); // unsubscribed: the request is aborted
     expect(toast('Tihany.jpg')).toBeUndefined();
     expect(network.requests.length).toBe(2);

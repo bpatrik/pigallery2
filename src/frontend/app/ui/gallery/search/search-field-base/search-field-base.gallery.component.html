@@ -1,11 +1,14 @@
 <div class="input-group" style="border-radius: inherit">
   <input type="text"
     class="form-control search-text"
+    role="combobox" aria-autocomplete="list" [attr.aria-controls]="autoCompleteListId"
+    [attr.aria-expanded]="autoCompleteRenders().length > 0"
     [placeholder]="placeholder()"
     (keyup)="onSearchChange()"
     (blur)="onFocusLost()"
     (focus)="onFocus()"
     [(ngModel)]="rawSearchText"
+    [ngModelOptions]="{standalone: true}"
     (ngModelChange)="onChange()"
     (keydown.enter)="OnEnter()"
     (keydown.arrowRight)="applyHint($event)"
@@ -20,19 +23,22 @@
     autocomplete="off">
     <input type="text"
       class="form-control search-hint"
-      [ngModel]="SearchHint"
+      [ngModel]="SearchHint()"
+      [ngModelOptions]="{standalone: true}"
       name="srch-term-hint"
       #SearchHintField
       autocomplete="off">
 
 
-      @if (autoCompleteRenders.length > 0) {
-        <div class="autocomplete-list"
-          (mouseover)="setMouseOverAutoComplete(true)" (mouseout)="setMouseOverAutoComplete(false)">
-          @for (item of autoCompleteRenders; track item; let i = $index) {
-            <div class="autocomplete-item text-start"
-              [class.autocomplete-item-selected]="highlightedAutoCompleteItem === i"
-              (mouseover)="setMouseOverAutoCompleteItem(i)"
+      @if (autoCompleteRenders().length > 0) {
+        <div class="autocomplete-list" role="listbox" [id]="autoCompleteListId"
+          (mouseenter)="setMouseOverAutoComplete(true)" (mouseleave)="setMouseOverAutoComplete(false)">
+          @for (item of autoCompleteRenders(); track item; let i = $index) {
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -- the keyboard selects with the arrow keys and Enter in the input -->
+            <div class="autocomplete-item text-start" role="option"
+              [class.autocomplete-item-selected]="highlightedAutoCompleteItem() === i"
+              [attr.aria-selected]="highlightedAutoCompleteItem() === i"
+              (mouseenter)="setMouseOverAutoCompleteItem(i)"
               (click)="searchAutoComplete(item)"
               >
               <div>

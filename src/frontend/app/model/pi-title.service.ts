@@ -13,7 +13,7 @@ export class PiTitleService {
   private searchQueryParserService = inject(SearchQueryParserService);
 
 
-  private lastNonMedia: string = null;
+  private lastNonMedia: string | null = null;
 
   setTitle(title: string) {
     if (title) {

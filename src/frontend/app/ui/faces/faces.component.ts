@@ -1,12 +1,9 @@
-import { Component, ElementRef, OnInit, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, inject, viewChild, computed, Signal } from '@angular/core';
 import {FacesService} from './faces.service';
 import {QueryService} from '../../model/query.service';
-import {combineLatest, Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
-import { AsyncPipe } from '@angular/common';
 import { FaceComponent } from './face/face.component';
 import {SortByDirectionalTypes} from '../../../../common/entities/SortingMethods';
 import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
@@ -15,11 +12,9 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
     selector: 'app-faces',
     templateUrl: './faces.component.html',
     styleUrl: './faces.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     FrameComponent,
     FaceComponent,
-    AsyncPipe,
     FacesNavigatorComponent
 ]
 })
@@ -30,32 +25,24 @@ export class FacesComponent implements OnInit {
 
   readonly container = viewChild<ElementRef>('container');
   public size: number;
-  favourites: Observable<PersonDTO[]>;
-  nonFavourites: Observable<PersonDTO[]>;
+  private readonly sortedPersons: Signal<PersonDTO[]> = computed(() => {
+    const sorting = this.facesService.sorting();
+    // sorting a copy: the service's array must not change in place
+    return [...this.facesService.persons()].sort((p1: PersonDTO, p2: PersonDTO) => {
+      let res = 0;
+      if (sorting.method === SortByDirectionalTypes.PersonCount) {
+        res = (p1.cache?.count || 0) - (p2.cache?.count || 0);
+      } else {
+        res = p1.name.localeCompare(p2.name);
+      }
+      return res * (sorting.ascending ? 1 : -1);
+    });
+  });
+  readonly favourites = computed(() => this.sortedPersons().filter((p) => p.isFavourite));
+  readonly nonFavourites = computed(() => this.sortedPersons().filter((p) => !p.isFavourite));
 
   constructor() {
     this.facesService.getPersons().catch(console.error);
-
-    const sortedPersons = combineLatest([this.facesService.persons, this.facesService.sorting]).pipe(
-      map(([persons, sorting]) => {
-        return persons.sort((p1: PersonDTO, p2: PersonDTO) => {
-          let res = 0;
-          if (sorting.method === SortByDirectionalTypes.PersonCount) {
-            res = (p1.cache?.count || 0) - (p2.cache?.count || 0);
-          } else {
-            res = p1.name.localeCompare(p2.name);
-          }
-          return res * (sorting.ascending ? 1 : -1);
-        });
-      })
-    );
-
-    this.favourites = sortedPersons.pipe(
-        map((value) => value.filter((p) => p.isFavourite))
-    );
-    this.nonFavourites = sortedPersons.pipe(
-        map((value) => value.filter((p) => !p.isFavourite))
-    );
   }
 
   ngOnInit(): void {
@@ -66,7 +53,11 @@ export class FacesComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container().nativeElement.clientWidth - 30;
+    const container = this.container();
+    if (!container) {
+      return;
+    }
+    const containerWidth = container.nativeElement.clientWidth - 30;
     this.size = containerWidth / Math.round(containerWidth / size) - 5;
   }
 }

@@ -69,7 +69,7 @@ export class UserRequestConstrainsMWs {
         return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR));
       }
       return next();
-    } catch (err) {
+    } catch {
       return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR));
     }
   }

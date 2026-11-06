@@ -18,7 +18,7 @@ Fix errors and warnings or add them to the ignore list of the [hadolint configur
 
 ### Building the docker image locally (Docs are as-it-is, no further support provided for this)
 
-Get the latest release from github (the source code is not enough, it needs to be built and packed, you can do that fropm source with `npm run create-release`)
+Get the latest release from github (the source code is not enough, it needs to be built and packed, you can do that from source with `npm run create-release`)
 
 ```bash
 wget https://github.com/bpatrik/pigallery2/releases/download/3.1.0/pigallery2-release.zip

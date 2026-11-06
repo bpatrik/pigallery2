@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, effect, inject, signal, untracked } from '@angular/core';
 import {ToastService, ToastSummary, ToastType} from '../ui/toast/toast.service';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
@@ -16,9 +16,9 @@ export class NotificationService {
   private networkService = inject(NetworkService);
   private authService = inject(AuthenticationService);
 
-  countedNotifications: CountedNotificationDTO[] = [];
+  readonly countedNotifications = signal<CountedNotificationDTO[]>([]);
   numberOfNotifications = 0;
-  lastUser: UserDTO = null;
+  lastUser: UserDTO | null = null;
 
   constructor() {
     // More than 3 notifications at once (e.g. server errors at login) would cover the page
@@ -32,23 +32,27 @@ export class NotificationService {
         closable: true
       })
     });
-    this.authService.user.subscribe(() => {
-      if (
-          this.authService.isAuthenticated() &&
-          (!this.lastUser ||
-              this.lastUser.id !== this.authService.user.value.id) &&
-          this.authService.user.value.role >= UserRoles.User
-      ) {
-        this.getServerNotifications();
-      }
-      this.lastUser = this.authService.user.value;
+    effect(() => {
+      const user = this.authService.user();
+      untracked(() => this.onUser(user));
     });
   }
 
+  private onUser(user: UserDTO | null): void {
+    if (
+        user &&
+        this.authService.isAuthenticated() &&
+        (!this.lastUser ||
+            this.lastUser.id !== user.id) &&
+        user.role >= UserRoles.User
+    ) {
+      this.getServerNotifications();
+    }
+    this.lastUser = user;
+  }
+
   groupNotifications(notifications: NotificationDTO[]): void {
-    const groups: {
-      [key: string]: { notification: NotificationDTO; count: number };
-    } = {};
+    const groups: Record<string, { notification: NotificationDTO; count: number }> = {};
     notifications.forEach((n) => {
       let key = n.message;
       if (n.details) {
@@ -58,14 +62,15 @@ export class NotificationService {
       groups[key].count++;
     });
     this.numberOfNotifications = notifications.length;
-    this.countedNotifications = [];
+    const counted: CountedNotificationDTO[] = [];
     for (const key of Object.keys(groups)) {
       (groups[key].notification as CountedNotificationDTO).count =
           groups[key].count;
-      this.countedNotifications.push(
+      counted.push(
           groups[key].notification as CountedNotificationDTO
       );
     }
+    this.countedNotifications.set(counted);
   }
 
   /**
@@ -90,7 +95,7 @@ export class NotificationService {
           )) || []
       );
       // The message is the title, the details go below it, like on the admin page
-      this.countedNotifications.forEach((noti) => {
+      this.countedNotifications().forEach((noti) => {
         const title = '(' + noti.count + ') ' + noti.message;
         const details = noti.details ? NotificationService.formatDetails(noti.details) : null;
         switch (noti.type) {
@@ -110,23 +115,23 @@ export class NotificationService {
     }
   }
 
-  success(text: string, title: string = null): void {
+  success(text: string | null, title: string | null = null): void {
     this.show('success', text, title);
   }
 
-  error(text: string, title?: string): void {
+  error(text: string | null, title?: string | null): void {
     this.show('error', text, title);
   }
 
-  warning(text: string, title?: string): void {
+  warning(text: string | null, title?: string | null): void {
     this.show('warning', text, title);
   }
 
-  info(text: string, title: string = null): void {
+  info(text: string | null, title: string | null = null): void {
     this.show('info', text, title);
   }
 
-  private show(type: ToastType, text: string, title: string): void {
-    this.toastService.open({type, text, title, timeout: ToastService.TIMEOUT, group: NotificationService.TOAST_GROUP});
+  private show(type: ToastType, text: string | null, title?: string | null): void {
+    this.toastService.open({type, text: text ?? undefined, title: title ?? undefined, timeout: ToastService.TIMEOUT, group: NotificationService.TOAST_GROUP});
   }
 }

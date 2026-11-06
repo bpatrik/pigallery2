@@ -18,8 +18,7 @@ describe('ContentWrapper', () => {
     }
 
     const content = (cw?.directory ? cw.directory : cw?.searchResult);
-    for (let i = 0; i < content.media.length; ++i) {
-      const m = content.media[i];
+    for (const m of content.media) {
       if (MediaDTOUtils.isPhoto(m)) {
         delete (m as VideoDTO).metadata.bitRate;
         delete (m as VideoDTO).metadata.duration;
@@ -41,8 +40,8 @@ describe('ContentWrapper', () => {
     if (!(content.directories?.length > 0)) {
       delete content.directories;
     }
-    for (let i = 0; i < content.metaFile.length; ++i) {
-      delete content.metaFile[i].id;
+    for (const metaFile of content.metaFile) {
+      delete metaFile.id;
     }
     return cw;
   };
@@ -441,7 +440,7 @@ describe('ContentWrapper', () => {
       const dir1 = TestHelper.getDirectoryEntry();
       const dir2 = TestHelper.getDirectoryEntry();
       const p1 = TestHelper.getPhotoEntry(dir1);
-      const p2 = TestHelper.getPhotoEntry(dir2);
+      TestHelper.getPhotoEntry(dir2);
 
       const sr1 = {
         searchQuery: { type: SearchQueryTypes.any_text, value: '' } as TextSearch,

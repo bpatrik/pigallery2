@@ -37,9 +37,7 @@ import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const chai = require('chai');
 
 chai.use(deepEqualInAnyOrder);
@@ -1136,7 +1134,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         }
       };
 
-      // eslint-disable-next-line @typescript-eslint/prefer-for-of
       for (let i = 1; i < alphabet.length / 2; ++i) {
         const query: SomeOfSearchQuery = {
           type: SearchQueryTypes.SOME_OF,
@@ -1797,6 +1794,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         // exactly 1 year ago keeps today's day; the every-year patterns match by day
         const d = new Date();
         d.setUTCFullYear(d.getUTCFullYear() - 1);
+        d.setUTCHours(10, 0, 0, 0);
         p7.metadata.creationDate = d.getTime();
         //p7.metadata.creationDateOffset = "+02:00";
 
@@ -2122,7 +2120,6 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       type: SearchQueryTypes.keyword
     } as TextSearch;
 
-    // eslint-disable-next-line
     expect(await sm.getNMedia(DBTestHelper.defaultSession, query, [{
       method: SortByTypes.Random,
       ascending: null

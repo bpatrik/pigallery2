@@ -4,14 +4,14 @@ export class AutoCompleteRenderItem {
   public preText = '';
   public highLightText = '';
   public postText = '';
-  public type: SearchQueryTypes;
+  public type: SearchQueryTypes | null | undefined;
   public queryHint: string;
   public notSearchable: boolean;
 
   constructor(
       public text: string,
       searchText: string,
-      type: SearchQueryTypes,
+      type: SearchQueryTypes | null | undefined,
       queryHint: string,
       notSearchable = false
   ) {

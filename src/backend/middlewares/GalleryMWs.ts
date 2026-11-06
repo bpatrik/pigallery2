@@ -77,7 +77,7 @@ export class GalleryMWs {
       if ((await fsp.stat(absoluteDirectoryName)).isDirectory() === false) {
         return AuthenticationMWs.directoryNotFound(res, next);
       }
-    } catch (e) {
+    } catch {
       return AuthenticationMWs.directoryNotFound(res, next);
     }
 
@@ -339,7 +339,7 @@ export class GalleryMWs {
       if ((await fsp.stat(fullMediaPath)).isDirectory()) {
         return next();
       }
-    } catch (e) {
+    } catch {
       return next(
         new ErrorDTO(
           ErrorCodes.PATH_ERROR,
@@ -371,7 +371,7 @@ export class GalleryMWs {
       await fsp.access(convertedVideo);
       req.resultPipe = convertedVideo;
       // eslint-disable-next-line no-empty
-    } catch (e) {
+    } catch {
     }
 
     return next();

@@ -10,7 +10,7 @@ export class MediaIcon {
     Config.Media.Photo.thumbnailSizes.sort((a, b): number => a - b);
 
 
-  protected replacementSizeCache: number | boolean = false;
+  protected replacementSizeCache: number | boolean | null = false;
 
   constructor(public media: MediaDTO) {
   }
@@ -20,14 +20,15 @@ export class MediaIcon {
   }
 
   iconLoaded(): void {
-    this.media.missingThumbnails -=
-      MediaIcon.ThumbnailMap[Config.Media.Photo.iconSize];
+    if (this.media.missingThumbnails) {
+      this.media.missingThumbnails -=
+        MediaIcon.ThumbnailMap[Config.Media.Photo.iconSize];
+    }
   }
 
   isIconAvailable(): boolean {
-    // eslint-disable-next-line no-bitwise
     return (
-      (this.media.missingThumbnails &
+      ((this.media.missingThumbnails ?? 0) &
         MediaIcon.ThumbnailMap[Config.Media.Photo.iconSize]) ===
       0
     );
@@ -36,9 +37,8 @@ export class MediaIcon {
 
   isPhotoAvailable(renderWidth: number, renderHeight: number): boolean {
     const size = this.getMediaSize(renderWidth, renderHeight);
-    // eslint-disable-next-line no-bitwise
     return (
-      (this.media.missingThumbnails &
+      ((this.media.missingThumbnails ?? 0) &
         MediaIcon.ThumbnailMap[size]) === 0
     );
   }

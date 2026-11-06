@@ -81,7 +81,6 @@ export class JobProgress {
     return this.logs;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onChange = (_: JobProgress): void => {
     // abstract function
   };

@@ -1,4 +1,5 @@
 import type {Mock} from 'vitest';
+import {signal, WritableSignal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {JobButtonComponent} from './job-button.settings.component';
@@ -12,8 +13,9 @@ import {appIcons} from '../../../../icons';
 
 describe('JobButtonComponent', () => {
   let jobsService: {
-    progress: { value: Record<string, OnTimerJobProgressDTO> },
-    getDefaultConfig: Mock
+    progress: WritableSignal<Record<string, OnTimerJobProgressDTO>>,
+    getDefaultConfig: Mock,
+    jobStartingStopping: WritableSignal<Record<string, boolean>>
   };
 
   const createComponent = (inputs: { config?: unknown } = {}): JobButtonComponent => {
@@ -27,8 +29,9 @@ describe('JobButtonComponent', () => {
 
   beforeEach(() => {
     jobsService = {
-      progress: {value: {}},
-      getDefaultConfig: vi.fn()
+      progress: signal({}),
+      getDefaultConfig: vi.fn(),
+      jobStartingStopping: signal({})
     };
     TestBed.configureTestingModule({
       imports: [JobButtonComponent],
@@ -53,7 +56,7 @@ describe('JobButtonComponent', () => {
     const defaultConfig = {indexChangesOnly: true};
     jobsService.getDefaultConfig.mockReturnValue(defaultConfig);
     const progress = {state: JobProgressStates.running} as OnTimerJobProgressDTO;
-    jobsService.progress.value[JobDTOUtils.getHashName('Indexing', defaultConfig)] = progress;
+    jobsService.progress.set({[JobDTOUtils.getHashName('Indexing', defaultConfig)]: progress});
     const component = createComponent();
     expect(component.Progress).toBe(progress);
     expect(component.Running).toBe(true);
@@ -63,7 +66,7 @@ describe('JobButtonComponent', () => {
     jobsService.getDefaultConfig.mockReturnValue({indexChangesOnly: true});
     const config = {indexChangesOnly: false};
     const progress = {state: JobProgressStates.running} as OnTimerJobProgressDTO;
-    jobsService.progress.value[JobDTOUtils.getHashName('Indexing', config)] = progress;
+    jobsService.progress.set({[JobDTOUtils.getHashName('Indexing', config)]: progress});
     const component = createComponent({config});
     expect(component.Progress).toBe(progress);
   });

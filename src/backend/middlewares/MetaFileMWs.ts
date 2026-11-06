@@ -35,7 +35,7 @@ export class MetaFileMWs {
         req.resultPipe = await GPXProcessing.compressGPX(fullPath);
         return next();
       }
-    } catch (err) {
+    } catch {
       // Graceful degradation if compression fails
       Logger.warn(LOG_TAG, 'Error during compressingGPX, using original file: ' + fullPath);
       return res.redirect(req.originalUrl.slice(0, -1 * '\\bestFit'.length));

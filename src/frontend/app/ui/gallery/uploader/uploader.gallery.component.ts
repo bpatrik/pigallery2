@@ -1,4 +1,4 @@
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 import {NgIconComponent} from '@ng-icons/core';
 
@@ -7,12 +7,11 @@ import {NgIconComponent} from '@ng-icons/core';
   selector: 'app-gallery-uploader',
   templateUrl: './uploader.gallery.component.html',
   styleUrl: './uploader.gallery.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgIconComponent
 ]
 })
 export class UploaderComponent {
-  readonly isUploadOver = input<boolean>(undefined);
+  readonly isUploadOver = input<boolean>();
 }
 

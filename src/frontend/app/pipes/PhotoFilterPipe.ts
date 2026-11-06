@@ -7,13 +7,13 @@ import {MediaGroup} from '../ui/gallery/navigator/sorting.service';
     name: 'photosOnly'
 })
 export class PhotoFilterPipe implements PipeTransform {
-  transform(mediaGroups: MediaGroup[]): PhotoDTO[] | null {
+  transform(mediaGroups: MediaGroup[] | null | undefined): PhotoDTO[] {
     if (!mediaGroups) {
-      return null;
+      return [];
     }
-    const ret = [];
-    for (let i = 0; i < mediaGroups.length; ++i) {
-      ret.push(...mediaGroups[i].media.filter((m: MediaDTO): boolean =>
+    const ret: PhotoDTO[] = [];
+    for (const group of mediaGroups) {
+      ret.push(...group.media.filter((m: MediaDTO): boolean =>
           MediaDTOUtils.isPhoto(m)
       ) as PhotoDTO[]);
     }

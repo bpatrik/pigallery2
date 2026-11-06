@@ -1,7 +1,6 @@
 import {AuthenticationMWs} from '../middlewares/user/AuthenticationMWs';
 import {Express} from 'express';
 import {RenderingMWs} from '../middlewares/RenderingMWs';
-import {UserRoles} from '../../common/entities/UserDTO';
 import {PersonMWs} from '../middlewares/PersonMWs';
 import {ThumbnailGeneratorMWs} from '../middlewares/thumbnail/ThumbnailGeneratorMWs';
 import {VersionMWs} from '../middlewares/VersionMWs';

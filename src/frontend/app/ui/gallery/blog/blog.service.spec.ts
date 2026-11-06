@@ -1,23 +1,25 @@
 import type {Mocked} from 'vitest';
 import {TestBed} from '@angular/core/testing';
+import {ApplicationRef, signal, WritableSignal} from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
 import {NetworkService} from '../../../model/network/network.service';
 import {ContentService} from '../content.service';
-import {of} from 'rxjs';
 import {MDFileDTO} from '../../../../../common/entities/MDFileDTO';
 import {DirectoryPathDTO} from '../../../../../common/entities/DirectoryDTO';
+import {GroupedDirectoryContent} from '../navigator/sorting.service';
 
 describe('BlogService', () => {
   let service: BlogService;
   let mockNetworkService: Mocked<NetworkService>;
   let mockGalleryService: Mocked<ContentService>;
+  let content: WritableSignal<GroupedDirectoryContent | null>;
 
   const createMockDirectory = (path: string, name: string): DirectoryPathDTO => ({
     path: path,
     name: name
   } as DirectoryPathDTO);
 
-  const createMockMDFile = (name: string, date: number, directory?: DirectoryPathDTO): MDFileDTO => ({
+  const createMockMDFile = (name: string, date: number | null, directory?: DirectoryPathDTO): MDFileDTO => ({
     id: 1,
     name: name,
     directory: directory || createMockDirectory('/test', 'folder'),
@@ -26,8 +28,9 @@ describe('BlogService', () => {
 
   beforeEach(() => {
     mockNetworkService = {getText: vi.fn()} as unknown as Mocked<NetworkService>;
+    content = signal<GroupedDirectoryContent | null>(null);
     mockGalleryService = {
-      sortedFilteredContent: of(null)
+      sortedFilteredContent: content
     } as unknown as Mocked<ContentService>;
 
     TestBed.configureTestingModule({
@@ -39,6 +42,27 @@ describe('BlogService', () => {
     });
 
     service = TestBed.inject(BlogService);
+  });
+
+  describe('getMarkDowns', () => {
+    const day = new Date(Date.UTC(2023, 6, 15));
+    const top = {date: null, text: '# Nyári túra'} as GroupedMarkdown;
+    const ofDay = {date: day.getTime(), text: '## Balatonfüred, július 15.'} as GroupedMarkdown;
+    const other = {date: day.getTime() + 86400000, text: '## Tihany'} as GroupedMarkdown;
+
+    it('should return the markdowns of the date', () => {
+      service.groupedMarkdowns.set([top, ofDay, other]);
+      expect(service.getMarkDowns(new Date(day.getTime()))).toEqual([ofDay]);
+    });
+
+    it('should return the markdowns without a date when there is no date', () => {
+      service.groupedMarkdowns.set([top, ofDay, other]);
+      expect(service.getMarkDowns()).toEqual([top]);
+    });
+
+    it('should return undefined while the markdowns are not loaded', () => {
+      expect(service.getMarkDowns(day)).toBeUndefined();
+    });
   });
 
   describe('splitMarkDown', () => {
@@ -476,7 +500,7 @@ This is dated.`;
     const dates = [Date.UTC(2025, 1, 1), Date.UTC(2025, 1, 3)];
 
     it('should place undated section at top when not search result', () => {
-      const sections: Array<{ date: Date | null; text: string }> = [{date: null, text: '# Test'}];
+      const sections: { date: Date | null; text: string }[] = [{date: null, text: '# Test'}];
       const firstMedia = Date.UTC(2025, 1, 1);
 
       const result = (service as any).groupSectionsByDate(sections, file, dates, firstMedia);
@@ -486,7 +510,7 @@ This is dated.`;
     });
 
     it('should place undated section at file date group when search result', () => {
-      const sections: Array<{ date: Date | null; text: string }> = [{date: null, text: '# Test'}];
+      const sections: { date: Date | null; text: string }[] = [{date: null, text: '# Test'}];
       const firstMedia = Date.UTC(2025, 0, 1); // Different from file.date
 
       const result = (service as any).groupSectionsByDate(sections, file, dates, firstMedia);
@@ -555,6 +579,68 @@ This is dated.`;
       await (service as any).getMarkDown(file);
 
       expect(mockNetworkService.getText).toHaveBeenCalledWith('/gallery/content//photos/2025/vacation/index.md');
+    });
+  });
+
+  describe('loading the markdowns of the content', () => {
+    // the server answers, resolved by the test
+    let answers: Map<string, (text: string) => void>;
+
+    const folder = (name: string): GroupedDirectoryContent => ({
+      directories: [],
+      mediaGroups: [],
+      metaFile: [createMockMDFile('index.md', null, createMockDirectory('./', name))]
+    });
+    const answer = (name: string, text: string): void => answers.get('/gallery/content/' + name + '/index.md')!(text);
+    // the resource starts loading after the tick
+    const show = async (dc: GroupedDirectoryContent): Promise<void> => {
+      content.set(dc);
+      TestBed.tick();
+      await Promise.resolve();
+    };
+    const settle = async (): Promise<void> => {
+      TestBed.tick();
+      await TestBed.inject(ApplicationRef).whenStable();
+    };
+    const topTexts = (): string[] | undefined => service.getMarkDowns()?.map((m) => m.text);
+
+    beforeEach(() => {
+      answers = new Map();
+      mockNetworkService.getText.mockImplementation((url: string) => new Promise<string>((resolve) => answers.set(url, resolve)));
+    });
+
+    it('should load the markdown of the content', async () => {
+      await show(folder('Őszi kirándulás'));
+      answer('Őszi kirándulás', 'Hello Őszi');
+      await settle();
+      expect(topTexts()).toEqual(['Hello Őszi']);
+    });
+
+    it('should keep the previous markdowns while the next ones load', async () => {
+      await show(folder('Őszi kirándulás'));
+      answer('Őszi kirándulás', 'Hello Őszi');
+      await settle();
+      // the templates read it on every render
+      expect(topTexts()).toEqual(['Hello Őszi']);
+
+      await show(folder('Balaton'));
+      expect(topTexts()).toEqual(['Hello Őszi']);
+
+      answer('Balaton', 'Hello Balaton');
+      await settle();
+      expect(topTexts()).toEqual(['Hello Balaton']);
+    });
+
+    it('should show the newest content even if an older one loads slower', async () => {
+      await show(folder('Balaton'));
+      await show(folder('Őszi kirándulás'));
+
+      answer('Őszi kirándulás', 'Hello Őszi');
+      await settle();
+      answer('Balaton', 'Hello Balaton');
+      await settle();
+
+      expect(topTexts()).toEqual(['Hello Őszi']);
     });
   });
 });

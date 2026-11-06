@@ -243,7 +243,7 @@ export const SearchQueryUtils = {
    * E.g.: exact 'a/b' -> ['a', 'b'], glob 'a/b/*' -> ['a', 'b'], glob 'a/b*' -> ['a'].
    * Returns null if the matches can be anywhere (like and negated searches).
    */
-  getDirectorySearchAnchor: (search: DirectorySearch): string[] => {
+  getDirectorySearchAnchor: (search: DirectorySearch): string[] | null => {
     if (search.negate) {
       return null;
     }
@@ -314,7 +314,7 @@ export const SearchQueryUtils = {
    * A directory matches the list if it matches any of its entries.
    * Returns null for an empty list.
    */
-  directoryListToQuery: (list: DirectorySearch[]): SearchQueryDTO => {
+  directoryListToQuery: (list: DirectorySearch[]): SearchQueryDTO | null => {
     SearchQueryUtils.validateDirectoryList(list);
     if (!list || list.length === 0) {
       return null;
@@ -384,10 +384,20 @@ export const SearchQueryUtils = {
     return JSON.stringify(shorten(query));
   },
   /**
+   * The urlified exact match text search (e.g. for a keyword, a person or a place link)
+   */
+  urlifyExactMatch: (type: SearchQueryTypes, value: string): string => {
+    return SearchQueryUtils.urlify({
+      type,
+      matchType: TextSearchQueryMatchTypes.exact_match,
+      value,
+    } as TextSearch);
+  },
+  /**
    * Pareses the shortened urls and returns with the original SearchQueryDTO
    * @param urlQuery
    */
-  parseURLifiedQuery: (urlQuery: string): SearchQueryDTO => {
+  parseURLifiedQuery: (urlQuery: string): SearchQueryDTO | null => {
     if (!urlQuery || urlQuery === '') {
       return null;
     }

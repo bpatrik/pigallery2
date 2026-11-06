@@ -1,6 +1,6 @@
 <a class="button btn btn-secondary"
-  [routerLink]="['/gallery', getDirectoryPath()]"
-  [queryParams]="queryService.getParams()"
+  [routerLink]="['/gallery', directoryPath()]"
+  [queryParams]="queryService.params()"
   style="display: inline-block;">
 
 
@@ -9,7 +9,7 @@
     [style.height.px]="size()">
     @if (thumbnail && thumbnail.Available) {
       <div class="photo"
-      [style.background-image]="getSanitizedThUrl()"></div>
+      [style.background-image]="thumbnail.Src | cssUrl"></div>
     }
 
     @if (!thumbnail || !thumbnail.Available) {

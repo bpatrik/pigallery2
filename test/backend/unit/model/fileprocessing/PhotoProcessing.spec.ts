@@ -33,7 +33,6 @@ describe('PhotoProcessing', () => {
   });
 
 
-  /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted thumbnail path', async () => {
 
     TestHelper.resetConfig();

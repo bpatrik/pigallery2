@@ -1,8 +1,7 @@
-import { Component, ElementRef, OnChanges, inject, input, output, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import {Component, ElementRef, computed, inject, input, linkedSignal, output, viewChild} from '@angular/core';
 import {GridMedia} from '../../grid/GridMedia';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
-import {SupportedFormats} from '../../../../../../common/SupportedFormats';
 import {Config} from '../../../../../../common/config/public/Config';
 import {LightboxService} from '../lightbox.service';
 
@@ -11,125 +10,116 @@ import {LightboxService} from '../lightbox.service';
   selector: 'app-gallery-lightbox-media',
   styleUrl: './media.lightbox.gallery.component.css',
   templateUrl: './media.lightbox.gallery.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: []
 })
-export class GalleryLightboxMediaComponent implements OnChanges {
+export class GalleryLightboxMediaComponent {
   elementRef = inject(ElementRef);
   lightboxService = inject(LightboxService);
   private sanitizer = inject(DomSanitizer);
 
-  readonly gridMedia = input<GridMedia>(undefined);
-  readonly nextGridMedia = input<GridMedia>(undefined);
+  readonly gridMedia = input<GridMedia | null>(null);
+  readonly nextGridMedia = input<GridMedia | null>(null);
   readonly loadMedia = input(false); // prevents loading media
   readonly windowAspect = input(1);
   readonly zoom = input(1);
-  readonly drag = input({ x: 0, y: 0 });
+  readonly drag = input({x: 0, y: 0});
   readonly videoSourceError = output();
 
   readonly video = viewChild<ElementRef<HTMLVideoElement>>('video');
   readonly liveVideo = viewChild<ElementRef<HTMLVideoElement>>('liveVideo');
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
-  prevGirdPhoto: GridMedia = null;
-
-  public imageSize = {width: 'auto', height: '100'};
-  // do not skip to the next photo if not both are loaded (or resulted in an error)
-  public imageLoadFinished = {
-    this: false,
-    next: false
-  };
-  thumbnailSrc: string = null;
-  liveVideoSrc: string = null;
-  liveVideoPlaying = false;
-  liveVideoClickLocked = false;
-  private liveVideoTouchActive = false;
-  photo = {
-    src: null as string,
-    isBestFit: null as boolean,
-  };
-  public transcodeNeedVideos = SupportedFormats.TranscodeNeed.Videos;
-  private nextImage = new Image();
-  // if media not loaded, show thumbnail
-  private mediaLoaded = false;
-  private videoProgress = 0;
-
-  get ImageTransform(): SafeStyle {
-    return this.sanitizer.bypassSecurityTrustStyle(
-      'scale(' +
-      this.zoom() +
-      ') translate(calc(' +
-      -50 / this.zoom() +
-      '% + ' +
-      this.drag().x / this.zoom() +
-      'px), calc(' +
-      -50 / this.zoom() +
-      '% + ' +
-      this.drag().y / this.zoom() +
-      'px))'
-    );
-  }
-
-  public get VideoProgress(): number {
-    return this.videoProgress;
-  }
-
-  public set VideoProgress(value: number) {
-    const video = this.video();
-    if (!video && value === null && typeof value === 'undefined') {
-      return;
-    }
-    video.nativeElement.currentTime =
-      video.nativeElement.duration * (value / 100);
-    if (video.nativeElement.paused) {
-      video.nativeElement.play().catch(console.error);
-    }
-  }
-
-  public get VideoVolume(): number {
-    const video = this.video();
-    if (!video) {
-      return 1;
-    }
-    return video.nativeElement.volume;
-  }
-
-  public set VideoVolume(value: number) {
-    const video = this.video();
-    if (!video) {
-      return;
-    }
-    video.nativeElement.muted = false;
-    video.nativeElement.volume = value;
-  }
-
-  public get Muted(): boolean {
-    const video = this.video();
-    if (!video) {
-      return false;
-    }
-    return video.nativeElement.muted;
-  }
-
-  public get Paused(): boolean {
-    const video = this.video();
-    if (!video) {
-      return true;
-    }
-    return video.nativeElement.paused;
-  }
-
-  private get ThumbnailUrl(): string {
+  // identifies the media; the state below starts over and the elements are re-created when it changes
+  private readonly mediaKey = computed((): string | null => this.gridMedia()?.getRelativePath() ?? null);
+  // One item while there is a media. The template tracks it by its key, so the elements of the previous media are
+  // removed before the new media is shown: the old photo never shows in the place of the new one.
+  readonly mediaItems = computed((): { key: string }[] => {
+    const key = this.mediaKey();
+    return key !== null ? [{key}] : [];
+  });
+  readonly isPhoto = computed((): boolean => !!this.gridMedia()?.isPhoto());
+  readonly isVideo = computed((): boolean => !!this.gridMedia()?.isVideo());
+  readonly isLivePhoto = computed((): boolean => !!this.gridMedia()?.isLivePhoto());
+  readonly bestFitVideoPath = computed((): string | null => {
     const gridMedia = this.gridMedia();
+    return gridMedia?.isVideo() ? gridMedia.getBestFitVideoPath() : null;
+  });
+  readonly liveVideoSrc = computed((): string | null => {
+    const gridMedia = this.gridMedia();
+    return gridMedia?.isLivePhoto() ? gridMedia.getLiveVideoPath() : null;
+  });
+  // the thumbnail the grid loaded, shown until the photo loads
+  readonly thumbnailSrc = computed((): string | null => {
+    const gridMedia = this.gridMedia();
+    if (!gridMedia) {
+      return null;
+    }
     if (gridMedia.isThumbnailAvailable() === true) {
       return gridMedia.getThumbnailPath();
     }
-
     if (gridMedia.isReplacementThumbnailAvailable() === true) {
       return gridMedia.getReplacementThumbnailPath();
     }
     return null;
-  }
+  });
+  readonly imageSize = computed((): { width: string | null, height: string | null } => {
+    const gridMedia = this.gridMedia();
+    if (gridMedia && MediaDTOUtils.calcAspectRatio(gridMedia.media) < this.windowAspect()) {
+      return {width: null, height: '100'};
+    }
+    return {width: '100', height: null};
+  });
+  readonly imageTransform = computed((): SafeStyle => {
+    const zoom = this.zoom();
+    const drag = this.drag();
+    return this.sanitizer.bypassSecurityTrustStyle(
+      'scale(' + zoom + ') translate(calc(' + -50 / zoom + '% + ' + drag.x / zoom + 'px), calc(' +
+      -50 / zoom + '% + ' + drag.y / zoom + 'px))'
+    );
+  });
+
+  private readonly mediaLoaded = linkedSignal({source: this.mediaKey, computation: (): boolean => false});
+  private readonly renderedMediaLoaded = linkedSignal({source: this.mediaKey, computation: (): boolean => false});
+  readonly liveVideoPlaying = linkedSignal({source: this.mediaKey, computation: (): boolean => false});
+  private readonly liveVideoClickLocked = linkedSignal({source: this.mediaKey, computation: (): boolean => false});
+  readonly paused = linkedSignal({source: this.mediaKey, computation: (): boolean => true});
+  readonly muted = linkedSignal({source: this.mediaKey, computation: (): boolean => false});
+  readonly videoVolume = linkedSignal({source: this.mediaKey, computation: (): number => 1});
+  readonly videoProgress = linkedSignal({source: this.mediaKey, computation: (): number => 0});
+  // the photo url: the best fitting preview once loading is allowed, the original on zoom
+  private readonly photo = linkedSignal<{ key: string | null, gridMedia: GridMedia | null, load: boolean, zoomed: boolean }, { src: string | null, isBestFit: boolean | null }>({
+    source: () => ({key: this.mediaKey(), gridMedia: this.gridMedia(), load: this.loadMedia(), zoomed: this.zoom() !== 1}),
+    computation: (source, previous) => {
+      const prev = previous?.source.key === source.key ? previous.value : {src: null, isBestFit: null};
+      const gridMedia = source.gridMedia;
+      if (!gridMedia || !source.load || !gridMedia.isPhoto()) {
+        return prev;
+      }
+      if (!source.zoomed || Config.Gallery.Lightbox.loadFullImageOnZoom === false) {
+        if (prev.src !== null) {
+          return prev;
+        }
+        // Check if the preview size is adequate for lightbox display
+        // If not, load the original instead of a tiny preview
+        if (this.isPreviewAdequateForLightbox(gridMedia)) {
+          return {src: gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight), isBestFit: true};
+        }
+        return {src: gridMedia.getOriginalMediaPath(), isBestFit: false};
+      }
+      // on zoom load high res photo
+      if (prev.isBestFit === true || prev.src === null) {
+        return {src: gridMedia.getOriginalMediaPath(), isBestFit: false};
+      }
+      return prev;
+    }
+  });
+  readonly photoSrc = computed((): string | null => this.photo().src);
+  readonly showThumbnail = computed((): boolean => !!this.gridMedia() && !this.mediaLoaded() && this.thumbnailSrc() !== null);
+
+  private liveVideoTouchActive = false;
+  // the next media whose preload started and finished; the slideshow waits for it
+  private preloadingNext: GridMedia | null = null;
+  private preloadedNext: GridMedia | null = null;
 
   public isRenderedMediaLoaded(): boolean {
     const gridMedia = this.gridMedia();
@@ -142,7 +132,7 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
     if (gridMedia.isPhoto()) {
       const imageElement = this.imageElement();
-      return this.imageLoadFinished.this || (imageElement && imageElement.nativeElement.complete);
+      return this.renderedMediaLoaded() || (!!imageElement && imageElement.nativeElement.complete);
     }
     return false;
   }
@@ -152,46 +142,31 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     if (!nextGridMedia || !nextGridMedia.isPhoto()) {
       return true;
     }
-    return this.imageLoadFinished.next || this.nextImage.complete;
+    // the next media changed after the current one loaded (e.g. loop switched on at the last photo)
+    if (this.preloadingNext !== nextGridMedia) {
+      this.loadNextPhoto();
+    }
+    return this.preloadedNext === nextGridMedia;
   }
 
-  // Side effect: resets and starts loading the image or video of the new media.
-  ngOnChanges(): void {
-    // media changed
-    const gridMedia = this.gridMedia();
-    if (this.prevGirdPhoto !== gridMedia) {
-      this.prevGirdPhoto = gridMedia;
-      this.thumbnailSrc = null;
-      this.liveVideoSrc = null;
-      this.liveVideoClickLocked = false;
-      this.photo.src = null;
-      this.nextImage.src = '';
-      this.nextImage.onload = null;
-      this.nextImage.onerror = null;
-      this.mediaLoaded = false;
-      this.imageLoadFinished = {
-        this: false,
-        next: false
-      };
+  public setVideoProgress(value: number): void {
+    const video = this.video();
+    if (!video || value === null || typeof value === 'undefined') {
+      return;
     }
-    this.setImageSize();
-    if (
-      this.thumbnailSrc == null &&
-      gridMedia &&
-      this.ThumbnailUrl !== null
-    ) {
-      this.thumbnailSrc = this.ThumbnailUrl;
+    video.nativeElement.currentTime = video.nativeElement.duration * (value / 100);
+    if (video.nativeElement.paused) {
+      video.nativeElement.play().catch(console.error);
     }
+  }
 
-    if (
-      this.liveVideoSrc == null &&
-      gridMedia &&
-      gridMedia.isLivePhoto()
-    ) {
-      this.liveVideoSrc = gridMedia.getLiveVideoPath();
+  public setVideoVolume(value: number): void {
+    const video = this.video();
+    if (!video) {
+      return;
     }
-
-    this.loadPhoto();
+    video.nativeElement.muted = false;
+    video.nativeElement.volume = value;
   }
 
   public mute(): void {
@@ -215,12 +190,31 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
   }
 
-  public startLiveVideo(): void {
-    const liveVideo = this.liveVideo();
-    if (!liveVideo || this.liveVideoClickLocked) {
+  // play, pause, volumechange
+  public onVideoStateChange(): void {
+    const video = this.video()?.nativeElement;
+    if (!video) {
       return;
     }
-    this.liveVideoPlaying = true;
+    this.paused.set(video.paused);
+    this.muted.set(video.muted);
+    this.videoVolume.set(video.volume);
+  }
+
+  public onVideoProgress(): void {
+    const video = this.video()?.nativeElement;
+    if (!video) {
+      return;
+    }
+    this.videoProgress.set((100 / video.duration) * video.currentTime);
+  }
+
+  public startLiveVideo(): void {
+    const liveVideo = this.liveVideo();
+    if (!liveVideo || this.liveVideoClickLocked()) {
+      return;
+    }
+    this.liveVideoPlaying.set(true);
     liveVideo.nativeElement.currentTime = 0;
     liveVideo.nativeElement.play().catch(console.error);
   }
@@ -232,10 +226,10 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   public stopLiveVideo(): void {
     const liveVideo = this.liveVideo();
-    if (!liveVideo || this.liveVideoClickLocked) {
+    if (!liveVideo || this.liveVideoClickLocked()) {
       return;
     }
-    this.liveVideoPlaying = false;
+    this.liveVideoPlaying.set(false);
     liveVideo.nativeElement.pause();
   }
 
@@ -249,13 +243,13 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     if (!liveVideo) {
       return;
     }
-    if (this.liveVideoClickLocked) {
-      this.liveVideoClickLocked = false;
-      this.liveVideoPlaying = false;
+    if (this.liveVideoClickLocked()) {
+      this.liveVideoClickLocked.set(false);
+      this.liveVideoPlaying.set(false);
       liveVideo.nativeElement.pause();
     } else {
-      this.liveVideoClickLocked = true;
-      this.liveVideoPlaying = true;
+      this.liveVideoClickLocked.set(true);
+      this.liveVideoPlaying.set(true);
       liveVideo.nativeElement.currentTime = 0;
       liveVideo.nativeElement.play().catch(console.error);
     }
@@ -263,40 +257,23 @@ export class GalleryLightboxMediaComponent implements OnChanges {
 
   onImageError(): void {
     // TODO:handle error
-    this.imageLoadFinished.this = true;
+    this.renderedMediaLoaded.set(true);
     console.error(
       'Error: cannot load media for lightbox url: ' +
-      this.gridMedia().getBestSizedMediaPath(window.innerWidth, window.innerHeight)
+      this.gridMedia()?.getBestSizedMediaPath(window.innerWidth, window.innerHeight)
     );
     this.loadNextPhoto();
   }
 
   onImageLoad(): void {
-    this.imageLoadFinished.this = true;
-    this.mediaLoaded = true;
+    this.renderedMediaLoaded.set(true);
+    this.mediaLoaded.set(true);
     this.loadNextPhoto();
   }
 
-  public showThumbnail(): boolean {
-    const gridMedia = this.gridMedia();
-    return (
-      gridMedia &&
-      !this.mediaLoaded &&
-      this.thumbnailSrc !== null &&
-      (gridMedia.isThumbnailAvailable() ||
-        gridMedia.isReplacementThumbnailAvailable())
-    );
-  }
-
   onSourceError(): void {
-    this.mediaLoaded = false;
+    this.mediaLoaded.set(false);
     this.videoSourceError.emit();
-  }
-
-  public onVideoProgress(): void {
-    this.videoProgress =
-      (100 / this.video().nativeElement.duration) *
-      this.video().nativeElement.currentTime;
   }
 
   /**
@@ -311,19 +288,24 @@ export class GalleryLightboxMediaComponent implements OnChanges {
     }
     // Videos do not support preloading
     if (!nextGridMedia.isPhoto()) {
-      this.imageLoadFinished.next = true;
       return;
     }
-    this.nextImage.src = nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
-
-    this.nextImage.onload = () => this.imageLoadFinished.next = true;
-    this.nextImage.onerror = () => {
-      console.error('Cant preload:' + this.nextImage.src);
-      this.imageLoadFinished.next = true;
+    this.preloadingNext = nextGridMedia;
+    // a new image for each preload, so an older one can't mark this one loaded
+    const image = new Image();
+    const done = (): void => {
+      if (this.preloadingNext === nextGridMedia) {
+        this.preloadedNext = nextGridMedia;
+      }
     };
-
-    if (this.nextImage.complete) {
-      this.imageLoadFinished.next = true;
+    image.onload = done;
+    image.onerror = (): void => {
+      console.error('Cant preload:' + image.src);
+      done();
+    };
+    image.src = nextGridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
+    if (image.complete) {
+      done();
     }
   }
 
@@ -331,62 +313,16 @@ export class GalleryLightboxMediaComponent implements OnChanges {
    * Checks if the available preview size is adequate for lightbox display.
    * Returns false if the preview would be significantly smaller than the lightbox area.
    */
-  private isPreviewAdequateForLightbox(): boolean {
+  private isPreviewAdequateForLightbox(gridMedia: GridMedia): boolean {
     if (!Config.Gallery.Lightbox.loadFullImageIfPreviewTooSmall) {
       return true;
     }
 
-    const selectedSize = this.gridMedia().getMediaSize(window.innerWidth, window.innerHeight);
+    const selectedSize = gridMedia.getMediaSize(window.innerWidth, window.innerHeight);
     const minDisplaySize = Math.min(window.innerWidth, window.innerHeight);
 
     // If the selected preview size is less than 50% of the minimum display dimension,
     // consider it inadequate for lightbox display (e.g., 240px on a 1080p screen)
     return selectedSize >= minDisplaySize * 0.5;
   }
-
-  private loadPhoto(): void {
-    const gridMedia = this.gridMedia();
-    if (!gridMedia || !this.loadMedia() || !gridMedia.isPhoto()) {
-      return;
-    }
-
-    if (
-      this.zoom() === 1 ||
-      Config.Gallery.Lightbox.loadFullImageOnZoom === false
-    ) {
-      if (this.photo.src == null) {
-        // Check if the preview size is adequate for lightbox display
-        // If not, load the original instead of a tiny preview
-        if (this.isPreviewAdequateForLightbox()) {
-          this.photo.src = gridMedia.getBestSizedMediaPath(window.innerWidth, window.innerHeight);
-          this.photo.isBestFit = true;
-        } else {
-          this.photo.src = gridMedia.getOriginalMediaPath();
-          this.photo.isBestFit = false;
-        }
-      }
-      // on zoom load high res photo
-    } else if (this.photo.isBestFit === true || this.photo.src == null) {
-      this.photo.src = gridMedia.getOriginalMediaPath();
-      this.photo.isBestFit = false;
-    }
-  }
-
-  private setImageSize(): void {
-    const gridMedia = this.gridMedia();
-    if (!gridMedia) {
-      return;
-    }
-
-    const photoAspect = MediaDTOUtils.calcAspectRatio(gridMedia.media);
-
-    if (photoAspect < this.windowAspect()) {
-      this.imageSize.height = '100';
-      this.imageSize.width = null;
-    } else {
-      this.imageSize.height = null;
-      this.imageSize.width = '100';
-    }
-  }
 }
-

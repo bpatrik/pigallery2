@@ -44,7 +44,7 @@ export class VideoProcessing {
 
     try {
       await fsp.access(origFilePath, fsConstants.R_OK);
-    } catch (e) {
+    } catch {
       return false;
     }
 
@@ -57,7 +57,7 @@ export class VideoProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return true;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 
@@ -70,7 +70,7 @@ export class VideoProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 

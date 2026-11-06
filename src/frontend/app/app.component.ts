@@ -1,9 +1,8 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, effect, inject, untracked } from '@angular/core';
 import {AuthenticationService} from './model/network/authentication.service';
 import {Config} from '../../common/config/public/Config';
 import {Title} from '@angular/platform-browser';
 import {ShareService} from './ui/gallery/share.service';
-import {Subscription} from 'rxjs';
 import {NavigationService} from './model/navigation.service';
 import {ThemeService} from './model/theme.service';
 import { RouterOutlet } from '@angular/router';
@@ -14,10 +13,9 @@ import {ToastContainerComponent} from './ui/toast/toast-container.component';
     template: `
     <router-outlet />
     <app-toast-container />`,
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [RouterOutlet, ToastContainerComponent]
 })
-export class AppComponent implements OnInit, OnDestroy {
+export class AppComponent implements OnInit {
   private authenticationService = inject(AuthenticationService);
   private shareService = inject(ShareService);
   private navigation = inject(NavigationService);
@@ -25,31 +23,35 @@ export class AppComponent implements OnInit, OnDestroy {
   // ThemeService applies the theme when it is created
   private themeService = inject(ThemeService);
 
-  private subscription: Subscription = null;
-
-  async ngOnInit(): Promise<void> {
-    this.title.setTitle(Config.Server.applicationTitle);
-    await this.shareService.wait();
-    this.subscription = this.authenticationService.user.subscribe(() => {
-      if(this.navigation.isErrorPage()){ //stay on the error page, do not auto navigate
+  constructor() {
+    // redirects between the login page and the gallery when the user logs in or out
+    effect(() => {
+      if (!this.shareService.ready()) {
         return;
       }
-      if (this.authenticationService.isAuthenticated()) {
-        if (this.navigation.isLoginPage()) {
-          return this.navigation.toDefault();
-        }
-      } else {
-        if (!this.navigation.isLoginPage()) {
-          return this.navigation.toLogin();
-        }
-      }
+      const authenticated = this.authenticationService.isAuthenticated();
+      untracked(() => this.redirect(authenticated)?.catch(console.error));
     });
   }
 
-  ngOnDestroy(): void {
-    if (this.subscription != null) {
-      this.subscription.unsubscribe();
+  ngOnInit(): void {
+    this.title.setTitle(Config.Server.applicationTitle);
+  }
+
+  private redirect(authenticated: boolean): Promise<boolean> | undefined {
+    if (this.navigation.isErrorPage()) { //stay on the error page, do not auto navigate
+      return;
     }
+    if (authenticated) {
+      if (this.navigation.isLoginPage()) {
+        return this.navigation.toDefault();
+      }
+    } else {
+      if (!this.navigation.isLoginPage()) {
+        return this.navigation.toLogin();
+      }
+    }
+    return undefined;
   }
 
 }

@@ -4,7 +4,10 @@ import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import multer = require('multer');
 
 const storage = multer.memoryStorage();
-const upload = multer({storage}).array('files');
+// browsers send the file name as UTF-8, while multer decodes it as latin1 by default (#1263).
+// @types/multer does not know defParamCharset yet, the installed multer does.
+const options: multer.Options & { defParamCharset: string } = {storage, defParamCharset: 'utf8'};
+const upload = multer(options).array('files');
 
 export class UploadMWs {
   public static async upload(

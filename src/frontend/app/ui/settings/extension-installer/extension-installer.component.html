@@ -14,7 +14,7 @@
         </button>
       </div>
       <div class="modal-body">
-        @if (loading) {
+        @if (loading()) {
           <div class="text-center">
             <div class="spinner-border" role="status">
               <span class="visually-hidden" i18n>Loading...</span>
@@ -22,21 +22,21 @@
           </div>
         }
 
-        @if (error) {
+        @if (error()) {
           <div class="alert alert-danger" role="alert">
-            {{ error }}
+            {{ error() }}
             <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="loadExtensions()" i18n>Retry</button>
           </div>
         }
 
-        @if (!loading && !error) {
+        @if (!loading() && !error()) {
           <div>
-            @if (extensions.length === 0) {
+            @if (extensions().length === 0) {
               <div class="alert alert-info" i18n>
             No extensions available.
           </div>
             }
-            @if (extensions.length > 0) {
+            @if (extensions().length > 0) {
               <table class="table table-striped">
                 <thead>
                   <tr>
@@ -46,7 +46,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @for (extension of extensions; track extension.id) {
+                  @for (extension of extensions(); track extension.id) {
                     <tr>
                       <td>
                         {{ extension.name }}
@@ -62,7 +62,7 @@
                           <button
                             class="btn btn-sm btn-primary"
                             (click)="installExtension(extension)"
-                            [disabled]="loading"
+                            [disabled]="loading()"
                             i18n>
                     Install
                   </button>
@@ -92,7 +92,7 @@
       <div class="modal-footer">
         <div class="d-flex justify-content-between w-100">
           <button class="btn btn-secondary" (click)="extensionsModal.hide()" i18n>Close</button>
-          <button class="btn btn-outline-secondary" (click)="loadExtensions()" [disabled]="loading">
+          <button class="btn btn-outline-secondary" (click)="loadExtensions()" [disabled]="loading()">
             <ng-icon name="ionRefresh" class="me-1" /><ng-container i18n>Refresh</ng-container>
           </button>
         </div>

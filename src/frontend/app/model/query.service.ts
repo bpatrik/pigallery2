@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import {Injectable, computed, inject} from '@angular/core';
 import {ShareService} from '../ui/gallery/share.service';
 import {MediaDTO} from '../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../common/QueryParams';
@@ -25,8 +25,11 @@ export class QueryService {
     }
   }
 
-  getParams(lightbox?: { media?: MediaDTO,map?:boolean}): { [key: string]: string } {
-    const query: { [key: string]: string } = {};
+  // the query params of a gallery link (keeps the sharing key)
+  public readonly params = computed((): Record<string, string> => this.getParams());
+
+  getParams(lightbox?: { media?: MediaDTO,map?:boolean}): Record<string, string> {
+    const query: Record<string, string> = {};
     if (lightbox?.media) {
       query[QueryParams.gallery.photo] = this.getMediaStringId(lightbox?.media);
     }
@@ -34,18 +37,16 @@ export class QueryService {
       query[QueryParams.gallery.map.show] = 'true';
     }
     if (Config.Sharing.enabled === true) {
-      if (this.shareService.isSharing()) {
-        query[QueryParams.gallery.sharingKey_query] =
-          this.shareService.getSharingKey();
+      const sharingKey = this.shareService.getSharingKey();
+      if (this.shareService.isSharing() && sharingKey) {
+        query[QueryParams.gallery.sharingKey_query] = sharingKey;
       }
     }
     return query;
   }
 
-  getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): {
-    [key: string]: any;
-  } {
-    const params: { [key: string]: any } = {};
+  getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): Record<string, unknown> {
+    const params: Record<string, unknown> = {};
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
         params[QueryParams.gallery.sharingKey_query] =

@@ -1,17 +1,17 @@
 @if (!dropDownItem()) {
   <button id="shareButton" class="nav-link btn  btn-link"
     style="white-space:nowrap"
-    type="button" [disabled]="!enabled" (click)="openModal(shareModal)">
+    type="button" [disabled]="!enabled()" (click)="openModal(shareModal)">
     <ng-icon name="ionShareSocialOutline" class="me-1" />
     <ng-container i18n>Share</ng-container>
   </button>
 }
 
 @if (dropDownItem()) {
-  <a class="dropdown-item" (click)="openModal(shareModal)">
+  <button type="button" class="dropdown-item" (click)="openModal(shareModal)">
     <ng-icon name="ionShareSocialOutline" />
     <ng-container i18n>Share</ng-container>
-  </a>
+  </button>
 }
 
 <ng-template #shareModal>
@@ -31,11 +31,11 @@
             class="form-control input-md"
             type="text"
             readonly
-            [disabled]="!shareForm.form.valid || !urlValid"
-            [ngModel]="shareForm.form.valid ? url: invalidSettings">
+            [disabled]="!shareForm.form.valid || !urlValid()"
+            [ngModel]="shareForm.form.valid ? url() : invalidSettings">
         </div>
         <div class="col-5 col-sm-3">
-          @if (!sharing) {
+          @if (!sharing()) {
             <button
               id="getShareButton" name="getShareButton"
               (click)="share()"
@@ -43,10 +43,10 @@
               class="btn btn-primary btn-block float-end"
             i18n>Share</button>
           }
-          @if (sharing) {
+          @if (sharing()) {
             <button
               id="copyButton" name="copyButton"
-              [appCopy]="url"
+              [appCopy]="url()"
               (copied)="onCopy()"
               [disabled]="!shareForm.form.valid"
               class="btn btn-primary btn-block float-end"
@@ -64,39 +64,39 @@
             name="sharing-dir"
             id="sharing-dir"
             class="full-width form-control"
-            [ngModel]="galleryService.isSearchResult() ? (currentQuery | searchQuery) : sharingTarget">
+            [ngModel]="galleryService.isSearchResult() ? (currentQuery() | searchQuery) : sharingTarget()">
         </div>
       </div>
 
       <div class="row mt-2">
         <div class="col-12">
           <small class="text-muted">
-            <span i18n>Sharing</span>&nbsp;@if (currentMediaCountIsLowerBound) {
+            <span i18n>Sharing</span>&nbsp;@if (currentMediaCountIsLowerBound()) {
             <span
             i18n>at least</span>&nbsp;
           }
-          <span class="fw-bold">{{ sharedMediaCount }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;
-          @if (isDirectorySharing) {
-            @if (input.recursive) {
+          <span class="fw-bold">{{ sharedMediaCount() }}</span>&nbsp;<span i18n>photos and videos.</span>&nbsp;
+          @if (isDirectorySharing()) {
+            @if (recursive()) {
               <span i18n>Subfolders are shared too.</span>
             }
-            @if (!input.recursive) {
+            @if (!recursive()) {
               <span i18n>Subfolders are not shared.</span>
             }
           }
-          @if (!isDirectorySharing) {
+          @if (!isDirectorySharing()) {
             <span i18n>Only folders that contain shared photos can be opened.</span>
           }
         </small>
       </div>
     </div>
 
-    @if (isDirectorySharing) {
+    @if (isDirectorySharing()) {
       <div class="row mt-2">
         <div class="col-12">
           <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="share-recursive" name="share-recursive"
-              [(ngModel)]="input.recursive" (ngModelChange)="onRecursiveChange()">
+              [(ngModel)]="recursive" (ngModelChange)="onRecursiveChange()">
             <label class="form-check-label" for="share-recursive" i18n>Include subfolders</label>
           </div>
         </div>
@@ -148,17 +148,17 @@
     </div>
   </form>
 </div>
-@if (activeShares && activeShares.length>0) {
+@if (activeShareRows().length > 0) {
   <div class="modal-footer">
     @if (!showSharingList) {
-      <a
+      <button type="button"
         (click)="showSharingList = true"
-        class="list-shares-button m-0">
-        <span class="badge text-bg-secondary me-1">{{ activeShares.length }}</span>
+        class="list-shares-button btn btn-link p-0 m-0">
+        <span class="badge text-bg-secondary me-1">{{ activeShareRows().length }}</span>
         <ng-container i18n>active share(s) for this folder.
       </ng-container>
         <ng-icon name="ionChevronForwardOutline" class="ms-1" />
-      </a>
+      </button>
     }
     @if (showSharingList) {
       <table class="table table-hover table-sm">
@@ -174,26 +174,27 @@
           </tr>
         </thead>
         <tbody>
-          @for (share of activeShares; track share.id) {
+          @for (row of activeShareRows(); track row.share.id) {
+            @let share = row.share;
             <tr>
               <td class="ellipsisContainer">
                 <div class="ellipsisText share-key">
-                  <a [href]="sharingService.getUrl(share)">{{share.sharingKey}}</a>
+                  <a [href]="row.url">{{share.sharingKey}}</a>
                   <button type="button" class="btn btn-link p-0 ms-1"
-                    [appCopy]="sharingService.getUrl(share)" (copied)="onCopy()"
+                    [appCopy]="row.url" (copied)="onCopy()"
                     title="Copy link" i18n-title>
                     <ng-icon name="ionCopyOutline" />
                   </button>
                 </div>
               </td>
-              <td>{{ isRecursive(share) ? text.Yes : text.No }}</td>
+              <td>{{ row.recursive ? text.Yes : text.No }}</td>
               @if (IsAdmin) {
-                <td>{{share.creator.name}}</td>
+                <td>{{share.creator?.name}}</td>
               }
               <td>{{share.expires | date}}</td>
               <td>
                 <button (click)="deleteSharing(share)"
-                  [disabled]="share.sharingKey == sharing?.sharingKey"
+                  [disabled]="share.sharingKey === sharing()?.sharingKey"
                   class="btn btn-danger float-end">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>

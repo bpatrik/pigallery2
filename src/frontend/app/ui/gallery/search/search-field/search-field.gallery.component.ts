@@ -1,4 +1,4 @@
-import { Component, forwardRef, TemplateRef, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, forwardRef, TemplateRef, inject, input, output, signal } from '@angular/core';
 import {Router} from '@angular/router';
 import {AutoCompleteService} from '../autocomplete.service';
 import {SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
@@ -27,7 +27,6 @@ import {GallerySearchQueryBuilderComponent} from '../query-builder/query-bulder.
       multi: true,
     },
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     GallerySearchFieldBaseComponent,
     FormsModule,
@@ -42,11 +41,11 @@ export class GallerySearchFieldComponent
   private modalService = inject(BsModalService);
   router = inject(Router);
 
-  readonly search = output<void>();
-  readonly placeholder = input<string>(undefined);
-  public rawSearchText = '';
-  public searchQueryDTO: SearchQueryDTO;
-  private searchModalRef: BsModalRef;
+  readonly searchSubmit = output<void>();
+  readonly placeholder = input<string>();
+  public readonly rawSearchText = signal('');
+  public readonly searchQueryDTO = signal<SearchQueryDTO | undefined>(undefined);
+  private searchModalRef: BsModalRef | null;
 
   public async openSearchModal(template: TemplateRef<unknown>): Promise<void> {
     this.searchModalRef = this.modalService.show(template, {
@@ -56,7 +55,7 @@ export class GallerySearchFieldComponent
   }
 
   public hideSearchModal(): void {
-    this.searchModalRef.hide();
+    this.searchModalRef?.hide();
     this.searchModalRef = null;
   }
 
@@ -66,19 +65,19 @@ export class GallerySearchFieldComponent
 
   public writeValue(obj: SearchQueryDTO): void {
     try {
-      if (Utils.equalsFilter(this.searchQueryDTO, obj) &&
+      if (Utils.equalsFilter(this.searchQueryDTO(), obj) &&
         Utils.equalsFilter(this.searchQueryParserService.parse(
-          this.rawSearchText
+          this.rawSearchText()
         ), obj)) {
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
-    this.searchQueryDTO = obj;
-    this.rawSearchText = this.searchQueryParserService.stringify(
-      this.searchQueryDTO
-    );
+    this.searchQueryDTO.set(obj);
+    this.rawSearchText.set(this.searchQueryParserService.stringify(
+      this.searchQueryDTO()
+    ));
   }
 
   registerOnChange(fn: (_: unknown) => void): void {
@@ -90,42 +89,42 @@ export class GallerySearchFieldComponent
   }
 
   public onChange(): void {
-    this.propagateChange(this.searchQueryDTO);
+    this.propagateChange(this.searchQueryDTO());
   }
 
-  validate(): ValidationErrors {
-    return {required: true};
+  // the field has no constraints, so it is always valid
+  validate(): ValidationErrors | null {
+    return null;
   }
 
   onQueryChange(): void {
     try {
-      if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText), this.searchQueryDTO)) {
+      if (Utils.equalsFilter(this.searchQueryParserService.parse(this.rawSearchText()), this.searchQueryDTO())) {
         this.onChange();
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
-    this.rawSearchText = this.searchQueryParserService.stringify(
-      this.searchQueryDTO
-    );
+    this.rawSearchText.set(this.searchQueryParserService.stringify(
+      this.searchQueryDTO()
+    ));
 
     this.onChange();
   }
 
   validateRawSearchText(): void {
     try {
-      this.searchQueryDTO = this.searchQueryParserService.parse(
-        this.rawSearchText
-      );
+      this.searchQueryDTO.set(this.searchQueryParserService.parse(
+        this.rawSearchText()
+      ));
       this.onChange();
     } catch (e) {
       console.error(e);
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private propagateChange = (_: SearchQueryDTO): void => {
+  private propagateChange = (_: SearchQueryDTO | undefined): void => {
     //ignoring
   };
 

@@ -1,4 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {signal} from '@angular/core';
 import {provideRouter} from '@angular/router';
 import {NgIconsModule} from '@ng-icons/core';
 import {
@@ -19,13 +20,22 @@ import {FullScreenService} from '../../fullscreen.service';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 
 class MockLightboxService {
-  controllersDimmed = false;
-  slideshowSpeed = 5;
-  captionAlwaysOn = false;
-  facesAlwaysOn = false;
+  readonly controllersDimmed = signal(false);
+  readonly slideshowSpeed = signal(5);
+  readonly captionAlwaysOn = signal(false);
+  readonly facesAlwaysOn = signal(false);
+  readonly loopSlideshow = signal(false);
+  readonly loopVideos = signal(false);
+  readonly playback = signal(false);
+  readonly topLeftTitle = signal([]);
+  readonly topLeftSubtitle = signal([]);
+  readonly bottomLeftTitle = signal([]);
+  readonly bottomLeftSubtitle = signal([]);
 }
 
 class MockFullScreenService {
+  readonly fullScreenEnabled = signal(false);
+
   isFullScreenEnabled() {
     return false;
   }
@@ -71,7 +81,7 @@ describe('ControlsLightboxComponent - cursor visibility', () => {
   });
 
   it('should hide the cursor while the controls are dimmed', () => {
-    component.controllersDimmed = true;
+    component.controllersDimmed.set(true);
     fixture.detectChanges();
 
     const swipeable: HTMLElement = fixture.nativeElement.querySelector('#swipeable-container');
@@ -80,7 +90,7 @@ describe('ControlsLightboxComponent - cursor visibility', () => {
   });
 
   it('should keep the cursor visible while the controls are shown', () => {
-    component.controllersDimmed = false;
+    component.controllersDimmed.set(false);
     fixture.detectChanges();
 
     const swipeable: HTMLElement = fixture.nativeElement.querySelector('#swipeable-container');

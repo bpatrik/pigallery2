@@ -26,7 +26,6 @@ export async function copyToClipboard(text: string): Promise<boolean> {
   textarea.select();
   try {
     // execCommand is deprecated, but it is the only way to copy without a secure context
-    // eslint-disable-next-line @typescript-eslint/no-deprecated
     return document.execCommand('copy');
   } catch {
     return false;

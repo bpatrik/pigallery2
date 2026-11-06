@@ -3,7 +3,6 @@ import {NetworkService} from '../../../model/network/network.service';
 import {IAutoCompleteItem} from '../../../../../common/entities/AutoCompleteItem';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {SearchQueryParserService} from './search-query-parser.service';
-import {BehaviorSubject} from 'rxjs';
 import {SearchQueryTypes, TextSearchQueryTypes,} from '../../../../../common/entities/SearchQueryDTO';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {defaultQueryKeywords, SearchQueryParser} from '../../../../../common/SearchQueryParser';
@@ -15,8 +14,8 @@ export class AutoCompleteService {
   private galleryCacheService = inject(GalleryCacheService);
 
   private keywords: string[] = [];
-  private textSearchKeywordsMap: { [key: string]: SearchQueryTypes } = {};
-  private noACKeywordsMap: { [key: string]: SearchQueryTypes } = {}; // these commands do not have autocompete
+  private textSearchKeywordsMap: Record<string, SearchQueryTypes> = {};
+  private noACKeywordsMap: Record<string, SearchQueryTypes> = {}; // these commands do not have autocompete
 
   constructor() {
     this.keywords = Object.values(defaultQueryKeywords)
@@ -64,7 +63,7 @@ export class AutoCompleteService {
       defaultQueryKeywords.date +
       '<=' +
       SearchQueryParser.stringifyText(
-        SearchQueryParser.stringifyDate(Date.now())
+        SearchQueryParser.stringifyDate(Date.now()) ?? ''
       )
     );
 
@@ -77,7 +76,7 @@ export class AutoCompleteService {
       defaultQueryKeywords.date +
       '>=' +
       SearchQueryParser.stringifyText(
-        SearchQueryParser.stringifyDate(Date.now())
+        SearchQueryParser.stringifyDate(Date.now()) ?? ''
       )
     );
     this.keywords.push(
@@ -92,14 +91,14 @@ export class AutoCompleteService {
     this.keywords.push(
       defaultQueryKeywords.date +
       ':' +
-      SearchQueryParser.stringifyText(SearchQueryParser.stringifyDate(Date.now() - 60 * 60 * 24 * 1000 * 365)) +
+      SearchQueryParser.stringifyText(SearchQueryParser.stringifyDate(Date.now() - 60 * 60 * 24 * 1000 * 365) ?? '') +
       '..' +
-      SearchQueryParser.stringifyText(SearchQueryParser.stringifyDate(Date.now()))
+      SearchQueryParser.stringifyText(SearchQueryParser.stringifyDate(Date.now()) ?? '')
     );
 
     TextSearchQueryTypes.forEach((t) => {
       this.textSearchKeywordsMap[
-        (defaultQueryKeywords as any)[SearchQueryTypes[t]]
+        defaultQueryKeywords[SearchQueryTypes[t] as keyof typeof defaultQueryKeywords]
         ] = t;
     });
 
@@ -116,20 +115,17 @@ export class AutoCompleteService {
   public autoComplete(text: {
     current: string;
     prev: string;
-  }): BehaviorSubject<RenderableAutoCompleteItem[]> {
-    const items: BehaviorSubject<RenderableAutoCompleteItem[]> =
-      new BehaviorSubject(
-        this.sortResults(text.current, this.getQueryKeywords(text))
-      );
+  }): AutoCompleteResult {
+    const items: RenderableAutoCompleteItem[] =
+      this.sortResults(text.current, this.getQueryKeywords(text));
 
     const prefixType = this.getTypeFromPrefix(text.current);
     const searchText = this.getPrefixLessSearchText(text.current);
     if (searchText === '' || searchText === '.' || prefixType.noAc) {
-      return items;
+      return {items, more: null};
     }
 
-    this.typedAutoComplete(searchText, text.current, prefixType.type, items);
-    return items;
+    return this.typedAutoComplete(searchText, text.current, prefixType.type, items);
   }
 
   public getPrefixLessSearchText(text: string): string {
@@ -147,45 +143,37 @@ export class AutoCompleteService {
   private typedAutoComplete(
     text: string,
     fullText: string,
-    type: SearchQueryTypes,
-    items?: BehaviorSubject<RenderableAutoCompleteItem[]>
-  ): BehaviorSubject<RenderableAutoCompleteItem[]> {
-    items = items || new BehaviorSubject([]);
+    type: SearchQueryTypes | null | undefined,
+    items: RenderableAutoCompleteItem[]
+  ): AutoCompleteResult {
+    const merge = (ret: IAutoCompleteItem[]): RenderableAutoCompleteItem[] =>
+      this.sortResults(
+        fullText,
+        ret
+          .map((i) => this.ACItemToRenderable(i, fullText))
+          .concat(items)
+      );
 
     const cached = this.galleryCacheService.getAutoComplete(text, type);
     try {
       if (cached == null) {
-        const acParams: any = {};
+        const acParams: Record<string, unknown> = {};
         if (type) {
           acParams[QueryParams.gallery.search.type] = type;
         }
-        this.networkService
+        const more = this.networkService
           .getJson<IAutoCompleteItem[]>('/autocomplete/' + encodeURIComponent(text), acParams)
           .then((ret) => {
             this.galleryCacheService.setAutoComplete(text, type, ret);
-            items.next(
-              this.sortResults(
-                fullText,
-                ret
-                  .map((i) => this.ACItemToRenderable(i, fullText))
-                  .concat(items.value)
-              )
-            );
+            return merge(ret);
           });
-      } else {
-        items.next(
-          this.sortResults(
-            fullText,
-            cached
-              .map((i) => this.ACItemToRenderable(i, fullText))
-              .concat(items.value)
-          )
-        );
+        return {items, more};
       }
+      return {items: merge(cached), more: null};
     } catch (e) {
       console.error(e);
     }
-    return items;
+    return {items, more: null};
   }
 
   /**
@@ -193,7 +181,7 @@ export class AutoCompleteService {
    * @param text
    * @private
    */
-  private getTypeFromPrefix(text: string): { type?: SearchQueryTypes, noAc?: boolean } {
+  private getTypeFromPrefix(text: string): { type?: SearchQueryTypes | null, noAc?: boolean } {
     const tokens = text.split(':');
     if (tokens.length !== 2) {
       return {type: null};
@@ -224,8 +212,8 @@ export class AutoCompleteService {
       item.type !== SearchQueryTypes.any_text
     ) {
       let queryHint =
-        (defaultQueryKeywords as any)[
-          SearchQueryTypes[item.type]
+        defaultQueryKeywords[
+          SearchQueryTypes[item.type] as keyof typeof defaultQueryKeywords
           ] +
         ':"' +
         item.value +
@@ -391,6 +379,15 @@ export class AutoCompleteService {
 
     return Object.values(ret);
   }
+}
+
+/**
+ * items: available right away (keywords and cached results),
+ * more: all items once the server answered (null if no server call is needed)
+ */
+export interface AutoCompleteResult {
+  items: RenderableAutoCompleteItem[];
+  more: Promise<RenderableAutoCompleteItem[]> | null;
 }
 
 export interface RenderableAutoCompleteItem extends IAutoCompleteItem {

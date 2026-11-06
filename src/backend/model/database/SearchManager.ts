@@ -32,7 +32,6 @@ import {FileEntity} from './enitites/FileEntity';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {GroupSortByTypes, SortByTypes, SortingMethod} from '../../../common/entities/SortingMethods';
 import {SessionContext} from '../SessionContext';
-import {GalleryManager} from './GalleryManager';
 import * as path from 'path';
 
 export class SearchManager {
@@ -89,8 +88,8 @@ export class SearchManager {
   }
 
   private static autoCompleteItemsUnique(
-    array: Array<AutoCompleteItem>
-  ): Array<AutoCompleteItem> {
+    array: AutoCompleteItem[]
+  ): AutoCompleteItem[] {
     const a = array.concat();
     for (let i = 0; i < a.length; ++i) {
       for (let j = i + 1; j < a.length; ++j) {
@@ -139,8 +138,8 @@ export class SearchManager {
       q.limit(Config.Search.AutoComplete.ItemsPerCategory.keyword);
       (await q.getRawMany())
         .map(
-          (r): Array<string> =>
-            (r.metadataKeywords as string).split(',') as Array<string>
+          (r): string[] =>
+            (r.metadataKeywords as string).split(',') as string[]
         )
         .forEach((keywords): void => {
           acList.push(
@@ -230,8 +229,8 @@ export class SearchManager {
       )
         .filter((pm): boolean => !!pm)
         .map(
-          (pm): Array<string> =>
-            [pm.city || '', pm.country || '', pm.state || ''] as Array<string>
+          (pm): string[] =>
+            [pm.city || '', pm.country || '', pm.state || ''] as string[]
         )
         .forEach((positions): void => {
           acList.push(
@@ -486,7 +485,7 @@ export class SearchManager {
 
   public async prepareAndBuildWhereQuery(
     queryIN: SearchQueryDTO, directoryOnly = false,
-    aliases: { [key: string]: string } = {}): Promise<Brackets> {
+    aliases: Record<string, string> = {}): Promise<Brackets> {
     let query = await this.prepareQuery(queryIN);
     if (directoryOnly) {
       query = this.filterDirectoryQuery(query);
@@ -516,7 +515,7 @@ export class SearchManager {
   public buildWhereQuery(
     query: SearchQueryDTO,
     directoryOnly = false,
-    aliases: { [key: string]: string } = {}
+    aliases: Record<string, string> = {}
   ): Brackets {
     const queryId = (query as SearchQueryDTOWithID).queryId;
     switch (query.type) {
@@ -582,7 +581,7 @@ export class SearchManager {
         );
 
         return new Brackets((q): unknown => {
-          const textParam: { [key: string]: number | string } = {};
+          const textParam: Record<string, number | string> = {};
           textParam['maxLat' + queryId] = maxLat;
           textParam['minLat' + queryId] = minLat;
           textParam['maxLon' + queryId] = maxLon;
@@ -672,7 +671,7 @@ export class SearchManager {
         return new Brackets((q): unknown => {
 
 
-          const textParam: { [key: string]: unknown } = {};
+          const textParam: Record<string, unknown> = {};
           if (min === max) {
             textParam['eql' + queryId] = min;
             q.where(
@@ -754,7 +753,7 @@ export class SearchManager {
             const from = new Date(to);
             from.setUTCDate(from.getUTCDate() - tq.daysLength);
 
-            const textParam: { [key: string]: unknown } = {};
+            const textParam: Record<string, unknown> = {};
             textParam['to' + queryId] = to.getTime();
             textParam['from' + queryId] = from.getTime();
             if (tq.negate) {
@@ -791,7 +790,7 @@ export class SearchManager {
           } else {
             // recurring
 
-            const textParam: { [key: string]: unknown } = {};
+            const textParam: Record<string, unknown> = {};
             textParam['diff' + queryId] = tq.daysLength;
             const addWhere = (duration: string, crossesDateBoundary: boolean) => {
 
@@ -968,7 +967,7 @@ export class SearchManager {
         return `${fieldName} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
       };
 
-      const textParam: { [key: string]: unknown } = {};
+      const textParam: Record<string, unknown> = {};
       textParam['text' + queryId] = createMatchString(
         (query as TextSearch).value
       );
@@ -1390,7 +1389,7 @@ export class SearchManager {
   private encapsulateAutoComplete(
     values: string[],
     type: SearchQueryTypes
-  ): Array<AutoCompleteItem> {
+  ): AutoCompleteItem[] {
     const res: AutoCompleteItem[] = [];
     values.forEach((value): void => {
       res.push(new AutoCompleteItem(value, type));

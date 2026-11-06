@@ -8,7 +8,6 @@ import {SessionContext} from '../SessionContext';
 import {ProjectedAlbumCacheEntity} from './enitites/album/ProjectedAlbumCacheEntity';
 import {ProjectionAwareManager} from './ProjectionAwareManager';
 import {NotificationManager} from '../NotifocationManager';
-import {Job} from '../jobs/jobs/Job';
 
 const LOG_TAG = '[AlbumManager]';
 

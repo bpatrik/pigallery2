@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {expect} from 'chai';
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {Utils} from '../../../../../src/common/Utils';

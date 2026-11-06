@@ -1,12 +1,10 @@
-import { Injectable, LOCALE_ID, inject } from '@angular/core';
+import { Injectable, LOCALE_ID, inject, linkedSignal } from '@angular/core';
 import {formatDate} from '@angular/common';
 import {GalleryCacheService} from '../cache.gallery.service';
-import {BehaviorSubject, Observable} from 'rxjs';
 import {Config} from '../../../../../common/config/public/Config';
 import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {map, switchMap} from 'rxjs/operators';
 import {SeededRandomService} from '../../../model/seededRandom.service';
 import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
@@ -22,46 +20,22 @@ export class GallerySortingService {
   private rndService = inject(SeededRandomService);
   private locale = inject(LOCALE_ID);
 
-  public sorting: BehaviorSubject<SortingMethod>;
-  public grouping: BehaviorSubject<GroupingMethod>;
+  // the sorting and grouping saved for the content (or its default), until the user changes them
+  public readonly sorting = linkedSignal<SortingMethod>(() => {
+    const c = this.galleryService.content();
+    return this.galleryCacheService.getSorting(c) ?? this.getDefaultSorting(c);
+  });
+  public readonly grouping = linkedSignal<GroupingMethod>(() => {
+    const c = this.galleryService.content();
+    return this.galleryCacheService.getGrouping(c) ?? this.getDefaultGrouping(c);
+  });
   private collator = new Intl.Collator(undefined, {numeric: true});
-
-  constructor() {
-    this.sorting = new BehaviorSubject(
-      {
-        method: Config.Gallery.NavBar.SortingGrouping.defaultPhotoSortingMethod.method,
-        ascending: Config.Gallery.NavBar.SortingGrouping.defaultPhotoSortingMethod.ascending
-      }
-    );
-    this.grouping = new BehaviorSubject(
-      {
-        method: Config.Gallery.NavBar.SortingGrouping.defaultPhotoGroupingMethod.method,
-        ascending: Config.Gallery.NavBar.SortingGrouping.defaultPhotoGroupingMethod.ascending
-      }
-    );
-    this.galleryService.content.subscribe((c) => {
-      if (c) {
-        const sort = this.galleryCacheService.getSorting(c);
-        const group = this.galleryCacheService.getGrouping(c);
-        if (sort !== null) {
-          this.sorting.next(sort);
-        } else {
-          this.sorting.next(this.getDefaultSorting(c));
-        }
-        if (group !== null) {
-          this.grouping.next(group);
-        } else {
-          this.grouping.next(this.getDefaultGrouping(c));
-        }
-      }
-    });
-  }
 
   isDefaultSortingAndGrouping(cw: ContentWrapper): boolean {
     const defS = this.getDefaultSorting(cw);
     const defG = this.getDefaultGrouping(cw);
-    const s = this.sorting.value;
-    const g = this.grouping.value;
+    const s = this.sorting();
+    const g = this.grouping();
     return s.method === defS.method && s.ascending === defS.ascending &&
       g.method === defG.method && g.ascending === defG.ascending;
   }
@@ -89,38 +63,38 @@ export class GallerySortingService {
   }
 
   setSorting(sorting: SortingMethod): void {
-    this.sorting.next(sorting);
-    if (this.galleryService.content.value) {
+    this.sorting.set(sorting);
+    if (this.galleryService.content()) {
       if (
         sorting !==
-        this.getDefaultSorting(this.galleryService.content.value)
+        this.getDefaultSorting(this.galleryService.content())
       ) {
         this.galleryCacheService.setSorting(
-          this.galleryService.content.value,
+          this.galleryService.content(),
           sorting
         );
       } else {
         this.galleryCacheService.removeSorting(
-          this.galleryService.content.value
+          this.galleryService.content()
         );
       }
     }
   }
 
   setGrouping(grouping: GroupingMethod): void {
-    this.grouping.next(grouping);
-    if (this.galleryService.content.value) {
+    this.grouping.set(grouping);
+    if (this.galleryService.content()) {
       if (
         grouping !==
-        this.getDefaultGrouping(this.galleryService.content.value)
+        this.getDefaultGrouping(this.galleryService.content())
       ) {
         this.galleryCacheService.setGrouping(
-          this.galleryService.content.value,
+          this.galleryService.content(),
           grouping
         );
       } else {
         this.galleryCacheService.removeGrouping(
-          this.galleryService.content.value
+          this.galleryService.content()
         );
       }
     }
@@ -197,7 +171,7 @@ export class GallerySortingService {
         }
 
       case SortByTypes.Name:
-        return (m: MediaDTO) => m.name.at(0).toUpperCase();
+        return (m: MediaDTO) => (m.name.at(0) ?? '').toUpperCase();
 
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();
@@ -224,95 +198,85 @@ export class GallerySortingService {
   }
 
   public applySorting(
-    directoryContent: Observable<DirectoryContent>
-  ): Observable<GroupedDirectoryContent> {
-    return directoryContent.pipe(
-        switchMap((dirContent) => {
-          return this.grouping.pipe(
-              switchMap((grouping) => {
-                return this.sorting.pipe(
-                    map((sorting) => {
-                      if (!dirContent) {
-                        return null;
-                      }
-                      const c: GroupedDirectoryContent = {
-                        mediaGroups: [],
-                        directories: dirContent.directories,
-                        metaFile: dirContent.metaFile,
-                      };
-                      if (c.directories) {
-                        switch (sorting.method) {
-                          case SortByTypes.FileSize:
-                          case SortByTypes.PersonCount:
-                          case SortByTypes.Rating: // directories do not have rating
-                          case SortByTypes.Name:
-                            c.directories.sort((a, b) =>
-                                this.collator.compare(a.name, b.name)
-                            );
-                            break;
-                          case SortByTypes.Date:
-                            if (
-                                Config.Gallery.enableDirectorySortingByDate === true
-                            ) {
-                              c.directories.sort(
-                                  (a, b) => (a.cache?.oldestMedia || a.lastModified) - (b.cache?.oldestMedia || b.lastModified)
-                              );
-                              break;
-                            }
-                            c.directories.sort((a, b) =>
-                                this.collator.compare(a.name, b.name)
-                            );
-                            break;
-                          case SortByTypes.Random:
-                            this.rndService.setSeed(c.directories.length);
-                            for (let i = c.directories.length - 1; i > 0; i--) {
-                              const j = Math.floor(this.rndService.get() * (i + 1));
-                              [c.directories[i], c.directories[j]] = [c.directories[j], c.directories[i]];
-                            }
-                            break;
-                        }
-
-                  if (!sorting.ascending) {
-                    c.directories.reverse();
-                  }
-                }
-
-                // group
-                if (dirContent.media) {
-                  const mCopy = dirContent.media;
-                  this.sortMedia(grouping, mCopy);
-                  const groupFN = this.getGroupByNameFn(grouping);
-
-                  c.mediaGroups = [];
-
-                  for (const m of mCopy) {
-                    const k = groupFN(m);
-                    if (c.mediaGroups.length == 0 || c.mediaGroups[c.mediaGroups.length - 1].name != k) {
-                      c.mediaGroups.push({name: k, media: []});
-                    }
-                    c.mediaGroups[c.mediaGroups.length - 1].media.push(m);
-                  }
-                }
-
-                if (grouping.method === GroupByTypes.Date) {
-                  // We do not need the youngest as we group by day. All photos are from the same day
-                  c.mediaGroups.forEach(g => {
-                    g.date = Utils.makeUTCMidnight(new Date(g.media?.[0]?.metadata?.creationDate), g.media?.[0]?.metadata?.creationDateOffset);
-                  });
-                }
-
-                // sort groups
-                for (let i = 0; i < c.mediaGroups.length; ++i) {
-                  this.sortMedia(sorting, c.mediaGroups[i].media);
-                }
-
-                return c;
-              })
+    dirContent: DirectoryContent | undefined,
+    sorting: SortingMethod,
+    grouping: GroupingMethod
+  ): GroupedDirectoryContent | null {
+    if (!dirContent) {
+      return null;
+    }
+    const c: GroupedDirectoryContent = {
+      mediaGroups: [],
+      directories: dirContent.directories,
+      metaFile: dirContent.metaFile,
+    };
+    if (c.directories) {
+      switch (sorting.method) {
+        case SortByTypes.FileSize:
+        case SortByTypes.PersonCount:
+        case SortByTypes.Rating: // directories do not have rating
+        case SortByTypes.Name:
+          c.directories.sort((a, b) =>
+            this.collator.compare(a.name, b.name)
+          );
+          break;
+        case SortByTypes.Date:
+          if (
+            Config.Gallery.enableDirectorySortingByDate === true
+          ) {
+            c.directories.sort(
+              (a, b) => (a.cache?.oldestMedia || a.lastModified) - (b.cache?.oldestMedia || b.lastModified)
             );
-          })
-        );
-      })
-    );
+            break;
+          }
+          c.directories.sort((a, b) =>
+            this.collator.compare(a.name, b.name)
+          );
+          break;
+        case SortByTypes.Random:
+          this.rndService.setSeed(c.directories.length);
+          for (let i = c.directories.length - 1; i > 0; i--) {
+            const j = Math.floor(this.rndService.get() * (i + 1));
+            [c.directories[i], c.directories[j]] = [c.directories[j], c.directories[i]];
+          }
+          break;
+      }
+
+      if (!sorting.ascending) {
+        c.directories.reverse();
+      }
+    }
+
+    // group
+    if (dirContent.media) {
+      const mCopy = dirContent.media;
+      this.sortMedia(grouping, mCopy);
+      const groupFN = this.getGroupByNameFn(grouping);
+
+      c.mediaGroups = [];
+
+      for (const m of mCopy) {
+        const k = groupFN(m);
+        if (c.mediaGroups.length == 0 || c.mediaGroups[c.mediaGroups.length - 1].name != k) {
+          c.mediaGroups.push({name: k, media: []});
+        }
+        c.mediaGroups[c.mediaGroups.length - 1].media.push(m);
+      }
+    }
+
+    if (grouping.method === GroupByTypes.Date) {
+      // We do not need the youngest as we group by day. All photos are from the same day
+      c.mediaGroups.forEach(g => {
+        g.date = Utils.makeUTCMidnight(new Date(g.media?.[0]?.metadata?.creationDate), g.media?.[0]?.metadata?.creationDateOffset);
+      });
+    }
+
+    // sort groups
+    for (const group of c.mediaGroups) {
+      this.sortMedia(sorting, group.media);
+    }
+
+    return c;
   }
 }
 

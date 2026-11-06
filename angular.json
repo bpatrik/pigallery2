@@ -105,7 +105,6 @@
             "browser": "src/frontend/main.ts",
             "tsConfig": "src/frontend/tsconfig.app.json",
             "polyfills": [
-              "zone.js",
               "@angular/localize/init"
             ],
             "assets": [
@@ -216,7 +215,8 @@
           "options": {
             "lintFilePatterns": [
               "src/**/*.ts",
-              "src/**/*.html"
+              "src/**/*.html",
+              "test/**/*.ts"
             ]
           }
         }

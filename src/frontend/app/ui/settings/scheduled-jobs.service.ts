@@ -1,5 +1,5 @@
-import { EventEmitter, Injectable, inject } from '@angular/core';
-import {BehaviorSubject} from 'rxjs';
+import {Injectable, inject, signal} from '@angular/core';
+import {Subject} from 'rxjs';
 import {JobProgressDTO, JobProgressStates, OnTimerJobProgressDTO,} from '../../../../common/entities/job/JobProgressDTO';
 import {NetworkService} from '../../model/network/network.service';
 import {JobScheduleDTO} from '../../../../common/entities/job/JobScheduleDTO';
@@ -14,38 +14,32 @@ export class ScheduledJobsService {
   private notification = inject(NotificationService);
   private backendTextService = inject(BackendtextService);
 
-  public progress: BehaviorSubject<Record<string, OnTimerJobProgressDTO>>;
-  public onJobFinish: EventEmitter<string> = new EventEmitter<string>();
-  timer: number = null;
-  public availableJobs: BehaviorSubject<JobDTO[]>;
-  public availableMessengers: BehaviorSubject<string[]>;
-  public jobStartingStopping: { [key: string]: boolean } = {};
+  public readonly progress = signal<Record<string, OnTimerJobProgressDTO>>({});
+  public readonly onJobFinish = new Subject<string>();
+  timer: number | null = null;
+  public readonly availableJobs = signal<JobDTO[]>([]);
+  public readonly availableMessengers = signal<string[]>([]);
+  public readonly jobStartingStopping = signal<Record<string, boolean>>({});
   private subscribers = 0;
 
-  constructor() {
-    this.progress = new BehaviorSubject({});
-    this.availableJobs = new BehaviorSubject([]);
-    this.availableMessengers = new BehaviorSubject([]);
-  }
-
   public  isValidJob(name: string): boolean {
-    return !!this.availableJobs.value.find(j => j.Name === name);
+    return !!this.availableJobs().find(j => j.Name === name);
   }
 
-  public async getAvailableJobs(): Promise<void> {
-    this.availableJobs.next(
+  private async getAvailableJobs(): Promise<void> {
+    this.availableJobs.set(
       await this.networkService.getJson<JobDTO[]>('/admin/jobs/available')
     );
   }
 
   public async getAvailableMessengers(): Promise<void> {
-    this.availableMessengers.next(
+    this.availableMessengers.set(
       await this.networkService.getJson<string[]>('/admin/messengers/available')
     );
   }
 
-  public getConfigTemplate(JobName: string): DynamicConfig[] {
-    const job = this.availableJobs.value.find(
+  public getConfigTemplate(JobName: string): DynamicConfig[] | null {
+    const job = this.availableJobs().find(
       (t) => t.Name === JobName
     );
     if (job && job.ConfigTemplate && job.ConfigTemplate.length > 0) {
@@ -54,7 +48,7 @@ export class ScheduledJobsService {
     return null;
   }
 
-  public getDefaultConfig(jobName: string): Record<string, unknown> {
+  public getDefaultConfig(jobName: string): Record<string, unknown> | null {
 
     const ct = this.getConfigTemplate(jobName);
     if (!ct) {
@@ -66,7 +60,7 @@ export class ScheduledJobsService {
   }
 
   getProgress(schedule: JobScheduleDTO): JobProgressDTO {
-    return this.progress.value[
+    return this.progress()[
       JobDTOUtils.getHashName(schedule.jobName, schedule.config)
       ];
   }
@@ -90,7 +84,7 @@ export class ScheduledJobsService {
     allowParallelRun = false
   ): Promise<void> {
     try {
-      this.jobStartingStopping[jobName] = true;
+      this.jobStartingStopping.update(m => ({...m, [jobName]: true}));
       await this.networkService.postJson(
         '/admin/jobs/scheduled/' + jobName + '/start',
         {
@@ -102,41 +96,41 @@ export class ScheduledJobsService {
       // placeholder to force showing running job
       this.addDummyProgress(jobName, config);
     } finally {
-      delete this.jobStartingStopping[jobName];
+      this.removeStartingStopping(jobName);
       this.forceUpdate();
     }
   }
 
   public async stop(jobName: string): Promise<void> {
-    this.jobStartingStopping[jobName] = true;
+    this.jobStartingStopping.update(m => ({...m, [jobName]: true}));
     await this.networkService.postJson(
       '/admin/jobs/scheduled/' + jobName + '/stop'
     );
-    delete this.jobStartingStopping[jobName];
+    this.removeStartingStopping(jobName);
     this.forceUpdate();
   }
 
   protected async loadProgress(): Promise<void> {
-    const prevPrg = this.progress.value;
-    this.progress.next(
-      await this.networkService.getJson<{ [key: string]: JobProgressDTO }>(
-        '/admin/jobs/scheduled/progress'
-      )
+    const prevPrg = this.progress();
+    const newPrg = await this.networkService.getJson<Record<string, JobProgressDTO>>(
+      '/admin/jobs/scheduled/progress'
     );
+    this.progress.set(newPrg);
     for (const prg of Object.keys(prevPrg)) {
       if (
         // eslint-disable-next-line no-prototype-builtins
-        !(this.progress.value).hasOwnProperty(prg) ||
+        !newPrg.hasOwnProperty(prg) ||
         // state changed from running to finished
         ((prevPrg[prg].state === JobProgressStates.running ||
             prevPrg[prg].state === JobProgressStates.cancelling) &&
           !(
-            this.progress.value[prg].state === JobProgressStates.running ||
-            this.progress.value[prg].state === JobProgressStates.cancelling
+            newPrg[prg].state === JobProgressStates.running ||
+            newPrg[prg].state === JobProgressStates.cancelling
           ))
       ) {
-        this.onJobFinish.emit(prg);
-        if (this.progress.value[prg].state === JobProgressStates.failed) {
+        this.onJobFinish.next(prg);
+        // a job that is gone from the new progress (e.g. the placeholder of a quick job) finished
+        if (newPrg[prg]?.state === JobProgressStates.failed) {
           this.notification.warning(
             $localize`Job failed` +
             ': ' +
@@ -154,7 +148,7 @@ export class ScheduledJobsService {
   }
 
   protected isAnyJobRunning(): boolean {
-    return Object.values(this.progress.value)
+    return Object.values(this.progress())
       .findIndex(p => p.state === JobProgressStates.running ||
         p.state === JobProgressStates.cancelling) !== -1;
   }
@@ -174,28 +168,42 @@ export class ScheduledJobsService {
     this.loadProgress().catch(console.error);
   }
 
-  private addDummyProgress(jobName: string, config: any): void {
-    const prgs = this.progress.value;
-    prgs[JobDTOUtils.getHashName(jobName, config)] = {
-      jobName,
-      state: JobProgressStates.running,
-      HashName: JobDTOUtils.getHashName(jobName, config),
-      logs: [],
-      steps: {
-        skipped: 0,
-        processed: 0,
-        all: 0,
-      },
-      time: {
-        start: Date.now(),
-        end: Date.now(),
-      },
-    };
-    this.progress.next(prgs);
+  private addDummyProgress(jobName: string, config: Record<string, unknown> | undefined): void {
+    const hashName = JobDTOUtils.getHashName(jobName, config);
+    this.progress.update(prgs => ({
+      ...prgs,
+      [hashName]: {
+        jobName,
+        state: JobProgressStates.running,
+        HashName: hashName,
+        logs: [],
+        steps: {
+          skipped: 0,
+          processed: 0,
+          all: 0,
+        },
+        time: {
+          start: Date.now(),
+          end: Date.now(),
+        },
+      }
+    }));
+  }
+
+  private removeStartingStopping(jobName: string): void {
+    this.jobStartingStopping.update(m => {
+      const rest = {...m};
+      delete rest[jobName];
+      return rest;
+    });
   }
 
   private incSubscribers(): void {
     this.subscribers++;
+    // the progress of a job is keyed by its config, so the first subscriber (re)loads the jobs and their default configs
+    if (this.subscribers === 1) {
+      this.getAvailableJobs().catch(console.error);
+    }
     this.getProgressPeriodically();
   }
 

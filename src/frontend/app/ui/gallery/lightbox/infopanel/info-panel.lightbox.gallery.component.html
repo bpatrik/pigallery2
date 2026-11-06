@@ -33,10 +33,10 @@
       </div>
       <div class="col-11">
         <a class="details-main dir-link"
-          title="{{DirectoryPath}}"
-          [routerLink]="['/gallery', DirectoryPath]"
-          [queryParams]="queryService.getParams()">
-          {{ DirectoryPathStr }}
+          title="{{directoryPath()}}"
+          [routerLink]="['/gallery', directoryPath()]"
+          [queryParams]="queryService.params()">
+          {{ directoryPathStr() }}
         </a>
       </div>
     </div>
@@ -54,7 +54,7 @@
           x {{ media().metadata.size.height }}
         </div>
         @if (isPhoto()) {
-          <div class="col-4" title="Megapixels" i18n-title>{{ calcMpx() }}MP</div>
+          <div class="col-4" title="Megapixels" i18n-title>{{ mpx() }}MP</div>
         }
         @if (media().metadata.fileSize) {
           <div class="col-4" title="File size on disk"
@@ -65,28 +65,29 @@
     </div>
   </div>
   @if (isLivePhoto()) {
+    @let liveVideoInfo = media().liveVideoInfo;
     <div class="row pt-0" title="Companion video" i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main" title="Video filename" i18n-title>
-          {{ media().liveVideoInfo?.name }}
+          {{ liveVideoInfo?.name }}
         </div>
         <div class="details-sub text-secondary row">
-          @if (media().liveVideoInfo?.size) {
+          @if (liveVideoInfo?.size) {
             <div class="col-4" title="Video dimensions in pixels"
-              i18n-title>{{ media().liveVideoInfo.size.width }} x {{ media().liveVideoInfo.size.height }}
+              i18n-title>{{ liveVideoInfo.size.width }} x {{ liveVideoInfo.size.height }}
             </div>
           }
-          @if (media().liveVideoInfo?.fileSize) {
+          @if (liveVideoInfo?.fileSize) {
             <div class="col-4" title="Video file size on disk"
-              i18n-title>{{ media().liveVideoInfo.fileSize | fileSize }}
+              i18n-title>{{ liveVideoInfo.fileSize | fileSize }}
             </div>
           }
-          @if (media().liveVideoInfo?.duration) {
+          @if (liveVideoInfo?.duration) {
             <div class="col-4" title="Video duration"
-              i18n-title>{{ media().liveVideoInfo.duration | duration }}
+              i18n-title>{{ liveVideoInfo.duration | duration }}
             </div>
           }
         </div>
@@ -102,7 +103,7 @@
       <div class="col-11">
         <div class="details-main clickable" title="Click to search for media from the same date" i18n-title>
           @if (searchEnabled) {
-            <a [routerLink]="['/search', getDateSearchQuery()]">
+            <a [routerLink]="['/search', dateSearchQuery()]">
               {{ media().metadata.creationDate | date: (isThisYear() ? 'MMMM d' : 'longDate') : (media().metadata.creationDateOffset ? media().metadata.creationDateOffset : 'UTC') }}
             </a>
           }
@@ -122,7 +123,7 @@
   }
 
 
-  @if (VideoData && (VideoData.duration || VideoData.bitRate)) {
+  @if (videoInfo(); as video) {
     <div class="row" title="Video technical information"
       i18n-title>
       <div class="col-1 ps-0">
@@ -133,21 +134,21 @@
           {{ "Video" }}
         </div>
         <div class="details-sub  text-secondary row">
-          @if (VideoData.duration) {
+          @if (video.duration) {
             <div class="col-6" title="How long the video is" i18n-title>
               <ng-container i18n>duration</ng-container>
-              : {{ VideoData.duration | duration }}
+              : {{ video.duration | duration }}
             </div>
           }
-          @if (VideoData.fps) {
+          @if (video.fps) {
             <div class="col-6" title="Frames per second - video smoothness" i18n-title>
-              fps: {{ VideoData.fps }}/s
+              fps: {{ video.fps }}/s
             </div>
           }
-          @if (VideoData.bitRate) {
+          @if (video.bitRate) {
             <div class="col-6" title="Data rate - video quality indicator" i18n-title>
               <ng-container i18n>bit rate</ng-container>
-              : {{ VideoData.bitRate | fileSize }}/s
+              : {{ video.bitRate | fileSize }}/s
             </div>
           }
         </div>
@@ -156,39 +157,39 @@
   }
 
 
-  @if (CameraData) {
+  @if (cameraData(); as cameraData) {
     <div class="row" title="Camera and lens information used to take this photo" i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionCameraOutline" title="Camera information" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main">
-          {{ CameraData.model || CameraData.make || "Camera" }}
+          {{ cameraData.model || cameraData.make || "Camera" }}
         </div>
         <div class="details-sub  text-secondary row">
-          @if (CameraData.ISO) {
+          @if (cameraData.ISO) {
             <div class="col-3" title="ISO sensitivity - higher values for darker conditions"
-              i18n-title>ISO{{ CameraData.ISO }}
+              i18n-title>ISO{{ cameraData.ISO }}
             </div>
           }
-          @if (CameraData.fStop) {
+          @if (cameraData.fStop) {
             <div class="col-3" title="Aperture - lower numbers mean more background blur"
-              i18n-title>f/{{ CameraData.fStop }}
+              i18n-title>f/{{ cameraData.fStop }}
             </div>
           }
-          @if (CameraData.exposure) {
+          @if (cameraData.exposure) {
             <div class="col-3" title="Shutter speed - how long the sensor was exposed to light"
               i18n-title>
-              {{ toFraction(CameraData.exposure) }}s
+              {{ exposure() }}s
             </div>
           }
-          @if (CameraData.focalLength) {
+          @if (cameraData.focalLength) {
             <div class="col-3" title="Focal length - zoom level of the lens" i18n-title>
-              {{ CameraData.focalLength }}mm
+              {{ cameraData.focalLength }}mm
             </div>
           }
-          @if (CameraData.lens) {
-            <div class="col-12" title="Specific lens model used" i18n-title>{{ CameraData.lens }}
+          @if (cameraData.lens) {
+            <div class="col-12" title="Specific lens model used" i18n-title>{{ cameraData.lens }}
             </div>
           }
         </div>
@@ -196,17 +197,17 @@
     </div>
   }
 
-  @if (Rating) {
+  @if (rating()) {
     <div class="row">
       <div class="col-1 ps-0" title="rating" p18n-rating>
         <ng-icon class="details-icon" name="ionStarOutline" />
       </div>
       <div class="col-11">
-        <div class="details-main" [title]="Rating + ' stars'">
-          @for (stars of [].constructor(Rating); track $index) {
+        <div class="details-main" [title]="rating() + ' stars'">
+          @for (star of ratingStars().filled; track $index) {
             <ng-icon class="text-body me-1" name="ionStar" />
           }
-          @for (stars of [].constructor(5-Rating); track $index) {
+          @for (star of ratingStars().empty; track $index) {
             <ng-icon class="text-body-tertiary me-1"
             name="ionStarOutline" />
           }
@@ -215,7 +216,7 @@
     </div>
   }
 
-  @if (keywords) {
+  @if (keywords(); as keywords) {
     <div class="row" title="Keywords and people tags associated with this media" i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionPricetagOutline" title="Keywords and people" i18n-title />
@@ -223,7 +224,7 @@
       <div class="col-11 keywords clickable">
         @for (keyword of keywords; track keyword; let last = $last) {
           @if (searchEnabled) {
-            <a [routerLink]="['/search', getTextSearchQuery(keyword.value,keyword.type)]">
+            <a [routerLink]="['/search', keyword.link]">
               @switch (keyword.type) {
                 @case (SearchQueryTypes.keyword) {#}
                 @case (SearchQueryTypes.person) {<ng-icon name="ionPersonOutline" />}
@@ -254,32 +255,32 @@
                 <div class="details-main clickable" title="Click location parts to search for media from the same area"
                   i18n-title>
                   @if (searchEnabled && hasTextPositionData()) {
-                    @for (item of getPositionParts(); track $index; let i = $index; let isLast = $last) {
-                      <a [routerLink]="['/search', getTextSearchQuery(item, SearchQueryTypes.position)]">{{ item }}</a><!--
+                    @for (item of positionLinks(); track $index; let isLast = $last) {
+                      <a [routerLink]="['/search', item.link]">{{ item.text }}</a><!--
                       -->
                       @if (!isLast) {,}
                     }
                   }
                   @if (!searchEnabled || !hasTextPositionData()) {
                     <span>
-                      {{ getPositionText() || "Position" }}
+                      {{ positionText() || "Position" }}
                     </span>
                   }
                 </div>
-                @if (hasGPS()) {
+                @if (gpsText(); as coordinates) {
                   <div class="details-sub text-secondary row clickable">
                     <div class="col-12" title="Click GPS coordinates to search for nearby media" i18n-title>
                       @if (searchEnabled) {
                         <a
-                          [routerLink]="['/search', getDistanceSearchQuery()]">
-                          {{ PositionData.GPSData.latitude.toFixed(6) }},
-                          {{ PositionData.GPSData.longitude.toFixed(6) }}
+                          [routerLink]="['/search', distanceSearchQuery()]">
+                          {{ coordinates.latitude }},
+                          {{ coordinates.longitude }}
                         </a>
                       }
                       @if (!searchEnabled) {
                         <span>
-                          {{ PositionData.GPSData.latitude.toFixed(6) }},
-                          {{ PositionData.GPSData.longitude.toFixed(6) }}
+                          {{ coordinates.latitude }},
+                          {{ coordinates.longitude }}
                         </span>
                       }
                     </div>
@@ -289,13 +290,13 @@
             </div>
           }
           <div class="mt-auto" style="height: 400px">
-            @if (hasGPS() && mapEnabled) {
+            @if (mapEnabled && gps(); as gps) {
               <div
                 id="map"
                 leaflet
       [leafletOptions]="{zoom:10,
-          center:{lat:PositionData.GPSData.latitude,
-          lng:PositionData.GPSData.longitude},
+          center:{lat:gps.latitude,
+          lng:gps.longitude},
           layers:[baseLayer],
           zoomControl: false}"
                 [leafletLayers]="markerLayer()">

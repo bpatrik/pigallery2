@@ -1,12 +1,11 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import { Component, OnDestroy, TemplateRef, computed, inject, linkedSignal } from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
-import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
 import {ActivatedRoute, Params} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {SearchQueryParserService} from '../search/search-query-parser.service';
@@ -22,7 +21,6 @@ import {Utils} from '../../../../../common/Utils';
     selector: 'app-gallery-random-query-builder',
     templateUrl: './random-query-builder.gallery.component.html',
     styleUrl: './random-query-builder.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         NgIconComponent,
         FormsModule,
@@ -30,26 +28,54 @@ import {Utils} from '../../../../../common/Utils';
         GallerySearchQueryBuilderComponent,
     ]
 })
-export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
+export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   contentLoaderService = inject(ContentLoaderService);
   private notification = inject(NotificationService);
   private searchQueryParserService = inject(SearchQueryParserService);
   private route = inject(ActivatedRoute);
   private modalService = inject(BsModalService);
 
-  public searchQueryDTO: SearchQueryDTO = {
-    type: SearchQueryTypes.any_text,
-    value: '',
-  } as TextSearch;
-  enabled = true;
-  url = '';
+  public readonly searchQueryDTO = linkedSignal<string | null, SearchQueryDTO>({
+    source: (): string | null => {
+      const dir = this.contentLoaderService.content()?.directory;
+      if (!dir) {
+        return null;
+      }
+      return SearchQueryUtils.normalizeDirectoryPath(
+        Utils.concatUrls(dir.path, dir.name)
+      );
+    },
+    computation: (directory, prev): SearchQueryDTO => {
+      if (prev && prev.source === directory) {
+        return prev.value;
+      }
+      if (!directory) {
+        return {
+          type: SearchQueryTypes.any_text,
+          value: '',
+        } as TextSearch;
+      }
+      return {
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.globMatch,
+        value: directory + '/*',
+      } as DirectorySearch;
+    },
+  });
 
-  contentSubscription: Subscription = null;
-  private prefilledDirectory: string = null;
+  readonly enabled = computed((): boolean => !!this.contentLoaderService.content()?.directory);
 
-  modalRef: BsModalRef;
+  get HTMLSearchQuery(): string {
+    return SearchQueryUtils.urlify(this.searchQueryDTO());
+  }
 
-  private readonly subscription: Subscription = null;
+  readonly url = computed((): string => NetworkService.buildUrl(
+    Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random') + '/' + encodeURIComponent(this.HTMLSearchQuery)
+  ));
+
+  modalRef: BsModalRef | null = null;
+
+  private readonly subscription: Subscription | null = null;
 
   constructor() {
     this.subscription = this.route.params.subscribe((params: Params) => {
@@ -58,73 +84,31 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
       }
       const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
       if (searchQuery) {
-        this.searchQueryDTO = searchQuery;
-        this.onQueryChange();
+        this.searchQueryDTO.set(searchQuery);
       }
     });
   }
 
-  get HTMLSearchQuery(): string {
-    return SearchQueryUtils.urlify(this.searchQueryDTO);
-  }
-
   onQueryChange(): void {
-    this.url = NetworkService.buildUrl(
-        Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random') + '/' + encodeURIComponent(this.HTMLSearchQuery)
-    );
-  }
-
-  ngOnInit(): void {
-    this.contentSubscription = this.contentLoaderService.content.subscribe(
-        (content: ContentWrapper) => {
-          this.enabled = !!content?.directory;
-          if (!this.enabled) {
-            return;
-          }
-          const directory = SearchQueryUtils.normalizeDirectoryPath(
-              Utils.concatUrls(content.directory.path, content.directory.name)
-          );
-          // prefill only when the directory changes, so a query typed by the user is not overwritten
-          if (directory === this.prefilledDirectory) {
-            return;
-          }
-          this.prefilledDirectory = directory;
-          this.searchQueryDTO = directory
-              ? {
-                type: SearchQueryTypes.directory,
-                matchType: TextSearchQueryMatchTypes.globMatch,
-                value: directory + '/*',
-              } as DirectorySearch
-              : {
-                type: SearchQueryTypes.any_text,
-                value: '',
-              } as TextSearch;
-          this.onQueryChange();
-        }
-    );
+    // url is computed reactively from searchQueryDTO
   }
 
   ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
-    }
-
     if (this.subscription !== null) {
       this.subscription.unsubscribe();
     }
   }
 
-  openModal(template: TemplateRef<unknown>): boolean {
-    if (!this.enabled) {
-      return;
+  openModal(template: TemplateRef<unknown>): boolean | undefined {
+    if (!this.enabled()) {
+      return undefined;
     }
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
 
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
     document.body.style.paddingRight = '0px';
-    this.onQueryChange();
     return false;
   }
 
@@ -133,7 +117,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }

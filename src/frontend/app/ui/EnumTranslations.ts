@@ -13,12 +13,14 @@ import {GroupByTypes, SortByTypes} from '../../../common/entities/SortingMethods
 import {GridSizes} from '../../../common/entities/GridSizes';
 
 export const EnumTranslations: Record<string, string> = {};
-export const enumToTranslatedArray = (EnumType: any): { key: number; value: string }[] => {
-  const arr: Array<{ key: number; value: string }> = [];
-  for (const enumMember in EnumType) {
+export const enumToTranslatedArray = (EnumType: object): { key: number; value: string }[] => {
+  const arr: { key: number; value: string }[] = [];
+  // a numeric enum: its number keys map to the names
+  const names = EnumType as Record<string, string>;
+  for (const enumMember in names) {
     const key = parseInt(enumMember, 10);
     if (key >= 0) {
-      arr.push({key, value: EnumTranslations[EnumType[enumMember]] || EnumType[enumMember]});
+      arr.push({key, value: EnumTranslations[names[enumMember]] || names[enumMember]});
     }
   }
   return arr;

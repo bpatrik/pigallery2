@@ -1,4 +1,4 @@
-import { Component, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, inject, input } from '@angular/core';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryDTO} from '../../../../../common/entities/SearchQueryDTO';
@@ -9,26 +9,25 @@ import { JsonPipe } from '@angular/common';
     selector: 'app-saved-search-popup-btn',
     templateUrl: './saved-search-popup.component.html',
     styleUrl: './saved-search-popup.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent, JsonPipe]
 })
 export class SavedSearchPopupComponent {
   private modalService = inject(BsModalService);
 
-  readonly disabled = input<boolean>(undefined);
+  readonly disabled = input<boolean>();
   readonly savedSearchDTO = input<{
     name: string;
     searchQuery: SearchQueryDTO;
-}>(undefined);
-  private modalRef: BsModalRef;
+}>();
+  private modalRef: BsModalRef | null;
 
-  public async openModal(template: TemplateRef<any>): Promise<void> {
+  public async openModal(template: TemplateRef<unknown>): Promise<void> {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
     document.body.style.paddingRight = '0px';
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }

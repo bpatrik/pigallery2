@@ -56,9 +56,7 @@ describe('Config property types', () => {
       return 'enum:' + Object.keys(t).filter((k) => isNaN(Number(k))).join(',');
     };
     const types: Record<string, string> = {};
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const walk = (cls: any, prefix: string): void => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const state: Record<string, any> = cls.prototype.__state || {};
       for (const key of Object.keys(state).sort()) {
         const p = state[key];

@@ -16,7 +16,7 @@ export class ExtensionConfigTemplateLoader {
   private static instance: ExtensionConfigTemplateLoader;
 
   private extensionList: string[] = [];
-  private extensionTemplates: { folder: string, template?: { new(): unknown } }[] = [];
+  private extensionTemplates: { folder: string, template?: new() => unknown }[] = [];
 
   public static get Instance() {
     if (!this.instance) {
@@ -91,7 +91,7 @@ export class ExtensionConfigTemplateLoader {
    * @param extFolder The folder name of the extension
    * @returns The extension template object if the extension is valid, null otherwise
    */
-  private loadSingleExtensionTemplate(extFolder: string): { folder: string, template?: { new(): unknown } } | null {
+  private loadSingleExtensionTemplate(extFolder: string): { folder: string, template?: new() => unknown } | null {
     if (!ProjectPath.ExtensionFolder) {
       throw new Error('Unknown extensions folder.');
     }
@@ -105,14 +105,13 @@ export class ExtensionConfigTemplateLoader {
       return null;
     }
 
-    let template: { folder: string, template?: { new(): unknown } } = {folder: extFolder};
+    let template: { folder: string, template?: new() => unknown } = {folder: extFolder};
 
     if (fs.existsSync(configExtPath)) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const extCfg = require(configExtPath);
       if (typeof extCfg?.initConfig === 'function') {
         extCfg?.initConfig({
-          setConfigTemplate: (templateClass: { new(): unknown }): void => {
+          setConfigTemplate: (templateClass: new() => unknown): void => {
             template = {folder: extFolder, template: templateClass};
           }
         });
