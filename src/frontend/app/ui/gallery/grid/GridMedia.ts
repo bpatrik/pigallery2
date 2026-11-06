@@ -34,7 +34,7 @@ export class GridMedia extends Media {
     return !!this.media.liveVideoPath;
   }
 
-  getLiveVideoPath(): string {
+  getLiveVideoPath(): string | null {
     if (!this.media.liveVideoPath) {
       return null;
     }

@@ -1,4 +1,4 @@
-@if (queryEntry()) {
+@if (queryEntry(); as queryEntry) {
   <div class="row mt-1 mb-1">
     @if (IsListQuery) {
       <div class="col-md-3 col-4">
@@ -6,7 +6,7 @@
           [id]="'listSearchType'+id()"
           [name]="'listSearchType'+id()"
           class="form-select"
-          [(ngModel)]="queryEntry().type" [ngModelOptions]="{standalone: true}"
+          [(ngModel)]="queryEntry.type" [ngModelOptions]="{standalone: true}"
           (ngModelChange)="onChangeType()">
           @for (opt of SearchQueryTypesEnum; track opt) {
             <option [ngValue]="opt.key">{{opt.key | stringifySearchType}}
@@ -14,7 +14,7 @@
           }
         </select>
       </div>
-      @if (queryEntry().type === SearchQueryTypes.SOME_OF) {
+      @if (queryEntry.type === SearchQueryTypes.SOME_OF) {
         <label class="col-4 col-sm-auto control-label" [for]="'someOfMinValue'+id()">
           <ng-container i18n>At least this many</ng-container>
         (1-{{AsListQuery.list.length}}):</label>
@@ -31,7 +31,7 @@
             required="required">
           </div>
         }
-        @if (queryEntry().type !== SearchQueryTypes.SOME_OF) {
+        @if (queryEntry.type !== SearchQueryTypes.SOME_OF) {
           <div class="col"></div>
         }
         <button
@@ -63,7 +63,7 @@
               [id]="'searchType'+id()"
               [name]="'searchType'+id()"
               class="form-select"
-              [(ngModel)]="queryEntry().type" [ngModelOptions]="{standalone: true}"
+              [(ngModel)]="queryEntry.type" [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onChangeType()">
               @for (opt of SearchQueryTypesEnum; track opt) {
                 <option [ngValue]="opt.key">{{opt.key | stringifySearchType}}
@@ -100,7 +100,7 @@
                   </div>
                 </div>
               }
-              @switch (queryEntry().type) {
+              @switch (queryEntry.type) {
                 @case (SearchQueryTypes.distance) {
                   <div class="col-10 col-lg">
                     <div class="row">

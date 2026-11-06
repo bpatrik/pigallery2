@@ -42,18 +42,18 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private modalService = inject(MediaButtonModalService);
   private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
 
-  readonly gridMedia = input<GridMedia>(undefined);
+  readonly gridMedia = input.required<GridMedia>();
   readonly imageRef = viewChild<ElementRef>('img');
-  readonly container = viewChild<ElementRef>('photoContainer');
+  readonly container = viewChild.required<ElementRef>('photoContainer');
 
   thumbnail: Thumbnail;
   readonly infoBarVisible = signal(false);
-  animationTimer: number = null;
+  animationTimer: number | null = null;
 
   readonly SearchQueryTypes: typeof SearchQueryTypes = SearchQueryTypes;
   searchEnabled = true;
 
-  wasInView: boolean = null;
+  wasInView: boolean | null = null;
   loaded = false;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[];
 
@@ -65,20 +65,21 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     if (Config.Gallery.captionFirstNaming === false) {
       return this.gridMedia().media.name;
     }
-    if ((this.gridMedia().media as PhotoDTO).metadata.caption) {
-      if ((this.gridMedia().media as PhotoDTO).metadata.caption.length > 20) {
+    const caption = (this.gridMedia().media as PhotoDTO).metadata.caption;
+    if (caption) {
+      if (caption.length > 20) {
         return (
-          (this.gridMedia().media as PhotoDTO).metadata.caption.substring(0, 17) +
+          caption.substring(0, 17) +
           '...'
         );
       }
-      return (this.gridMedia().media as PhotoDTO).metadata.caption;
+      return caption;
     }
     return this.gridMedia().media.name;
   });
 
   // the faces and keywords of the media with their search links, null if it has none
-  readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] => {
+  readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] | null => {
     const metadata = this.gridMedia().media.metadata as PhotoMetadata;
     if (
       !(metadata.keywords && metadata.keywords.length > 0) &&
@@ -110,13 +111,14 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   readonly positionText = computed((): string => {
     const gridMedia = this.gridMedia();
-    if (!gridMedia || !gridMedia.isPhoto() || !(gridMedia.media as PhotoDTO).metadata.positionData) {
+    const positionData = (gridMedia?.media as PhotoDTO | undefined)?.metadata.positionData;
+    if (!gridMedia || !gridMedia.isPhoto() || !positionData) {
       return '';
     }
     return ( //not much space in the gridview, so we only deliver city, or state or country
-      (gridMedia.media as PhotoDTO).metadata.positionData.city ||
-      (gridMedia.media as PhotoDTO).metadata.positionData.state ||
-      (gridMedia.media as PhotoDTO).metadata.positionData.country || ''
+      positionData.city ||
+      positionData.state ||
+      positionData.country || ''
     ).trim();
   });
 
@@ -176,13 +178,13 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     return filters.every(filter => {
       // Get the value from metadata using the field path (e.g., 'rating' or 'size.width')
       const fieldParts = filter.field.split('.');
-      let fieldValue: any = metadata;
+      let fieldValue: unknown = metadata;
 
       for (const part of fieldParts) {
         if (fieldValue === undefined || fieldValue === null) {
           break;
         }
-        fieldValue = fieldValue[part];
+        fieldValue = (fieldValue as Record<string, unknown>)[part];
       }
 
       if (fieldValue === undefined || fieldValue === null) {

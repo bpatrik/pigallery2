@@ -54,7 +54,7 @@ import {TextSearchMatchingTypes} from './TextSearchMatchingTypes';
 })
 export class GallerySearchQueryEntryComponent
   implements ControlValueAccessor, Validator {
-  public readonly queryEntry = signal<SearchQueryDTO>(undefined);
+  public readonly queryEntry = signal<SearchQueryDTO | undefined>(undefined);
   public SearchQueryTypesEnum: { value: string; key: SearchQueryTypes }[];
   public SearchQueryTypes = SearchQueryTypes;
   public DatePatternFrequency = DatePatternFrequency;
@@ -73,21 +73,18 @@ export class GallerySearchQueryEntryComponent
   }
 
   get IsTextQuery(): boolean {
-    return (
-      this.queryEntry() && TextSearchQueryTypes.includes(this.queryEntry().type)
-    );
+    const entry = this.queryEntry();
+    return !!entry && TextSearchQueryTypes.includes(entry.type);
   }
 
   get IsListQuery(): boolean {
-    return (
-      this.queryEntry() && ListSearchQueryTypes.includes(this.queryEntry().type)
-    );
+    const entry = this.queryEntry();
+    return !!entry && ListSearchQueryTypes.includes(entry.type);
   }
 
   get IsRangeQuery(): boolean {
-    return (
-      this.queryEntry() && (RangeSearchQueryTypes.includes(this.queryEntry().type))
-    );
+    const entry = this.queryEntry();
+    return !!entry && RangeSearchQueryTypes.includes(entry.type);
   }
 
   get AsListQuery(): SearchListQuery {
@@ -124,7 +121,7 @@ export class GallerySearchQueryEntryComponent
   private readonly negatableMatchingTypes = ['=', '!='] //normal negatable query
     .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, false)}));
 
-  get MatchingTypes(): { value: string; description: string }[] {
+  get MatchingTypes(): { value: string; description: string | undefined }[] {
     if (this.IsListQuery) {
       return [];
     }
@@ -134,7 +131,7 @@ export class GallerySearchQueryEntryComponent
     return this.negatableMatchingTypes;
   }
 
-  get SelectedMatchType(): string {
+  get SelectedMatchType(): string | undefined {
     return TextSearchMatchingTypes.get(this.AsTextQuery);
   }
 
@@ -165,19 +162,27 @@ export class GallerySearchQueryEntryComponent
   }
 
   onChangeType(): void {
+    const entry = this.queryEntry();
+    if (!entry) {
+      return;
+    }
+    // a new type keeps only the fields of that type
+    const deleteField = (key: string): void => {
+      delete (entry as unknown as Record<string, unknown>)[key];
+    };
     if (this.IsListQuery) {
-      delete this.AsTextQuery.value;
+      deleteField('value');
       this.AsListQuery.list = this.AsListQuery.list || [
         {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
         {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
       ];
     } else {
-      delete this.AsListQuery.list;
+      deleteField('list');
     }
     if (!this.IsTextQuery) {
-      delete this.AsTextQuery.value;
+      deleteField('value');
     }
-    if (this.queryEntry().type === SearchQueryTypes.distance) {
+    if (entry.type === SearchQueryTypes.distance) {
       this.AsDistanceQuery.distance = 1;
       // Initialize location input text
       if (this.AsDistanceQuery.from?.GPSData) {
@@ -186,8 +191,8 @@ export class GallerySearchQueryEntryComponent
         this.locationInputText.set(this.AsDistanceQuery.from?.value || '');
       }
     } else {
-      delete this.AsDistanceQuery.from;
-      delete this.AsDistanceQuery.distance;
+      deleteField('from');
+      deleteField('distance');
     }
 
     if (this.IsRangeQuery) {
@@ -200,20 +205,20 @@ export class GallerySearchQueryEntryComponent
 
     }
 
-    if (this.queryEntry().type === SearchQueryTypes.orientation) {
+    if (entry.type === SearchQueryTypes.orientation) {
       this.AsOrientationQuery.landscape = true;
     } else {
-      delete this.AsOrientationQuery.landscape;
+      deleteField('landscape');
     }
 
 
-    if (this.queryEntry().type === SearchQueryTypes.date_pattern) {
+    if (entry.type === SearchQueryTypes.date_pattern) {
       this.AsDatePatternQuery.daysLength = 0;
       this.AsDatePatternQuery.frequency = DatePatternFrequency.every_year;
     } else {
-      delete this.AsDatePatternQuery.daysLength;
-      delete this.AsDatePatternQuery.frequency;
-      delete this.AsDatePatternQuery.agoNumber;
+      deleteField('daysLength');
+      deleteField('frequency');
+      deleteField('agoNumber');
     }
     this.onChange();
   }

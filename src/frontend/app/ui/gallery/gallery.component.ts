@@ -90,10 +90,10 @@ export class GalleryComponent implements OnInit, OnDestroy {
     hour: string;
     minute: string;
     second: string;
-  }>(null);
+  } | null>(null);
   public readonly mapEnabled: boolean;
   // keeps showing the previous content while the next one loads
-  public readonly directoryContent = linkedSignal<GroupedDirectoryContent, GroupedDirectoryContent>({
+  public readonly directoryContent = linkedSignal<GroupedDirectoryContent | null, GroupedDirectoryContent | null | undefined>({
     source: this.contentService.sortedFilteredContent,
     computation: (content, previous) => content ?? previous?.value
   });
@@ -104,7 +104,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   );
   public isUploadOver = false;
   private $counter: Observable<number>;
-  private subscription: Record<string, Subscription> = {
+  private subscription: Record<string, Subscription | null> = {
     route: null,
     timer: null,
   };
@@ -119,20 +119,22 @@ export class GalleryComponent implements OnInit, OnDestroy {
   }
 
   get ShowMarkDown(): boolean {
-    return this.config.MetaFile.markdown && this.directoryContent()?.metaFile && filterMDFiles(this.directoryContent().metaFile).length > 0;
+    const metaFile = this.directoryContent()?.metaFile;
+    return this.config.MetaFile.markdown && !!metaFile && (filterMDFiles(metaFile)?.length ?? 0) > 0;
   }
 
   get ShowMap(): boolean {
-    return (this.isPhotoWithLocation() || filterGPXFiles(this.directoryContent()?.metaFile)?.length > 0) && this.mapEnabled;
+    return (this.isPhotoWithLocation() || filterGPXFiles(this.directoryContent()?.metaFile).length > 0) && this.mapEnabled;
   }
 
   updateTimer(t: number): void {
-    if (this.shareService.sharing() == null) {
+    const sharing = this.shareService.sharing();
+    if (sharing == null) {
       return;
     }
     // if the timer is longer than 10 years, just do not show it
     if (
-      (this.shareService.sharing().expires - Date.now()) /
+      (sharing.expires - Date.now()) /
       1000 /
       86400 /
       365 >
@@ -142,7 +144,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
 
     t = Math.floor(
-      (this.shareService.sharing().expires - Date.now()) / 1000
+      (sharing.expires - Date.now()) / 1000
     );
     const day = Math.floor(t / 86400);
     t -= day * 86400;
@@ -164,7 +166,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
   }
 
-  async ngOnInit(): Promise<boolean> {
+  async ngOnInit(): Promise<boolean | undefined> {
     await this.shareService.wait();
     if (!this.authService.isAuthenticated()) {
       return this.navigation.toLogin();
@@ -184,6 +186,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
         this.updateTimer(x)
       );
     }
+    return undefined;
   }
 
   onDragOver(event: DragEvent): void {
@@ -207,8 +210,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
       event.preventDefault();
       event.stopPropagation();
       this.isUploadOver = false;
-      const files = event.dataTransfer.files;
-      if (files.length > 0) {
+      const files = event.dataTransfer?.files;
+      if (files && files.length > 0) {
         this.uploaderService.uploadFiles(files);
       }
     }
@@ -229,7 +232,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
       const sharing = await this.shareService.currentSharing
         .pipe(take(1))
         .toPromise();
-      const qParams: Record<string, any> = {};
+      const qParams: Record<string, string | null> = {};
       qParams[QueryParams.gallery.sharingKey_query] =
         this.shareService.getSharingKey();
       const route = this.shareService.getDefaultRoute(sharing);

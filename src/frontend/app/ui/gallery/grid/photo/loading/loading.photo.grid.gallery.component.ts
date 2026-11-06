@@ -9,7 +9,7 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class GalleryPhotoLoadingComponent {
-  readonly animate = input<boolean>(undefined);
-  readonly error = input<boolean>(undefined);
+  readonly animate = input<boolean>();
+  readonly error = input<boolean>();
 }
 

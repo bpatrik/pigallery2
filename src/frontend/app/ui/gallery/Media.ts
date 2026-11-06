@@ -27,7 +27,7 @@ export class Media extends MediaIcon {
     return this.getMediaSize(this.renderWidth,this.renderHeight);
   }
 
-  getReplacementThumbnailSize(): number {
+  getReplacementThumbnailSize(): number | null {
     if (this.replacementSizeCache === false) {
       this.replacementSizeCache = null;
 
@@ -45,7 +45,7 @@ export class Media extends MediaIcon {
         }
       }
     }
-    return this.replacementSizeCache as number;
+    return this.replacementSizeCache as number | null;
   }
 
   isReplacementThumbnailAvailable(): boolean {
@@ -54,7 +54,7 @@ export class Media extends MediaIcon {
 
   isThumbnailAvailable(): boolean {
     return (
-        (this.media.missingThumbnails &
+        ((this.media.missingThumbnails ?? 0) &
             MediaIcon.ThumbnailMap[this.getThumbnailSize()]) ===
         0
     );
@@ -65,7 +65,7 @@ export class Media extends MediaIcon {
     return Config.Server.getApiUrl(
         '/gallery/content/',
         this.getRelativePath(),
-        size.toString()
+        String(size) // callers check isReplacementThumbnailAvailable() first
     );
   }
 

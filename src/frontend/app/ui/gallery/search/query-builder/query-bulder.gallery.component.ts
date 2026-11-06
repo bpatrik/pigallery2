@@ -35,7 +35,7 @@ export class GallerySearchQueryBuilderComponent
 
   public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
   readonly searchSubmit = output<void>();
-  readonly placeholder = input($localize `Search`);
+  readonly placeholder = input<string | undefined>($localize `Search`);
   public readonly rawSearchText = signal('');
 
   /**

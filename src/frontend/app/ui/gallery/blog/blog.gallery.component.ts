@@ -21,8 +21,8 @@ export class GalleryBlogComponent {
   /**
    * Blog is inserted to the top (when date is null) and to all date groups, when date is set
    */
-  readonly date = input<Date>(undefined);
-  readonly markdowns = computed((): GroupedMarkdown[] => this.blogService.getMarkDowns(this.date()));
+  readonly date = input<Date>();
+  readonly markdowns = computed((): GroupedMarkdown[] | undefined => this.blogService.getMarkDowns(this.date()));
 
 
   toggleCollapsed(): void {

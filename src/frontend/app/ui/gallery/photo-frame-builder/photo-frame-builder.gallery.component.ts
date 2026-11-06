@@ -54,9 +54,9 @@ import {Config} from '../../../../../common/config/public/Config';
     // Enum option names for selects
     readonly LightBoxTitleTextsArr = Utils.enumToArray(LightBoxTitleTexts).map(v=>v.value);
 
-  modalRef: BsModalRef;
+  modalRef: BsModalRef | null;
 
-  private readonly subscription: Subscription = null;
+  private readonly subscription: Subscription | null = null;
 
   constructor() {
     // keep for potential future route driven defaults
@@ -76,7 +76,7 @@ import {Config} from '../../../../../common/config/public/Config';
     // Auto polling toggle
     if (typeof this.autoPollInterval != 'undefined') {
       u.searchParams.set(QueryParams.gallery.autoPollInterval,
-        String(parseInt(this.autoPollInterval as unknown as any, 10)));
+        String(parseInt(String(this.autoPollInterval), 10)));
     } else {
       u.searchParams.delete(QueryParams.gallery.autoPollInterval);
     }
@@ -107,7 +107,7 @@ import {Config} from '../../../../../common/config/public/Config';
     if (this.slideshowSpeed && this.slideshowSpeed > 0) {
       u.searchParams.set(
         QueryParams.gallery.lightbox.slideshowSpeed,
-        String(parseInt(this.slideshowSpeed as unknown as any, 10))
+        String(parseInt(String(this.slideshowSpeed), 10))
       );
     } else {
       u.searchParams.delete(QueryParams.gallery.lightbox.slideshowSpeed);
@@ -154,12 +154,12 @@ import {Config} from '../../../../../common/config/public/Config';
     }
   }
 
-  openModal(template: TemplateRef<unknown>): boolean {
+  openModal(template: TemplateRef<unknown>): boolean | undefined {
     if (!this.enabled()) {
       return;
     }
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
 
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
@@ -173,7 +173,7 @@ import {Config} from '../../../../../common/config/public/Config';
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }

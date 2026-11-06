@@ -189,7 +189,7 @@
               </td>
               <td>{{ row.recursive ? text.Yes : text.No }}</td>
               @if (IsAdmin) {
-                <td>{{share.creator.name}}</td>
+                <td>{{share.creator?.name}}</td>
               }
               <td>{{share.expires | date}}</td>
               <td>

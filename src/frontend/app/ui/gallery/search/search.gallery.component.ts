@@ -51,9 +51,9 @@ export class GallerySearchComponent implements OnDestroy {
     key: SearchQueryTypes;
   }[];
   public saveSearchName = '';
-  private searchModalRef: BsModalRef;
-  private readonly subscription: Subscription = null;
-  private saveSearchModalRef: BsModalRef;
+  private searchModalRef: BsModalRef | null;
+  private readonly subscription: Subscription | null = null;
+  private saveSearchModalRef: BsModalRef | null;
 
   constructor() {
     this.SearchQueryTypes = SearchQueryTypes;
@@ -68,7 +68,7 @@ export class GallerySearchComponent implements OnDestroy {
       }
       const searchQuery: string = params[QueryParams.gallery.search.query];
       if (searchQuery) {
-        this.searchQueryDTO.set(SearchQueryUtils.parseURLifiedQuery(searchQuery));
+        this.searchQueryDTO.set(SearchQueryUtils.parseURLifiedQuery(searchQuery) ?? {type: SearchQueryTypes.any_text, value: ''} as TextSearch);
         this.onQueryChange();
       }
     });
@@ -77,7 +77,7 @@ export class GallerySearchComponent implements OnDestroy {
   get CanCreateAlbum(): boolean {
     return (
       Config.Album.enabled &&
-      this.authenticationService.user().role >= UserRoles.Admin
+      this.authenticationService.isAuthorized(UserRoles.Admin)
     );
   }
 
@@ -99,7 +99,7 @@ export class GallerySearchComponent implements OnDestroy {
   }
 
   public hideSearchModal(): void {
-    this.searchModalRef.hide();
+    this.searchModalRef?.hide();
     this.searchModalRef = null;
   }
 
@@ -111,7 +111,7 @@ export class GallerySearchComponent implements OnDestroy {
   }
 
   public hideSaveSearchModal(): void {
-    this.saveSearchModalRef.hide();
+    this.saveSearchModalRef?.hide();
     this.saveSearchModalRef = null;
   }
 

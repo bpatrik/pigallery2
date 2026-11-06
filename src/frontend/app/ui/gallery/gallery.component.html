@@ -70,7 +70,7 @@
             }
           </div>
         }
-        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups" />
+        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups ?? []" />
       }
     </div>
   }

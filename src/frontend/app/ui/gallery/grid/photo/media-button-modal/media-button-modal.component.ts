@@ -57,7 +57,7 @@ export class MediaButtonModalComponent {
     // Check if all required custom fields are properly filled
     for (const field of modalData.button.popup.customFields) {
       if (field.required) {
-        const value = this.formData().customFields[field.id];
+        const value = this.formData().customFields?.[field.id];
 
         // For boolean fields, required means it must be checked (true)
         if (field.type === 'boolean' && !value) {
@@ -128,7 +128,7 @@ export class MediaButtonModalComponent {
       if (modalData?.button?.popup?.customFields) {
         modalData.button.popup.customFields.forEach(field => {
           if (field.keepValue) {
-            this.modalService.setValue(field.id, formData.customFields[field.id]);
+            this.modalService.setValue(field.id, formData.customFields?.[field.id]);
           }
         });
       }
@@ -147,21 +147,23 @@ export class MediaButtonModalComponent {
   private initFormData(modalData: MediaButtonModalData): IMediaRequestBodyData {
     const formData: IMediaRequestBodyData = {};
     if (modalData.button?.popup?.fields) {
-      formData.fields = {};
+      const fields: Record<string, unknown> = {};
       modalData.button.popup.fields.forEach(field => {
-        formData.fields[field] = this.getFieldValue(field);
+        fields[field] = this.getFieldValue(field);
       });
+      formData.fields = fields;
     }
     if (modalData.button?.popup?.customFields) {
-      formData.customFields = {};
+      const customFields: Record<string, unknown> = {};
       modalData.button.popup.customFields.forEach(field => {
         // load last value if we should keep it
         if (field.keepValue && this.modalService.getValue(field.id) !== undefined) {
-          formData.customFields[field.id] = this.modalService.getValue(field.id);
+          customFields[field.id] = this.modalService.getValue(field.id);
           return;
         }
-        formData.customFields[field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
+        customFields[field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
       });
+      formData.customFields = customFields;
     }
     return formData;
   }

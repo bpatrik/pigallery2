@@ -38,11 +38,11 @@ export class GallerySearchFieldBaseComponent
   private autoCompleteService = inject(AutoCompleteService);
   router = inject(Router);
 
-  readonly placeholder = input($localize `Search`);
+  readonly placeholder = input<string | undefined>($localize `Search`);
   readonly searchSubmit = output<void>();
 
-  readonly searchField = viewChild<ElementRef>('SearchField');
-  readonly searchHintField = viewChild<ElementRef>('SearchHintField');
+  readonly searchField = viewChild.required<ElementRef>('SearchField');
+  readonly searchHintField = viewChild.required<ElementRef>('SearchHintField');
 
   readonly autoCompleteRenders = signal<AutoCompleteRenderItem[]>([]);
   public readonly rawSearchText = signal('');
