@@ -18,7 +18,7 @@
       </button>
     }
 
-    @if (albumsService.albums() && albumsService.albums().length === 0) {
+    @if (albumsService.albums()?.length === 0) {
       <div class="d-flex no-item-msg"
         >
         <div class="flex-fill">

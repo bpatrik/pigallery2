@@ -10,6 +10,6 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class GridSizeIconComponent {
-  readonly method = input<number>(undefined);
+  readonly method = input.required<number>();
   public readonly GridSizes = GridSizes;
 }

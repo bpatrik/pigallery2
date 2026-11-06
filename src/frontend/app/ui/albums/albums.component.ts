@@ -40,19 +40,19 @@ export class AlbumsComponent implements OnInit {
   private searchQueryParserService = inject(SearchQueryParserService);
 
   readonly container = viewChild<ElementRef>('container');
-  public readonly size = signal<number>(undefined);
+  public readonly size = signal(0); // set from the container width in ngOnInit
   public savedSearch = {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
   };
-  private modalRef: BsModalRef;
+  private modalRef: BsModalRef | null;
 
   constructor() {
     this.albumsService.getAlbums().catch(console.error);
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.user().role >= UserRoles.Admin;
+    return this.authenticationService.isAuthorized(UserRoles.Admin);
   }
 
   get IsSearchQueryEmpty(): boolean {
@@ -69,13 +69,13 @@ export class AlbumsComponent implements OnInit {
     this.updateSize();
   }
 
-  public async openModal(template: TemplateRef<any>): Promise<void> {
+  public async openModal(template: TemplateRef<unknown>): Promise<void> {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
     document.body.style.paddingRight = '0px';
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 
@@ -90,7 +90,11 @@ export class AlbumsComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container().nativeElement.clientWidth - 30;
+    const container = this.container();
+    if (!container) {
+      return;
+    }
+    const containerWidth = container.nativeElement.clientWidth - 30;
     this.size.set(containerWidth / Math.round(containerWidth / size) - 5);
   }
 }

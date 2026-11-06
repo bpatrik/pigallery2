@@ -24,7 +24,7 @@ export class ToastCardComponent {
   // false: the title and text are cut to one line each
   readonly wrap = input(true);
   // ms; the bar shrinks over this time, pausing while the mouse is over the card. Only shows it, the owner hides the card.
-  readonly countdown = input<number>(null);
+  readonly countdown = input<number | null>(null);
   // 0-100; the bar shows this progress
-  readonly progress = input<number>(null);
+  readonly progress = input<number | null>(null);
 }

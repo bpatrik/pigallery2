@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
 export class TimeStampDatePickerComponent {
   readonly timestamp = model<number>(0);
   readonly date = computed((): Date => new Date(this.timestamp()));
-  readonly name = input<string>(undefined);
+  readonly name = input<string>();
 
   onChange(date: Date | string): void {
     this.timestamp.set(new Date(date).getTime());

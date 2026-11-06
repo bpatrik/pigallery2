@@ -53,7 +53,11 @@ export class FacesComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container().nativeElement.clientWidth - 30;
+    const container = this.container();
+    if (!container) {
+      return;
+    }
+    const containerWidth = container.nativeElement.clientWidth - 30;
     this.size = containerWidth / Math.round(containerWidth / size) - 5;
   }
 }

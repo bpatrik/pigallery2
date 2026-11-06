@@ -14,20 +14,20 @@ import { JsonPipe } from '@angular/common';
 export class SavedSearchPopupComponent {
   private modalService = inject(BsModalService);
 
-  readonly disabled = input<boolean>(undefined);
+  readonly disabled = input<boolean>();
   readonly savedSearchDTO = input<{
     name: string;
     searchQuery: SearchQueryDTO;
-}>(undefined);
-  private modalRef: BsModalRef;
+}>();
+  private modalRef: BsModalRef | null;
 
-  public async openModal(template: TemplateRef<any>): Promise<void> {
+  public async openModal(template: TemplateRef<unknown>): Promise<void> {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
     document.body.style.paddingRight = '0px';
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }
