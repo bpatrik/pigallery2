@@ -254,10 +254,11 @@ export class ExtensionManager implements IObjectManager {
   private createUniqueExtensionObject(extensionName: string, folderName: string): IExtensionObject<unknown> {
     let uniqueExtensionId = extensionName;
     if (this.extObjects[uniqueExtensionId]) {
-      let i = 0;
-      while (this.extObjects[`${extensionName}_${++i}`]) { /* empty */
+      let i = 2;
+      while (this.extObjects[`${extensionName}_${i}`]) {
+        i++;
       }
-      uniqueExtensionId = `${extensionName}_${++i}`;
+      uniqueExtensionId = `${extensionName}_${i}`;
     }
     if (!this.extObjects[uniqueExtensionId]) {
       this.extObjects[uniqueExtensionId] = new ExtensionObject(uniqueExtensionId, extensionName, folderName, this.router, this.events);
@@ -417,7 +418,7 @@ export class ExtensionManager implements IObjectManager {
       }
     } catch (error) {
       Logger.error(LOG_TAG, `Error unzipping file: ${error}`);
-      throw new Error(`Failed to unzip file: ${error}`);
+      throw new Error(`Failed to unzip file: ${error}`, {cause: error});
     }
   }
 }

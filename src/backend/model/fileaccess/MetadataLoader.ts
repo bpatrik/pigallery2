@@ -433,11 +433,10 @@ export class MetadataLoader {
     }
 
     function extractTSAndOffset(mainpath: string, extrapath: string, extratype: string) {
-      let ts: string | undefined = undefined;
       let offset: string | undefined = undefined;
       //line below is programmatic way of finding a timestamp in the exif object. For example "xmp.CreateDate", from the DateTags list
       //ts = exif.xmp?.CreateDate
-      ts = getValue(exif, mainpath);
+      let ts: string | undefined = getValue(exif, mainpath);
       if (ts) {
         if (!extratype || extratype == 'O') { //offset can be in the timestamp itself
           [ts, offset] = Utils.splitTimestampAndOffset(ts);

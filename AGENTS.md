@@ -209,3 +209,4 @@ Pitfalls seen so far:
 Only relevant when working with the maintainer, Patrik J. Braun.
 
 - Works on Windows (Git Bash and PowerShell). `python` there is only the Microsoft Store stub; use `perl` or `node` for scripted edits.
+- Single maintainer: after opening a PR, don't watch its CI or reviews unless asked. The maintainer reports problems.
