@@ -117,7 +117,9 @@ describe('TemplateComponent', () => {
       getDefaultConfig: vi.fn((job: string) => job === 'Indexing' ? defaultConfig : null)
     };
     const {component} = setUp('Indexing', jobsService);
-    const uiJob = component.states().tags.uiJob;
+    const uiJobTag = component.states().tags?.uiJob;
+    expect(uiJobTag).toBeDefined();
+    const uiJob = uiJobTag!;
     const rows = component.uiJobRows().get(uiJob)!;
 
     expect(rows.map(r => r.job.job)).toEqual(['Indexing', 'Gallery Reset']);
