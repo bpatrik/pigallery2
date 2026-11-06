@@ -42,11 +42,85 @@ export interface PackedContentWrapperWithError extends PackedContentWrapper {
 }
 
 /**
- * The packer renames and drops the fields of the DTOs in place,
- * so it works on them as plain records.
+ * The packer renames and drops the fields of the DTOs in place, so a field's type changes while packing.
+ * The interfaces below list the field names (DTO and packed) of each level; their values stay loosely typed.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PackedObject = Record<string, any>;
+type Loose = any;
+
+interface PackedFile {
+  id?: Loose;
+  directory?: Loose;
+  d?: Loose;
+  name?: Loose;
+  n?: Loose;
+  missingThumbnails?: Loose;
+  t?: Loose;
+  liveVideoPath?: Loose;
+  l?: Loose;
+  liveVideoInfo?: Loose;
+  li?: Loose;
+  metadata?: Loose;
+  m?: Loose;
+}
+
+interface PackedMetadata {
+  size?: Loose;
+  d?: Loose;
+  fileSize?: Loose;
+  s?: Loose;
+  creationDate?: Loose;
+  t?: Loose;
+  creationDateOffset?: Loose;
+  o?: Loose;
+  rating?: Loose;
+  r?: Loose;
+  caption?: Loose;
+  a?: Loose;
+  faces?: Loose;
+  f?: Loose;
+  keywords?: Loose;
+  k?: Loose;
+  cameraData?: Loose;
+  c?: Loose;
+  positionData?: Loose;
+  p?: Loose;
+}
+
+interface PackedCameraData {
+  lens?: Loose;
+  l?: Loose;
+  make?: Loose;
+  m?: Loose;
+  model?: Loose;
+  o?: Loose;
+  ISO?: Loose;
+  i?: Loose;
+  fStop?: Loose;
+  s?: Loose;
+  exposure?: Loose;
+  e?: Loose;
+  focalLength?: Loose;
+  a?: Loose;
+}
+
+interface PackedPositionData {
+  country?: Loose;
+  c?: Loose;
+  city?: Loose;
+  cy?: Loose;
+  state?: Loose;
+  s?: Loose;
+  GPSData?: Loose;
+  g?: Loose;
+}
+
+interface PackedDirectory {
+  cache?: Loose;
+  media?: Loose;
+  metaFile?: Loose;
+  directories?: Loose;
+}
 
 export class ContentWrapperUtils {
   // the list length marker bit also needs to fit into a safe integer (2^53)
@@ -304,7 +378,7 @@ export class ContentWrapperUtils {
 
   private static mapify(cw: PackedContentWrapper, mediaIn: FileDTO, isSearchResult: boolean): void {
     const reverseMap = cw.reverseMap!; // pack() sets it for the time of packing
-    const media = mediaIn as PackedObject;
+    const media = mediaIn as PackedFile;
     if (isSearchResult) {
       const k = JSON.stringify(media.directory);
       if (!reverseMap.directories.has(k)) {
@@ -335,7 +409,7 @@ export class ContentWrapperUtils {
     }
 
     if (media.metadata) {
-      const metadata = media.metadata as PackedObject;
+      const metadata = media.metadata as PackedMetadata;
       metadata.d = [metadata.size.width, metadata.size.height];
       delete metadata.size;
       metadata.s = metadata.fileSize;
@@ -384,8 +458,8 @@ export class ContentWrapperUtils {
         metadata.k = metadata.keywords;
         delete metadata.keywords;
       }
-      const mapifyOne = (map: string[], reverseMapOne: Map<string, number>,
-                         obj: PackedObject, key: string, mappedKey: string) => {
+      const mapifyOne = <K extends string>(map: string[], reverseMapOne: Map<string, number>,
+                                         obj: Partial<Record<K, Loose>>, key: K, mappedKey: K) => {
 
         const k: string = obj[key];
 
@@ -397,7 +471,7 @@ export class ContentWrapperUtils {
         delete obj[key];
       };
       if (metadata.cameraData) {
-        const cameraData = metadata.cameraData as PackedObject;
+        const cameraData = metadata.cameraData as PackedCameraData;
         if (cameraData.lens) {
           mapifyOne(cw.map.lens, reverseMap.lens, cameraData, 'lens', 'l');
         }
@@ -429,7 +503,7 @@ export class ContentWrapperUtils {
         delete metadata.cameraData;
       }
       if (metadata.positionData) {
-        const positionData = metadata.positionData as PackedObject;
+        const positionData = metadata.positionData as PackedPositionData;
         if (positionData.country) {
           mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'country', 'c');
         }
@@ -458,7 +532,7 @@ export class ContentWrapperUtils {
 
     // clean up media
     for (let i = 0; i < media.length; ++i) {
-      const m = media[i] as PackedObject;
+      const m = media[i] as PackedFile;
       delete m.id;
 
       if (m.directory) {
@@ -500,7 +574,7 @@ export class ContentWrapperUtils {
   }
 
   private static packDirectory(cw: PackedContentWrapper, dirIn: DirectoryBaseDTO | SearchResultDTO, isSearchResult = false): void {
-    const dir = dirIn as PackedObject;
+    const dir = dirIn as PackedDirectory;
     if (dir.cache?.cover) {
       dir.cache.cover.directory = {
         path: dir.cache.cover.directory.path,
@@ -547,12 +621,12 @@ export class ContentWrapperUtils {
 
   private static deMapify(cw: PackedContentWrapper, mediaIn: FileDTO, isSearchResult: boolean): void {
 
-    const deMapifyOne = (map: unknown[],
-                         obj: PackedObject, key: string, mappedKey: string) => {
+    const deMapifyOne = <K extends string>(map: unknown[],
+                                           obj: Partial<Record<K, Loose>>, key: K, mappedKey: K) => {
       obj[key] = map[obj[mappedKey]];
       delete obj[mappedKey];
     };
-    const media = mediaIn as PackedObject;
+    const media = mediaIn as PackedFile;
     if (isSearchResult) {
       deMapifyOne(cw.map.directories, media, 'directory', 'd');
     }
@@ -577,7 +651,7 @@ export class ContentWrapperUtils {
     if (media.m) {
       media.metadata = media.m;
       delete media.m;
-      const metadata = media.metadata as PackedObject;
+      const metadata = media.metadata as PackedMetadata;
 
       metadata.size = {
         width: metadata.d[0],
@@ -643,7 +717,7 @@ export class ContentWrapperUtils {
       if (metadata.c) {
         metadata.cameraData = metadata.c;
         delete metadata.c;
-        const cameraData = metadata.cameraData as PackedObject;
+        const cameraData = metadata.cameraData as PackedCameraData;
 
         if (typeof cameraData.l !== 'undefined') {
           deMapifyOne(cw.map.lens, cameraData, 'lens', 'l');
@@ -676,7 +750,7 @@ export class ContentWrapperUtils {
       if (metadata.p) {
         metadata.positionData = metadata.p;
         delete metadata.p;
-        const positionData = metadata.positionData as PackedObject;
+        const positionData = metadata.positionData as PackedPositionData;
         if (typeof positionData.c !== 'undefined') {
           deMapifyOne(cw.map.keywords, positionData, 'country', 'c');
         }

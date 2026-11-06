@@ -74,7 +74,7 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
 
   openModal(template: TemplateRef<unknown>): boolean | undefined {
     if (!this.enabled()) {
-      return;
+      return undefined;
     }
     if (this.modalRef) {
       this.modalRef?.hide();

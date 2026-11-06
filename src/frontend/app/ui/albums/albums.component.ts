@@ -60,10 +60,11 @@ export class AlbumsComponent implements OnInit {
     return !this.searchQueryParserService.stringify(this.savedSearch.searchQuery);
   }
 
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
     await this.shareService.wait();
     if (!this.authService.isAuthenticated()) {
-      return this.navigation.toLogin();
+      await this.navigation.toLogin();
+      return;
     }
     this.piTitleService.setTitle($localize`Albums`);
     this.updateSize();

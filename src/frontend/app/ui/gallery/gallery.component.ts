@@ -104,7 +104,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   );
   public isUploadOver = false;
   private $counter: Observable<number>;
-  private subscription: Record<string, Subscription | null> = {
+  private subscription: { route: Subscription | null, timer: Subscription | null } = {
     route: null,
     timer: null,
   };

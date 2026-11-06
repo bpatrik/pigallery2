@@ -589,7 +589,7 @@ export class ServerUserConfig extends ClientUserConfig {
     },
     description:  $localize`Setup SSO with external authentication apps like Authentik or Authelia`,
   })
-  oidc: ServerUserOIDCConfig = new ServerUserOIDCConfig();
+  override oidc: ServerUserOIDCConfig = new ServerUserOIDCConfig();
 }
 
 
@@ -728,7 +728,7 @@ export class ServerMetaFileConfig extends ClientMetaFileConfig {
         }]
       } as TAGS
   })
-  GPXCompressing: ServerGPXCompressingConfig = new ServerGPXCompressingConfig();
+  override GPXCompressing: ServerGPXCompressingConfig = new ServerGPXCompressingConfig();
 }
 
 
@@ -883,34 +883,34 @@ export class JobTriggerConfigBase {
 @SubConfigClass({softReadonly: true})
 export class NeverJobTriggerConfig extends JobTriggerConfigBase implements NeverJobTrigger {
   @ConfigProperty({type: JobTriggerType})
-  readonly type = JobTriggerType.never;
+  override readonly type = JobTriggerType.never;
 }
 
 @SubConfigClass({softReadonly: true})
 export class ScheduledJobTriggerConfig extends JobTriggerConfigBase implements ScheduledJobTrigger {
   @ConfigProperty({type: JobTriggerType})
-  readonly type = JobTriggerType.scheduled;
+  override readonly type = JobTriggerType.scheduled;
 
   @ConfigProperty({type: 'unsignedInt'})
-  time: number; // data time
+  override time: number; // data time
 }
 
 @SubConfigClass({softReadonly: true})
 export class PeriodicJobTriggerConfig extends JobTriggerConfigBase implements PeriodicJobTrigger {
   @ConfigProperty({type: JobTriggerType})
-  readonly type = JobTriggerType.periodic;
+  override readonly type = JobTriggerType.periodic;
   @ConfigProperty({type: 'unsignedInt', max: 7})
-  periodicity: number | undefined = 7; // 0-6: week days 7 every day
+  override periodicity: number | undefined = 7; // 0-6: week days 7 every day
   @ConfigProperty({type: 'unsignedInt', max: 23 * 60 + 59})
-  atTime: number | undefined = 0; // daytime
+  override atTime: number | undefined = 0; // daytime
 }
 
 @SubConfigClass({softReadonly: true})
 export class AfterJobTriggerConfig extends JobTriggerConfigBase implements AfterJobTrigger {
   @ConfigProperty({type: JobTriggerType})
-  readonly type = JobTriggerType.after;
+  override readonly type = JobTriggerType.after;
   @ConfigProperty({type: 'string'})
-  afterScheduleName: string | undefined; // runs after schedule
+  override afterScheduleName: string | undefined; // runs after schedule
 
   constructor(afterScheduleName?: string) {
     super();
@@ -1257,7 +1257,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
     } as TAGS,
     description: $localize`Video support uses ffmpeg. ffmpeg and ffprobe binaries need to be available in the PATH or the @ffmpeg-installer/ffmpeg and @ffprobe-installer/ffprobe optional node packages need to be installed.`
   })
-  Video: ServerVideoConfig = new ServerVideoConfig();
+  override Video: ServerVideoConfig = new ServerVideoConfig();
   @ConfigProperty({
     type: ServerPhotoConfig,
     tags: {
@@ -1267,7 +1267,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
       uiJob: [{job: DefaultsJobs[DefaultsJobs['Photo Converting']]}]
     } as TAGS
   })
-  Photo: ServerPhotoConfig = new ServerPhotoConfig();
+  override Photo: ServerPhotoConfig = new ServerPhotoConfig();
 }
 
 @SubConfigClass({softReadonly: true})
@@ -1371,7 +1371,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionCloudOutline'
     } as TAGS,
   })
-  Server: ServerServiceConfig = new ServerServiceConfig();
+  override Server: ServerServiceConfig = new ServerServiceConfig();
 
   @ConfigProperty({
     type: ServerDataBaseConfig,
@@ -1389,7 +1389,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionPersonOutline'
     } as TAGS,
   })
-  Users: ServerUserConfig = new ServerUserConfig();
+  override Users: ServerUserConfig = new ServerUserConfig();
 
   @ConfigProperty({
     type: ServerIndexingConfig,
@@ -1415,7 +1415,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionImagesOutline'
     } as TAGS,
   })
-  Media: ServerMediaConfig = new ServerMediaConfig();
+  override Media: ServerMediaConfig = new ServerMediaConfig();
 
   @ConfigProperty({
     type: ServerMetaFileConfig,
@@ -1424,7 +1424,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionDocumentOutline'
     } as TAGS,
   })
-  MetaFile: ServerMetaFileConfig = new ServerMetaFileConfig();
+  override MetaFile: ServerMetaFileConfig = new ServerMetaFileConfig();
 
   @ConfigProperty({
     type: ServerAlbumCoverConfig,
@@ -1451,7 +1451,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionShareSocialOutline'
     } as TAGS,
   })
-  Sharing: ServerSharingConfig = new ServerSharingConfig();
+  override Sharing: ServerSharingConfig = new ServerSharingConfig();
 
   @ConfigProperty({
     type: ServerDuplicatesConfig,
@@ -1481,7 +1481,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionExtensionPuzzleOutline'
     } as TAGS
   })
-  Extensions: ServerExtensionsConfig = new ServerExtensionsConfig();
+  override Extensions: ServerExtensionsConfig = new ServerExtensionsConfig();
 
   @ConfigProperty({
     type: ServerUploadConfig,
@@ -1490,7 +1490,7 @@ export class ServerConfig extends ClientConfig {
       uiIcon: 'ionCloudUploadOutline'
     } as TAGS
   })
-  Upload: ServerUploadConfig = new ServerUploadConfig();
+  override Upload: ServerUploadConfig = new ServerUploadConfig();
 
   @ConfigProperty({
     type: ServerJobConfig,

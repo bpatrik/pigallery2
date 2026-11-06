@@ -156,7 +156,7 @@ import {Config} from '../../../../../common/config/public/Config';
 
   openModal(template: TemplateRef<unknown>): boolean | undefined {
     if (!this.enabled()) {
-      return;
+      return undefined;
     }
     if (this.modalRef) {
       this.modalRef?.hide();

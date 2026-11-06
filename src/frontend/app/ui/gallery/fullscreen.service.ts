@@ -11,6 +11,13 @@ declare const document: {
   webkitExitFullscreen: () => void;
 };
 
+// the prefixed versions of Element.requestFullscreen
+interface VendorFullscreenElement {
+  mozRequestFullScreen?: () => void;
+  webkitRequestFullscreen?: () => void;
+  msRequestFullscreen?: () => void;
+}
+
 @Injectable({providedIn: 'root'})
 export class FullScreenService {
   private readonly fullScreen = signal(this.isFullScreenEnabled());
@@ -36,14 +43,15 @@ export class FullScreenService {
       return;
     }
 
+    const vendorElement = element as VendorFullscreenElement;
     if (element.requestFullscreen) {
       element.requestFullscreen().catch(console.error);
-    } else if ((element as unknown as Record<string, () => void>).mozRequestFullScreen) {
-      (element as unknown as Record<string, () => void>).mozRequestFullScreen();
-    } else if ((element as unknown as Record<string, () => void>).webkitRequestFullscreen) {
-      (element as unknown as Record<string, () => void>).webkitRequestFullscreen();
-    } else if ((element as unknown as Record<string, () => void>).msRequestFullscreen) {
-      (element as unknown as Record<string, () => void>).msRequestFullscreen();
+    } else if (vendorElement.mozRequestFullScreen) {
+      vendorElement.mozRequestFullScreen();
+    } else if (vendorElement.webkitRequestFullscreen) {
+      vendorElement.webkitRequestFullscreen();
+    } else if (vendorElement.msRequestFullscreen) {
+      vendorElement.msRequestFullscreen();
     }
   }
 

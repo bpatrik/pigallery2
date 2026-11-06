@@ -19,7 +19,7 @@ export class OverlayService {
       const outer = document.createElement('div');
       outer.style.visibility = 'hidden';
       outer.style.width = '100px';
-      (outer.style as unknown as Record<string, string>).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+      (outer.style as CSSStyleDeclaration & { msOverflowStyle: string }).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
 
       document.body.appendChild(outer);
 

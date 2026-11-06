@@ -3,13 +3,19 @@ import {TAGS} from '../../../../../common/config/public/ClientConfig';
 
 /**
  * A config object as the web config builder creates it: its properties plus their states.
+ * K lists the property names, when the config class is known (see Stateful).
  */
-export interface StatefulConfig {
-  __state: Record<string, RecursiveState>;
+export interface StatefulConfig<K extends string = string> {
+  __state: Record<K, RecursiveState>;
   __propPath?: string;
 
   toJSON(): Record<string, unknown>;
 }
+
+/**
+ * A config object of a known config class, with the states of its properties.
+ */
+export type Stateful<T> = T & StatefulConfig<keyof T & string>;
 
 /**
  * The typeconfig state of a config property, as the settings UI edits it.

@@ -84,7 +84,7 @@ describe('TemplateComponent', () => {
     expect(component.nestedConfigs().map(n => n.id)).toEqual(['Users.oidc']);
 
     fixture.componentRef.setInput('ConfigPath', 'Database');
-    expect(subStates(component.states()).dbFolder).toBeDefined();
+    expect(subStates(component.states())['dbFolder']).toBeDefined();
     expect(component.Name()).toBe('Database');
     expect(component.icon()).toBe('ionServerOutline');
   });
@@ -101,12 +101,12 @@ describe('TemplateComponent', () => {
     // the sub config and the array go last
     expect(states.keys!.slice(-2).sort()).toEqual(['enforcedUsers', 'oidc']);
     expect(states.keys).toContain('authenticationRequired');
-    expect(subStates(states).oidc.isExpandableConfig).toBe(true);
-    expect(subStates(states).oidc.keys!.length).toBeGreaterThan(0);
-    expect(subStates(states).authenticationRequired.isExpandableConfig).toBe(false);
+    expect(subStates(states)['oidc'].isExpandableConfig).toBe(true);
+    expect(subStates(states)['oidc'].keys!.length).toBeGreaterThan(0);
+    expect(subStates(states)['authenticationRequired'].isExpandableConfig).toBe(false);
     // users have a custom UI
-    expect(subStates(states).enforcedUsers.isExpandableArrayConfig).toBe(false);
-    expect(subStates(states).oidc.isExtension).toBe(false);
+    expect(subStates(states)['enforcedUsers'].isExpandableArrayConfig).toBe(false);
+    expect(subStates(states)['oidc'].isExtension).toBe(false);
   });
 
   it('should list the ui jobs with their progress and default config', () => {

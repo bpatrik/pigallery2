@@ -9,6 +9,7 @@ import {
   MapPathGroupThemeConfig,
   NavigationLinkConfig,
   NavigationLinkTypes,
+  PathThemeConfig,
   SVGIconConfig,
   ThemeConfig
 } from '../../../../../../common/config/public/ClientConfig';
@@ -27,7 +28,7 @@ import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
 import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
-import {RecursiveState, StatefulConfig} from '../RecursiveState';
+import {RecursiveState, Stateful, StatefulConfig} from '../RecursiveState';
 import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 
 interface OptionView {
@@ -111,20 +112,20 @@ export class SettingsEntryComponent
     return this.st.value as unknown[];
   }
 
-  get IconValue(): SVGIconConfig & StatefulConfig {
-    return this.st.value as SVGIconConfig & StatefulConfig;
+  get IconValue(): Stateful<SVGIconConfig> {
+    return this.st.value as Stateful<SVGIconConfig>;
   }
 
   get MapLayersValue(): MapLayers[] {
     return this.st.value as MapLayers[];
   }
 
-  get PathThemeGroupsValue(): (MapPathGroupThemeConfig & StatefulConfig & { theme: StatefulConfig })[] {
-    return this.st.value as (MapPathGroupThemeConfig & StatefulConfig & { theme: StatefulConfig })[];
+  get PathThemeGroupsValue(): (Stateful<MapPathGroupThemeConfig> & { theme: Stateful<PathThemeConfig> })[] {
+    return this.st.value as (Stateful<MapPathGroupThemeConfig> & { theme: Stateful<PathThemeConfig> })[];
   }
 
-  get PathGroupsValue(): (MapPathGroupConfig & StatefulConfig)[] {
-    return this.st.value as (MapPathGroupConfig & StatefulConfig)[];
+  get PathGroupsValue(): Stateful<MapPathGroupConfig>[] {
+    return this.st.value as Stateful<MapPathGroupConfig>[];
   }
 
   get NavigationLinksValue(): NavigationLinkConfig[] {

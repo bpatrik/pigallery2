@@ -609,7 +609,7 @@ export class LRU<V> {
 
   get(key: string): V | undefined {
     if (!this.data[key]) {
-      return;
+      return undefined;
     }
     return this.data[key].value;
   }
