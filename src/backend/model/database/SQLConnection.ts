@@ -26,6 +26,7 @@ import {MDFileEntity} from './enitites/MDFileEntity';
 import {ProjectedDirectoryCacheEntity} from './enitites/ProjectedDirectoryCacheEntity';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {ProjectedAlbumCacheEntity} from './enitites/album/ProjectedAlbumCacheEntity';
+import {SQLiteLike} from './SQLiteLike';
 
 const LOG_TAG = '[SQLConnection]';
 
@@ -295,6 +296,7 @@ export class SQLConnection {
           ProjectPath.getAbsolutePath(config.dbFolder),
           config.sqlite.DBFileName
         ),
+        prepareDatabase: (db) => SQLiteLike.register(db),
       };
     }
     driver.entities = this.entries;
