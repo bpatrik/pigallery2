@@ -118,12 +118,12 @@ export class ConfigDiagnostics {
     try {
       await FFmpeg.run(['-codecs']);
     } catch (err) {
-      throw new Error('Error accessing ffmpeg, cant find executable: ' + err.toString());
+      throw new Error('Error accessing ffmpeg, cant find executable: ' + err.toString(), {cause: err});
     }
     try {
       await FFmpeg.probe(__dirname + '/blank.jpg');
     } catch (err) {
-      throw new Error('Error accessing ffmpeg-probe, cant find executable: ' + err.toString());
+      throw new Error('Error accessing ffmpeg-probe, cant find executable: ' + err.toString(), {cause: err});
     }
   }
 
