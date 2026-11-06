@@ -14,7 +14,7 @@
         [style.height.%]="imageSize().height"
         [style.transform]="imageTransform()"
         [src]="photoSrc()"
-        [alt]="gridMedia().media.name"
+        [alt]="gridMedia()?.media?.name"
         (load)="onImageLoad()"
         (error)="onImageError()"
         #image/>

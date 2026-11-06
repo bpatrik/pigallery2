@@ -51,10 +51,10 @@
         <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu dropdown-menu-right"
           role="menu" aria-labelledby="button-basic">
           <li role="menuitem">
-            @if (activePhoto()) {
+            @if (activePhoto(); as activePhoto) {
               <a
                 [href]="originalMediaPath()"
-                [download]="activePhoto().media.name"
+                [download]="activePhoto.media.name"
                 class="dropdown-item">
                 <ng-icon class="me-2"
                 name="ionDownloadOutline" title="Download" i18n-title />

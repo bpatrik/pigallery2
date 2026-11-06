@@ -44,7 +44,7 @@ export class InfoPanelLightboxComponent {
   private authService = inject(AuthenticationService);
   private themeService = inject(ThemeService);
 
-  readonly media = input<MediaDTO>(undefined);
+  readonly media = input.required<MediaDTO>();
   readonly closed = output();
 
   public readonly mapEnabled: boolean;
@@ -53,13 +53,14 @@ export class InfoPanelLightboxComponent {
 
   public baseLayer: TileLayer;
   public readonly markerLayer = computed((): Marker[] => {
-    if (!this.hasGPS()) {
+    const gps = this.gps();
+    if (!gps) {
       return [];
     }
     return [
       marker({
-        lat: this.positionData().GPSData.latitude,
-        lng: this.positionData().GPSData.longitude,
+        lat: gps.latitude,
+        lng: gps.longitude,
       } as LatLngLiteral, {icon: MarkerFactory.defIcon}),
     ];
   });
@@ -94,26 +95,32 @@ export class InfoPanelLightboxComponent {
     return p;
   });
 
-  public readonly videoData = computed((): VideoMetadata => {
+  public readonly videoData = computed((): VideoMetadata | null => {
     if (typeof (this.media() as VideoDTO).metadata.bitRate === 'undefined') {
       return null;
     }
     return (this.media() as VideoDTO).metadata;
   });
 
-  public readonly rating = computed((): number => (this.media() as PhotoDTO).metadata.rating);
+  // the video data, only if there is a duration or bit rate to show
+  public readonly videoInfo = computed((): VideoMetadata | null => {
+    const video = this.videoData();
+    return video && (video.duration || video.bitRate) ? video : null;
+  });
+
+  public readonly rating = computed((): number | undefined => (this.media() as PhotoDTO).metadata.rating);
   // the filled and the empty stars of the rating
   public readonly ratingStars = computed((): { filled: undefined[], empty: undefined[] } => ({
-    filled: new Array(this.rating()),
-    empty: new Array(5 - this.rating())
+    filled: new Array(this.rating() ?? 0),
+    empty: new Array(5 - (this.rating() ?? 0))
   }));
 
-  public readonly positionData = computed((): PositionMetaData => (this.media() as PhotoDTO).metadata.positionData);
+  public readonly positionData = computed((): PositionMetaData | undefined => (this.media() as PhotoDTO).metadata.positionData);
 
-  public readonly cameraData = computed((): CameraMetadata => (this.media() as PhotoDTO).metadata.cameraData);
+  public readonly cameraData = computed((): CameraMetadata | undefined => (this.media() as PhotoDTO).metadata.cameraData);
 
   public readonly exposure = computed((): string | number => {
-    const f = this.cameraData()?.exposure;
+    const f = this.cameraData()?.exposure ?? NaN; // shown only with an exposure
     if (f > 1) {
       return f;
     }
@@ -121,7 +128,7 @@ export class InfoPanelLightboxComponent {
   });
 
   // the faces and keywords of the media with their search links, null if it has none
-  public readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] => {
+  public readonly keywords = computed((): { value: string; type: SearchQueryTypes; link: string }[] | null => {
     const metadata = this.media().metadata as PhotoMetadata;
     if (
       !(metadata.keywords && metadata.keywords.length > 0) &&
@@ -153,7 +160,7 @@ export class InfoPanelLightboxComponent {
 
   public readonly isPhoto = computed((): boolean => {
     const media = this.media();
-    return media && MediaDTOUtils.isPhoto(media);
+    return !!media && MediaDTOUtils.isPhoto(media);
   });
 
   public readonly isLivePhoto = computed((): boolean => !!this.media()?.liveVideoPath);
@@ -174,7 +181,7 @@ export class InfoPanelLightboxComponent {
       positionData.city,
       positionData.state,
       positionData.country
-    ].filter(text => !!text);
+    ].filter((text): text is string => !!text);
   });
 
   // the position parts with their search links
@@ -185,37 +192,40 @@ export class InfoPanelLightboxComponent {
 
   public readonly hasTextPositionData = computed((): boolean => this.positionParts().length > 0);
 
-  public readonly hasGPS = computed((): boolean => !!(
-    (this.media() as PhotoDTO).metadata.positionData &&
-    (this.media() as PhotoDTO).metadata.positionData.GPSData &&
-    (this.media() as PhotoDTO).metadata.positionData.GPSData.latitude &&
-    (this.media() as PhotoDTO).metadata.positionData.GPSData.longitude
-  ));
+  // the GPS coordinates, null if the media has none
+  public readonly gps = computed((): { latitude: number, longitude: number } | null => {
+    const gpsData = (this.media() as PhotoDTO).metadata.positionData?.GPSData;
+    return gpsData?.latitude && gpsData?.longitude ? {latitude: gpsData.latitude, longitude: gpsData.longitude} : null;
+  });
+
+  public readonly hasGPS = computed((): boolean => !!this.gps());
 
   //Filter removes empty elements, join concats the values separated by ', '
   public readonly positionText = computed((): string => this.positionParts().join(', ').trim());
 
   // the GPS coordinates as shown, only set if the media has GPS data
-  public readonly gpsText = computed((): { latitude: string, longitude: string } => {
-    if (!this.hasGPS()) {
+  public readonly gpsText = computed((): { latitude: string, longitude: string } | null => {
+    const gps = this.gps();
+    if (!gps) {
       return null;
     }
     return {
-      latitude: this.positionData().GPSData.latitude.toFixed(6),
-      longitude: this.positionData().GPSData.longitude.toFixed(6)
+      latitude: gps.latitude.toFixed(6),
+      longitude: gps.longitude.toFixed(6)
     };
   });
 
-  public readonly distanceSearchQuery = computed((): string => {
-    if (!this.hasGPS()) {
+  public readonly distanceSearchQuery = computed((): string | null => {
+    const gps = this.gps();
+    if (!gps) {
       return null;
     }
     return SearchQueryUtils.urlify({
       type: SearchQueryTypes.distance,
       from: {
         GPSData: {
-          latitude: this.positionData().GPSData.latitude,
-          longitude: this.positionData().GPSData.longitude
+          latitude: gps.latitude,
+          longitude: gps.longitude
         }
       },
       distance: 1 // 1km radius

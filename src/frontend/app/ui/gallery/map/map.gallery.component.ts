@@ -24,10 +24,10 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   private router = inject(Router);
   private themeService = inject(ThemeService);
 
-  readonly photos = input<PhotoDTO[]>(undefined);
-  readonly gpxFiles = input<FileDTO[]>(undefined);
+  readonly photos = input.required<PhotoDTO[]>();
+  readonly gpxFiles = input.required<FileDTO[]>();
   readonly mapLightbox = viewChild(GalleryMapLightboxComponent);
-  readonly mapElement = viewChild<ElementRef>('map');
+  readonly mapElement = viewChild.required<ElementRef>('map');
 
   leafletMap: Map;
   layers: { light: TileLayer, dark: TileLayer };
@@ -43,22 +43,12 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
     center: [0, 0],
   };
   readonly markerLayer = computed((): Marker[] => this.photos()
-    .filter((p): number => {
-      return (
-        p.metadata &&
-        p.metadata.positionData &&
-        p.metadata.positionData.GPSData &&
-        p.metadata.positionData.GPSData.latitude &&
-        p.metadata.positionData.GPSData.longitude
-      );
+    .flatMap((p): LatLngLiteral[] => {
+      const gps = p.metadata?.positionData?.GPSData;
+      return gps?.latitude && gps.longitude ? [{lat: gps.latitude, lng: gps.longitude}] : [];
     })
     .slice(0, Config.Map.maxPreviewMarkers)
-    .map((p): Marker => {
-      return marker({
-        lat: p.metadata.positionData.GPSData.latitude,
-        lng: p.metadata.positionData.GPSData.longitude,
-      } as LatLngLiteral).setIcon(MarkerFactory.defIconSmall);
-    }));
+    .map((latLng): Marker => marker(latLng).setIcon(MarkerFactory.defIconSmall)));
 
   constructor() {
     this.initThemeModes();
@@ -147,7 +137,7 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   // an arrow function, so the map lightbox can call it
   public readonly getDimension = (): Dimension => {
     const mapElement = this.mapElement();
-    if (isNaN(mapElement?.nativeElement?.parentElement?.offsetParent.offsetTop)) {
+    if (isNaN(mapElement.nativeElement?.parentElement?.offsetParent?.offsetTop)) {
       return {top: 0, left: 0, width: 0, height: 0};
     }
     return {

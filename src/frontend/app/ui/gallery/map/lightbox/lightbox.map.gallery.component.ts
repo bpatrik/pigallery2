@@ -70,10 +70,10 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
   private queryService = inject(QueryService);
   private router = inject(Router);
 
-  readonly photos = input<PhotoDTO[]>(undefined);
-  readonly gpxFiles = input<FileDTO[]>(undefined);
+  readonly photos = input.required<PhotoDTO[]>();
+  readonly gpxFiles = input.required<FileDTO[]>();
   // read only when the lightbox opens or closes, so the parent is not measured on every change detection
-  readonly getParentDimension = input<() => Dimension>(undefined);
+  readonly getParentDimension = input.required<() => Dimension>();
   public readonly lightboxDimension = signal<Dimension>({
     top: 0,
     left: 0,
@@ -89,7 +89,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
   public readonly visible = signal(false);
   public readonly controllersVisible = signal(false);
   public readonly opacity = signal(1.0);
-  readonly elementRef = viewChild<ElementRef>('root');
+  readonly elementRef = viewChild.required<ElementRef>('root');
   public mapOptions: MapOptions = {
     zoom: 2,
     // setting max zoom is needed to MarkerCluster https://github.com/Leaflet/Leaflet.markercluster/issues/611
@@ -99,7 +99,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
   defLayer: TileLayer;
   darkLayer: TileLayer;
   mapLayerControl: Control.Layers;
-  private subscription: { route: Subscription } = {route: null};
+  private subscription: { route: Subscription | null } = {route: null};
   private smallIconSize = new Point(
     Config.Media.Photo.iconSize * 0.75,
     Config.Media.Photo.iconSize * 0.75
@@ -165,8 +165,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
       untracked(this.selectBaseLayer);
     });
     this.setUpPathLayers();
-    this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos];
-    this.pathLayersConfigOrdered.forEach(pl => this.mapOptions.layers.push(pl.layer));
+    this.mapOptions.layers = [this.mapLayersControlOption.overlays.Photos, ...this.pathLayersConfigOrdered.map(pl => pl.layer)];
     for (const l of this.mapService.Layers) {
       const tl = tileLayer(l.url, {attribution: this.mapService.Attributions});
       if (l.url === this.mapService.MapLayer.url) {
@@ -296,19 +295,14 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
     }
     this.thumbnailsOnLoad = [];
     this.photos()
-      .filter((p): number => {
-        return (
-          p.metadata &&
-          p.metadata.positionData &&
-          p.metadata.positionData.GPSData &&
-          p.metadata.positionData.GPSData.latitude &&
-          p.metadata.positionData.GPSData.longitude
-        );
-      })
       .forEach((p): void => {
+        const gps = p.metadata?.positionData?.GPSData;
+        if (!gps?.latitude || !gps.longitude) {
+          return;
+        }
         const mkr = marker({
-          lat: p.metadata.positionData.GPSData.latitude,
-          lng: p.metadata.positionData.GPSData.longitude,
+          lat: gps.latitude,
+          lng: gps.longitude,
         });
         this.mapLayersControlOption.overlays.Photos.addLayer(mkr);
         let width = 500;
@@ -337,7 +331,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
           }
           mkr.on('popupopen', () => {
             const popup = mkr.getPopup();
-            const container = popup.getElement();
+            const container = popup?.getElement();
             if (container) {
               const img = container.querySelector('img');
               if (img) {
@@ -378,7 +372,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
             const setIcon = () => {
               mkr.setIcon(
                 icon({
-                  iconUrl: iconTh.Src,
+                  iconUrl: iconTh.Src ?? '', // set once the thumbnail loaded
                   iconSize: this.usedIconSize, // size of the icon
                   className: 'photo-icon',
                 })
@@ -460,7 +454,8 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
 
   onMapReady(map: Map): void {
     this.leafletMap = map;
-    this.leafletMap.setMaxZoom(undefined);
+    // no limit: leaflet then uses the max zoom of the layers (its typing does not allow undefined)
+    this.leafletMap.setMaxZoom(undefined as unknown as number);
     this.leafletMap.zoomControl.setPosition('bottomright');
     this.mapLayerControl.addTo(this.leafletMap);
   }
@@ -575,7 +570,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
   };
 
   private centerMap(): void {
-    let bounds: LatLngBounds = null;
+    let bounds: LatLngBounds | null = null;
     for (const k of Object.keys(this.mapLayersControlOption.overlays)) {
       const b = this.mapLayersControlOption?.overlays?.[k]?.getBounds();
       if (!b) {
@@ -687,7 +682,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
     const loadAFile = async (file: FileDTO) => {
       const parsedGPX = await this.mapService.getMapCoordinates(file);
 
-      let pathLayer: { layer: FeatureGroup, icon?: DivIcon, theme?: { color?: string, dashArray?: string } };
+      let pathLayer: { layer: FeatureGroup, icon: DivIcon, theme?: { color?: string, dashArray?: string } } | undefined;
       for (const pl of this.pathLayersConfigOrdered) {
         pathLayer = {layer: pl.layer, icon: MarkerFactory.defIcon};
         if (!pl.themes || pl.themes.length === 0) {

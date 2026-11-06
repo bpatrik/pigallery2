@@ -73,16 +73,16 @@ export class GalleryLightboxComponent implements OnDestroy {
   private lightboxService = inject(LightboxService);
   private notificationService = inject(NotificationService);
 
-  readonly grid = input<LightboxGrid>(undefined);
-  readonly mediaElement = viewChild<GalleryLightboxMediaComponent>('photo');
-  readonly lightboxElement = viewChild<ElementRef>('lightbox');
-  readonly root = viewChild<ElementRef>('root');
+  readonly grid = input<LightboxGrid>();
+  readonly mediaElement = viewChild.required<GalleryLightboxMediaComponent>('photo');
+  readonly lightboxElement = viewChild.required<ElementRef>('lightbox');
+  readonly root = viewChild.required<ElementRef>('root');
 
   readonly status = signal(LightboxStates.Closed);
   readonly isVisible = computed((): boolean => this.status() !== LightboxStates.Closed);
   readonly isOpen = computed((): boolean => this.status() === LightboxStates.Open);
   // the media shown; the grid's GridMedia when its tile was rendered
-  readonly activePhoto = signal<GridMedia>(null);
+  readonly activePhoto = signal<GridMedia | null>(null);
   readonly blackCanvasOpacity = signal(0);
   readonly infoPanelVisible = signal(false);
   readonly infoPanelWidth = signal(0);
@@ -96,14 +96,17 @@ export class GalleryLightboxComponent implements OnDestroy {
 
   private readonly queryParams = toSignal(this.route.queryParams, {initialValue: {} as Params});
   // the open photo, from the URL
-  private readonly photoId = computed((): string => (this.queryParams()[QueryParams.gallery.photo] as string) || null);
-  private readonly media = computed((): MediaDTO[] => this.grid()?.media() ?? null);
+  private readonly photoId = computed((): string | null => (this.queryParams()[QueryParams.gallery.photo] as string) || null);
+  private readonly media = computed((): MediaDTO[] | null => this.grid()?.media() ?? null);
   private readonly indexById = computed((): Map<string, number> =>
     new Map((this.media() ?? []).map((m, i): [string, number] => [this.queryService.getMediaStringId(m), i]))
   );
-  readonly activeIndex = computed((): number => this.indexById().get(this.photoId()) ?? -1);
+  readonly activeIndex = computed((): number => {
+    const photoId = this.photoId();
+    return photoId === null ? -1 : this.indexById().get(photoId) ?? -1;
+  });
   readonly hasPrev = computed((): boolean => this.activeIndex() > 0);
-  readonly nextMedia = computed((): MediaDTO => {
+  readonly nextMedia = computed((): MediaDTO | null => {
     const media = this.media();
     const index = this.activeIndex();
     if (!media || index === -1) {
@@ -117,24 +120,24 @@ export class GalleryLightboxComponent implements OnDestroy {
   readonly hasNext = computed((): boolean => !!this.nextMedia());
   readonly navigation = computed(() => ({hasPrev: this.hasPrev(), hasNext: this.hasNext()}));
   // only used to preload the next photo, that is sized to the window: it does not need the grid's tile
-  readonly nextGridMedia = computed((): GridMedia => {
+  readonly nextGridMedia = computed((): GridMedia | null => {
     const media = this.nextMedia();
     return media ? this.createGridMedia(media) : null;
   });
   readonly videoTranscodingNeeded = computed((): boolean => !!this.activePhoto()?.isVideoTranscodingNeeded());
 
   private infoPanelMaxWidth = 1000;
-  private iPvisibilityTimer: number = null;
+  private iPvisibilityTimer: number | null = null;
   // the string id of the photo that is shown or being revealed
-  private shownId: string = null;
+  private shownId: string | null = null;
   // the photo that was not found, so its toast shows once
-  private goneId: string = null;
+  private goneId: string | null = null;
   // increases with every photo change and close: an outdated async step stops
   private navigationId = 0;
   // increases with every open and close: an outdated animation end is ignored
   private openCloseId = 0;
-  private photoPlayer: Animation = null;
-  private lightboxPlayer: Animation = null;
+  private photoPlayer: Animation | null = null;
+  private lightboxPlayer: Animation | null = null;
 
   constructor() {
     this.updatePhotoFrameDim();
@@ -201,7 +204,11 @@ export class GalleryLightboxComponent implements OnDestroy {
       return;
     }
     // going back pauses the slideshow; in the same navigation, so the URL keeps both changes
-    this.navigateToMedia(this.media()[this.activeIndex() - 1], {[QueryParams.gallery.lightbox.playback]: null});
+    const media = this.media();
+    if (!media) {
+      return;
+    }
+    this.navigateToMedia(media[this.activeIndex() - 1], {[QueryParams.gallery.lightbox.playback]: null});
   }
 
   public hide(): void {
@@ -252,7 +259,7 @@ export class GalleryLightboxComponent implements OnDestroy {
     const starPhotoPos = media ? this.calcLightBoxPhotoDimension(media) : null;
     this.infoPanelWidth.set(0);
     this.updatePhotoFrameDim();
-    if (!enableAnimate || !media) {
+    if (!enableAnimate || !media || !starPhotoPos) {
       return;
     }
     this.animatePhoto(starPhotoPos, this.calcLightBoxPhotoDimension(media));
@@ -272,7 +279,10 @@ export class GalleryLightboxComponent implements OnDestroy {
     this.updateInfoPanelWidth();
     this.infoPanelVisible.set(true);
 
-    const media = this.activePhoto().media;
+    const media = this.activePhoto()?.media;
+    if (!media) {
+      return;
+    }
     const starPhotoPos = this.calcLightBoxPhotoDimension(media);
     this.infoPanelWidth.set(this.infoPanelMaxWidth);
     this.updatePhotoFrameDim();
@@ -300,11 +310,11 @@ export class GalleryLightboxComponent implements OnDestroy {
   /**
    * Brings the lightbox to the state the URL (photo, playback) and the grid's content ask for.
    */
-  private sync(id: string, media: MediaDTO[], playback: boolean): void {
+  private sync(id: string | null, media: MediaDTO[] | null, playback: boolean): void {
     if (!id) {
       this.goneId = null;
       // a slideshow URL without a photo (e.g. the photo frame) starts at the first one
-      if (playback && media?.length > 0) {
+      if (playback && media && media.length > 0) {
         this.navigateToMedia(media[0]);
         return;
       }
@@ -342,7 +352,7 @@ export class GalleryLightboxComponent implements OnDestroy {
     const navigationId = ++this.navigationId;
     this.shownId = this.queryService.getMediaStringId(media);
     this.resetZoom();
-    const tile = await this.grid().revealMedia(media);
+    const tile = await this.grid()?.revealMedia(media);
     if (navigationId !== this.navigationId) {
       return;
     }

@@ -54,8 +54,8 @@ export class ControlsLightboxComponent implements OnDestroy {
   readonly nextPhoto = output();
   readonly previousPhoto = output();
   readonly navigation = input({hasPrev: true, hasNext: true});
-  readonly activePhoto = input<GridMedia>(undefined);
-  readonly mediaElement = input<GalleryLightboxMediaComponent>(undefined);
+  readonly activePhoto = input<GridMedia | null>(null);
+  readonly mediaElement = input.required<GalleryLightboxMediaComponent>();
   readonly photoFrameDim = input({width: 1, height: 1, aspect: 1});
   readonly slideShowRunning = input<boolean>(false);
   readonly zoom = model(1);
@@ -65,13 +65,13 @@ export class ControlsLightboxComponent implements OnDestroy {
   public readonly controllersDimmed = signal(this.lightboxService.controllersDimmed());
   public searchEnabled: boolean;
 
-  readonly topLeftTitle = computed((): string => this.getText(this.lightboxService.topLeftTitle()));
-  readonly topLeftSubtitle = computed((): string => this.getText(this.lightboxService.topLeftSubtitle()));
-  readonly bottomLeftTitle = computed((): string => this.getText(this.lightboxService.bottomLeftTitle()));
-  readonly bottomLeftSubtitle = computed((): string => this.getText(this.lightboxService.bottomLeftSubtitle()));
+  readonly topLeftTitle = computed((): string | null => this.getText(this.lightboxService.topLeftTitle()));
+  readonly topLeftSubtitle = computed((): string | null => this.getText(this.lightboxService.topLeftSubtitle()));
+  readonly bottomLeftTitle = computed((): string | null => this.getText(this.lightboxService.bottomLeftTitle()));
+  readonly bottomLeftSubtitle = computed((): string | null => this.getText(this.lightboxService.bottomLeftSubtitle()));
   readonly isPhoto = computed((): boolean => !!this.activePhoto()?.isPhoto());
   readonly isVideo = computed((): boolean => !!this.activePhoto()?.isVideo());
-  readonly originalMediaPath = computed((): string => this.activePhoto()?.getOriginalMediaPath() ?? null);
+  readonly originalMediaPath = computed((): string | null => this.activePhoto()?.getOriginalMediaPath() ?? null);
   // the faces with their position in % of the photo and their search link
   readonly faces = computed(() => {
     const photo = this.activePhoto()?.Photo;
@@ -79,17 +79,18 @@ export class ControlsLightboxComponent implements OnDestroy {
       return [];
     }
     const size = photo.metadata.size;
-    return photo.metadata.faces.map(face => ({
+    // a face without a box can't be placed on the photo
+    return photo.metadata.faces.filter(face => !!face.box).map(face => ({
       name: face.name,
       query: SearchQueryUtils.urlify({
         type: SearchQueryTypes.person,
         matchType: TextSearchQueryMatchTypes.exact_match,
         value: face.name,
       } as TextSearch),
-      top: face.box.top / size.height * 100,
-      left: face.box.left / size.width * 100,
-      height: face.box.height / size.height * 100,
-      width: face.box.width / size.width * 100,
+      top: face.box!.top / size.height * 100,
+      left: face.box!.left / size.width * 100,
+      height: face.box!.height / size.height * 100,
+      width: face.box!.width / size.width * 100,
     }));
   });
   // the size of the photo on the screen, without zoom
@@ -106,12 +107,12 @@ export class ControlsLightboxComponent implements OnDestroy {
     return {width: frame.width, height: frame.width / photoAspect};
   });
 
-  private ctx: CanvasRenderingContext2D;
-  private visibilityTimer: number = null;
-  private timerSub: Subscription;
+  private ctx: CanvasRenderingContext2D | null;
+  private visibilityTimer: number | null = null;
+  private timerSub: Subscription | null;
   // the drag and the zoom when the current pan or pinch started
-  private panStart: { x: number, y: number } = null;
-  private pinchStart: number = null;
+  private panStart: { x: number, y: number } | null = null;
+  private pinchStart: number | null = null;
 
   constructor() {
     this.searchEnabled = this.authService.canSearch();
@@ -289,7 +290,7 @@ export class ControlsLightboxComponent implements OnDestroy {
         break;
       case ' ': // space
         if (activePhoto && activePhoto.isVideo()) {
-          this.mediaElement().playPause();
+          this.mediaElement()?.playPause();
         }
         break;
     }
@@ -342,7 +343,7 @@ export class ControlsLightboxComponent implements OnDestroy {
     this.nextPhoto.emit();
   }
 
-  private getText(type: LightBoxTitleTexts[]): string {
+  private getText(type: LightBoxTitleTexts[]): string | null {
     const gridMedia = this.activePhoto();
     if (!gridMedia?.media) {
       return null;
@@ -413,13 +414,15 @@ export class ControlsLightboxComponent implements OnDestroy {
         case LightBoxTitleTexts.iso:
           retTexts.push(m.metadata.cameraData?.ISO?.toString());
           break;
-        case LightBoxTitleTexts.fstop:
-          if (m.metadata.cameraData?.fStop > 1) {
-            retTexts.push(m.metadata.cameraData?.fStop?.toString());
+        case LightBoxTitleTexts.fstop: {
+          const fStop = m.metadata.cameraData?.fStop ?? NaN;
+          if (fStop > 1) {
+            retTexts.push(fStop.toString());
             break;
           }
-          retTexts.push('1/' + Math.round(1 / m.metadata.cameraData?.fStop));
+          retTexts.push('1/' + Math.round(1 / fStop));
           break;
+        }
         case LightBoxTitleTexts.focal_length:
           retTexts.push(m.metadata.cameraData?.focalLength?.toString());
           break;
@@ -446,7 +449,7 @@ export class ControlsLightboxComponent implements OnDestroy {
       return;
     }
     const mediaElement = this.mediaElement();
-    if (!mediaElement.isRenderedMediaLoaded() ||
+    if (!mediaElement || !mediaElement.isRenderedMediaLoaded() ||
       !mediaElement.isNextMediaLoaded()) {
       return;
     }
@@ -461,7 +464,7 @@ export class ControlsLightboxComponent implements OnDestroy {
     let p = 0;
 
     // Video is a special snowflake. It won't go to next media if a video is playing
-    if (!(this.isVideo() && !this.mediaElement().paused())) {
+    if (!(this.isVideo() && !this.mediaElement()?.paused())) {
       const speed = this.lightboxService.slideshowSpeed();
       p = (t % (speed * 10)) / speed / 10;  // ticks every 100 ms
     }
@@ -469,18 +472,20 @@ export class ControlsLightboxComponent implements OnDestroy {
     if (!canvas) {
       return;
     }
-    if (!this.ctx) {
-      this.ctx = canvas.nativeElement.getContext('2d');
+    const ctx = this.ctx ?? canvas.nativeElement.getContext('2d');
+    if (!ctx) {
+      return;
     }
+    this.ctx = ctx;
 
-    this.ctx.lineWidth = 5;
-    this.ctx.strokeStyle = 'white';
-    this.ctx.lineCap = 'round';
-    this.ctx.clearRect(0, 0, canvas.nativeElement.width, canvas.nativeElement.height);
-    this.ctx.beginPath();
-    this.ctx.arc(canvas.nativeElement.width / 2, canvas.nativeElement.height / 2, canvas.nativeElement.width / 2 - this.ctx.lineWidth, 0, p * 2 * Math.PI);
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = 'white';
+    ctx.lineCap = 'round';
+    ctx.clearRect(0, 0, canvas.nativeElement.width, canvas.nativeElement.height);
+    ctx.beginPath();
+    ctx.arc(canvas.nativeElement.width / 2, canvas.nativeElement.height / 2, canvas.nativeElement.width / 2 - ctx.lineWidth, 0, p * 2 * Math.PI);
 
-    this.ctx.stroke();
+    ctx.stroke();
   }
 
   private resetSlideshowTimer(): void {
