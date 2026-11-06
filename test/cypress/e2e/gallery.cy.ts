@@ -74,7 +74,7 @@ describe('Gallery', () => {
 
     // these photos should be visible
     cy.get('.photo-container > img[alt="IMG_6220.jpg"]');
-    cy.get('.photo-container > img[alt="IMG_5910.jpg"]').trigger('mouseover', {scrollBehavior: 'center'});
+    cy.get('.photo-container > img[alt="IMG_5910.jpg"]').trigger('mouseenter', {scrollBehavior: 'center'});
 
     cy.get('.photo-container > .info > .photo-name').contains('IMG_5910.jpg');
     cy.get('.photo-container > .info > .photo-position').contains('Berkeley');
