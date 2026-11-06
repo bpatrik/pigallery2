@@ -13,7 +13,7 @@ echo "--- 1. Pre-flight Environment Check ---"
 
 # Check for Node.js
 if ! command -v node &> /dev/null; then
-    echo "Error: node is not installed. Please install Node.js (v22 recommended)."
+    echo "Error: node is not installed. Please install Node.js (v26 recommended)."
     exit 1
 else
     NODE_VER=$(node -v)
@@ -50,8 +50,7 @@ git clone --depth 1 $REPO_URL $BUILD_DIR
 cd $BUILD_DIR
 
 echo "--- 3. Installing Build Dependencies ---"
-# --unsafe-perm handles permission issues during lifecycle scripts (like sharp/libvips)
-npm install --unsafe-perm
+npm install
 
 echo "--- 4. Creating Production Release ---"
 # This mirrors the GitHub Action workflow you provided

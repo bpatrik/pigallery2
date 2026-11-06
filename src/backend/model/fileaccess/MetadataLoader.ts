@@ -24,6 +24,18 @@ const ffmpeg = FFmpegFactory.get();
 
 sharp.cache(false);
 
+// exifr (unmaintained) calls fileHandle.stat(path). Node 26 rejects the string as `options`, so every
+// chunked read throws and leaks the open FileHandle, which Node 26 also turns into an uncaught error.
+const ExifrFsReader = exifr.fileReaders.get('fs');
+exifr.fileReaders.set('fs', class extends ExifrFsReader {
+  async open(): Promise<void> {
+    if (this.fh === undefined) {
+      this.fh = await this.fs.open(this.input, 'r');
+      this.size = (await this.fh.stat()).size;
+    }
+  }
+});
+
 export class MetadataLoader {
 
   private static readonly EMPTY_METADATA: PhotoMetadata = {

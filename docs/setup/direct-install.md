@@ -14,7 +14,7 @@
 
 ### 1. Install Node.js
 ```bash
-curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_26.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
