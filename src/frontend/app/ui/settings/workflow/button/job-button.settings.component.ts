@@ -22,7 +22,7 @@ export class JobButtonComponent {
   private modalService = inject(BsModalService);
   backendTextService = inject(BackendtextService);
 
-  readonly jobName = input<string>(undefined);
+  readonly jobName = input.required<string>();
   readonly config = input<any>(undefined);
   readonly shortName = input(false);
   readonly disabled = input(false);
@@ -31,10 +31,10 @@ export class JobButtonComponent {
   readonly danger = input(false);
   JobProgressStates = JobProgressStates;
   readonly jobError = output<string>();
-  private modalRef: BsModalRef;
+  private modalRef: BsModalRef | null;
   private defaultConfig: any;
-  readonly JobName = computed<string>(() => this.backendTextService.getJobName(this.jobName()));
-  readonly JobDescription = computed<string>(() => this.backendTextService.getJobDescription(this.jobName()));
+  readonly JobName = computed<string | null>(() => this.backendTextService.getJobName(this.jobName()));
+  readonly JobDescription = computed<string | null>(() => this.backendTextService.getJobDescription(this.jobName()));
 
   /**
    * The config input, or the job's default config if the input is not set.
@@ -55,13 +55,14 @@ export class JobButtonComponent {
 
   public get Running(): boolean {
     return (
-      this.Progress &&
+      !!this.Progress &&
       (this.Progress.state === JobProgressStates.running ||
         this.Progress.state === JobProgressStates.cancelling)
     );
   }
 
-  get Progress(): OnTimerJobProgressDTO {
+  // undefined until the job has a progress
+  get Progress(): OnTimerJobProgressDTO | undefined {
     return this.jobsService.progress()[
       JobDTOUtils.getHashName(this.jobName(), this.Config)
       ];
@@ -69,7 +70,7 @@ export class JobButtonComponent {
 
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 
@@ -107,7 +108,7 @@ export class JobButtonComponent {
     } catch (err) {
       console.log(err);
       if (err.message) {
-        this.jobError.emit((err as ErrorDTO).message);
+        this.jobError.emit((err as ErrorDTO).message ?? '');
       }
     }
 
@@ -127,7 +128,7 @@ export class JobButtonComponent {
     } catch (err) {
       console.error(err);
       if (err.message) {
-        this.jobError.emit((err as ErrorDTO).message);
+        this.jobError.emit((err as ErrorDTO).message ?? '');
       }
     }
     return false;

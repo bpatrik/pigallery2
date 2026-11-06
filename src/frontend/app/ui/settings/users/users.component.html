@@ -159,13 +159,13 @@
                 <div class="mb-3" role="group" aria-labelledby="allowDirectoryListLabel">
                   <span class="form-label d-inline-block" id="allowDirectoryListLabel" i18n>Allowed directories</span>
                   <app-settings-directory-search-list idName="allowDirectoryList"
-                    [list]="editSettings.allowDirectoryList" />
+                    [list]="editSettings.allowDirectoryList ?? []" />
                   <div><small class="text-muted" i18n>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</small></div>
                 </div>
                 <div class="mb-3" role="group" aria-labelledby="blockDirectoryListLabel">
                   <span class="form-label d-inline-block" id="blockDirectoryListLabel" i18n>Blocked directories</span>
                   <app-settings-directory-search-list idName="blockDirectoryList"
-                    [list]="editSettings.blockDirectoryList" />
+                    [list]="editSettings.blockDirectoryList ?? []" />
                   <div><small class="text-muted" i18n>Directories (and their content) matching any of these will be hidden.</small></div>
                 </div>
               </div>

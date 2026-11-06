@@ -31,7 +31,7 @@ export class DirectorySearchListSettingsComponent {
   readonly MatchingTypes = TextSearchMatchingTypes.values
     .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value)}));
 
-  getMatchingType(d: DirectorySearch): string {
+  getMatchingType(d: DirectorySearch): string | undefined {
     return TextSearchMatchingTypes.get(d);
   }
 

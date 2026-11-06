@@ -54,7 +54,7 @@ export class AdminComponent implements OnInit {
   readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
   readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
   // the server notifications with their alert class and readable details
-  readonly notificationRows = computed((): { notification: CountedNotificationDTO; css: string; details: string }[] =>
+  readonly notificationRows = computed((): { notification: CountedNotificationDTO; css: string; details: string | null }[] =>
     this.notificationService.countedNotifications().map(notification => ({
       notification,
       css: this.getCss(notification.type),
@@ -77,7 +77,7 @@ export class AdminComponent implements OnInit {
   ngOnInit(): void {
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user().role < UserRoles.Admin
+      !this.authService.isAuthorized(UserRoles.Admin)
     ) {
       this.navigation.toLogin();
       return;

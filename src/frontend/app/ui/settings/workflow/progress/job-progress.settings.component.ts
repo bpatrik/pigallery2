@@ -25,16 +25,16 @@ export class JobProgressComponent {
   private modalService = inject(BsModalService);
   backendTextService = inject(BackendtextService);
 
-  readonly progress = input<JobProgressDTO>(undefined);
+  readonly progress = input<JobProgressDTO>();
   JobProgressStates = JobProgressStates;
   modalRef: BsModalRef;
   // Reset to the job's last reported time on every new progress, then ticks forward every second.
-  private readonly timeCurrentCopy = linkedSignal<number>(() => this.progress()?.time.end);
+  private readonly timeCurrentCopy = linkedSignal<number | undefined>(() => this.progress()?.time.end);
 
   constructor() {
     timer(0, 1000).pipe(takeUntilDestroyed()).subscribe(() => {
       if (this.progress()) {
-        this.timeCurrentCopy.update(t => t + 1000);
+        this.timeCurrentCopy.update(t => t === undefined ? t : t + 1000);
       }
     });
   }
@@ -59,7 +59,7 @@ export class JobProgressComponent {
     );
   });
 
-  readonly Name = computed<string>(() => {
+  readonly Name = computed<string | null>(() => {
     const progress = this.progress();
     if (!progress) {
       return '';
@@ -102,7 +102,7 @@ export class JobProgressComponent {
     if (!progress) {
       return 0;
     }
-    return this.timeCurrentCopy() - progress.time.start;
+    return (this.timeCurrentCopy() ?? NaN) - progress.time.start;
   });
 
   readonly State = computed<string>(() => {

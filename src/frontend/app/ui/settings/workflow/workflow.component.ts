@@ -83,7 +83,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   public JobProgressStates = JobProgressStates;
   public newSchedule: JobScheduleDTO = {
     name: '',
-    config: null,
+    config: {},
     jobName: '',
     trigger: {
       type: JobTriggerType.never,
@@ -111,7 +111,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     }
     return templates;
   });
-  readonly availableJobOptions = computed((): { name: string; label: string }[] =>
+  readonly availableJobOptions = computed((): { name: string; label: string | null }[] =>
     this.jobsService.availableJobs().map(job => ({name: job.Name, label: this.backendTextService.getJobName(job.Name)})));
 
 
@@ -138,7 +138,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
 
   }
 
-  atTimeLocal(atTime: number): Date {
+  atTimeLocal(atTime: number): Date | null {
     if (isNaN(atTime)) {
       return null;
     }
@@ -174,7 +174,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
       (t) => t.Name === schedule.jobName
     );
     schedule.config = schedule.config || {};
-    if (job.ConfigTemplate) {
+    if (job?.ConfigTemplate) {
       job.ConfigTemplate.forEach(
         (ct) => (schedule.config[ct.id] = ct.defaultValue as never)
       );
@@ -204,7 +204,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
       case JobTriggerType.after:
         schedule.trigger = new AfterJobTriggerConfig();
         if (!(schedule.trigger as unknown as AfterJobTrigger).afterScheduleName && this.schedules().length > 1) {
-          (schedule.trigger as unknown as AfterJobTrigger).afterScheduleName = this.schedules().find(s => s.name !== schedule.name).name;
+          (schedule.trigger as unknown as AfterJobTrigger).afterScheduleName = this.schedules().find(s => s.name !== schedule.name)?.name;
         }
         break;
     }
@@ -262,7 +262,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
       (t) => t.Name === jobName
     );
     this.newSchedule.config = this.newSchedule.config || {};
-    if (job.ConfigTemplate) {
+    if (job?.ConfigTemplate) {
       job.ConfigTemplate.forEach(
         (ct) => (this.newSchedule.config[ct.id] = ct.defaultValue as never)
       );
@@ -318,7 +318,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     return d !== null ? d.getTime() : 0;
   }
 
-  validate(): ValidationErrors {
+  validate(): ValidationErrors | null {
     return null;
   }
 
@@ -330,7 +330,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     // empty
   };
 
-  getJobDescription(jobName: string): string {
+  getJobDescription(jobName: string): string | null {
     return this.backendTextService.getJobDescription(jobName);
   }
 

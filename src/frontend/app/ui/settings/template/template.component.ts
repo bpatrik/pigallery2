@@ -66,7 +66,7 @@ export interface UiJobRow {
   progress: JobProgressDTO;
 }
 
-type UiJob = TAGS['uiJob'][number];
+type UiJob = NonNullable<TAGS['uiJob']>[number];
 
 @Component({
   selector: 'app-settings-template',
@@ -85,13 +85,13 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
 
   private destroyRef = inject(DestroyRef);
 
-  readonly ConfigPath = input<string>(undefined);
+  readonly ConfigPath = input<string>();
 
   readonly form = viewChild<UntypedFormControl>('settingsForm');
 
 
   public readonly inProgress = signal(false);
-  public readonly error = signal<string>(null);
+  public readonly error = signal<string | null>(null);
   public readonly changed = signal(false);
   /**
    * A fresh, instrumented clone of the current settings slice.
@@ -150,8 +150,8 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   /**
    * The default config of each uiJob, it changes only when the available jobs are (re)loaded.
    */
-  private readonly uiJobDefaultConfigs = computed<Map<string, Record<string, unknown>>>(() => {
-    const configs = new Map<string, Record<string, unknown>>();
+  private readonly uiJobDefaultConfigs = computed<Map<string, Record<string, unknown> | null>>(() => {
+    const configs = new Map<string, Record<string, unknown> | null>();
     for (const list of this.uiJobLists()) {
       for (const job of list) {
         configs.set(job.job, this.jobsService.getDefaultConfig(job.job));
@@ -206,7 +206,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
 
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user().role < UserRoles.Admin
+      !this.authService.isAuthorized(UserRoles.Admin)
     ) {
       this.navigation.toLogin();
       return;
@@ -217,13 +217,13 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     this.destroyRef.onDestroy(() => this.jobsService.unsubscribeFromProgress());
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
-    this.form().valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    this.form()?.valueChanges?.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.onOptionChange();
     });
   }
 
   // Adds the UI helpers (shouldHide, onChange, original value, ...) to every state of the tree.
-  private instrument(st: RecursiveState, parent: RecursiveState): void {
+  private instrument(st: RecursiveState, parent: RecursiveState | null): void {
     const shouldHide = (state: RecursiveState) => {
       return () => {
         if (state.volatile) {
@@ -231,7 +231,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
         }
 
         if (state.tags &&
-          ((state.tags.relevant && !state.tags.relevant(parent.value))
+          ((state.tags.relevant && !state.tags.relevant(parent?.value))
             || state.tags.secret)) {
           return true;
         }
@@ -356,7 +356,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     } catch (err) {
       console.error(err);
       if (err.message) {
-        this.error.set((err as ErrorDTO).message);
+        this.error.set((err as ErrorDTO).message ?? null);
       }
     }
 

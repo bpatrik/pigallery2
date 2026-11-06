@@ -50,13 +50,13 @@ export class UsersComponent implements OnInit {
       canModify: this.canModifyUser(currentUser, user)
     }));
   });
-  public error: string = null;
+  public error: string | null = null;
   public inProgress = false;
 
-  public editUser: UserDTO = null;
+  public editUser: UserDTO | null = null;
   public editSettings: UserSettingsDTO = {};
   public newPassword = '';
-  public readonly editOriginalUser = signal<UserDTO>(null);
+  public readonly editOriginalUser = signal<UserDTO | null>(null);
   readonly canModifyRole = computed<boolean>(() => this.canModifyUserRole(this.authService.user(), this.editOriginalUser()));
 
   // Confirm password fields for validation
@@ -78,20 +78,20 @@ export class UsersComponent implements OnInit {
   ngOnInit(): void {
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user().role < UserRoles.Admin
+      !this.authService.isAuthorized(UserRoles.Admin)
     ) {
       this.navigation.toLogin();
       return;
     }
     this.userRoles = Utils.enumToArray(UserRoles)
       .filter((r) => r.key !== UserRoles.LimitedGuest)
-      .filter((r) => r.key <= this.authService.user().role)
+      .filter((r) => this.authService.isAuthorized(r.key))
       .sort((a, b) => a.key - b.key);
 
     this.getUsersList();
   }
 
-  private canModifyUser(currentUser: UserDTO, user: UserDTO): boolean {
+  private canModifyUser(currentUser: UserDTO | null, user: UserDTO): boolean {
     if (!currentUser) {
       return false;
     }
@@ -99,7 +99,7 @@ export class UsersComponent implements OnInit {
     return currentUser.role >= user.role;
   }
 
-  private canDeleteUser(currentUser: UserDTO, user: UserDTO): boolean {
+  private canDeleteUser(currentUser: UserDTO | null, user: UserDTO): boolean {
     if (!currentUser) {
       return false;
     }
@@ -107,7 +107,7 @@ export class UsersComponent implements OnInit {
     return currentUser.name !== user.name && currentUser.role >= user.role;
   }
 
-  private canModifyUserRole(currentUser: UserDTO, user: UserDTO): boolean {
+  private canModifyUserRole(currentUser: UserDTO | null, user: UserDTO | null): boolean {
     if (!currentUser || !user) {
       return false;
     }
@@ -121,7 +121,7 @@ export class UsersComponent implements OnInit {
   initNewUser(): void {
     this.newUser = {role: UserRoles.User} as UserDTO;
     this.newUserPasswordConfirm = '';
-    this.childModal().show();
+    this.childModal()?.show();
   }
 
   async addNewUser(): Promise<void> {
@@ -133,7 +133,7 @@ export class UsersComponent implements OnInit {
       }
       await this.userSettings.createUser(this.newUser);
       await this.getUsersList();
-      this.childModal().hide();
+      this.childModal()?.hide();
     } catch (e) {
       const err: ErrorDTO = e;
       this.notification.error(
@@ -146,13 +146,13 @@ export class UsersComponent implements OnInit {
   async updateRole(user: UserDTO): Promise<void> {
     await this.userSettings.updateRole(user);
     await this.getUsersList();
-    this.childModal().hide();
+    this.childModal()?.hide();
   }
 
   async deleteUser(user: UserDTO): Promise<void> {
     await this.userSettings.deleteUser(user);
     await this.getUsersList();
-    this.childModal().hide();
+    this.childModal()?.hide();
   }
 
   async unlinkOidc(user: UserDTO): Promise<void> {
@@ -175,25 +175,29 @@ export class UsersComponent implements OnInit {
     } as UserSettingsDTO;
     this.newPassword = '';
     this.confirmNewPassword = '';
-    this.editModal().show();
+    this.editModal()?.show();
   }
 
 
 
-  private cleanDirectoryList(list: DirectorySearch[]): DirectorySearch[] {
+  private cleanDirectoryList(list: DirectorySearch[] | null | undefined): DirectorySearch[] {
     return (list || []).filter(d => d.value && d.value.trim() !== '');
   }
 
   async saveEditUser(): Promise<void> {
+    const editUser = this.editUser;
+    if (!editUser) {
+      return;
+    }
     try {
 
       // Save role if changed
-      if (this.editUser.role !== this.editOriginalUser()?.role) {
+      if (editUser.role !== this.editOriginalUser()?.role) {
         if (!this.canModifyRole()) {
           this.notification.error($localize`Can't modify user role`);
           return;
         }
-        await this.userSettings.updateRole(this.editUser);
+        await this.userSettings.updateRole(editUser);
       }
 
       // Check password confirmation for edit
@@ -213,10 +217,10 @@ export class UsersComponent implements OnInit {
       if (this.newPassword && this.newPassword.length > 0) {
         settings.newPassword = this.newPassword;
       }
-      await this.userSettings.updateSettings(this.editUser.id, settings);
+      await this.userSettings.updateSettings(editUser.id, settings);
       this.notification.success($localize`User settings saved successfully`);
       await this.getUsersList();
-      this.editModal().hide();
+      this.editModal()?.hide();
     } catch (e) {
       const err: ErrorDTO = e;
       this.notification.error(
