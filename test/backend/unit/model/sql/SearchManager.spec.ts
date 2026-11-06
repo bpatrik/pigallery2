@@ -1791,11 +1791,13 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         p6.metadata.creationDate = Date.now() - 60 * 60 * 24 * 300 * 1000;
         //p6.metadata.creationDateOffset = "+02:00";
         p7 = TestHelper.getBasePhotoEntry(subDir2, 'p7-1y-ago.jpg');
-        // exactly 1 year ago keeps today's day; the every-year patterns match by day
+        // Today's UTC date 1 year ago, at 00:30 local time of the photo (+02:00).
+        // The every-year patterns match the photo's day against today's UTC date, the n-month-ago windows end at
+        // the server's local midnight. "now" instead of a fixed time would be tomorrow in the photo's local time
+        // in the last 2 hours of the day, and early in the day keeps it inside both in every server timezone.
         const d = new Date();
-        d.setUTCFullYear(d.getUTCFullYear() - 1);
-        p7.metadata.creationDate = d.getTime();
-        //p7.metadata.creationDateOffset = "+02:00";
+        p7.metadata.creationDate = Date.UTC(d.getUTCFullYear() - 1, d.getUTCMonth(), d.getUTCDate(), 0, 30) - 2 * 60 * 60 * 1000;
+        p7.metadata.creationDateOffset = '+02:00';
 
         subDir2 = await DBTestHelper.persistTestDir(subDir2) as any;
         p4 = subDir2.media[0];
