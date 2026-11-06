@@ -196,6 +196,7 @@ Pitfalls seen so far:
 - Commit messages: short imperative summary, with the GitHub issue when there is one (e.g. `Fix X #1234`).
 - `git add` every new file that belongs in the repo as soon as you create it (not scratch or generated files),
   so it shows up in the IDE's diff before the commit.
+- After opening a PR, don't watch its CI or reviews unless asked: the maintainer reports problems.
 
 ## Maintaining this file
 
