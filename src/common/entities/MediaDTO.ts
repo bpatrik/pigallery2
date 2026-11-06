@@ -47,15 +47,16 @@ export interface MediaDimension {
 
 export const MediaDTOUtils = {
   hasPositionData: (media: MediaDTO): boolean => {
+    const positionData = (media as PhotoDTO).metadata.positionData;
     return (
-        !!(media as PhotoDTO).metadata.positionData &&
+        !!positionData &&
         !!(
-            (media as PhotoDTO).metadata.positionData.city ||
-            (media as PhotoDTO).metadata.positionData.state ||
-            (media as PhotoDTO).metadata.positionData.country ||
-            ((media as PhotoDTO).metadata.positionData.GPSData &&
-                (media as PhotoDTO).metadata.positionData.GPSData.latitude &&
-                (media as PhotoDTO).metadata.positionData.GPSData.longitude)
+            positionData.city ||
+            positionData.state ||
+            positionData.country ||
+            (positionData.GPSData &&
+                positionData.GPSData.latitude &&
+                positionData.GPSData.longitude)
         )
     );
   },

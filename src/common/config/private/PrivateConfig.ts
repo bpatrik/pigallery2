@@ -942,7 +942,8 @@ export class JobScheduleConfig implements JobScheduleDTO {
         case JobTriggerType.periodic:
           return PeriodicJobTriggerConfig;
       }
-      return null;
+      // an unknown trigger type; typeconfig's typing has no "no type" value for typeBuilder
+      return null as unknown as typeof NeverJobTriggerConfig;
     },
   })
   trigger:

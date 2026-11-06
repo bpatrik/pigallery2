@@ -82,9 +82,9 @@ export interface TAGS {
   uiDisabled?: (subConfig: any, config: ClientConfig) => boolean
   uiJob?: {
     job: string,
-    hideProgress: boolean,
+    hideProgress?: boolean,
     relevant?: (c: ClientConfig) => boolean,
-    description: string
+    description?: string
   }[],
   uiResetNeeded?: {
     server?: boolean,
@@ -521,7 +521,7 @@ export class ClientMapConfig {
   @ConfigProperty<boolean, ClientConfig, TAGS>({
     type: 'boolean',
     onNewValue: (value, config) => {
-      if (value === false) {
+      if (value === false && config) {
         config.MetaFile.gpx = false;
       }
     },
@@ -1105,7 +1105,7 @@ export class ThemeConfig {
     } as TAGS,
     description: $localize`Name of the theme`
   })
-  name: string;
+  name: string | undefined;
   @ConfigProperty({
     type: 'string',
     tags: {
@@ -1113,7 +1113,7 @@ export class ThemeConfig {
     } as TAGS,
     description: $localize`Adds these css settings as it is to the end of the body tag of the page.`
   })
-  theme: string;
+  theme: string | undefined;
 
   constructor(name?: string, theme?: string) {
     this.name = name;
