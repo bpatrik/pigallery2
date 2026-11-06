@@ -96,8 +96,14 @@ export default tseslint.config(
         destructuredArrayIgnorePattern: "^_",
         ignoreRestSiblings: true,
       }],
-      // the frontend goes to error with strictNullChecks (#1249)
       "@typescript-eslint/no-explicit-any": "warn",
+    },
+  },
+  {
+    // the frontend is strictNullChecks and any-free (#1249); the backend still has some
+    files: ["src/frontend/**/*.ts"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
     },
   },
   {

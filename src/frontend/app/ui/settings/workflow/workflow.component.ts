@@ -210,7 +210,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     }
   }
 
-  setEmailArray(configElement: any, id: string, value: string): void {
+  setEmailArray(configElement: Record<string, unknown>, id: string, value: string): void {
     value = value.replace(new RegExp(',', 'g'), ';');
     value = value.replace(new RegExp(' ', 'g'), ';');
     configElement[id] = value
@@ -221,7 +221,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     return configElement[id] && Array.isArray(configElement[id]) ? configElement[id].join('; ') : '';
   }
 
-  setNumberArray(configElement: any, id: string, value: string): void {
+  setNumberArray(configElement: Record<string, unknown>, id: string, value: string): void {
     value = value.replace(new RegExp(',', 'g'), ';');
     value = value.replace(new RegExp(' ', 'g'), ';');
     configElement[id] = value
@@ -351,7 +351,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     return configElement as MediaPickDTO[];
   }
 
-  removeFromArray(configElement: any[], i: number): void {
+  removeFromArray(configElement: unknown[], i: number): void {
     configElement.splice(i, 1);
   }
 

@@ -9,14 +9,13 @@ import {
   MapPathGroupThemeConfig,
   NavigationLinkConfig,
   NavigationLinkTypes,
-  TAGS,
+  SVGIconConfig,
   ThemeConfig
 } from '../../../../../../common/config/public/ClientConfig';
 import {ConfigStyle, SettingsService} from '../../settings.service';
-import {WebConfig} from '../../../../../../common/config/private/WebConfig';
-import {JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
+import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
-import {BsModalService} from 'ngx-bootstrap/modal';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
@@ -28,30 +27,12 @@ import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
 import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
+import {RecursiveState, StatefulConfig} from '../RecursiveState';
+import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 
 interface OptionView {
   key: number | string;
   value: string | number;
-}
-
-interface IState {
-  shouldHide(): boolean;
-
-  isEnumArrayType: boolean;
-  isEnumType: boolean;
-  isConfigType: boolean;
-  isConfigArrayType: boolean;
-  default: any;
-  value: any;
-  min?: number;
-  max?: number;
-  type: propertyTypes;
-  arrayType: any | null;
-  original: any;
-  rootConfig: WebConfig;
-  readonly?: boolean;
-  description?: string;
-  tags?: TAGS;
 }
 
 @Component({
@@ -95,9 +76,9 @@ export class SettingsEntryComponent
   allowSpaces = false;
   description: string | undefined;
   // set by writeValue (ngModel), not by an input, so it is a signal to refresh the view
-  readonly state = signal<IState | null>(null);
+  readonly state = signal<RecursiveState | null>(null);
   // the state for the code that only runs once writeValue has set it (the template renders under @if (state()))
-  private get st(): IState {
+  private get st(): RecursiveState {
     return this.state()!;
   }
   isNumberArray = false;
@@ -107,17 +88,17 @@ export class SettingsEntryComponent
   idName: string;
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
-  readonly newDirectorySearch = () => new (this.st.arrayType)();
-  public type: string | object;
-  public arrayType: string | null;
-  public uiType: string | null;
+  readonly newDirectorySearch = (): DirectorySearch => new (this.st.arrayType as new () => DirectorySearch)();
+  public type: string | object | undefined;
+  public arrayType: string | propertyTypes | null | undefined;
+  public uiType: string | propertyTypes | null | undefined;
   // options of the select(s), static per state type, set in ngOnChanges
   optionsView: OptionView[] = [];
   navigationLinkTypeOptions: OptionView[] = [];
   userRoleOptions: OptionView[] = [];
-  newThemeModalRef: any;
+  newThemeModalRef: BsModalRef | null;
   iconModal: {
-    ref?: any,
+    ref?: BsModalRef,
     error?: string
   } | undefined;
   readonly noChangeDetection = input(false);
@@ -125,17 +106,52 @@ export class SettingsEntryComponent
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
 
+  // typed views of the value for the editors of the template (it depends on uiType)
+  get ArrayValue(): unknown[] {
+    return this.st.value as unknown[];
+  }
+
+  get IconValue(): SVGIconConfig & StatefulConfig {
+    return this.st.value as SVGIconConfig & StatefulConfig;
+  }
+
+  get MapLayersValue(): MapLayers[] {
+    return this.st.value as MapLayers[];
+  }
+
+  get PathThemeGroupsValue(): (MapPathGroupThemeConfig & StatefulConfig & { theme: StatefulConfig })[] {
+    return this.st.value as (MapPathGroupThemeConfig & StatefulConfig & { theme: StatefulConfig })[];
+  }
+
+  get PathGroupsValue(): (MapPathGroupConfig & StatefulConfig)[] {
+    return this.st.value as (MapPathGroupConfig & StatefulConfig)[];
+  }
+
+  get NavigationLinksValue(): NavigationLinkConfig[] {
+    return this.st.value as NavigationLinkConfig[];
+  }
+
+  get UsersValue(): UserConfig[] {
+    return this.st.value as UserConfig[];
+  }
+
+  get DirectorySearchesValue(): DirectorySearchConfig[] {
+    return this.st.value as DirectorySearchConfig[];
+  }
+
   get changed(): boolean {
     if (this.Disabled || this.noChangeDetection()) {
       return false;
     }
 
     if (this.st.isConfigArrayType) {
-      for (let i = 0; i < this.st.value?.length; ++i) {
-        for (const k of Object.keys(this.st.value[i].__state)) {
+      const items = this.st.value as StatefulConfig[] | undefined;
+      const defaults = this.st.default as Record<string, unknown>[];
+      for (let i = 0; i < (items?.length ?? 0); ++i) {
+        for (const k of Object.keys(items![i].__state)) {
           if (!Utils.equalsFilter(
-              this.st.value[i]?.__state[k]?.value,
-              this.st.default[i] ? this.st.default[i][k] : undefined,
+              items![i]?.__state[k]?.value,
+              defaults[i] ? defaults[i][k] : undefined,
               ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
 
             return true;
@@ -157,21 +173,21 @@ export class SettingsEntryComponent
 
   get shouldHide(): boolean {
     this.settingsService.edits(); // depends on other entries: refresh after every edit
-    return this.st.shouldHide && this.st.shouldHide();
+    return !!this.st.shouldHide && this.st.shouldHide();
   }
 
   get defaultStr(): string {
     if (this.type === 'SearchQuery') {
       return (
-          '\'' + this.searchQueryParserService.stringify(this.st.default) + '\''
+          '\'' + this.searchQueryParserService.stringify(this.st.default as SearchQueryDTO) + '\''
       );
     }
 
     if (this.st.type === 'array' && this.st.arrayType === 'string') {
-      return (this.st.default || []).join(';');
+      return ((this.st.default as string[]) || []).join(';');
     }
 
-    return this.st.default;
+    return this.st.default as string;
   }
 
 
@@ -180,18 +196,18 @@ export class SettingsEntryComponent
         this.st.type === 'array' &&
         (this.st.arrayType === 'string' || this.isNumberArray)
     ) {
-      return (this.st.value || []).join(';');
+      return ((this.st.value as unknown[]) || []).join(';');
     }
 
     if (this.st.isConfigType) {
-      return JSON.stringify(this.st.value.toJSON());
+      return JSON.stringify((this.st.value as StatefulConfig).toJSON());
     }
 
     if (typeof this.st.value === 'object') {
       return JSON.stringify(this.st.value);
     }
 
-    return this.st.value;
+    return this.st.value as string;
   }
 
   set StringValue(value: string) {
@@ -203,9 +219,10 @@ export class SettingsEntryComponent
       if (!this.allowSpaces) {
         value = value.replace(new RegExp(' ', 'g'), ';');
       }
-      this.st.value = value.split(';').filter((v: string) => v !== '');
+      const values = value.split(';').filter((v: string) => v !== '');
+      this.st.value = values;
       if (this.isNumberArray) {
-        this.st.value = this.st.value
+        this.st.value = values
             .map((v: string) => parseFloat(v))
             .filter((v: number) => !isNaN(v));
       }
@@ -228,7 +245,7 @@ export class SettingsEntryComponent
     return [{
       key: 'default',
       value: $localize`default`
-    }, ...(this.st.rootConfig as any).__state.availableThemes.value
+    }, ...(this.st.rootConfig!.__state['availableThemes'].value as ThemeConfig[])
         .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
   }
 
@@ -237,7 +254,7 @@ export class SettingsEntryComponent
     theme: string | undefined
   } {
     this.settingsService.edits(); // depends on other entries: refresh after every edit
-    return (this.st.value as ThemeConfig[]).find(th => th.name === (this.st.rootConfig as any).__state.selectedTheme.value) || {theme: 'N/A'};
+    return (this.st.value as ThemeConfig[]).find(th => th.name === this.st.rootConfig!.__state['selectedTheme'].value) || {theme: 'N/A'};
   }
 
   get Disabled() {
@@ -314,7 +331,7 @@ export class SettingsEntryComponent
     this.userRoleOptions = this.arrayType === 'UserConfig' ?
       this.getOptionsView(this.newArrayItemState('role')) : [];
 
-    this.placeholder = this.st.tags?.hint || this.st.default;
+    this.placeholder = (this.st.tags?.hint || this.st.default) as string;
 
     this.title = '';
     if (this.st.readonly) {
@@ -358,11 +375,11 @@ export class SettingsEntryComponent
   }
 
   // The state of a property of the array items. It is the same for every item, so a fresh item is used.
-  private newArrayItemState(property: string): IState {
-    return (new (this.st.arrayType)() as { __state: Record<string, IState> }).__state[property];
+  private newArrayItemState(property: string): RecursiveState {
+    return new (this.st.arrayType as new () => StatefulConfig)().__state[property];
   }
 
-  private getOptionsView(state: IState): OptionView[] {
+  private getOptionsView(state: RecursiveState): OptionView[] {
     const eClass = state.isEnumType
         ? state.type
         : state.arrayType;
@@ -378,7 +395,7 @@ export class SettingsEntryComponent
         value: o + (state.tags?.unit ? state.tags?.unit : '')
       }));
     }
-    return enumToTranslatedArray(eClass);
+    return enumToTranslatedArray(eClass as object);
   }
 
   validate(): ValidationErrors | null {
@@ -403,7 +420,7 @@ export class SettingsEntryComponent
   };
   newThemeName: string;
 
-  public writeValue(obj: IState): void {
+  public writeValue(obj: RecursiveState): void {
     this.state.set(obj);
     this.ngOnChanges();
   }
@@ -418,12 +435,13 @@ export class SettingsEntryComponent
 
   AddNew(): void {
     this.st.value = this.st.value || [];
+    const items = this.st.value as unknown[];
     if (this.st.type === 'array') {
       if (this.st.isConfigArrayType && this.st.arrayType) {
-        this.st.value.push(new (this.st.arrayType)());
+        items.push(new (this.st.arrayType as new () => unknown)());
         return;
       }
-      this.st.value.push(this.st.value[this.st.value.length - 1]);
+      items.push(items[items.length - 1]);
     }
   }
 
@@ -436,28 +454,31 @@ export class SettingsEntryComponent
    * MapLayer function
    */
   addNewLayer(): void {
-    this.st.value.push({
-      name: 'Layer-' + this.st.value.length,
+    const layers = this.st.value as MapLayers[];
+    layers.push({
+      name: 'Layer-' + layers.length,
       url: '',
-    });
+    } as MapLayers);
   }
 
   removeLayer(layer: MapLayers): void {
-    this.st.value.splice(
-        this.st.value.indexOf(layer),
+    const layers = this.st.value as MapLayers[];
+    layers.splice(
+        layers.indexOf(layer),
         1
     );
   }
 
 
   addNewTheme(): void {
-    const availableThemes = (this.st.rootConfig as any).__state.availableThemes;
+    const availableThemes = this.st.rootConfig!.__state['availableThemes'];
     if (!this.newThemeName ||
         (availableThemes.value as ThemeConfig[]).find(th => th.name === this.newThemeName)) {
       return;
     }
     this.st.value = this.newThemeName;
-    availableThemes.value.push(new availableThemes.arrayType(this.newThemeName, ''));
+    (availableThemes.value as ThemeConfig[])
+      .push(new (availableThemes.arrayType as typeof ThemeConfig)(this.newThemeName, ''));
     this.newThemeName = '';
     this.onChange(null);
     this.hideNewThemeModal();
@@ -465,17 +486,17 @@ export class SettingsEntryComponent
 
 
   removeTheme(): void {
-    const availableThemes = (this.st.rootConfig as any).__state.availableThemes;
+    const availableThemes = this.st.rootConfig!.__state['availableThemes'];
     const i = (availableThemes.value as ThemeConfig[]).findIndex(th => th.name === this.st.value);
     if (i >= 0) {
       this.st.value = 'default';
-      availableThemes.value.splice(i, 1);
+      (availableThemes.value as ThemeConfig[]).splice(i, 1);
       this.onChange(null);
     }
 
   }
 
-  showNewThemeModal(template: TemplateRef<any>): void {
+  showNewThemeModal(template: TemplateRef<unknown>): void {
     this.newThemeModalRef = this.modalService.show(template, {
       class: 'modal-lg',
     });
@@ -483,7 +504,7 @@ export class SettingsEntryComponent
   }
 
 
-  showIconModal(template: TemplateRef<any>): void {
+  showIconModal(template: TemplateRef<unknown>): void {
     this.iconModal = {};
     this.iconModal.ref = this.modalService.show(template, {
       class: 'modal-lg',
@@ -493,7 +514,7 @@ export class SettingsEntryComponent
 
 
   public hideNewThemeModal(): void {
-    this.newThemeModalRef.hide();
+    this.newThemeModalRef?.hide();
     this.newThemeModalRef = null;
   }
 
@@ -501,7 +522,7 @@ export class SettingsEntryComponent
     if (!this.iconModal) {
       return;
     }
-    this.iconModal.ref.hide();
+    this.iconModal.ref?.hide();
     this.iconModal = undefined;
   }
 
@@ -519,8 +540,9 @@ export class SettingsEntryComponent
       try {
         const wb = doc.documentElement.getAttribute('viewBox');
         const items = doc.documentElement.innerHTML;
-        this.st.value.items = items;
-        this.st.value.viewBox = wb;
+        const icon = this.st.value as SVGIconConfig;
+        icon.items = items;
+        icon.viewBox = wb as string;
       } catch (e) {
         console.error(e);
         if (this.iconModal) {

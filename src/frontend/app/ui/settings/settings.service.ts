@@ -73,7 +73,7 @@ export class SettingsService {
   }
 
 
-  public updateSettings(settings: Record<string, any>, settingsPath: string | undefined): Promise<void> {
+  public updateSettings(settings: Record<string, unknown>, settingsPath: string | undefined): Promise<void> {
     return this.networkService.putJson('/settings', {settings, settingsPath});
   }
 

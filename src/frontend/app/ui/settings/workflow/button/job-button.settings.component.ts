@@ -23,7 +23,7 @@ export class JobButtonComponent {
   backendTextService = inject(BackendtextService);
 
   readonly jobName = input.required<string>();
-  readonly config = input<any>(undefined);
+  readonly config = input<Record<string, unknown> | undefined>(undefined);
   readonly shortName = input(false);
   readonly disabled = input(false);
   readonly soloRun = input(false);
@@ -32,14 +32,14 @@ export class JobButtonComponent {
   JobProgressStates = JobProgressStates;
   readonly jobError = output<string>();
   private modalRef: BsModalRef | null;
-  private defaultConfig: any;
+  private defaultConfig: Record<string, unknown> | undefined;
   readonly JobName = computed<string | null>(() => this.backendTextService.getJobName(this.jobName()));
   readonly JobDescription = computed<string | null>(() => this.backendTextService.getJobDescription(this.jobName()));
 
   /**
    * The config input, or the job's default config if the input is not set.
    */
-  private get Config(): any {
+  private get Config(): Record<string, unknown> | undefined {
     if (this.config()) {
       return this.config();
     }

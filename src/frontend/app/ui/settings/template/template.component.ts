@@ -23,41 +23,8 @@ import {SettingsEntryComponent} from './settings-entry/settings-entry.component'
 import {JobButtonComponent} from '../workflow/button/job-button.settings.component';
 import {JobProgressComponent} from '../workflow/progress/job-progress.settings.component';
 import {ExtensionInstallerService} from '../extension-installer/extension-installer.service';
+import {RecursiveState, StatefulConfig, subStates} from './RecursiveState';
 
-
-interface ConfigState {
-  value: Record<string, RecursiveState>;
-  default: Record<string, RecursiveState>;
-  readonly?: boolean;
-  tags?: TAGS;
-  volatile?: boolean;
-  isEnumType?: boolean;
-  isConfigType?: boolean;
-  isConfigArrayType?: boolean;
-}
-
-export interface RecursiveState extends ConfigState {
-  value: any;
-  default: any;
-  volatile?: any;
-  tags?: any;
-  isConfigType?: any;
-  isConfigArrayType?: any;
-  isEnumType?: any;
-  readonly?: any;
-  toJSON?: any;
-  onChange?: any;
-  original?: any;
-  shouldHide?: any;
-  // UI helpers precomputed by TemplateComponent.instrument()
-  keys?: any; // sorted keys of the sub configs
-  arrayEntries?: any; // {value, keys} per array item of an expandable config array
-  isExpandableConfig?: any;
-  isExpandableArrayConfig?: any;
-  isExtension?: any;
-
-  [key: string]: RecursiveState;
-}
 
 export interface UiJobRow {
   job: UiJob;
@@ -106,17 +73,21 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     this.instrument(states, null);
     return states;
   });
-  public readonly icon = computed<string>(() => this.states().tags?.uiIcon);
+  public readonly icon = computed<string | undefined>(() => this.states().tags?.uiIcon);
+  // the config object of the card, its `enabled` switch is in the header
+  protected readonly config = computed(() => this.states().value as StatefulConfig & { enabled?: boolean });
+  protected readonly uiJob = computed(() => this.states().tags?.uiJob);
+  protected readonly uiJobHasDescription = computed(() => !!this.uiJob()?.[0].description);
   public readonly nestedConfigs = computed(() => {
     const states = this.states();
-    const nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
-    for (const key of states.keys) {
-      const st = states.value.__state[key];
+    const nestedConfigs: { id: string, name: string | undefined, visible: () => boolean, icon: string }[] = [];
+    for (const key of states.keys || []) {
+      const st = subStates(states)[key];
       if (st.isConfigType && st.tags?.uiIcon) {
         nestedConfigs.push({
           id: this.ConfigPath() + '.' + key,
-          name: st.tags?.name,
-          icon: st.tags?.uiIcon,
+          name: st.tags.name,
+          icon: st.tags.uiIcon,
           visible: () => !(st.shouldHide && st.shouldHide())
         });
       }
@@ -124,8 +95,8 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     return nestedConfigs;
   });
   public readonly ConfigStyle = ConfigStyle;
-  protected readonly name = computed<string>(() => this.states().tags?.name || this.ConfigPath());
-  public readonly Name = computed<string>(() => this.changed() ? this.name() + '*' : this.name());
+  protected readonly name = computed<string | undefined>(() => this.states().tags?.name || this.ConfigPath());
+  public readonly Name = computed<string | undefined>(() => this.changed() ? this.name() + '*' : this.name());
   /**
    * All uiJob lists of the states tree, they only change when the states are re-derived.
    */
@@ -136,7 +107,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
         lists.push(st.tags.uiJob);
       }
       for (const k of st.keys || []) {
-        collect(st.value.__state[k]);
+        collect(subStates(st)[k]);
       }
       for (const e of st.arrayEntries || []) {
         for (const k of e.keys) {
@@ -186,7 +157,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   }
 
   get HasAvailableSettings(): boolean {
-    return !this.states()?.shouldHide || !this.states()?.shouldHide();
+    return !this.states().shouldHide?.();
   }
 
   getSaveTitle(isFormInvalid: boolean): string {
@@ -238,23 +209,26 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
 
         // if all sub elements are hidden, hide the parent too.
         if (state.isConfigType) {
-          if (state.value && state.value.__state &&
-            Object.keys(state.value.__state).findIndex(k => !st.value.__state[k].shouldHide()) === -1) {
+          if (state.value && subStates(state) &&
+            Object.keys(subStates(state)).findIndex(k => !subStates(st)[k].shouldHide?.()) === -1) {
             return true;
           }
         }
 
-        const forcedVisibility = !(state.tags?.priority > this.settingsService.configPriority() ||
+        const priority = state.tags?.priority;
+        const forcedVisibility = !((priority !== undefined && priority > this.settingsService.configPriority()) ||
           //if this value should not change in Docker, lets hide it
           (this.settingsService.configPriority() === ConfigPriority.basic &&
             state.tags?.dockerSensitive && this.settingsService.settings().Environment.isDocker));
 
         if (state.isConfigArrayType) {
-          for (let i = 0; i < state.value?.length; ++i) {
-            for (const k of Object.keys(state.value[i].__state)) {
+          const items = state.value as StatefulConfig[] | undefined;
+          const defaults = state.default as Record<string, unknown>[];
+          for (let i = 0; i < (items?.length ?? 0); ++i) {
+            for (const k of Object.keys(items![i].__state)) {
               if (!Utils.equalsFilter(
-                state.value[i]?.__state[k]?.value,
-                state.default[i] ? state.default[i][k] : undefined,
+                items![i]?.__state[k]?.value,
+                defaults[i] ? defaults[i][k] : undefined,
                 ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
 
                 return false;
@@ -275,7 +249,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
 
     st.shouldHide = shouldHide(st);
     st.onChange = this.onOptionChange;
-    st.rootConfig = parent?.value;
+    st.rootConfig = parent?.value as StatefulConfig | undefined;
     if (typeof st.value !== 'undefined') {
       st.original = Utils.clone(st.value);
     }
@@ -285,23 +259,23 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
     st.isExtension = !!(st.isConfigType && st.value) && this.isExtension(st);
 
     if (st.isConfigType && st.value) {
-      for (const k of Object.keys(st.value.__state)) {
-        this.instrument(st.value.__state[k], st);
+      for (const k of Object.keys(subStates(st))) {
+        this.instrument(subStates(st)[k], st);
       }
     }
     if (st.isConfigArrayType && st.value) {
-      for (let i = 0; i < st.value?.length; ++i) {
-        for (const k of Object.keys(st.value[i].__state)) {
-          this.instrument(st.value[i].__state[k], st);
+      for (const item of st.value as StatefulConfig[]) {
+        for (const k of Object.keys(item.__state)) {
+          this.instrument(item.__state[k], st);
         }
       }
     }
     // after the children, as sorting reads their flags
-    st.keys = st.isConfigType && st.value ? this.sortKeys(st.value.__state) : [];
+    st.keys = st.isConfigType && st.value ? this.sortKeys(subStates(st)) : [];
     // A snapshot of the items: edits inside them show up, but adding or removing items does not until
     // the settings are reloaded. No UI does that for these arrays (the editable ones have custom entries).
     if (st.isExpandableArrayConfig && st.value) {
-      st.arrayEntries = (st.value as { __state: Record<string, RecursiveState> }[])
+      st.arrayEntries = (st.value as StatefulConfig[])
         .map(v => ({value: v, keys: this.sortKeys(v.__state)}));
     }
   }
@@ -309,10 +283,12 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   onOptionChange = () => {
     this.settingsService.edits.update(e => e + 1);
     setTimeout(() => {
-      const settingsSame = (state: RecursiveState): boolean => {
-        if (typeof state === 'undefined') {
+      // walks every property, until it finds the states (they have an original value)
+      const settingsSame = (s: unknown): boolean => {
+        if (typeof s === 'undefined') {
           return true;
         }
+        const state = s as Record<string, unknown> & Partial<RecursiveState>;
         if (typeof state.original === 'object') {
           return Utils.equalsFilter(state.value, state.original,
             ['__propPath', '__created', '__prototype', '__rootConfig', '__state']);
@@ -375,7 +351,8 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
         }
       }
       if (s[a].tags?.priority !== s[b].tags?.priority) {
-        return s[a].tags?.priority - s[b].tags?.priority;
+        // NaN when only one of them has a priority, sort() treats that as equal
+        return (s[a].tags?.priority ?? NaN) - (s[b].tags?.priority ?? NaN);
       }
 
       if (a === 'enabled' && b !== 'enabled') {
@@ -383,20 +360,20 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       } else if (b === 'enabled') {
         return 1;
       }
-      return (s[a].tags?.name as string || a).localeCompare(s[b].tags?.name || b);
+      return (s[a].tags?.name || a).localeCompare(s[b].tags?.name || b);
     });
   }
 
-  private isExtension(c: ConfigState): boolean {
-    const propPath = (c?.value as unknown as { __propPath?: string })?.__propPath;
+  private isExtension(c: RecursiveState): boolean {
+    const propPath = (c?.value as StatefulConfig | undefined)?.__propPath;
     if (typeof propPath !== 'string') {
       return false;
     }
     return propPath.substring(0, propPath.lastIndexOf('.')) == 'Extensions.extensions';
   }
 
-  protected async removeExtension(c: ConfigState): Promise<void> {
-    const extensionPath = c.value.__state['path'].value;
+  protected async removeExtension(c: RecursiveState): Promise<void> {
+    const extensionPath = subStates(c)['path'].value as string;
     try {
       this.inProgress.set(true);
       await this.extensionService.deleteExtension(extensionPath);
@@ -414,8 +391,8 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
   }
 
 
-  protected async reloadExtension(c: ConfigState): Promise<void> {
-    const extensionPath = c.value.__state['path'].value;
+  protected async reloadExtension(c: RecursiveState): Promise<void> {
+    const extensionPath = subStates(c)['path'].value as string;
     try {
       this.inProgress.set(true);
       await this.extensionService.reloadExtension(extensionPath);

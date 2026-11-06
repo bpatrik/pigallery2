@@ -40,8 +40,8 @@ export class MediaButtonModalComponent {
   };
 
   // the current values of the fields of the modal
-  readonly fieldValues = computed((): Partial<Record<IClientMediaFields, any>> => {
-    const values: Partial<Record<IClientMediaFields, any>> = {};
+  readonly fieldValues = computed((): Partial<Record<IClientMediaFields, string | number>> => {
+    const values: Partial<Record<IClientMediaFields, string | number>> = {};
     (this.modalData()?.button?.popup?.fields || []).forEach(field => {
       values[field] = this.getFieldValue(field);
     });
@@ -65,7 +65,7 @@ export class MediaButtonModalComponent {
         }
 
         // For string fields, required means not empty
-        if (field.type === 'string' && (!value || value.trim() === '')) {
+        if (field.type === 'string' && (!value || String(value).trim() === '')) {
           return false;
         }
 
@@ -79,7 +79,7 @@ export class MediaButtonModalComponent {
     return true;
   });
 
-  getFieldValue(field: IClientMediaFields): any {
+  getFieldValue(field: IClientMediaFields): string | number {
     const modalData = this.modalData();
     if (!modalData) {
       return '';
@@ -97,14 +97,14 @@ export class MediaButtonModalComponent {
       case 'duration':
       case 'fileSize':
       case 'fps':
-        return (metadata as any)[field] || '';
+        return (metadata[field as keyof typeof metadata] as string | number | undefined) || '';
       case 'cameraData':
       case 'positionData':
       case 'size':
-        return JSON.stringify((metadata as any)[field] || {});
+        return JSON.stringify(metadata[field as keyof typeof metadata] || {});
       case 'faces':
       case 'keywords':
-        return JSON.stringify((metadata as any)[field] || []);
+        return JSON.stringify(metadata[field as keyof typeof metadata] || []);
       default:
         return '';
     }
@@ -140,25 +140,26 @@ export class MediaButtonModalComponent {
     }
   }
 
-  setCustomField(id: string, value: any): void {
+  setCustomField(id: string, value: string | number | boolean): void {
     this.formData.update((f) => ({...f, customFields: {...f.customFields, [id]: value}}));
   }
 
   private initFormData(modalData: MediaButtonModalData): IMediaRequestBodyData {
     const formData: IMediaRequestBodyData = {};
     if (modalData.button?.popup?.fields) {
-      const fields: Record<string, unknown> = {};
+      const fields: Record<string, string | number> = {};
       modalData.button.popup.fields.forEach(field => {
         fields[field] = this.getFieldValue(field);
       });
       formData.fields = fields;
     }
     if (modalData.button?.popup?.customFields) {
-      const customFields: Record<string, unknown> = {};
+      const customFields: Record<string, string | number | boolean> = {};
       modalData.button.popup.customFields.forEach(field => {
         // load last value if we should keep it
-        if (field.keepValue && this.modalService.getValue(field.id) !== undefined) {
-          customFields[field.id] = this.modalService.getValue(field.id);
+        const savedValue = this.modalService.getValue(field.id);
+        if (field.keepValue && savedValue !== undefined) {
+          customFields[field.id] = savedValue;
           return;
         }
         customFields[field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
@@ -168,7 +169,7 @@ export class MediaButtonModalComponent {
     return formData;
   }
 
-  private getDefaultValueForType(type: 'string' | 'number' | 'boolean'): any {
+  private getDefaultValueForType(type: 'string' | 'number' | 'boolean'): string | number | boolean {
     switch (type) {
       case 'string':
         return '';

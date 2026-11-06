@@ -168,7 +168,7 @@ export class ScheduledJobsService {
     this.loadProgress().catch(console.error);
   }
 
-  private addDummyProgress(jobName: string, config: any): void {
+  private addDummyProgress(jobName: string, config: Record<string, unknown> | undefined): void {
     const hashName = JobDTOUtils.getHashName(jobName, config);
     this.progress.update(prgs => ({
       ...prgs,

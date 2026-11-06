@@ -3,6 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {WebConfigClassBuilder} from 'typeconfig/web';
 import {IWebConfigClassPrivate} from 'typeconfig/common';
 import {TemplateComponent} from './template.component';
+import {RecursiveState, subStates} from './RecursiveState';
 import {SettingsService} from '../settings.service';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -16,6 +17,8 @@ import {JobProgressDTO} from '../../../../../common/entities/job/JobProgressDTO'
 
 describe('TemplateComponent', () => {
   type Settings = IWebConfigClassPrivate<TAGS> & WebConfig;
+  // the Users config of the states
+  const users = (st: RecursiveState): { authenticationRequired: boolean } => st.value as { authenticationRequired: boolean };
 
   const createSettings = (authenticationRequired: boolean): Settings => {
     const wc: Settings = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
@@ -52,10 +55,10 @@ describe('TemplateComponent', () => {
     const {component, settingsService} = setUp('Users');
     const states = component.states();
 
-    expect(states.value.authenticationRequired).toBe(true);
+    expect(users(states).authenticationRequired).toBe(true);
     expect(states.value).not.toBe(settingsService.settings().Users);
     // cached while the settings do not change, so in-place UI edits stay
-    states.value.authenticationRequired = false;
+    users(states).authenticationRequired = false;
     expect(component.states()).toBe(states);
     expect(settingsService.settings().Users.authenticationRequired).toBe(true);
   });
@@ -63,15 +66,15 @@ describe('TemplateComponent', () => {
   it('should re-derive the states when the settings are reloaded', () => {
     const {component, settingsService} = setUp('Users');
     const oldStates = component.states();
-    oldStates.value.authenticationRequired = true;
+    users(oldStates).authenticationRequired = true;
 
     settingsService.settings.set(createSettings(false));
 
     const newStates = component.states();
     expect(newStates).not.toBe(oldStates);
-    expect(newStates.value.authenticationRequired).toBe(false);
+    expect(users(newStates).authenticationRequired).toBe(false);
     // the old (dropped) states are not touched anymore
-    expect(oldStates.value.authenticationRequired).toBe(true);
+    expect(users(oldStates).authenticationRequired).toBe(true);
   });
 
   it('should derive the name, icon and nested configs from the config path', () => {
@@ -81,7 +84,7 @@ describe('TemplateComponent', () => {
     expect(component.nestedConfigs().map(n => n.id)).toEqual(['Users.oidc']);
 
     fixture.componentRef.setInput('ConfigPath', 'Database');
-    expect(component.states().value.__state.dbFolder).toBeDefined();
+    expect(subStates(component.states()).dbFolder).toBeDefined();
     expect(component.Name()).toBe('Database');
     expect(component.icon()).toBe('ionServerOutline');
   });
@@ -96,14 +99,14 @@ describe('TemplateComponent', () => {
     const {component} = setUp('Users');
     const states = component.states();
     // the sub config and the array go last
-    expect(states.keys.slice(-2).sort()).toEqual(['enforcedUsers', 'oidc']);
+    expect(states.keys!.slice(-2).sort()).toEqual(['enforcedUsers', 'oidc']);
     expect(states.keys).toContain('authenticationRequired');
-    expect(states.value.__state.oidc.isExpandableConfig).toBe(true);
-    expect(states.value.__state.oidc.keys.length).toBeGreaterThan(0);
-    expect(states.value.__state.authenticationRequired.isExpandableConfig).toBe(false);
+    expect(subStates(states).oidc.isExpandableConfig).toBe(true);
+    expect(subStates(states).oidc.keys!.length).toBeGreaterThan(0);
+    expect(subStates(states).authenticationRequired.isExpandableConfig).toBe(false);
     // users have a custom UI
-    expect(states.value.__state.enforcedUsers.isExpandableArrayConfig).toBe(false);
-    expect(states.value.__state.oidc.isExtension).toBe(false);
+    expect(subStates(states).enforcedUsers.isExpandableArrayConfig).toBe(false);
+    expect(subStates(states).oidc.isExtension).toBe(false);
   });
 
   it('should list the ui jobs with their progress and default config', () => {

@@ -5,6 +5,7 @@ import {NotificationService} from '../../../../../model/notification.service';
 import {NetworkService} from '../../../../../model/network/network.service';
 import {Utils} from '../../../../../../../common/Utils';
 import {ContentLoaderService} from '../../../contentLoader.service';
+import {IMediaRequestBodyData} from '../../../../../../../common/entities/extension/IClientUIConfig';
 
 export interface MediaButtonModalData {
   button: IClientMediaButtonConfigWithBaseApiPath;
@@ -22,7 +23,7 @@ export class MediaButtonModalService {
 
   private readonly _modalData = signal<MediaButtonModalData | null>(null);
   readonly modalData = this._modalData.asReadonly();
-  private savedModalValues: Record<string, string | number | boolean> = {};
+  private savedModalValues: Record<string, string | number | boolean | undefined> = {};
 
   showModal(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia): void {
     this._modalData.set({
@@ -36,10 +37,7 @@ export class MediaButtonModalService {
     this._modalData.set(null);
   }
 
-  async executeButtonAction(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia, formData?: {
-    fields?: Record<string, any>,
-    customFields?: Record<string, any>
-  }): Promise<void> {
+  async executeButtonAction(button: IClientMediaButtonConfigWithBaseApiPath, media: GridMedia, formData?: IMediaRequestBodyData): Promise<void> {
     try {
       if (!button.apiPath) {
         return; // this is a fake button, nothing to call
@@ -79,11 +77,11 @@ export class MediaButtonModalService {
 
   }
 
-  getValue(id: string): string | number | boolean {
+  getValue(id: string): string | number | boolean | undefined {
     return this.savedModalValues[id];
   }
 
-  setValue(id: string, value: string | number | boolean): void {
+  setValue(id: string, value: string | number | boolean | undefined): void {
     this.savedModalValues[id] = value;
   }
 }
