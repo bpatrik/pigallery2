@@ -1,12 +1,7 @@
-import {SearchManager} from '../../../../../src/backend/model/database/SearchManager';
 import {DBTestHelper} from '../../../DBTestHelper';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../../src/common/entities/SearchQueryDTO';
-import {IndexingManager} from '../../../../../src/backend/model/database/IndexingManager';
+import {SearchQueryTypes, TextSearch} from '../../../../../src/common/entities/SearchQueryDTO';
 import {DirectoryBaseDTO, ParentDirectoryDTO, SubDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
 import {TestHelper} from '../../../../TestHelper';
-import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
-import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
-import {Connection} from 'typeorm';
 import {PhotoDTO} from '../../../../../src/common/entities/PhotoDTO';
 import {VideoDTO} from '../../../../../src/common/entities/VideoDTO';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
@@ -16,12 +11,9 @@ import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
 import {Utils} from '../../../../../src/common/Utils';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {ClientSortingConfig} from '../../../../../src/common/config/public/ClientConfig';
-import {SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {ProjectedDirectoryCacheEntity} from '../../../../../src/backend/model/database/enitites/ProjectedDirectoryCacheEntity';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const chai = require('chai');
 
 chai.use(deepEqualInAnyOrder);
@@ -34,32 +26,6 @@ declare const before: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe(); // fake it os IDE plays nicely (recognize the test)
 
-
-class IndexingManagerTest extends IndexingManager {
-
-  public async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
-    return super.saveToDB(scannedDirectory);
-  }
-}
-
-class SearchManagerTest extends SearchManager {
-
-  public flattenSameOfQueries(query: SearchQueryDTO): SearchQueryDTO {
-    return super.flattenSameOfQueries(query);
-  }
-
-}
-
-class GalleryManagerTest extends GalleryManager {
-
-  public async getDirIdAndTime(connection: Connection, directoryName: string, directoryParent: string) {
-    return super.getDirIdAndTime(connection, directoryName, directoryParent);
-  }
-
-  public async getParentDirFromId(connection: Connection, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
-    return super.getParentDirFromId(connection, session, dir);
-  }
-}
 
 describe('CoverManager', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);

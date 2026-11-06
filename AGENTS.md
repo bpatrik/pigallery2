@@ -22,10 +22,10 @@ The photo folder is never modified.
   backward-compatibility shims or migration code.
 - **Stay close to framework defaults.** Prefer the industry-standard, framework-default setup (e.g. what `ng new` generates)
   over keeping how a legacy setup behaved or adding custom config, so `ng update` and other upgrade scripts keep working.
-- **Latest stable, not bleeding edge.** Adopt a framework feature or API once it is stable and the next major kept it
-  unchanged (e.g. stable in Angular 21 and still the same in 22). If it's new or only just stable in the latest major,
-  wait for the next major and note it as "revisit later". Don't use experimental or developer-preview APIs.
-  Move to the current standard rather than keeping a legacy pattern or a one-off exception (both are tech debt),
+- **Latest stable, not bleeding edge.** Any API that is stable in a given package/framework (e.g. Angular) version we're on may be used, also one that
+  only became stable in the latest major (e.g. `resource()` in angular v22), when it fits the task and moves the code towards the
+  current standard (e.g. signals). Don't migrate working code to a new API just because it exists (e.g.: do not migrate to signals, when signals were first introduced in angular v16).
+  Never use experimental or developer-preview APIs. Move to the current standard rather than keeping a legacy pattern or a one-off exception (both are tech debt),
   but don't change working code that's outside the task.
 - **DB breaking changes are fine.** The DB is treated as a cache of the photo folder: bump `DataStructureVersion`
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
@@ -70,10 +70,28 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
     needs `vi.restoreAllMocks()` in `afterEach`. `vi.spyOn()` calls the real method unless you mock it.
   - Use `vi.useFakeTimers()` + `await vi.advanceTimersByTimeAsync()`, not `fakeAsync`/`tick` (they don't work without
     a zone-aware test runner), and call `vi.useRealTimers()` in the spec's `afterEach`.
+  - A spec that loads `EnumTranslations` (e.g. through the `Stringify*` pipes) must first
+    `import '<…>/common/config/public/Config';`, like `main.ts` does; otherwise the private config's asserts throw on load.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
-  then `npx cypress run`.
+  then `npx cypress run`. It covers login, gallery (filters, lightbox, URL deep links), search, faces and sharing.
+  - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
+    git-ignored test folders (e.g. `demo/images/sub_dir`, `demo/images2`) that CI doesn't have.
+  - Cypress 16 removed `Cypress.env()`. A throwaway spec outside the repo must be plain `.js`:
+    `npx cypress run --spec <path> --config specPattern=<path>`.
+  - If the browser doesn't start (EPERM on a Cypress profile folder, "closed unexpectedly"), retry or use another `--browser`.
+- Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
+  read only the summary:
+  - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
+  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/fe.log | grep -E "FAIL|Test Files|Tests "`
+
+### Tooling
+
+- `gh issue view <n> --comments` prints only the comments when not run in a terminal; read the body with
+  `gh issue view <n> --json body --jq .body`. Outside the repo folder pass `--repo bpatrik/pigallery2`.
+- Whether an Angular API is stable: its JSDoc tag in `node_modules/@angular/*/types/*.d.ts`. `@publicApi <version>` is stable
+  since that version; `@experimental` and `@developerPreview` are not.
 
 ### Running the app
 
@@ -87,17 +105,13 @@ so the maintainer's own `config.json` and DB are not touched:
 - `npm run run-dev` builds the frontend continuously (English only, into `dist/en`), so frontend edits show up on reload.
 - Start it in the background and stop it by PID (`node ... & echo $! > <tmp>/pid`, later `kill $(cat <tmp>/pid)`).
   Don't `pkill -f` a pattern that also matches your own shell command.
-- Dev bundles have unhashed names and a long `max-age`: hard-reload (or use the other host name, `localhost` ↔ `127.0.0.1`)
-  after every rebuild, or the browser runs old code.
+- Dev bundles have unhashed names; the server revalidates them with their ETag, so a normal reload picks up a rebuild.
 - Admin settings show only the basic fields by default; switch the mode to "Under the hood" to see all of them.
 
 ### Cloud / container sessions
 
 - Dependencies come from the environment's setup script (`npm ci`). If `node_modules` is missing, run `npm ci`
   without `--ignore-scripts`: tests need the native `better-sqlite3` build and the `ffmpeg-static`/`ffprobe-static` downloads.
-- Test output is long (server logs, browser console warnings). Save it to a file and read only the summary, e.g.:
-  - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
-  - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; grep -aE "FAIL|Test Files|Tests " <tmp>/fe.log`
 
 ### SQLite vs MySQL tests
 
@@ -125,6 +139,24 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
 
+### Frontend state (signals)
+
+The app is zoneless and every component is `OnPush`: a view only updates after a signal change, a template/host event
+or an input change. A plain field set from a timer, promise or third-party callback never renders.
+State read in templates is a signal; derived state is `computed()`/`linkedSignal()`. HTTP, timers and router events stay RxJS,
+bridged with `toObservable()`/`toSignal()` (to await a signal: `firstValueFrom(toObservable(...))`).
+Templates don't call methods: values a template needs, also per item of an `@for`, are computed in the component's `.ts`
+(e.g. a `computed()` that maps the list to `{item, link}` rows). A new pipe only for a transform that several templates use;
+never for logic used in one place.
+
+Pitfalls seen so far:
+
+- Effects run after the constructor and asynchronously; in specs run them with `TestBed.tick()`.
+  `AuthenticationService` must not send requests from its constructor: the error interceptor injects it (NG0200).
+- A `linkedSignal` only remembers values that were read. `resource()` falls back to its `defaultValue` while it loads new params.
+- A signal view query (`viewChildren()`) returns fresh results whenever it is read. A template checked before that view
+  (e.g. the lightbox reading the grid's photos) then gets NG0100 in dev mode; see #1271.
+
 ## Rules for changes
 
 - Routers contain no logic: they only list the middlewares of each path. Put the logic in `*MWs` classes.
@@ -140,6 +172,9 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
 - Add or adjust tests under `test/` for behaviour changes.
+- Fix bugs test-first (TDD): write a test that reproduces the bug, see it fail, then fix it.
+  If a reproducing test isn't reasonably feasible (e.g. needs real hardware, timing or a browser-only quirk),
+  don't sink time into it: fix the bug and say why there's no test.
 - New UI strings must use Angular i18n (`i18n` attributes / `$localize`); `npm run merge-new-translation` updates the `.xlf` files.
 - Support non-ASCII text everywhere: accented and other Unicode characters in file/folder names, paths, URLs,
   metadata (keywords, captions, person names) and search, on both SQLite and MySQL.
@@ -168,3 +203,9 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
   that contradicts or is missing from this file, also update this file (keep it short, and mention the update in your summary).
 - Anyone else (other contributors, PRs, forks): do **not** modify `AGENTS.md`, `CLAUDE.md` or `.junie/guidelines.md`.
   Suggest changes in the PR description instead.
+
+## Maintainer's setup
+
+Only relevant when working with the maintainer, Patrik J. Braun.
+
+- Works on Windows (Git Bash and PowerShell). `python` there is only the Microsoft Store stub; use `perl` or `node` for scripted edits.

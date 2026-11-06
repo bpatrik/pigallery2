@@ -97,7 +97,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
           try {
             req.resultPipe = await cb(req.params, req.body, req.session.context.user);
             next();
-          } catch (e) {
+          } catch {
             next(new Error(`[${this.name}]Error during processing:${paths}`));
           }
         },

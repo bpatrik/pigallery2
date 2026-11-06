@@ -6,39 +6,39 @@
   <nav class="navbar navbar-expand bg-body">
     <div class="container-fluid">
       <a class="navbar-brand d-none d-sm-block" [routerLink]="['/gallery']"
-        [queryParams]="queryService.getParams()">
+        [queryParams]="queryService.params()">
         <app-icon class="d-inline-block align-top me-1" [width]="30" [height]="30" />
         <strong class="d-none d-lg-inline-block">{{ title }}</strong>
       </a>
-      <div class="collapse navbar-collapse text-center" id="navbarCollapse" [collapse]="collapsed">
+      <div class="collapse navbar-collapse text-center" id="navbarCollapse">
         <ul class="navbar-nav mb-0 me-2 text-lg-start d-none d-md-flex">
-          @for (link of navbarLinks; track link) {
-            @if (link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {
+          @for (item of navbarLinkItems(); track item.link) {
+            @if (item.link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {
               <li class="nav-item">
-                <a class="nav-link" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')" i18n>Albums</a>
+                <a class="nav-link" [routerLink]="['/albums']" [class.active]="item.active" i18n>Albums</a>
               </li>
             }
-            @if (link.type === NavigationLinkTypes.faces && isFacesAvailable()) {
+            @if (item.link.type === NavigationLinkTypes.faces && isFacesAvailable()) {
               <li class="nav-item">
-                <a class="nav-link" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')" i18n>Faces</a>
+                <a class="nav-link" [routerLink]="['/faces']" [class.active]="item.active" i18n>Faces</a>
               </li>
             }
-            @if (link.type === NavigationLinkTypes.gallery && isGalleryAvailable()) {
+            @if (item.link.type === NavigationLinkTypes.gallery && isGalleryAvailable()) {
               <li class="nav-item">
                 <a class="nav-link"
                   [routerLink]="['/gallery']"
-                [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')" i18n>Gallery</a>
+                [queryParams]="queryService.params()" [class.active]="item.active" i18n>Gallery</a>
               </li>
             }
-            @if (link.type === NavigationLinkTypes.url && isCustomLinksAvailable()) {
+            @if (item.link.type === NavigationLinkTypes.url && isCustomLinksAvailable()) {
               <li class="nav-item">
-                <a class="nav-link" [href]="link.url" [class.active]="isLinkActive(link.url)">{{ link.name }}</a>
+                <a class="nav-link" [href]="item.link.url" [class.active]="item.active">{{ item.link.name }}</a>
               </li>
             }
-            @if (link.type === NavigationLinkTypes.search && isCustomLinksAvailable()) {
+            @if (item.link.type === NavigationLinkTypes.search && isCustomLinksAvailable()) {
               <li class="nav-item">
-                <a class="nav-link" [routerLink]="['/search', getSearchParams(link.SearchQuery)]"
-                [class.active]="isSearchActive(link.SearchQuery)">{{ link.name }}</a>
+                <a class="nav-link" [routerLink]="['/search', item.searchUrl]"
+                [class.active]="item.active">{{ item.link.name }}</a>
               </li>
             }
           }
@@ -57,15 +57,15 @@
                 <app-gallery-share />
               </li>
             }
-            @if (authenticationRequired && user.value && showShare()) {
+            @if (authenticationRequired && user() && showShare()) {
               <li class="nav-item divider-vertical  d-xl-block d-none"
                 >
               </li>
             }
-            @if (authenticationRequired && user.value) {
+            @if (authenticationRequired && user(); as user) {
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
                 <span style="white-space: nowrap;">
-                  <ng-icon name="ionPersonOutline" class="me-1" /><span>{{ user.value.name }}</span>
+                  <ng-icon name="ionPersonOutline" class="me-1" /><span>{{ user.name }}</span>
                 </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
@@ -97,9 +97,9 @@
 
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">
-                      @if (authenticationRequired && user.value) {
+                      @if (authenticationRequired && user(); as user) {
                         <ng-icon name="ionPersonOutline" />
-                        <span>{{ user.value.name }}</span>
+                        <span>{{ user.name }}</span>
                       }
                       <app-language class="navbar-btn d-inline-block float-end" />
                     </div>
@@ -113,7 +113,7 @@
                     <li role="menuitem">
                       <div class="dropdown-item bg-transparent">
                         <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
-                          @switch (themeService.mode) {
+                          @switch (themeService.mode()) {
                             @case (ThemeModes.light) {
                               <ng-icon name="ionSunnyOutline" />
                               <ng-container i18n>Light</ng-container>
@@ -133,49 +133,49 @@
                     </li>
                   }
                   <hr/>
-                  @for (link of navbarLinks; track link) {
-                    @if (link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {
+                  @for (item of navbarLinkItems(); track item.link) {
+                    @if (item.link.type === NavigationLinkTypes.albums && isAlbumsAvailable()) {
                       <li class="nav-item d-md-none"
                         >
-                        <a class="dropdown-item" [routerLink]="['/albums']" [class.active]="isLinkActive('/albums')">
+                        <a class="dropdown-item" [routerLink]="['/albums']" [class.active]="item.active">
                           <ng-icon name="ionAlbumsOutline" />
                           <ng-container i18n>Albums</ng-container>
                         </a>
                       </li>
                     }
-                    @if (link.type === NavigationLinkTypes.faces && isFacesAvailable()) {
+                    @if (item.link.type === NavigationLinkTypes.faces && isFacesAvailable()) {
                       <li class="nav-item d-md-none"
                         >
-                        <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="isLinkActive('/faces')">
+                        <a class="dropdown-item" [routerLink]="['/faces']" [class.active]="item.active">
                           <ng-icon name="ionPeopleOutline" />
                           <ng-container i18n>Faces</ng-container>
                         </a>
                       </li>
                     }
-                    @if (link.type === NavigationLinkTypes.gallery  && isGalleryAvailable()) {
+                    @if (item.link.type === NavigationLinkTypes.gallery  && isGalleryAvailable()) {
                       <li class="nav-item d-md-none">
                         <a class="dropdown-item"
                           [routerLink]="['/gallery']"
-                          [queryParams]="queryService.getParams()" [class.active]="isLinkActive('/gallery')">
+                          [queryParams]="queryService.params()" [class.active]="item.active">
                           <ng-icon name="ionImagesOutline" />
                           <ng-container i18n>Gallery</ng-container>
                         </a>
                       </li>
                     }
-                    @if (link.type === NavigationLinkTypes.url  && isCustomLinksAvailable()) {
+                    @if (item.link.type === NavigationLinkTypes.url  && isCustomLinksAvailable()) {
                       <li class="nav-item d-md-none">
-                        <a class="dropdown-item" [href]="link.url" [class.active]="isLinkActive(link.url)">
+                        <a class="dropdown-item" [href]="item.link.url" [class.active]="item.active">
                           <ng-icon name="ionLinkOutline" />
-                          <span>{{ link.name }}</span>
+                          <span>{{ item.link.name }}</span>
                         </a>
                       </li>
                     }
-                    @if (link.type === NavigationLinkTypes.search  && isCustomLinksAvailable()) {
+                    @if (item.link.type === NavigationLinkTypes.search  && isCustomLinksAvailable()) {
                       <li class="nav-item d-md-none">
-                        <a class="dropdown-item" [routerLink]="['/search', getSearchParams(link.SearchQuery)]"
-                          [class.active]="isSearchActive(link.SearchQuery)">
+                        <a class="dropdown-item" [routerLink]="['/search', item.searchUrl]"
+                          [class.active]="item.active">
                           <ng-icon name="ionSearchOutline" />
-                          <span>{{ link.name }}</span>
+                          <span>{{ item.link.name }}</span>
                         </a>
                       </li>
                     }
@@ -242,12 +242,12 @@
                     </li>
                     @if (uploadService.canUpload()) {
                       <li role="menuitem">
-                        <a class="dropdown-item cursor-pointer" (click)="uploadInput.click()">
+                        <button type="button" class="dropdown-item" (click)="uploadInput.click()">
                           <ng-icon name="ionCloudUploadOutline" />
                           <ng-container i18n>Upload</ng-container>
-                          <input #uploadInput type="file" multiple [style.display]="'none'"
-                            (change)="uploadService.uploadFiles(uploadInput.files); uploadInput.value = ''">
-                          </a>
+                        </button>
+                        <input #uploadInput type="file" multiple [style.display]="'none'"
+                            (change)="uploadService.uploadFiles(uploadInput.files ?? []); uploadInput.value = ''">
                         </li>
                       }
                       @if (isAdmin()) {

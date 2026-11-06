@@ -33,9 +33,9 @@ describe('BackendTextService', () => {
 
       const allJobs = Utils.enumToArray(DefaultsJobs);
 
-      for (let i = 0; i < allJobs.length; ++i){
-        expect(backendTextService.getJobName(allJobs[i].value), 'Cant find job name: ' + allJobs[i].value).not.toEqual(null);
-        expect(backendTextService.getJobDescription(allJobs[i].value), 'Cant find job name: ' + allJobs[i].value).not.toEqual(null);
+      for (const job of allJobs) {
+        expect(backendTextService.getJobName(job.value), 'Cant find job name: ' + job.value).not.toEqual(null);
+        expect(backendTextService.getJobDescription(job.value), 'Cant find job name: ' + job.value).not.toEqual(null);
       }
     }
   ));

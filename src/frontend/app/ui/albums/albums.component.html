@@ -1,24 +1,24 @@
 <app-frame>
 
   <div body #container class="container-fluid">
-    @for (album of albumsService.albums | async; track album.id) {
+    @for (album of albumsService.albums(); track album.id) {
       <app-album [album]="album"
-      [size]="size" />
+      [size]="size()" />
     }
 
     @if (CanCreateAlbum) {
-      <div class="add-saved-search btn btn-secondary"
-        [style.width.px]="size"
-        [style.height.px]="size"
+      <button type="button" class="add-saved-search btn btn-secondary"
+        [style.width.px]="size()"
+        [style.height.px]="size()"
         (click)="openModal(modal)">
-        <div class="text">
+        <span class="text d-block">
           <ng-icon name="ionAddOutline" class="mb-2" />
           <span i18n>Add saved search</span>
-        </div>
-      </div>
+        </span>
+      </button>
     }
 
-    @if ((albumsService.albums | async) && (albumsService.albums | async).length == 0) {
+    @if (albumsService.albums()?.length === 0) {
       <div class="d-flex no-item-msg"
         >
         <div class="flex-fill">

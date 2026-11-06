@@ -5,7 +5,7 @@ import {StdoutMessenger} from './StdoutMessenger';
 export class MessengerRepository {
 
   private static instance: MessengerRepository = null;
-  messengers: { [key: string]: Messenger } = {};
+  messengers: Record<string, Messenger> = {};
 
   public static get Instance(): MessengerRepository {
     if (MessengerRepository.instance == null) {

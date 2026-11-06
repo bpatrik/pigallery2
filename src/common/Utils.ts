@@ -58,7 +58,7 @@ export class Utils {
 
   static shallowClone<T>(object: T): T {
     const c: T = {} as T;
-    for (const e of Object.entries(object)) {
+    for (const e of Object.entries(object as object)) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (c as Record<string, any>)[e[0]] = e[1];
     }
@@ -115,14 +115,19 @@ export class Utils {
     return d.getUTCFullYear() + '-' + d.getUTCMonth() + '-' + d.getUTCDate();
   }
 
-  static toIsoTimestampString(YYYYMMDD: string, hhmmss: string): string {
+  static toIsoTimestampString(YYYYMMDD: string, hhmmss: string): string | undefined {
     if (YYYYMMDD && hhmmss) {
       // Regular expression to match YYYYMMDD format
       const dateRegex = /^(\d{4})(\d{2})(\d{2})$/;
       // Regular expression to match hhmmss+/-ohom format
       const timeRegex = /^(\d{2})(\d{2})(\d{2})([+-]\d{2})?(\d{2})?$/;
-      const [, year, month, day] = YYYYMMDD.match(dateRegex);
-      const [, hour, minute, second, offsetHour, offsetMinute] = hhmmss.match(timeRegex);
+      const dateMatch = YYYYMMDD.match(dateRegex);
+      const timeMatch = hhmmss.match(timeRegex);
+      if (!dateMatch || !timeMatch) {
+        return undefined;
+      }
+      const [, year, month, day] = dateMatch;
+      const [, hour, minute, second, offsetHour, offsetMinute] = timeMatch;
       const isoTimestamp = `${year}-${month}-${day}T${hour}:${minute}:${second}`;
       if (offsetHour && offsetMinute) {
         return isoTimestamp + `${offsetHour}:${offsetMinute}`;
@@ -134,7 +139,7 @@ export class Utils {
     }
   }
 
-  static makeUTCMidnight(d: number | Date, offset: string) {
+  static makeUTCMidnight(d: number | Date, offset?: string) {
     if (!(d instanceof Date)) {
       d = new Date(d);
     }
@@ -147,14 +152,14 @@ export class Utils {
     return d;
   }
 
-  static getUTCFullYear(d: number | Date, offset: string) {
+  static getUTCFullYear(d: number | Date, offset?: string) {
     if (!(d instanceof Date)) {
       d = new Date(d);
     }
     return new Date(new Date(d).toISOString().substring(0, 19) + (offset ? offset : '+00:00')).getUTCFullYear();
   }
 
-  static getFullYear(d: number | Date, offset: string) {
+  static getFullYear(d: number | Date, offset?: string) {
     if (!(d instanceof Date)) {
       d = new Date(d);
     }
@@ -162,7 +167,7 @@ export class Utils {
   }
 
   //function to convert timestamp into milliseconds taking offset into account
-  static timestampToMS(timestamp: string, offset: string): number {
+  static timestampToMS(timestamp: string, offset?: string): number | undefined {
     if (!timestamp) {
       return undefined;
     }
@@ -209,7 +214,7 @@ export class Utils {
     if (UTCTimestamp && timestamp) {
       //offset in minutes is the difference between gps timestamp, and given timestamp
       //to calculate this correctly, we have to work with the same offset
-      const offsetMinutes: number = Math.round((Utils.timestampToMS(timestamp, '+00:00') - Utils.timestampToMS(UTCTimestamp, '+00:00')) / 1000 / 60);
+      const offsetMinutes: number = Math.round((Utils.timestampToMS(timestamp, '+00:00')! - Utils.timestampToMS(UTCTimestamp, '+00:00')!) / 1000 / 60); // both are set (checked above)
       return Utils.getOffsetString(offsetMinutes);
     } else {
       return undefined;
@@ -227,10 +232,10 @@ export class Utils {
     }
   }
 
-  static getOffsetMinutes(offsetString: string) { //Convert offset string (+HH:MM or -HH:MM) into a minute value
+  static getOffsetMinutes(offsetString?: string): number | undefined { //Convert offset string (+HH:MM or -HH:MM) into a minute value
     const regex = /^([+-](0[0-9]|1[0-4]):[0-5][0-9])$/;  //checks if offset is between -14:00 and +14:00.
                                                          //-12:00 is the lowest valid UTC-offset, but we allow down to -14 for efficiency
-    if (regex.test(offsetString)) {
+    if (offsetString !== undefined && regex.test(offsetString)) {
       const hhmm = offsetString.split(':');
       const hours = parseInt(hhmm[0]);
       return hours < 0 ? ((hours * 60) - parseInt(hhmm[1])) : ((hours * 60) + parseInt(hhmm[1]));
@@ -241,13 +246,13 @@ export class Utils {
 
   //Get the MS of the creationDate, adjusted for  the offset. Effectively getting the MS value as if the photo did not contain an offset.
   //One can consider this "Local" time of the photo. Starting point is UTC, as MetadataLoader loads timestamps with unknown timestamps as UTC.
-  static getLocalTimeMS(creationDate: number, creationDateOffset: string) {
+  static getLocalTimeMS(creationDate: number, creationDateOffset?: string) {
     const offsetMinutes = Utils.getOffsetMinutes(creationDateOffset);
     return creationDate + (offsetMinutes ? (offsetMinutes * 60000) : 0);
   }
 
   //Like getLocalTimeMS, but only if localTime is true, otherwise just returns creationDate (global time)
-  static getTimeMS(creationDate: number, creationDateOffset: string, localTime: boolean) {
+  static getTimeMS(creationDate: number, creationDateOffset: string | undefined, localTime: boolean) {
     if (localTime) {
       return Utils.getLocalTimeMS(creationDate, creationDateOffset);
     } else {
@@ -413,7 +418,7 @@ export class Utils {
     return curr;
   }
 
-  public static asciiToUTF8(text: string): string {
+  public static asciiToUTF8(text: string): string | undefined {
     if (text) {
       // Check for corrupted IPTC data - very long strings with binary content indicate corruption
       // The specific corruption we observed: 25k+ chars with mix of high-ASCII and control chars
@@ -493,7 +498,7 @@ export class Utils {
     return ret;
   }
 
-  public static xmpExifGpsCoordinateToDecimalDegrees(text: string): number {
+  public static xmpExifGpsCoordinateToDecimalDegrees(text: string): number | undefined {
     if (!text || typeof text !== 'string') {
       return undefined;
     }
@@ -554,7 +559,7 @@ export class Utils {
       }
       const trimmed = raw.trim();
       // try by name (case-insensitive)
-      const key: string = Object.keys(enumType).find(k => isNaN(Number(k)) && k.toLowerCase() === trimmed.toLowerCase());
+      const key: string | undefined = Object.keys(enumType).find(k => isNaN(Number(k)) && k.toLowerCase() === trimmed.toLowerCase());
       if (key) {
         const val: number = enumType[key];
         if (typeof val === 'number') {
@@ -602,9 +607,9 @@ export class LRU<V> {
     }
   }
 
-  get(key: string): V {
+  get(key: string): V | undefined {
     if (!this.data[key]) {
-      return;
+      return undefined;
     }
     return this.data[key].value;
   }

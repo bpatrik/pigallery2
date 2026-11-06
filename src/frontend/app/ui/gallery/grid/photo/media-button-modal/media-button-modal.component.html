@@ -1,13 +1,13 @@
-@if (modalData) {
+@if (modalData(); as modalData) {
   <div class="modal fade"
-    [class.show]="modalData?.visible"
-    [style.display]="modalData?.visible ? 'block' : 'none'"
+    [class.show]="modalData.visible"
+    [style.display]="modalData.visible ? 'block' : 'none'"
     >
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">{{ modalData.button.popup?.header || modalData.button.name }}</h4>
-          <button type="button" class="btn-close" (click)="closeModal()"></button>
+          <button type="button" class="btn-close" (click)="closeModal()" aria-label="Close" i18n-aria-label></button>
         </div>
         <div class="modal-body">
           <!-- Media info -->
@@ -23,12 +23,13 @@
             <div>
               @for (field of modalData.button.popup.fields; track field) {
                 <div class="mb-3">
-                  <label [for]="field" class="form-label">{{ getFieldLabel(field) }}</label>
+                  <label [for]="field" class="form-label">{{ fieldLabels[field] || field }}</label>
+                  <!-- initFormData sets formData().fields when the popup has fields -->
                   <input [id]="field"
                     type="text"
                     class="form-control"
-                    [(ngModel)]="formData.fields[field]"
-                    [value]="getFieldValue(field)">
+                    [(ngModel)]="formData().fields![field]"
+                    [value]="fieldValues()[field]">
                   </div>
                 }
               </div>
@@ -36,7 +37,7 @@
             <!-- Custom fields -->
             @if (modalData.button.popup?.customFields) {
               <div>
-                @for (customFieldEntry of modalData.button.popup?.customFields; track customFieldEntry) {
+                @for (customFieldEntry of modalData.button.popup.customFields; track customFieldEntry) {
                   <div class="mb-3">
                     <label [for]="'custom_' + customFieldEntry.id" class="form-label">
                       {{ customFieldEntry.label }}
@@ -50,8 +51,9 @@
                         [id]="'custom_' + customFieldEntry.id"
                         type="text"
                         class="form-control"
-                        [(ngModel)]="formData.customFields[customFieldEntry.id]"
-                        [required]="customFieldEntry.required">
+                        [ngModel]="formData().customFields?.[customFieldEntry.id]"
+                        (ngModelChange)="setCustomField(customFieldEntry.id, $event)"
+                        [required]="!!customFieldEntry.required">
                     }
                     <!-- Number input -->
                     @if (customFieldEntry.type === 'number') {
@@ -59,8 +61,9 @@
                         [id]="'custom_' + customFieldEntry.id"
                         type="number"
                         class="form-control"
-                        [(ngModel)]="formData.customFields[customFieldEntry.id]"
-                        [required]="customFieldEntry.required">
+                        [ngModel]="formData().customFields?.[customFieldEntry.id]"
+                        (ngModelChange)="setCustomField(customFieldEntry.id, $event)"
+                        [required]="!!customFieldEntry.required">
                     }
                     <!-- Boolean input -->
                     @if (customFieldEntry.type === 'boolean') {
@@ -68,8 +71,9 @@
                         <input [id]="'custom_' + customFieldEntry.id"
                           type="checkbox"
                           class="form-check-input"
-                          [(ngModel)]="formData.customFields[customFieldEntry.id]"v
-                          [required]="customFieldEntry.required">
+                          [ngModel]="formData().customFields?.[customFieldEntry.id]"
+                          (ngModelChange)="setCustomField(customFieldEntry.id, $event)"
+                          [required]="!!customFieldEntry.required">
                           <label [for]="'custom_' + customFieldEntry.id" class="form-check-label">
                             {{ customFieldEntry.label }}
                             @if (customFieldEntry.required) {
@@ -93,8 +97,8 @@
         </div>
       </div>
     }
-    @if (modalData?.visible) {
-      <div class="modal-backdrop fade"
-        [class.show]="modalData?.visible"
+    @if (modalData()?.visible) {
+      <div class="modal-backdrop fade" role="presentation"
+        [class.show]="modalData()?.visible"
       (click)="closeModal()"></div>
     }

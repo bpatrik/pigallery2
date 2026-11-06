@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import { Component, OnDestroy, TemplateRef, computed, inject, signal } from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -21,7 +20,6 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
     selector: 'app-gallery-random-query-builder',
     templateUrl: './random-query-builder.gallery.component.html',
     styleUrl: './random-query-builder.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
         NgIconComponent,
         FormsModule,
@@ -29,25 +27,21 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
         GallerySearchQueryBuilderComponent,
     ]
 })
-export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
+export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   contentLoaderService = inject(ContentLoaderService);
   private notification = inject(NotificationService);
   private searchQueryParserService = inject(SearchQueryParserService);
   private route = inject(ActivatedRoute);
   private modalService = inject(BsModalService);
 
-  public searchQueryDTO: SearchQueryDTO = {
-    type: SearchQueryTypes.any_text,
-    value: '',
-  } as TextSearch;
-  enabled = true;
-  url = '';
+  public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
+  readonly enabled = computed((): boolean => !!this.contentLoaderService.content()?.directory);
+  readonly url = signal('');
 
-  contentSubscription: Subscription = null;
 
-  modalRef: BsModalRef;
+  modalRef: BsModalRef | null;
 
-  private readonly subscription: Subscription = null;
+  private readonly subscription: Subscription | null = null;
 
   constructor() {
     this.subscription = this.route.params.subscribe((params: Params) => {
@@ -56,50 +50,34 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
       }
       const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
       if (searchQuery) {
-        this.searchQueryDTO = searchQuery;
+        this.searchQueryDTO.set(searchQuery);
         this.onQueryChange();
       }
     });
   }
 
   get HTMLSearchQuery(): string {
-    return SearchQueryUtils.urlify(this.searchQueryDTO);
+    return SearchQueryUtils.urlify(this.searchQueryDTO());
   }
 
   onQueryChange(): void {
-    this.url = NetworkService.buildUrl(
+    this.url.set(NetworkService.buildUrl(
         Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random/') + '/' + this.HTMLSearchQuery
-    );
-  }
-
-  ngOnInit(): void {
-    this.contentSubscription = this.contentLoaderService.content.subscribe(
-        (content: ContentWrapper) => {
-          this.enabled = !!content?.directory;
-          if (!this.enabled) {
-            return;
-          }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
-        }
-    );
+    ));
   }
 
   ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
-    }
-
     if (this.subscription !== null) {
       this.subscription.unsubscribe();
     }
   }
 
-  openModal(template: TemplateRef<unknown>): boolean {
-    if (!this.enabled) {
-      return;
+  openModal(template: TemplateRef<unknown>): boolean | undefined {
+    if (!this.enabled()) {
+      return undefined;
     }
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
 
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
@@ -113,7 +91,7 @@ export class RandomQueryBuilderGalleryComponent implements OnInit, OnDestroy {
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }

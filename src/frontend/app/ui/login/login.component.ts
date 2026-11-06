@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes} from '../../../../common/entities/Error';
@@ -14,7 +14,6 @@ import {NgIconComponent} from '@ng-icons/core';
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrl: './login.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     LanguageComponent,
     IconComponent,
@@ -27,9 +26,9 @@ export class LoginComponent implements OnInit {
   private navigation = inject(NavigationService);
 
   loginCredential: LoginCredential;
-  loginError = false;
+  readonly loginError = signal(false);
   title: string;
-  inProgress = false;
+  readonly inProgress = signal(false);
   oidcEnabled = false;
   oidcDisplayName = 'OpenID login';
 
@@ -47,18 +46,18 @@ export class LoginComponent implements OnInit {
   }
 
   async onLogin(): Promise<void> {
-    this.loginError = false;
+    this.loginError.set(false);
 
-    this.inProgress = true;
+    this.inProgress.set(true);
     try {
       await this.authService.login(this.loginCredential);
     } catch (error) {
       if (error && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) {
-        this.loginError = true;
+        this.loginError.set(true);
       }
     }
 
-    this.inProgress = false;
+    this.inProgress.set(false);
   }
 
   onLoginWithOIDC(): void {

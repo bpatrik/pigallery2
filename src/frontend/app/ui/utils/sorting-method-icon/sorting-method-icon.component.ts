@@ -1,4 +1,4 @@
-import {Component, input, ChangeDetectionStrategy} from '@angular/core';
+import {Component, input} from '@angular/core';
 import {GroupSortByTypes} from '../../../../../common/entities/SortingMethods';
 
 import { NgIconComponent } from '@ng-icons/core';
@@ -7,10 +7,9 @@ import { NgIconComponent } from '@ng-icons/core';
     selector: 'app-sorting-method-icon',
     templateUrl: './sorting-method-icon.component.html',
     styleUrl: './sorting-method-icon.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [NgIconComponent]
 })
 export class SortingMethodIconComponent {
-  readonly method = input<number>(undefined);
+  readonly method = input<number>();
   public readonly GroupSortByTypes = GroupSortByTypes;
 }

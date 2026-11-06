@@ -3,10 +3,8 @@ import {DBTestHelper} from '../../../DBTestHelper';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
 import {TestHelper} from '../../../../TestHelper';
-import {Config} from '../../../../../src/common/config/private/Config';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const chai = require('chai');
 const {expect} = chai;
 

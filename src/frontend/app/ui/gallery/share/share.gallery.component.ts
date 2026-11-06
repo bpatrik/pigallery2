@@ -1,13 +1,11 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import {Utils} from '../../../../../common/Utils';
 import {ShareService} from '../share.service';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
 import {ResponseSharingDTO} from '../../../../../common/entities/SharingDTO';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
-import {Subscription} from 'rxjs';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {copyToClipboard, CopyDirective} from '../../utils/copy/copy.directive';
@@ -22,7 +20,6 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     selector: 'app-gallery-share',
     templateUrl: './share.gallery.component.html',
     styleUrl: './share.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,
@@ -31,17 +28,16 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     StringifySearchQuery
 ]
 })
-export class GalleryShareComponent implements OnInit, OnDestroy {
+export class GalleryShareComponent {
   sharingService = inject(ShareService);
   galleryService = inject(ContentLoaderService);
   private notification = inject(NotificationService);
   private modalService = inject(BsModalService);
   authService = inject(AuthenticationService);
 
-  enabled = true;
   readonly dropDownItem = input(false);
-  url = '';
-  urlValid = false;
+  readonly url = signal('');
+  readonly urlValid = signal(false);
   showSharingList = false;
 
   input = {
@@ -49,24 +45,71 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
       amount: 30,
       type: ValidityTypes.Days as ValidityTypes,
     },
-    password: null as string,
-    recursive: false, // share the subdirectories too (directory sharing only)
+    password: null as string | null,
   };
-  currentDir = '';
-  currentRecursiveMediaCount = 0;
-  currentQuery: SearchQueryDTO = null;
-  sharingTarget = '';
-  currentMediaCount = 0;
-  currentMediaCountIsLowerBound = false;
-  sharing: ResponseSharingDTO = null;
-  contentSubscription: Subscription = null;
+  // share the subdirectories too (directory sharing only)
+  readonly recursive = signal(false);
+  // what the current content would share
+  private readonly target = computed((): {
+    enabled: boolean;
+    dir: string;
+    searchQuery: SearchQueryDTO | null;
+    name: string;
+    mediaCount: number;
+    recursiveMediaCount: number;
+    mediaCountIsLowerBound: boolean;
+  } => {
+    const content = this.galleryService.content();
+    const target = {
+      enabled: !!(content?.directory || content?.searchResult),
+      dir: '',
+      searchQuery: null as SearchQueryDTO | null,
+      name: '',
+      mediaCount: 0,
+      recursiveMediaCount: 0,
+      mediaCountIsLowerBound: false,
+    };
+    if (content?.searchResult) {
+      const sr = content.searchResult;
+      target.searchQuery = sr.searchQuery;
+      target.name = $localize`Search query`;
+      target.mediaCount = sr.media ? sr.media.length : 0;
+      target.mediaCountIsLowerBound = !!sr.resultOverflow;
+    } else if (content?.directory) {
+      target.dir = Utils.concatUrls(content.directory.path, content.directory.name);
+      target.name = target.dir;
+      // Prefer mediaCount, fallback to media length if needed
+      target.mediaCount = typeof content.directory.cache?.mediaCount === 'number' ?
+        content.directory.cache.mediaCount : (content.directory.media ? content.directory.media.length : 0);
+      target.recursiveMediaCount = content.directory.cache?.recursiveMediaCount ?? target.mediaCount;
+    }
+    return target;
+  });
+  readonly enabled = computed((): boolean => this.target().enabled);
+  readonly currentDir = computed((): string => this.target().dir);
+  readonly isDirectorySharing = computed((): boolean => !!this.currentDir());
+  readonly sharingTarget = computed((): string => this.target().name);
+  readonly currentMediaCountIsLowerBound = computed((): boolean => this.target().mediaCountIsLowerBound);
+  readonly sharedMediaCount = computed((): number =>
+    this.isDirectorySharing() && this.recursive() ? this.target().recursiveMediaCount : this.target().mediaCount);
+  readonly currentQuery = computed((): SearchQueryDTO | null =>
+    this.isDirectorySharing() ? this.buildDirectoryQuery(this.recursive()) : this.target().searchQuery);
+  readonly sharing = signal<ResponseSharingDTO | null>(null);
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
 
-  modalRef: BsModalRef;
+  modalRef: BsModalRef | null;
   invalidSettings = $localize`Invalid settings`;
 
-  activeShares: ResponseSharingDTO[] = [];
+  private readonly activeShares = signal<ResponseSharingDTO[]>([]);
+  // the active shares with their link and whether they share the subdirectories too (a 'path/*' glob)
+  readonly activeShareRows = computed((): { share: ResponseSharingDTO; url: string; recursive: boolean }[] =>
+    (this.activeShares() ?? []).map(share => ({
+      share,
+      url: this.sharingService.getUrl(share),
+      recursive: share.directoryQuery?.matchType === TextSearchQueryMatchTypes.globMatch &&
+        !!share.directoryQuery.value?.endsWith('*')
+    })));
 
   text = {
     Yes: 'Yes',
@@ -76,87 +119,46 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   constructor() {
     this.text.Yes = $localize`Yes`;
     this.text.No = $localize`No`;
+    // effect: loads the active shares of the new content over HTTP
+    effect(() => {
+      this.target();
+      untracked(() => this.onContentChange().catch(console.error));
+    });
   }
 
   public get IsAdmin() {
-    return this.authService.user.value.role > UserRoles.Admin;
+    return this.authService.isAuthorized(UserRoles.Developer); // above Admin
   }
 
-  ngOnInit(): void {
-    this.contentSubscription = this.galleryService.content.subscribe(
-        async (content: ContentWrapper) => {
-          this.activeShares = [];
-          this.enabled = !!(content?.directory || (content as any)?.searchResult);
-          this.currentDir = '';
-          this.currentQuery = null;
-          this.sharingTarget = '';
-          this.currentMediaCount = 0;
-          this.currentRecursiveMediaCount = 0;
-          this.currentMediaCountIsLowerBound = false;
-
-          if ((content as any)?.searchResult) {
-            const sr = (content as any).searchResult;
-            this.currentQuery = sr.searchQuery as SearchQueryDTO;
-            this.sharingTarget = $localize`Search query`;
-            this.currentMediaCount = (sr.media ? sr.media.length : 0);
-            this.currentMediaCountIsLowerBound = !!sr.resultOverflow;
-          } else if (content?.directory) {
-            this.currentDir = Utils.concatUrls(
-              content?.directory.path,
-              content?.directory.name
-            );
-            this.currentQuery = this.buildDirectoryQuery();
-            this.sharingTarget = this.currentDir;
-            // Prefer mediaCount, fallback to media length if needed
-            this.currentMediaCount = (typeof content?.directory.cache?.mediaCount === 'number' ? content.directory.cache?.mediaCount : (content.directory.media ? content.directory.media.length : 0));
-            this.currentRecursiveMediaCount = content?.directory.cache?.recursiveMediaCount ?? this.currentMediaCount;
-            this.currentMediaCountIsLowerBound = false;
-          }
-
-          if (!this.enabled || !this.currentQuery) {
-            return;
-          }
-          await this.updateActiveSharesList();
-        }
-    );
-  }
-
-  get isDirectorySharing(): boolean {
-    return !!this.currentDir;
-  }
-
-  get sharedMediaCount(): number {
-    return this.isDirectorySharing && this.input.recursive ? this.currentRecursiveMediaCount : this.currentMediaCount;
+  private async onContentChange(): Promise<void> {
+    this.activeShares.set([]);
+    if (!this.enabled() || !this.currentQuery()) {
+      return;
+    }
+    await this.updateActiveSharesList();
   }
 
   /**
    * Directory sharing: exact match for the directory, or the directory and everything below it if recursive
    */
-  private buildDirectoryQuery(recursive = this.input.recursive): DirectorySearch {
+  private buildDirectoryQuery(recursive: boolean): DirectorySearch {
     return recursive ? {
       type: SearchQueryTypes.directory,
-      value: Utils.concatUrls(this.currentDir, '*'),
+      value: Utils.concatUrls(this.currentDir(), '*'),
       matchType: TextSearchQueryMatchTypes.globMatch
     } as DirectorySearch : {
       type: SearchQueryTypes.directory,
-      value: this.currentDir,
+      value: this.currentDir(),
       matchType: TextSearchQueryMatchTypes.exact_match
     } as DirectorySearch;
   }
 
   async onRecursiveChange(): Promise<void> {
-    if (!this.isDirectorySharing) {
+    if (!this.isDirectorySharing()) {
       return;
     }
-    this.currentQuery = this.buildDirectoryQuery();
-    if (this.sharing) {
+    if (this.sharing()) {
       await this.update();
-    }
-  }
-
-  ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
     }
   }
 
@@ -168,27 +170,23 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
 
   private async updateActiveSharesList() {
     try {
-      if (!this.currentQuery) {
-        this.activeShares = [];
+      const query = this.currentQuery();
+      if (!query) {
+        this.activeShares.set([]);
         return;
       }
-      if (this.isDirectorySharing) {
+      if (this.isDirectorySharing()) {
         // list the shares of this folder with and without subfolders, independently of the switch
         const lists = await Promise.all([false, true].map(r =>
           this.sharingService.getSharingListForQuery(this.buildDirectoryQuery(r))));
-        this.activeShares = lists.flat();
+        this.activeShares.set(lists.flat());
         return;
       }
-      this.activeShares = await this.sharingService.getSharingListForQuery(this.currentQuery);
+      this.activeShares.set(await this.sharingService.getSharingListForQuery(query));
     } catch (e) {
-      this.activeShares = [];
+      this.activeShares.set([]);
       console.error(e);
     }
-  }
-
-  isRecursive(share: ResponseSharingDTO): boolean {
-    return share.directoryQuery?.matchType === TextSearchQueryMatchTypes.globMatch &&
-      share.directoryQuery.value?.endsWith('*');
   }
 
   calcValidity(): number {
@@ -208,65 +206,70 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   }
 
   async update(): Promise<void> {
-    if (this.sharing == null || !this.currentQuery) {
+    const sharing = this.sharing();
+    const query = this.currentQuery();
+    if (sharing == null || !query) {
       return;
     }
-    this.urlValid = false;
-    this.url = $localize`loading..`;
-    this.sharing = this.isDirectorySharing
+    this.urlValid.set(false);
+    this.url.set($localize`loading..`);
+    const updated = this.isDirectorySharing()
       ? await this.sharingService.updateSharingByDirectory(
-        this.sharing.id,
-        this.currentQuery as DirectorySearch,
+        sharing.id,
+        query as DirectorySearch,
         this.input.password,
         this.calcValidity(),
-        this.currentDir
+        this.currentDir()
       )
       : await this.sharingService.updateSharingByQuery(
-        this.sharing.id,
-        this.currentQuery,
+        sharing.id,
+        query,
         this.input.password,
         this.calcValidity()
       );
-    this.urlValid = true;
-    this.url = this.sharingService.getUrl(this.sharing);
+    this.sharing.set(updated);
+    this.urlValid.set(true);
+    this.url.set(this.sharingService.getUrl(updated));
     await this.updateActiveSharesList();
   }
 
   async get(): Promise<void> {
     if(Config.Sharing.passwordRequired && !this.input.password){
-      this.url = $localize`Set password.`;
+      this.url.set($localize`Set password.`);
       return;
     }
-    if (!this.currentQuery) {
-      this.url = $localize`Invalid settings`;
+    const query = this.currentQuery();
+    if (!query) {
+      this.url.set($localize`Invalid settings`);
       return;
     }
-    this.urlValid = false;
-    this.url = $localize`loading..`;
-    this.sharing = this.isDirectorySharing
+    this.urlValid.set(false);
+    this.url.set($localize`loading..`);
+    const created = this.isDirectorySharing()
       ? await this.sharingService.createSharingByDirectory(
-        this.currentQuery as DirectorySearch,
+        query as DirectorySearch,
         this.input.password,
         this.calcValidity(),
-        this.currentDir
+        this.currentDir()
       )
       : await this.sharingService.createSharingByQuery(
-        this.currentQuery,
+        query,
         this.input.password,
         this.calcValidity()
       );
-    this.url = this.sharingService.getUrl(this.sharing);
-    this.urlValid = true;
+    this.sharing.set(created);
+    this.url.set(this.sharingService.getUrl(created));
+    this.urlValid.set(true);
     await this.updateActiveSharesList();
   }
 
   async openModal(template: TemplateRef<unknown>): Promise<void> {
-    this.url = $localize`Click share to get a link.`;
-    this.urlValid = false;
-    this.sharing = null;
+    this.url.set($localize`Click share to get a link.`);
+    this.urlValid.set(false);
+    this.sharing.set(null);
     this.input.password = '';
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
     this.modalRef = this.modalService.show(template);
   }
@@ -276,14 +279,14 @@ export class GalleryShareComponent implements OnInit, OnDestroy {
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
-    this.sharing = null;
+    this.sharing.set(null);
   }
 
   async share() {
     await this.get();
-    if (await copyToClipboard(this.url)) {
+    if (await copyToClipboard(this.url())) {
       this.onCopy();
     }
   }

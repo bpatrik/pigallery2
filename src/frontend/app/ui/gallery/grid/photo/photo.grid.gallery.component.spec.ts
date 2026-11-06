@@ -9,6 +9,9 @@ import {ExtensionService} from '../../../../model/extension.service';
 import {MediaButtonModalService} from './media-button-modal/media-button-modal.service';
 import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../../../icons';
+import {provideRouter, Router} from '@angular/router';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 
 class MockThumbnailManagerService {
   getThumbnail() {
@@ -17,8 +20,7 @@ class MockThumbnailManagerService {
       Src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
       Error: false,
       loading: false,
-      destroy() {
-      },
+      destroy: vi.fn(),
     };
   }
 }
@@ -34,11 +36,9 @@ class MockExtensionService {
 }
 
 class MockMediaButtonModalService {
-  showModal() {
-  }
+  showModal = vi.fn();
 
-  executeButtonAction() {
-  }
+  executeButtonAction = vi.fn();
 }
 
 function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
@@ -56,7 +56,6 @@ function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
 }
 
 describe('GalleryPhotoComponent - Live Photo badge', () => {
-  let component: GalleryPhotoComponent;
   let fixture: ComponentFixture<GalleryPhotoComponent>;
 
   beforeEach(async () => {
@@ -72,7 +71,6 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalleryPhotoComponent);
-    component = fixture.componentInstance;
   });
 
   it('should render the LIVE badge for paired Live Photos', () => {
@@ -157,5 +155,64 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
       {field: 'keywords', comparator: 'contains', value: 'favorite'},
       {field: 'rating', comparator: '>=', value: 4},
     ])).toBe(false);
+  });
+});
+
+describe('GalleryPhotoComponent - search links', () => {
+  let fixture: ComponentFixture<GalleryPhotoComponent>;
+  let router: Router;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [GalleryPhotoComponent],
+      providers: [
+        provideIcons(appIcons),
+        provideRouter([]),
+        {provide: ThumbnailManagerService, useClass: MockThumbnailManagerService},
+        {provide: AuthenticationService, useValue: {canSearch: (): boolean => true}},
+        {provide: ExtensionService, useClass: MockExtensionService},
+        {provide: MediaButtonModalService, useClass: MockMediaButtonModalService},
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(GalleryPhotoComponent);
+    router = TestBed.inject(Router);
+  });
+
+  const searchHref = (value: string, type: SearchQueryTypes): string =>
+    router.serializeUrl(router.createUrlTree(['/search', SearchQueryUtils.urlify({
+      type,
+      matchType: TextSearchQueryMatchTypes.exact_match,
+      value
+    } as TextSearch)]));
+
+  const showInfo = (metadata: Partial<PhotoMetadata>): string[] => {
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({metadata: {size: {width: 4032, height: 3024}, ...metadata}} as any));
+    fixture.componentInstance.infoBarVisible.set(true);
+    fixture.detectChanges();
+    return Array.from(fixture.nativeElement.querySelectorAll('.info a'))
+      .map((a: HTMLAnchorElement) => a.getAttribute('href')!);
+  };
+
+  it('should link the place, the persons and the keywords to their search', () => {
+    const hrefs = showInfo({
+      positionData: {city: 'Székesfehérvár', country: 'Magyarország'},
+      faces: [{name: 'Árvíztűrő Péter'}, {name: 'Árvíztűrő Péter'}],
+      keywords: ['Balaton nyár', 'tükörfúrógép (2)']
+    } as any);
+    expect(hrefs).toEqual([
+      searchHref('Székesfehérvár', SearchQueryTypes.position),
+      searchHref('Árvíztűrő Péter', SearchQueryTypes.person),
+      searchHref('Balaton nyár', SearchQueryTypes.keyword),
+      searchHref('tükörfúrógép (2)', SearchQueryTypes.keyword),
+    ]);
+    expect(fixture.nativeElement.querySelector('.photo-position a').textContent).toBe('Székesfehérvár');
+  });
+
+  it('should follow a new media', () => {
+    showInfo({keywords: ['Balaton nyár']});
+    expect(showInfo({keywords: ['Tihany'], caption: 'Őszi kirándulás'})).toEqual([
+      searchHref('Tihany', SearchQueryTypes.keyword),
+    ]);
   });
 });

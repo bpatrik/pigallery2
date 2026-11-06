@@ -1,20 +1,19 @@
-import {Component, computed, input, model, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, input, model} from '@angular/core';
 import { TimepickerComponent } from 'ngx-bootstrap/timepicker';
 import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-timestamp-timepicker',
     templateUrl: './timepicker.component.html',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [TimepickerComponent, FormsModule]
 })
 export class TimeStampTimePickerComponent {
   /**
    * Minutes since midnight (UTC)
    */
-  readonly timestamp = model<number>(0);
+  readonly timestamp = model<number | undefined>(0);
   readonly date = computed((): Date => {
-    const val = this.timestamp();
+    const val = this.timestamp() ?? 0;
     const date = new Date();
     date.setUTCSeconds(0);
     date.setUTCMilliseconds(0);
@@ -22,7 +21,7 @@ export class TimeStampTimePickerComponent {
     date.setUTCMinutes(val % 60);
     return date;
   });
-  readonly name = input<string>(undefined);
+  readonly name = input<string>();
 
   onChange(date: Date | string): void {
     const d = new Date(date);

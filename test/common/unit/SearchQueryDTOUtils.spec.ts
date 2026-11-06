@@ -508,3 +508,16 @@ describe('SearchQueryDTOUtils.parseURLifiedQuery', () => {
     }
   });
 });
+
+describe('SearchQueryDTOUtils.urlifyExactMatch', () => {
+  it('should build the exact match search of a keyword, a person and a place', () => {
+    expect(SearchQueryUtils.urlifyExactMatch(SearchQueryTypes.keyword, 'Balaton nyár')).to.equal('{"t":104,"mt":1,"v":"Balaton nyár"}');
+    expect(SearchQueryUtils.urlifyExactMatch(SearchQueryTypes.person, 'Árvíztűrő Tükörfúrógép')).to.equal('{"t":105,"mt":1,"v":"Árvíztűrő Tükörfúrógép"}');
+    expect(SearchQueryUtils.urlifyExactMatch(SearchQueryTypes.position, 'Székesfehérvár')).to.equal('{"t":106,"mt":1,"v":"Székesfehérvár"}');
+  });
+
+  it('should be parsed back to the same query', () => {
+    const query = {type: SearchQueryTypes.keyword, matchType: TextSearchQueryMatchTypes.exact_match, value: 'Pécs "belváros" (2)'} as TextSearch;
+    expect(SearchQueryUtils.parseURLifiedQuery(SearchQueryUtils.urlifyExactMatch(query.type, query.value))).to.deep.equal(query);
+  });
+});

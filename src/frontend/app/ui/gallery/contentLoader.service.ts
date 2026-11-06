@@ -1,53 +1,47 @@
-import { Injectable, OnDestroy, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import {takeUntilDestroyed, toObservable} from '@angular/core/rxjs-interop';
 import {NetworkService} from '../../model/network/network.service';
 import {ContentWrapperUtils, ContentWrapperWithError, PackedContentWrapperWithError} from '../../../../common/entities/ContentWrapper';
 import {SubDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {GalleryCacheService} from './cache.gallery.service';
-import {BehaviorSubject, EMPTY, firstValueFrom, from, Observable, Subject, Subscription, timer} from 'rxjs';
+import {EMPTY, firstValueFrom, from, Subject, timer} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
 import {ShareService} from './share.service';
 import {QueryParams} from '../../../../common/QueryParams';
 import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
 import {Router} from '@angular/router';
-import {filter, map, startWith, switchMap} from 'rxjs/operators';
+import {filter, startWith, switchMap} from 'rxjs/operators';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
 import {FileDTO} from '../../../../common/entities/FileDTO';
 import {GalleryService} from './gallery.service';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 
 @Injectable({providedIn: 'root'})
-export class ContentLoaderService implements OnDestroy {
+export class ContentLoaderService {
   private networkService = inject(NetworkService);
   private galleryCacheService = inject(GalleryCacheService);
   private shareService = inject(ShareService);
   private galleryService = inject(GalleryService);
   private router = inject(Router);
 
-  public content: BehaviorSubject<ContentWrapperWithError>;
-  public originalContent: Observable<DirectoryContent>;
-  private ongoingContentRequest: string = null;
+  public readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
+  public readonly originalContent = computed((): DirectoryContent | undefined => {
+    const c = this.content();
+    return (c?.directory ? c.directory : c?.searchResult) ?? undefined;
+  });
+  private ongoingContentRequest: string | null = null;
   // directories that answered 'not found' since the last successfully loaded directory (avoids redirect loops)
   private readonly notFoundDirectories = new Set<string>();
-  private lastContentRequest: { type: 'directory' | 'search', value: string } = null;
+  private lastContentRequest: { type: 'directory' | 'search', value: string } | null = null;
   private pollingTimerRestart = new Subject<void>();
-  private pollingSub: Subscription;
 
   constructor() {
-    this.content = new BehaviorSubject<ContentWrapperWithError>(
-      {} as ContentWrapperWithError
-    );
-    this.originalContent = this.content.pipe(
-      map((c) => (c?.directory ? c?.directory : c?.searchResult))
-    );
     this.setupAutoUpdate();
   }
 
-  ngOnDestroy(): void {
-    this.unSubPolling();
-  }
-
   setupAutoUpdate() {
-    this.pollingSub = this.galleryService.autoPollIntervalS.pipe(
+    // polling is time based, so it stays a stream
+    toObservable(this.galleryService.autoPollIntervalS).pipe(
       switchMap(interval => {
         if (!interval) {
           return EMPTY; // stop polling
@@ -62,21 +56,21 @@ export class ContentLoaderService implements OnDestroy {
               interval * 1000
             ).pipe(
               filter(() => this.ongoingContentRequest === null),
-              switchMap(i => from(this.reloadCurrentContent()))
+              switchMap(() => from(this.reloadCurrentContent()))
             )
           )
         );
       })
-    ).subscribe({
+    ).pipe(takeUntilDestroyed()).subscribe({
       error: err => console.error(err)
     });
   }
 
   setContent(content: ContentWrapperWithError): void {
-    if (ContentWrapperUtils.equals(this.content.value, content)) {
+    if (ContentWrapperUtils.equals(this.content(), content)) {
       return;
     }
-    this.content.next(content);
+    this.content.set(content);
   }
 
   public async loadDirectory(directoryName: string, forceReload = false): Promise<void> {
@@ -89,14 +83,14 @@ export class ContentLoaderService implements OnDestroy {
     this.lastContentRequest = {type: 'directory', value: directoryName};
 
     // prepare server request
-    const params: { [key: string]: unknown } = {};
+    const params: Record<string, unknown> = {};
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
         params[QueryParams.gallery.sharingKey_query] =
           this.shareService.getSharingKey();
       }
     }
-    let cw :PackedContentWrapperWithError = null;
+    let cw: PackedContentWrapperWithError | null = null;
 
     try {
       if (
@@ -136,7 +130,7 @@ export class ContentLoaderService implements OnDestroy {
       return;
     }
 
-    if (!!cw?.directory) {
+    if (cw?.directory) {
       this.notFoundDirectories.clear();
       this.galleryCacheService.setDirectory(cw); // save it before adding references
     }
@@ -152,10 +146,10 @@ export class ContentLoaderService implements OnDestroy {
     const normalize = (d: string) => (d || '').replace(/\\/g, '/').split('/').filter(s => s !== '' && s !== '.').join('/');
     this.notFoundDirectories.add(normalize(directoryName));
 
-    let route: string[];
+    let route: string[] | null;
     if (this.shareService.isSharing()) {
       // the sharing loads in parallel with the content, so the 404 can arrive first
-      const sharing = this.shareService.sharingSubject.value ?? await firstValueFrom(this.shareService.currentSharing);
+      const sharing = this.shareService.sharing() ?? await firstValueFrom(this.shareService.currentSharing);
       route = this.shareService.getDefaultRoute(sharing);
     } else {
       route = ['/gallery', ''];
@@ -165,9 +159,10 @@ export class ContentLoaderService implements OnDestroy {
       this.setContent({error: $localize`Directory not found`} as ContentWrapperWithError);
       return;
     }
-    const queryParams: { [key: string]: string } = {};
-    if (this.shareService.isSharing()) {
-      queryParams[QueryParams.gallery.sharingKey_query] = this.shareService.getSharingKey();
+    const queryParams: Record<string, string> = {};
+    const sharingKey = this.shareService.getSharingKey();
+    if (this.shareService.isSharing() && sharingKey) {
+      queryParams[QueryParams.gallery.sharingKey_query] = sharingKey;
     }
     await this.router.navigate(route, {queryParams});
   }
@@ -208,9 +203,7 @@ export class ContentLoaderService implements OnDestroy {
     this.setContent(ContentWrapperUtils.unpack(cw));
   }
 
-  isSearchResult(): boolean {
-    return !!this.content.value.searchResult;
-  }
+  public readonly isSearchResult = computed((): boolean => !!this.content().searchResult);
 
   public async reloadCurrentContent(): Promise<void> {
     if (!this.lastContentRequest) {
@@ -221,14 +214,6 @@ export class ContentLoaderService implements OnDestroy {
       await this.loadDirectory(this.lastContentRequest.value, true);
     } else if (this.lastContentRequest.type === 'search') {
       await this.search(JSON.parse(this.lastContentRequest.value), true);
-    }
-  }
-
-  private unSubPolling() {
-
-    if (this.pollingSub) {
-      this.pollingSub.unsubscribe();
-      this.pollingSub = null;
     }
   }
 }

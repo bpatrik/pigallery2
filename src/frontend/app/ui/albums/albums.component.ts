@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -7,7 +7,6 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {FrameComponent} from '../frame/frame.component';
-import { AsyncPipe } from '@angular/common';
 import {AlbumComponent} from './album/album.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {FormsModule} from '@angular/forms';
@@ -21,15 +20,13 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
   selector: 'app-albums',
   templateUrl: './albums.component.html',
   styleUrl: './albums.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FrameComponent,
     AlbumComponent,
     NgIconComponent,
     FormsModule,
     GallerySearchQueryBuilderComponent,
-    SavedSearchPopupComponent,
-    AsyncPipe
+    SavedSearchPopupComponent
 ]
 })
 export class AlbumsComponent implements OnInit {
@@ -43,19 +40,19 @@ export class AlbumsComponent implements OnInit {
   private searchQueryParserService = inject(SearchQueryParserService);
 
   readonly container = viewChild<ElementRef>('container');
-  public size: number;
+  public readonly size = signal(0); // set from the container width in ngOnInit
   public savedSearch = {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
   };
-  private modalRef: BsModalRef;
+  private modalRef: BsModalRef | null;
 
   constructor() {
     this.albumsService.getAlbums().catch(console.error);
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.user.getValue().role >= UserRoles.Admin;
+    return this.authenticationService.isAuthorized(UserRoles.Admin);
   }
 
   get IsSearchQueryEmpty(): boolean {
@@ -63,22 +60,23 @@ export class AlbumsComponent implements OnInit {
     return !this.searchQueryParserService.stringify(this.savedSearch.searchQuery);
   }
 
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
     await this.shareService.wait();
     if (!this.authService.isAuthenticated()) {
-      return this.navigation.toLogin();
+      await this.navigation.toLogin();
+      return;
     }
     this.piTitleService.setTitle($localize`Albums`);
     this.updateSize();
   }
 
-  public async openModal(template: TemplateRef<any>): Promise<void> {
+  public async openModal(template: TemplateRef<unknown>): Promise<void> {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
     document.body.style.paddingRight = '0px';
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 
@@ -93,8 +91,12 @@ export class AlbumsComponent implements OnInit {
   private updateSize(): void {
     const size = 220 + 5;
     // body - container margin
-    const containerWidth = this.container().nativeElement.clientWidth - 30;
-    this.size = containerWidth / Math.round(containerWidth / size) - 5;
+    const container = this.container();
+    if (!container) {
+      return;
+    }
+    const containerWidth = container.nativeElement.clientWidth - 30;
+    this.size.set(containerWidth / Math.round(containerWidth / size) - 5);
   }
 }
 

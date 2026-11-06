@@ -1,6 +1,5 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, inject, linkedSignal } from '@angular/core';
 import {MediaButtonModalData, MediaButtonModalService} from './media-button-modal.service';
-import {Subscription} from 'rxjs';
 
 import {FormsModule} from '@angular/forms';
 import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../common/entities/extension/IClientUIConfig';
@@ -12,117 +11,53 @@ import {IClientMediaFields, IMediaRequestBodyData} from '../../../../../../../co
   },
   templateUrl: './media-button-modal.component.html',
   styleUrl: './media-button-modal.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule]
 })
-export class MediaButtonModalComponent implements OnInit, OnDestroy {
+export class MediaButtonModalComponent {
   private modalService = inject(MediaButtonModalService);
 
-  modalData: MediaButtonModalData | null = null;
-  formData: IMediaRequestBodyData = {};
-  private subscription: Subscription;
+  readonly modalData = this.modalService.modalData;
+  // reset for every new modal; the field inputs edit it in place, the custom fields through setCustomField()
+  readonly formData = linkedSignal<IMediaRequestBodyData>(() => {
+    const data = this.modalData();
+    return data ? this.initFormData(data) : {};
+  });
 
-  ngOnInit(): void {
-    this.subscription = this.modalService.modalData.subscribe(data => {
-      this.modalData = data;
-      if (data) {
-        this.initFormData();
-      }
+  readonly fieldLabels: Record<IClientMediaFields, string> = {
+    title: $localize`Title`,
+    caption: $localize`Caption`,
+    cameraData: $localize`Camera Data`,
+    positionData: $localize`Position Data`,
+    faces: $localize`Faces`,
+    size: $localize`Size`,
+    creationDate: $localize`Creation Date`,
+    creationDateOffset: $localize`Creation Date Offset`,
+    bitRate: $localize`Bit Rate`,
+    duration: $localize`Duration`,
+    fileSize: $localize`File Size`,
+    fps: $localize`FPS`,
+    keywords: $localize`Keywords`
+  };
+
+  // the current values of the fields of the modal
+  readonly fieldValues = computed((): Partial<Record<IClientMediaFields, string | number>> => {
+    const values: Partial<Record<IClientMediaFields, string | number>> = {};
+    (this.modalData()?.button?.popup?.fields || []).forEach(field => {
+      values[field] = this.getFieldValue(field);
     });
-  }
+    return values;
+  });
 
-  ngOnDestroy(): void {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-    }
-  }
-
-  getFieldLabel(field: IClientMediaFields): string {
-    const labels: { [key in IClientMediaFields]: string } = {
-      title: $localize`Title`,
-      caption: $localize`Caption`,
-      cameraData: $localize`Camera Data`,
-      positionData: $localize`Position Data`,
-      faces: $localize`Faces`,
-      size: $localize`Size`,
-      creationDate: $localize`Creation Date`,
-      creationDateOffset: $localize`Creation Date Offset`,
-      bitRate: $localize`Bit Rate`,
-      duration: $localize`Duration`,
-      fileSize: $localize`File Size`,
-      fps: $localize`FPS`,
-      keywords: $localize`Keywords`
-    };
-    return labels[field] || field;
-  }
-
-  getFieldValue(field: IClientMediaFields): any {
-    if (!this.modalData) {
-      return '';
-    }
-
-    const media = this.modalData.media;
-    const metadata = media.media.metadata;
-
-    switch (field) {
-      case 'title':
-      case 'caption':
-      case 'bitRate':
-      case 'creationDate':
-      case 'creationDateOffset':
-      case 'duration':
-      case 'fileSize':
-      case 'fps':
-        return (metadata as any)[field] || '';
-      case 'cameraData':
-      case 'positionData':
-      case 'size':
-        return JSON.stringify((metadata as any)[field] || {});
-      case 'faces':
-      case 'keywords':
-        return JSON.stringify((metadata as any)[field] || []);
-      default:
-        return '';
-    }
-  }
-
-  closeModal(): void {
-    this.modalService.hideModal();
-  }
-
-  onKeyDown(event: KeyboardEvent): void {
-    if (event.key === 'Escape' && this.modalData?.visible) {
-      this.closeModal();
-    }
-  }
-
-  executeAction(): void {
-    if (this.modalData && this.isFormValid()) {
-      // save value to reuse in the next modal
-      if (this.modalData?.button?.popup?.customFields) {
-        this.modalData.button.popup.customFields.forEach(field => {
-          if (field.keepValue) {
-            this.modalService.setValue(field.id, this.formData.customFields[field.id]);
-          }
-        });
-      }
-      this.modalService.executeButtonAction(
-        this.modalData.button,
-        this.modalData.media,
-        this.formData
-      ).catch(console.error);
-    }
-  }
-
-  isFormValid(): boolean {
-    if (!this.modalData?.button?.popup?.customFields) {
+  readonly isFormValid = computed((): boolean => {
+    const modalData = this.modalData();
+    if (!modalData?.button?.popup?.customFields) {
       return true;
     }
 
     // Check if all required custom fields are properly filled
-    for (const field of this.modalData.button.popup.customFields) {
+    for (const field of modalData.button.popup.customFields) {
       if (field.required) {
-        const value = this.formData.customFields[field.id];
+        const value = this.formData().customFields?.[field.id];
 
         // For boolean fields, required means it must be checked (true)
         if (field.type === 'boolean' && !value) {
@@ -130,7 +65,7 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
         }
 
         // For string fields, required means not empty
-        if (field.type === 'string' && (!value || value.trim() === '')) {
+        if (field.type === 'string' && (!value || String(value).trim() === '')) {
           return false;
         }
 
@@ -142,30 +77,99 @@ export class MediaButtonModalComponent implements OnInit, OnDestroy {
     }
 
     return true;
+  });
+
+  getFieldValue(field: IClientMediaFields): string | number {
+    const modalData = this.modalData();
+    if (!modalData) {
+      return '';
+    }
+
+    const media = modalData.media;
+    const metadata = media.media.metadata;
+
+    switch (field) {
+      case 'title':
+      case 'caption':
+      case 'bitRate':
+      case 'creationDate':
+      case 'creationDateOffset':
+      case 'duration':
+      case 'fileSize':
+      case 'fps':
+        return (metadata[field as keyof typeof metadata] as string | number | undefined) || '';
+      case 'cameraData':
+      case 'positionData':
+      case 'size':
+        return JSON.stringify(metadata[field as keyof typeof metadata] || {});
+      case 'faces':
+      case 'keywords':
+        return JSON.stringify(metadata[field as keyof typeof metadata] || []);
+      default:
+        return '';
+    }
   }
 
-  private initFormData(): void {
-    this.formData = {};
-    if (this.modalData?.button?.popup?.fields) {
-      this.formData.fields = {};
-      this.modalData.button.popup.fields.forEach(field => {
-        this.formData.fields[field] = this.getFieldValue(field);
-      });
+  closeModal(): void {
+    this.modalService.hideModal();
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.modalData()?.visible) {
+      this.closeModal();
     }
-    if (this.modalData?.button?.popup?.customFields) {
-      this.formData.customFields = {};
-      this.modalData.button.popup.customFields.forEach(field => {
+  }
+
+  executeAction(): void {
+    const modalData = this.modalData();
+    const formData = this.formData();
+    if (modalData && this.isFormValid()) {
+      // save value to reuse in the next modal
+      if (modalData?.button?.popup?.customFields) {
+        modalData.button.popup.customFields.forEach(field => {
+          if (field.keepValue) {
+            this.modalService.setValue(field.id, formData.customFields?.[field.id]);
+          }
+        });
+      }
+      this.modalService.executeButtonAction(
+        modalData.button,
+        modalData.media,
+        formData
+      ).catch(console.error);
+    }
+  }
+
+  setCustomField(id: string, value: string | number | boolean): void {
+    this.formData.update((f) => ({...f, customFields: {...f.customFields, [id]: value}}));
+  }
+
+  private initFormData(modalData: MediaButtonModalData): IMediaRequestBodyData {
+    const formData: IMediaRequestBodyData = {};
+    if (modalData.button?.popup?.fields) {
+      const fields: Record<string, string | number> = {};
+      modalData.button.popup.fields.forEach(field => {
+        fields[field] = this.getFieldValue(field);
+      });
+      formData.fields = fields;
+    }
+    if (modalData.button?.popup?.customFields) {
+      const customFields: Record<string, string | number | boolean> = {};
+      modalData.button.popup.customFields.forEach(field => {
         // load last value if we should keep it
-        if (field.keepValue && this.modalService.getValue(field.id) !== undefined) {
-          this.formData.customFields[field.id] = this.modalService.getValue(field.id);
+        const savedValue = this.modalService.getValue(field.id);
+        if (field.keepValue && savedValue !== undefined) {
+          customFields[field.id] = savedValue;
           return;
         }
-        this.formData.customFields[field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
+        customFields[field.id] = field.defaultValue ?? this.getDefaultValueForType(field.type);
       });
+      formData.customFields = customFields;
     }
+    return formData;
   }
 
-  private getDefaultValueForType(type: 'string' | 'number' | 'boolean'): any {
+  private getDefaultValueForType(type: 'string' | 'number' | 'boolean'): string | number | boolean {
     switch (type) {
       case 'string':
         return '';

@@ -1,11 +1,11 @@
-<app-gallery-search-field-base [(ngModel)]="rawSearchText"
+<app-gallery-search-field-base [(ngModel)]="rawSearchText" [ngModelOptions]="{standalone: true}"
                                (ngModelChange)="validateRawSearchText()"
-                               (search)="search.emit()"
+                               (searchSubmit)="searchSubmit.emit()"
                                [placeholder]="placeholder()"
                                class="rounded-2"
                                name="form-search-field" />
 <hr>
-<app-gallery-search-query-entry [(ngModel)]="searchQueryDTO"
+<app-gallery-search-query-entry [(ngModel)]="searchQueryDTO" [ngModelOptions]="{standalone: true}"
   (change)="onChange()"
   (ngModelChange)="onChange()"
   name="search-root"

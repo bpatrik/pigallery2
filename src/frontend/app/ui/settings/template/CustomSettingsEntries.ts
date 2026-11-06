@@ -29,7 +29,7 @@ export class CustomSettingsEntries {
     {c: SVGIconConfig, name: 'SVGIconConfig'},
   ];
 
-  public static getConfigName(s: { tags?: { uiType?: string }, type?: propertyTypes, arrayType?: propertyTypes }): string {
+  public static getConfigName(s: { tags?: { uiType?: string }, type?: propertyTypes, arrayType?: propertyTypes }): string | undefined {
     let c = s.tags?.uiType;
     try {
       if (!c) {
@@ -38,7 +38,7 @@ export class CustomSettingsEntries {
             if (s?.arrayType) {
               return s?.arrayType == e.c;
             }
-          } catch (e) {
+          } catch {
             // do nothing
           }
           if (s?.type) {
@@ -50,7 +50,7 @@ export class CustomSettingsEntries {
           c = ent.name;
         }
       }
-    } catch (e) {
+    } catch {
       // no action
     }
     return c;
@@ -61,7 +61,7 @@ export class CustomSettingsEntries {
     if (!s.tags?.uiType && s.arrayType) {
       return cN + '-Array';
     }
-    return cN;
+    return cN ?? '';
   }
 
   public static iS(s: { tags?: { uiType?: string }, type?: propertyTypes, arrayType?: propertyTypes }) {

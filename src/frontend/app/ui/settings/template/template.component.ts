@@ -1,4 +1,5 @@
-import { Component, OnChanges, OnDestroy, OnInit, inject, viewChild, input, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, viewChild, input, computed, signal, DestroyRef} from '@angular/core';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
@@ -8,7 +9,6 @@ import {JobProgressDTO} from '../../../../../common/entities/job/JobProgressDTO'
 import {JobDTOUtils} from '../../../../../common/entities/job/JobDTO';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {FormsModule, UntypedFormControl} from '@angular/forms';
-import {Subscription} from 'rxjs';
 import {IWebConfigClassPrivate} from 'typeconfig/common';
 import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
@@ -18,53 +18,30 @@ import {ErrorDTO} from '../../../../../common/entities/Error';
 import {ISettingsComponent} from './ISettingsComponent';
 import {CustomSettingsEntries} from './CustomSettingsEntries';
 import {NgIconComponent} from '@ng-icons/core';
-import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
+import {NgTemplateOutlet} from '@angular/common';
 import {SettingsEntryComponent} from './settings-entry/settings-entry.component';
 import {JobButtonComponent} from '../workflow/button/job-button.settings.component';
 import {JobProgressComponent} from '../workflow/progress/job-progress.settings.component';
 import {ExtensionInstallerService} from '../extension-installer/extension-installer.service';
+import {RecursiveState, StatefulConfig, subStates} from './RecursiveState';
 
 
-interface ConfigState {
-  value: {
-    [key: string]: RecursiveState;
-  };
-  default: {
-    [key: string]: RecursiveState;
-  };
-  readonly?: boolean;
-  tags?: TAGS;
-  volatile?: boolean;
-  isEnumType?: boolean;
-  isConfigType?: boolean;
-  isConfigArrayType?: boolean;
+export interface UiJobRow {
+  job: UiJob;
+  danger: boolean;
+  relevant: boolean;
+  progress: JobProgressDTO;
 }
 
-export interface RecursiveState extends ConfigState {
-  value: any;
-  default: any;
-  volatile?: any;
-  tags?: any;
-  isConfigType?: any;
-  isConfigArrayType?: any;
-  isEnumType?: any;
-  readonly?: any;
-  toJSON?: any;
-  onChange?: any;
-  original?: any;
-  shouldHide?: any;
-
-  [key: string]: RecursiveState;
-}
+type UiJob = NonNullable<TAGS['uiJob']>[number];
 
 @Component({
   selector: 'app-settings-template',
   templateUrl: './template.component.html',
   styleUrl: './template.component.css',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent, AsyncPipe]
+  imports: [FormsModule, NgIconComponent, NgTemplateOutlet, SettingsEntryComponent, JobButtonComponent, JobProgressComponent]
 })
-export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISettingsComponent {
+export class TemplateComponent implements OnInit, ISettingsComponent {
   protected authService = inject(AuthenticationService);
   private navigation = inject(NavigationService);
   protected notification = inject(NotificationService);
@@ -73,193 +50,245 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
   private extensionService = inject(ExtensionInstallerService);
 
 
-  public icon: string;
-  readonly ConfigPath = input<string>(undefined);
-  nestedConfigs: { id: string, name: string, visible: () => boolean, icon: string }[] = [];
+  private destroyRef = inject(DestroyRef);
+
+  readonly ConfigPath = input<string>();
 
   readonly form = viewChild<UntypedFormControl>('settingsForm');
 
 
-  public inProgress = false;
-  public error: string = null;
-  public changed = false;
-  public states: RecursiveState = {} as RecursiveState;
-  public readonly ConfigStyle = ConfigStyle;
-  protected name: string;
-  protected sliceFN?: (s: IWebConfigClassPrivate<TAGS> & WebConfig) => ConfigState;
-  private subscription: Subscription = null;
-  private settingsSubscription: Subscription = null;
-
-  get Name(): string {
-    return this.changed ? this.name + '*' : this.name;
-  }
-
-  get Changed(): boolean {
-    return this.changed;
-  }
-
-  get HasAvailableSettings(): boolean {
-    return !this.states?.shouldHide || !this.states?.shouldHide();
-  }
-
-  getSaveTitle(isFormValid: boolean): string {
-    if (isFormValid) {
-      return $localize`Can't save: invalid form.`;
-    }
-    if (!this.changed) {
-      return $localize`Can't save: not changed.`;
-    }
-    if (this.inProgress) {
-      return $localize`Can't save: saving in progress.`;
-    }
-    return $localize`Click to save.`;
-  }
-
-  // Side effect: subscribes to the settings slice of the new config path.
-  ngOnChanges(): void {
-    const ConfigPath = this.ConfigPath();
-    if (!ConfigPath) {
-      this.setSliceFN(c => ({value: c as any, isConfigType: true, type: WebConfig} as any));
-    } else {
-      this.setSliceFN(c => c.__state[this.ConfigPath()]);
-    }
-    this.name = this.states.tags?.name || ConfigPath;
-    this.nestedConfigs = [];
-    for (const key of this.getKeys(this.states)) {
-      if (this.states.value.__state[key].isConfigType &&
-        this.states?.value.__state[key].tags?.uiIcon) {
-        this.nestedConfigs.push({
-          id: ConfigPath + '.' + key,
-          name: this.states?.value.__state[key].tags?.name,
-          icon: this.states?.value.__state[key].tags?.uiIcon,
-          visible: () => !(this.states.value.__state[key].shouldHide && this.states.value.__state[key].shouldHide())
+  public readonly inProgress = signal(false);
+  public readonly error = signal<string | null>(null);
+  public readonly changed = signal(false);
+  /**
+   * A fresh, instrumented clone of the current settings slice.
+   * The UI edits it in place; it is only re-derived when the settings are (re)loaded.
+   */
+  public readonly states = computed<RecursiveState>(() => {
+    const s = this.settingsService.settings().clone() as IWebConfigClassPrivate<TAGS> & WebConfig;
+    const configPath = this.ConfigPath();
+    const states = (!configPath ?
+      {value: s, isConfigType: true, type: WebConfig} :
+      s.__state[configPath]) as unknown as RecursiveState;
+    this.instrument(states, null);
+    return states;
+  });
+  public readonly icon = computed<string | undefined>(() => this.states().tags?.uiIcon);
+  // the config object of the card, its `enabled` switch is in the header
+  protected readonly config = computed(() => this.states().value as StatefulConfig & { enabled?: boolean });
+  protected readonly uiJob = computed(() => this.states().tags?.uiJob);
+  protected readonly uiJobHasDescription = computed(() => !!this.uiJob()?.[0].description);
+  public readonly nestedConfigs = computed(() => {
+    const states = this.states();
+    const nestedConfigs: { id: string, name: string | undefined, visible: () => boolean, icon: string }[] = [];
+    for (const key of states.keys || []) {
+      const st = subStates(states)[key];
+      if (st.isConfigType && st.tags?.uiIcon) {
+        nestedConfigs.push({
+          id: this.ConfigPath() + '.' + key,
+          name: st.tags.name,
+          icon: st.tags.uiIcon,
+          visible: () => !(st.shouldHide && st.shouldHide())
         });
       }
     }
+    return nestedConfigs;
+  });
+  public readonly ConfigStyle = ConfigStyle;
+  protected readonly name = computed<string | undefined>(() => this.states().tags?.name || this.ConfigPath());
+  public readonly Name = computed<string | undefined>(() => this.changed() ? this.name() + '*' : this.name());
+  /**
+   * All uiJob lists of the states tree, they only change when the states are re-derived.
+   */
+  private readonly uiJobLists = computed<UiJob[][]>(() => {
+    const lists: UiJob[][] = [];
+    const collect = (st: RecursiveState): void => {
+      if (st.tags?.uiJob) {
+        lists.push(st.tags.uiJob);
+      }
+      for (const k of st.keys || []) {
+        collect(subStates(st)[k]);
+      }
+      for (const e of st.arrayEntries || []) {
+        for (const k of e.keys) {
+          collect(e.value.__state[k]);
+        }
+      }
+    };
+    collect(this.states());
+    return lists;
+  });
+  /**
+   * The default config of each uiJob, it changes only when the available jobs are (re)loaded.
+   */
+  private readonly uiJobDefaultConfigs = computed<Map<string, Record<string, unknown> | null>>(() => {
+    const configs = new Map<string, Record<string, unknown> | null>();
+    for (const list of this.uiJobLists()) {
+      for (const job of list) {
+        configs.set(job.job, this.jobsService.getDefaultConfig(job.job));
+      }
+    }
+    return configs;
+  });
+  /**
+   * The job buttons and progress rows of each uiJob list (keyed by the list).
+   */
+  public readonly uiJobRows = computed<Map<UiJob[], UiJobRow[]>>(() => {
+    const settings = this.settingsService.settings();
+    const progress = this.jobsService.progress();
+    const configs = this.uiJobDefaultConfigs();
+    const rows = new Map<UiJob[], UiJobRow[]>();
+    for (const list of this.uiJobLists()) {
+      rows.set(list, list.map(job => {
+        const config = configs.get(job.job);
+        return {
+          job,
+          danger: job.job.includes('Reset') || job.job.includes('Delete'),
+          relevant: !job.relevant || job.relevant(settings),
+          progress: progress[JobDTOUtils.getHashName(job.job, config || {})]
+        };
+      }));
+    }
+    return rows;
+  });
 
+  get Changed(): boolean {
+    return this.changed();
+  }
+
+  get HasAvailableSettings(): boolean {
+    return !this.states().shouldHide?.();
+  }
+
+  getSaveTitle(isFormInvalid: boolean): string {
+    if (isFormInvalid) {
+      return $localize`Can't save: invalid form.`;
+    }
+    if (!this.changed()) {
+      return $localize`Can't save: not changed.`;
+    }
+    if (this.inProgress()) {
+      return $localize`Can't save: saving in progress.`;
+    }
+    return $localize`Click to save.`;
   }
 
   ngOnInit(): void {
 
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user.value.role < UserRoles.Admin
+      !this.authService.isAuthorized(UserRoles.Admin)
     ) {
       this.navigation.toLogin();
       return;
     }
     this.getSettings();
+    // the card's jobs show their progress, also when the Jobs card (that subscribes too) is hidden
+    this.jobsService.subscribeToProgress();
+    this.destroyRef.onDestroy(() => this.jobsService.unsubscribeFromProgress());
 
     // TODO: fix after this issue is fixed: https://github.com/angular/angular/issues/24818
-    this.subscription = this.form().valueChanges.subscribe(() => {
+    this.form()?.valueChanges?.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.onOptionChange();
     });
-
-
   }
 
-  ngOnDestroy(): void {
-    if (this.subscription != null) {
-      this.subscription.unsubscribe();
-    }
-    if (this.settingsSubscription != null) {
-      this.settingsSubscription.unsubscribe();
-    }
-  }
-
-  setSliceFN(sliceFN?: (s: IWebConfigClassPrivate<TAGS> & WebConfig) => ConfigState) {
-    if (sliceFN) {
-      this.sliceFN = sliceFN;
-      this.settingsSubscription = this.settingsService.settings.subscribe(
-        this.onNewSettings
-      );
-    }
-  }
-
-  onNewSettings = (s: IWebConfigClassPrivate<TAGS> & WebConfig) => {
-    this.states = this.sliceFN(s.clone()) as RecursiveState;
-
-    const instrument = (st: RecursiveState, parent: RecursiveState) => {
-      const shouldHide = (state: RecursiveState) => {
-        return () => {
-          if (state.volatile) {
-            return true;
-          }
-
-          if (state.tags &&
-            ((state.tags.relevant && !state.tags.relevant(parent.value))
-              || state.tags.secret)) {
-            return true;
-          }
-
-          // if all sub elements are hidden, hide the parent too.
-          if (state.isConfigType) {
-            if (state.value && state.value.__state &&
-              Object.keys(state.value.__state).findIndex(k => !st.value.__state[k].shouldHide()) === -1) {
-              return true;
-            }
-          }
-
-          const forcedVisibility = !(state.tags?.priority > this.settingsService.configPriority ||
-            //if this value should not change in Docker, lets hide it
-            (this.settingsService.configPriority === ConfigPriority.basic &&
-              state.tags?.dockerSensitive && this.settingsService.settings.value.Environment.isDocker));
-
-          if (state.isConfigArrayType) {
-            for (let i = 0; i < state.value?.length; ++i) {
-              for (const k of Object.keys(state.value[i].__state)) {
-                if (!Utils.equalsFilter(
-                  state.value[i]?.__state[k]?.value,
-                  state.default[i] ? state.default[i][k] : undefined,
-                  ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
-
-                  return false;
-                }
-              }
-            }
-            return !forcedVisibility;
-          }
-
-
-          return (!forcedVisibility &&
-            Utils.equalsFilter(state.value, state.default,
-              ['__propPath', '__created', '__prototype', '__rootConfig']) &&
-            Utils.equalsFilter(state.original, state.default,
-              ['__propPath', '__created', '__prototype', '__rootConfig']));
-        };
-      };
-
-      st.shouldHide = shouldHide(st);
-      st.onChange = this.onOptionChange;
-      st.rootConfig = parent?.value;
-      if (typeof st.value !== 'undefined') {
-        st.original = Utils.clone(st.value);
-      }
-
-      if (st.isConfigType && st.value) {
-        for (const k of Object.keys(st.value.__state)) {
-          instrument(st.value.__state[k], st);
-        }
-      }
-      if (st.isConfigArrayType && st.value) {
-        for (let i = 0; i < st.value?.length; ++i) {
-          for (const k of Object.keys(st.value[i].__state)) {
-            instrument(st.value[i].__state[k], st);
-          }
-        }
-      }
-    };
-
-    instrument(this.states, null);
-    this.icon = this.states.tags?.uiIcon;
-  };
-
-  onOptionChange = () => {
-    setTimeout(() => {
-      const settingsSame = (state: RecursiveState): boolean => {
-        if (typeof state === 'undefined') {
+  // Adds the UI helpers (shouldHide, onChange, original value, ...) to every state of the tree.
+  private instrument(st: RecursiveState, parent: RecursiveState | null): void {
+    const shouldHide = (state: RecursiveState) => {
+      return () => {
+        if (state.volatile) {
           return true;
         }
+
+        if (state.tags &&
+          ((state.tags.relevant && !state.tags.relevant(parent?.value))
+            || state.tags.secret)) {
+          return true;
+        }
+
+        // if all sub elements are hidden, hide the parent too.
+        if (state.isConfigType) {
+          if (state.value && subStates(state) &&
+            Object.keys(subStates(state)).findIndex(k => !subStates(st)[k].shouldHide?.()) === -1) {
+            return true;
+          }
+        }
+
+        const priority = state.tags?.priority;
+        const forcedVisibility = !((priority !== undefined && priority > this.settingsService.configPriority()) ||
+          //if this value should not change in Docker, lets hide it
+          (this.settingsService.configPriority() === ConfigPriority.basic &&
+            state.tags?.dockerSensitive && this.settingsService.settings().Environment.isDocker));
+
+        if (state.isConfigArrayType) {
+          const items = state.value as StatefulConfig[] | undefined;
+          const defaults = state.default as Record<string, unknown>[];
+          for (let i = 0; i < (items?.length ?? 0); ++i) {
+            for (const k of Object.keys(items![i].__state)) {
+              if (!Utils.equalsFilter(
+                items![i]?.__state[k]?.value,
+                defaults[i] ? defaults[i][k] : undefined,
+                ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
+
+                return false;
+              }
+            }
+          }
+          return !forcedVisibility;
+        }
+
+
+        return (!forcedVisibility &&
+          Utils.equalsFilter(state.value, state.default,
+            ['__propPath', '__created', '__prototype', '__rootConfig']) &&
+          Utils.equalsFilter(state.original, state.default,
+            ['__propPath', '__created', '__prototype', '__rootConfig']));
+      };
+    };
+
+    st.shouldHide = shouldHide(st);
+    st.onChange = this.onOptionChange;
+    st.rootConfig = parent?.value as StatefulConfig | undefined;
+    if (typeof st.value !== 'undefined') {
+      st.original = Utils.clone(st.value);
+    }
+    const isCustom = CustomSettingsEntries.iS(st);
+    st.isExpandableConfig = !!st.isConfigType && !isCustom;
+    st.isExpandableArrayConfig = !!st.isConfigArrayType && !isCustom;
+    st.isExtension = !!(st.isConfigType && st.value) && this.isExtension(st);
+
+    if (st.isConfigType && st.value) {
+      for (const k of Object.keys(subStates(st))) {
+        this.instrument(subStates(st)[k], st);
+      }
+    }
+    if (st.isConfigArrayType && st.value) {
+      for (const item of st.value as StatefulConfig[]) {
+        for (const k of Object.keys(item.__state)) {
+          this.instrument(item.__state[k], st);
+        }
+      }
+    }
+    // after the children, as sorting reads their flags
+    st.keys = st.isConfigType && st.value ? this.sortKeys(subStates(st)) : [];
+    // A snapshot of the items: edits inside them show up, but adding or removing items does not until
+    // the settings are reloaded. No UI does that for these arrays (the editable ones have custom entries).
+    if (st.isExpandableArrayConfig && st.value) {
+      st.arrayEntries = (st.value as StatefulConfig[])
+        .map(v => ({value: v, keys: this.sortKeys(v.__state)}));
+    }
+  }
+
+  onOptionChange = () => {
+    this.settingsService.edits.update(e => e + 1);
+    setTimeout(() => {
+      // walks every property, until it finds the states (they have an original value)
+      const settingsSame = (s: unknown): boolean => {
+        if (typeof s === 'undefined') {
+          return true;
+        }
+        const state = s as Record<string, unknown> & Partial<RecursiveState>;
         if (typeof state.original === 'object') {
           return Utils.equalsFilter(state.value, state.original,
             ['__propPath', '__created', '__prototype', '__rootConfig', '__state']);
@@ -279,7 +308,7 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
         return true;
       };
 
-      this.changed = !settingsSame(this.states);
+      this.changed.set(!settingsSame(this.states()));
     }, 0);
   };
 
@@ -287,60 +316,43 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
     this.getSettings();
   }
 
-  /**
-   * main template should list it
-   * @param c
-   */
-  isExpandableConfig(c: ConfigState) {
-    return c.isConfigType && !CustomSettingsEntries.iS(c);
-  }
-
-  isExpandableArrayConfig(c: ConfigState) {
-    return c.isConfigArrayType && !CustomSettingsEntries.iS(c);
-  }
-
   public async save(): Promise<boolean> {
-    this.inProgress = true;
-    this.error = '';
+    this.inProgress.set(true);
+    this.error.set('');
     try {
-      const state = WebConfigClassBuilder.attachInterface(this.states.value).toJSON();
+      const state = WebConfigClassBuilder.attachInterface(this.states().value).toJSON();
       await this.settingsService.updateSettings(state, this.ConfigPath());
       await this.getSettings();
       this.notification.success(
-        this.Name + ' ' + $localize`settings saved`,
+        this.Name() + ' ' + $localize`settings saved`,
         $localize`Success`
       );
-      this.inProgress = false;
+      this.inProgress.set(false);
       return true;
     } catch (err) {
       console.error(err);
       if (err.message) {
-        this.error = (err as ErrorDTO).message;
+        this.error.set((err as ErrorDTO).message ?? null);
       }
     }
 
-    this.inProgress = false;
+    this.inProgress.set(false);
     return false;
   }
 
-  getKeys(states: any): string[] {
-    if (states.keys) {
-      return states.keys;
-    }
-    if (!states.value) {
-      return [];
-    }
-    const s = states.value.__state;
-    const keys = Object.keys(s).sort((a, b) => {
-      if ((this.isExpandableConfig(s[a]) || s[a].isConfigArrayType) !== (this.isExpandableConfig(s[b]) || s[b].isConfigArrayType)) {
-        if (this.isExpandableConfig(s[a]) || s[a].isConfigArrayType) {
+  // Expandable sub configs and arrays go last, the rest by priority and name.
+  private sortKeys(s: Record<string, RecursiveState>): string[] {
+    return Object.keys(s).sort((a, b) => {
+      if ((s[a].isExpandableConfig || s[a].isConfigArrayType) !== (s[b].isExpandableConfig || s[b].isConfigArrayType)) {
+        if (s[a].isExpandableConfig || s[a].isConfigArrayType) {
           return 1;
         } else {
           return -1;
         }
       }
       if (s[a].tags?.priority !== s[b].tags?.priority) {
-        return s[a].tags?.priority - s[b].tags?.priority;
+        // NaN when only one of them has a priority, sort() treats that as equal
+        return (s[a].tags?.priority ?? NaN) - (s[b].tags?.priority ?? NaN);
       }
 
       if (a === 'enabled' && b !== 'enabled') {
@@ -348,27 +360,22 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
       } else if (b === 'enabled') {
         return 1;
       }
-      return (s[a].tags?.name as string || a).localeCompare(s[b].tags?.name || b);
+      return (s[a].tags?.name || a).localeCompare(s[b].tags?.name || b);
     });
-    states.keys = keys;
-    return states.keys;
   }
 
-  getProgress(uiJob: { job: string, config?: any }): JobProgressDTO {
-    if (!uiJob.config) {
-      uiJob.config = this.jobsService.getDefaultConfig(uiJob.job);
+  private isExtension(c: RecursiveState): boolean {
+    const propPath = (c?.value as StatefulConfig | undefined)?.__propPath;
+    if (typeof propPath !== 'string') {
+      return false;
     }
-    return this.jobsService.progress.value[JobDTOUtils.getHashName(uiJob.job, uiJob.config || {})];
+    return propPath.substring(0, propPath.lastIndexOf('.')) == 'Extensions.extensions';
   }
 
-  protected isExtension(c: ConfigState): boolean {
-    return (c?.value?.__propPath as any).substring(0, (c?.value?.__propPath as any).lastIndexOf('.')) == 'Extensions.extensions';
-  }
-
-  protected async removeExtension(c: ConfigState): Promise<void> {
-    const extensionPath = c.value.__state['path'].value;
+  protected async removeExtension(c: RecursiveState): Promise<void> {
+    const extensionPath = subStates(c)['path'].value as string;
     try {
-      this.inProgress = true;
+      this.inProgress.set(true);
       await this.extensionService.deleteExtension(extensionPath);
       await this.settingsService.getSettings();
       this.notification.success(
@@ -379,15 +386,15 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
       console.error(err);
       this.notification.error($localize`Failed to delete extension`, err);
     } finally {
-      this.inProgress = false;
+      this.inProgress.set(false);
     }
   }
 
 
-  protected async reloadExtension(c: ConfigState): Promise<void> {
-    const extensionPath = c.value.__state['path'].value;
+  protected async reloadExtension(c: RecursiveState): Promise<void> {
+    const extensionPath = subStates(c)['path'].value as string;
     try {
-      this.inProgress = true;
+      this.inProgress.set(true);
       await this.extensionService.reloadExtension(extensionPath);
       await this.settingsService.getSettings();
       this.notification.success(
@@ -398,12 +405,12 @@ export class TemplateComponent implements OnInit, OnChanges, OnDestroy, ISetting
       console.error(err);
       this.notification.error($localize`Failed to reload extension`, err);
     } finally {
-      this.inProgress = false;
+      this.inProgress.set(false);
     }
   }
 
   private async getSettings(): Promise<void> {
     await this.settingsService.getSettings();
-    this.changed = false;
+    this.changed.set(false);
   }
 }

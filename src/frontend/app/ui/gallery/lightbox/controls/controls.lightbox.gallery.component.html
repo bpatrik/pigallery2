@@ -1,28 +1,28 @@
-<div id="controllers-container" #root>
-  @if (TopLeftTitle || TopLeftSubtitle) {
-    <div [class.dim-controls]="controllersDimmed" class="controls-title controls-top-left-title"
-      [class.controls-nodim]="lightboxService.captionAlwaysOn"
+<div id="controllers-container">
+  @if (topLeftTitle() || topLeftSubtitle()) {
+    <div [class.dim-controls]="controllersDimmed()" class="controls-title controls-top-left-title"
+      [class.controls-nodim]="lightboxService.captionAlwaysOn()"
       >
-      @if (TopLeftTitle) {
-        <div class="controls-title-text">{{ TopLeftTitle }}</div>
+      @if (topLeftTitle()) {
+        <div class="controls-title-text">{{ topLeftTitle() }}</div>
       }
-      @if (TopLeftSubtitle) {
-        <div class="controls-subtitle-text">{{ TopLeftSubtitle }}</div>
+      @if (topLeftSubtitle()) {
+        <div class="controls-subtitle-text">{{ topLeftSubtitle() }}</div>
       }
     </div>
   }
 
 
-  <div [class.dim-controls]="controllersDimmed"
+  <div [class.dim-controls]="controllersDimmed()"
     class="controls controls-top">
     <div class="controls-background rounded-start-bottom">
-      <div class="highlight control-button" (click)="toggleInfoPanel.emit()"
+      <div role="button" tabindex="-1" class="highlight control-button" (click)="toggleInfoPanel.emit()"
         title="info key: i" i18n-title>
         <ng-icon name="ionInformationOutline" />
       </div>
 
-      @if (fullScreenService.isFullScreenEnabled()) {
-        <div
+      @if (fullScreenService.fullScreenEnabled()) {
+        <div role="button" tabindex="-1"
           class="highlight control-button"
           (click)="toggleFullScreen.emit()"
           title="toggle fullscreen, key: f" i18n-title>
@@ -31,8 +31,8 @@
         </div>
       }
 
-      @if (!fullScreenService.isFullScreenEnabled()) {
-        <div
+      @if (!fullScreenService.fullScreenEnabled()) {
+        <div role="button" tabindex="-1"
           class="highlight control-button"
           (click)="toggleFullScreen.emit()"
           title="toggle fullscreen, key: f" i18n-title>
@@ -51,10 +51,10 @@
         <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu dropdown-menu-right"
           role="menu" aria-labelledby="button-basic">
           <li role="menuitem">
-            @if (activePhoto()) {
+            @if (activePhoto(); as activePhoto) {
               <a
-                [href]="activePhoto().gridMedia().getOriginalMediaPath()"
-                [download]="activePhoto().gridMedia().media.name"
+                [href]="originalMediaPath()"
+                [download]="activePhoto.media.name"
                 class="dropdown-item">
                 <ng-icon class="me-2"
                 name="ionDownloadOutline" title="Download" i18n-title />
@@ -71,7 +71,8 @@
               <span class="pe-2" i18n-title title="Slideshow playback speed" i18n>Slideshow speed:</span>
               <select
                 class="form-select d-inline-block w-auto"
-                [(ngModel)]="lightboxService.slideshowSpeed">
+                [ngModel]="lightboxService.slideshowSpeed()"
+                (ngModelChange)="lightboxService.setSlideshowSpeed($event)">
                 @for (speed of playBackDurations; track speed) {
                   <option [value]="speed">{{ speed }}s</option>
                 }
@@ -88,7 +89,8 @@
                   role="switch"
                   name="caption-switch"
                   id="caption-switch"
-                  [(ngModel)]="lightboxService.captionAlwaysOn">
+                  [ngModel]="lightboxService.captionAlwaysOn()"
+                  (ngModelChange)="lightboxService.setCaptionAlwaysOn($event)">
                 </div>
               </div>
             </li>
@@ -102,7 +104,8 @@
                     role="switch"
                     name="faces-switch"
                     id="faces-switch"
-                    [(ngModel)]="lightboxService.facesAlwaysOn">
+                    [ngModel]="lightboxService.facesAlwaysOn()"
+                    (ngModelChange)="lightboxService.setFacesAlwaysOn($event)">
                   </div>
                 </div>
               </li>
@@ -116,11 +119,12 @@
                       role="switch"
                       name="loop-slideshow-switch"
                       id="loop-slideshow-switch"
-                      [(ngModel)]="lightboxService.loopSlideshow">
+                      [ngModel]="lightboxService.loopSlideshow()"
+                      (ngModelChange)="lightboxService.setLoopSlideshow($event)">
                     </div>
                   </div>
                 </li>
-                @if (activePhoto() && activePhoto().gridMedia().isVideo()) {
+                @if (isVideo()) {
                   <li
                     role="menuitem">
             <div class="dropdown-item d-flex justify-content-between  align-items-center
@@ -132,7 +136,8 @@
                           role="switch"
                           name="loop-videos-switch"
                           id="loop-videos-switch"
-                          [(ngModel)]="lightboxService.loopVideos">
+                          [ngModel]="lightboxService.loopVideos()"
+                          (ngModelChange)="lightboxService.setLoopVideos($event)">
                         </div>
                       </div>
                     </li>
@@ -140,7 +145,7 @@
                 </ul>
               </div>
 
-              <div class="highlight control-button"
+              <div role="button" tabindex="-1" class="highlight control-button"
                 (click)="closeLightbox()"
                 title="close, key: Escape" i18n-title>
                 <ng-icon size="1.2em" name="ionCloseOutline" />
@@ -148,56 +153,56 @@
             </div>
           </div>
 
-          <div id="swipeable-container"
-            [class.hide-cursor]="controllersDimmed"
+          <div id="swipeable-container" role="presentation"
+            [class.hide-cursor]="controllersDimmed()"
             appGesture
-            (swipeLeft)="zoom == 1 && nextPhoto.emit()"
-            (swipeRight)="zoom == 1 && previousPhoto.emit()"
-            (swipeUp)="zoom == 1 && closed.emit()"
+            (swipeLeft)="zoom() === 1 && nextPhoto.emit()"
+            (swipeRight)="zoom() === 1 && previousPhoto.emit()"
+            (swipeUp)="zoom() === 1 && closed.emit()"
             (doubleTap)="doubleTap()"
             (pan)="pan($event)"
             (pinch)="pinch($event)"
             (wheel)="wheel($event)"
             (click)="mediaElement().playPause()">
 
-            @if (facesEnabled && activePhoto() && activePhoto().gridMedia().Photo.metadata.faces && activePhoto().gridMedia().Photo.metadata.faces.length > 0) {
+            @if (facesEnabled && faces().length > 0) {
               <div class="faces-container"
-                [style.top.px]="photoFrameDim().height/2 + drag.y"
-                [style.left.px]="photoFrameDim().width/2 + drag.x"
-                [style.width.px]="faceContainerDim.width* zoom"
-                [style.height.px]="faceContainerDim.height* zoom"
+                [style.top.px]="photoFrameDim().height/2 + drag().y"
+                [style.left.px]="photoFrameDim().width/2 + drag().x"
+                [style.width.px]="faceContainerDim().width * zoom()"
+                [style.height.px]="faceContainerDim().height * zoom()"
                 >
                 @if (searchEnabled) {
-                  @for (face of activePhoto().gridMedia().Photo.metadata.faces; track face) {
+                  @for (face of faces(); track $index) {
                     <a
                       class="face"
-                      [routerLink]="['/search', getPersonSearchQuery(face.name)]"
-                      [style.top.%]="face.box.top / activePhoto().gridMedia().Photo.metadata.size.height*100"
-                      [style.left.%]="face.box.left / activePhoto().gridMedia().Photo.metadata.size.width*100"
-                      [style.height.%]="face.box.height / activePhoto().gridMedia().Photo.metadata.size.height*100"
-                      [style.width.%]="face.box.width / activePhoto().gridMedia().Photo.metadata.size.width*100"
+                      [routerLink]="['/search', face.query]"
+                      [style.top.%]="face.top"
+                      [style.left.%]="face.left"
+                      [style.height.%]="face.height"
+                      [style.width.%]="face.width"
                       >
                       <div class="face-box"
-                      [class.controls-nodim]="lightboxService.facesAlwaysOn"></div>
+                      [class.controls-nodim]="lightboxService.facesAlwaysOn()"></div>
                       <span class="face-name"
-                      [class.controls-nodim]="lightboxService.facesAlwaysOn">{{ face.name }}</span>
+                      [class.controls-nodim]="lightboxService.facesAlwaysOn()">{{ face.name }}</span>
                     </a>
                   }
                 }
                 @if (!searchEnabled) {
-                  @for (face of activePhoto().gridMedia().Photo.metadata.faces; track face) {
+                  @for (face of faces(); track $index) {
                     <div
                       class="face"
-                      [style.top.%]="face.box.top / activePhoto().gridMedia().Photo.metadata.size.height*100"
-                      [style.left.%]="face.box.left / activePhoto().gridMedia().Photo.metadata.size.width*100"
-                      [style.height.%]="face.box.height / activePhoto().gridMedia().Photo.metadata.size.height*100"
-                      [style.width.%]="face.box.width / activePhoto().gridMedia().Photo.metadata.size.width*100"
+                      [style.top.%]="face.top"
+                      [style.left.%]="face.left"
+                      [style.height.%]="face.height"
+                      [style.width.%]="face.width"
                       >
                       <div class="face-box"
-                        [class.controls-nodim]="lightboxService.facesAlwaysOn">
+                        [class.controls-nodim]="lightboxService.facesAlwaysOn()">
                       </div>
                       <span class="face-name"
-                        [class.controls-nodim]="lightboxService.facesAlwaysOn"
+                        [class.controls-nodim]="lightboxService.facesAlwaysOn()"
                       >{{ face.name }}</span>
                     </div>
                   }
@@ -208,15 +213,15 @@
 
           </div>
 
-          @if (navigation().hasPrev && zoom == 1) {
-            <div [class.dim-controls]="controllersDimmed" class="navigation-arrow navigation-arrow-left highlight rounded-end"
+          @if (navigation().hasPrev && zoom() === 1) {
+            <div role="button" tabindex="-1" [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-left highlight rounded-end"
               title="key: left arrow" id="leftArrow" i18n-title
               (click)="previousPhoto.emit()">
               <ng-icon name="ionChevronBackOutline" />
             </div>
           }
-          @if (navigation().hasNext && zoom == 1) {
-            <div [class.dim-controls]="controllersDimmed" class="navigation-arrow navigation-arrow-right highlight rounded-start"
+          @if (navigation().hasNext && zoom() === 1) {
+            <div role="button" tabindex="-1" [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-right highlight rounded-start"
               title="key: right arrow" id="rightArrow" i18n-title
               (click)="nextMediaManuallyTriggered()">
               <ng-icon name="ionChevronForwardOutline" />
@@ -226,28 +231,28 @@
               }
             </div>
           }
-          @if (BottomLeftTitle || BottomLeftSubtitle) {
-            <div [class.dim-controls]="controllersDimmed" class="controls-title controls-bottom-left-title"
-              [class.controls-nodim]="lightboxService.captionAlwaysOn"
+          @if (bottomLeftTitle() || bottomLeftSubtitle()) {
+            <div [class.dim-controls]="controllersDimmed()" class="controls-title controls-bottom-left-title"
+              [class.controls-nodim]="lightboxService.captionAlwaysOn()"
               >
-              @if (BottomLeftTitle) {
-                <div class="controls-title-text">{{ BottomLeftTitle }}</div>
+              @if (bottomLeftTitle()) {
+                <div class="controls-title-text">{{ bottomLeftTitle() }}</div>
               }
-              @if (BottomLeftSubtitle) {
-                <div class="controls-subtitle-text ">{{ BottomLeftSubtitle }}</div>
+              @if (bottomLeftSubtitle()) {
+                <div class="controls-subtitle-text ">{{ bottomLeftSubtitle() }}</div>
               }
             </div>
           }
 
 
-          @if (Zoom > 1) {
-            <div [class.dim-controls]="controllersDimmed" class="controls controls-zoom row mb-3">
+          @if (zoom() > 1) {
+            <div [class.dim-controls]="controllersDimmed()" class="controls controls-zoom row mb-3">
               <div class="col-1 col-md-4">
                 <ng-icon name="ionRemoveOutline" class="float-end highlight"
                 (click)="zoomOut()" i18n-title title="Zoom out, key: '-'" />
               </div>
               <input type="range"
-                [(ngModel)]="Zoom" min="1" [max]="MAX_ZOOM" step="0.1"
+                [ngModel]="zoom()" (ngModelChange)="setZoom($event)" min="1" [max]="MAX_ZOOM" step="0.1"
                 value="1" class="col-10 col-md-4 zoom-progress rounded ">
                 <div class="col-1 col-md-4">
                   <ng-icon name="ionAddOutline" class="float-start highlight"
@@ -256,8 +261,8 @@
               </div>
             }
 
-            @if (zoom == 1 && activePhoto() && activePhoto().gridMedia().isPhoto()) {
-              <div [class.dim-controls]="controllersDimmed" class="controls controls-playback"
+            @if (zoom() === 1 && isPhoto()) {
+              <div [class.dim-controls]="controllersDimmed()" class="controls controls-playback"
                 >
                 <div class="controls-background rounded-start-top pe-1 pb-1">
                   @if (slideShowRunning()) {
@@ -276,27 +281,27 @@
               </div>
             }
 
-            @if (activePhoto() && activePhoto().gridMedia().isVideo() && mediaElement().Paused) {
-              <div [class.dim-controls]="controllersDimmed" class="controls controls-big-play mb-3"
+            @if (isVideo() && mediaElement().paused()) {
+              <div [class.dim-controls]="controllersDimmed()" class="controls controls-big-play mb-3"
                 >
                 <ng-icon name="ionPlayOutline" />
               </div>
             }
 
-            @if (activePhoto() && activePhoto().gridMedia().isVideo()) {
+            @if (isVideo()) {
               <div class="controls controls-video row mb-3">
                 <div class="col-1">
-                  <ng-icon [name]="!mediaElement().Paused ? 'ionPauseOutline' :'ionPlayOutline'"
+                  <ng-icon [name]="!mediaElement().paused() ? 'ionPauseOutline' :'ionPlayOutline'"
                   (click)="mediaElement().playPause()" />
                 </div>
-                <input type="range" [(ngModel)]="mediaElement().VideoProgress"
+                <input type="range" [ngModel]="mediaElement().videoProgress()" (ngModelChange)="mediaElement().setVideoProgress($event)"
                   min="0" max="100" step="0.1" class="col video-progress rounded">
                   <div class="col-1">
-                    <ng-icon [name]="mediaElement().Muted ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
+                    <ng-icon [name]="mediaElement().muted() ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
                     (click)="mediaElement().mute()" />
                   </div>
                   <input type="range"
-                    [(ngModel)]="mediaElement().VideoVolume" min="0" max="1" step="0.1"
+                    [ngModel]="mediaElement().videoVolume()" (ngModelChange)="mediaElement().setVideoVolume($event)" min="0" max="1" step="0.1"
                     value="1" class="col-2 col-md-1 volume rounded">
                   </div>
                 }

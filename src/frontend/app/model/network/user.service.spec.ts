@@ -40,7 +40,7 @@ describe('UserService', (): void => {
           userService: UserService,
           networkService: NetworkService
       ): Promise<void> => {
-        vi.spyOn(networkService, 'postJson').mockImplementation(() => undefined);
+        vi.spyOn(networkService, 'postJson').mockImplementation(() => Promise.resolve(undefined));
         const credential = new LoginCredential('name', 'pass');
         await userService.login(credential);
         expect(networkService.postJson).toHaveBeenCalled();
@@ -57,7 +57,7 @@ describe('UserService', (): void => {
           userService: UserService,
           networkService: NetworkService
       ): Promise<void> => {
-        vi.spyOn(networkService, 'getJson').mockImplementation(() => undefined);
+        vi.spyOn(networkService, 'getJson').mockImplementation(() => Promise.resolve(undefined));
         await userService.getSessionUser();
         expect(networkService.getJson).toHaveBeenCalled();
         expect((networkService.getJson as any).mock.calls[0]).toEqual([

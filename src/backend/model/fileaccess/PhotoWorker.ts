@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import sharp from 'sharp';
 import {Metadata, Sharp, SharpOptions} from 'sharp';
 import {Logger} from '../../Logger';

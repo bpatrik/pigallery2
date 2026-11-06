@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, TemplateRef, inject, ChangeDetectionStrategy } from '@angular/core';
-import {ContentWrapper} from '../../../../../common/entities/ContentWrapper';
+import { Component, OnDestroy, TemplateRef, computed, inject } from '@angular/core';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -20,7 +19,6 @@ import {Config} from '../../../../../common/config/public/Config';
     selector: 'app-gallery-photo-frame-builder',
     templateUrl: './photo-frame-builder.gallery.component.html',
     styleUrl: './photo-frame-builder.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     NgIconComponent,
     FormsModule,
@@ -28,14 +26,17 @@ import {Config} from '../../../../../common/config/public/Config';
     StringifyEnum
 ]
   })
-  export class PhotoFrameBuilderGalleryComponent implements OnInit, OnDestroy {
+  export class PhotoFrameBuilderGalleryComponent implements OnDestroy {
     contentLoaderService = inject(ContentLoaderService);
     private notification = inject(NotificationService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
     private modalService = inject(BsModalService);
 
-    enabled = true;
+    readonly enabled = computed((): boolean => {
+      const content = this.contentLoaderService.content();
+      return !!(content?.directory || content?.searchResult);
+    });
     url = '';
     showSettings = false;
     // Options
@@ -53,11 +54,9 @@ import {Config} from '../../../../../common/config/public/Config';
     // Enum option names for selects
     readonly LightBoxTitleTextsArr = Utils.enumToArray(LightBoxTitleTexts).map(v=>v.value);
 
-  contentSubscription: Subscription = null;
+  modalRef: BsModalRef | null;
 
-  modalRef: BsModalRef;
-
-  private readonly subscription: Subscription = null;
+  private readonly subscription: Subscription | null = null;
 
   constructor() {
     // keep for potential future route driven defaults
@@ -77,7 +76,7 @@ import {Config} from '../../../../../common/config/public/Config';
     // Auto polling toggle
     if (typeof this.autoPollInterval != 'undefined') {
       u.searchParams.set(QueryParams.gallery.autoPollInterval,
-        String(parseInt(this.autoPollInterval as unknown as any, 10)));
+        String(parseInt(String(this.autoPollInterval), 10)));
     } else {
       u.searchParams.delete(QueryParams.gallery.autoPollInterval);
     }
@@ -108,7 +107,7 @@ import {Config} from '../../../../../common/config/public/Config';
     if (this.slideshowSpeed && this.slideshowSpeed > 0) {
       u.searchParams.set(
         QueryParams.gallery.lightbox.slideshowSpeed,
-        String(parseInt(this.slideshowSpeed as unknown as any, 10))
+        String(parseInt(String(this.slideshowSpeed), 10))
       );
     } else {
       u.searchParams.delete(QueryParams.gallery.lightbox.slideshowSpeed);
@@ -149,34 +148,18 @@ import {Config} from '../../../../../common/config/public/Config';
   }
 
 
-  ngOnInit(): void {
-    this.contentSubscription = this.contentLoaderService.content.subscribe(
-        (content: ContentWrapper) => {
-          this.enabled = !!(content?.directory || content?.searchResult);
-          if (!this.enabled) {
-            return;
-          }
-          // this.data.directory = Utils.concatUrls((<DirectoryDTO>content.directory).path, (<DirectoryDTO>content.directory).name);
-        }
-    );
-  }
-
   ngOnDestroy(): void {
-    if (this.contentSubscription !== null) {
-      this.contentSubscription.unsubscribe();
-    }
-
     if (this.subscription !== null) {
       this.subscription.unsubscribe();
     }
   }
 
-  openModal(template: TemplateRef<unknown>): boolean {
-    if (!this.enabled) {
-      return;
+  openModal(template: TemplateRef<unknown>): boolean | undefined {
+    if (!this.enabled()) {
+      return undefined;
     }
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
 
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
@@ -190,7 +173,7 @@ import {Config} from '../../../../../common/config/public/Config';
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }

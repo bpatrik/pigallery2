@@ -1,4 +1,4 @@
-@if (Enabled) {
+@if (Enabled()) {
   <div class="row mt-2">
     <div class="col-auto">
       <h5 i18n>User list</h5>
@@ -17,25 +17,25 @@
       </tr>
     </thead>
     <tbody>
-      @for (user of users; track user.id) {
+      @for (row of userRows(); track row.user.id) {
         <tr>
-          <td>{{ user.name }}</td>
+          <td>{{ row.user.name }}</td>
           <td>
-            {{ user.role | stringifyRole }}
+            {{ row.roleName }}
           </td>
           <td>
-            <button [disabled]="!canDeleteUser(user)" (click)="deleteUser(user)"
-              [class]="canDeleteUser(user)? 'btn-danger':'btn-secondary'"
+            <button [disabled]="!row.canDelete" (click)="deleteUser(row.user)"
+              [class]="row.canDelete ? 'btn-danger':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
-            <button [disabled]="!canModifyUser(user)" (click)="openEditUser(user)"
-              [class]="canModifyUser(user)? 'btn-primary':'btn-secondary'"
+            <button [disabled]="!row.canModify" (click)="openEditUser(row.user)"
+              [class]="row.canModify ? 'btn-primary':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionPencil" title="Edit" i18n-title />
             </button>
-            @if (user.oidcSubject) {
-              <button (click)="unlinkOidc(user)"
+            @if (row.user.oidcSubject) {
+              <button (click)="unlinkOidc(row.user)"
                 class="btn btn-warning float-end ms-2">
                 <ng-icon name="ionUnlinkOutline" title="Unlink OIDC account" i18n-title />
               </button>
@@ -110,7 +110,7 @@
           <div class="modal-body">
             <div class="mb-3">
               <label class="form-label" for="editRole" i18n>Role</label>
-              <select id="editRole" [disabled]="!canModifyRole(editOriginalUser)" class="form-select"
+              <select id="editRole" [disabled]="!canModifyRole()" class="form-select"
                 [(ngModel)]="editUser.role" name="editRole" required>
                 @for (repository of userRoles; track repository) {
                   <option [value]="repository.key">{{ repository.value }}</option>
@@ -140,32 +140,32 @@
             </div>
             @if (editSettings.overrideAllowBlockList) {
               <div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Allowed query</label>
+                <div class="mb-3" role="group" aria-labelledby="allowQueryLabel">
+                  <span class="form-label d-inline-block" id="allowQueryLabel" i18n>Allowed query</span>
                   <app-gallery-search-field name="allowQuery"
                     [(ngModel)]="editSettings.allowQuery"
                     i18n-placeholder
                     placeholder="Allowed query" />
                   <small class="text-muted" i18n>Only items matching this query will be visible.</small>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Blocked query</label>
+                <div class="mb-3" role="group" aria-labelledby="blockQueryLabel">
+                  <span class="form-label d-inline-block" id="blockQueryLabel" i18n>Blocked query</span>
                   <app-gallery-search-field name="blockQuery"
                     [(ngModel)]="editSettings.blockQuery"
                     placeholder="Blocked query"
                     i18n-placeholder />
                   <small class="text-muted" i18n>Items matching this query will be hidden.</small>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Allowed directories</label>
+                <div class="mb-3" role="group" aria-labelledby="allowDirectoryListLabel">
+                  <span class="form-label d-inline-block" id="allowDirectoryListLabel" i18n>Allowed directories</span>
                   <app-settings-directory-search-list idName="allowDirectoryList"
-                    [list]="editSettings.allowDirectoryList" />
+                    [list]="editSettings.allowDirectoryList ?? []" />
                   <div><small class="text-muted" i18n>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</small></div>
                 </div>
-                <div class="mb-3">
-                  <label class="form-label" i18n>Blocked directories</label>
+                <div class="mb-3" role="group" aria-labelledby="blockDirectoryListLabel">
+                  <span class="form-label d-inline-block" id="blockDirectoryListLabel" i18n>Blocked directories</span>
                   <app-settings-directory-search-list idName="blockDirectoryList"
-                    [list]="editSettings.blockDirectoryList" />
+                    [list]="editSettings.blockDirectoryList ?? []" />
                   <div><small class="text-muted" i18n>Directories (and their content) matching any of these will be hidden.</small></div>
                 </div>
               </div>

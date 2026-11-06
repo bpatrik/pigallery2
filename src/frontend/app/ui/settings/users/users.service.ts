@@ -15,7 +15,7 @@ export class UsersSettingsService {
   }
 
 
-  public getUsers(): Promise<Array<UserDTO>> {
+  public getUsers(): Promise<UserDTO[]> {
     return this.networkService.getJson('/user/list');
   }
 

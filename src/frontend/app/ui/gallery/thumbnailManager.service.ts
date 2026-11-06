@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {ThumbnailLoaderService, ThumbnailLoadingListener, ThumbnailLoadingPriority, ThumbnailTaskEntity,} from './thumbnailLoader.service';
 import {Media} from './Media';
 import {MediaIcon} from './MediaIcon';
@@ -28,12 +28,12 @@ export class ThumbnailManagerService {
 }
 
 export abstract class ThumbnailBase {
-  public loading = false;
-  protected available = false;
-  protected src: string = null;
-  protected error = false;
-  protected onLoad: () => void = null;
-  protected thumbnailTask: ThumbnailTaskEntity = null;
+  protected readonly loading = signal(false);
+  protected readonly available = signal(false);
+  protected readonly src = signal<string | null>(null);
+  protected readonly error = signal(false);
+  protected onLoad: (() => void) | null = null;
+  protected thumbnailTask: ThumbnailTaskEntity | null = null;
 
   protected constructor(protected thumbnailService: ThumbnailLoaderService) {
   }
@@ -45,19 +45,19 @@ export abstract class ThumbnailBase {
   }
 
   get Available(): boolean {
-    return this.available;
+    return this.available();
   }
 
-  get Src(): string {
-    return this.src;
+  get Src(): string | null {
+    return this.src();
   }
 
   get Loading(): boolean {
-    return this.loading;
+    return this.loading();
   }
 
   get Error(): boolean {
-    return this.error;
+    return this.error();
   }
 
   destroy(): void {
@@ -74,11 +74,11 @@ export class PersonThumbnail extends ThumbnailBase {
       thumbnailService: ThumbnailLoaderService
   ) {
     super(thumbnailService);
-    this.src = '';
-    this.error = false;
+    this.src.set('');
+    this.error.set(false);
     if (!this.person.missingThumbnail) {
-      this.src = Person.getThumbnailUrl(person);
-      this.available = true;
+      this.src.set(Person.getThumbnailUrl(person));
+      this.available.set(true);
       if (this.onLoad) {
         this.onLoad();
       }
@@ -89,23 +89,23 @@ export class PersonThumbnail extends ThumbnailBase {
       const listener: ThumbnailLoadingListener = {
         onStartedLoading: (): void => {
           // onLoadStarted
-          this.loading = true;
+          this.loading.set(true);
         },
         onLoad: (): void => {
           // onLoaded
-          this.src = Person.getThumbnailUrl(person);
+          this.src.set(Person.getThumbnailUrl(person));
           if (this.onLoad) {
             this.onLoad();
           }
-          this.available = true;
-          this.loading = false;
+          this.available.set(true);
+          this.loading.set(false);
           this.thumbnailTask = null;
         },
         onError: (): void => {
           // onError
           this.thumbnailTask = null;
-          this.loading = false;
-          this.error = true;
+          this.loading.set(false);
+          this.error.set(true);
         },
       };
       this.thumbnailTask = this.thumbnailService.loadPersonThumbnail(
@@ -134,11 +134,11 @@ export class IconThumbnail extends ThumbnailBase {
       thumbnailService: ThumbnailLoaderService
   ) {
     super(thumbnailService);
-    this.src = '';
-    this.error = false;
+    this.src.set('');
+    this.error.set(false);
     if (this.media.isIconAvailable()) {
-      this.src = this.media.getIconPath();
-      this.available = true;
+      this.src.set(this.media.getIconPath());
+      this.available.set(true);
       if (this.onLoad) {
         this.onLoad();
       }
@@ -149,23 +149,23 @@ export class IconThumbnail extends ThumbnailBase {
         const listener: ThumbnailLoadingListener = {
           onStartedLoading: (): void => {
             // onLoadStarted
-            this.loading = true;
+            this.loading.set(true);
           },
           onLoad: (): void => {
             // onLoaded
-            this.src = this.media.getIconPath();
+            this.src.set(this.media.getIconPath());
             if (this.onLoad) {
               this.onLoad();
             }
-            this.available = true;
-            this.loading = false;
+            this.available.set(true);
+            this.loading.set(false);
             this.thumbnailTask = null;
           },
           onError: (): void => {
             // onError
             this.thumbnailTask = null;
-            this.loading = false;
-            this.error = true;
+            this.loading.set(false);
+            this.error.set(true);
           },
         };
         this.thumbnailTask = this.thumbnailService.loadIcon(
@@ -197,14 +197,14 @@ export class Thumbnail extends ThumbnailBase {
   ) {
     super(thumbnailService);
     if (this.media.isThumbnailAvailable()) {
-      this.src = this.media.getThumbnailPath();
-      this.available = true;
+      this.src.set(this.media.getThumbnailPath());
+      this.available.set(true);
       if (this.onLoad) {
         this.onLoad();
       }
     } else if (this.media.isReplacementThumbnailAvailable()) {
-      this.src = this.media.getReplacementThumbnailPath();
-      this.available = true;
+      this.src.set(this.media.getReplacementThumbnailPath());
+      this.available.set(true);
     }
     if (autoLoad) {
       this.load();
@@ -255,23 +255,23 @@ export class Thumbnail extends ThumbnailBase {
       const listener: ThumbnailLoadingListener = {
         onStartedLoading: (): void => {
           // onLoadStarted
-          this.loading = true;
+          this.loading.set(true);
         },
         onLoad: (): void => {
           // onLoaded
-          this.src = this.media.getThumbnailPath();
+          this.src.set(this.media.getThumbnailPath());
           if (this.onLoad) {
             this.onLoad();
           }
-          this.available = true;
-          this.loading = false;
+          this.available.set(true);
+          this.loading.set(false);
           this.thumbnailTask = null;
         },
         onError: (): void => {
           // onError
           this.thumbnailTask = null;
-          this.loading = false;
-          this.error = true;
+          this.loading.set(false);
+          this.error.set(true);
         },
       };
       if (this.media.isReplacementThumbnailAvailable()) {

@@ -10,7 +10,7 @@ import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../../../icons';
 
 class MockLightboxService {
-  loopVideos = false;
+  loopVideos = () => false;
 }
 
 function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
@@ -71,7 +71,6 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
   const renderLivePhoto = () => {
     fixture.componentRef.setInput('gridMedia', makeGridMedia());
     fixture.componentRef.setInput('loadMedia', true);
-    component.ngOnChanges();
     fixture.detectChanges();
     return fixture.nativeElement.querySelector('.live-photo-badge') as HTMLElement;
   };
@@ -84,14 +83,14 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
     badge.dispatchEvent(new Event('mouseenter'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBe(true);
+    expect(component.liveVideoPlaying()).toBe(true);
     expect(video.currentTime).toBe(0);
     expect(video.play).toHaveBeenCalled();
 
     badge.dispatchEvent(new Event('mouseleave'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBe(false);
+    expect(component.liveVideoPlaying()).toBe(false);
     expect(video.pause).toHaveBeenCalled();
   });
 
@@ -103,14 +102,14 @@ describe('GalleryLightboxMediaComponent - Live Photo interactions', () => {
     badge.dispatchEvent(new Event('touchstart'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBe(true);
+    expect(component.liveVideoPlaying()).toBe(true);
     expect(video.currentTime).toBe(0);
     expect(video.play).toHaveBeenCalled();
 
     badge.dispatchEvent(new Event('touchend'));
     fixture.detectChanges();
 
-    expect(component.liveVideoPlaying).toBe(false);
+    expect(component.liveVideoPlaying()).toBe(false);
     expect(video.pause).toHaveBeenCalled();
   });
 });

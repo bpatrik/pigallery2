@@ -76,6 +76,7 @@ export interface IClientMediaButtonPopupConfig {
 export interface IMediaRequestBodyData {
   /**
    * Existing metadata fields of a media.
+   * The numeric ones stay numbers, unless the user edited them in the popup.
    */
   fields?: {
     title?: string,
@@ -84,15 +85,15 @@ export interface IMediaRequestBodyData {
     positionData?: string,
     faces?: string,
     size?: string,
-    creationDate?: string,
+    creationDate?: string | number,
     creationDateOffset?: string,
-    bitRate?: string,
-    duration?: string,
-    fileSize?: string,
-    fps?: string,
+    bitRate?: string | number,
+    duration?: string | number,
+    fileSize?: string | number,
+    fps?: string | number,
     keywords?: string
   };
-  customFields?: Record<string, any>;
+  customFields?: Record<string, string | number | boolean>;
 }
 
 

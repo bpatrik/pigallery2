@@ -16,7 +16,7 @@ import {UserRoles} from '../../../common/entities/UserDTO';
 describe('PreloadMarkedRoutes', () => {
 
   // role: null if not logged in
-  const setUp = (role: UserRoles): PreloadMarkedRoutes => {
+  const setUp = (role: UserRoles | null): PreloadMarkedRoutes => {
     TestBed.configureTestingModule({
       providers: [
         {provide: AuthenticationService, useValue: {isAuthorized: (r: UserRoles) => role !== null && role >= r}},

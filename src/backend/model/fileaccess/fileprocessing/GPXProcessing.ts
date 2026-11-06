@@ -5,7 +5,7 @@ import {ProjectPath} from '../../../ProjectPath';
 import {Config} from '../../../../common/config/private/Config';
 import {SupportedFormats} from '../../../../common/SupportedFormats';
 
-type gpxEntry = { '$': { lat: string, lon: string }, ele?: string[], time?: string[], extensions?: unknown };
+interface gpxEntry { '$': { lat: string, lon: string }, ele?: string[], time?: string[], extensions?: unknown }
 
 export class GPXProcessing {
   private static readonly GPX_FLOAT_ACCURACY = 6;
@@ -45,7 +45,7 @@ export class GPXProcessing {
 
     try {
       await fsp.access(origFilePath, fsConstants.R_OK);
-    } catch (e) {
+    } catch {
       return false;
     }
 
@@ -63,7 +63,7 @@ export class GPXProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return true;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
     return false;
@@ -79,7 +79,7 @@ export class GPXProcessing {
     try {
       await fsp.access(outPath, fsConstants.R_OK);
       return outPath;
-    } catch (e) {
+    } catch {
       // ignoring errors
     }
 

@@ -102,7 +102,7 @@
     "@types/nodemailer": "6.4.17",
     "@types/openid-client": "3.1.6",
     "@types/xml2js": "0.4.14",
-    "@vitest/coverage-v8": "4.1.12",
+    "@vitest/coverage-v8": "5.1.0",
     "angular-eslint": "22.6.0",
     "bootstrap": "5.3.7",
     "chai": "5.2.1",
@@ -130,9 +130,8 @@
     "ts-node": "10.9.2",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "4.1.12",
-    "xlf-google-translate": "1.0.1",
-    "zone.js": "0.15.1"
+    "vitest": "5.1.0",
+    "xlf-google-translate": "1.0.1"
   },
   "optionalDependencies": {
     "ffmpeg-static": "5.2.0",

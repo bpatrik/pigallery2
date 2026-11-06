@@ -138,7 +138,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">246,247</context>
+          <context context-type="linenumber">252,253</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
@@ -1010,7 +1010,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">52</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <target>FPS</target>
       </trans-unit>
@@ -1374,7 +1374,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
-          <context context-type="linenumber">134</context>
+          <context context-type="linenumber">142</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -2618,7 +2618,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">84,85</context>
+          <context context-type="linenumber">85,86</context>
         </context-group>
         <target>Always show captions</target>
       </trans-unit>
@@ -2638,7 +2638,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">98,99</context>
+          <context context-type="linenumber">100,101</context>
         </context-group>
         <target>Always show faces</target>
       </trans-unit>
@@ -2674,7 +2674,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">112,113</context>
+          <context context-type="linenumber">115,116</context>
         </context-group>
         <target>Loop Slideshow</target>
       </trans-unit>
@@ -3478,11 +3478,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-builder/query-bulder.gallery.component.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">38</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search-field-base/search-field-base.gallery.component.ts</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">41</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
@@ -3514,7 +3514,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">49</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/navigator/navigator.faces.component.html</context>
@@ -3530,11 +3530,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">45</context>
+          <context context-type="linenumber">31</context>
         </context-group>
         <target>Fețe</target>
       </trans-unit>
@@ -3931,7 +3931,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.ts</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <target>Admin</target>
       </trans-unit>
@@ -4047,11 +4047,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">30,31</context>
+          <context context-type="linenumber">33,34</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <target>never</target>
       </trans-unit>
@@ -4099,7 +4099,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">118</context>
         </context-group>
         <target>name</target>
       </trans-unit>
@@ -4191,7 +4191,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.ts</context>
-          <context context-type="linenumber">70</context>
+          <context context-type="linenumber">68</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -4227,7 +4227,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">46</context>
+          <context context-type="linenumber">32</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/gallery-statistic/gallery-statistic.component.html</context>
@@ -4247,11 +4247,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">79</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">42</context>
+          <context context-type="linenumber">28</context>
         </context-group>
         <target>Caption</target>
       </trans-unit>
@@ -4263,7 +4263,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">41</context>
+          <context context-type="linenumber">27</context>
         </context-group>
         <target>Title</target>
       </trans-unit>
@@ -4275,11 +4275,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">36</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">53</context>
+          <context context-type="linenumber">39</context>
         </context-group>
         <target>Keywords</target>
       </trans-unit>
@@ -4323,7 +4323,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">104</context>
         </context-group>
         <target>Camera</target>
       </trans-unit>
@@ -4335,7 +4335,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <target>Lens</target>
       </trans-unit>
@@ -4363,7 +4363,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">120</context>
+          <context context-type="linenumber">138</context>
         </context-group>
         <target>Focal length</target>
       </trans-unit>
@@ -4439,7 +4439,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">84</context>
         </context-group>
         <target>Rating</target>
       </trans-unit>
@@ -4535,7 +4535,7 @@
         <source> Menu</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">91,93</context>
+          <context context-type="linenumber">91,92</context>
         </context-group>
         <note priority="1" from="description">title of left card in settings page that contains settings contents</note>
         <target>Menu</target>
@@ -4588,11 +4588,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">198</context>
+          <context context-type="linenumber">199</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">46</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
@@ -4600,35 +4600,35 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">101</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">269</context>
+          <context context-type="linenumber">277</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">300</context>
+          <context context-type="linenumber">308</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">358</context>
+          <context context-type="linenumber">367</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">438</context>
+          <context context-type="linenumber">452</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">508</context>
+          <context context-type="linenumber">525</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">551</context>
+          <context context-type="linenumber">569</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">593</context>
+          <context context-type="linenumber">611</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
@@ -4640,15 +4640,15 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">40</context>
+          <context context-type="linenumber">43</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">300</context>
+          <context context-type="linenumber">313</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">350</context>
+          <context context-type="linenumber">364</context>
         </context-group>
         <target>Delete</target>
       </trans-unit>
@@ -4932,7 +4932,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
-          <context context-type="linenumber">34,35</context>
+          <context context-type="linenumber">35,36</context>
         </context-group>
         <target>ascending</target>
       </trans-unit>
@@ -4952,7 +4952,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/sorting-method/sorting-method.settings-entry.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">43,44</context>
         </context-group>
         <target>descending</target>
       </trans-unit>
@@ -4996,7 +4996,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">84</context>
+          <context context-type="linenumber">85</context>
         </context-group>
         <target>key: c</target>
       </trans-unit>
@@ -5048,7 +5048,7 @@
         <source>Directory not found</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <target>Directory not found</target>
       </trans-unit>
@@ -5056,7 +5056,7 @@
         <source>Cannot find location</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">193</context>
+          <context context-type="linenumber">189</context>
         </context-group>
         <target>Cannot find location</target>
       </trans-unit>
@@ -5064,7 +5064,7 @@
         <source>Unknown server error</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">195</context>
+          <context context-type="linenumber">191</context>
         </context-group>
         <target>Unknown server error</target>
       </trans-unit>
@@ -5072,7 +5072,7 @@
         <source>Select only this</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.html</context>
-          <context context-type="linenumber">122,123</context>
+          <context context-type="linenumber">127,128</context>
         </context-group>
         <target>Select only this</target>
       </trans-unit>
@@ -5080,7 +5080,7 @@
         <source>Nothing to filter</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.html</context>
-          <context context-type="linenumber">136,137</context>
+          <context context-type="linenumber">141,142</context>
         </context-group>
         <target>Nothing to filter</target>
       </trans-unit>
@@ -5088,7 +5088,7 @@
         <source>Reset</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.html</context>
-          <context context-type="linenumber">144,145</context>
+          <context context-type="linenumber">149,150</context>
         </context-group>
         <target>Restabilire</target>
       </trans-unit>
@@ -5096,7 +5096,7 @@
         <source>unknown</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.gallery.component.ts</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>unknown</target>
       </trans-unit>
@@ -5104,7 +5104,7 @@
         <source>no face</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">46</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>no face</target>
       </trans-unit>
@@ -5112,7 +5112,7 @@
         <source>Faces groups</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">69</context>
         </context-group>
         <target>Faces groups</target>
       </trans-unit>
@@ -5120,7 +5120,7 @@
         <source>City</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <target>City</target>
       </trans-unit>
@@ -5128,7 +5128,7 @@
         <source>State</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <target>State</target>
       </trans-unit>
@@ -5136,7 +5136,7 @@
         <source>Country</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">81</context>
+          <context context-type="linenumber">99</context>
         </context-group>
         <target>Country</target>
       </trans-unit>
@@ -5144,7 +5144,7 @@
         <source>ISO</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">114</context>
         </context-group>
         <target>ISO</target>
       </trans-unit>
@@ -5152,7 +5152,7 @@
         <source>Aperture</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">119</context>
         </context-group>
         <target>Aperture</target>
       </trans-unit>
@@ -5160,7 +5160,7 @@
         <source>Shutter speed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <target>Shutter speed</target>
       </trans-unit>
@@ -5192,11 +5192,43 @@
         </context-group>
         <target>Prea multe rezultate de afișat. Adjustați-vă interogarea.</target>
       </trans-unit>
+      <trans-unit id="7819314041543176992" datatype="html">
+        <source>Close</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.html</context>
+          <context context-type="linenumber">10</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
+          <context context-type="linenumber">94,95</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
+          <context context-type="linenumber">84,85</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
+          <context context-type="linenumber">176,177</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
+          <context context-type="linenumber">444,445</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
+          <context context-type="linenumber">31</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
+          <context context-type="linenumber">54</context>
+        </context-group>
+        <target>Închide</target>
+      </trans-unit>
       <trans-unit id="8282018551586977212" datatype="html">
         <source>Camera Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">29</context>
         </context-group>
         <target>Camera Data</target>
       </trans-unit>
@@ -5204,7 +5236,7 @@
         <source>Position Data</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">44</context>
+          <context context-type="linenumber">30</context>
         </context-group>
         <target>Position Data</target>
       </trans-unit>
@@ -5212,7 +5244,7 @@
         <source>Creation Date</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">33</context>
         </context-group>
         <target>Creation Date</target>
       </trans-unit>
@@ -5220,7 +5252,7 @@
         <source>Creation Date Offset</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">48</context>
+          <context context-type="linenumber">34</context>
         </context-group>
         <target>Creation Date Offset</target>
       </trans-unit>
@@ -5228,7 +5260,7 @@
         <source>Bit Rate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">49</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <target>Bit Rate</target>
       </trans-unit>
@@ -5236,7 +5268,7 @@
         <source>Duration</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">50</context>
+          <context context-type="linenumber">36</context>
         </context-group>
         <target>Duration</target>
       </trans-unit>
@@ -5244,7 +5276,7 @@
         <source>File Size</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">37</context>
         </context-group>
         <target>File Size</target>
       </trans-unit>
@@ -5252,7 +5284,7 @@
         <source>Action completed successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.service.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">60</context>
         </context-group>
         <target>Action completed successfully</target>
       </trans-unit>
@@ -5260,7 +5292,7 @@
         <source>Action failed:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.service.ts</context>
-          <context context-type="linenumber">68</context>
+          <context context-type="linenumber">64</context>
         </context-group>
         <target>Action failed:</target>
       </trans-unit>
@@ -5332,7 +5364,7 @@
         <source>key: a</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">98</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <target>key: a</target>
       </trans-unit>
@@ -5340,11 +5372,11 @@
         <source>key: l</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <target>key: l</target>
       </trans-unit>
@@ -5352,7 +5384,7 @@
         <source>Loop videos</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">128,129</context>
+          <context context-type="linenumber">132,133</context>
         </context-group>
         <target>Loop videos</target>
       </trans-unit>
@@ -5360,7 +5392,7 @@
         <source>close, key: Escape</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">145</context>
+          <context context-type="linenumber">150</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.html</context>
@@ -5372,7 +5404,7 @@
         <source>key: left arrow</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">213</context>
+          <context context-type="linenumber">218</context>
         </context-group>
         <target>tasta: săgeată stânga</target>
       </trans-unit>
@@ -5380,7 +5412,7 @@
         <source>key: right arrow</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">220</context>
+          <context context-type="linenumber">225</context>
         </context-group>
         <target>tasta: săgeată dreapta</target>
       </trans-unit>
@@ -5388,7 +5420,7 @@
         <source>Zoom out, key: '-'</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">247,248</context>
+          <context context-type="linenumber">252,253</context>
         </context-group>
         <target>Micșorează, tasta: '-'</target>
       </trans-unit>
@@ -5396,7 +5428,7 @@
         <source>Zoom in, key: '+'</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">254,255</context>
+          <context context-type="linenumber">259,260</context>
         </context-group>
         <target>Mărește, tasta: '+'</target>
       </trans-unit>
@@ -5404,7 +5436,7 @@
         <source>Pause</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">267</context>
+          <context context-type="linenumber">272</context>
         </context-group>
         <target>Pause</target>
       </trans-unit>
@@ -5412,7 +5444,7 @@
         <source>Auto play</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">273</context>
+          <context context-type="linenumber">278</context>
         </context-group>
         <target>Auto play</target>
       </trans-unit>
@@ -5420,15 +5452,15 @@
         <source>Home</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">372</context>
+          <context context-type="linenumber">358</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">89</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">91</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target>Home</target>
       </trans-unit>
@@ -5616,7 +5648,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">50,51</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
         <target>durată</target>
       </trans-unit>
@@ -5764,11 +5796,19 @@
         </context-group>
         <target>Most likely the video is not transcoded. It can be done in the settings. You need to transcode these videos to watch them online:</target>
       </trans-unit>
+      <trans-unit id="4845204768169982250" datatype="html">
+        <source>The photo is not available anymore. Showing the first one.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">328</context>
+        </context-group>
+        <target>The photo is not available anymore. Showing the first one.</target>
+      </trans-unit>
       <trans-unit id="3681011128402308176" datatype="html">
         <source>Sport</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">200</context>
+          <context context-type="linenumber">206</context>
         </context-group>
         <target>Sport</target>
       </trans-unit>
@@ -5776,7 +5816,7 @@
         <source>Transportation</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">203</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <target>Transportation</target>
       </trans-unit>
@@ -5784,11 +5824,11 @@
         <source>Other paths</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">206</context>
+          <context context-type="linenumber">212</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">229</context>
+          <context context-type="linenumber">235</context>
         </context-group>
         <target>Other paths</target>
       </trans-unit>
@@ -5796,7 +5836,7 @@
         <source>Latitude</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">766</context>
+          <context context-type="linenumber">770</context>
         </context-group>
         <target>Latitude</target>
       </trans-unit>
@@ -5804,9 +5844,17 @@
         <source>longitude</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.ts</context>
-          <context context-type="linenumber">766</context>
+          <context context-type="linenumber">770</context>
         </context-group>
         <target>longitude</target>
+      </trans-unit>
+      <trans-unit id="5655563590612634199" datatype="html">
+        <source>Open the map</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.gallery.component.html</context>
+          <context context-type="linenumber">13</context>
+        </context-group>
+        <target>Open the map</target>
       </trans-unit>
       <trans-unit id="6560708001470959956" datatype="html">
         <source>street</source>
@@ -5924,7 +5972,7 @@
         <source>key: alt + up</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">155</context>
         </context-group>
         <target>key: alt + up</target>
       </trans-unit>
@@ -6032,11 +6080,11 @@
         <source>Url has been copied to clipboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.ts</context>
-          <context context-type="linenumber">188</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/random-query-builder/random-query-builder.gallery.component.ts</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">90</context>
         </context-group>
         <target>URL-ul a fost copiat în planșetă</target>
       </trans-unit>
@@ -6136,31 +6184,31 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">53</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
-          <context context-type="linenumber">52,53</context>
+          <context context-type="linenumber">54,55</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">519,520</context>
+          <context context-type="linenumber">536,537</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">564,565</context>
+          <context context-type="linenumber">582,583</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">606,607</context>
+          <context context-type="linenumber">624,625</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">311,312</context>
+          <context context-type="linenumber">324,325</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">362,363</context>
+          <context context-type="linenumber">376,377</context>
         </context-group>
         <target>Add</target>
       </trans-unit>
@@ -6364,7 +6412,7 @@
         <source>Insert</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search-field-base/search-field-base.gallery.component.html</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <target>Insert</target>
       </trans-unit>
@@ -6572,19 +6620,27 @@
         <source>Copy link</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">184</context>
+          <context context-type="linenumber">185</context>
         </context-group>
         <target>Copy link</target>
+      </trans-unit>
+      <trans-unit id="3302121187449737262" datatype="html">
+        <source>Search query</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
+          <context context-type="linenumber">75</context>
+        </context-group>
+        <target>Search query</target>
       </trans-unit>
       <trans-unit id="1625809888219597132" datatype="html">
         <source>Invalid settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">66</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">238</context>
         </context-group>
         <target>Invalid settings</target>
       </trans-unit>
@@ -6592,7 +6648,7 @@
         <source>Yes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">76</context>
+          <context context-type="linenumber">120</context>
         </context-group>
         <target>Da</target>
       </trans-unit>
@@ -6600,27 +6656,19 @@
         <source>No</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">77</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>Nu</target>
-      </trans-unit>
-      <trans-unit id="3302121187449737262" datatype="html">
-        <source>Search query</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">99</context>
-        </context-group>
-        <target>Search query</target>
       </trans-unit>
       <trans-unit id="765974048716015903" datatype="html">
         <source>loading..</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">214</context>
+          <context context-type="linenumber">212</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">244</context>
+          <context context-type="linenumber">242</context>
         </context-group>
         <target>încărcare...</target>
       </trans-unit>
@@ -6628,7 +6676,7 @@
         <source>Set password.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">236</context>
+          <context context-type="linenumber">234</context>
         </context-group>
         <target>Set password.</target>
       </trans-unit>
@@ -6636,7 +6684,7 @@
         <source>Click share to get a link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">263</context>
+          <context context-type="linenumber">261</context>
         </context-group>
         <target>Click share to get a link.</target>
       </trans-unit>
@@ -6644,7 +6692,7 @@
         <source>Sharing link has been copied to clipboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">274</context>
+          <context context-type="linenumber">272</context>
         </context-group>
         <target>Sharing link has been copied to clipboard</target>
       </trans-unit>
@@ -6704,7 +6752,7 @@
         <source>Some files were skipped due to unsupported format.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">106</context>
         </context-group>
         <target>Some files were skipped due to unsupported format.</target>
       </trans-unit>
@@ -6712,7 +6760,7 @@
         <source>Queued</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">139</context>
         </context-group>
         <target>Queued</target>
       </trans-unit>
@@ -6723,7 +6771,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">159</context>
         </context-group>
         <target>
           Files already exist: 
@@ -6734,7 +6782,7 @@
         <source>File already exists</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">160</context>
         </context-group>
         <target>File already exists</target>
       </trans-unit>
@@ -6742,7 +6790,7 @@
         <source>Upload canceled.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">333</context>
+          <context context-type="linenumber">330</context>
         </context-group>
         <target>Upload canceled.</target>
       </trans-unit>
@@ -6753,7 +6801,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">333</context>
         </context-group>
         <target>
           Uploaded files: 
@@ -6764,7 +6812,7 @@
         <source>Upload completed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">333</context>
         </context-group>
         <target>Upload completed.</target>
       </trans-unit>
@@ -6776,7 +6824,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">339</context>
+          <context context-type="linenumber">336</context>
         </context-group>
         <target>
           Uploaded: , failed: 
@@ -6788,7 +6836,7 @@
         <source>Upload completed with errors</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">340</context>
+          <context context-type="linenumber">337</context>
         </context-group>
         <target>Upload completed with errors</target>
       </trans-unit>
@@ -6799,7 +6847,7 @@
         </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">339</context>
         </context-group>
         <target>
           Failed files: 
@@ -6810,7 +6858,7 @@
         <source>Upload failed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">339</context>
         </context-group>
         <target>Upload failed.</target>
       </trans-unit>
@@ -6866,7 +6914,7 @@
         <source>/path/to/folder</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
-          <context context-type="linenumber">31,32</context>
+          <context context-type="linenumber">32,33</context>
         </context-group>
         <target>/path/to/folder</target>
       </trans-unit>
@@ -6946,34 +6994,6 @@
         </context-group>
         <target>Installed</target>
       </trans-unit>
-      <trans-unit id="7819314041543176992" datatype="html">
-        <source>Close</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
-          <context context-type="linenumber">94,95</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
-          <context context-type="linenumber">84,85</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
-          <context context-type="linenumber">176,177</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">430,431</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">31</context>
-        </context-group>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">54</context>
-        </context-group>
-        <target>Închide</target>
-      </trans-unit>
       <trans-unit id="1102717806459547726" datatype="html">
         <source>Refresh</source>
         <context-group purpose="location">
@@ -7018,7 +7038,7 @@
         <source>Job failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/scheduled-jobs.service.ts</context>
-          <context context-type="linenumber">141</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>Job failed</target>
       </trans-unit>
@@ -7026,7 +7046,7 @@
         <source>Job finished</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/scheduled-jobs.service.ts</context>
-          <context context-type="linenumber">147</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <target>Job finished</target>
       </trans-unit>
@@ -7067,7 +7087,7 @@
         <source>Add new</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">94</context>
+          <context context-type="linenumber">96</context>
         </context-group>
         <target>Add new</target>
       </trans-unit>
@@ -7075,11 +7095,11 @@
         <source>Add new theme</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">104,105</context>
+          <context context-type="linenumber">106,107</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <target>Add new theme</target>
       </trans-unit>
@@ -7087,7 +7107,7 @@
         <source>Theme name</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">111,112</context>
+          <context context-type="linenumber">113,114</context>
         </context-group>
         <target>Theme name</target>
       </trans-unit>
@@ -7095,7 +7115,7 @@
         <source>Icon</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">186,187</context>
+          <context context-type="linenumber">192,193</context>
         </context-group>
         <target>Icon</target>
       </trans-unit>
@@ -7103,7 +7123,7 @@
         <source>Load from SVG file</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">207,208</context>
+          <context context-type="linenumber">213,214</context>
         </context-group>
         <target>Load from SVG file</target>
       </trans-unit>
@@ -7111,7 +7131,7 @@
         <source>To auto load these values from file: pick an SVG file with a single 'path'. You can use e.g: http://fontawesome.com/icons. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">212,213</context>
+          <context context-type="linenumber">218,219</context>
         </context-group>
         <target>To auto load these values from file: pick an SVG file with a single 'path'. You can use e.g: http://fontawesome.com/icons.</target>
       </trans-unit>
@@ -7119,7 +7139,7 @@
         <source>Save &amp; Close</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">234</context>
+          <context context-type="linenumber">240</context>
         </context-group>
         <target>Save &amp; Close</target>
       </trans-unit>
@@ -7127,7 +7147,7 @@
         <source>Tile Url*</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">247,248</context>
+          <context context-type="linenumber">253,254</context>
         </context-group>
         <target>URL plăci*</target>
       </trans-unit>
@@ -7135,7 +7155,7 @@
         <source>Add Layer</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">279,280</context>
+          <context context-type="linenumber">287,288</context>
         </context-group>
         <target>Add Layer</target>
       </trans-unit>
@@ -7143,7 +7163,7 @@
         <source>Add matcher</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">335,336</context>
+          <context context-type="linenumber">343,344</context>
         </context-group>
         <target>Add matcher</target>
       </trans-unit>
@@ -7151,7 +7171,7 @@
         <source>Add path theme group</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">378,379</context>
+          <context context-type="linenumber">388,389</context>
         </context-group>
         <target>Add path theme group</target>
       </trans-unit>
@@ -7159,7 +7179,7 @@
         <source>Add Link</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">448,449</context>
+          <context context-type="linenumber">462,463</context>
         </context-group>
         <target>Add Link</target>
       </trans-unit>
@@ -7167,7 +7187,7 @@
         <source>Experimental</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">629,630</context>
+          <context context-type="linenumber">647,648</context>
         </context-group>
         <target>Experimental</target>
       </trans-unit>
@@ -7175,7 +7195,7 @@
         <source>';' separated list.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">633,634</context>
+          <context context-type="linenumber">651,652</context>
         </context-group>
         <target>';' separated list.</target>
       </trans-unit>
@@ -7183,7 +7203,7 @@
         <source>See</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">638</context>
+          <context context-type="linenumber">656</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
@@ -7195,7 +7215,7 @@
         <source>Reset database after changing this settings!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">644,645</context>
+          <context context-type="linenumber">662,663</context>
         </context-group>
         <target>Reset database after changing this settings!</target>
       </trans-unit>
@@ -7203,7 +7223,7 @@
         <source>Restart server after changing this settings!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
-          <context context-type="linenumber">649,650</context>
+          <context context-type="linenumber">667,668</context>
         </context-group>
         <target>Restart server after changing this settings!</target>
       </trans-unit>
@@ -7211,7 +7231,7 @@
         <source>default</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
-          <context context-type="linenumber">214</context>
+          <context context-type="linenumber">226</context>
         </context-group>
         <target>default</target>
       </trans-unit>
@@ -7219,7 +7239,7 @@
         <source>readonly</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
-          <context context-type="linenumber">295</context>
+          <context context-type="linenumber">316</context>
         </context-group>
         <target>readonly</target>
       </trans-unit>
@@ -7227,7 +7247,7 @@
         <source>default value</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
-          <context context-type="linenumber">297</context>
+          <context context-type="linenumber">318</context>
         </context-group>
         <target>default value</target>
       </trans-unit>
@@ -7267,7 +7287,7 @@
         <source>Can't save: invalid form.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">194</context>
         </context-group>
         <target>Can't save: invalid form.</target>
       </trans-unit>
@@ -7275,7 +7295,7 @@
         <source>Can't save: not changed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">197</context>
         </context-group>
         <target>Can't save: not changed.</target>
       </trans-unit>
@@ -7283,7 +7303,7 @@
         <source>Can't save: saving in progress.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">200</context>
         </context-group>
         <target>Can't save: saving in progress.</target>
       </trans-unit>
@@ -7291,7 +7311,7 @@
         <source>Click to save.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">114</context>
+          <context context-type="linenumber">202</context>
         </context-group>
         <target>Click to save.</target>
       </trans-unit>
@@ -7299,7 +7319,7 @@
         <source>settings saved</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">309</context>
+          <context context-type="linenumber">351</context>
         </context-group>
         <target>setări salvate</target>
       </trans-unit>
@@ -7307,15 +7327,15 @@
         <source>Success</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">310</context>
+          <context context-type="linenumber">352</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">375</context>
+          <context context-type="linenumber">406</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">394</context>
+          <context context-type="linenumber">425</context>
         </context-group>
         <target>Succes</target>
       </trans-unit>
@@ -7323,7 +7343,7 @@
         <source>Extension deleted successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">374</context>
+          <context context-type="linenumber">405</context>
         </context-group>
         <target>Extension deleted successfully</target>
       </trans-unit>
@@ -7331,7 +7351,7 @@
         <source>Failed to delete extension</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">379</context>
+          <context context-type="linenumber">410</context>
         </context-group>
         <target>Failed to delete extension</target>
       </trans-unit>
@@ -7339,7 +7359,7 @@
         <source>Extension reloaded successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">393</context>
+          <context context-type="linenumber">424</context>
         </context-group>
         <target>Extension reloaded successfully</target>
       </trans-unit>
@@ -7347,7 +7367,7 @@
         <source>Failed to reload extension</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
-          <context context-type="linenumber">398</context>
+          <context context-type="linenumber">429</context>
         </context-group>
         <target>Failed to reload extension</target>
       </trans-unit>
@@ -7567,11 +7587,11 @@
         <source>Passwords do not match</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">196</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <target>Passwords do not match</target>
       </trans-unit>
@@ -7579,11 +7599,11 @@
         <source>User creation error!</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <target>User creation error!</target>
       </trans-unit>
@@ -7591,7 +7611,7 @@
         <source>Can't modify user role</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">188</context>
+          <context context-type="linenumber">193</context>
         </context-group>
         <target>Can't modify user role</target>
       </trans-unit>
@@ -7599,11 +7619,11 @@
         <source>Could not save user settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">196</context>
+          <context context-type="linenumber">201</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">219</context>
+          <context context-type="linenumber">224</context>
         </context-group>
         <target>Could not save user settings</target>
       </trans-unit>
@@ -7611,7 +7631,7 @@
         <source>User settings saved successfully</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
-          <context context-type="linenumber">212</context>
+          <context context-type="linenumber">217</context>
         </context-group>
         <target>User settings saved successfully</target>
       </trans-unit>
@@ -7671,7 +7691,7 @@
         <source>Job started</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/button/job-button.settings.component.ts</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">102</context>
         </context-group>
         <target>Job started</target>
       </trans-unit>
@@ -7679,7 +7699,7 @@
         <source>Stopping job</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/button/job-button.settings.component.ts</context>
-          <context context-type="linenumber">120</context>
+          <context context-type="linenumber">122</context>
         </context-group>
         <target>Stopping job</target>
       </trans-unit>
@@ -7711,7 +7731,7 @@
         <source>Cancelling...</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">39,40</context>
         </context-group>
         <target>Cancelling...</target>
       </trans-unit>
@@ -7719,7 +7739,7 @@
         <source>time elapsed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">48,49</context>
+          <context context-type="linenumber">49,50</context>
         </context-group>
         <target>time elapsed</target>
       </trans-unit>
@@ -7727,7 +7747,7 @@
         <source>Processed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">91</context>
         </context-group>
         <target>Processed</target>
       </trans-unit>
@@ -7735,7 +7755,7 @@
         <source>Skipped</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">93</context>
+          <context context-type="linenumber">94</context>
         </context-group>
         <target>Skipped</target>
       </trans-unit>
@@ -7743,7 +7763,7 @@
         <source>Left</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <target>Left</target>
       </trans-unit>
@@ -7751,7 +7771,7 @@
         <source>All</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">99</context>
+          <context context-type="linenumber">100</context>
         </context-group>
         <target>All</target>
       </trans-unit>
@@ -7759,7 +7779,7 @@
         <source> Logs </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
-          <context context-type="linenumber">128,129</context>
+          <context context-type="linenumber">129,130</context>
         </context-group>
         <target>Logs</target>
       </trans-unit>
@@ -7767,7 +7787,7 @@
         <source>processed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">39</context>
+          <context context-type="linenumber">48</context>
         </context-group>
         <target>processed</target>
       </trans-unit>
@@ -7775,7 +7795,7 @@
         <source>skipped</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">43</context>
+          <context context-type="linenumber">52</context>
         </context-group>
         <target>skipped</target>
       </trans-unit>
@@ -7783,7 +7803,7 @@
         <source>all</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">47</context>
+          <context context-type="linenumber">56</context>
         </context-group>
         <target>all</target>
       </trans-unit>
@@ -7791,7 +7811,7 @@
         <source>running</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">117</context>
+          <context context-type="linenumber">115</context>
         </context-group>
         <target>running</target>
       </trans-unit>
@@ -7799,7 +7819,7 @@
         <source>cancelling</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">119</context>
+          <context context-type="linenumber">117</context>
         </context-group>
         <target>cancelling</target>
       </trans-unit>
@@ -7807,7 +7827,7 @@
         <source>canceled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">119</context>
         </context-group>
         <target>canceled</target>
       </trans-unit>
@@ -7815,7 +7835,7 @@
         <source>interrupted</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">121</context>
         </context-group>
         <target>interrupted</target>
       </trans-unit>
@@ -7823,7 +7843,7 @@
         <source>finished</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">123</context>
         </context-group>
         <target>finished</target>
       </trans-unit>
@@ -7831,7 +7851,7 @@
         <source>failed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <target>failed</target>
       </trans-unit>
@@ -7839,11 +7859,11 @@
         <source>every</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">25,26</context>
+          <context context-type="linenumber">28,29</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">153</context>
+          <context context-type="linenumber">158</context>
         </context-group>
         <target>every</target>
       </trans-unit>
@@ -7851,11 +7871,11 @@
         <source>after</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">33,34</context>
+          <context context-type="linenumber">36,37</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">100</context>
+          <context context-type="linenumber">122</context>
         </context-group>
         <target>after</target>
       </trans-unit>
@@ -7863,7 +7883,7 @@
         <source>Job:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">63,64</context>
+          <context context-type="linenumber">66,67</context>
         </context-group>
         <target>Job:</target>
       </trans-unit>
@@ -7871,7 +7891,7 @@
         <source>Periodicity:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">77,78</context>
+          <context context-type="linenumber">80,81</context>
         </context-group>
         <target>Periodicity:</target>
       </trans-unit>
@@ -7879,7 +7899,7 @@
         <source>Set the time to run the job. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">92,93</context>
+          <context context-type="linenumber">95,96</context>
         </context-group>
         <target>Set the time to run the job.</target>
       </trans-unit>
@@ -7887,7 +7907,7 @@
         <source>After:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">101,102</context>
+          <context context-type="linenumber">104,105</context>
         </context-group>
         <target>After:</target>
       </trans-unit>
@@ -7895,7 +7915,7 @@
         <source>The job will run after that job finishes. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">118,119</context>
+          <context context-type="linenumber">122,123</context>
         </context-group>
         <target>The job will run after that job finishes.</target>
       </trans-unit>
@@ -7903,11 +7923,11 @@
         <source>At:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">128,129</context>
+          <context context-type="linenumber">132,133</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">141,142</context>
+          <context context-type="linenumber">145,146</context>
         </context-group>
         <target>At:</target>
       </trans-unit>
@@ -7915,7 +7935,7 @@
         <source>Allow parallel run</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">166,167</context>
+          <context context-type="linenumber">171,172</context>
         </context-group>
         <target>Allow parallel run</target>
       </trans-unit>
@@ -7923,7 +7943,7 @@
         <source>Enables the job to start even if another job is already running. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">182,183</context>
+          <context context-type="linenumber">188,189</context>
         </context-group>
         <target>Enables the job to start even if another job is already running.</target>
       </trans-unit>
@@ -7931,7 +7951,7 @@
         <source> Search query to list photos and videos. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">271</context>
+          <context context-type="linenumber">284</context>
         </context-group>
         <target>Search query to list photos and videos.</target>
       </trans-unit>
@@ -7939,7 +7959,7 @@
         <source>Sort by</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">279,280</context>
+          <context context-type="linenumber">292,293</context>
         </context-group>
         <target>Sort by</target>
       </trans-unit>
@@ -7947,7 +7967,7 @@
         <source> Sorts the photos and videos by this. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">318</context>
+          <context context-type="linenumber">331</context>
         </context-group>
         <target>Sorts the photos and videos by this.</target>
       </trans-unit>
@@ -7955,7 +7975,7 @@
         <source>Pick</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">326,327</context>
+          <context context-type="linenumber">339,340</context>
         </context-group>
         <target>Pick</target>
       </trans-unit>
@@ -7963,7 +7983,7 @@
         <source> Number of photos and videos to pick. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">337</context>
+          <context context-type="linenumber">351</context>
         </context-group>
         <target>Number of photos and videos to pick.</target>
       </trans-unit>
@@ -7971,7 +7991,7 @@
         <source>';' separated integers. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">372,373</context>
+          <context context-type="linenumber">386,387</context>
         </context-group>
         <target>';' separated integers.</target>
       </trans-unit>
@@ -7979,7 +7999,7 @@
         <source>Add Job</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">396,397</context>
+          <context context-type="linenumber">410,411</context>
         </context-group>
         <target>Add Job</target>
       </trans-unit>
@@ -7987,7 +8007,7 @@
         <source>Add new job</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">406,407</context>
+          <context context-type="linenumber">420,421</context>
         </context-group>
         <target>Add new job</target>
       </trans-unit>
@@ -7995,7 +8015,7 @@
         <source>Select a job to schedule. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">424,425</context>
+          <context context-type="linenumber">438,439</context>
         </context-group>
         <target>Select a job to schedule.</target>
       </trans-unit>
@@ -8003,7 +8023,7 @@
         <source>Add Job </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
-          <context context-type="linenumber">434</context>
+          <context context-type="linenumber">448</context>
         </context-group>
         <target>Add Job</target>
       </trans-unit>
@@ -8011,7 +8031,7 @@
         <source>periodic</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">102</context>
+          <context context-type="linenumber">124</context>
         </context-group>
         <target>periodic</target>
       </trans-unit>
@@ -8019,7 +8039,7 @@
         <source>scheduled</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">103</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <target>scheduled</target>
       </trans-unit>
@@ -8027,7 +8047,7 @@
         <source>Monday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">106</context>
+          <context context-type="linenumber">128</context>
         </context-group>
         <target>Monday</target>
       </trans-unit>
@@ -8035,7 +8055,7 @@
         <source>Tuesday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">107</context>
+          <context context-type="linenumber">129</context>
         </context-group>
         <target>Tuesday</target>
       </trans-unit>
@@ -8043,7 +8063,7 @@
         <source>Wednesday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">108</context>
+          <context context-type="linenumber">130</context>
         </context-group>
         <target>Wednesday</target>
       </trans-unit>
@@ -8051,7 +8071,7 @@
         <source>Thursday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <target>Thursday</target>
       </trans-unit>
@@ -8059,7 +8079,7 @@
         <source>Friday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">110</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <target>Friday</target>
       </trans-unit>
@@ -8067,7 +8087,7 @@
         <source>Saturday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">111</context>
+          <context context-type="linenumber">133</context>
         </context-group>
         <target>Saturday</target>
       </trans-unit>
@@ -8075,7 +8095,7 @@
         <source>Sunday</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">112</context>
+          <context context-type="linenumber">134</context>
         </context-group>
         <target>Sunday</target>
       </trans-unit>
@@ -8083,7 +8103,7 @@
         <source>day</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.ts</context>
-          <context context-type="linenumber">113</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>day</target>
       </trans-unit>

@@ -7,7 +7,7 @@ describe('TaskExecuter', () => {
 
   it('should execute', async () => {
     const taskWorker = (input: number) => {
-      return new Promise<number>((resolve, reject) => {
+      return new Promise<number>((resolve) => {
         setTimeout(() => {
           resolve(input * 2);
         }, 1);
@@ -43,8 +43,8 @@ describe('TaskExecuter', () => {
 
   it('should handle race condition', async () => {
     let counter = 0;
-    const taskWorker = (input: number) => {
-      return new Promise<void>((resolve, reject) => {
+    const taskWorker = () => {
+      return new Promise<void>((resolve) => {
         setTimeout(() => {
           counter++;
           resolve();

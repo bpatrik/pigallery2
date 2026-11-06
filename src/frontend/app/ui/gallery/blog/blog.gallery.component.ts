@@ -1,7 +1,5 @@
-import {Component, computed, inject, input, model, ChangeDetectionStrategy} from '@angular/core';
+import {Component, computed, inject, input, model} from '@angular/core';
 import {BlogService, GroupedMarkdown} from './blog.service';
-import {Observable} from 'rxjs';
-import { AsyncPipe } from '@angular/common';
 import { MarkdownComponent } from 'ngx-markdown';
 import { NgIconComponent } from '@ng-icons/core';
 import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathPipe';
@@ -10,11 +8,9 @@ import { FileDTOToRelativePathPipe } from '../../../pipes/FileDTOToRelativePathP
     selector: 'app-gallery-blog',
     templateUrl: './blog.gallery.component.html',
     styleUrl: './blog.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     MarkdownComponent,
     NgIconComponent,
-    AsyncPipe,
     FileDTOToRelativePathPipe
 ]
 })
@@ -25,8 +21,8 @@ export class GalleryBlogComponent {
   /**
    * Blog is inserted to the top (when date is null) and to all date groups, when date is set
    */
-  readonly date = input<Date>(undefined);
-  readonly mkObservable = computed((): Observable<GroupedMarkdown[]> => this.blogService.getMarkDowns(this.date()));
+  readonly date = input<Date>();
+  readonly markdowns = computed((): GroupedMarkdown[] | undefined => this.blogService.getMarkDowns(this.date()));
 
 
   toggleCollapsed(): void {

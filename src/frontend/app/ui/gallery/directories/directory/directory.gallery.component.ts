@@ -1,5 +1,4 @@
-import { Component, OnDestroy, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
-import {DomSanitizer, SafeStyle} from '@angular/platform-browser';
+import { Component, OnDestroy, OnInit, computed, inject, input } from '@angular/core';
 import {SubDirectoryDTO} from '../../../../../../common/entities/DirectoryDTO';
 import {RouterLink} from '@angular/router';
 import {Utils} from '../../../../../../common/Utils';
@@ -9,38 +8,28 @@ import {QueryService} from '../../../../model/query.service';
 import {CoverPhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 
 import { IconComponent } from '../../../../icon.component';
+import {CssUrlPipe} from '../../../../pipes/CssUrlPipe';
 
 @Component({
     selector: 'app-gallery-directory',
     templateUrl: './directory.gallery.component.html',
     styleUrl: './directory.gallery.component.css',
-    changeDetection: ChangeDetectionStrategy.Eager,
     imports: [
     RouterLink,
-    IconComponent
+    IconComponent,
+    CssUrlPipe
 ]
 })
 export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   private thumbnailService = inject(ThumbnailManagerService);
-  private sanitizer = inject(DomSanitizer);
   queryService = inject(QueryService);
 
-  readonly directory = input<SubDirectoryDTO>(undefined);
-  readonly size = input<number>(undefined);
-  thumbnail: Thumbnail = null;
+  readonly directory = input.required<SubDirectoryDTO>();
+  readonly size = input.required<number>();
+  thumbnail: Thumbnail | null = null;
 
-  public get SamplePhoto(): CoverPhotoDTO {
+  public get SamplePhoto(): CoverPhotoDTO | undefined {
     return this.directory().cache?.cover;
-  }
-
-  getSanitizedThUrl(): SafeStyle {
-    return this.sanitizer.bypassSecurityTrustStyle(
-        'url(' +
-        this.thumbnail.Src.replace(/\(/g, '%28')
-            .replace(/'/g, '%27')
-            .replace(/\)/g, '%29') +
-        ')'
-    );
   }
 
   // TODO: implement scroll
@@ -49,9 +38,7 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
        && document.body.scrollTop + window.innerHeight > this.container.nativeElement.offsetTop;
    }*/
 
-  getDirectoryPath(): string {
-    return Utils.concatUrls(this.directory().path, this.directory().name);
-  }
+  public readonly directoryPath = computed((): string => Utils.concatUrls(this.directory().path, this.directory().name));
 
   ngOnDestroy(): void {
     if (this.thumbnail != null) {
@@ -60,9 +47,10 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.directory().cache?.cover) {
+    const cover = this.SamplePhoto;
+    if (cover) {
       this.thumbnail = this.thumbnailService.getThumbnail(
-          new Media(this.SamplePhoto, this.size(), this.size())
+          new Media(cover, this.size(), this.size())
       );
     }
   }

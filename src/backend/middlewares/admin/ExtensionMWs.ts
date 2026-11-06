@@ -1,10 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
-import {StatisticDTO} from '../../../common/entities/settings/StatisticDTO';
-import {MessengerRepository} from '../../model/messenger/MessengerRepository';
-import {JobStartDTO} from '../../../common/entities/job/JobDTO';
-import {ExtensionListItem} from '../../../common/entities/extension/ExtensionListItem';
 
 export class ExtensionMWs {
   public static async getExtensionList(

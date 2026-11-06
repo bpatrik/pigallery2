@@ -1,6 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 import {Router} from '@angular/router';
-import {BehaviorSubject} from 'rxjs';
+import {signal} from '@angular/core';
+import {toObservable} from '@angular/core/rxjs-interop';
 import {filter} from 'rxjs/operators';
 import {ContentLoaderService} from './contentLoader.service';
 import {NetworkService} from '../../model/network/network.service';
@@ -16,8 +17,8 @@ class MockNetworkService {
 }
 
 class MockShareService {
-  sharingSubject = new BehaviorSubject<ResponseSharingDTO>(null);
-  currentSharing = this.sharingSubject.pipe(filter((s) => s !== null));
+  readonly sharing = signal<ResponseSharingDTO | null>(null);
+  currentSharing = toObservable(this.sharing).pipe(filter((s) => s !== null));
 
   isSharing(): boolean {
     return true;
@@ -27,7 +28,7 @@ class MockShareService {
     return 'key123';
   }
 
-  getDefaultRoute(sharing: ResponseSharingDTO): string[] {
+  getDefaultRoute(sharing: ResponseSharingDTO | null): string[] | null {
     return sharing?.directoryQuery ? ['/gallery', sharing.directoryQuery.value] : null;
   }
 }
@@ -46,7 +47,7 @@ describe('ContentLoaderService', () => {
         {provide: NetworkService, useClass: MockNetworkService},
         {provide: GalleryCacheService, useValue: {getDirectory: (): null => null}},
         {provide: ShareService, useClass: MockShareService},
-        {provide: GalleryService, useValue: {autoPollIntervalS: new BehaviorSubject(0)}},
+        {provide: GalleryService, useValue: {autoPollIntervalS: signal(0)}},
         {provide: Router, useValue: router},
       ]
     });
@@ -55,7 +56,8 @@ describe('ContentLoaderService', () => {
   });
 
   it('should open the shared directory when a not shared one is not found', async () => {
-    share.sharingSubject.next(sharing);
+    share.sharing.set(sharing);
+    TestBed.tick();
 
     await service.loadDirectory('timestamps');
 
@@ -68,7 +70,8 @@ describe('ContentLoaderService', () => {
     await Promise.resolve();
     expect(router.navigate).not.toHaveBeenCalled();
 
-    share.sharingSubject.next(sharing);
+    share.sharing.set(sharing);
+    TestBed.tick();
     await loading;
 
     expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Balaton nyár'],

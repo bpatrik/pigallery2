@@ -1,7 +1,7 @@
-import {Component, ChangeDetectionStrategy} from '@angular/core';
+import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {By} from '@angular/platform-browser';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, NgForm, NgModel} from '@angular/forms';
 import {provideRouter} from '@angular/router';
 import {NgIconsModule} from '@ng-icons/core';
 import {ionTrashOutline} from '@ng-icons/ionicons';
@@ -17,7 +17,6 @@ import {RangeSearch, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../.
     <form>
       <app-gallery-search-query-builder name="query" [(ngModel)]="query" />
     </form>`,
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, GallerySearchQueryBuilderComponent]
 })
 class HostComponent {
@@ -65,11 +64,22 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
     host = fixture.componentInstance;
   });
 
+  it('should keep the search form and its fields valid', async () => {
+    host.query = {type: SearchQueryTypes.any_text, value: 'Őszi kirándulás'} as TextSearch;
+    await render();
+
+    const models = fixture.debugElement.queryAll(By.directive(NgModel)).map((d) => d.injector.get(NgModel));
+    // the host's query, the builder's search text and the entry's fields
+    expect(models.length).toBeGreaterThan(2);
+    expect(models.filter((m) => !m.valid).map((m) => m.name)).toEqual([]);
+    expect(fixture.debugElement.query(By.directive(NgForm)).injector.get(NgForm).valid).toBe(true);
+  });
+
   it('should populate the search text when dates are picked', async () => {
     await render();
 
     // same as picking "date" in the type dropdown
-    entry().queryEntry.type = SearchQueryTypes.date;
+    entry().queryEntry()!.type = SearchQueryTypes.date;
     entry().onChangeType();
     await render();
 
@@ -81,20 +91,20 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
     expect(q.min).toBe(Date.UTC(2024, 0, 10));
     expect(q.max).toBe(Date.UTC(2024, 1, 20));
     expect((q as unknown as TextSearch).value).toBeUndefined();
-    expect(builder().rawSearchText).toBe('date:2024-01-10..2024-02-20');
+    expect(builder().rawSearchText()).toBe('date:2024-01-10..2024-02-20');
   });
 
   it('should update the search text when the end date is deleted', async () => {
     host.query = {type: SearchQueryTypes.date, min: Date.UTC(2024, 0, 10), max: Date.UTC(2024, 1, 20)} as RangeSearch;
     await render();
-    expect(builder().rawSearchText).toBe('date:2024-01-10..2024-02-20');
+    expect(builder().rawSearchText()).toBe('date:2024-01-10..2024-02-20');
     expect(dateInput('date_max').value).toBe('2024-02-20');
 
     await typeDate('date_max', '');
 
     expect((host.query as RangeSearch).min).toBe(Date.UTC(2024, 0, 10));
     expect((host.query as RangeSearch).max).toBeUndefined();
-    expect(builder().rawSearchText).toBe('date>=2024-01-10');
+    expect(builder().rawSearchText()).toBe('date>=2024-01-10');
   });
 
   it('should update the search text when the start date is deleted', async () => {
@@ -105,7 +115,7 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
 
     expect((host.query as RangeSearch).min).toBeUndefined();
     expect((host.query as RangeSearch).max).toBe(Date.UTC(2024, 1, 20));
-    expect(builder().rawSearchText).toBe('date<=2024-02-20');
+    expect(builder().rawSearchText()).toBe('date<=2024-02-20');
   });
 
   it('should move the end date along when the start date is set after it', async () => {
@@ -117,7 +127,7 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
     expect((host.query as RangeSearch).min).toBe(Date.UTC(2026, 9, 14));
     expect((host.query as RangeSearch).max).toBe(Date.UTC(2026, 9, 14));
     expect(dateInput('date_max').value).toBe('2026-10-14');
-    expect(builder().rawSearchText).toBe('date=2026-10-14');
+    expect(builder().rawSearchText()).toBe('date=2026-10-14');
   });
 
   it('should move the start date along when the end date is set before it', async () => {
@@ -129,7 +139,7 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
     expect((host.query as RangeSearch).min).toBe(Date.UTC(1903, 2, 31));
     expect((host.query as RangeSearch).max).toBe(Date.UTC(1903, 2, 31));
     expect(dateInput('date_min').value).toBe('1903-03-31');
-    expect(builder().rawSearchText).toBe('date=1903-03-31');
+    expect(builder().rawSearchText()).toBe('date=1903-03-31');
   });
 
   it('should limit the date pickers to the other end of the range', async () => {
@@ -147,6 +157,6 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
     await typeDate('date_max', '');
     await typeDate('date_min', '');
 
-    expect(builder().rawSearchText).toBe('');
+    expect(builder().rawSearchText()).toBe('');
   });
 });

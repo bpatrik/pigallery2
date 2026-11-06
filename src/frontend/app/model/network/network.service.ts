@@ -15,9 +15,9 @@ export class NetworkService {
   private versionService = inject(VersionService);
 
   readonly apiBaseUrl = Config.Server.getApiUrl();
-  private globalErrorHandlers: Array<(error: ErrorDTO) => boolean> = [];
+  private globalErrorHandlers: ((error: ErrorDTO) => boolean)[] = [];
 
-  public static buildUrl(url: string, data?: { [key: string]: unknown }): string {
+  public static buildUrl(url: string, data?: Record<string, unknown>): string {
     if (data) {
       const keys = Object.getOwnPropertyNames(data);
       if (keys.length > 0) {
@@ -85,15 +85,13 @@ export class NetworkService {
       next: (event) => {
         if (event.type === HttpEventType.Response) {
           this.loadingBarService.useRef().complete();
-          if (event.headers.has(CustomHeaders.dataVersion)) {
-            this.versionService.onNewVersion(
-              event.headers.get(CustomHeaders.dataVersion)
-            );
+          const dataVersion = event.headers.get(CustomHeaders.dataVersion);
+          if (dataVersion !== null) {
+            this.versionService.onNewVersion(dataVersion);
           }
-          if (event.headers.has(CustomHeaders.appVersion)) {
-            this.versionService.onNewAppVersion(
-              event.headers.get(CustomHeaders.appVersion)
-            );
+          const appVersion = event.headers.get(CustomHeaders.appVersion);
+          if (appVersion !== null) {
+            this.versionService.onNewAppVersion(appVersion);
           }
         }
       },
@@ -111,7 +109,7 @@ export class NetworkService {
     return this.callJson('put', url, data);
   }
 
-  public getJson<T>(url: string, query?: { [key: string]: any }): Promise<T> {
+  public getJson<T>(url: string, query?: Record<string, unknown>): Promise<T> {
     return this.callJson('get', NetworkService.buildUrl(url, query));
   }
 
@@ -135,23 +133,25 @@ export class NetworkService {
     const process = (res: HttpResponse<Message<T>>): T => {
       this.loadingBarService.useRef().complete();
       const msg = res.body;
-      if (res.headers.has(CustomHeaders.dataVersion)) {
-        this.versionService.onNewVersion(
-          res.headers.get(CustomHeaders.dataVersion)
-        );
+      const dataVersion = res.headers.get(CustomHeaders.dataVersion);
+      if (dataVersion !== null) {
+        this.versionService.onNewVersion(dataVersion);
       }
-      if (res.headers.has(CustomHeaders.appVersion)) {
-        this.versionService.onNewAppVersion(
-          res.headers.get(CustomHeaders.appVersion)
-        );
+      const appVersion = res.headers.get(CustomHeaders.appVersion);
+      if (appVersion !== null) {
+        this.versionService.onNewAppVersion(appVersion);
+      }
+      if (!msg) {
+        throw new Error('Empty response from the server');
       }
       if (msg.error) {
         if (msg.error.code) {
-          (msg.error as any).title = ErrorCodes[msg.error.code];
+          (msg.error as ErrorDTO & { title?: string }).title = ErrorCodes[msg.error.code];
         }
         throw msg.error;
       }
-      return msg.result;
+      // the caller's T says whether the result can be null
+      return msg.result as T;
     };
 
     const err = <T>(error: T) => {
@@ -198,7 +198,8 @@ export class NetworkService {
       // being handled somewhere else (e.g.: not authenticated in the authentication service)
       for (const item of this.globalErrorHandlers) {
         if (item(error as ErrorDTO) === true) {
-          return;
+          // handled: the request resolves with undefined
+          return Promise.resolve(undefined as T);
         }
       }
       return Promise.reject(error);

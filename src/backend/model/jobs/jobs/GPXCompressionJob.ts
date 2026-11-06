@@ -33,7 +33,7 @@ export class GPXCompressionJob extends FileJob {
   protected async processFile(fPath: string): Promise<void> {
     try {
       await GPXProcessing.compressGPX(fPath);
-    } catch (e) {
+    } catch {
       Logger.warn('GPXCompressionJob', ' Could not compress gpx at: ' + fPath);
     }
   }

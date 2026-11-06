@@ -1,15 +1,23 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { FilterService } from './filter.service';
 import { PhotoDTO, FaceRegion, PhotoMetadata } from '../../../../../common/entities/PhotoDTO';
-import { DirectoryContent } from '../contentLoader.service';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { ContentLoaderService, DirectoryContent } from '../contentLoader.service';
 
 describe('FilterService', () => {
   let service: FilterService;
+  let originalContent: ReturnType<typeof signal<DirectoryContent | null>>;
+
+  const getFacesFilter = () => service.filteredContent().filters.selectedFilters
+    .find(f => f.filter.name === $localize`Faces`)!;
 
   beforeEach(() => {
+    originalContent = signal<DirectoryContent | null>(null);
     TestBed.configureTestingModule({
-      providers: [FilterService]
+      providers: [
+        FilterService,
+        {provide: ContentLoaderService, useValue: {originalContent}}
+      ]
     });
     service = TestBed.inject(FilterService);
   });
@@ -19,7 +27,7 @@ describe('FilterService', () => {
   });
 
   describe('Face filtering', () => {
-    it('should keep photos that contain selected face even if photo has multiple faces', async () => {
+    it('should keep photos that contain selected face even if photo has multiple faces', () => {
       // Create test photos with various face combinations
       const testPhotos: PhotoDTO[] = [
         createPhotoWithFaces(['John']),
@@ -31,30 +39,17 @@ describe('FilterService', () => {
         createPhotoWithFaces([]),
       ];
 
-      const testContent: DirectoryContent = {
+      originalContent.set({
         directories: [],
         media: testPhotos,
         metaFile: []
-      };
-
-      const content$ = new BehaviorSubject<DirectoryContent>(testContent);
-
-      // Make filters visible and apply initial filters to populate options
-      service.setShowingFilters(true);
-      const filtered$ = service.applyFilters(content$);
-
-      // Subscribe once to avoid multiple resets
-      let latestResult: DirectoryContent;
-      const subscription = filtered$.subscribe(result => {
-        latestResult = result;
       });
 
-      // Wait for initial population
-      await new Promise(resolve => setTimeout(resolve, 0));
+      // Make filters visible; filtering populates the options
+      service.setShowingFilters(true);
 
       // Get the faces filter and verify initial state
-      const activeFacesFilter = service.activeFilters.value.selectedFilters
-        .find(f => f.filter.name === $localize`Faces`);
+      const activeFacesFilter = getFacesFilter();
       expect(activeFacesFilter).toBeTruthy();
       expect(activeFacesFilter.options.length).toBe(3); // John, Kate, Bob
 
@@ -72,16 +67,28 @@ describe('FilterService', () => {
       // Trigger filter change to apply the selection
       service.onFilterChange();
 
-      // Wait for changes to propagate
-      await new Promise(resolve => setTimeout(resolve, 0));
-
       // Should keep all photos containing Kate (3 photos: Kate alone, Kate+John, John+Kate, Kate+Bob)
-      expect(latestResult.media.length).toBe(4);
-      expect(latestResult.media.every(photo =>
+      const result = service.filteredContent().content!;
+      expect(result.media.length).toBe(4);
+      expect(result.media.every(photo =>
         (photo.metadata as PhotoMetadata).faces?.some((face: FaceRegion) => face.name === 'Kate')
       )).toBe(true);
+      expect(service.filteredContent().filters.areFiltersActive).toBe(true);
+    });
 
-      subscription.unsubscribe();
+    it('should reset the selected options for new content', () => {
+      originalContent.set({directories: [], media: [createPhotoWithFaces(['Kovács Éva']), createPhotoWithFaces(['Bob'])], metaFile: []});
+      service.setShowingFilters(true);
+      getFacesFilter().options.find(opt => opt.name === 'Bob')!.selected = false;
+      service.onFilterChange();
+      expect(service.filteredContent().content!.media.length).toBe(1);
+
+      originalContent.set({directories: [], media: [createPhotoWithFaces(['Bob']), createPhotoWithFaces(['Bob'])], metaFile: []});
+
+      expect(service.filteredContent().content!.media.length).toBe(2);
+      expect(getFacesFilter().options.map(opt => [opt.name, opt.selected])).toEqual([['Bob', true]]);
+      // the filter panel stays open
+      expect(service.filteredContent().filters.filtersVisible).toBe(true);
     });
   });
 });

@@ -1,8 +1,8 @@
 export class LoginCredential {
   constructor(
-      public username: string = '',
-      public password: string = '',
-      public rememberMe: boolean = true
+      public username = '',
+      public password = '',
+      public rememberMe = true
   ) {
   }
 }

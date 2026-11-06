@@ -1,8 +1,6 @@
-import {Injectable} from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
+import {computed, inject, Injectable, linkedSignal} from '@angular/core';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
-import {DirectoryContent} from '../contentLoader.service';
-import {map, switchMap} from 'rxjs/operators';
+import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {Utils} from '../../../../../common/Utils';
 
@@ -13,13 +11,13 @@ export enum FilterRenderType {
 
 export interface Filter {
   name: string;
-  mapFn: (m: PhotoDTO) => (string | number)[] | (string | number);
+  mapFn: (m: PhotoDTO) => (string | number)[] | (string | number) | undefined;
   renderType: FilterRenderType;
   isArrayValue?: boolean;
 }
 
 export interface FilterOption {
-  name: string;
+  name: string | number;
   count: number;
   selected: boolean;
 }
@@ -29,18 +27,38 @@ export interface SelectedFilter {
   options: FilterOption[];
 }
 
+export interface ActiveFilters {
+  filtersVisible: boolean;
+  areFiltersActive: boolean;
+  dateFilter: {
+    minDate: number;
+    maxDate: number;
+    minFilter: number;
+    maxFilter: number;
+  };
+  selectedFilters: SelectedFilter[];
+}
+
+export interface FilteredContent {
+  content: DirectoryContent | undefined;
+  // the active filters with the options and date range of the content
+  filters: ActiveFilters;
+}
+
 @Injectable({providedIn: 'root'})
 export class FilterService {
+  private contentLoader = inject(ContentLoaderService);
+
   public readonly AVAILABLE_FILTERS: Filter[] = [
     {
       name: $localize`Keywords`,
-      mapFn: (m: PhotoDTO): string[] => m.metadata.keywords,
+      mapFn: (m: PhotoDTO): string[] | undefined => m.metadata.keywords,
       renderType: FilterRenderType.enum,
       isArrayValue: true,
     },
     {
       name: $localize`Faces`,
-      mapFn: (m: PhotoDTO): string[] =>
+      mapFn: (m: PhotoDTO): string[] | undefined =>
         m.metadata.faces
           ? m.metadata.faces.map((f) => f.name)
           : ['<' + $localize`no face` + '>'],
@@ -49,7 +67,7 @@ export class FilterService {
     },
     {
       name: $localize`Faces groups`,
-      mapFn: (m: PhotoDTO): string =>
+      mapFn: (m: PhotoDTO): string | undefined =>
         m.metadata.faces
           ?.map((f) => f.name)
           .sort()
@@ -59,52 +77,52 @@ export class FilterService {
     },
     {
       name: $localize`Caption`,
-      mapFn: (m: PhotoDTO): string => m.metadata.caption,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.caption,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Rating`,
-      mapFn: (m: PhotoDTO): number => m.metadata.rating,
+      mapFn: (m: PhotoDTO): number | undefined => m.metadata.rating,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`City`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.city,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.positionData?.city,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`State`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.state,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.positionData?.state,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Country`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.country,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.positionData?.country,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Camera`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.model,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.model,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Lens`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.lens,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.lens,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`ISO`,
-      mapFn: (m: PhotoDTO): number => m.metadata.cameraData?.ISO,
+      mapFn: (m: PhotoDTO): number | undefined => m.metadata.cameraData?.ISO,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Aperture`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.fStop ? `f/${m.metadata.cameraData?.fStop}` : undefined,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.fStop ? `f/${m.metadata.cameraData?.fStop}` : undefined,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Shutter speed`,
-      mapFn: (m: PhotoDTO): string => {
+      mapFn: (m: PhotoDTO): string | undefined => {
         const f = m.metadata.cameraData?.exposure;
         if (typeof f === 'undefined') {
           return undefined;
@@ -118,48 +136,72 @@ export class FilterService {
     },
     {
       name: $localize`Focal length`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.focalLength ? `${m.metadata.cameraData?.focalLength} mm` : undefined,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.focalLength ? `${m.metadata.cameraData?.focalLength} mm` : undefined,
       renderType: FilterRenderType.enum,
     },
   ];
 
-  public readonly activeFilters = new BehaviorSubject({
-    filtersVisible: false,
-    areFiltersActive: false,
-    dateFilter: {
-      minDate: 0,
-      maxDate: Date.now(),
-      minFilter: Number.MIN_VALUE,
-      maxFilter: Number.MAX_VALUE,
-    },
-    selectedFilters: [
-      {
-        filter: this.AVAILABLE_FILTERS[0],
-        options: [],
-      },
-      {
-        filter: this.AVAILABLE_FILTERS[1],
-        options: [],
-      },
-      {
-        filter: this.AVAILABLE_FILTERS[7],
-        options: [],
-      },
-      {
-        filter: this.AVAILABLE_FILTERS[4],
-        options: [],
-      },
-    ],
+  // The filter UI edits this object in place (ngModel) and then calls onFilterChange().
+  // New content resets the selected options and the date range.
+  public readonly activeFilters = linkedSignal<DirectoryContent | undefined, ActiveFilters>({
+    source: this.contentLoader.originalContent,
+    computation: (content, previous) => {
+      const filters = previous?.value ?? this.getInitialFilters();
+      FilterService.resetFilterValues(filters);
+      return {...filters};
+    }
   });
-  public statistic: { date: Date; endDate: Date; dateStr: string; count: number; max: number; }[] = [];
+  public readonly statistic = computed(() => this.getStatistic(this.contentLoader.originalContent()));
+  // Filtering also updates the options and the date range of the active filters, so the UI reads them from here.
+  public readonly filteredContent = computed((): FilteredContent => {
+    const filters = this.activeFilters();
+    return {content: this.applyFilters(this.contentLoader.originalContent(), filters), filters};
+  });
 
-  private getStatistic(prefiltered: DirectoryContent): { date: Date, endDate: Date, dateStr: string, count: number, max: number }[] {
+  private getInitialFilters(): ActiveFilters {
+    return {
+      filtersVisible: false,
+      areFiltersActive: false,
+      dateFilter: {
+        minDate: 0,
+        maxDate: Date.now(),
+        minFilter: Number.MIN_VALUE,
+        maxFilter: Number.MAX_VALUE,
+      },
+      selectedFilters: [
+        {
+          filter: this.AVAILABLE_FILTERS[0],
+          options: [],
+        },
+        {
+          filter: this.AVAILABLE_FILTERS[1],
+          options: [],
+        },
+        {
+          filter: this.AVAILABLE_FILTERS[7],
+          options: [],
+        },
+        {
+          filter: this.AVAILABLE_FILTERS[4],
+          options: [],
+        },
+      ],
+    };
+  }
+
+  private static resetFilterValues(filters: ActiveFilters): void {
+    filters.dateFilter.minFilter = Number.MIN_VALUE;
+    filters.dateFilter.maxFilter = Number.MAX_VALUE;
+    filters.selectedFilters.forEach((f) => (f.options = []));
+  }
+
+  private getStatistic(prefiltered: DirectoryContent | undefined): { date: Date, time: number, endTime: number, dateStr: string, count: number, max: number }[] {
     if (!prefiltered ||
       !prefiltered.media ||
       prefiltered.media.length === 0) {
       return [];
     }
-    const ret: { date: Date, endDate: Date, dateStr: string, count: number, max: number }[] = [];
+    const ret: { date: Date, time: number, endTime: number, dateStr: string, count: number, max: number }[] = [];
     const minDate = prefiltered.media.reduce(
       (p, curr) => Math.min(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
       Number.MAX_VALUE - 1
@@ -183,9 +225,9 @@ export class FilterService {
 
     // finding the resolution
     let usedDiv = H;
-    for (let i = 0; i < divs.length; ++i) {
-      if (diff / divs[i] < 26) {
-        usedDiv = divs[i];
+    for (const div of divs) {
+      if (diff / div < 26) {
+        usedDiv = div;
         break;
       }
     }
@@ -235,7 +277,8 @@ export class FilterService {
         } else {
           dStr = 'HH';
         }
-        ret.push({date: getDate(ret.length), endDate: getDate(ret.length + 1), dateStr: dStr, count: 0, max: 0});
+        const date = getDate(ret.length);
+        ret.push({date, time: date.getTime(), endTime: getDate(ret.length + 1).getTime(), dateStr: dStr, count: 0, max: 0});
       }
 
       ret[key].count++;
@@ -251,152 +294,140 @@ export class FilterService {
     return ret;
   }
 
-  public applyFilters(
-    directoryContent: Observable<DirectoryContent>
-  ): Observable<DirectoryContent> {
-    return directoryContent.pipe(
-      switchMap((dirContent: DirectoryContent) => {
-        this.statistic = this.getStatistic(dirContent);
-        this.resetFilters(false);
-        return this.activeFilters.pipe(
-          map((afilters) => {
-            if (!dirContent || !dirContent.media || (!afilters.filtersVisible && !afilters.areFiltersActive)) {
-              return dirContent;
-            }
+  private applyFilters(dirContent: DirectoryContent | undefined, afilters: ActiveFilters): DirectoryContent | undefined {
+    if (!dirContent || !dirContent.media || (!afilters.filtersVisible && !afilters.areFiltersActive)) {
+      return dirContent;
+    }
 
-            // clone, so the original won't get overwritten
-            const c = {
-              media: dirContent.media,
-              directories: dirContent.directories,
-              metaFile: dirContent.metaFile,
+    // clone, so the original won't get overwritten
+    const c = {
+      media: dirContent.media,
+      directories: dirContent.directories,
+      metaFile: dirContent.metaFile,
+    };
+
+    /* Date Selector */
+    if (c.media.length > 0) {
+      // Update date filter range
+      afilters.dateFilter.minDate = c.media.reduce(
+        (p, curr) => Math.min(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
+        Number.MAX_VALUE - 1
+      );
+      afilters.dateFilter.maxDate = c.media.reduce(
+        (p, curr) => Math.max(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
+        Number.MIN_VALUE + 1
+      );
+      // Add a few sec padding
+      afilters.dateFilter.minDate -= ((afilters.dateFilter.minDate % 1000) + 1000);
+      afilters.dateFilter.maxDate += ((1000 - (afilters.dateFilter.maxDate % 1000)) + 1000);
+
+      if (afilters.dateFilter.minFilter === Number.MIN_VALUE) {
+        afilters.dateFilter.minFilter = afilters.dateFilter.minDate;
+      }
+      if (afilters.dateFilter.maxFilter === Number.MAX_VALUE) {
+        afilters.dateFilter.maxFilter = afilters.dateFilter.maxDate;
+      }
+
+      // Apply Date filter
+      c.media = c.media.filter(
+        (m) =>
+          Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) >= afilters.dateFilter.minFilter &&
+          Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) <= afilters.dateFilter.maxFilter
+      );
+    } else {
+      afilters.dateFilter.minDate = Number.MIN_VALUE;
+      afilters.dateFilter.maxDate = Number.MAX_VALUE;
+      afilters.dateFilter.minFilter = Number.MIN_VALUE;
+      afilters.dateFilter.maxFilter = Number.MAX_VALUE;
+    }
+
+    // filters
+    for (const f of afilters.selectedFilters) {
+
+      /* Update filter options */
+      const valueMap: Record<string, { name: string | number, count: number, selected: boolean }> = {};
+      f.options.forEach((o) => {
+        valueMap[o.name] = o;
+        o.count = 0; // reset count so unknown options can be removed at the end
+      });
+      if (f.filter.isArrayValue) {
+        c.media.forEach((m) => {
+          (f.filter.mapFn(m as PhotoDTO) as string[])?.forEach((v) => {
+            valueMap[v] = valueMap[v] || {
+              name: v,
+              count: 0,
+              selected: true,
             };
+            valueMap[v].count++;
+          });
+        });
+      } else {
+        c.media.forEach((m) => {
+          const key = f.filter.mapFn(m as PhotoDTO) as string;
+          valueMap[key] = valueMap[key] || {
+            name: key,
+            count: 0,
+            selected: true,
+          };
+          valueMap[key].count++;
+        });
+      }
+      f.options = Object.values(valueMap)
+        .filter((o) => o.count > 0)
+        // sort by count and alpha. if counts are the same
+        .sort((a, b) =>
+          a.count == b.count && (a.name !== undefined && b.name !== undefined) ?
+            Number.isFinite(a.name) && Number.isFinite(b.name) ? (a.name as number) - (b.name as number) : a.name.toString().localeCompare(b.name.toString()) :
+            b.count - a.count);
 
-            /* Date Selector */
-            if (c.media.length > 0) {
-              // Update date filter range
-              afilters.dateFilter.minDate = c.media.reduce(
-                (p, curr) => Math.min(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
-                Number.MAX_VALUE - 1
-              );
-              afilters.dateFilter.maxDate = c.media.reduce(
-                (p, curr) => Math.max(p, Utils.getTimeMS(curr.metadata.creationDate, curr.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset)),
-                Number.MIN_VALUE + 1
-              );
-              // Add a few sec padding
-              afilters.dateFilter.minDate -= ((afilters.dateFilter.minDate % 1000) + 1000);
-              afilters.dateFilter.maxDate += ((1000 - (afilters.dateFilter.maxDate % 1000)) + 1000);
-
-              if (afilters.dateFilter.minFilter === Number.MIN_VALUE) {
-                afilters.dateFilter.minFilter = afilters.dateFilter.minDate;
-              }
-              if (afilters.dateFilter.maxFilter === Number.MAX_VALUE) {
-                afilters.dateFilter.maxFilter = afilters.dateFilter.maxDate;
-              }
-
-              // Apply Date filter
-              c.media = c.media.filter(
-                (m) =>
-                  Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) >= afilters.dateFilter.minFilter &&
-                  Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset) <= afilters.dateFilter.maxFilter
-              );
-            } else {
-              afilters.dateFilter.minDate = Number.MIN_VALUE;
-              afilters.dateFilter.maxDate = Number.MAX_VALUE;
-              afilters.dateFilter.minFilter = Number.MIN_VALUE;
-              afilters.dateFilter.maxFilter = Number.MAX_VALUE;
+      /* Apply filters */
+      f.options.forEach((opt) => {
+        if (opt.selected) {
+          return;
+        }
+        if (f.filter.isArrayValue) {
+          c.media = c.media.filter((m) => {
+            const mapped = f.filter.mapFn(m as PhotoDTO) as string[];
+            if (!mapped) {
+              return true;
             }
-
-            // filters
-            for (const f of afilters.selectedFilters) {
-
-              /* Update filter options */
-              const valueMap: { [key: string]: { name: string | number, count: number, selected: boolean } } = {};
-              f.options.forEach((o) => {
-                valueMap[o.name] = o;
-                o.count = 0; // reset count so unknown options can be removed at the end
-              });
-              if (f.filter.isArrayValue) {
-                c.media.forEach((m) => {
-                  (f.filter.mapFn(m as PhotoDTO) as string[])?.forEach((v) => {
-                    valueMap[v] = valueMap[v] || {
-                      name: v,
-                      count: 0,
-                      selected: true,
-                    };
-                    valueMap[v].count++;
-                  });
-                });
-              } else {
-                c.media.forEach((m) => {
-                  const key = f.filter.mapFn(m as PhotoDTO) as string;
-                  valueMap[key] = valueMap[key] || {
-                    name: key,
-                    count: 0,
-                    selected: true,
-                  };
-                  valueMap[key].count++;
-                });
-              }
-              f.options = Object.values(valueMap)
-                .filter((o) => o.count > 0)
-                // sort by count and alpha. if counts are the same
-                .sort((a, b) =>
-                  a.count == b.count && (a.name !== undefined && b.name !== undefined) ?
-                    Number.isFinite(a.name) && Number.isFinite(b.name) ? (a.name as number) - (b.name as number) : a.name.toString().localeCompare(b.name.toString()) :
-                    b.count - a.count);
-
-              /* Apply filters */
-              f.options.forEach((opt) => {
-                if (opt.selected) {
-                  return;
-                }
-                if (f.filter.isArrayValue) {
-                  c.media = c.media.filter((m) => {
-                    const mapped = f.filter.mapFn(m as PhotoDTO) as string[];
-                    if (!mapped) {
-                      return true;
-                    }
-                    // Keep photos that have at least one of the selected values
-                    return mapped.some(value =>
-                      f.options.find(opt => opt.name === value && opt.selected)
-                    );
-                  });
-                } else {
-                  c.media = c.media.filter(
-                    (m) =>
-                      (f.filter.mapFn(m as PhotoDTO) as string) !== opt.name
-                  );
-                }
-              });
-            }
-            // If the number of photos did not change, the filters are not active
-            afilters.areFiltersActive = c.media.length !== dirContent.media.length;
-            return c;
-          })
-        );
-      })
-    );
+            // Keep photos that have at least one of the selected values
+            return mapped.some(value =>
+              f.options.find(opt => opt.name === value && opt.selected)
+            );
+          });
+        } else {
+          c.media = c.media.filter(
+            (m) =>
+              (f.filter.mapFn(m as PhotoDTO) as string) !== opt.name
+          );
+        }
+      });
+    }
+    // If the number of photos did not change, the filters are not active
+    afilters.areFiltersActive = c.media.length !== dirContent.media.length;
+    return c;
   }
 
   public onFilterChange(): void {
-    this.activeFilters.next(this.activeFilters.value);
+    // a new object, so the filters are applied again
+    this.activeFilters.update((f) => ({...f}));
   }
 
   setShowingFilters(value: boolean): void {
-    if (this.activeFilters.value.filtersVisible === value) {
+    const filters = this.activeFilters();
+    if (filters.filtersVisible === value) {
       return;
     }
-    this.activeFilters.value.filtersVisible = value;
-    if ((!this.activeFilters.value.filtersVisible && !this.activeFilters.value.areFiltersActive)) {
+    filters.filtersVisible = value;
+    if ((!filters.filtersVisible && !filters.areFiltersActive)) {
       this.resetFilters(false);
     }
     this.onFilterChange();
   }
 
   resetFilters(triggerChangeDetection = true): void {
-    this.activeFilters.value.dateFilter.minFilter = Number.MIN_VALUE;
-    this.activeFilters.value.dateFilter.maxFilter = Number.MAX_VALUE;
-    this.activeFilters.value.selectedFilters.forEach((f) => (f.options = []));
+    FilterService.resetFilterValues(this.activeFilters());
     if (triggerChangeDetection) {
       this.onFilterChange();
     }

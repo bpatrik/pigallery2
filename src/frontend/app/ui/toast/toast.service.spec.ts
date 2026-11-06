@@ -1,14 +1,11 @@
 import {TestBed} from '@angular/core/testing';
-import {BehaviorSubject} from 'rxjs';
+import {computed, signal} from '@angular/core';
 import {ToastService} from './toast.service';
 import {AuthenticationService} from '../../model/network/authentication.service';
 
 class MockToastAuthenticationService {
-  user = new BehaviorSubject<unknown>({name: 'admin'});
-
-  isAuthenticated(): boolean {
-    return !!this.user.value;
-  }
+  readonly user = signal<unknown>({name: 'admin'});
+  readonly isAuthenticated = computed((): boolean => !!this.user());
 }
 
 describe('ToastService', () => {
@@ -80,7 +77,8 @@ describe('ToastService', () => {
 
   it('should show no toasts while logged out', () => {
     service.open({type: 'error', text: 'Upload failed'});
-    auth.user.next(null);
+    auth.user.set(null);
+    TestBed.tick();
     expect(service.toasts().length).toBe(0);
     service.open({type: 'info', text: 'Hello'});
     expect(service.toasts().length).toBe(0);

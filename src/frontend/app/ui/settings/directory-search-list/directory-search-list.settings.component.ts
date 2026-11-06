@@ -1,4 +1,4 @@
-import {Component, input, output, ChangeDetectionStrategy} from '@angular/core';
+import {Component, input, output} from '@angular/core';
 
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
@@ -13,7 +13,6 @@ import {TextSearchMatchingTypes} from '../../gallery/search/query-enrty/TextSear
 @Component({
   selector: 'app-settings-directory-search-list',
   templateUrl: './directory-search-list.settings.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, NgIconComponent, StringifySearchType]
 })
 export class DirectorySearchListSettingsComponent {
@@ -29,19 +28,16 @@ export class DirectorySearchListSettingsComponent {
   readonly changed = output<void>();
 
   readonly SearchQueryTypes = SearchQueryTypes;
-  readonly MatchingTypes = TextSearchMatchingTypes.values;
+  readonly MatchingTypes = TextSearchMatchingTypes.values
+    .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value)}));
 
-  getMatchingType(d: DirectorySearch): string {
+  getMatchingType(d: DirectorySearch): string | undefined {
     return TextSearchMatchingTypes.get(d);
   }
 
   setMatchingType(d: DirectorySearch, value: string): void {
     TextSearchMatchingTypes.set(d, value);
     this.changed.emit();
-  }
-
-  getMatchingTypesDescription(type: string): string {
-    return TextSearchMatchingTypes.getDescription(type);
   }
 
   add(): void {

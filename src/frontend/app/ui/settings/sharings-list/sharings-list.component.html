@@ -1,4 +1,4 @@
-@if (Enabled) {
+@if (Enabled()) {
   <div class="row mt-2">
     <div class="col-auto">
       <h5 i18n>Active shares</h5>
@@ -7,7 +7,7 @@
       <hr/>
     </div>
   </div>
-  @if (shares && shares.length >0) {
+  @if (shareRows().length > 0) {
     <table class="table table-hover">
       <thead>
         <tr>
@@ -19,14 +19,14 @@
         </tr>
       </thead>
       <tbody>
-        @for (share of shares; track share.id) {
+        @for (row of shareRows(); track row.share.id) {
           <tr>
-            <td class="ellipsisContainer"><a [href]="sharingService.getUrl(share)" class="ellipsisText">{{share.sharingKey}}</a></td>
-            <td>{{(share.searchQuery || share.directoryQuery) | searchQuery}}</td>
-            <td>{{share.creator.name}}</td>
-            <td>{{share.expires | date}}</td>
+            <td class="ellipsisContainer"><a [href]="row.url" class="ellipsisText">{{row.share.sharingKey}}</a></td>
+            <td>{{(row.share.searchQuery || row.share.directoryQuery) | searchQuery}}</td>
+            <td>{{row.share.creator?.name}}</td>
+            <td>{{row.share.expires | date}}</td>
             <td>
-              <button (click)="deleteSharing(share)" class="btn btn-danger float-end">
+              <button (click)="deleteSharing(row.share)" class="btn btn-danger float-end">
                 <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
               </button>
             </td>
@@ -35,7 +35,7 @@
       </tbody>
     </table>
   }
-  @if (!shares || shares.length  == 0) {
+  @if (shareRows().length === 0) {
     <div class="panel-info" i18n>
       No sharing was created.
     </div>
