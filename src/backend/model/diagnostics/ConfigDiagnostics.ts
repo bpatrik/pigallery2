@@ -4,7 +4,7 @@ import {NotificationManager} from '../NotifocationManager';
 import {SQLConnection} from '../database/SQLConnection';
 import * as fs from 'fs';
 import * as path from 'path';
-import {FFmpegFactory} from '../FFmpegFactory';
+import {FFmpeg} from '../FFmpeg';
 import {
   ClientAlbumConfig,
   ClientFacesConfig,
@@ -104,47 +104,27 @@ export class ConfigDiagnostics {
   }
 
 
-  static testVideoConfig(videoConfig: ServerVideoConfig,
-                         config: PrivateConfigClass): Promise<void> {
+  static async testVideoConfig(videoConfig: ServerVideoConfig,
+                               config: PrivateConfigClass): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing video config with ffmpeg test');
-    return new Promise((resolve, reject) => {
-      try {
-
-        if (config.Media.Video.enabled === true) {
-          if (videoConfig.transcoding.fps <= 0) {
-            throw new Error('fps should be grater than 0');
-          }
-        }
-        if (videoConfig.enabled === true) {
-          const ffmpeg = FFmpegFactory.get();
-          ffmpeg().getAvailableCodecs((err: Error) => {
-            if (err) {
-              return reject(
-                new Error(
-                  'Error accessing ffmpeg, cant find executable: ' +
-                  err.toString()
-                )
-              );
-            }
-            ffmpeg(__dirname + '/blank.jpg').ffprobe((err2: Error) => {
-              if (err2) {
-                return reject(
-                  new Error(
-                    'Error accessing ffmpeg-probe, cant find executable: ' +
-                    err2.toString()
-                  )
-                );
-              }
-              return resolve();
-            });
-          });
-        } else {
-          return resolve();
-        }
-      } catch (e) {
-        return reject(new Error('unknown video error: ' + e.toString()));
+    if (config.Media.Video.enabled === true) {
+      if (videoConfig.transcoding.fps <= 0) {
+        throw new Error('unknown video error: Error: fps should be grater than 0');
       }
-    });
+    }
+    if (videoConfig.enabled !== true) {
+      return;
+    }
+    try {
+      await FFmpeg.run(['-codecs']);
+    } catch (err) {
+      throw new Error('Error accessing ffmpeg, cant find executable: ' + err.toString(), {cause: err});
+    }
+    try {
+      await FFmpeg.probe(__dirname + '/blank.jpg');
+    } catch (err) {
+      throw new Error('Error accessing ffmpeg-probe, cant find executable: ' + err.toString(), {cause: err});
+    }
   }
 
 

@@ -41,7 +41,6 @@ test2.*
 *.sublime-workspace
 .DS_Store
 /coverage/
-.nyc_output/
 .vscode*
 !test/setup-local.js  # Excludes setup.js from the ignore rule
 /demo/tmp2/

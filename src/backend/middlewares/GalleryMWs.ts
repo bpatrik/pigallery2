@@ -1,6 +1,6 @@
 import * as path from 'path';
 import {promises as fsp} from 'fs';
-import archiver from 'archiver';
+import {ZipArchive} from 'archiver';
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {ParentDirectoryDTO,} from '../../common/entities/DirectoryDTO';
@@ -148,7 +148,7 @@ export class GalleryMWs {
       res.set('Content-Type', 'application/zip');
       res.set('Content-Disposition', 'attachment; filename=SearchResults.zip');
 
-      const archive = archiver('zip', {
+      const archive = new ZipArchive({
         store: true, // disable compression
       });
 

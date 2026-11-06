@@ -10,17 +10,14 @@ import {Logger} from '../../Logger';
 import * as exifr from 'exifr';
 import exifReader from 'exif-reader';
 import sharp from 'sharp';
-import {FfprobeData} from 'fluent-ffmpeg';
-import * as util from 'node:util';
 import * as path from 'path';
 import {Utils} from '../../../common/Utils';
-import {FFmpegFactory} from '../FFmpegFactory';
+import {FFmpeg} from '../FFmpeg';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {DateTags} from './MetadataCreationDate';
 
 const {imageSizeFromFile} = require('image-size/fromFile');
 const LOG_TAG = '[MetadataLoader]';
-const ffmpeg = FFmpegFactory.get();
 
 sharp.cache(false);
 
@@ -69,10 +66,7 @@ export class MetadataLoader {
     try {
 
 
-      const data: FfprobeData = await util.promisify<FfprobeData>(
-        // wrap to arrow function otherwise 'this' is lost for ffprobe
-        (cb) => ffmpeg(fullPath).ffprobe(cb)
-      )();
+      const data = await FFmpeg.probe(fullPath);
 
       try {
         for (const stream of data.streams) {
@@ -80,9 +74,10 @@ export class MetadataLoader {
             metadata.size.width = stream.width;
             metadata.size.height = stream.height;
 
+            const rotation = stream.side_data_list?.find(sd => sd.rotation !== undefined)?.rotation;
             if (
-              Utils.isInt32(parseInt('' + stream.rotation, 10)) &&
-              (Math.abs(parseInt('' + stream.rotation, 10)) / 90) % 2 === 1
+              Utils.isInt32(parseInt('' + rotation, 10)) &&
+              (Math.abs(parseInt('' + rotation, 10)) / 90) % 2 === 1
             ) {
               // noinspection JSSuspiciousNameCombination
               metadata.size.width = stream.height;
@@ -123,17 +118,17 @@ export class MetadataLoader {
         if (
           metadata.duration === 0 &&
           data.format.duration !== undefined &&
-          Utils.isInt32(Math.floor(data.format.duration * 1000))
+          Utils.isInt32(Math.floor(parseFloat(data.format.duration) * 1000))
         ) {
-          metadata.duration = Math.floor(data.format.duration * 1000);
+          metadata.duration = Math.floor(parseFloat(data.format.duration) * 1000);
         }
 
         // Prefer bitrate from container header (includes video and audio)
         if (
           data.format.bit_rate !== undefined &&
-          Utils.isInt32(data.format.bit_rate)
+          Utils.isInt32(parseInt(data.format.bit_rate, 10))
         ) {
-          metadata.bitRate = data.format.bit_rate;
+          metadata.bitRate = parseInt(data.format.bit_rate, 10);
         }
 
         if (
@@ -148,9 +143,9 @@ export class MetadataLoader {
         // Extract Apple Live Photo Content Identifier from MOV companion videos
         if (
           data.format.tags !== undefined &&
-          typeof (data.format.tags as any)['com.apple.quicktime.content.identifier'] === 'string'
+          typeof data.format.tags['com.apple.quicktime.content.identifier'] === 'string'
         ) {
-          metadata.contentIdentifier = (data.format.tags as any)['com.apple.quicktime.content.identifier'];
+          metadata.contentIdentifier = data.format.tags['com.apple.quicktime.content.identifier'];
         }
 
       } catch (err) {

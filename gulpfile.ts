@@ -5,8 +5,6 @@ import {promises as fsp} from 'fs';
 import * as path from 'path';
 import * as util from 'util';
 import zip from 'gulp-zip';
-import * as ts from 'gulp-typescript';
-import * as sourcemaps from 'gulp-sourcemaps';
 import * as xml2js from 'xml2js';
 import * as child_process from 'child_process';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -20,7 +18,6 @@ import {PG2ConfMap, ServerPG2ConfMap} from './src/common/PG2ConfMap';
 const execPr = util.promisify(child_process.exec);
 
 const translationFolder = 'translate';
-const tsBackendProject = ts.createProject('tsconfig.json');
 declare const process: NodeJS.Process;
 
 const getSwitch = (name: string, def: string = null): string => {
@@ -39,16 +36,14 @@ const getSwitch = (name: string, def: string = null): string => {
   return def;
 };
 
-gulp.task('build-backend', (): any =>
-  gulp
-    .src(['src/common/**/*.ts', 'src/backend/**/*.ts', 'benchmark/**/*.ts'], {
-      base: '.'
-    })
-    .pipe(sourcemaps.init())
-    .pipe(tsBackendProject())
-    .pipe(sourcemaps.write('.', {includeContent: false}))
-    .pipe(gulp.dest('./release'))
-);
+gulp.task('build-backend', async (): Promise<void> => {
+  try {
+    await execPr('tsc -p tsconfig.release.json');
+  } catch (e) {
+    console.error(e.stdout); // tsc prints its errors to stdout
+    throw e;
+  }
+});
 
 const createDynamicTranslationFile = async (
   language: string
