@@ -1,6 +1,6 @@
 import {IExtensionDB} from './IExtension';
 import {SQLConnection} from '../database/SQLConnection';
-import {Connection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import {ILogger} from '../../Logger';
 
 export class ExtensionDB implements IExtensionDB {
@@ -13,7 +13,7 @@ export class ExtensionDB implements IExtensionDB {
     return SQLConnection.getEntries();
   }
 
-  getSQLConnection(): Promise<Connection> {
+  getSQLConnection(): Promise<DataSource> {
     return SQLConnection.getConnection();
   }
 

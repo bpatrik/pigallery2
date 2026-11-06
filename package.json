@@ -58,7 +58,7 @@
     "sharp": "0.34.2",
     "tslib": "2.9.1",
     "typeconfig": "2.5.0",
-    "typeorm": "0.3.31",
+    "typeorm": "1.1.2",
     "xml2js": "0.6.2"
   },
   "devDependencies": {

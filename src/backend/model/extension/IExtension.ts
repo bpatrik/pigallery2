@@ -6,7 +6,7 @@ import {ProjectPathClass} from '../../ProjectPath';
 import {ILogger} from '../../Logger';
 import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {ParamsDictionary} from 'express-serve-static-core';
-import {Connection, Repository} from 'typeorm';
+import {DataSource, Repository} from 'typeorm';
 import {DynamicConfig} from '../../../common/entities/DynamicConfig';
 import {MediaDTOWithThPath} from '../messenger/Messenger';
 import {PhotoMetadata} from '../../../common/entities/PhotoDTO';
@@ -64,7 +64,7 @@ export interface IExtensionEvents {
        * Returns the projected directory cache for a given directory
        * ProjectedDirectoryCacheEntity contains information, like the number of photos, videos, etc..
        */
-      getCacheForDirectory: IExtensionEvent<[connection: Connection, session: SessionContext, dir: {
+      getCacheForDirectory: IExtensionEvent<[connection: DataSource, session: SessionContext, dir: {
         id: number,
         name: string,
         path: string
@@ -163,7 +163,7 @@ export interface IExtensionDB {
   /**
    * Returns with a typeorm SQL connection
    */
-  getSQLConnection(): Promise<Connection>;
+  getSQLConnection(): Promise<DataSource>;
 
   /**
    * Adds SQL tables to typeorm

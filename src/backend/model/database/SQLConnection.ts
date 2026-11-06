@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import {Connection, createConnection, DataSourceOptions, getConnection, LoggerOptions,} from 'typeorm';
+import { DataSource, DataSourceOptions, LoggerOptions } from 'typeorm';
 import {UserEntity} from './enitites/UserEntity';
 import {UserRoles} from '../../../common/entities/UserDTO';
 import {PhotoEntity} from './enitites/PhotoEntity';
@@ -52,7 +52,7 @@ export class SQLConnection {
     ProjectedPersonCacheEntity,
     ProjectedAlbumCacheEntity
   ];
-  private static connection: Connection = null;
+  private static connection: DataSource = null;
   private static FIXED_SQL_TABLE = [
     'sqlite_sequence'
   ];
@@ -72,7 +72,7 @@ export class SQLConnection {
     await (await this.getConnection()).synchronize();
   }
 
-  public static async getConnection(): Promise<Connection> {
+  public static async getConnection(): Promise<DataSource> {
     if (this.connection == null) {
       const options = this.getDriver(Config.Database);
 
@@ -92,7 +92,9 @@ export class SQLConnection {
     config: ServerDataBaseConfig
   ): Promise<boolean> {
     try {
-      await getConnection('test').destroy();
+      // TODO(typeorm-v1): `dataSource` is not defined — inject or import your DataSource instance
+      // TODO(typeorm-v1): named connections were removed in v1 — if you relied on `getConnection("name")`, wire up a second DataSource and reference it here
+      await dataSource.destroy();
       // eslint-disable-next-line no-empty
     } catch {
     }
@@ -200,11 +202,13 @@ export class SQLConnection {
 
   private static async createConnection(
     options: DataSourceOptions
-  ): Promise<Connection> {
+  ): Promise<DataSource> {
     if (options.type === 'sqlite' || options.type === 'better-sqlite3') {
+      // TODO(typeorm-v1): `createConnection()` was removed — instantiate a `DataSource` and call `.initialize()` instead: `const dataSource = new DataSource(options); await dataSource.initialize()`
       return await createConnection(options);
     }
     try {
+      // TODO(typeorm-v1): `createConnection()` was removed — instantiate a `DataSource` and call `.initialize()` instead: `const dataSource = new DataSource(options); await dataSource.initialize()`
       return await createConnection(options);
     } catch (e) {
       if (e.sqlMessage === 'Unknown database \'' + options.database + '\'') {
@@ -213,18 +217,20 @@ export class SQLConnection {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         delete tmpOption.database;
+        // TODO(typeorm-v1): `createConnection()` was removed — instantiate a `DataSource` and call `.initialize()` instead: `const dataSource = new DataSource(options); await dataSource.initialize()`
         const tmpConn = await createConnection(tmpOption);
         await tmpConn.query(
           'CREATE DATABASE IF NOT EXISTS ' + options.database
         );
         await tmpConn.destroy();
+        // TODO(typeorm-v1): `createConnection()` was removed — instantiate a `DataSource` and call `.initialize()` instead: `const dataSource = new DataSource(options); await dataSource.initialize()`
         return await createConnection(options);
       }
       throw e;
     }
   }
 
-  private static async schemeSync(connection: Connection): Promise<void> {
+  private static async schemeSync(connection: DataSource): Promise<void> {
     let version = null;
     try {
       version = (await connection.getRepository(VersionEntity).find())[0];
