@@ -30,6 +30,9 @@ class MockContentLoaderService {
 class MockAuthenticationService {
   readonly user = signal({name: 'admin', role: UserRoles.Admin});
   readonly isAuthenticated = computed((): boolean => !!this.user());
+  isAuthorized(role: UserRoles): boolean {
+    return this.user().role >= role;
+  }
 }
 
 describe('UploaderService', () => {
@@ -45,7 +48,7 @@ describe('UploaderService', () => {
     network.requests[i].complete();
   };
   const fail = (i: number): void => network.requests[i].error({message: 'Disk full'});
-  const toast = (title: string) => toasts.toasts().find((t) => t.title === title);
+  const toast = (title: string) => toasts.toasts().find((t) => t.title === title)!;
 
   beforeEach(() => {
     uploadEnabled = Config.Upload.enabled;
@@ -112,7 +115,7 @@ describe('UploaderService', () => {
     vi.useFakeTimers();
     service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
     await vi.advanceTimersByTimeAsync(0);
-    toast('Hévíz.jpg').onCancel();
+    toast('Hévíz.jpg').onCancel!();
     expect(toast('Hévíz.jpg')).toBeUndefined();
     finish(0);
     expect(network.requests.length).toBe(1);
@@ -124,7 +127,7 @@ describe('UploaderService', () => {
     service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
     await vi.advanceTimersByTimeAsync(0);
     network.requests[0].next({type: HttpEventType.UploadProgress, loaded: 30, total: 100});
-    toast('Tihany.jpg').onCancel();
+    toast('Tihany.jpg').onCancel!();
     expect(network.requests[0].observed).toBe(false); // unsubscribed: the request is aborted
     expect(toast('Tihany.jpg')).toBeUndefined();
     expect(network.requests.length).toBe(2);

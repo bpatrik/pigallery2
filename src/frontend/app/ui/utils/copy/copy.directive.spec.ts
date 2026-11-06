@@ -35,9 +35,9 @@ describe('copyToClipboard', () => {
   });
 
   it('should fall back to a textarea without navigator.clipboard (plain http)', async () => {
-    let copied: string = null;
+    let copied: string | null = null;
     setUpBrowser(false, (command: string): boolean => {
-      const textarea = document.querySelector('textarea');
+      const textarea = document.querySelector('textarea')!;
       copied = command === 'copy' ? textarea.value.substring(textarea.selectionStart, textarea.selectionEnd) : null;
       return true;
     });

@@ -18,7 +18,7 @@ describe('TemplateComponent', () => {
   type Settings = IWebConfigClassPrivate<TAGS> & WebConfig;
 
   const createSettings = (authenticationRequired: boolean): Settings => {
-    const wc = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
+    const wc: Settings = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
     wc.load({Users: {authenticationRequired}} as unknown as WebConfig);
     return wc;
   };
@@ -115,7 +115,7 @@ describe('TemplateComponent', () => {
     };
     const {component} = setUp('Indexing', jobsService);
     const uiJob = component.states().tags.uiJob;
-    const rows = component.uiJobRows().get(uiJob);
+    const rows = component.uiJobRows().get(uiJob)!;
 
     expect(rows.map(r => r.job.job)).toEqual(['Indexing', 'Gallery Reset']);
     expect(rows.map(r => r.danger)).toEqual([false, true]);
@@ -125,7 +125,7 @@ describe('TemplateComponent', () => {
     // the default configs are not looked up again on a progress change
     const calls = jobsService.getDefaultConfig.mock.calls.length;
     jobsService.progress.set({});
-    expect(component.uiJobRows().get(uiJob)[0].progress).toBeUndefined();
+    expect(component.uiJobRows().get(uiJob)![0].progress).toBeUndefined();
     expect(jobsService.getDefaultConfig.mock.calls.length).toBe(calls);
   });
 });

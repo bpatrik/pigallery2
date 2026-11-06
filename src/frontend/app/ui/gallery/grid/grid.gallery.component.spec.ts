@@ -280,7 +280,7 @@ describe('GalleryGridComponent', () => {
       expect(component.getNumberOfRenderedMedia()).toBeLessThan(photos.length);
 
       TestBed.tick();
-      const tile = await revealed;
+      const tile = (await revealed)!;
       expect(tile.gridMedia.media).toBe(target);
       expect(tile.gridMedia).toBe(secondGroup[index]);
       expect(tile.rect).toEqual({top: 0, left: 0, width: 0, height: 0}); // jsdom has no layout

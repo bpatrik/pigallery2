@@ -17,7 +17,7 @@ class MockUserService {
     return Promise.resolve({name: 'testUserName'} as UserDTO);
   }
 
-  public async getSessionUser(): Promise<UserDTO> {
+  public async getSessionUser(): Promise<UserDTO | null> {
     return null;
   }
 
@@ -47,7 +47,7 @@ class MockShareService {
     return false;
   }
 
-  getPublicSharing(): Promise<PublicSharingDTO> {
+  getPublicSharing(): Promise<PublicSharingDTO | null> {
     return Promise.resolve(null);
   }
 
@@ -87,7 +87,7 @@ describe('AuthenticationService', () => {
         vi.spyOn(userService, 'login');
 
         expect(userService.login).not.toHaveBeenCalled();
-        await authService.login(null);
+        await authService.login({} as LoginCredential);
         expect(userService.login).toHaveBeenCalled();
       }
   ));
@@ -152,7 +152,7 @@ describe('AuthenticationService', () => {
 
   describe('logout', () => {
     const setUpLogout = async (authService: AuthenticationService, userService: UserService, shareService: ShareService,
-                         sharing: PublicSharingDTO) => {
+                         sharing: PublicSharingDTO | null) => {
       // let the session pickup of the service constructor finish first
       await new Promise(resolve => setTimeout(resolve, 0));
       await authService.login({} as LoginCredential);

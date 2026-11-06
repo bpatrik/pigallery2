@@ -79,7 +79,7 @@ describe('GallerySearchQueryBuilderComponent - date range', () => {
     await render();
 
     // same as picking "date" in the type dropdown
-    entry().queryEntry().type = SearchQueryTypes.date;
+    entry().queryEntry()!.type = SearchQueryTypes.date;
     entry().onChangeType();
     await render();
 

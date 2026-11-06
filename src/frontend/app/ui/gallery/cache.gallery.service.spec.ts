@@ -9,8 +9,8 @@ import {PackedContentWrapperWithError} from '../../../../common/entities/Content
 describe('GalleryCacheService', () => {
 
   const setUp = () => {
-    const versionService = {version: signal<string>(null)};
-    const authService = {user: signal<UserDTO>(null)};
+    const versionService = {version: signal<string | null>(null)};
+    const authService = {user: signal<UserDTO | null>(null)};
     // a fresh injector per setUp, like a page reload
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -41,7 +41,7 @@ describe('GalleryCacheService', () => {
     TestBed.tick();
     authService.user.set({...admin});
     TestBed.tick();
-    expect(service.getDirectory('dir').directory).toBeDefined();
+    expect(service.getDirectory('dir')!.directory).toBeDefined();
   });
 
   it('should drop the cached content when the user changes', () => {
@@ -53,7 +53,7 @@ describe('GalleryCacheService', () => {
     TestBed.tick();
     authService.user.set({id: 0, name: 'Guest', role: UserRoles.LimitedGuest, usedSharingKey: 'key'} as UserDTO);
     TestBed.tick();
-    expect(service.getDirectory('dir').directory).toBeUndefined();
+    expect(service.getDirectory('dir')!.directory).toBeUndefined();
   });
 
   it('should drop the cached content when the projection of the user changes', () => {
@@ -63,7 +63,7 @@ describe('GalleryCacheService', () => {
     cacheDir(service);
     authService.user.set({...admin, projectionKey: 'other'});
     TestBed.tick();
-    expect(service.getDirectory('dir').directory).toBeUndefined();
+    expect(service.getDirectory('dir')!.directory).toBeUndefined();
   });
 
   it('should drop the cached content of an other user after reload', () => {
@@ -75,6 +75,6 @@ describe('GalleryCacheService', () => {
     const second = setUp();
     second.authService.user.set({id: 2, name: 'user', role: UserRoles.User} as UserDTO);
     TestBed.tick();
-    expect(second.service.getDirectory('dir').directory).toBeUndefined();
+    expect(second.service.getDirectory('dir')!.directory).toBeUndefined();
   });
 });

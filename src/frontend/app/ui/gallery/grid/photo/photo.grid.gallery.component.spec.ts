@@ -191,7 +191,7 @@ describe('GalleryPhotoComponent - search links', () => {
     fixture.componentInstance.infoBarVisible.set(true);
     fixture.detectChanges();
     return Array.from(fixture.nativeElement.querySelectorAll('.info a'))
-      .map((a: HTMLAnchorElement) => a.getAttribute('href'));
+      .map((a: HTMLAnchorElement) => a.getAttribute('href')!);
   };
 
   it('should link the place, the persons and the keywords to their search', () => {

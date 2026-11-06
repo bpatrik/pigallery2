@@ -38,11 +38,11 @@ import {appIcons} from '../../icons';
 
 // Mock services
 class MockContentLoaderService {
-  readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
+  readonly content = signal<ContentWrapperWithError | null>({} as ContentWrapperWithError);
   loadDirectory = vi.fn();
   search = vi.fn().mockReturnValue(Promise.resolve());
 
-  constructor(private initialContent: ContentWrapperWithError = null) {
+  constructor(private initialContent: ContentWrapperWithError | null = null) {
     if (initialContent) {
       this.content.set(initialContent);
     }
@@ -50,7 +50,7 @@ class MockContentLoaderService {
 }
 
 class MockContentService {
-  readonly sortedFilteredContent = signal<GroupedDirectoryContent>(null);
+  readonly sortedFilteredContent = signal<GroupedDirectoryContent | null>(null);
 }
 
 class MockAuthenticationService {

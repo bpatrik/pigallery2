@@ -6,13 +6,13 @@ import { ContentLoaderService, DirectoryContent } from '../contentLoader.service
 
 describe('FilterService', () => {
   let service: FilterService;
-  let originalContent: ReturnType<typeof signal<DirectoryContent>>;
+  let originalContent: ReturnType<typeof signal<DirectoryContent | null>>;
 
   const getFacesFilter = () => service.filteredContent().filters.selectedFilters
-    .find(f => f.filter.name === $localize`Faces`);
+    .find(f => f.filter.name === $localize`Faces`)!;
 
   beforeEach(() => {
-    originalContent = signal<DirectoryContent>(null);
+    originalContent = signal<DirectoryContent | null>(null);
     TestBed.configureTestingModule({
       providers: [
         FilterService,
@@ -68,7 +68,7 @@ describe('FilterService', () => {
       service.onFilterChange();
 
       // Should keep all photos containing Kate (3 photos: Kate alone, Kate+John, John+Kate, Kate+Bob)
-      const result = service.filteredContent().content;
+      const result = service.filteredContent().content!;
       expect(result.media.length).toBe(4);
       expect(result.media.every(photo =>
         (photo.metadata as PhotoMetadata).faces?.some((face: FaceRegion) => face.name === 'Kate')
@@ -79,13 +79,13 @@ describe('FilterService', () => {
     it('should reset the selected options for new content', () => {
       originalContent.set({directories: [], media: [createPhotoWithFaces(['Kovács Éva']), createPhotoWithFaces(['Bob'])], metaFile: []});
       service.setShowingFilters(true);
-      getFacesFilter().options.find(opt => opt.name === 'Bob').selected = false;
+      getFacesFilter().options.find(opt => opt.name === 'Bob')!.selected = false;
       service.onFilterChange();
-      expect(service.filteredContent().content.media.length).toBe(1);
+      expect(service.filteredContent().content!.media.length).toBe(1);
 
       originalContent.set({directories: [], media: [createPhotoWithFaces(['Bob']), createPhotoWithFaces(['Bob'])], metaFile: []});
 
-      expect(service.filteredContent().content.media.length).toBe(2);
+      expect(service.filteredContent().content!.media.length).toBe(2);
       expect(getFacesFilter().options.map(opt => [opt.name, opt.selected])).toEqual([['Bob', true]]);
       // the filter panel stays open
       expect(service.filteredContent().filters.filtersVisible).toBe(true);

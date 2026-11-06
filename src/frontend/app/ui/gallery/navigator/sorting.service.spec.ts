@@ -18,11 +18,11 @@ class FakeGalleryCacheService {
     return cw?.directory?.path + '/' + cw?.directory?.name;
   }
 
-  getSorting(cw: ContentWrapper): SortingMethod {
+  getSorting(cw: ContentWrapper): SortingMethod | null {
     return this.sorting.get(FakeGalleryCacheService.key(cw)) ?? null;
   }
 
-  getGrouping(cw: ContentWrapper): GroupingMethod {
+  getGrouping(cw: ContentWrapper): GroupingMethod | null {
     return this.grouping.get(FakeGalleryCacheService.key(cw)) ?? null;
   }
 
@@ -117,7 +117,7 @@ describe('GallerySortingService', () => {
   describe('applySorting', () => {
     const noGrouping = {method: GroupByTypes.NoGrouping, ascending: true};
     const names = (dc: DirectoryContent, s: SortingMethod, g: GroupingMethod = noGrouping): string[][] =>
-      service.applySorting({...dc, media: [...dc.media]}, s, g).mediaGroups.map((mg) => mg.media.map((m) => m.name));
+      service.applySorting({...dc, media: [...dc.media]}, s, g)!.mediaGroups.map((mg) => mg.media.map((m) => m.name));
 
     const day = 24 * 60 * 60 * 1000;
     const dc: DirectoryContent = {
@@ -131,7 +131,7 @@ describe('GallerySortingService', () => {
     };
 
     it('should return null without content', () => {
-      expect(service.applySorting(null, {method: SortByTypes.Name, ascending: true}, noGrouping)).toBeNull();
+      expect(service.applySorting(undefined, {method: SortByTypes.Name, ascending: true}, noGrouping)).toBeNull();
     });
 
     it('should sort by name with numbers in order', () => {

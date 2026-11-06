@@ -11,16 +11,16 @@ import {Config} from '../../../../../common/config/public/Config';
 class FakeGalleryCacheService {
   gridSizes = new Map<string, GridSizes>();
 
-  getGridSize(cw: ContentWrapperWithError): GridSizes {
-    return this.gridSizes.get(cw?.directory?.name) ?? null;
+  getGridSize(cw: ContentWrapperWithError): GridSizes | null {
+    return this.gridSizes.get(cw?.directory?.name ?? '') ?? null;
   }
 
   setGridSize(cw: ContentWrapperWithError, gs: GridSizes): void {
-    this.gridSizes.set(cw?.directory?.name, gs);
+    this.gridSizes.set(cw?.directory?.name ?? '', gs);
   }
 
   removeGridSize(cw: ContentWrapperWithError): void {
-    this.gridSizes.delete(cw?.directory?.name);
+    this.gridSizes.delete(cw?.directory?.name ?? '');
   }
 }
 

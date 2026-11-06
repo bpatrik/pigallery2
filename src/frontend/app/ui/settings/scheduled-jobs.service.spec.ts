@@ -98,7 +98,7 @@ describe('ScheduledJobsService', () => {
 
   it('should track starting jobs and add a placeholder progress immutably', async () => {
     const {service, networkService} = setUp();
-    let resolvePost: () => void;
+    let resolvePost!: () => void;
     networkService.postJson.mockImplementation(() => new Promise<void>(r => resolvePost = r));
     // keep the progress reload after start pending, so the placeholder stays visible
     networkService.getJson.mockReturnValue(new Promise(() => undefined));

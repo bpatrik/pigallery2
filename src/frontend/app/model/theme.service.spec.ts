@@ -13,9 +13,9 @@ describe('ThemeService', () => {
     changeListeners.forEach((l) => l({matches} as MediaQueryListEvent));
   };
 
-  const setUp = (cachedMode: ThemeModes = null) => {
+  const setUp = (cachedMode: ThemeModes | null = null) => {
     const cacheService = {
-      getThemeMode: (): ThemeModes => cachedMode,
+      getThemeMode: (): ThemeModes | null => cachedMode,
       setThemeMode: vi.fn(),
     };
     TestBed.configureTestingModule({
@@ -24,7 +24,7 @@ describe('ThemeService', () => {
     return TestBed.inject(ThemeService);
   };
 
-  const theme = (): string => document.documentElement.getAttribute('data-bs-theme');
+  const theme = (): string | null => document.documentElement.getAttribute('data-bs-theme');
 
   beforeEach(() => {
     prefersDark = false;

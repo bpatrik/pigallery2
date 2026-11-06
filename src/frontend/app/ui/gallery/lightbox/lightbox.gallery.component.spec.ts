@@ -93,7 +93,7 @@ class MockRouter {
   constructor(private ac: MockActivatedRoute) {
   }
 
-  navigate(commands: unknown, extras: { queryParams: Record<string, string>, queryParamsHandling?: string }) {
+  navigate(commands: unknown, extras: { queryParams: Record<string, string | null>, queryParamsHandling?: string }) {
     let newQP: Record<string, string> = {};
     if (extras.queryParamsHandling == 'merge') {
       newQP = {...this.ac.queryParams.value};
@@ -112,8 +112,8 @@ class MockRouter {
 
 // The grid with all its media "rendered" on request
 class FakeGrid implements LightboxGrid {
-  readonly media = signal<MediaDTO[]>(null);
-  readonly revealMedia = vi.fn((media: MediaDTO): Promise<LightboxGridTile> => {
+  readonly media = signal<MediaDTO[] | null>(null);
+  readonly revealMedia = vi.fn((media: MediaDTO): Promise<LightboxGridTile | null> => {
     const found = this.media()?.find(m => m.name === media.name);
     return Promise.resolve(found ? {
       rect: {top: 10, left: 10, width: 100, height: 100},
@@ -211,7 +211,7 @@ describe('GalleryLightboxComponent', () => {
 
     expect(grid.revealMedia).toHaveBeenCalledWith(photos[1]);
     expect(component.status()).toBe(LightboxStates.Open);
-    expect(component.activePhoto().media).toBe(photos[1]);
+    expect(component.activePhoto()!.media).toBe(photos[1]);
     expect(component.activeIndex()).toBe(1);
   });
 
@@ -232,7 +232,7 @@ describe('GalleryLightboxComponent', () => {
     await settle();
 
     expect(photoParam()).toBe('photo2.jpg');
-    expect(component.activePhoto().media).toBe(photos[1]);
+    expect(component.activePhoto()!.media).toBe(photos[1]);
     expect(component.slideShowRunning()).toBe(true);
   });
 
@@ -256,7 +256,7 @@ describe('GalleryLightboxComponent', () => {
       [QueryParams.gallery.lightbox.loopSlideshow]: 'true'
     });
     expect(component.nextMedia()).toBe(photos[0]);
-    expect(component.nextGridMedia().media).toBe(photos[0]);
+    expect(component.nextGridMedia()!.media).toBe(photos[0]);
 
     component.nextImage();
     await settle();
@@ -302,7 +302,7 @@ describe('GalleryLightboxComponent', () => {
   it('should navigate to specific photo and start slideshow', async () => {
     await openPhoto('photo2.jpg', {[QueryParams.gallery.lightbox.playback]: 'true'});
 
-    expect(component.activePhoto().media).toBe(photos[1]);
+    expect(component.activePhoto()!.media).toBe(photos[1]);
     expect(component.slideShowRunning()).toBe(true);
   });
 
@@ -339,13 +339,13 @@ describe('GalleryLightboxComponent', () => {
 
     expect(photoParam()).toBe('p31.jpg');
     expect(grid.revealMedia).toHaveBeenLastCalledWith(many[31]);
-    expect(component.activePhoto().media).toBe(many[31]);
+    expect(component.activePhoto()!.media).toBe(many[31]);
 
     component.prevImage();
     await settle();
     component.prevImage();
     await settle();
-    expect(component.activePhoto().media).toBe(many[29]);
+    expect(component.activePhoto()!.media).toBe(many[29]);
   });
 
   it('should show the first photo with a toast when the open photo is gone, and keep the slideshow playing', async () => {
@@ -357,7 +357,7 @@ describe('GalleryLightboxComponent', () => {
 
     expect(notifications.info).toHaveBeenCalledTimes(1);
     expect(photoParam()).toBe('photo1.jpg');
-    expect(component.activePhoto().media).toBe(photos[0]);
+    expect(component.activePhoto()!.media).toBe(photos[0]);
     expect(component.status()).toBe(LightboxStates.Open);
     expect(component.slideShowRunning()).toBe(true);
   });
@@ -391,7 +391,7 @@ describe('GalleryLightboxComponent', () => {
 
     expect(grid.revealMedia).toHaveBeenCalledWith(photos[2]);
     expect(component.status()).toBe(LightboxStates.Open);
-    expect(component.activePhoto().media).toBe(photos[2]);
+    expect(component.activePhoto()!.media).toBe(photos[2]);
     expect(notifications.info).not.toHaveBeenCalled();
   });
 

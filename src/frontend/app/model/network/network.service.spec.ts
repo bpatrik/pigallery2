@@ -158,7 +158,7 @@ describe('NetworkService Fail tests', () => {
         const mockReq = httpMock.expectOne({method: 'GET'});
         expect(mockReq.cancelled).toBeFalsy();
         expect(mockReq.request.responseType).toEqual('json');
-        mockReq.error(null, {statusText: testError});
+        mockReq.error(new ProgressEvent('error'), {statusText: testError});
       }
   ));
 
@@ -180,7 +180,7 @@ describe('NetworkService Fail tests', () => {
         expect(mockReq.cancelled).toBeFalsy();
         expect(mockReq.request.responseType).toEqual('json');
         expect(mockReq.request.body).toEqual(testData);
-        mockReq.error(null, {statusText: testError});
+        mockReq.error(new ProgressEvent('error'), {statusText: testError});
       }
   ));
 
@@ -202,7 +202,7 @@ describe('NetworkService Fail tests', () => {
         expect(mockReq.cancelled).toBeFalsy();
         expect(mockReq.request.responseType).toEqual('json');
         expect(mockReq.request.body).toEqual(testData);
-        mockReq.error(null, {statusText: testError});
+        mockReq.error(new ProgressEvent('error'), {statusText: testError});
       }
   ));
 
@@ -223,7 +223,7 @@ describe('NetworkService Fail tests', () => {
         const mockReq = httpMock.expectOne({method: 'DELETE'});
         expect(mockReq.cancelled).toBeFalsy();
         expect(mockReq.request.responseType).toEqual('json');
-        mockReq.error(null, {statusText: testError});
+        mockReq.error(new ProgressEvent('error'), {statusText: testError});
       }
   ));
 });

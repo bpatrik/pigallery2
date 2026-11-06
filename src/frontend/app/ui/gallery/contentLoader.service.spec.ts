@@ -17,7 +17,7 @@ class MockNetworkService {
 }
 
 class MockShareService {
-  readonly sharing = signal<ResponseSharingDTO>(null);
+  readonly sharing = signal<ResponseSharingDTO | null>(null);
   currentSharing = toObservable(this.sharing).pipe(filter((s) => s !== null));
 
   isSharing(): boolean {
@@ -28,7 +28,7 @@ class MockShareService {
     return 'key123';
   }
 
-  getDefaultRoute(sharing: ResponseSharingDTO): string[] {
+  getDefaultRoute(sharing: ResponseSharingDTO | null): string[] | null {
     return sharing?.directoryQuery ? ['/gallery', sharing.directoryQuery.value] : null;
   }
 }

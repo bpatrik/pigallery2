@@ -30,13 +30,13 @@ describe('ToastCardComponent', () => {
   });
 
   it('should project the title, text and action', () => {
-    expect(card.querySelector('.toast-title').textContent).toBe('Balaton_naplemente.jpg');
-    expect(card.querySelector('.toast-text').textContent).toBe('45%');
+    expect(card.querySelector('.toast-title')!.textContent).toBe('Balaton_naplemente.jpg');
+    expect(card.querySelector('.toast-text')!.textContent).toBe('45%');
     expect(card.querySelector('button[toastAction]')).toBeTruthy();
   });
 
   it('should show the progress as the bar width in the given color', () => {
-    const bar: HTMLElement = card.querySelector('.toast-bar');
+    const bar: HTMLElement = card.querySelector('.toast-bar')!;
     expect(bar.style.width).toBe('45%');
     expect(bar.classList).toContain('bg-primary');
     expect(bar.classList).not.toContain('countdown');
@@ -44,7 +44,7 @@ describe('ToastCardComponent', () => {
     fixture.componentInstance.color.set('success');
     fixture.detectChanges();
     expect(bar.style.width).toBe('100%');
-    expect(card.querySelector('.toast-icon').classList).toContain('text-success');
+    expect(card.querySelector('.toast-icon')!.classList).toContain('text-success');
   });
 
   it('should keep the text on one line when wrap is off', () => {
