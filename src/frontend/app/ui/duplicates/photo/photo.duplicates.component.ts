@@ -14,7 +14,7 @@ import { PopoverDirective } from 'ngx-bootstrap/popover';
 export class DuplicatesPhotoComponent implements OnInit, OnDestroy {
   private thumbnailService = inject(ThumbnailManagerService);
 
-  readonly media = input<MediaDTO>(undefined);
+  readonly media = input.required<MediaDTO>();
 
   thumbnail: IconThumbnail;
 

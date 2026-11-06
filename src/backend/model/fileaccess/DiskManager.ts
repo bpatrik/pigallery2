@@ -114,7 +114,7 @@ export class DiskManager {
       try {
         await fsp.access(path.join(absoluteName, exclude));
         return true;
-      } catch (e) {
+      } catch {
         // ignoring errors
       }
     }

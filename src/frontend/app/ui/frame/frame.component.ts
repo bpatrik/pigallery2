@@ -80,7 +80,7 @@ export class FrameComponent {
   public animateNavbar = false;
   public fixNavbarOnTop = false;
   readonly dropdownMenu = viewChild<ElementRef>('dropdownMenu');
-  readonly navContainer = viewChild<ElementRef>('navContainer');
+  readonly navContainer = viewChild.required<ElementRef>('navContainer');
   readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
   readonly languageSelector = viewChild<LanguageComponent>('languageSelector');
   ThemeModes = ThemeModes;
@@ -94,24 +94,20 @@ export class FrameComponent {
 
   public readonly isFacesAvailable = computed((): boolean =>
     Config.Faces.enabled &&
-    this.user() &&
-    this.user().role >= Config.Faces.readAccessMinRole
+    this.authService.isAuthorized(Config.Faces.readAccessMinRole)
   );
 
   public readonly isGalleryAvailable = computed((): boolean =>
-    this.user() &&
-    this.user().role >= UserRoles.User
+    this.authService.isAuthorized(UserRoles.User)
   );
 
   public readonly isCustomLinksAvailable = computed((): boolean =>
-    this.user() &&
-    this.user().role >= UserRoles.User
+    this.authService.isAuthorized(UserRoles.User)
   );
 
   public readonly isAlbumsAvailable = computed((): boolean =>
     Config.Album.enabled &&
-    this.user() &&
-    this.user().role >= Config.Album.readAccessMinRole
+    this.authService.isAuthorized(Config.Album.readAccessMinRole)
   );
 
   // the navbar links with their active state, that follows the url
@@ -126,12 +122,12 @@ export class FrameComponent {
         case NavigationLinkTypes.gallery:
           return {link, active: url.startsWith('/gallery')};
         case NavigationLinkTypes.url:
-          return {link, active: url.startsWith(link.url)};
+          return {link, active: !!link.url && url.startsWith(link.url)};
         case NavigationLinkTypes.search:
           return {
             link,
-            active: FrameComponent.isSearchActive(url, link.SearchQuery),
-            searchUrl: SearchQueryUtils.urlify(link.SearchQuery)
+            active: !!link.SearchQuery && FrameComponent.isSearchActive(url, link.SearchQuery),
+            searchUrl: link.SearchQuery ? SearchQueryUtils.urlify(link.SearchQuery) : undefined
           };
         default:
           return {link, active: false};
@@ -151,7 +147,7 @@ export class FrameComponent {
       const rawUrl = url.substring('/search/'.length);
       const sq = JSON.parse(decodeURIComponent(rawUrl)) as SearchQueryDTO;
       return sq.type == searchQuery.type && Utils.equalsFilter(sq, searchQuery);
-    } catch (e) {
+    } catch {
       // ignored
     }
     return false;
@@ -183,8 +179,8 @@ export class FrameComponent {
       this.navbarKeepTop = false;
 
       if (downDelay) { // scroll down
-        this.dropdown().hide();
-        this.languageSelector().dropdown().hide();
+        this.dropdown()?.hide();
+        this.languageSelector()?.dropdown()?.hide();
       }
     }
 

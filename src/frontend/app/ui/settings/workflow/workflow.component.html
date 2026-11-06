@@ -6,7 +6,10 @@
       class="card bg-body-tertiary mt-2 mb-2  no-changed-settings {{shouldIdent(schedule,sortedList[i-1])? 'ms-4' : ''}}">
       <div class="card-header">
         <div class="d-flex justify-content-between">
-          <div (click)="showDetails[schedule.name]=!showDetails[schedule.name]">
+          <div role="button" tabindex="0" [attr.aria-expanded]="!!showDetails[schedule.name]"
+            (click)="toggleDetails(schedule.name)"
+            (keydown.enter)="toggleDetails(schedule.name)"
+            (keydown.space)="$event.preventDefault(); toggleDetails(schedule.name)">
             @if (!validJobs()[schedule.jobName]) {
               <span
                 triggers="mouseenter:mouseleave"
@@ -52,7 +55,7 @@
       <div class="card-body" [hidden]="!showDetails[schedule.name]">
         <div class="row">
           <div class="col-md-12">
-            @if (settingsService.configStyle() == ConfigStyle.full) {
+            @if (settingsService.configStyle() === ConfigStyle.full) {
               <div class="alert alert-secondary" role="alert"
                 >
                 <ng-icon size="1.3em" name="ionInformationCircleOutline" />
@@ -60,7 +63,7 @@
               </div>
             }
             <div class="mb-1 row">
-              <label class="col-md-2 control-label" i18n>Job:</label>
+              <span class="col-md-2 control-label" i18n>Job:</span>
               <div class="col-md-4">
                 {{ backendTextService.getJobName(schedule.jobName) }}
               </div>
@@ -87,16 +90,16 @@
                     </option>
                   }
                 </select>
-                @if (settingsService.configStyle() == ConfigStyle.full) {
+                @if (settingsService.configStyle() === ConfigStyle.full) {
                   <small class="form-text text-muted"
                     i18n>Set the time to run the job.
               </small>
                 }
               </div>
             </div>
-            @if (schedule.trigger.type == JobTriggerType.after) {
+            @if (schedule.trigger.type === JobTriggerType.after) {
               <div class="mb-1 row"
-                [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
+                [class.mb-3]="settingsService.configStyle() === ConfigStyle.full"
                 >
                 <label class="col-md-2 control-label" [for]="'triggerAfter'+i" i18n>After:</label>
                 <div class="col-md-10">
@@ -114,7 +117,7 @@
                       }
                     }
                   </select>
-                  @if (settingsService.configStyle() == ConfigStyle.full) {
+                  @if (settingsService.configStyle() === ConfigStyle.full) {
                     <small class="form-text text-muted"
                       i18n>The job will run after that job finishes.
               </small>
@@ -122,9 +125,9 @@
                 </div>
               </div>
             }
-            @if (schedule.trigger.type == JobTriggerType.scheduled) {
+            @if (schedule.trigger.type === JobTriggerType.scheduled) {
               <div class="mb-1 row"
-                [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
+                [class.mb-3]="settingsService.configStyle() === ConfigStyle.full"
                 >
                 <label class="col-md-2 control-label" [for]="'triggerTime'+i" i18n>At:</label>
                 <div class="col-md-10">
@@ -135,9 +138,9 @@
                 </div>
               </div>
             }
-            @if (schedule.trigger.type == JobTriggerType.periodic) {
+            @if (schedule.trigger.type === JobTriggerType.periodic) {
               <div class="mb-1 row"
-                [class.mb-3]="settingsService.configStyle() == ConfigStyle.full"
+                [class.mb-3]="settingsService.configStyle() === ConfigStyle.full"
                 >
                 <label class="col-md-2 control-label" [for]="'periodicity'+i" i18n>At:</label>
                 <div class="col-md-10">
@@ -164,7 +167,7 @@
               </div>
             }
             <div class="mb-1 row"
-              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
+              [class.mb-3]="settingsService.configStyle() === ConfigStyle.full">
               <label class="col-md-2 control-label" [for]="'allowParallelRun'+'_'+i" i18n>Allow parallel run</label>
               <div class="col-md-10">
                 <div class="input-group">
@@ -180,7 +183,7 @@
                       [ngModelOptions]="{standalone: true}">
                   </div>
                 </div>
-                @if (settingsService.configStyle() == ConfigStyle.full) {
+                @if (settingsService.configStyle() === ConfigStyle.full) {
                   <small class="form-text text-muted"
                     i18n>Enables the job to start even if another job is already running.
               </small>
@@ -193,13 +196,13 @@
           <hr/>
           @for (configEntry of configTemplates()[schedule.jobName]; track configEntry.id) {
             <div>
-              @if (!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] == configEntry.validIf.equalsValue) {
+              @if (!configEntry.validIf || schedule.config[configEntry.validIf.configFiled] === configEntry.validIf.equalsValue) {
                 <div class="mb-1 row"
-                  [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
+                  [class.mb-3]="settingsService.configStyle() === ConfigStyle.full">
                   <label class="col-md-2 control-label"
                   [for]="configEntry.id+'_'+i">{{ backendTextService.get(configEntry.name) }}</label>
                   <div class="col-md-10">
-                    <div [class.input-group]="'MediaPickDTO-array'!=configEntry.type">
+                    <div [class.input-group]="'MediaPickDTO-array'!==configEntry.type">
                       @switch (configEntry.type) {
                         @case ('boolean') {
                           <div
@@ -262,7 +265,7 @@
                           @let mediaPicks = AsMediaPickDTOArray(schedule.config[configEntry.id]);
                           @for (mp of mediaPicks; track mp; let j = $index) {
                             <div class="mb-1 row"
-                              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
+                              [class.mb-3]="settingsService.configStyle() === ConfigStyle.full">
                               <label class="col-md-2 control-label"
                                 [for]="configEntry.id+'_'+i">
                                 <ng-container>Search Query</ng-container>
@@ -275,7 +278,7 @@
                                     (change)="onChange($event)"
                                     placeholder="Search Query" />
                                 </div>
-                                @if (settingsService.configStyle() == ConfigStyle.full) {
+                                @if (settingsService.configStyle() === ConfigStyle.full) {
                                   <small class="form-text text-muted"
                                     i18n>
                             Search query to list photos and videos.
@@ -284,7 +287,7 @@
                               </div>
                             </div>
                             <div class="mb-1 row"
-                              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
+                              [class.mb-3]="settingsService.configStyle() === ConfigStyle.full">
                               <label class="col-md-2 control-label"
                               [for]="configEntry.id+'_'+i" i18n>Sort by</label>
                               <div class="col-md-10">
@@ -322,7 +325,7 @@
                                     </button>
                                   </div>
                                 </div>
-                                @if (settingsService.configStyle() == ConfigStyle.full) {
+                                @if (settingsService.configStyle() === ConfigStyle.full) {
                                   <small class="form-text text-muted"
                                     i18n>
                             Sorts the photos and videos by this.
@@ -331,7 +334,7 @@
                               </div>
                             </div>
                             <div class="mb-1 row"
-                              [class.mb-3]="settingsService.configStyle() == ConfigStyle.full">
+                              [class.mb-3]="settingsService.configStyle() === ConfigStyle.full">
                               <label class="col-md-2 control-label"
                               [for]="configEntry.id+'_'+i+'_'+j" i18n>Pick</label>
                               <div class="col-md-10">
@@ -342,7 +345,7 @@
                                     [(ngModel)]="mp.pick"
                                     [ngModelOptions]="{standalone: true}" required>
                                 </div>
-                                @if (settingsService.configStyle() == ConfigStyle.full) {
+                                @if (settingsService.configStyle() === ConfigStyle.full) {
                                   <small class="form-text text-muted"
                                     i18n>
                             Number of photos and videos to pick.
@@ -377,9 +380,9 @@
                         }
                       }
                     </div>
-                    @if (settingsService.configStyle() == ConfigStyle.full) {
+                    @if (settingsService.configStyle() === ConfigStyle.full) {
                       <small class="form-text text-muted">
-                        @if (configEntry.type == 'number-array') {
+                        @if (configEntry.type === 'number-array') {
                           <ng-container i18n>';' separated integers.
                 </ng-container>
                         }
@@ -430,7 +433,7 @@
               </option>
             }
           </select>
-          @if (settingsService.configStyle() == ConfigStyle.full) {
+          @if (settingsService.configStyle() === ConfigStyle.full) {
             <small class="form-text text-muted"
               i18n>Select a job to schedule.
           </small>

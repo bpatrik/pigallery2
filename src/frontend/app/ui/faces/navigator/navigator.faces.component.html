@@ -26,34 +26,34 @@
               <h6 class="ps-2"><ng-container i18n>Sorting</ng-container></h6>
               <div class="row">
                 @for (type of sortingByTypes; track type) {
-                  <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                    [class.active]="facesService.sorting().method == type.key"
+                  <button type="button" class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
+                    [class.active]="facesService.sorting().method === type.key"
                     (click)="setSortingBy(type.key)">
-                    <div class="me-2 d-inline-block">
+                    <span class="me-2 d-inline-block">
                       <app-sorting-method-icon [method]="type.key" />
-                    </div>
-                    <div class="d-inline-block">{{type.key | stringifySorting}}</div>
-                  </div>
+                    </span>
+                    <span class="d-inline-block">{{type.key | stringifySorting}}</span>
+                  </button>
                 }
 
                 <hr>
-                  <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                    [class.active]="facesService.sorting().ascending == true"
+                  <button type="button" class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
+                    [class.active]="facesService.sorting().ascending === true"
                     (click)="setSortingAscending(true)">
-                    <div class="me-2 d-inline-block">
+                    <span class="me-2 d-inline-block">
                       <ng-icon name="ionArrowUpOutline" />
-                    </div>
-                    <div class="d-inline-block" i18n>ascending</div>
-                  </div>
+                    </span>
+                    <span class="d-inline-block" i18n>ascending</span>
+                  </button>
 
-                  <div class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
-                    [class.active]="facesService.sorting().ascending == false"
+                  <button type="button" class="dropdown-item sorting-item ps-3 pe-3" role="menuitem"
+                    [class.active]="facesService.sorting().ascending === false"
                     (click)="setSortingAscending(false)">
-                    <div class="me-2 d-inline-block">
+                    <span class="me-2 d-inline-block">
                       <ng-icon name="ionArrowDownOutline" />
-                    </div>
-                    <div class="d-inline-block" i18n>descending</div>
-                  </div>
+                    </span>
+                    <span class="d-inline-block" i18n>descending</span>
+                  </button>
                 </div>
               </div>
             </div>

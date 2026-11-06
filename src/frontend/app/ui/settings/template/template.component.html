@@ -5,7 +5,7 @@
         <ng-icon [name]="icon()" />
         {{ Name() }}
       </h5>
-      @if (states().value.enabled !== undefined) {
+      @if (config().enabled !== undefined) {
         <div class="float-end p-0">
           <div
             class="form-check form-switch">
@@ -16,28 +16,28 @@
               name="enabled"
               [id]="ConfigPath()+'.enabled'"
               [disabled]="inProgress()"
-              [(ngModel)]="states().value.enabled">
+              [(ngModel)]="config().enabled">
             </div>
           </div>
         }
       </div>
       <div class="card-body">
         <div [hidden]="!error()" class="alert alert-danger" role="alert"><strong>Error: </strong>{{ error() }}</div>
-        @if (states().value.enabled !== false) {
+        @if (config().enabled !== false) {
           <ng-container *ngTemplateOutlet="Recursion; context:{ rStates: states(),topLevel:true,confPath:ConfigPath(),skipJobs:true }"
            />
         }
 
-        @if (states().value.enabled === false) {
+        @if (config().enabled === false) {
           <div class="panel-info"
             >
             {{ Name() }} <span i18n>config is not supported with these settings.</span>
           </div>
         }
         <div class="row mt-2">
-          @if (states().tags?.uiJob && !states().tags?.uiJob[0].description) {
+          @if (uiJob() && !uiJobHasDescription()) {
             <div class="col-auto">
-              <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: states().tags?.uiJob }"
+              <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: uiJob() }"
                />
             </div>
           }
@@ -54,18 +54,18 @@
           </button>
           </div>
         </div>
-        @if (states().tags?.uiJob && !states().tags?.uiJob[0].description) {
+        @if (uiJob() && !uiJobHasDescription()) {
           <div>
-            <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states().tags?.uiJob }"
+            <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: uiJob() }"
              />
           </div>
         }
-        @if (states().tags?.uiJob && states().tags?.uiJob[0].description) {
+        @if (uiJob() && uiJobHasDescription()) {
           <div>
             <hr/>
-            <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: states().tags?.uiJob }"
+            <ng-container *ngTemplateOutlet="JobTemplate; context:{ uiJob: uiJob() }"
              />
-            <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: states().tags?.uiJob }"
+            <ng-container *ngTemplateOutlet="JobProcessTemplate; context:{ uiJob: uiJob() }"
              />
           </div>
         }
@@ -75,7 +75,7 @@
 
     <ng-template #Recursion let-rStates="rStates" let-topLevel="topLevel" let-skipJobs="skipJobs"
       let-confPath="confPath">
-      @if (rStates.description && settingsService.configStyle() == ConfigStyle.full) {
+      @if (rStates.description && settingsService.configStyle() === ConfigStyle.full) {
         <div class="alert alert-secondary" role="alert"
           >
           <ng-icon size="1.3em" name="ionInformationCircleOutline" />
@@ -174,7 +174,7 @@
     <ng-template #JobTemplate let-uiJob="uiJob">
       <div class="mb-2">
         @for (row of uiJobRows().get(uiJob); track row.job) {
-          @if (row.job.description  && settingsService.configStyle() == ConfigStyle.full) {
+          @if (row.job.description  && settingsService.configStyle() === ConfigStyle.full) {
             <div class="alert alert-secondary" role="alert"
               >
               <ng-icon size="1.3em" name="ionInformationCircleOutline" />

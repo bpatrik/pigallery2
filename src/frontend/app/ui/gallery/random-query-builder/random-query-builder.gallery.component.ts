@@ -39,9 +39,9 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   readonly url = signal('');
 
 
-  modalRef: BsModalRef;
+  modalRef: BsModalRef | null;
 
-  private readonly subscription: Subscription = null;
+  private readonly subscription: Subscription | null = null;
 
   constructor() {
     this.subscription = this.route.params.subscribe((params: Params) => {
@@ -72,12 +72,12 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
     }
   }
 
-  openModal(template: TemplateRef<unknown>): boolean {
+  openModal(template: TemplateRef<unknown>): boolean | undefined {
     if (!this.enabled()) {
-      return;
+      return undefined;
     }
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
 
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
@@ -91,7 +91,7 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
   }
 }

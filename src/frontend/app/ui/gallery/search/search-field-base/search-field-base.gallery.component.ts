@@ -8,6 +8,9 @@ import {AutoCompleteRenderItem} from '../AutoCompleteRenderItem';
 
 import {NgIconComponent} from '@ng-icons/core';
 
+// the navbar and the search modal can show a search field at the same time
+let nextAutoCompleteListId = 0;
+
 @Component({
   selector: 'app-gallery-search-field-base',
   templateUrl: './search-field-base.gallery.component.html',
@@ -35,11 +38,11 @@ export class GallerySearchFieldBaseComponent
   private autoCompleteService = inject(AutoCompleteService);
   router = inject(Router);
 
-  readonly placeholder = input($localize `Search`);
-  readonly search = output<void>();
+  readonly placeholder = input<string | undefined>($localize `Search`);
+  readonly searchSubmit = output<void>();
 
-  readonly searchField = viewChild<ElementRef>('SearchField');
-  readonly searchHintField = viewChild<ElementRef>('SearchHintField');
+  readonly searchField = viewChild.required<ElementRef>('SearchField');
+  readonly searchHintField = viewChild.required<ElementRef>('SearchHintField');
 
   readonly autoCompleteRenders = signal<AutoCompleteRenderItem[]>([]);
   public readonly rawSearchText = signal('');
@@ -50,6 +53,7 @@ export class GallerySearchFieldBaseComponent
     key: SearchQueryTypes;
   }[];
   public readonly highlightedAutoCompleteItem = signal(-1);
+  readonly autoCompleteListId = 'autocomplete-list-' + nextAutoCompleteListId++;
   readonly inFocus = signal(false);
   private cache = {
     lastAutocomplete: '',
@@ -174,7 +178,7 @@ export class GallerySearchFieldBaseComponent
     this.applyAutoComplete(item);
 
     if (!item.notSearchable) {
-      this.search.emit();
+      this.searchSubmit.emit();
     }
   }
 
@@ -202,7 +206,7 @@ export class GallerySearchFieldBaseComponent
       this.autoCompleteRenders().length === 0 ||
       this.highlightedAutoCompleteItem() === -1
     ) {
-      this.search.emit();
+      this.searchSubmit.emit();
       return false;
     }
     // search selected autocomplete
@@ -299,11 +303,11 @@ export class GallerySearchFieldBaseComponent
     ));
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private propagateChange = (_: string): void => {
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars,@typescript-eslint/no-empty-function
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   private propagateTouch = (_: never): void => {
   };
 

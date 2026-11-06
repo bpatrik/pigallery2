@@ -62,10 +62,10 @@
                 >
               </li>
             }
-            @if (authenticationRequired && user()) {
+            @if (authenticationRequired && user(); as user) {
               <li class="nav-item me-2 ms-2 navbar-text d-xl-block d-none">
                 <span style="white-space: nowrap;">
-                  <ng-icon name="ionPersonOutline" class="me-1" /><span>{{ user().name }}</span>
+                  <ng-icon name="ionPersonOutline" class="me-1" /><span>{{ user.name }}</span>
                 </span>
               </li>
               <li class="nav-item divider-vertical  d-xl-block d-none">
@@ -97,9 +97,9 @@
 
                   <li role="menuitem" class="d-xl-none">
                     <div style="white-space: nowrap;" class="dropdown-item">
-                      @if (authenticationRequired && user()) {
+                      @if (authenticationRequired && user(); as user) {
                         <ng-icon name="ionPersonOutline" />
-                        <span>{{ user().name }}</span>
+                        <span>{{ user.name }}</span>
                       }
                       <app-language class="navbar-btn d-inline-block float-end" />
                     </div>
@@ -242,12 +242,12 @@
                     </li>
                     @if (uploadService.canUpload()) {
                       <li role="menuitem">
-                        <a class="dropdown-item cursor-pointer" (click)="uploadInput.click()">
+                        <button type="button" class="dropdown-item" (click)="uploadInput.click()">
                           <ng-icon name="ionCloudUploadOutline" />
                           <ng-container i18n>Upload</ng-container>
-                          <input #uploadInput type="file" multiple [style.display]="'none'"
-                            (change)="uploadService.uploadFiles(uploadInput.files); uploadInput.value = ''">
-                          </a>
+                        </button>
+                        <input #uploadInput type="file" multiple [style.display]="'none'"
+                            (change)="uploadService.uploadFiles(uploadInput.files ?? []); uploadInput.value = ''">
                         </li>
                       }
                       @if (isAdmin()) {

@@ -3,7 +3,7 @@ import {PageHelper} from '../../model/page.helper';
 
 @Injectable({providedIn: 'root'})
 export class OverlayService {
-  private scrollWidth: number = null;
+  private scrollWidth: number | null = null;
 
   public showOverlay(requester:string): void {
     // disable scrolling
@@ -19,7 +19,7 @@ export class OverlayService {
       const outer = document.createElement('div');
       outer.style.visibility = 'hidden';
       outer.style.width = '100px';
-      (outer.style as unknown as Record<string, string>).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+      (outer.style as CSSStyleDeclaration & { msOverflowStyle: string }).msOverflowStyle = 'scrollbar'; // needed for WinJS apps
 
       document.body.appendChild(outer);
 
@@ -35,7 +35,7 @@ export class OverlayService {
       const widthWithScroll = inner.offsetWidth;
 
       // remove divs
-      outer.parentNode.removeChild(outer);
+      outer.parentNode?.removeChild(outer);
       this.scrollWidth = widthNoScroll - widthWithScroll;
     }
 

@@ -12,6 +12,6 @@ import {NgIconComponent} from '@ng-icons/core';
 ]
 })
 export class UploaderComponent {
-  readonly isUploadOver = input<boolean>(undefined);
+  readonly isUploadOver = input<boolean>();
 }
 

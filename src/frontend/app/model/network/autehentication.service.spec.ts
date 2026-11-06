@@ -6,7 +6,6 @@ import {UserDTO} from '../../../../common/entities/UserDTO';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from './authentication.service';
 import {NetworkService} from './network.service';
-import {ErrorDTO} from '../../../../common/entities/Error';
 import {VersionService} from '../version.service';
 import {ShareService} from '../../ui/gallery/share.service';
 import {NavigationService} from '../navigation.service';
@@ -14,11 +13,11 @@ import {PublicSharingDTO} from '../../../../common/entities/SharingDTO';
 import {Config} from '../../../../common/config/public/Config';
 
 class MockUserService {
-  public login(credential: LoginCredential): Promise<UserDTO> {
+  public login(): Promise<UserDTO> {
     return Promise.resolve({name: 'testUserName'} as UserDTO);
   }
 
-  public async getSessionUser(): Promise<UserDTO> {
+  public async getSessionUser(): Promise<UserDTO | null> {
     return null;
   }
 
@@ -28,7 +27,7 @@ class MockUserService {
 }
 
 class MockNetworkService {
-  addGlobalErrorHandler(fn: (error: ErrorDTO) => boolean): void {
+  addGlobalErrorHandler(): void {
     // mock fn
   }
 }
@@ -36,7 +35,7 @@ class MockNetworkService {
 class MockShareService {
   readonly routeRecognized = signal(true);
 
-  onNewUser(user: any): Promise<void> {
+  onNewUser(): Promise<void> {
     return Promise.resolve();
   }
 
@@ -48,7 +47,7 @@ class MockShareService {
     return false;
   }
 
-  getPublicSharing(): Promise<PublicSharingDTO> {
+  getPublicSharing(): Promise<PublicSharingDTO | null> {
     return Promise.resolve(null);
   }
 
@@ -88,7 +87,7 @@ describe('AuthenticationService', () => {
         vi.spyOn(userService, 'login');
 
         expect(userService.login).not.toHaveBeenCalled();
-        await authService.login(null);
+        await authService.login({} as LoginCredential);
         expect(userService.login).toHaveBeenCalled();
       }
   ));
@@ -153,7 +152,7 @@ describe('AuthenticationService', () => {
 
   describe('logout', () => {
     const setUpLogout = async (authService: AuthenticationService, userService: UserService, shareService: ShareService,
-                         sharing: PublicSharingDTO) => {
+                         sharing: PublicSharingDTO | null) => {
       // let the session pickup of the service constructor finish first
       await new Promise(resolve => setTimeout(resolve, 0));
       await authService.login({} as LoginCredential);

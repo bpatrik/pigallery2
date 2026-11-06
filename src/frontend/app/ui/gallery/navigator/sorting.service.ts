@@ -171,7 +171,7 @@ export class GallerySortingService {
         }
 
       case SortByTypes.Name:
-        return (m: MediaDTO) => m.name.at(0).toUpperCase();
+        return (m: MediaDTO) => (m.name.at(0) ?? '').toUpperCase();
 
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();
@@ -198,10 +198,10 @@ export class GallerySortingService {
   }
 
   public applySorting(
-    dirContent: DirectoryContent,
+    dirContent: DirectoryContent | undefined,
     sorting: SortingMethod,
     grouping: GroupingMethod
-  ): GroupedDirectoryContent {
+  ): GroupedDirectoryContent | null {
     if (!dirContent) {
       return null;
     }
@@ -272,8 +272,8 @@ export class GallerySortingService {
     }
 
     // sort groups
-    for (let i = 0; i < c.mediaGroups.length; ++i) {
-      this.sortMedia(sorting, c.mediaGroups[i].media);
+    for (const group of c.mediaGroups) {
+      this.sortMedia(sorting, group.media);
     }
 
     return c;

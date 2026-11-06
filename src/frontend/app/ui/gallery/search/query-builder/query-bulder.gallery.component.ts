@@ -34,8 +34,8 @@ export class GallerySearchQueryBuilderComponent
   private searchQueryParserService = inject(SearchQueryParserService);
 
   public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
-  readonly search = output<void>();
-  readonly placeholder = input($localize `Search`);
+  readonly searchSubmit = output<void>();
+  readonly placeholder = input<string | undefined>($localize `Search`);
   public readonly rawSearchText = signal('');
 
   /**
@@ -90,7 +90,7 @@ export class GallerySearchQueryBuilderComponent
           ), obj)) {
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
     this.searchQueryDTO.set(obj);
@@ -113,7 +113,7 @@ export class GallerySearchQueryBuilderComponent
         this.propagateChange(this.searchQueryDTO());
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
     this.rawSearchText.set(this.searchQueryParserService.stringify(
@@ -122,7 +122,6 @@ export class GallerySearchQueryBuilderComponent
     this.propagateChange(this.searchQueryDTO());
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private propagateChange = (_: SearchQueryDTO): void => {
     // ignoring
   };

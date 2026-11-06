@@ -41,11 +41,11 @@ export class GallerySearchFieldComponent
   private modalService = inject(BsModalService);
   router = inject(Router);
 
-  readonly search = output<void>();
-  readonly placeholder = input<string>(undefined);
+  readonly searchSubmit = output<void>();
+  readonly placeholder = input<string>();
   public readonly rawSearchText = signal('');
-  public readonly searchQueryDTO = signal<SearchQueryDTO>(undefined);
-  private searchModalRef: BsModalRef;
+  public readonly searchQueryDTO = signal<SearchQueryDTO | undefined>(undefined);
+  private searchModalRef: BsModalRef | null;
 
   public async openSearchModal(template: TemplateRef<unknown>): Promise<void> {
     this.searchModalRef = this.modalService.show(template, {
@@ -55,7 +55,7 @@ export class GallerySearchFieldComponent
   }
 
   public hideSearchModal(): void {
-    this.searchModalRef.hide();
+    this.searchModalRef?.hide();
     this.searchModalRef = null;
   }
 
@@ -71,7 +71,7 @@ export class GallerySearchFieldComponent
         ), obj)) {
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
     this.searchQueryDTO.set(obj);
@@ -103,7 +103,7 @@ export class GallerySearchFieldComponent
         this.onChange();
         return;
       }
-    } catch (e) {
+    } catch {
       // if cant parse they are not the same
     }
     this.rawSearchText.set(this.searchQueryParserService.stringify(
@@ -124,8 +124,7 @@ export class GallerySearchFieldComponent
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private propagateChange = (_: SearchQueryDTO): void => {
+  private propagateChange = (_: SearchQueryDTO | undefined): void => {
     //ignoring
   };
 

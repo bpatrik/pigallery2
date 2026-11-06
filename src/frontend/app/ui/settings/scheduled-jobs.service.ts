@@ -16,7 +16,7 @@ export class ScheduledJobsService {
 
   public readonly progress = signal<Record<string, OnTimerJobProgressDTO>>({});
   public readonly onJobFinish = new Subject<string>();
-  timer: number = null;
+  timer: number | null = null;
   public readonly availableJobs = signal<JobDTO[]>([]);
   public readonly availableMessengers = signal<string[]>([]);
   public readonly jobStartingStopping = signal<Record<string, boolean>>({});
@@ -38,7 +38,7 @@ export class ScheduledJobsService {
     );
   }
 
-  public getConfigTemplate(JobName: string): DynamicConfig[] {
+  public getConfigTemplate(JobName: string): DynamicConfig[] | null {
     const job = this.availableJobs().find(
       (t) => t.Name === JobName
     );
@@ -48,7 +48,7 @@ export class ScheduledJobsService {
     return null;
   }
 
-  public getDefaultConfig(jobName: string): Record<string, unknown> {
+  public getDefaultConfig(jobName: string): Record<string, unknown> | null {
 
     const ct = this.getConfigTemplate(jobName);
     if (!ct) {
@@ -112,7 +112,7 @@ export class ScheduledJobsService {
 
   protected async loadProgress(): Promise<void> {
     const prevPrg = this.progress();
-    const newPrg = await this.networkService.getJson<{ [key: string]: JobProgressDTO }>(
+    const newPrg = await this.networkService.getJson<Record<string, JobProgressDTO>>(
       '/admin/jobs/scheduled/progress'
     );
     this.progress.set(newPrg);
@@ -168,7 +168,7 @@ export class ScheduledJobsService {
     this.loadProgress().catch(console.error);
   }
 
-  private addDummyProgress(jobName: string, config: any): void {
+  private addDummyProgress(jobName: string, config: Record<string, unknown> | undefined): void {
     const hashName = JobDTOUtils.getHashName(jobName, config);
     this.progress.update(prgs => ({
       ...prgs,

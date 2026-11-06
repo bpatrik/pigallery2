@@ -9,7 +9,7 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 
 describe('ShareService', () => {
 
-  const setUp = (publicSharing: PublicSharingDTO) => {
+  const setUp = (publicSharing: PublicSharingDTO | null) => {
     const networkService = {
       getJson: vi.fn().mockImplementation((url: string) =>
         url.endsWith('/publicInfo') ? Promise.resolve(publicSharing) : Promise.resolve(null))
@@ -53,7 +53,7 @@ describe('ShareService', () => {
         .toEqual(['/search', SearchQueryUtils.urlify(searchQuery)]);
       expect(service.getDefaultRoute({defaultSearchView: searchQuery} as unknown as ResponseSharingDTO))
         .toEqual(['/search', SearchQueryUtils.urlify(searchQuery)]);
-      expect(SearchQueryUtils.parseURLifiedQuery(service.getDefaultRoute({searchQuery} as unknown as ResponseSharingDTO)[1]))
+      expect(SearchQueryUtils.parseURLifiedQuery(service.getDefaultRoute({searchQuery} as unknown as ResponseSharingDTO)![1]))
         .toEqual(searchQuery);
     });
   });

@@ -42,27 +42,27 @@ export class GalleryGridComponent
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
 
-  readonly gridContainer = viewChild<ElementRef>('gridContainer');
+  readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
   // only read imperatively (revealMedia, onScroll), never in a template, computed or effect
   private readonly photoComponents = viewChildren(GalleryPhotoComponent);
-  readonly mediaGroups = input<MediaGroup[]>(undefined);
+  readonly mediaGroups = input.required<MediaGroup[]>();
   // all media in grid order, also the ones that are not rendered yet; null while the content loads
   readonly media = computed((): MediaDTO[] => this.mediaGroups()?.flatMap(g => g.media) ?? null);
   readonly mediaToRender = signal<GridMediaGroup[]>([]);
   containerWidth = 0;
   readonly containerMinHeight = signal(0); // used to fix container height while updating photos to prevent flickering
-  readonly pinnedWidth = signal<number>(null); // keeps the grid width while a resize is waiting to rerender
+  readonly pinnedWidth = signal<number | null>(null); // keeps the grid width while a resize is waiting to rerender
   screenHeight = 0;
   isAfterViewInit = false;
   public IMAGE_MARGIN = 2;
-  private renderDelayTimer: number = null; // delays render on resize
+  private renderDelayTimer: number | null = null; // delays render on resize
   public readonly GroupByTypes = GroupByTypes;
   public readonly blogOpen = Config.Gallery.InlineBlogStartsOpen;
   private TARGET_COL_COUNT = 5;
   private MIN_ROW_COUNT = 2;
   private MAX_ROW_COUNT = 5;
   private onScrollFired = false;
-  private helperTime: number = null;
+  private helperTime: number | null = null;
 
   constructor() {
     effect(() => {
@@ -309,7 +309,7 @@ export class GalleryGridComponent
     this.mediaToRender.set(kept);
   }
 
-  public renderARow(): number {
+  public renderARow(): number | null {
     if (
       !this.isMoreToRender() ||
       this.containerWidth === 0

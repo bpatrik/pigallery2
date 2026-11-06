@@ -16,7 +16,7 @@ import { GalleryDirectoryComponent } from './directory/directory.gallery.compone
 export class DirectoriesComponent implements OnChanges {
   private container = inject(ElementRef);
 
-  readonly directories = input<SubDirectoryDTO[]>(undefined);
+  readonly directories = input.required<SubDirectoryDTO[]>();
   size: number;
   isDesktop: boolean;
 

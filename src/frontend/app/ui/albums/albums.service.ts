@@ -7,7 +7,7 @@ import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 export class AlbumsService {
   private networkService = inject(NetworkService);
 
-  public readonly albums = signal<AlbumBaseDTO[]>(null);
+  public readonly albums = signal<AlbumBaseDTO[] | null>(null);
 
   public async getAlbums(): Promise<void> {
     this.albums.set(

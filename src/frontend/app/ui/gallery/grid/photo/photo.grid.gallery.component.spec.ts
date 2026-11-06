@@ -20,8 +20,7 @@ class MockThumbnailManagerService {
       Src: 'data:image/gif;base64,R0lGODlhAQABAAAAACw=',
       Error: false,
       loading: false,
-      destroy() {
-      },
+      destroy: vi.fn(),
     };
   }
 }
@@ -37,11 +36,9 @@ class MockExtensionService {
 }
 
 class MockMediaButtonModalService {
-  showModal() {
-  }
+  showModal = vi.fn();
 
-  executeButtonAction() {
-  }
+  executeButtonAction = vi.fn();
 }
 
 function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
@@ -59,7 +56,6 @@ function makeGridMedia(overrides: Partial<PhotoDTO> = {}): GridMedia {
 }
 
 describe('GalleryPhotoComponent - Live Photo badge', () => {
-  let component: GalleryPhotoComponent;
   let fixture: ComponentFixture<GalleryPhotoComponent>;
 
   beforeEach(async () => {
@@ -75,7 +71,6 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(GalleryPhotoComponent);
-    component = fixture.componentInstance;
   });
 
   it('should render the LIVE badge for paired Live Photos', () => {
@@ -196,7 +191,7 @@ describe('GalleryPhotoComponent - search links', () => {
     fixture.componentInstance.infoBarVisible.set(true);
     fixture.detectChanges();
     return Array.from(fixture.nativeElement.querySelectorAll('.info a'))
-      .map((a: HTMLAnchorElement) => a.getAttribute('href'));
+      .map((a: HTMLAnchorElement) => a.getAttribute('href')!);
   };
 
   it('should link the place, the persons and the keywords to their search', () => {

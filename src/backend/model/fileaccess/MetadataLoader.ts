@@ -141,7 +141,6 @@ export class MetadataLoader {
           metadata.contentIdentifier = (data.format.tags as any)['com.apple.quicktime.content.identifier'];
         }
 
-        // eslint-disable-next-line no-empty
       } catch (err) {
         Logger.silly(LOG_TAG, 'Error loading metadata for : ' + fullPath);
         Logger.silly(err);
@@ -187,7 +186,7 @@ export class MetadataLoader {
       creationDate: 0,
       fileSize: 0,
     };
-    const exifrOptions: {[key: string]: boolean} = {
+    const exifrOptions: Record<string, boolean> = {
       tiff: true,
       xmp: true,
       icc: false,
@@ -206,14 +205,14 @@ export class MetadataLoader {
         const stat = fs.statSync(fullPath);
         metadata.fileSize = stat.size;
         metadata.creationDate = stat.mtime.getTime();
-      } catch (err) {
+      } catch {
         // ignoring errors
       }
       try {
         //read the actual image size, don't rely on tags for this
         const info = await imageSizeFromFile(fullPath);
         metadata.size = {width: info.width, height: info.height};
-      } catch (e) {
+      } catch {
         //in case of failure, set dimensions to 0 so they may be read via tags
         metadata.size = {width: 0, height: 0};
       } finally {
@@ -235,11 +234,11 @@ export class MetadataLoader {
               metadata.contentIdentifier = contentId;
             }
           }
-        } catch (err) {
+        } catch {
           try {
             const m = await sharp(fullPath, {failOnError: false}).metadata();
             MetadataLoader.mapMetadata(metadata, this.mapExifReader(exifReader(m.exif)), true);
-          } catch (e) {
+          } catch {
             // ignoring errors
           }
         }
@@ -390,7 +389,7 @@ export class MetadataLoader {
           offset = exif.exif?.OffsetTimeOriginal || exif.exif?.OffsetTimeDigitized || exif.exif?.OffsetTime || Utils.getTimeOffsetByGPSStamp(ts, exif.exif?.GPSTimeStamp, exif.gps);
         }
         if (!offset) { //still no offset? let's look for a timestamp with offset in the rest of the DateTags list
-          const [tsonly, tsoffset] = Utils.splitTimestampAndOffset(ts);
+          const [tsonly] = Utils.splitTimestampAndOffset(ts);
           for (let j = i + 1; j < DateTags.length; j++) {
             const [exts, exOffset] = extractTSAndOffset(DateTags[j][0], DateTags[j][1], DateTags[j][2]);
             if (exts && exOffset && Math.abs(Utils.timestampToMS(tsonly, null) - Utils.timestampToMS(exts, null)) < 30000) {

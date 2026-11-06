@@ -15,7 +15,7 @@ describe('UsersComponent', () => {
   const guest = {id: 3, name: 'Éva', role: UserRoles.Guest} as UserDTO;
 
   const setUp = () => {
-    const user = signal<UserDTO>(admin);
+    const user = signal<UserDTO | null>(admin);
     TestBed.configureTestingModule({
       imports: [UsersComponent],
       providers: [

@@ -57,9 +57,7 @@ export class DuplicateComponent implements OnInit {
       if (dupls.length === 0) {
         return null;
       }
-      const dirFrequency: {
-        [key: string]: { count: number; dir: DirectoryPathDTO };
-      } = {};
+      const dirFrequency: Record<string, { count: number; dir: DirectoryPathDTO }> = {};
       dupls.forEach((d): void =>
           d.media.forEach((m): void => {
             const k = Utils.concatUrls(m.directory.path, m.directory.name);
@@ -70,7 +68,7 @@ export class DuplicateComponent implements OnInit {
             dirFrequency[k].count++;
           })
       );
-      let max: { count: number; dir: DirectoryPathDTO } = {
+      let max: { count: number; dir: DirectoryPathDTO | null } = {
         count: -1,
         dir: null,
       };
@@ -83,10 +81,10 @@ export class DuplicateComponent implements OnInit {
     };
 
     while (duplicates.length > 0) {
-      const dir = getMostFrequentDir(duplicates);
+      const dir = getMostFrequentDir(duplicates)!; // duplicates is not empty and every group has media
       const group = duplicates.filter(
-          (d): MediaDTO =>
-              d.media.find(
+          (d): boolean =>
+              !!d.media.find(
                   (m): boolean =>
                       m.directory.name === dir.name && m.directory.path === dir.path
               )
@@ -108,12 +106,12 @@ export class DuplicateComponent implements OnInit {
     return groups;
   });
   // grows while rendering; its groups and pair lists are pushed to in place, so it is set to a new array after each step
-  readonly renderedDirGroups = signal<GroupedDuplicate[]>(null);
+  readonly renderedDirGroups = signal<GroupedDuplicate[] | null>(null);
   renderedIndex = {
     group: -1,
     pairs: 0,
   };
-  renderTimer: number = null;
+  renderTimer: number | null = null;
   readonly duplicateCount = computed(() => {
     const duplicates = this.duplicateService.duplicates();
     return {
@@ -181,7 +179,7 @@ export class DuplicateComponent implements OnInit {
       return;
     }
     if (this.shouldRenderMore()) {
-      const groups = this.renderedDirGroups();
+      const groups = this.renderedDirGroups() ?? [];
       if (
           groups.length === 0 ||
           this.renderedIndex.pairs >=

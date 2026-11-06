@@ -1,7 +1,7 @@
 export class EventLimit<T> {
   private lastTriggerValue: T = null;
 
-  private handlers: Array<EventLimitHandler<T>> = [];
+  private handlers: EventLimitHandler<T>[] = [];
 
   public on(limit: T, handler: (data?: T) => void): void {
     this.handlers.push(new EventLimitHandler(limit, handler));

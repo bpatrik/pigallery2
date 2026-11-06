@@ -29,7 +29,7 @@ import {GridSizes} from '../../../../common/entities/GridSizes';
 import {PhotoDTO} from '../../../../common/entities/PhotoDTO';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 import {BlogService, GroupedMarkdown} from './blog/blog.service';
-import {UploaderService, UploadProgress} from './uploader/uploader.service';
+import {UploaderService} from './uploader/uploader.service';
 import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {provideIcons} from '@ng-icons/core';
@@ -38,11 +38,11 @@ import {appIcons} from '../../icons';
 
 // Mock services
 class MockContentLoaderService {
-  readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
+  readonly content = signal<ContentWrapperWithError | null>({} as ContentWrapperWithError);
   loadDirectory = vi.fn();
   search = vi.fn().mockReturnValue(Promise.resolve());
 
-  constructor(private initialContent: ContentWrapperWithError = null) {
+  constructor(private initialContent: ContentWrapperWithError | null = null) {
     if (initialContent) {
       this.content.set(initialContent);
     }
@@ -50,7 +50,7 @@ class MockContentLoaderService {
 }
 
 class MockContentService {
-  readonly sortedFilteredContent = signal<GroupedDirectoryContent>(null);
+  readonly sortedFilteredContent = signal<GroupedDirectoryContent | null>(null);
 }
 
 class MockAuthenticationService {
@@ -86,12 +86,11 @@ class MockCacheService {
     return null;
   }
 
-  setThemeMode() {
-  }
+  setThemeMode = vi.fn();
 }
 
 class MockBlogService{
-  getMarkDowns(date: Date): GroupedMarkdown[] {
+  getMarkDowns(): GroupedMarkdown[] {
     return [];
   }
 }
@@ -107,11 +106,6 @@ class MockPiTitleService {
   setSearchTitle = vi.fn();
   setDirectoryTitle = vi.fn();
 }
-
-class MockRouter {
-  navigate = vi.fn().mockReturnValue(Promise.resolve(true));
-}
-
 
 class MockUploaderService{
   public uploadProgress: unknown[] = [];
@@ -260,9 +254,9 @@ describe('GalleryComponent', () => {
 
       // These should not throw errors due to the null checks in the template
       expect(() => {
-        const hasError = component.ContentWrapper?.error;
-        const hasDirectory = component.ContentWrapper?.directory;
-        const hasSearchResult = component.ContentWrapper?.searchResult;
+        void component.ContentWrapper?.error;
+        void component.ContentWrapper?.directory;
+        void component.ContentWrapper?.searchResult;
       }).not.toThrow();
     });
 

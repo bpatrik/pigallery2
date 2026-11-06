@@ -6,10 +6,10 @@
     data-toggle="dropdown"
     aria-haspopup="true"
     aria-expanded="true">
-    @if (current != null) {
+    @if (current !== null) {
       {{current}}
     }
-    @if (current == null) {
+    @if (current === null) {
       <ng-icon name="ionGlobeOutline" />
     }
 

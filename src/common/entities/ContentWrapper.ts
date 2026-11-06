@@ -1,22 +1,19 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 import {DirectoryBaseDTO, DirectoryPathDTO, ParentDirectoryDTO} from './DirectoryDTO';
 import {SearchResultDTO} from './SearchResultDTO';
 import {Utils} from '../Utils';
 import {MediaDTO, MediaDTOUtils} from './MediaDTO';
 import {FileDTO} from './FileDTO';
-import {VideoDTO} from './VideoDTO';
-import {PhotoDTO} from './PhotoDTO';
 
 
 export interface ContentWrapper {
-  directory: ParentDirectoryDTO;
-  searchResult: SearchResultDTO;
+  directory?: ParentDirectoryDTO | null;
+  searchResult?: SearchResultDTO | null;
   notModified?: boolean;
 }
 
 export interface PackedContentWrapper {
-  directory: ParentDirectoryDTO;
-  searchResult: SearchResultDTO;
+  directory?: ParentDirectoryDTO | null;
+  searchResult?: SearchResultDTO | null;
   notModified?: boolean;
   map: {
     faces: string[],
@@ -42,6 +39,87 @@ export interface ContentWrapperWithError extends ContentWrapper {
 
 export interface PackedContentWrapperWithError extends PackedContentWrapper {
   error?: string;
+}
+
+/**
+ * The packer renames and drops the fields of the DTOs in place, so a field's type changes while packing.
+ * The interfaces below list the field names (DTO and packed) of each level; their values stay loosely typed.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Loose = any;
+
+interface PackedFile {
+  id?: Loose;
+  directory?: Loose;
+  d?: Loose;
+  name?: Loose;
+  n?: Loose;
+  missingThumbnails?: Loose;
+  t?: Loose;
+  liveVideoPath?: Loose;
+  l?: Loose;
+  liveVideoInfo?: Loose;
+  li?: Loose;
+  metadata?: Loose;
+  m?: Loose;
+}
+
+interface PackedMetadata {
+  size?: Loose;
+  d?: Loose;
+  fileSize?: Loose;
+  s?: Loose;
+  creationDate?: Loose;
+  t?: Loose;
+  creationDateOffset?: Loose;
+  o?: Loose;
+  rating?: Loose;
+  r?: Loose;
+  caption?: Loose;
+  a?: Loose;
+  faces?: Loose;
+  f?: Loose;
+  keywords?: Loose;
+  k?: Loose;
+  cameraData?: Loose;
+  c?: Loose;
+  positionData?: Loose;
+  p?: Loose;
+}
+
+interface PackedCameraData {
+  lens?: Loose;
+  l?: Loose;
+  make?: Loose;
+  m?: Loose;
+  model?: Loose;
+  o?: Loose;
+  ISO?: Loose;
+  i?: Loose;
+  fStop?: Loose;
+  s?: Loose;
+  exposure?: Loose;
+  e?: Loose;
+  focalLength?: Loose;
+  a?: Loose;
+}
+
+interface PackedPositionData {
+  country?: Loose;
+  c?: Loose;
+  city?: Loose;
+  cy?: Loose;
+  state?: Loose;
+  s?: Loose;
+  GPSData?: Loose;
+  g?: Loose;
+}
+
+interface PackedDirectory {
+  cache?: Loose;
+  media?: Loose;
+  metaFile?: Loose;
+  directories?: Loose;
 }
 
 export class ContentWrapperUtils {
@@ -87,7 +165,7 @@ export class ContentWrapperUtils {
     return true;
   }
 
-  static equalsMedia(d1: FileDTO, d2: FileDTO): boolean {
+  static equalsMedia(d1: FileDTO | undefined, d2: FileDTO | undefined): boolean {
     if (d1 === d2) {
       return true;
     }
@@ -112,7 +190,7 @@ export class ContentWrapperUtils {
 
   }
 
-  static equalsPartialDirectory(d1: DirectoryBaseDTO, d2: DirectoryBaseDTO): boolean {
+  static equalsPartialDirectory(d1: DirectoryBaseDTO | null | undefined, d2: DirectoryBaseDTO | null | undefined): boolean {
     if (d1 === d2) {
       return true;
     }
@@ -124,8 +202,8 @@ export class ContentWrapperUtils {
       return false;
     }
 
-    const {cover: d1cover, ...d1c} = d1.cache;
-    const {cover: d2cover, ...d2c} = d2.cache;
+    const {cover: d1cover, ...d1c} = d1.cache ?? {};
+    const {cover: d2cover, ...d2c} = d2.cache ?? {};
 
     if (!Utils.equalsFilter(d1c, d2c)) {
       return false;
@@ -195,7 +273,7 @@ export class ContentWrapperUtils {
    * to keep the length of the list (e.g.: [true, false] -> 0b101).
    * Returns null if the list is too long to be stored in a safe integer.
    */
-  static booleansToBitmask(list: boolean[]): number {
+  static booleansToBitmask(list: boolean[]): number | null {
     if (list.length > ContentWrapperUtils.MAX_BITMASK_LENGTH) {
       return null;
     }
@@ -258,11 +336,10 @@ export class ContentWrapperUtils {
     }
 
     // remove empty maps
-    for (const k in cw.map) {
-      // @ts-ignore
-      if (cw.map[k].length === 0) {
-        // @ts-ignore
-        delete cw.map[k];
+    const map = cw.map as Partial<PackedContentWrapper['map']>;
+    for (const k of Object.keys(map) as (keyof PackedContentWrapper['map'])[]) {
+      if (map[k]?.length === 0) {
+        delete map[k];
       }
     }
 
@@ -271,8 +348,8 @@ export class ContentWrapperUtils {
 
   }
 
-  static unpack(cwIn: PackedContentWrapper): ContentWrapper {
-    const cw = {...cwIn};
+  static unpack(cwIn: PackedContentWrapper | null): ContentWrapper {
+    const cw = {...cwIn} as PackedContentWrapper;
     if (!cw || cw.notModified) {
       return cw;
     }
@@ -282,13 +359,13 @@ export class ContentWrapperUtils {
     } else if (cw.searchResult) {
       ContentWrapperUtils.unPackDirectory(cw, cw.searchResult, true);
     }
-    delete cw.map;
+    delete (cw as Partial<PackedContentWrapper>).map;
     return cw;
   }
 
   public static build(
-    directory: ParentDirectoryDTO = null,
-    searchResult: SearchResultDTO = null,
+    directory: ParentDirectoryDTO | null = null,
+    searchResult: SearchResultDTO | null = null,
     notModified?: boolean
   ) {
     const cw: ContentWrapper = {
@@ -299,180 +376,154 @@ export class ContentWrapperUtils {
     return cw;
   }
 
-  private static mapify(cw: PackedContentWrapper, media: FileDTO, isSearchResult: boolean): void {
+  private static mapify(cw: PackedContentWrapper, mediaIn: FileDTO, isSearchResult: boolean): void {
+    const reverseMap = cw.reverseMap!; // pack() sets it for the time of packing
+    const media = mediaIn as PackedFile;
     if (isSearchResult) {
       const k = JSON.stringify(media.directory);
-      if (!cw.reverseMap.directories.has(k)) {
-        cw.reverseMap.directories.set(k, cw.map.directories.length);
+      if (!reverseMap.directories.has(k)) {
+        reverseMap.directories.set(k, cw.map.directories.length);
         cw.map.directories.push(media.directory);
       }
-      // @ts-ignore
-      media.d = cw.reverseMap.directories.get(k);
+      media.d = reverseMap.directories.get(k);
       delete media.directory;
     }
 
 
-    // @ts-ignore
-    (media as MediaDTO)['n'] = (media as MediaDTO).name;
-    delete (media as MediaDTO).name;
+    media.n = media.name;
+    delete media.name;
 
-    if (typeof (media as MediaDTO).missingThumbnails !== 'undefined') {
-      // @ts-ignore
-      (media as MediaDTO)['t'] = (media as MediaDTO).missingThumbnails;
-      delete (media as MediaDTO).missingThumbnails;
+    if (typeof media.missingThumbnails !== 'undefined') {
+      media.t = media.missingThumbnails;
+      delete media.missingThumbnails;
     }
 
-    if (typeof (media as MediaDTO).liveVideoPath !== 'undefined') {
-      // @ts-ignore
-      (media as MediaDTO)['l'] = (media as MediaDTO).liveVideoPath;
-      delete (media as MediaDTO).liveVideoPath;
+    if (typeof media.liveVideoPath !== 'undefined') {
+      media.l = media.liveVideoPath;
+      delete media.liveVideoPath;
     }
 
-    if (typeof (media as MediaDTO).liveVideoInfo !== 'undefined') {
-      // @ts-ignore
-      (media as MediaDTO)['li'] = (media as MediaDTO).liveVideoInfo;
-      delete (media as MediaDTO).liveVideoInfo;
+    if (typeof media.liveVideoInfo !== 'undefined') {
+      media.li = media.liveVideoInfo;
+      delete media.liveVideoInfo;
     }
 
-    if ((media as MediaDTO).metadata) {
-      // @ts-ignore
-      (media as MediaDTO).metadata['d'] = [(media as MediaDTO).metadata.size.width, (media as MediaDTO).metadata.size.height];
-      delete (media as MediaDTO).metadata.size;
-      // @ts-ignore
-      (media as MediaDTO).metadata['s'] = (media as MediaDTO).metadata.fileSize;
-      delete (media as MediaDTO).metadata.fileSize;
+    if (media.metadata) {
+      const metadata = media.metadata as PackedMetadata;
+      metadata.d = [metadata.size.width, metadata.size.height];
+      delete metadata.size;
+      metadata.s = metadata.fileSize;
+      delete metadata.fileSize;
 
-      // @ts-ignore
-      (media as MediaDTO).metadata['t'] = (media as MediaDTO).metadata.creationDate / 1000; // skip millies
-      delete (media as MediaDTO).metadata.creationDate;
+      metadata.t = metadata.creationDate / 1000; // skip millies
+      delete metadata.creationDate;
 
-      if ((media as MediaDTO).metadata.creationDateOffset) {
-        // @ts-ignore
-        (media as MediaDTO).metadata['o'] = Utils.getOffsetMinutes((media as MediaDTO).metadata.creationDateOffset); // offset in minutes
-        delete (media as MediaDTO).metadata.creationDateOffset;
+      if (metadata.creationDateOffset) {
+        metadata.o = Utils.getOffsetMinutes(metadata.creationDateOffset); // offset in minutes
+        delete metadata.creationDateOffset;
       }
 
-      if ((media as PhotoDTO).metadata.rating) {
-        // @ts-ignore
-        (media as PhotoDTO).metadata['r'] = (media as PhotoDTO).metadata.rating;
-        delete (media as PhotoDTO).metadata.rating;
+      if (metadata.rating) {
+        metadata.r = metadata.rating;
+        delete metadata.rating;
       }
-      if ((media as PhotoDTO).metadata.caption) {
-        // @ts-ignore
-        (media as PhotoDTO).metadata['a'] = (media as PhotoDTO).metadata.caption;
-        delete (media as PhotoDTO).metadata.caption;
+      if (metadata.caption) {
+        metadata.a = metadata.caption;
+        delete metadata.caption;
       }
 
-      if ((media as PhotoDTO).metadata.faces) {
-        for (let i = 0; i < (media as PhotoDTO).metadata.faces.length; ++i) {
-          const name = (media as PhotoDTO).metadata.faces[i].name;
-          if (!cw.reverseMap.faces.has(name)) {
-            cw.reverseMap.faces.set(name, cw.map.faces.length);
+      if (metadata.faces) {
+        for (let i = 0; i < metadata.faces.length; ++i) {
+          const name = metadata.faces[i].name;
+          if (!reverseMap.faces.has(name)) {
+            reverseMap.faces.set(name, cw.map.faces.length);
             cw.map.faces.push(name);
           }
-          // @ts-ignore
-          (media as PhotoDTO).metadata.faces[i] = [...(media as PhotoDTO).metadata.faces[i].b, cw.reverseMap.faces.get(name)];
+          metadata.faces[i] = [...metadata.faces[i].b, reverseMap.faces.get(name)];
         }
 
-        // @ts-ignore
-        (media as PhotoDTO).metadata['f'] = (media as PhotoDTO).metadata.faces;
-        delete (media as PhotoDTO).metadata.faces;
+        metadata.f = metadata.faces;
+        delete metadata.faces;
       }
 
-      if ((media as PhotoDTO).metadata.keywords) {
-        for (let i = 0; i < (media as PhotoDTO).metadata.keywords.length; ++i) {
-          const k = (media as PhotoDTO).metadata.keywords[i];
-          if (!cw.reverseMap.keywords.has(k)) {
-            cw.reverseMap.keywords.set(k, cw.map.keywords.length);
+      if (metadata.keywords) {
+        for (let i = 0; i < metadata.keywords.length; ++i) {
+          const k = metadata.keywords[i];
+          if (!reverseMap.keywords.has(k)) {
+            reverseMap.keywords.set(k, cw.map.keywords.length);
             cw.map.keywords.push(k);
           }
-          // @ts-ignore
-          (media as PhotoDTO).metadata.keywords[i] = cw.reverseMap.keywords.get(k);
+          metadata.keywords[i] = reverseMap.keywords.get(k);
         }
-        // @ts-ignore
-        (media as PhotoDTO).metadata['k'] = (media as PhotoDTO).metadata.keywords;
-        delete (media as PhotoDTO).metadata.keywords;
+        metadata.k = metadata.keywords;
+        delete metadata.keywords;
       }
-      const mapifyOne = <T>(map: string[], reverseMap: Map<string, number>,
-                            obj: T, key: keyof T, mappedKey: string) => {
+      const mapifyOne = <K extends string>(map: string[], reverseMapOne: Map<string, number>,
+                                         obj: Partial<Record<K, Loose>>, key: K, mappedKey: K) => {
 
-        // @ts-ignore
         const k: string = obj[key];
 
-        if (!reverseMap.has(k)) {
-          reverseMap.set(k, map.length);
+        if (!reverseMapOne.has(k)) {
+          reverseMapOne.set(k, map.length);
           map.push(k);
         }
-        // @ts-ignore
-        obj[mappedKey] = reverseMap.get(k);
+        obj[mappedKey] = reverseMapOne.get(k);
         delete obj[key];
       };
-      if ((media as PhotoDTO).metadata.cameraData) {
-        if ((media as PhotoDTO).metadata.cameraData.lens) {
-          mapifyOne(cw.map.lens, cw.reverseMap.lens,
-            (media as PhotoDTO).metadata.cameraData, 'lens', 'l');
+      if (metadata.cameraData) {
+        const cameraData = metadata.cameraData as PackedCameraData;
+        if (cameraData.lens) {
+          mapifyOne(cw.map.lens, reverseMap.lens, cameraData, 'lens', 'l');
         }
-        if ((media as PhotoDTO).metadata.cameraData.make) {
-          mapifyOne(cw.map.camera, cw.reverseMap.camera,
-            (media as PhotoDTO).metadata.cameraData, 'make', 'm');
+        if (cameraData.make) {
+          mapifyOne(cw.map.camera, reverseMap.camera, cameraData, 'make', 'm');
         }
-        if ((media as PhotoDTO).metadata.cameraData.model) {
-          mapifyOne(cw.map.camera, cw.reverseMap.camera,
-            (media as PhotoDTO).metadata.cameraData, 'model', 'o');
+        if (cameraData.model) {
+          mapifyOne(cw.map.camera, reverseMap.camera, cameraData, 'model', 'o');
         }
 
-        if ((media as PhotoDTO).metadata.cameraData.ISO) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData['i'] = (media as PhotoDTO).metadata.cameraData.ISO;
-          delete (media as PhotoDTO).metadata.cameraData.ISO;
+        if (cameraData.ISO) {
+          cameraData.i = cameraData.ISO;
+          delete cameraData.ISO;
         }
-        if ((media as PhotoDTO).metadata.cameraData.fStop) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData['s'] = (media as PhotoDTO).metadata.cameraData.fStop;
-          delete (media as PhotoDTO).metadata.cameraData.fStop;
+        if (cameraData.fStop) {
+          cameraData.s = cameraData.fStop;
+          delete cameraData.fStop;
         }
-        if ((media as PhotoDTO).metadata.cameraData.exposure) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData['e'] = (media as PhotoDTO).metadata.cameraData.exposure;
-          delete (media as PhotoDTO).metadata.cameraData.exposure;
+        if (cameraData.exposure) {
+          cameraData.e = cameraData.exposure;
+          delete cameraData.exposure;
         }
-        if ((media as PhotoDTO).metadata.cameraData.focalLength) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData['a'] = (media as PhotoDTO).metadata.cameraData.focalLength;
-          delete (media as PhotoDTO).metadata.cameraData.focalLength;
+        if (cameraData.focalLength) {
+          cameraData.a = cameraData.focalLength;
+          delete cameraData.focalLength;
         }
 
-        // @ts-ignore
-        (media as PhotoDTO).metadata['c'] = (media as PhotoDTO).metadata.cameraData;
-        delete (media as PhotoDTO).metadata.cameraData;
+        metadata.c = cameraData;
+        delete metadata.cameraData;
       }
-      if ((media as PhotoDTO).metadata.positionData) {
-        if ((media as PhotoDTO).metadata.positionData.country) {
-          mapifyOne(cw.map.keywords, cw.reverseMap.keywords,
-            (media as PhotoDTO).metadata.positionData, 'country', 'c');
+      if (metadata.positionData) {
+        const positionData = metadata.positionData as PackedPositionData;
+        if (positionData.country) {
+          mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'country', 'c');
         }
-        if ((media as PhotoDTO).metadata.positionData.city) {
-          mapifyOne(cw.map.keywords, cw.reverseMap.keywords,
-            (media as PhotoDTO).metadata.positionData, 'city', 'cy');
+        if (positionData.city) {
+          mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'city', 'cy');
         }
-        if ((media as PhotoDTO).metadata.positionData.state) {
-          mapifyOne(cw.map.keywords, cw.reverseMap.keywords,
-            (media as PhotoDTO).metadata.positionData, 'state', 's');
+        if (positionData.state) {
+          mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'state', 's');
         }
 
-        if ((media as PhotoDTO).metadata.positionData.GPSData) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.positionData['g'] = [(media as PhotoDTO).metadata.positionData.GPSData.latitude, (media as PhotoDTO).metadata.positionData.GPSData.longitude];
-          delete (media as PhotoDTO).metadata.positionData.GPSData;
+        if (positionData.GPSData) {
+          positionData.g = [positionData.GPSData.latitude, positionData.GPSData.longitude];
+          delete positionData.GPSData;
         }
-        // @ts-ignore
-        (media as PhotoDTO).metadata['p'] = (media as PhotoDTO).metadata.positionData;
-        delete (media as PhotoDTO).metadata.positionData;
+        metadata.p = positionData;
+        delete metadata.positionData;
       }
 
-      // @ts-ignore
-      (media as PhotoDTO)['m'] = (media as PhotoDTO).metadata;
-      delete (media as PhotoDTO).metadata;
+      media.m = metadata;
+      delete media.metadata;
     }
 
   }
@@ -481,7 +532,7 @@ export class ContentWrapperUtils {
 
     // clean up media
     for (let i = 0; i < media.length; ++i) {
-      const m = media[i];
+      const m = media[i] as PackedFile;
       delete m.id;
 
       if (m.directory) {
@@ -498,41 +549,41 @@ export class ContentWrapperUtils {
         }
       }
 
-      if (MediaDTOUtils.isPhoto(m)) {
-        delete (m as VideoDTO).metadata.bitRate;
-        delete (m as VideoDTO).metadata.duration;
+      if (MediaDTOUtils.isPhoto(m as MediaDTO)) {
+        delete m.metadata.bitRate;
+        delete m.metadata.duration;
 
         // compress faces
-        if ((m as PhotoDTO).metadata.faces) {
-          for (let j = 0; j < (m as PhotoDTO).metadata.faces.length; ++j) {
-            const f = (m as PhotoDTO).metadata.faces[j];
-            // @ts-ignore
-            f['b'] = [f.box.top, f.box.left, f.box.height, f.box.width];
+        if (m.metadata.faces) {
+          for (let j = 0; j < m.metadata.faces.length; ++j) {
+            const f = m.metadata.faces[j];
+            f.b = [f.box.top, f.box.left, f.box.height, f.box.width];
             delete f.box;
           }
         }
-        ContentWrapperUtils.mapify(cw, m, isSearchResult);
-      } else if (MediaDTOUtils.isVideo(m)) {
-        delete (m as PhotoDTO).metadata.caption;
-        delete (m as PhotoDTO).metadata.cameraData;
-        delete (m as PhotoDTO).metadata.faces;
-        delete (m as PhotoDTO).metadata.positionData;
-        ContentWrapperUtils.mapify(cw, m, isSearchResult);
+        ContentWrapperUtils.mapify(cw, m as MediaDTO, isSearchResult);
+      } else if (MediaDTOUtils.isVideo(m as MediaDTO)) {
+        delete m.metadata.caption;
+        delete m.metadata.cameraData;
+        delete m.metadata.faces;
+        delete m.metadata.positionData;
+        ContentWrapperUtils.mapify(cw, m as MediaDTO, isSearchResult);
       }
       Utils.removeNullOrEmptyObj(m);
     }
   }
 
-  private static packDirectory(cw: PackedContentWrapper, dir: DirectoryBaseDTO | SearchResultDTO, isSearchResult = false): void {
-    if ((dir as DirectoryBaseDTO).cache?.cover) {
-      (dir as DirectoryBaseDTO).cache.cover.directory = {
-        path: (dir as DirectoryBaseDTO).cache.cover.directory.path,
-        name: (dir as DirectoryBaseDTO).cache.cover.directory.name,
+  private static packDirectory(cw: PackedContentWrapper, dirIn: DirectoryBaseDTO | SearchResultDTO, isSearchResult = false): void {
+    const dir = dirIn as PackedDirectory;
+    if (dir.cache?.cover) {
+      dir.cache.cover.directory = {
+        path: dir.cache.cover.directory.path,
+        name: dir.cache.cover.directory.name,
       } as DirectoryPathDTO;
 
       // make sure that it is a different object as one of the photo in the media[]
       // as the next foreach would remove the directory
-      (dir as DirectoryBaseDTO).cache.cover = Utils.clone((dir as DirectoryBaseDTO).cache.cover);
+      dir.cache.cover = Utils.clone(dir.cache.cover);
     }
 
     if (dir.media) {
@@ -542,7 +593,7 @@ export class ContentWrapperUtils {
     if (dir.metaFile) {
       for (let i = 0; i < dir.metaFile.length; ++i) {
         if (isSearchResult) {
-          delete (dir.metaFile[i].directory as DirectoryBaseDTO).id;
+          delete dir.metaFile[i].directory.id;
         } else {
           delete dir.metaFile[i].directory;
         }
@@ -559,238 +610,164 @@ export class ContentWrapperUtils {
     }
 
     // should not go to the client side
-    delete (dir as DirectoryBaseDTO).cache?.directory; // client know its directory
-    delete (dir as DirectoryBaseDTO).cache?.cover?.id;
-    delete (dir as DirectoryBaseDTO).cache?.id;
-    delete (dir as DirectoryBaseDTO).cache?.projectionKey; // client already knows its projectionKey
-    delete (dir as DirectoryBaseDTO).cache?.valid;
+    delete dir.cache?.directory; // client know its directory
+    delete dir.cache?.cover?.id;
+    delete dir.cache?.id;
+    delete dir.cache?.projectionKey; // client already knows its projectionKey
+    delete dir.cache?.valid;
 
     Utils.removeNullOrEmptyObj(dir);
   }
 
-  private static deMapify(cw: PackedContentWrapper, media: FileDTO, isSearchResult: boolean): void {
+  private static deMapify(cw: PackedContentWrapper, mediaIn: FileDTO, isSearchResult: boolean): void {
 
-    const deMapifyOne = <T>(map: any[],
-                            obj: T, key: keyof T, mappedKey: string) => {
-      // @ts-ignore
+    const deMapifyOne = <K extends string>(map: unknown[],
+                                           obj: Partial<Record<K, Loose>>, key: K, mappedKey: K) => {
       obj[key] = map[obj[mappedKey]];
-      // @ts-ignore
       delete obj[mappedKey];
     };
+    const media = mediaIn as PackedFile;
     if (isSearchResult) {
       deMapifyOne(cw.map.directories, media, 'directory', 'd');
     }
 
-    // @ts-ignore
-    if ((media as MediaDTO)['n']) {
-      // @ts-ignore
-      (media as PhotoDTO).name = (media as PhotoDTO)['n'];
-      // @ts-ignore
-      delete (media as PhotoDTO)['n'];
+    if (media.n) {
+      media.name = media.n;
+      delete media.n;
     }
-    // @ts-ignore
-    if ((media as MediaDTO)['t']) {
-      // @ts-ignore
-      (media as PhotoDTO).missingThumbnails = (media as PhotoDTO)['t'];
-      // @ts-ignore
-      delete (media as PhotoDTO)['t'];
+    if (media.t) {
+      media.missingThumbnails = media.t;
+      delete media.t;
     }
-    // @ts-ignore
-    if ((media as MediaDTO)['l']) {
-      // @ts-ignore
-      (media as PhotoDTO).liveVideoPath = (media as PhotoDTO)['l'];
-      // @ts-ignore
-      delete (media as PhotoDTO)['l'];
+    if (media.l) {
+      media.liveVideoPath = media.l;
+      delete media.l;
     }
-    // @ts-ignore
-    if ((media as MediaDTO)['li']) {
-      // @ts-ignore
-      (media as PhotoDTO).liveVideoInfo = (media as PhotoDTO)['li'];
-      // @ts-ignore
-      delete (media as PhotoDTO)['li'];
+    if (media.li) {
+      media.liveVideoInfo = media.li;
+      delete media.li;
     }
 
-    // @ts-ignore
-    if ((media as MediaDTO)['m']) {
-      // @ts-ignore
-      (media as PhotoDTO).metadata = (media as PhotoDTO)['m'];
-      // @ts-ignore
-      delete (media as PhotoDTO)['m'];
+    if (media.m) {
+      media.metadata = media.m;
+      delete media.m;
+      const metadata = media.metadata as PackedMetadata;
 
-      (media as MediaDTO).metadata.size = {
-        // @ts-ignore
-        width: (media as MediaDTO).metadata['d'][0],
-        // @ts-ignore
-        height: (media as MediaDTO).metadata['d'][1],
+      metadata.size = {
+        width: metadata.d[0],
+        height: metadata.d[1],
       };
-      // @ts-ignore
-      delete (media as MediaDTO).metadata['d'];
+      delete metadata.d;
 
 
-      // @ts-ignore
-      if (typeof (media as PhotoDTO).metadata['t'] !== 'undefined') {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.creationDate = (media as PhotoDTO).metadata['t'] * 1000;
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata['t'];
+      if (typeof metadata.t !== 'undefined') {
+        metadata.creationDate = metadata.t * 1000;
+        delete metadata.t;
       }
 
-      // @ts-ignore
-      if (typeof (media as PhotoDTO).metadata['o'] !== 'undefined') {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.creationDateOffset = Utils.getOffsetString((media as PhotoDTO).metadata['o']);//convert offset from minutes to String
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata['o'];
+      if (typeof metadata.o !== 'undefined') {
+        metadata.creationDateOffset = Utils.getOffsetString(metadata.o);//convert offset from minutes to String
+        delete metadata.o;
       }
 
-      // @ts-ignore
-      if (typeof (media as PhotoDTO).metadata['r'] !== 'undefined') {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.rating = (media as PhotoDTO).metadata['r'];
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata['r'];
+      if (typeof metadata.r !== 'undefined') {
+        metadata.rating = metadata.r;
+        delete metadata.r;
       }
 
-      // @ts-ignore
-      if (typeof (media as PhotoDTO).metadata['a'] !== 'undefined') {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.caption = (media as PhotoDTO).metadata['a'];
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata['a'];
+      if (typeof metadata.a !== 'undefined') {
+        metadata.caption = metadata.a;
+        delete metadata.a;
       }
 
-      // @ts-ignore
-      (media as PhotoDTO).metadata.fileSize = (media as PhotoDTO).metadata['s'];
-      // @ts-ignore
-      delete (media as PhotoDTO).metadata['s'];
+      metadata.fileSize = metadata.s;
+      delete metadata.s;
 
 
-      // @ts-ignore
-      if ((media as PhotoDTO).metadata['f']) {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.faces = (media as PhotoDTO).metadata['f'];
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata['f'];
-        for (let j = 0; j < (media as PhotoDTO).metadata.faces.length; ++j) {
-          // @ts-ignore
-          const boxArr: number[] = (media as PhotoDTO).metadata.faces[j];
-          (media as PhotoDTO).metadata.faces[j] = {
+      if (metadata.f) {
+        metadata.faces = metadata.f;
+        delete metadata.f;
+        for (let j = 0; j < metadata.faces.length; ++j) {
+          const boxArr: number[] = metadata.faces[j];
+          metadata.faces[j] = {
             box: {
               top: boxArr[0],
               left: boxArr[1],
               height: boxArr[2],
               width: boxArr[3],
             },
-            // @ts-ignore
             name: boxArr[4]
           };
         }
 
-        for (let i = 0; i < (media as PhotoDTO).metadata.faces.length; ++i) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.faces[i].name = cw.map.faces[(media as PhotoDTO).metadata.faces[i].name];
+        for (let i = 0; i < metadata.faces.length; ++i) {
+          metadata.faces[i].name = cw.map.faces[metadata.faces[i].name];
 
         }
 
       }
-      // @ts-ignore
-      if ((media as PhotoDTO).metadata['k']) {
+      if (metadata.k) {
 
-        // @ts-ignore
-        (media as PhotoDTO).metadata.keywords = (media as PhotoDTO).metadata['k'];
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata['k'];
-        for (let i = 0; i < (media as PhotoDTO).metadata.keywords.length; ++i) {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.keywords[i] = cw.map.keywords[(media as PhotoDTO).metadata.keywords[i]];
+        metadata.keywords = metadata.k;
+        delete metadata.k;
+        for (let i = 0; i < metadata.keywords.length; ++i) {
+          metadata.keywords[i] = cw.map.keywords[metadata.keywords[i]];
         }
       }
-      // @ts-ignore
-      if ((media as PhotoDTO).metadata['c']) {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.cameraData = (media as PhotoDTO).metadata.c;
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata.c;
+      if (metadata.c) {
+        metadata.cameraData = metadata.c;
+        delete metadata.c;
+        const cameraData = metadata.cameraData as PackedCameraData;
 
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData.l !== 'undefined') {
-          deMapifyOne(cw.map.lens,
-            (media as PhotoDTO).metadata.cameraData, 'lens', 'l');
+        if (typeof cameraData.l !== 'undefined') {
+          deMapifyOne(cw.map.lens, cameraData, 'lens', 'l');
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData.m !== 'undefined') {
-          deMapifyOne(cw.map.camera,
-            (media as PhotoDTO).metadata.cameraData, 'make', 'm');
+        if (typeof cameraData.m !== 'undefined') {
+          deMapifyOne(cw.map.camera, cameraData, 'make', 'm');
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData['o'] !== 'undefined') {
-          deMapifyOne(cw.map.camera,
-            (media as PhotoDTO).metadata.cameraData, 'model', 'o');
+        if (typeof cameraData.o !== 'undefined') {
+          deMapifyOne(cw.map.camera, cameraData, 'model', 'o');
         }
 
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData['i'] !== 'undefined') {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData.ISO = (media as PhotoDTO).metadata.cameraData['i'];
-          // @ts-ignore
-          delete (media as PhotoDTO).metadata.cameraData['i'];
+        if (typeof cameraData.i !== 'undefined') {
+          cameraData.ISO = cameraData.i;
+          delete cameraData.i;
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData['a'] !== 'undefined') {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData.focalLength = (media as PhotoDTO).metadata.cameraData['a'];
-          // @ts-ignore
-          delete (media as PhotoDTO).metadata.cameraData['a'];
+        if (typeof cameraData.a !== 'undefined') {
+          cameraData.focalLength = cameraData.a;
+          delete cameraData.a;
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData['e'] !== 'undefined') {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData.exposure = (media as PhotoDTO).metadata.cameraData['e'];
-          // @ts-ignore
-          delete (media as PhotoDTO).metadata.cameraData['e'];
+        if (typeof cameraData.e !== 'undefined') {
+          cameraData.exposure = cameraData.e;
+          delete cameraData.e;
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.cameraData['s'] !== 'undefined') {
-          // @ts-ignore
-          (media as PhotoDTO).metadata.cameraData.fStop = (media as PhotoDTO).metadata.cameraData['s'];
-          // @ts-ignore
-          delete (media as PhotoDTO).metadata.cameraData['s'];
+        if (typeof cameraData.s !== 'undefined') {
+          cameraData.fStop = cameraData.s;
+          delete cameraData.s;
         }
 
       }
-      // @ts-ignore
-      if ((media as PhotoDTO).metadata['p']) {
-        // @ts-ignore
-        (media as PhotoDTO).metadata.positionData = (media as PhotoDTO).metadata.p;
-        // @ts-ignore
-        delete (media as PhotoDTO).metadata.p;
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.positionData.c !== 'undefined') {
-          deMapifyOne(cw.map.keywords,
-            (media as PhotoDTO).metadata.positionData, 'country', 'c');
+      if (metadata.p) {
+        metadata.positionData = metadata.p;
+        delete metadata.p;
+        const positionData = metadata.positionData as PackedPositionData;
+        if (typeof positionData.c !== 'undefined') {
+          deMapifyOne(cw.map.keywords, positionData, 'country', 'c');
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.positionData.cy !== 'undefined') {
-          deMapifyOne(cw.map.keywords,
-            (media as PhotoDTO).metadata.positionData, 'city', 'cy');
+        if (typeof positionData.cy !== 'undefined') {
+          deMapifyOne(cw.map.keywords, positionData, 'city', 'cy');
         }
-        // @ts-ignore
-        if (typeof (media as PhotoDTO).metadata.positionData.s !== 'undefined') {
-          deMapifyOne(cw.map.keywords,
-            (media as PhotoDTO).metadata.positionData, 'state', 's');
+        if (typeof positionData.s !== 'undefined') {
+          deMapifyOne(cw.map.keywords, positionData, 'state', 's');
         }
 
-        // @ts-ignore
-        if ((media as PhotoDTO).metadata.positionData['g']) {
-          (media as PhotoDTO).metadata.positionData.GPSData =
+        if (positionData.g) {
+          positionData.GPSData =
             {
-              // @ts-ignore
-              latitude: (media as PhotoDTO).metadata.positionData['g'][0],
-              // @ts-ignore
-              longitude: (media as PhotoDTO).metadata.positionData['g'][1]
+              latitude: positionData.g[0],
+              longitude: positionData.g[1]
             };
-          // @ts-ignore
-          delete (media as PhotoDTO).metadata.positionData['g'];
+          delete positionData.g;
         }
       }
     }

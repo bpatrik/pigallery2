@@ -1,5 +1,4 @@
 import {AuthenticationMWs} from '../middlewares/user/AuthenticationMWs';
-import {UserRoles} from '../../common/entities/UserDTO';
 import {RenderingMWs} from '../middlewares/RenderingMWs';
 import * as express from 'express';
 import {ServerTimingMWs} from '../middlewares/ServerTimingMWs';

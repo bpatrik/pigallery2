@@ -77,13 +77,13 @@
           [min]="ActiveFilters.dateFilter.minDate"
           [(ngModel)]="ActiveFilters.dateFilter.minFilter"
           step="60"
-          (change)="newMinDate($event); filterService.onFilterChange()"/>
+          (change)="newMinDate(); filterService.onFilterChange()"/>
           <input type="range"
             step="60"
             [max]="ActiveFilters.dateFilter.maxDate"
             [min]="ActiveFilters.dateFilter.minDate"
             [(ngModel)]="ActiveFilters.dateFilter.maxFilter"
-            (change)="newMaxDate($event); filterService.onFilterChange()"/>
+            (change)="newMaxDate(); filterService.onFilterChange()"/>
 
           </div>
           <div class="col-md-1-half col-12  d-table">
@@ -114,7 +114,11 @@
                     @for (option of filter.options; track option.name; let j = $index) {
                       <li
                         [class.unselected]="!option.selected"
-                        (click)="option.selected = !option.selected; filterService.onFilterChange()"
+                        role="checkbox" tabindex="0"
+                        [attr.aria-checked]="option.selected"
+                        (click)="toggleOption(option)"
+                        (keydown.enter)="toggleOption(option)"
+                        (keydown.space)="$event.preventDefault(); toggleOption(option)"
                         class="filter-option list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         <div>
                           <ng-icon name="ionFlagOutline"

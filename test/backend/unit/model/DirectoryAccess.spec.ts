@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import {expect} from 'chai';
 import * as path from 'path';
 import {DBTestHelper} from '../../DBTestHelper';
@@ -49,7 +48,7 @@ describe('DirectoryAccess', (sqlHelper: DBTestHelper) => {
   };
 
   const accessOf = async (session: SessionContext, dirs: string[]) => {
-    const ret: { [key: string]: DirectoryAccessTypes } = {};
+    const ret: Record<string, DirectoryAccessTypes> = {};
     for (const d of dirs) {
       ret[d] = await session.directoryAccess.getAccess(path.normalize(d));
     }

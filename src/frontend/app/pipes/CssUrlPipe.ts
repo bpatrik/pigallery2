@@ -15,7 +15,7 @@ export const toCssUrl = (url: string): string =>
   name: 'cssUrl'
 })
 export class CssUrlPipe implements PipeTransform {
-  transform(url: string): string {
-    return toCssUrl(url);
+  transform(url: string | null): string {
+    return url === null ? 'none' : toCssUrl(url);
   }
 }

@@ -15,7 +15,7 @@
       @if (shareService.sharingIsValid()) {
         <form
           name="form" id="form" class="form-horizontal" #LoginForm="ngForm" (submit)="onLogin()">
-          <div class="error-message" [hidden]="loginError()==false" i18n>Wrong password</div>
+          <div class="error-message" [hidden]="loginError()===false" i18n>Wrong password</div>
           <div class="input-group mb-3">
             <div class="input-group-text"><ng-icon name="ionLockClosedOutline" /></div>
             <input type="password"

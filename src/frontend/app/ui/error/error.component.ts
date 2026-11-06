@@ -2,7 +2,6 @@ import { Component, inject } from '@angular/core';
 import {Config} from '../../../../common/config/public/Config';
 import {IconComponent} from '../../icon.component';
 
-import {Router} from '@angular/router';
 import {NavigationService} from '../../model/navigation.service';
 
 @Component({

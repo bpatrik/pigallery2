@@ -37,12 +37,12 @@ describe('ToastContainerComponent', () => {
     render();
     expect(cards().length).toBe(2);
     expect(cards()[0].getAttribute('role')).toBe('alert');
-    expect(cards()[0].querySelector('.toast-icon').classList).toContain('text-danger');
-    expect(cards()[0].querySelector('.toast-bar').classList).toContain('countdown');
-    expect(cards()[0].querySelector('.toast-title').textContent).toContain('(1) Mentés sikertelen');
-    expect(cards()[0].querySelector('.toast-text').textContent).toContain('Árvíztűrő hiba');
+    expect(cards()[0].querySelector('.toast-icon')!.classList).toContain('text-danger');
+    expect(cards()[0].querySelector('.toast-bar')!.classList).toContain('countdown');
+    expect(cards()[0].querySelector('.toast-title')!.textContent).toContain('(1) Mentés sikertelen');
+    expect(cards()[0].querySelector('.toast-text')!.textContent).toContain('Árvíztűrő hiba');
     expect(cards()[1].getAttribute('role')).toBe('status');
-    expect(cards()[1].querySelector('.toast-icon').classList).toContain('text-success');
+    expect(cards()[1].querySelector('.toast-icon')!.classList).toContain('text-success');
   });
 
   it('should show toasts that stay at the bottom right with their progress', () => {

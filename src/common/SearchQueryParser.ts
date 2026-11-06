@@ -108,7 +108,7 @@ export class SearchQueryParser {
     return text;
   }
 
-  public static stringifyDate(time: number): string {
+  public static stringifyDate(time?: number): string | null {
     if (!time) {
       return null;
     }
@@ -274,7 +274,7 @@ export class SearchQueryParser {
     ) {
       const prefix = str.startsWith(this.keywords.someOf + ':')
         ? this.keywords.someOf + ':'
-        : new RegExp('^\\d*-' + this.keywords.NSomeOf + ':').exec(str)[0];
+        : new RegExp('^\\d*-' + this.keywords.NSomeOf + ':').exec(str)![0]; // tested above
       let tmpList: SearchQueryDTO | SearchQueryDTO[] = this.parse(str.slice(prefix.length + 1, -1), false); // trim brackets
 
       const unfoldList = (q: SearchListQuery): SearchQueryDTO[] => {
@@ -293,7 +293,7 @@ export class SearchQueryParser {
         list: tmpList,
       } as SomeOfSearchQuery;
       if (new RegExp('^\\d*-' + this.keywords.NSomeOf + ':').test(str)) {
-        ret.min = parseInt(new RegExp(/^\d*/).exec(str)[0], 10);
+        ret.min = parseInt(new RegExp(/^\d*/).exec(str)![0], 10); // \d* always matches
       }
       return ret;
     }
@@ -302,7 +302,7 @@ export class SearchQueryParser {
       return s.startsWith(kw + ':') || s.startsWith(kw + '!:');
     };
 
-    const addValueRangeParser = (matcher: string, type: SearchQueryTypes): RangeSearch => {
+    const addValueRangeParser = (matcher: string, type: SearchQueryTypes): RangeSearch | null => {
 
 
       const value =
@@ -394,7 +394,7 @@ export class SearchQueryParser {
 
     if (new RegExp('^\\d*-' + this.keywords.kmFrom + '!?:').test(str)) {
       let from = str.slice(
-        new RegExp('^\\d*-' + this.keywords.kmFrom + '!?:').exec(str)[0].length
+        new RegExp('^\\d*-' + this.keywords.kmFrom + '!?:').exec(str)![0].length // tested above
       );
       if (
         (from.charAt(0) === '(' && from.charAt(from.length - 1) === ')') ||
@@ -451,8 +451,8 @@ export class SearchQueryParser {
       new RegExp('^' + SearchQueryParser.humanToRegexpStr(this.keywords.lastNDays) + '!?:').test(str)) {
 
       const freqStr = str.indexOf('!:') === -1 ? str.slice(str.indexOf(':') + 1) : str.slice(str.indexOf('!:') + 2);
-      let freq: DatePatternFrequency = null;
-      let ago;
+      let freq: DatePatternFrequency | null = null;
+      let ago: number | undefined;
       if (freqStr == this.keywords.every_week) {
         freq = DatePatternFrequency.every_week;
       } else if (freqStr == this.keywords.every_month) {
@@ -482,7 +482,7 @@ export class SearchQueryParser {
             str.startsWith(this.keywords.sameDay + '!:')) && {
             negate: true
           }),
-          ...(!isNaN(ago) && {agoNumber: ago})
+          ...(ago !== undefined && !isNaN(ago) && {agoNumber: ago})
         } as DatePatternSearch;
       }
     }
@@ -538,7 +538,7 @@ export class SearchQueryParser {
     return {type: SearchQueryTypes.any_text, value: str} as TextSearch;
   }
 
-  public stringify(query: SearchQueryDTO): string {
+  public stringify(query: SearchQueryDTO | null | undefined): string {
     const ret = this.stringifyOneEntry(query);
     if (ret.charAt(0) === '(' && ret.charAt(ret.length - 1) === ')') {
       return ret.slice(1, ret.length - 1);
@@ -546,7 +546,7 @@ export class SearchQueryParser {
     return ret;
   }
 
-  private stringifyOneEntry(query: SearchQueryDTO): string {
+  private stringifyOneEntry(query: SearchQueryDTO | null | undefined): string {
     if (!query || !query.type) {
       return '';
     }
@@ -611,14 +611,17 @@ export class SearchQueryParser {
         if (dq.type == SearchQueryTypes.person_count) {
           kw = this.keywords.personCount;
         }
-        let minStr = '' + dq.min;
-        let maxStr = '' + dq.max;
+        let minStr: string | null = '' + dq.min;
+        let maxStr: string | null = '' + dq.max;
         if (dq.type == SearchQueryTypes.date) {
           minStr = SearchQueryParser.stringifyDate(dq.min);
           maxStr = SearchQueryParser.stringifyDate(dq.max);
         }
 
-        if (isNaN(dq.min) && isNaN(dq.max)) {
+        // a missing bound counts as NaN, like isNaN(undefined)
+        const min = dq.min ?? NaN;
+        const max = dq.max ?? NaN;
+        if (isNaN(min) && isNaN(max)) {
           return '';
         }
         if (dq.min == dq.max) {
@@ -628,7 +631,7 @@ export class SearchQueryParser {
             '=' +
             minStr
           );
-        } else if (!isNaN(dq.min) && !isNaN(dq.max)) {
+        } else if (!isNaN(min) && !isNaN(max)) {
           return (
             kw +
             negateSign +
@@ -637,7 +640,7 @@ export class SearchQueryParser {
             '..' +
             maxStr
           );
-        } else if (!isNaN(dq.min)) {
+        } else if (!isNaN(min)) {
           return (
             kw +
             negateSign +

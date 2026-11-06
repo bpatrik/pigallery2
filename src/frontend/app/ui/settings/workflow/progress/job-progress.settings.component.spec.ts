@@ -14,7 +14,7 @@ describe('JobProgressComponent', () => {
     time: {start: 1000, end: 3000}
   });
 
-  const setUp = (progress: JobProgressDTO) => {
+  const setUp = (progress: JobProgressDTO | undefined) => {
     TestBed.configureTestingModule({
       imports: [JobProgressComponent],
       providers: [

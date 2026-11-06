@@ -63,8 +63,8 @@
                 dropdownToggle
                 id="config-style"
                 class="btn dropdown-toggle"
-                [class.btn-secondary]="settingsService.configStyle() == ConfigStyle.full"
-                [class.btn-primary]="settingsService.configStyle() == ConfigStyle.compact"
+                [class.btn-secondary]="settingsService.configStyle() === ConfigStyle.full"
+                [class.btn-primary]="settingsService.configStyle() === ConfigStyle.compact"
                 data-bs-toggle="dropdown" aria-expanded="false">
                 {{ConfigStyle[settingsService.configStyle()] | stringifyEnum}}
               </button>
@@ -93,7 +93,7 @@
                   <div class="py-md-1 px-md-0"
                     [hidden]="!s.HasAvailableSettings">
                     <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
-                      (click)="viewportScroller.scrollToAnchor(s.ConfigPath())"
+                      (click)="viewportScroller.scrollToAnchor(s.ConfigPath() ?? '')"
                       >
                       <ng-icon [name]="s.icon()" /> {{s.Name()}}
                     </button>
@@ -118,18 +118,18 @@
               #tmpl
               [ConfigPath]="cp"
               [hidden]="!tmpl.HasAvailableSettings">
-              @if (cp=='Indexing') {
+              @if (cp==='Indexing') {
                 <br/>
                 <hr class="mt-2"/>
                 <app-settings-gallery-statistic />
               }
-              @if (cp=='Users') {
+              @if (cp==='Users') {
                 <app-settings-users />
               }
-              @if (cp=='Sharing') {
+              @if (cp==='Sharing') {
                 <app-settigns-sharings-list />
               }
-              @if (cp=='Extensions') {
+              @if (cp==='Extensions') {
                 <app-extension-installer />
               }
             </app-settings-template>

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {JobScheduleDTO, JobScheduleDTOUtils, JobTriggerType} from '../../../src/common/entities/job/JobScheduleDTO';
+import {JobScheduleDTOUtils, JobTriggerType} from '../../../src/common/entities/job/JobScheduleDTO';
 
 describe('JobScheduleDTO', () => {
 

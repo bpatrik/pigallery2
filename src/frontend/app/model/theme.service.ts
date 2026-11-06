@@ -23,8 +23,9 @@ export class ThemeService {
   }
 
   public init() {
-    if (this.cachingService.getThemeMode()) {
-      this.setMode(this.cachingService.getThemeMode());
+    const cachedMode = this.cachingService.getThemeMode();
+    if (cachedMode) {
+      this.setMode(cachedMode);
     } else {
       this.setMode(Config.Gallery.Themes.defaultMode);
     }

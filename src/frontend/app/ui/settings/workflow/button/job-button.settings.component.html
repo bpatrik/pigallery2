@@ -14,7 +14,7 @@
 }
 @if (Running) {
   <button class="btn btn-secondary"
-    [disabled]="disabled() || jobsService.jobStartingStopping()[jobName()] || Progress.state !== JobProgressStates.running"
+    [disabled]="disabled() || jobsService.jobStartingStopping()[jobName()] || Progress?.state !== JobProgressStates.running"
     (click)="stop();">
     <ng-icon name="ionStopOutline" />
     @if (!shortName()) {

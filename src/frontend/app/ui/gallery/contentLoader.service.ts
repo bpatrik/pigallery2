@@ -25,14 +25,14 @@ export class ContentLoaderService {
   private router = inject(Router);
 
   public readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
-  public readonly originalContent = computed((): DirectoryContent => {
+  public readonly originalContent = computed((): DirectoryContent | undefined => {
     const c = this.content();
-    return c?.directory ? c?.directory : c?.searchResult;
+    return (c?.directory ? c.directory : c?.searchResult) ?? undefined;
   });
-  private ongoingContentRequest: string = null;
+  private ongoingContentRequest: string | null = null;
   // directories that answered 'not found' since the last successfully loaded directory (avoids redirect loops)
   private readonly notFoundDirectories = new Set<string>();
-  private lastContentRequest: { type: 'directory' | 'search', value: string } = null;
+  private lastContentRequest: { type: 'directory' | 'search', value: string } | null = null;
   private pollingTimerRestart = new Subject<void>();
 
   constructor() {
@@ -56,7 +56,7 @@ export class ContentLoaderService {
               interval * 1000
             ).pipe(
               filter(() => this.ongoingContentRequest === null),
-              switchMap(i => from(this.reloadCurrentContent()))
+              switchMap(() => from(this.reloadCurrentContent()))
             )
           )
         );
@@ -83,14 +83,14 @@ export class ContentLoaderService {
     this.lastContentRequest = {type: 'directory', value: directoryName};
 
     // prepare server request
-    const params: { [key: string]: unknown } = {};
+    const params: Record<string, unknown> = {};
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
         params[QueryParams.gallery.sharingKey_query] =
           this.shareService.getSharingKey();
       }
     }
-    let cw :PackedContentWrapperWithError = null;
+    let cw: PackedContentWrapperWithError | null = null;
 
     try {
       if (
@@ -130,7 +130,7 @@ export class ContentLoaderService {
       return;
     }
 
-    if (!!cw?.directory) {
+    if (cw?.directory) {
       this.notFoundDirectories.clear();
       this.galleryCacheService.setDirectory(cw); // save it before adding references
     }
@@ -146,7 +146,7 @@ export class ContentLoaderService {
     const normalize = (d: string) => (d || '').replace(/\\/g, '/').split('/').filter(s => s !== '' && s !== '.').join('/');
     this.notFoundDirectories.add(normalize(directoryName));
 
-    let route: string[];
+    let route: string[] | null;
     if (this.shareService.isSharing()) {
       // the sharing loads in parallel with the content, so the 404 can arrive first
       const sharing = this.shareService.sharing() ?? await firstValueFrom(this.shareService.currentSharing);
@@ -159,9 +159,10 @@ export class ContentLoaderService {
       this.setContent({error: $localize`Directory not found`} as ContentWrapperWithError);
       return;
     }
-    const queryParams: { [key: string]: string } = {};
-    if (this.shareService.isSharing()) {
-      queryParams[QueryParams.gallery.sharingKey_query] = this.shareService.getSharingKey();
+    const queryParams: Record<string, string> = {};
+    const sharingKey = this.shareService.getSharingKey();
+    if (this.shareService.isSharing() && sharingKey) {
+      queryParams[QueryParams.gallery.sharingKey_query] = sharingKey;
     }
     await this.router.navigate(route, {queryParams});
   }

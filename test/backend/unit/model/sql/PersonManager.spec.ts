@@ -20,12 +20,10 @@ declare let describe: any;
 declare const after: any;
 declare const before: any;
 declare const beforeEach: any;
-declare const afterEach: any;
 declare const it: any;
 
 
 const tmpDescribe = describe;
-// eslint-disable-next-line prefer-const
 describe = DBTestHelper.describe();
 
 describe('PersonManager', (sqlHelper: DBTestHelper) => {
@@ -38,7 +36,6 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
   let v: VideoDTO;
   let p: PhotoDTO;
   let p2: PhotoDTO;
-  let pFaceLess: PhotoDTO;
 
   let savedPerson: PersonEntry[] = [];
 
@@ -54,7 +51,6 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
     dir = await DBTestHelper.persistTestDir(directory);
     p = (dir.media.filter(m => m.name === p.name)[0] as any);
     p2 = (dir.media.filter(m => m.name === p2.name)[0] as any);
-    pFaceLess = (dir.media[2] as any);
     v = (dir.media.filter(m => m.name === v.name)[0] as any);
     savedPerson = await (await SQLConnection.getConnection()).getRepository(PersonEntry).createQueryBuilder('person')
       .leftJoin('person.cache', 'cache', 'cache.projectionKey = :pk AND cache.valid = 1', {pk: DBTestHelper.defaultSession.user.projectionKey})
@@ -401,7 +397,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
       // Ensure there are valid cache entries
       await pm.getAll(DBTestHelper.defaultSession);
 
-      let validCacheCount = await connection.getRepository(ProjectedPersonCacheEntity)
+      const validCacheCount = await connection.getRepository(ProjectedPersonCacheEntity)
         .count({where: {valid: true}});
       expect(validCacheCount).to.be.equal(10);
 

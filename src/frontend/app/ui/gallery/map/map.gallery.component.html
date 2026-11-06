@@ -10,6 +10,5 @@
     [leafletLayers]="markerLayer()"
     (leafletMapReady)="onMapReady($event)">
   </div>
-  <div class="overlay" (click)="click()">
-  </div>
+  <button type="button" class="overlay" (click)="click()" aria-label="Open the map" i18n-aria-label></button>
 </div>

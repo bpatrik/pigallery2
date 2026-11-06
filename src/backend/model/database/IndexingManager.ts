@@ -23,7 +23,6 @@ import {PersonJunctionTable} from './enitites/person/PersonJunctionTable';
 import {MDFileEntity} from './enitites/MDFileEntity';
 import {MDFileDTO} from '../../../common/entities/MDFileDTO';
 import {DiskManager} from '../fileaccess/DiskManager';
-import {ProjectedDirectoryCacheEntity} from './enitites/ProjectedDirectoryCacheEntity';
 
 const LOG_TAG = '[IndexingManager]';
 
@@ -230,7 +229,6 @@ export class IndexingManager {
     scannedDirectory: ParentDirectoryDTO
   ): Promise<number> {
     const directoryRepository = connection.getRepository(DirectoryEntity);
-    const projDirCacheRep = connection.getRepository(ProjectedDirectoryCacheEntity);
 
     const currentDir: DirectoryEntity = await directoryRepository
       .createQueryBuilder('directory')
@@ -396,7 +394,6 @@ export class IndexingManager {
       insertV: [] as MediaDTO[], // insert video
     };
     const personsPerPhoto: { faces: { name: string, mediaId?: number }[]; mediaName: string }[] = [];
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < media.length; i++) {
       let mediaItem: MediaDTO = null;
       for (let j = 0; j < indexedMedia.length; j++) {
@@ -507,7 +504,6 @@ export class IndexingManager {
       .getMany();
 
     const faceToInsert: { person: { id: number }, media: { id: number } }[] = [];
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let i = 0; i < scannedFaces.length; i++) {
       // was the Person - media connection already indexed
       let face: PersonJunctionTable = null;

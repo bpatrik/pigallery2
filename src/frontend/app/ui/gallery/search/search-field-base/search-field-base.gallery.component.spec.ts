@@ -8,7 +8,7 @@ describe('GallerySearchFieldBaseComponent - autocomplete', () => {
   const item = (value: string): RenderableAutoCompleteItem => ({value, queryHint: value});
 
   const deferred = () => {
-    let resolve: (items: RenderableAutoCompleteItem[]) => void;
+    let resolve!: (items: RenderableAutoCompleteItem[]) => void;
     const promise = new Promise<RenderableAutoCompleteItem[]>((r) => resolve = r);
     return {promise, resolve};
   };

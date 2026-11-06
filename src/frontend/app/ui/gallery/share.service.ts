@@ -24,23 +24,23 @@ export class ShareService {
   public readonly UnknownSharingKey = {
     sharingKey: 'UnknownSharingKey'
   } as ResponseSharingDTO;
-  param: string = null;
-  queryParam: string = null;
-  public readonly sharingKey = signal<string>(null);
+  param: string | null = null;
+  queryParam: string | null = null;
+  public readonly sharingKey = signal<string | null>(null);
   // true once the router read the sharing key of the first navigation (it might be none)
   public readonly routeRecognized = signal(false);
   // true once the sharing key is known (from the route or from the session user)
   public readonly ready = signal(false);
   public ReadyPR: Promise<void>;
-  public readonly sharing = signal<ResponseSharingDTO>(null);
-  public readonly sharingIsValid = signal<boolean>(null);
+  public readonly sharing = signal<ResponseSharingDTO | null>(null);
+  public readonly sharingIsValid = signal<boolean | null>(null);
   // a stream, so it can be awaited until the sharing is loaded
   public currentSharing = toObservable(this.sharing)
     .pipe(filter((s) => s !== null))
     .pipe(distinctUntilChanged());
 
-  private resolve: () => void;
-  public readonly publicSharing = signal<PublicSharingDTO>(null);
+  private resolve: (() => void) | null = null;
+  public readonly publicSharing = signal<PublicSharingDTO | null>(null);
 
   constructor() {
     this.ReadyPR = new Promise((resolve: () => void) => {
@@ -53,11 +53,11 @@ export class ShareService {
     this.router.events.subscribe(async (val) => {
       if (val instanceof RoutesRecognized) {
         this.param =
-          val.state.root.firstChild.params[
+          val.state.root.firstChild?.params[
             QueryParams.gallery.sharingKey_params
             ] || null;
         this.queryParam =
-          val.state.root.firstChild.queryParams[
+          val.state.root.firstChild?.queryParams[
             QueryParams.gallery.sharingKey_query
             ] || null;
 
@@ -83,12 +83,12 @@ export class ShareService {
   }
 
 
-  onNewUser = async (user: UserDTO): Promise<void> => {
+  onNewUser = async (user: UserDTO | null): Promise<void> => {
     // if this is a sharing user or a logged-in user, get sharing key
-    if (user?.usedSharingKey || user?.role > UserRoles.LimitedGuest) {
+    if (user && (user.usedSharingKey || user.role > UserRoles.LimitedGuest)) {
       if (
-        (user?.usedSharingKey &&
-          user?.usedSharingKey !== this.sharingKey()) ||
+        (user.usedSharingKey &&
+          user.usedSharingKey !== this.sharingKey()) ||
         this.sharing() == null
       ) {
         this.sharingKey.set(user.usedSharingKey || this.getSharingKey());
@@ -125,7 +125,7 @@ export class ShareService {
 
   public createSharing(
     dir: string,
-    password: string,
+    password: string | null,
     valid: number,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
@@ -144,7 +144,7 @@ export class ShareService {
 
   public createSharingByQuery(
     searchQuery: SearchQueryDTO,
-    password: string,
+    password: string | null,
     valid: number,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
@@ -166,7 +166,7 @@ export class ShareService {
    */
   public createSharingByDirectory(
     directoryQuery: DirectorySearch,
-    password: string,
+    password: string | null,
     valid: number,
     defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
@@ -183,7 +183,7 @@ export class ShareService {
   public updateSharingByDirectory(
     sharingId: number,
     directoryQuery: DirectorySearch,
-    password: string,
+    password: string | null,
     valid: number,
     defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
@@ -202,7 +202,7 @@ export class ShareService {
    * Where the sharing should be opened: its default view, otherwise its search query or its directory.
    * Returns the router commands.
    */
-  public getDefaultRoute(sharing: ResponseSharingDTO): string[] {
+  public getDefaultRoute(sharing: ResponseSharingDTO | null | undefined): string[] | null {
     if (sharing?.defaultDirectoryView) {
       return ['/gallery', sharing.defaultDirectoryView];
     }
@@ -222,7 +222,7 @@ export class ShareService {
   public updateSharing(
     dir: string,
     sharingId: number,
-    password: string,
+    password: string | null,
     valid: number,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
@@ -243,7 +243,7 @@ export class ShareService {
   public updateSharingByQuery(
     sharingId: number,
     searchQuery: SearchQueryDTO,
-    password: string,
+    password: string | null,
     valid: number,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
@@ -261,7 +261,7 @@ export class ShareService {
     });
   }
 
-  public getSharingKey(): string {
+  public getSharingKey(): string | null {
     return this.sharingKey();
   }
 
@@ -316,7 +316,7 @@ export class ShareService {
    * It is only loaded on navigation when the sharing key changes, so it might not be loaded yet
    * (e.g.: the sharing key comes from the session user after a page reload).
    */
-  public async getPublicSharing(): Promise<PublicSharingDTO> {
+  public async getPublicSharing(): Promise<PublicSharingDTO | null> {
     if (this.publicSharing() === null) {
       await this.checkSharing();
     }

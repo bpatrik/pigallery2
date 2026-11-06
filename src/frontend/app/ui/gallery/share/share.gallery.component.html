@@ -8,10 +8,10 @@
 }
 
 @if (dropDownItem()) {
-  <a class="dropdown-item" (click)="openModal(shareModal)">
+  <button type="button" class="dropdown-item" (click)="openModal(shareModal)">
     <ng-icon name="ionShareSocialOutline" />
     <ng-container i18n>Share</ng-container>
-  </a>
+  </button>
 }
 
 <ng-template #shareModal>
@@ -151,14 +151,14 @@
 @if (activeShareRows().length > 0) {
   <div class="modal-footer">
     @if (!showSharingList) {
-      <a
+      <button type="button"
         (click)="showSharingList = true"
-        class="list-shares-button m-0">
+        class="list-shares-button btn btn-link p-0 m-0">
         <span class="badge text-bg-secondary me-1">{{ activeShareRows().length }}</span>
         <ng-container i18n>active share(s) for this folder.
       </ng-container>
         <ng-icon name="ionChevronForwardOutline" class="ms-1" />
-      </a>
+      </button>
     }
     @if (showSharingList) {
       <table class="table table-hover table-sm">
@@ -189,12 +189,12 @@
               </td>
               <td>{{ row.recursive ? text.Yes : text.No }}</td>
               @if (IsAdmin) {
-                <td>{{share.creator.name}}</td>
+                <td>{{share.creator?.name}}</td>
               }
               <td>{{share.expires | date}}</td>
               <td>
                 <button (click)="deleteSharing(share)"
-                  [disabled]="share.sharingKey == sharing()?.sharingKey"
+                  [disabled]="share.sharingKey === sharing()?.sharingKey"
                   class="btn btn-danger float-end">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>

@@ -15,7 +15,7 @@ export class SearchQueryParserService {
     return this.parser.parse(str);
   }
 
-  stringify(query: SearchQueryDTO): string {
+  stringify(query: SearchQueryDTO | null | undefined): string {
     return this.parser.stringify(SearchQueryUtils.stripDefault(query));
   }
 }

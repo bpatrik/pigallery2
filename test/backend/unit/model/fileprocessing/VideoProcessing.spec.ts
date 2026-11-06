@@ -9,7 +9,6 @@ import {TestHelper} from '../../../../TestHelper';
 describe('VideoProcessing', () => {
   before(TestHelper.resetConfig);
 
-  /* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
   it('should generate converted file path', async () => {
 
     ProjectPath.ImageFolder = path.join(__dirname, './../../../assets');

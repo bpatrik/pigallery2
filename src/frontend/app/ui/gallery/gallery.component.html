@@ -41,7 +41,7 @@
       }
       @if (!ContentWrapper.error && (ContentWrapper.searchResult || ContentWrapper.directory)) {
         <!-- Show search result overflow -->
-        @if (ContentWrapper.searchResult && ContentWrapper.searchResult.resultOverflow == true) {
+        @if (ContentWrapper.searchResult && ContentWrapper.searchResult.resultOverflow === true) {
           <div class="alert alert-info" role="alert"
             i18n>
         Too many results to show. Refine your search.
@@ -70,13 +70,13 @@
             }
           </div>
         }
-        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups" />
+        <app-gallery-grid [mediaGroups]="directoryContent()?.mediaGroups ?? []" />
       }
     </div>
   }
 
   @if (ContentWrapper && ((!ContentWrapper.directory ||
-    ContentWrapper.directory.isPartial == true)
+    ContentWrapper.directory.isPartial === true)
     && !ContentWrapper.searchResult
     && !ContentWrapper.error)) {
     <div body class="container spinner-container"

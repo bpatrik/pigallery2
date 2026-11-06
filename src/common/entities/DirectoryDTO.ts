@@ -67,7 +67,7 @@ export interface SubDirectoryDTO<S extends FileDTO = MediaDTO>
 
 export const DirectoryDTOUtils = {
   addReferences: (dir: DirectoryBaseDTO): void => {
-    dir.media.forEach((media: MediaDTO) => {
+    dir.media?.forEach((media: MediaDTO) => {
       media.directory = dir;
     });
 
@@ -97,25 +97,30 @@ export const DirectoryDTOUtils = {
       dir.cache.cover = Utils.clone(dir.cache.cover);
     }
 
+    // The back references would make the JSON circular. They are null only on the wire:
+    // addReferences sets them again, so the DTO types keep them non-null.
+    const noReference = null as unknown as ParentDirectoryDTO;
     if (dir.media) {
       dir.media.forEach((media: MediaDTO) => {
-        media.directory = null;
+        media.directory = noReference;
       });
     }
 
     if (dir.metaFile) {
       dir.metaFile.forEach((file: FileDTO) => {
-        file.directory = null;
+        file.directory = noReference;
       });
     }
     if (dir.directories) {
       dir.directories.forEach((directory) => {
         DirectoryDTOUtils.removeReferences(directory);
-        directory.parent = null;
+        directory.parent = noReference;
       });
     }
 
-    delete dir.cache.valid; // should not go to the client side;
+    if (dir.cache) {
+      delete dir.cache.valid; // should not go to the client side;
+    }
 
     return dir;
   },

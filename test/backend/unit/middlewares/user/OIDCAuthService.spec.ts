@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import {expect} from 'chai';
 import {OIDCAuthService} from '../../../../../src/backend/middlewares/user/OIDCAuthService';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
@@ -239,7 +238,7 @@ describe('OIDCAuthService', () => {
       const tokenSet = createTokenSet({sub: '123'});
       const client = createClient(tokenSet, {sub: '123', preferred_username: 'alice', email: 'alice@example.com'});
 
-      const {req, user} = await getUser(client);
+      const {user} = await getUser(client);
 
       expect(foundUserNames).to.deep.equal(['alice']);
       expect(user.name).to.equal('alice');

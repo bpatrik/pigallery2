@@ -4,7 +4,7 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {CountedNotificationDTO, NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
 import {NavigationService} from '../../model/navigation.service';
-import { ViewportScroller, JsonPipe, DatePipe } from '@angular/common';
+import {ViewportScroller, DatePipe} from '@angular/common';
 import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
@@ -54,7 +54,7 @@ export class AdminComponent implements OnInit {
   readonly settingsComponents = viewChildren<ISettingsComponent>('setting');
   readonly settingsComponentsElemRef = viewChildren('setting', { read: ElementRef });
   // the server notifications with their alert class and readable details
-  readonly notificationRows = computed((): { notification: CountedNotificationDTO; css: string; details: string }[] =>
+  readonly notificationRows = computed((): { notification: CountedNotificationDTO; css: string; details: string | null }[] =>
     this.notificationService.countedNotifications().map(notification => ({
       notification,
       css: this.getCss(notification.type),
@@ -77,7 +77,7 @@ export class AdminComponent implements OnInit {
   ngOnInit(): void {
     if (
       !this.authService.isAuthenticated() ||
-      this.authService.user().role < UserRoles.Admin
+      !this.authService.isAuthorized(UserRoles.Admin)
     ) {
       this.navigation.toLogin();
       return;

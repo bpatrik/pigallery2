@@ -1,7 +1,7 @@
 <div class="imgContainer" #imgContainer>
   @for (item of mediaItems(); track item.key) {
     @if (showThumbnail()) {
-      <img
+      <img [alt]="gridMedia()?.media.name"
         [style.width.%]="imageSize().width"
         [style.height.%]="imageSize().height"
         [style.transform]="imageTransform()"
@@ -14,7 +14,7 @@
         [style.height.%]="imageSize().height"
         [style.transform]="imageTransform()"
         [src]="photoSrc()"
-        [alt]="gridMedia().media.name"
+        [alt]="gridMedia()?.media?.name"
         (load)="onImageLoad()"
         (error)="onImageError()"
         #image/>
@@ -34,7 +34,7 @@
           #liveVideo>
           <source [src]="liveVideoSrc()" (error)="onSourceError()">
         </video>
-        <div class="live-photo-badge"
+        <button type="button" class="live-photo-badge"
           [class.active]="liveVideoPlaying()"
           (mouseenter)="startLiveVideo()"
           (mouseleave)="stopLiveVideo()"
@@ -43,7 +43,7 @@
           (touchcancel)="stopLiveVideo()"
           (click)="toggleLiveVideo()">
           LIVE
-        </div>
+        </button>
       </div>
     }
 

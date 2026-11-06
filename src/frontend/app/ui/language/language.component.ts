@@ -22,12 +22,12 @@ export class LanguageComponent {
   private navigationService = inject(NavigationService);
 
   languages: string[] = [];
-  current: string = null;
+  current: string | null = null;
 
   readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
 
   constructor() {
-    this.languages = Config.Server.languages.sort();
+    this.languages = (Config.Server.languages ?? []).sort();
     if (CookieHelper.get(CookieNames.lang) != null) {
       this.current = CookieHelper.get(CookieNames.lang);
     }

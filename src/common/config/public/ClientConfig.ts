@@ -63,7 +63,7 @@ export enum LightBoxTitleTexts {
 
 }
 
-export type TAGS = {
+export interface TAGS {
   client?: true,
   priority?: ConfigPriority,
   name?: string,
@@ -82,15 +82,15 @@ export type TAGS = {
   uiDisabled?: (subConfig: any, config: ClientConfig) => boolean
   uiJob?: {
     job: string,
-    hideProgress: boolean,
+    hideProgress?: boolean,
     relevant?: (c: ClientConfig) => boolean,
-    description: string
+    description?: string
   }[],
   uiResetNeeded?: {
     server?: boolean,
     db?: boolean
   }
-};
+}
 
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class AutoCompleteItemsPerCategoryConfig {
@@ -521,7 +521,7 @@ export class ClientMapConfig {
   @ConfigProperty<boolean, ClientConfig, TAGS>({
     type: 'boolean',
     onNewValue: (value, config) => {
-      if (value === false) {
+      if (value === false && config) {
         config.MetaFile.gpx = false;
       }
     },
@@ -1105,7 +1105,7 @@ export class ThemeConfig {
     } as TAGS,
     description: $localize`Name of the theme`
   })
-  name: string;
+  name: string | undefined;
   @ConfigProperty({
     type: 'string',
     tags: {
@@ -1113,7 +1113,7 @@ export class ThemeConfig {
     } as TAGS,
     description: $localize`Adds these css settings as it is to the end of the body tag of the page.`
   })
-  theme: string;
+  theme: string | undefined;
 
   constructor(name?: string, theme?: string) {
     this.name = name;
@@ -1420,8 +1420,8 @@ export class ClientPhotoConfig {
   /**
    * Generates a map for bitwise operation from icon and normal thumbnails
    */
-  generateThumbnailMap(): { [key: number]: number } {
-    const m: { [key: number]: number } = {};
+  generateThumbnailMap(): Record<number, number> {
+    const m: Record<number, number> = {};
     [this.iconSize, ...this.thumbnailSizes.sort()].forEach((v, i) => {
       m[v] = Math.pow(2, i + 1);
     });

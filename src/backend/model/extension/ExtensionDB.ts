@@ -8,7 +8,7 @@ export class ExtensionDB implements IExtensionDB {
   constructor(private readonly extLogger: ILogger) {
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   _getAllTables(): Function[] {
     return SQLConnection.getEntries();
   }
@@ -17,7 +17,7 @@ export class ExtensionDB implements IExtensionDB {
     return SQLConnection.getConnection();
   }
 
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   async setExtensionTables(tables: Function[]): Promise<void> {
     this.extLogger.debug('Adding ' + tables?.length + ' extension tables to DB');
     await SQLConnection.addEntries(tables);

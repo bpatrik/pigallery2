@@ -25,7 +25,7 @@ export class ExtensionInstallerComponent {
   public readonly error = signal<string | null>(null);
 
   public openExtensionsModal(): void {
-    this.extensionsModal().show();
+    this.extensionsModal()?.show();
     this.loadExtensions();
   }
 

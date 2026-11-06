@@ -20,7 +20,6 @@ chai.use(chaiHttp);
 
 // to help WebStorm to handle the test cases
 declare let describe: any;
-declare const after: any;
 declare const it: any;
 declare global {
   export interface Object {

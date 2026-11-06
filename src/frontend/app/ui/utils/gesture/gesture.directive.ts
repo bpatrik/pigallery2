@@ -44,13 +44,14 @@ export class GestureDirective implements OnDestroy {
   readonly pinch = output<PinchEvent>();
 
   private pointers = new Map<number, Point>();
-  private start: Point & { time: number } = null;
+  // where the first pointer went down; set whenever a pointer is down
+  private start: Point & { time: number } = {x: 0, y: 0, time: 0};
   // A second pointer joined: this gesture is a pinch, so no more pan, swipe or tap until every pointer is up.
   private multiTouch = false;
   private panning = false;
   private pinchStartDistance = 0;
   private pinchScale = 1;
-  private lastTap: Point & { time: number } = null;
+  private lastTap: Point & { time: number } | null = null;
 
   ngOnDestroy(): void {
     this.listen(false);
@@ -168,6 +169,9 @@ export class GestureDirective implements OnDestroy {
   // Movement of the first pointer since the gesture started
   private delta(): Point {
     const p = this.pointers.values().next().value;
+    if (!p) {
+      return {x: 0, y: 0};
+    }
     return {x: p.x - this.start.x, y: p.y - this.start.y};
   }
 

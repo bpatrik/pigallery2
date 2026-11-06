@@ -30,15 +30,15 @@ export class AlbumComponent implements OnInit, OnDestroy {
   private albumService = inject(AlbumsService);
   authenticationService = inject(AuthenticationService);
 
-  readonly album = input<AlbumBaseDTO>(undefined);
-  readonly size = input<number>(undefined);
+  readonly album = input.required<AlbumBaseDTO>();
+  readonly size = input.required<number>();
   public readonly svgIcon = Config.Server.svgIcon;
 
-  public thumbnail: Thumbnail = null;
+  public thumbnail: Thumbnail | null = null;
 
-  public readonly canUpdate = computed((): boolean => this.authenticationService.user().role >= UserRoles.Admin);
+  public readonly canUpdate = computed((): boolean => this.authenticationService.isAuthorized(UserRoles.Admin));
 
-  public readonly routerLink = computed((): string[] => {
+  public readonly routerLink = computed((): string[] | null => {
     const savedSearch = this.album() as SavedSearchDTO;
     if (savedSearch && !!savedSearch.searchQuery) {
       return ['/search', SearchQueryUtils.urlify(savedSearch.searchQuery)];

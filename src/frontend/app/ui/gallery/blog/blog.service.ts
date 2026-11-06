@@ -13,14 +13,14 @@ export class BlogService {
   private networkService = inject(NetworkService);
   private galleryService = inject(ContentService);
 
-  private cache: { [key: string]: string } = {};
+  private cache: Record<string, string> = {};
   // loads the markdown files of the content; a newer content cancels the older load
   private readonly markdownResource = resource({
     params: () => this.galleryService.sortedFilteredContent() ?? undefined,
     loader: ({params: content}) => this.loadMarkdowns(content)
   });
   // keeps the last loaded markdowns (that were read) while the next ones load; undefined until the first load
-  public readonly groupedMarkdowns = linkedSignal<GroupedMarkdown[], GroupedMarkdown[]>({
+  public readonly groupedMarkdowns = linkedSignal<GroupedMarkdown[] | undefined, GroupedMarkdown[] | undefined>({
     source: () => this.markdownResource.hasValue() ? this.markdownResource.value() : undefined,
     computation: (markdowns, previous) => markdowns ?? previous?.value
   });
@@ -46,7 +46,7 @@ export class BlogService {
    * The markdowns of a date group. Without a date, the ones that go to the top.
    * Undefined while the markdowns are not loaded.
    */
-  getMarkDowns(date: Date): GroupedMarkdown[] {
+  getMarkDowns(date?: Date): GroupedMarkdown[] | undefined {
     const markdowns = this.groupedMarkdowns();
     if (!markdowns) {
       return undefined;
@@ -159,7 +159,7 @@ export class BlogService {
    * @param markdown The raw markdown content
    * @private
    */
-  private parseMarkdownSections(markdown: string): Array<{ date: Date | null; text: string }> {
+  private parseMarkdownSections(markdown: string): { date: Date | null; text: string }[] {
     const splitterRgx = /^\s*<!--\s*@pg-date:?\s*\d{4}-\d{1,2}-\d{1,2}\s*-->/gim;
     const dateRgx = /\d{4}-\d{1,2}-\d{1,2}/;
 
@@ -171,7 +171,7 @@ export class BlogService {
       return text ? [{date: null, text}] : [];
     }
 
-    const sections: Array<{ date: Date | null; text: string }> = [];
+    const sections: { date: Date | null; text: string }[] = [];
 
     // Extract the section before the first date tag (if any)
     const preFirstTagText = this.removeComments(markdown.substring(0, matches[0].index));
@@ -256,7 +256,7 @@ export class BlogService {
    * @private
    */
   private groupSectionsByDate(
-    sections: Array<{ date: Date | null; text: string }>,
+    sections: { date: Date | null; text: string }[],
     file: MDFileDTO,
     sortedDates: number[],
     firstMedia: number

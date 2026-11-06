@@ -20,7 +20,7 @@
         <ol class="mb-0 mt-1 breadcrumb">
           <li class="active">
             <ng-container i18n>Searching for:</ng-container>
-            <strong> {{contentLoaderService.content()?.searchResult?.searchQuery | searchQuery}}</strong>
+            <strong> {{contentLoaderService.content().searchResult?.searchQuery | searchQuery}}</strong>
           </li>
         </ol>
       }
@@ -52,13 +52,13 @@
         <div class="divider">&nbsp;</div>
       }
       @if (itemCount()> 0) {
-        <a class="btn btn-outline-secondary btn-navigator"
+        <button type="button" class="btn btn-outline-secondary btn-navigator"
           [class.btn-secondary]="filterService.filteredContent().filters.areFiltersActive"
           [class.btn-outline-secondary]="!filterService.filteredContent().filters.areFiltersActive"
           (click)="toggleFilters()">
           <ng-icon name="ionFunnelOutline"
           title="Filters" i18n-title />
-        </a>
+        </button>
         <div class="divider">&nbsp;</div>
       }
       <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
@@ -102,34 +102,34 @@
 
             <div class="row">
               @for (type of sortingByTypes; track type) {
-                <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                  [class.active]="sortingService.sorting().method == type.key"
+                <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                  [class.active]="sortingService.sorting().method === type.key"
                   (click)="setSortingBy(type.key)">
-                  <div class="me-2 d-inline-block">
+                  <span class="me-2 d-inline-block">
                     <app-sorting-method-icon [method]="type.key" />
-                  </div>
-                  <div class="d-inline-block">{{type.key | stringifySorting}}</div>
-                </div>
+                  </span>
+                  <span class="d-inline-block">{{type.key | stringifySorting}}</span>
+                </button>
               }
 
               @if (isDirectionalSorting()) {
                 <hr>
-                  <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                    [class.active]="sortingService.sorting().ascending == true"
+                  <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                    [class.active]="sortingService.sorting().ascending === true"
                     (click)="setSortingAscending(true)">
-                    <div class="me-2 d-inline-block">
+                    <span class="me-2 d-inline-block">
                       <ng-icon name="ionArrowUpOutline" />
-                    </div>
-                    <div class="d-inline-block" i18n>ascending</div>
-                  </div>
-                  <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                    [class.active]="sortingService.sorting().ascending == false"
+                    </span>
+                    <span class="d-inline-block" i18n>ascending</span>
+                  </button>
+                  <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                    [class.active]="sortingService.sorting().ascending === false"
                     (click)="setSortingAscending(false)">
-                    <div class="me-2 d-inline-block">
+                    <span class="me-2 d-inline-block">
                       <ng-icon name="ionArrowDownOutline" />
-                    </div>
-                    <div class="d-inline-block" i18n>descending</div>
-                  </div>
+                    </span>
+                    <span class="d-inline-block" i18n>descending</span>
+                  </button>
                 }
               </div>
             </div>
@@ -137,33 +137,33 @@
               <h6 class="ps-2" i18n>Grouping</h6>
               <div class="row">
                 @for (type of groupingByTypes; track type) {
-                  <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                    [class.active]="sortingService.grouping().method == type.key"
+                  <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                    [class.active]="sortingService.grouping().method === type.key"
                     (click)="setGroupingBy(type.key)">
-                    <div class="me-2 d-inline-block">
+                    <span class="me-2 d-inline-block">
                       <app-sorting-method-icon [method]="type.key" />
-                    </div>
-                    <div class="d-inline-block">{{type.key | stringifySorting}}</div>
-                  </div>
+                    </span>
+                    <span class="d-inline-block">{{type.key | stringifySorting}}</span>
+                  </button>
                 }
                 @if (isDirectionalGrouping()) {
                   <hr>
-                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                      [class.active]="sortingService.grouping().ascending == true"
+                    <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                      [class.active]="sortingService.grouping().ascending === true"
                       (click)="setGroupingAscending(true)">
-                      <div class="me-2 d-inline-block">
+                      <span class="me-2 d-inline-block">
                         <ng-icon name="ionArrowUpOutline" />
-                      </div>
-                      <div class="d-inline-block" i18n>ascending</div>
-                    </div>
-                    <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                      [class.active]="sortingService.grouping().ascending == false"
+                      </span>
+                      <span class="d-inline-block" i18n>ascending</span>
+                    </button>
+                    <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                      [class.active]="sortingService.grouping().ascending === false"
                       (click)="setGroupingAscending(false)">
-                      <div class="me-2 d-inline-block">
+                      <span class="me-2 d-inline-block">
                         <ng-icon name="ionArrowDownOutline" />
-                      </div>
-                      <div class="d-inline-block" i18n>descending</div>
-                    </div>
+                      </span>
+                      <span class="d-inline-block" i18n>descending</span>
+                    </button>
                   }
                 </div>
               </div>
@@ -184,14 +184,14 @@
             role="menu" aria-labelledby="button-alignment">
             <h6 class="ps-2" i18n>Grid size</h6>
             @for (type of gridSizes; track type) {
-              <div class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
-                [class.active]="navigatorService.girdSize() == type.key"
+              <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                [class.active]="navigatorService.girdSize() === type.key"
                 (click)="navigatorService.setGridSize(type.key)">
-                <div class="me-2 d-inline-block">
+                <span class="me-2 d-inline-block">
                   <app-grid-size-icon [method]="type.key" />
-                </div>
-                <div class="d-inline-block">{{type.key | stringifyGridSize}}</div>
-              </div>
+                </span>
+                <span class="d-inline-block">{{type.key | stringifyGridSize}}</span>
+              </button>
             }
 
           </div>

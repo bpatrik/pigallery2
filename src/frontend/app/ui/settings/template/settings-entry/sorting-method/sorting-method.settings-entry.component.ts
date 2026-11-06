@@ -41,9 +41,7 @@ export class SortingMethodSettingsEntryComponent
   implements ControlValueAccessor, Validator, OnInit {
   private notificationService = inject(NotificationService);
 
-  readonly sortingByEnum = input<Record<string, number | string> & {
-    [k: number]: string;
-}>(undefined);
+  readonly sortingByEnum = input<Record<string, number | string> & Record<number, string>>();
 
   /**
    * The edited value (part of the settings tree), it is changed in place.
@@ -52,13 +50,13 @@ export class SortingMethodSettingsEntryComponent
   /**
    * A copy of the model for the view, replaced on every change.
    */
-  public readonly sortingMethod = signal<SortingMethod>(undefined);
+  public readonly sortingMethod = signal<SortingMethod | undefined>(undefined);
   public readonly isBidirectional = computed<boolean>(() =>
     this.isBidirectionalMethod(this.sortingMethod()?.method));
   public sortingByTypes: { key: number; value: string }[] = [];
 
   ngOnInit(): void {
-    this.sortingByTypes = enumToTranslatedArray(this.sortingByEnum());
+    this.sortingByTypes = enumToTranslatedArray(this.sortingByEnum() ?? {});
   }
 
   public onTouched(): void {
@@ -87,8 +85,8 @@ export class SortingMethodSettingsEntryComponent
     return {required: true};
   }
 
-  private isBidirectionalMethod(value: number): boolean {
-    return Utils.isValidEnumInt(SortByDirectionalTypes, value);
+  private isBidirectionalMethod(value: number | undefined): boolean {
+    return value !== undefined && Utils.isValidEnumInt(SortByDirectionalTypes, value);
   }
 
   private updateView(): void {
@@ -114,7 +112,6 @@ export class SortingMethodSettingsEntryComponent
     this.onChange();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private propagateChange = (_: SortingMethod): void => {
     //ignoring
   };

@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
 import {PersonDTO} from '../../../../common/entities/PersonDTO';
-import {SortByDirectionalTypes, type SortingMethod} from '../../../../common/entities/SortingMethods';
+import {type SortingMethod} from '../../../../common/entities/SortingMethods';
 import {Config} from '../../../../common/config/public/Config';
 
 @Injectable({providedIn: 'root'})

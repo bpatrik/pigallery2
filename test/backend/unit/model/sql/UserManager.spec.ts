@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-expressions,@typescript-eslint/no-unused-expressions */
 import * as chai from 'chai';
 import {expect} from 'chai';
 import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';

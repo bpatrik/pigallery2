@@ -24,11 +24,11 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   private thumbnailService = inject(ThumbnailManagerService);
   queryService = inject(QueryService);
 
-  readonly directory = input<SubDirectoryDTO>(undefined);
-  readonly size = input<number>(undefined);
-  thumbnail: Thumbnail = null;
+  readonly directory = input.required<SubDirectoryDTO>();
+  readonly size = input.required<number>();
+  thumbnail: Thumbnail | null = null;
 
-  public get SamplePhoto(): CoverPhotoDTO {
+  public get SamplePhoto(): CoverPhotoDTO | undefined {
     return this.directory().cache?.cover;
   }
 
@@ -47,9 +47,10 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (this.directory().cache?.cover) {
+    const cover = this.SamplePhoto;
+    if (cover) {
       this.thumbnail = this.thumbnailService.getThumbnail(
-          new Media(this.SamplePhoto, this.size(), this.size())
+          new Media(cover, this.size(), this.size())
       );
     }
   }

@@ -73,31 +73,34 @@ export class ToastContainerComponent {
     cancel();
   }
 
-  onCloseGroup(event: Event, group: string): void {
+  onCloseGroup(event: Event, group: string | undefined): void {
     event.stopPropagation();
-    this.toastService.dismissGroup(group);
+    if (group) {
+      this.toastService.dismissGroup(group);
+    }
   }
 
   private buildStack(toasts: Toast[], summaryFirst: boolean): ToastEntry[] {
     const entries: ToastEntry[] = [];
     const doneGroups = new Set<string>();
     for (const toast of toasts) {
-      const group = toast.group && this.toastService.getGroup(toast.group);
-      if (!group) {
+      const groupName = toast.group;
+      const group = groupName && this.toastService.getGroup(groupName);
+      if (!groupName || !group) {
         entries.push(this.toastEntry(toast));
         continue;
       }
-      if (doneGroups.has(toast.group)) {
+      if (doneGroups.has(groupName)) {
         continue;
       }
-      doneGroups.add(toast.group);
+      doneGroups.add(groupName);
       // the whole group goes where its first toast is
       const members = toasts.filter((t) => t.group === toast.group);
       if (members.length <= group.collapseAfter) {
         entries.push(...members.map((t) => this.toastEntry(t)));
         continue;
       }
-      const expanded = this.toastService.isExpanded(toast.group);
+      const expanded = this.toastService.isExpanded(groupName);
       const visible = expanded ? members : members.slice(0, group.visibleWhenCollapsed);
       const hidden = expanded ? [] : members.slice(group.visibleWhenCollapsed);
       const groupSummary = group.summary(members, hidden, expanded);

@@ -61,7 +61,7 @@ export interface ToastGroup {
 }
 
 interface Timer {
-  handle: number;
+  handle: number | null;
   deadline: number;
   remaining: number;
 }
@@ -93,7 +93,7 @@ export class ToastService {
     this.groups.set(name, group);
   }
 
-  getGroup(name: string): ToastGroup {
+  getGroup(name: string): ToastGroup | undefined {
     return this.groups.get(name);
   }
 
@@ -101,7 +101,10 @@ export class ToastService {
     if (!this.authService.isAuthenticated()) {
       return {
         update: (): void => {
-        }, close: (): void => {
+          // nothing is shown, so there is nothing to update
+        },
+        close: (): void => {
+          // nothing is shown, so there is nothing to close
         }
       };
     }
@@ -121,7 +124,7 @@ export class ToastService {
   }
 
   update(id: number, changes: Partial<ToastOptions>): void {
-    let updated: Toast = null;
+    let updated: Toast | null = null;
     this.toasts.update((toasts) => toasts.map((t) => {
       if (t.id !== id) {
         return t;
@@ -145,7 +148,7 @@ export class ToastService {
   }
 
   clear(): void {
-    this.timers.forEach((t) => clearTimeout(t.handle));
+    this.timers.forEach((t) => clearTimeout(t.handle ?? undefined));
     this.timers.clear();
     this.toasts.set([]);
     this.expandedGroups.set([]);
@@ -157,7 +160,7 @@ export class ToastService {
     if (!timer || timer.handle === null) {
       return;
     }
-    clearTimeout(timer.handle);
+    clearTimeout(timer.handle ?? undefined);
     timer.handle = null;
     timer.remaining = timer.deadline - Date.now();
   }
@@ -174,7 +177,10 @@ export class ToastService {
     return this.expandedGroups().includes(group);
   }
 
-  toggleGroup(group: string): void {
+  toggleGroup(group: string | undefined): void {
+    if (!group) {
+      return;
+    }
     this.expandedGroups.update((groups) =>
       groups.includes(group) ? groups.filter((g) => g !== group) : [...groups, group]);
   }
@@ -196,7 +202,7 @@ export class ToastService {
   private stopTimer(id: number): void {
     const timer = this.timers.get(id);
     if (timer) {
-      clearTimeout(timer.handle);
+      clearTimeout(timer.handle ?? undefined);
       this.timers.delete(id);
     }
   }

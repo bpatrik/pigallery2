@@ -10,6 +10,6 @@ import { NgIconComponent } from '@ng-icons/core';
     imports: [NgIconComponent]
 })
 export class SortingMethodIconComponent {
-  readonly method = input<number>(undefined);
+  readonly method = input<number>();
   public readonly GroupSortByTypes = GroupSortByTypes;
 }

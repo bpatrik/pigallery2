@@ -64,7 +64,7 @@ export class GalleryNavigatorComponent {
   public readonly SearchQueryTypes = SearchQueryTypes;
   public showFilters = false;
   // the filters fill the screen below the navigator; measured when they open and on scroll or resize
-  public readonly filterMaxHeight = signal<string>(null);
+  public readonly filterMaxHeight = signal<string | null>(null);
   readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
   readonly navigatorElement = viewChild('navigator', { read: ElementRef });
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
@@ -89,7 +89,7 @@ export class GalleryNavigatorComponent {
       name = c.directory.name;
     } else {
       // Handle exact directory search
-      const searchQuery = c?.searchResult.searchQuery as TextSearch;
+      const searchQuery = c?.searchResult?.searchQuery as TextSearch;
       path = searchQuery.value.replace(/^\.\//, ''); // Remove leading ./ if present
       const lastSlashIndex = path.lastIndexOf('/');
       if (lastSlashIndex !== -1) {
@@ -122,7 +122,7 @@ export class GalleryNavigatorComponent {
         return availableParents[index] === true;
       }
       // without a user (e.g. while logging out) no parent is available
-      return user?.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
+      return !!user && user.role > UserRoles.LimitedGuest; // it's basically a sharing. they should not just navigate wherever
     };
 
     // create root link
@@ -157,7 +157,7 @@ export class GalleryNavigatorComponent {
     return arr;
   });
 
-  private readonly parentPath = computed((): string => {
+  private readonly parentPath = computed((): string | null => {
     const arr = this.routes();
     return arr.length >= 2 ? arr[arr.length - 2].route : null;
   });
@@ -182,11 +182,11 @@ export class GalleryNavigatorComponent {
 
   public readonly itemCount = computed((): number => {
     const c = this.contentLoaderService.content();
-    return c?.directory
-      ? c?.directory.cache?.mediaCount
+    return (c?.directory
+      ? c.directory.cache?.mediaCount
       : c?.searchResult
-        ? c?.searchResult?.media?.length
-        : 0;
+        ? c.searchResult.media?.length
+        : 0) ?? 0;
   });
 
   public readonly isDefaultSortingAndGrouping = computed((): boolean =>
@@ -219,7 +219,7 @@ export class GalleryNavigatorComponent {
       return;
     }
 
-    this.sortingService.setGrouping(s);
+    this.sortingService.setGrouping({method: s.method, ascending: s.ascending ?? true}); // directional, so it has a direction
   }
 
   setSortingAscending(asc: boolean) {
@@ -244,7 +244,7 @@ export class GalleryNavigatorComponent {
   }
 
 
-  public readonly downloadZipLink = computed((): string => {
+  public readonly downloadZipLink = computed((): string | null => {
     const c = this.contentLoaderService.content();
     if (!c) {
       return null;
@@ -277,7 +277,7 @@ export class GalleryNavigatorComponent {
     );
   });
 
-  public readonly directoryFlattenSearchQuery = computed((): string => {
+  public readonly directoryFlattenSearchQuery = computed((): string | null => {
     const c = this.contentLoaderService.content();
     if (!c.directory) {
       return null;
@@ -316,7 +316,7 @@ export class GalleryNavigatorComponent {
       //hide delay
       if (this.lastScroll.up < scrollPosition - window.innerHeight * Config.Gallery.NavBar.NavbarHideDelay) {
         this.showFilters = false;
-        this.dropdown().hide();
+        this.dropdown()?.hide();
       }
       this.lastScroll.down = scrollPosition;
     } else if (this.lastScroll.any > scrollPosition) {
@@ -350,6 +350,6 @@ export class GalleryNavigatorComponent {
 
 interface NavigatorPath {
   name: string;
-  route: string;
+  route: string | null;
   title?: string;
 }

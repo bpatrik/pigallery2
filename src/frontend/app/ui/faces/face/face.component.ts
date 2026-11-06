@@ -26,15 +26,14 @@ export class FaceComponent implements OnInit, OnDestroy {
   private faceService = inject(FacesService);
   authenticationService = inject(AuthenticationService);
 
-  readonly person = input<PersonDTO>(undefined);
-  readonly size = input<number>(undefined);
+  readonly person = input.required<PersonDTO>();
+  readonly size = input.required<number>();
 
-  public thumbnail: PersonThumbnail = null;
+  public thumbnail: PersonThumbnail | null = null;
   public searchQueryDTOstr: string;
 
   public readonly canUpdate = computed((): boolean =>
-    this.authenticationService.user().role >=
-    Config.Faces.writeAccessMinRole
+    this.authenticationService.isAuthorized(Config.Faces.writeAccessMinRole)
   );
 
   ngOnInit(): void {

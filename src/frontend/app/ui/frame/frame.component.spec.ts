@@ -53,7 +53,8 @@ describe('FrameComponent', () => {
         {
           provide: AuthenticationService, useValue: {
             user: signal<UserDTO>({name: 'admin', role: UserRoles.Admin} as UserDTO),
-            isAdmin: signal(true)
+            isAdmin: signal(true),
+            isAuthorized: (): boolean => true // an admin
           }
         },
         {provide: NotificationService, useValue: {}},
@@ -89,7 +90,7 @@ describe('FrameComponent', () => {
 
   it('should link and mark the search link active only for its own search', () => {
     const searchUrl = SearchQueryUtils.urlify(searchQuery);
-    expect(component.navbarLinkItems().find((i) => i.link.name === 'Balaton').searchUrl).toBe(searchUrl);
+    expect(component.navbarLinkItems().find((i) => i.link.name === 'Balaton')!.searchUrl).toBe(searchUrl);
 
     // it compares the full (not the urlified) query of the url
     url.set('/search/' + encodeURIComponent(JSON.stringify(searchQuery)));
@@ -110,7 +111,8 @@ describe('FrameComponent template', () => {
         {
           provide: AuthenticationService, useValue: {
             user: signal<UserDTO>({name: 'Árvíztűrő Tükörfúrógép', role: UserRoles.Admin} as UserDTO),
-            isAdmin: signal(true)
+            isAdmin: signal(true),
+            isAuthorized: (): boolean => true // an admin
           }
         },
         {provide: NotificationService, useValue: {numberOfNotifications: 0}},

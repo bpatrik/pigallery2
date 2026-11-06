@@ -65,28 +65,29 @@
     </div>
   </div>
   @if (isLivePhoto()) {
+    @let liveVideoInfo = media().liveVideoInfo;
     <div class="row pt-0" title="Companion video" i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionVideocamOutline" title="Live Photo video" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main" title="Video filename" i18n-title>
-          {{ media().liveVideoInfo?.name }}
+          {{ liveVideoInfo?.name }}
         </div>
         <div class="details-sub text-secondary row">
-          @if (media().liveVideoInfo?.size) {
+          @if (liveVideoInfo?.size) {
             <div class="col-4" title="Video dimensions in pixels"
-              i18n-title>{{ media().liveVideoInfo.size.width }} x {{ media().liveVideoInfo.size.height }}
+              i18n-title>{{ liveVideoInfo.size.width }} x {{ liveVideoInfo.size.height }}
             </div>
           }
-          @if (media().liveVideoInfo?.fileSize) {
+          @if (liveVideoInfo?.fileSize) {
             <div class="col-4" title="Video file size on disk"
-              i18n-title>{{ media().liveVideoInfo.fileSize | fileSize }}
+              i18n-title>{{ liveVideoInfo.fileSize | fileSize }}
             </div>
           }
-          @if (media().liveVideoInfo?.duration) {
+          @if (liveVideoInfo?.duration) {
             <div class="col-4" title="Video duration"
-              i18n-title>{{ media().liveVideoInfo.duration | duration }}
+              i18n-title>{{ liveVideoInfo.duration | duration }}
             </div>
           }
         </div>
@@ -122,7 +123,7 @@
   }
 
 
-  @if (videoData() && (videoData().duration || videoData().bitRate)) {
+  @if (videoInfo(); as video) {
     <div class="row" title="Video technical information"
       i18n-title>
       <div class="col-1 ps-0">
@@ -133,21 +134,21 @@
           {{ "Video" }}
         </div>
         <div class="details-sub  text-secondary row">
-          @if (videoData().duration) {
+          @if (video.duration) {
             <div class="col-6" title="How long the video is" i18n-title>
               <ng-container i18n>duration</ng-container>
-              : {{ videoData().duration | duration }}
+              : {{ video.duration | duration }}
             </div>
           }
-          @if (videoData().fps) {
+          @if (video.fps) {
             <div class="col-6" title="Frames per second - video smoothness" i18n-title>
-              fps: {{ videoData().fps }}/s
+              fps: {{ video.fps }}/s
             </div>
           }
-          @if (videoData().bitRate) {
+          @if (video.bitRate) {
             <div class="col-6" title="Data rate - video quality indicator" i18n-title>
               <ng-container i18n>bit rate</ng-container>
-              : {{ videoData().bitRate | fileSize }}/s
+              : {{ video.bitRate | fileSize }}/s
             </div>
           }
         </div>
@@ -156,39 +157,39 @@
   }
 
 
-  @if (cameraData()) {
+  @if (cameraData(); as cameraData) {
     <div class="row" title="Camera and lens information used to take this photo" i18n-title>
       <div class="col-1 ps-0">
         <ng-icon class="details-icon" name="ionCameraOutline" title="Camera information" i18n-title />
       </div>
       <div class="col-11">
         <div class="details-main">
-          {{ cameraData().model || cameraData().make || "Camera" }}
+          {{ cameraData.model || cameraData.make || "Camera" }}
         </div>
         <div class="details-sub  text-secondary row">
-          @if (cameraData().ISO) {
+          @if (cameraData.ISO) {
             <div class="col-3" title="ISO sensitivity - higher values for darker conditions"
-              i18n-title>ISO{{ cameraData().ISO }}
+              i18n-title>ISO{{ cameraData.ISO }}
             </div>
           }
-          @if (cameraData().fStop) {
+          @if (cameraData.fStop) {
             <div class="col-3" title="Aperture - lower numbers mean more background blur"
-              i18n-title>f/{{ cameraData().fStop }}
+              i18n-title>f/{{ cameraData.fStop }}
             </div>
           }
-          @if (cameraData().exposure) {
+          @if (cameraData.exposure) {
             <div class="col-3" title="Shutter speed - how long the sensor was exposed to light"
               i18n-title>
               {{ exposure() }}s
             </div>
           }
-          @if (cameraData().focalLength) {
+          @if (cameraData.focalLength) {
             <div class="col-3" title="Focal length - zoom level of the lens" i18n-title>
-              {{ cameraData().focalLength }}mm
+              {{ cameraData.focalLength }}mm
             </div>
           }
-          @if (cameraData().lens) {
-            <div class="col-12" title="Specific lens model used" i18n-title>{{ cameraData().lens }}
+          @if (cameraData.lens) {
+            <div class="col-12" title="Specific lens model used" i18n-title>{{ cameraData.lens }}
             </div>
           }
         </div>
@@ -266,20 +267,20 @@
                     </span>
                   }
                 </div>
-                @if (hasGPS()) {
+                @if (gpsText(); as coordinates) {
                   <div class="details-sub text-secondary row clickable">
                     <div class="col-12" title="Click GPS coordinates to search for nearby media" i18n-title>
                       @if (searchEnabled) {
                         <a
                           [routerLink]="['/search', distanceSearchQuery()]">
-                          {{ gpsText().latitude }},
-                          {{ gpsText().longitude }}
+                          {{ coordinates.latitude }},
+                          {{ coordinates.longitude }}
                         </a>
                       }
                       @if (!searchEnabled) {
                         <span>
-                          {{ gpsText().latitude }},
-                          {{ gpsText().longitude }}
+                          {{ coordinates.latitude }},
+                          {{ coordinates.longitude }}
                         </span>
                       }
                     </div>
@@ -289,13 +290,13 @@
             </div>
           }
           <div class="mt-auto" style="height: 400px">
-            @if (hasGPS() && mapEnabled) {
+            @if (mapEnabled && gps(); as gps) {
               <div
                 id="map"
                 leaflet
       [leafletOptions]="{zoom:10,
-          center:{lat:positionData().GPSData.latitude,
-          lng:positionData().GPSData.longitude},
+          center:{lat:gps.latitude,
+          lng:gps.longitude},
           layers:[baseLayer],
           zoomControl: false}"
                 [leafletLayers]="markerLayer()">

@@ -74,7 +74,7 @@ describe('Gallery', () => {
 
     // these photos should be visible
     cy.get('.photo-container > img[alt="IMG_6220.jpg"]');
-    cy.get('.photo-container > img[alt="IMG_5910.jpg"]').trigger('mouseover', {scrollBehavior: 'center'});
+    cy.get('.photo-container > img[alt="IMG_5910.jpg"]').trigger('mouseenter', {scrollBehavior: 'center'});
 
     cy.get('.photo-container > .info > .photo-name').contains('IMG_5910.jpg');
     cy.get('.photo-container > .info > .photo-position').contains('Berkeley');
@@ -122,7 +122,7 @@ describe('Gallery', () => {
 
   it('Gallery should auto open lightbox for IMG_5910.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
@@ -137,7 +137,7 @@ describe('Gallery', () => {
   });
   it('Gallery should auto open lightbox for IMG_1252.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
@@ -155,7 +155,7 @@ describe('Gallery', () => {
 describe('Gallery - dont wait for content load', () => {
   it('Gallery should auto open lightbox for IMG_5910.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });
@@ -181,7 +181,7 @@ describe('Gallery - dont wait for content load', () => {
   });
   it('Gallery should auto open lightbox for IMG_1252.jpg', () => {
     // ignore noisy tests
-    cy.on('fail', (err, runnable) => {
+    cy.on('fail', (err) => {
       cy.log(err.message);
       return false;
     });

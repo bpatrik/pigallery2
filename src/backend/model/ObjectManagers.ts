@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {SQLConnection} from './database/SQLConnection';
 import {Logger} from '../Logger';
 import {LocationManager} from './database/LocationManager';
 import {JobManager} from './jobs/JobManager';
-import {DirectoryPathDTO, ParentDirectoryDTO} from '../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../common/entities/DirectoryDTO';
 import {GalleryManager} from './database/GalleryManager';
 import {UserManager} from './database/UserManager';
 import {IndexingManager} from './database/IndexingManager';

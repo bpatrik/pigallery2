@@ -9,14 +9,14 @@ import {
   MapPathGroupThemeConfig,
   NavigationLinkConfig,
   NavigationLinkTypes,
-  TAGS,
+  PathThemeConfig,
+  SVGIconConfig,
   ThemeConfig
 } from '../../../../../../common/config/public/ClientConfig';
 import {ConfigStyle, SettingsService} from '../../settings.service';
-import {WebConfig} from '../../../../../../common/config/private/WebConfig';
-import {JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
+import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
-import {BsModalService} from 'ngx-bootstrap/modal';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
@@ -28,30 +28,12 @@ import { WorkflowComponent } from '../../workflow/workflow.component';
 import { PopoverDirective } from 'ngx-bootstrap/popover';
 import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
 import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
+import {RecursiveState, Stateful, StatefulConfig} from '../RecursiveState';
+import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 
 interface OptionView {
   key: number | string;
   value: string | number;
-}
-
-interface IState {
-  shouldHide(): boolean;
-
-  isEnumArrayType: boolean;
-  isEnumType: boolean;
-  isConfigType: boolean;
-  isConfigArrayType: boolean;
-  default: any;
-  value: any;
-  min?: number;
-  max?: number;
-  type: propertyTypes;
-  arrayType: any;
-  original: any;
-  rootConfig: WebConfig;
-  readonly?: boolean;
-  description?: string;
-  tags: TAGS;
 }
 
 @Component({
@@ -87,15 +69,19 @@ export class SettingsEntryComponent
   settingsService = inject(SettingsService);
   private modalService = inject(BsModalService);
 
-  name: string;
+  name: string | undefined;
   required: boolean;
-  dockerWarning: boolean;
-  experimental: boolean;
+  dockerWarning: boolean | undefined;
+  experimental: boolean | undefined;
   placeholder: string;
   allowSpaces = false;
-  description: string;
+  description: string | undefined;
   // set by writeValue (ngModel), not by an input, so it is a signal to refresh the view
-  readonly state = signal<IState>(null);
+  readonly state = signal<RecursiveState | null>(null);
+  // the state for the code that only runs once writeValue has set it (the template renders under @if (state()))
+  private get st(): RecursiveState {
+    return this.state()!;
+  }
   isNumberArray = false;
   isNumber = false;
   HTMLInputType = 'text';
@@ -103,35 +89,70 @@ export class SettingsEntryComponent
   idName: string;
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
-  readonly newDirectorySearch = () => new (this.state().arrayType)();
-  public type: string | object;
-  public arrayType: string;
-  public uiType: string;
+  readonly newDirectorySearch = (): DirectorySearch => new (this.st.arrayType as new () => DirectorySearch)();
+  public type: string | object | undefined;
+  public arrayType: string | propertyTypes | null | undefined;
+  public uiType: string | propertyTypes | null | undefined;
   // options of the select(s), static per state type, set in ngOnChanges
   optionsView: OptionView[] = [];
   navigationLinkTypeOptions: OptionView[] = [];
   userRoleOptions: OptionView[] = [];
-  newThemeModalRef: any;
+  newThemeModalRef: BsModalRef | null;
   iconModal: {
-    ref?: any,
+    ref?: BsModalRef,
     error?: string
-  };
+  } | undefined;
   readonly noChangeDetection = input(false);
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
+
+  // typed views of the value for the editors of the template (it depends on uiType)
+  get ArrayValue(): unknown[] {
+    return this.st.value as unknown[];
+  }
+
+  get IconValue(): Stateful<SVGIconConfig> {
+    return this.st.value as Stateful<SVGIconConfig>;
+  }
+
+  get MapLayersValue(): MapLayers[] {
+    return this.st.value as MapLayers[];
+  }
+
+  get PathThemeGroupsValue(): (Stateful<MapPathGroupThemeConfig> & { theme: Stateful<PathThemeConfig> })[] {
+    return this.st.value as (Stateful<MapPathGroupThemeConfig> & { theme: Stateful<PathThemeConfig> })[];
+  }
+
+  get PathGroupsValue(): Stateful<MapPathGroupConfig>[] {
+    return this.st.value as Stateful<MapPathGroupConfig>[];
+  }
+
+  get NavigationLinksValue(): NavigationLinkConfig[] {
+    return this.st.value as NavigationLinkConfig[];
+  }
+
+  get UsersValue(): UserConfig[] {
+    return this.st.value as UserConfig[];
+  }
+
+  get DirectorySearchesValue(): DirectorySearchConfig[] {
+    return this.st.value as DirectorySearchConfig[];
+  }
 
   get changed(): boolean {
     if (this.Disabled || this.noChangeDetection()) {
       return false;
     }
 
-    if (this.state().isConfigArrayType) {
-      for (let i = 0; i < this.state().value?.length; ++i) {
-        for (const k of Object.keys(this.state().value[i].__state)) {
+    if (this.st.isConfigArrayType) {
+      const items = this.st.value as StatefulConfig[] | undefined;
+      const defaults = this.st.default as Record<string, unknown>[];
+      for (let i = 0; i < (items?.length ?? 0); ++i) {
+        for (const k of Object.keys(items![i].__state)) {
           if (!Utils.equalsFilter(
-              this.state().value[i]?.__state[k]?.value,
-              this.state().default[i] ? this.state().default[i][k] : undefined,
+              items![i]?.__state[k]?.value,
+              defaults[i] ? defaults[i][k] : undefined,
               ['default', '__propPath', '__created', '__prototype', '__rootConfig'])) {
 
             return true;
@@ -140,7 +161,7 @@ export class SettingsEntryComponent
       }
       return false;
     }
-    return !Utils.equalsFilter(this.state().value, this.state().default);
+    return !Utils.equalsFilter(this.st.value, this.st.default);
   }
 
 
@@ -148,73 +169,74 @@ export class SettingsEntryComponent
     if (this.Disabled) {
       return true;
     }
-    return Utils.equalsFilter(this.state().value, this.state().original);
+    return Utils.equalsFilter(this.st.value, this.st.original);
   }
 
   get shouldHide(): boolean {
     this.settingsService.edits(); // depends on other entries: refresh after every edit
-    return this.state().shouldHide && this.state().shouldHide();
+    return !!this.st.shouldHide && this.st.shouldHide();
   }
 
   get defaultStr(): string {
     if (this.type === 'SearchQuery') {
       return (
-          '\'' + this.searchQueryParserService.stringify(this.state().default) + '\''
+          '\'' + this.searchQueryParserService.stringify(this.st.default as SearchQueryDTO) + '\''
       );
     }
 
-    if (this.state().type === 'array' && this.state().arrayType === 'string') {
-      return (this.state().default || []).join(';');
+    if (this.st.type === 'array' && this.st.arrayType === 'string') {
+      return ((this.st.default as string[]) || []).join(';');
     }
 
-    return this.state().default;
+    return this.st.default as string;
   }
 
 
   get StringValue(): string {
     if (
-        this.state().type === 'array' &&
-        (this.state().arrayType === 'string' || this.isNumberArray)
+        this.st.type === 'array' &&
+        (this.st.arrayType === 'string' || this.isNumberArray)
     ) {
-      return (this.state().value || []).join(';');
+      return ((this.st.value as unknown[]) || []).join(';');
     }
 
-    if (this.state().isConfigType) {
-      return JSON.stringify(this.state().value.toJSON());
+    if (this.st.isConfigType) {
+      return JSON.stringify((this.st.value as StatefulConfig).toJSON());
     }
 
-    if (typeof this.state().value === 'object') {
-      return JSON.stringify(this.state().value);
+    if (typeof this.st.value === 'object') {
+      return JSON.stringify(this.st.value);
     }
 
-    return this.state().value;
+    return this.st.value as string;
   }
 
   set StringValue(value: string) {
     if (
-        this.state().type === 'array' &&
-        (this.state().arrayType === 'string' || this.isNumberArray)
+        this.st.type === 'array' &&
+        (this.st.arrayType === 'string' || this.isNumberArray)
     ) {
       value = value.replace(new RegExp(',', 'g'), ';');
       if (!this.allowSpaces) {
         value = value.replace(new RegExp(' ', 'g'), ';');
       }
-      this.state().value = value.split(';').filter((v: string) => v !== '');
+      const values = value.split(';').filter((v: string) => v !== '');
+      this.st.value = values;
       if (this.isNumberArray) {
-        this.state().value = this.state().value
+        this.st.value = values
             .map((v: string) => parseFloat(v))
             .filter((v: number) => !isNaN(v));
       }
       return;
     }
-    if (typeof this.state().value === 'object') {
-      this.state().value = JSON.parse(value);
+    if (typeof this.st.value === 'object') {
+      this.st.value = JSON.parse(value);
       return;
     }
 
-    this.state().value = value;
+    this.st.value = value;
     if (this.isNumber) {
-      this.state().value = parseFloat(value);
+      this.st.value = parseFloat(value);
     }
 
   }
@@ -224,24 +246,25 @@ export class SettingsEntryComponent
     return [{
       key: 'default',
       value: $localize`default`
-    }, ...(this.state().rootConfig as any).__state.availableThemes.value
+    }, ...(this.st.rootConfig!.__state['availableThemes'].value as ThemeConfig[])
         .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
   }
 
 
   get SelectedThemeSettings(): {
-    theme: string
+    theme: string | undefined
   } {
     this.settingsService.edits(); // depends on other entries: refresh after every edit
-    return (this.state().value as ThemeConfig[]).find(th => th.name === (this.state().rootConfig as any).__state.selectedTheme.value) || {theme: 'N/A'};
+    return (this.st.value as ThemeConfig[]).find(th => th.name === this.st.rootConfig!.__state['selectedTheme'].value) || {theme: 'N/A'};
   }
 
   get Disabled() {
     this.settingsService.edits(); // depends on other entries: refresh after every edit
-    if (!this.state()?.tags?.uiDisabled) {
+    const uiDisabled = this.state()?.tags?.uiDisabled;
+    if (!uiDisabled) {
       return false;
     }
-    return this.state().tags.uiDisabled(this.state().rootConfig, this.settingsService.settings());
+    return uiDisabled(this.st.rootConfig, this.settingsService.settings());
   }
 
   // Derives the editor from this.state(), which is set by writeValue, not by an input.
@@ -251,38 +274,38 @@ export class SettingsEntryComponent
     }
 
     // cache type overrides
-    this.type = this.state().tags?.uiType || this.state().type;
+    this.type = this.st.tags?.uiType || this.st.type;
     this.arrayType = null;
-    if (this.state().arrayType === MapLayers) {
+    if (this.st.arrayType === MapLayers) {
       this.arrayType = 'MapLayers';
-    } else if (this.state().arrayType === NavigationLinkConfig) {
+    } else if (this.st.arrayType === NavigationLinkConfig) {
       this.arrayType = 'NavigationLinkConfig';
-    } else if (this.state().arrayType === MapPathGroupConfig) {
+    } else if (this.st.arrayType === MapPathGroupConfig) {
       this.arrayType = 'MapPathGroupConfig';
-    } else if (this.state().arrayType === MapPathGroupThemeConfig) {
+    } else if (this.st.arrayType === MapPathGroupThemeConfig) {
       this.arrayType = 'MapPathGroupThemeConfig';
-    } else if (this.state().arrayType === UserConfig) {
+    } else if (this.st.arrayType === UserConfig) {
       this.arrayType = 'UserConfig';
-    } else if (this.state().arrayType === ServerExtensionsEntryConfig) {
+    } else if (this.st.arrayType === ServerExtensionsEntryConfig) {
       this.arrayType = 'ServerExtensionsEntryConfig';
-    } else if (this.state().arrayType === JobScheduleConfig) {
+    } else if (this.st.arrayType === JobScheduleConfig) {
       this.arrayType = 'JobScheduleConfig';
     } else {
-      this.arrayType = this.state().arrayType;
+      this.arrayType = this.st.arrayType;
     }
 
-    if (this.state().tags?.uiOptions) {
-      this.state().isEnumType = true;
+    if (this.st.tags?.uiOptions) {
+      this.st.isEnumType = true;
     }
     this.uiType = this.arrayType;
-    if (CustomSettingsEntries.iS(this.state())) {
-      this.uiType = CustomSettingsEntries.getFullName(this.state());
+    if (CustomSettingsEntries.iS(this.st)) {
+      this.uiType = CustomSettingsEntries.getFullName(this.st);
     }
-    if (!this.state().isEnumType &&
-        !this.state().isEnumArrayType &&
+    if (!this.st.isEnumType &&
+        !this.st.isEnumArrayType &&
         this.type !== 'boolean' &&
         this.type !== 'SearchQuery' &&
-        !CustomSettingsEntries.iS(this.state()) &&
+        !CustomSettingsEntries.iS(this.st) &&
         this.arrayType !== 'MapLayers' &&
         this.arrayType !== 'NavigationLinkConfig' &&
         this.arrayType !== 'MapPathGroupConfig' &&
@@ -292,79 +315,80 @@ export class SettingsEntryComponent
         this.arrayType !== 'UserConfig') {
       this.uiType = 'StringInput';
     }
-    if (this.type === this.state().tags?.uiType) {
-      this.uiType = this.state().tags?.uiType;
-    } else if (this.state().isEnumType) {
+    if (this.type === this.st.tags?.uiType) {
+      this.uiType = this.st.tags?.uiType;
+    } else if (this.st.isEnumType) {
       this.uiType = 'EnumType';
     } else if (this.type === 'boolean') {
       this.uiType = 'Boolean';
-    } else if (this.state().isEnumArrayType) {
+    } else if (this.st.isEnumArrayType) {
       this.uiType = 'EnumArray';
     }
 
     this.optionsView = this.uiType === 'EnumType' || this.uiType === 'EnumArray' ?
-      this.getOptionsView(this.state()) : [];
+      this.getOptionsView(this.st) : [];
     this.navigationLinkTypeOptions = this.arrayType === 'NavigationLinkConfig' ?
       this.getOptionsView(this.newArrayItemState('type')) : [];
     this.userRoleOptions = this.arrayType === 'UserConfig' ?
       this.getOptionsView(this.newArrayItemState('role')) : [];
 
-    this.placeholder = this.state().tags?.hint || this.state().default;
+    this.placeholder = (this.st.tags?.hint || this.st.default) as string;
 
     this.title = '';
-    if (this.state().readonly) {
+    if (this.st.readonly) {
       this.title = $localize`readonly` + ', ';
     }
     this.title += $localize`default value` + ': ' + this.defaultStr;
-    this.name = this.state()?.tags?.name;
+    this.name = this.st.tags?.name;
     if (this.name) {
       this.idName =
           this.GUID + this.name.toLowerCase().replace(new RegExp(' ', 'gm'), '-');
     }
     this.isNumberArray =
-        this.state().arrayType === 'unsignedInt' ||
-        this.state().arrayType === 'integer' ||
-        this.state().arrayType === 'float' ||
-        this.state().arrayType === 'positiveFloat';
+        this.st.arrayType === 'unsignedInt' ||
+        this.st.arrayType === 'integer' ||
+        this.st.arrayType === 'float' ||
+        this.st.arrayType === 'positiveFloat';
     this.isNumber =
-        this.state().type === 'unsignedInt' ||
-        this.state().type === 'integer' ||
-        this.state().type === 'float' ||
-        this.state().type === 'positiveFloat';
+        this.st.type === 'unsignedInt' ||
+        this.st.type === 'integer' ||
+        this.st.type === 'float' ||
+        this.st.type === 'positiveFloat';
 
 
     if (this.isNumber) {
       this.HTMLInputType = 'number';
-    } else if (this.state().type === 'password') {
+    } else if (this.st.type === 'password') {
       this.HTMLInputType = 'password';
     } else {
       this.HTMLInputType = 'text';
     }
-    this.description = this.description || this.state().description;
-    if (this.state().tags) {
+    this.description = this.description || this.st.description;
+    if (this.st.tags) {
       if (typeof this.dockerWarning === 'undefined') {
-        this.dockerWarning = this.state().tags.dockerSensitive && this.settingsService.settings().Environment.isDocker;
+        this.dockerWarning = this.st.tags.dockerSensitive && this.settingsService.settings().Environment.isDocker;
       }
-      this.name = this.name || this.state().tags.name;
-      this.allowSpaces = this.allowSpaces || this.state().tags.uiAllowSpaces;
-      this.required = this.required || !this.state().tags.uiOptional;
-      this.experimental = this.state().tags.experimental;
+      this.name = this.name || this.st.tags.name;
+      this.allowSpaces = this.allowSpaces || !!this.st.tags.uiAllowSpaces;
+      this.required = this.required || !this.st.tags.uiOptional;
+      this.experimental = this.st.tags.experimental;
     }
   }
 
   // The state of a property of the array items. It is the same for every item, so a fresh item is used.
-  private newArrayItemState(property: string): IState {
-    return (new (this.state().arrayType)() as { __state: Record<string, IState> }).__state[property];
+  private newArrayItemState(property: string): RecursiveState {
+    return new (this.st.arrayType as new () => StatefulConfig)().__state[property];
   }
 
-  private getOptionsView(state: IState): OptionView[] {
+  private getOptionsView(state: RecursiveState): OptionView[] {
     const eClass = state.isEnumType
         ? state.type
         : state.arrayType;
-    if (state.tags?.uiOptions && typeof eClass === 'object') {
+    const uiOptions = state.tags?.uiOptions;
+    if (uiOptions && typeof eClass === 'object') {
       // enum with a restricted set of options
       return enumToTranslatedArray(eClass)
-        .filter(o => state.tags.uiOptions.includes(o.key));
+        .filter(o => uiOptions.includes(o.key));
     }
     if (state.tags?.uiOptions) {
       return state.tags?.uiOptions.map(o => ({
@@ -372,23 +396,23 @@ export class SettingsEntryComponent
         value: o + (state.tags?.unit ? state.tags?.unit : '')
       }));
     }
-    return enumToTranslatedArray(eClass);
+    return enumToTranslatedArray(eClass as object);
   }
 
-  validate(): ValidationErrors {
+  validate(): ValidationErrors | null {
     if (
         !this.required ||
         (this.state() &&
-            typeof this.state().value !== 'undefined' &&
-            this.state().value !== null &&
-            this.state().value !== '')
+            typeof this.st.value !== 'undefined' &&
+            this.st.value !== null &&
+            this.st.value !== '')
     ) {
       return null;
     }
     return {required: true};
   }
 
-  public onChange = (value: unknown): void => {
+  public onChange = (_value: unknown): void => {
     // empty
   };
 
@@ -397,7 +421,7 @@ export class SettingsEntryComponent
   };
   newThemeName: string;
 
-  public writeValue(obj: IState): void {
+  public writeValue(obj: RecursiveState): void {
     this.state.set(obj);
     this.ngOnChanges();
   }
@@ -411,18 +435,19 @@ export class SettingsEntryComponent
   }
 
   AddNew(): void {
-    this.state().value = this.state().value || [];
-    if (this.state().type === 'array') {
-      if (this.state().isConfigArrayType && this.state().arrayType) {
-        this.state().value.push(new (this.state().arrayType)());
+    this.st.value = this.st.value || [];
+    const items = this.st.value as unknown[];
+    if (this.st.type === 'array') {
+      if (this.st.isConfigArrayType && this.st.arrayType) {
+        items.push(new (this.st.arrayType as new () => unknown)());
         return;
       }
-      this.state().value.push(this.state().value[this.state().value.length - 1]);
+      items.push(items[items.length - 1]);
     }
   }
 
   remove(i: number): void {
-    (this.state().value as unknown[]).splice(i, 1);
+    (this.st.value as unknown[]).splice(i, 1);
     this.onChange(null);
   }
 
@@ -430,28 +455,31 @@ export class SettingsEntryComponent
    * MapLayer function
    */
   addNewLayer(): void {
-    this.state().value.push({
-      name: 'Layer-' + this.state().value.length,
+    const layers = this.st.value as MapLayers[];
+    layers.push({
+      name: 'Layer-' + layers.length,
       url: '',
-    });
+    } as MapLayers);
   }
 
   removeLayer(layer: MapLayers): void {
-    this.state().value.splice(
-        this.state().value.indexOf(layer),
+    const layers = this.st.value as MapLayers[];
+    layers.splice(
+        layers.indexOf(layer),
         1
     );
   }
 
 
   addNewTheme(): void {
-    const availableThemes = (this.state().rootConfig as any).__state.availableThemes;
+    const availableThemes = this.st.rootConfig!.__state['availableThemes'];
     if (!this.newThemeName ||
         (availableThemes.value as ThemeConfig[]).find(th => th.name === this.newThemeName)) {
       return;
     }
-    this.state().value = this.newThemeName;
-    availableThemes.value.push(new availableThemes.arrayType(this.newThemeName, ''));
+    this.st.value = this.newThemeName;
+    (availableThemes.value as ThemeConfig[])
+      .push(new (availableThemes.arrayType as typeof ThemeConfig)(this.newThemeName, ''));
     this.newThemeName = '';
     this.onChange(null);
     this.hideNewThemeModal();
@@ -459,17 +487,17 @@ export class SettingsEntryComponent
 
 
   removeTheme(): void {
-    const availableThemes = (this.state().rootConfig as any).__state.availableThemes;
-    const i = (availableThemes.value as ThemeConfig[]).findIndex(th => th.name === this.state().value);
+    const availableThemes = this.st.rootConfig!.__state['availableThemes'];
+    const i = (availableThemes.value as ThemeConfig[]).findIndex(th => th.name === this.st.value);
     if (i >= 0) {
-      this.state().value = 'default';
-      availableThemes.value.splice(i, 1);
+      this.st.value = 'default';
+      (availableThemes.value as ThemeConfig[]).splice(i, 1);
       this.onChange(null);
     }
 
   }
 
-  showNewThemeModal(template: TemplateRef<any>): void {
+  showNewThemeModal(template: TemplateRef<unknown>): void {
     this.newThemeModalRef = this.modalService.show(template, {
       class: 'modal-lg',
     });
@@ -477,7 +505,7 @@ export class SettingsEntryComponent
   }
 
 
-  showIconModal(template: TemplateRef<any>): void {
+  showIconModal(template: TemplateRef<unknown>): void {
     this.iconModal = {};
     this.iconModal.ref = this.modalService.show(template, {
       class: 'modal-lg',
@@ -487,7 +515,7 @@ export class SettingsEntryComponent
 
 
   public hideNewThemeModal(): void {
-    this.newThemeModalRef.hide();
+    this.newThemeModalRef?.hide();
     this.newThemeModalRef = null;
   }
 
@@ -495,13 +523,16 @@ export class SettingsEntryComponent
     if (!this.iconModal) {
       return;
     }
-    this.iconModal.ref.hide();
-    delete this.iconModal;
+    this.iconModal.ref?.hide();
+    this.iconModal = undefined;
   }
 
   newSvgFile(event: Event): void {
 
-    const file: File = (event.target as HTMLInputElement).files[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
     reader.onload = () => {
@@ -510,8 +541,9 @@ export class SettingsEntryComponent
       try {
         const wb = doc.documentElement.getAttribute('viewBox');
         const items = doc.documentElement.innerHTML;
-        this.state().value.items = items;
-        this.state().value.viewBox = wb;
+        const icon = this.st.value as SVGIconConfig;
+        icon.items = items;
+        icon.viewBox = wb as string;
       } catch (e) {
         console.error(e);
         if (this.iconModal) {

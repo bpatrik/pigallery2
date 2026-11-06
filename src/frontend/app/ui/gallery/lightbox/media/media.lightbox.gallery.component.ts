@@ -17,8 +17,8 @@ export class GalleryLightboxMediaComponent {
   lightboxService = inject(LightboxService);
   private sanitizer = inject(DomSanitizer);
 
-  readonly gridMedia = input<GridMedia>(undefined);
-  readonly nextGridMedia = input<GridMedia>(undefined);
+  readonly gridMedia = input<GridMedia | null>(null);
+  readonly nextGridMedia = input<GridMedia | null>(null);
   readonly loadMedia = input(false); // prevents loading media
   readonly windowAspect = input(1);
   readonly zoom = input(1);
@@ -30,17 +30,26 @@ export class GalleryLightboxMediaComponent {
   readonly imageElement = viewChild<ElementRef<HTMLImageElement>>('image');
 
   // identifies the media; the state below starts over and the elements are re-created when it changes
-  private readonly mediaKey = computed((): string => this.gridMedia()?.getRelativePath() ?? null);
+  private readonly mediaKey = computed((): string | null => this.gridMedia()?.getRelativePath() ?? null);
   // One item while there is a media. The template tracks it by its key, so the elements of the previous media are
   // removed before the new media is shown: the old photo never shows in the place of the new one.
-  readonly mediaItems = computed((): { key: string }[] => this.mediaKey() !== null ? [{key: this.mediaKey()}] : []);
+  readonly mediaItems = computed((): { key: string }[] => {
+    const key = this.mediaKey();
+    return key !== null ? [{key}] : [];
+  });
   readonly isPhoto = computed((): boolean => !!this.gridMedia()?.isPhoto());
   readonly isVideo = computed((): boolean => !!this.gridMedia()?.isVideo());
   readonly isLivePhoto = computed((): boolean => !!this.gridMedia()?.isLivePhoto());
-  readonly bestFitVideoPath = computed((): string => this.isVideo() ? this.gridMedia().getBestFitVideoPath() : null);
-  readonly liveVideoSrc = computed((): string => this.isLivePhoto() ? this.gridMedia().getLiveVideoPath() : null);
+  readonly bestFitVideoPath = computed((): string | null => {
+    const gridMedia = this.gridMedia();
+    return gridMedia?.isVideo() ? gridMedia.getBestFitVideoPath() : null;
+  });
+  readonly liveVideoSrc = computed((): string | null => {
+    const gridMedia = this.gridMedia();
+    return gridMedia?.isLivePhoto() ? gridMedia.getLiveVideoPath() : null;
+  });
   // the thumbnail the grid loaded, shown until the photo loads
-  readonly thumbnailSrc = computed((): string => {
+  readonly thumbnailSrc = computed((): string | null => {
     const gridMedia = this.gridMedia();
     if (!gridMedia) {
       return null;
@@ -53,7 +62,7 @@ export class GalleryLightboxMediaComponent {
     }
     return null;
   });
-  readonly imageSize = computed((): { width: string, height: string } => {
+  readonly imageSize = computed((): { width: string | null, height: string | null } => {
     const gridMedia = this.gridMedia();
     if (gridMedia && MediaDTOUtils.calcAspectRatio(gridMedia.media) < this.windowAspect()) {
       return {width: null, height: '100'};
@@ -78,7 +87,7 @@ export class GalleryLightboxMediaComponent {
   readonly videoVolume = linkedSignal({source: this.mediaKey, computation: (): number => 1});
   readonly videoProgress = linkedSignal({source: this.mediaKey, computation: (): number => 0});
   // the photo url: the best fitting preview once loading is allowed, the original on zoom
-  private readonly photo = linkedSignal<{ key: string, gridMedia: GridMedia, load: boolean, zoomed: boolean }, { src: string, isBestFit: boolean }>({
+  private readonly photo = linkedSignal<{ key: string | null, gridMedia: GridMedia | null, load: boolean, zoomed: boolean }, { src: string | null, isBestFit: boolean | null }>({
     source: () => ({key: this.mediaKey(), gridMedia: this.gridMedia(), load: this.loadMedia(), zoomed: this.zoom() !== 1}),
     computation: (source, previous) => {
       const prev = previous?.source.key === source.key ? previous.value : {src: null, isBestFit: null};
@@ -104,13 +113,13 @@ export class GalleryLightboxMediaComponent {
       return prev;
     }
   });
-  readonly photoSrc = computed((): string => this.photo().src);
+  readonly photoSrc = computed((): string | null => this.photo().src);
   readonly showThumbnail = computed((): boolean => !!this.gridMedia() && !this.mediaLoaded() && this.thumbnailSrc() !== null);
 
   private liveVideoTouchActive = false;
   // the next media whose preload started and finished; the slideshow waits for it
-  private preloadingNext: GridMedia = null;
-  private preloadedNext: GridMedia = null;
+  private preloadingNext: GridMedia | null = null;
+  private preloadedNext: GridMedia | null = null;
 
   public isRenderedMediaLoaded(): boolean {
     const gridMedia = this.gridMedia();
@@ -123,7 +132,7 @@ export class GalleryLightboxMediaComponent {
     }
     if (gridMedia.isPhoto()) {
       const imageElement = this.imageElement();
-      return this.renderedMediaLoaded() || (imageElement && imageElement.nativeElement.complete);
+      return this.renderedMediaLoaded() || (!!imageElement && imageElement.nativeElement.complete);
     }
     return false;
   }
@@ -193,7 +202,10 @@ export class GalleryLightboxMediaComponent {
   }
 
   public onVideoProgress(): void {
-    const video = this.video().nativeElement;
+    const video = this.video()?.nativeElement;
+    if (!video) {
+      return;
+    }
     this.videoProgress.set((100 / video.duration) * video.currentTime);
   }
 
@@ -248,7 +260,7 @@ export class GalleryLightboxMediaComponent {
     this.renderedMediaLoaded.set(true);
     console.error(
       'Error: cannot load media for lightbox url: ' +
-      this.gridMedia().getBestSizedMediaPath(window.innerWidth, window.innerHeight)
+      this.gridMedia()?.getBestSizedMediaPath(window.innerWidth, window.innerHeight)
     );
     this.loadNextPhoto();
   }

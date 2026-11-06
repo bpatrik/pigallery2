@@ -10,7 +10,7 @@ import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 describe('NavigationService', () => {
 
-  const setUp = (publicSharing: PublicSharingDTO, isSharing = true) => {
+  const setUp = (publicSharing: PublicSharingDTO | null, isSharing = true) => {
     const router = {navigate: vi.fn(), isActive: vi.fn()};
     router.navigate.mockReturnValue(Promise.resolve(true));
     const shareService = {

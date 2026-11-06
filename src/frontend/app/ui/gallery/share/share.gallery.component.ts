@@ -45,7 +45,7 @@ export class GalleryShareComponent {
       amount: 30,
       type: ValidityTypes.Days as ValidityTypes,
     },
-    password: null as string,
+    password: null as string | null,
   };
   // share the subdirectories too (directory sharing only)
   readonly recursive = signal(false);
@@ -53,7 +53,7 @@ export class GalleryShareComponent {
   private readonly target = computed((): {
     enabled: boolean;
     dir: string;
-    searchQuery: SearchQueryDTO;
+    searchQuery: SearchQueryDTO | null;
     name: string;
     mediaCount: number;
     recursiveMediaCount: number;
@@ -63,7 +63,7 @@ export class GalleryShareComponent {
     const target = {
       enabled: !!(content?.directory || content?.searchResult),
       dir: '',
-      searchQuery: null as SearchQueryDTO,
+      searchQuery: null as SearchQueryDTO | null,
       name: '',
       mediaCount: 0,
       recursiveMediaCount: 0,
@@ -92,13 +92,13 @@ export class GalleryShareComponent {
   readonly currentMediaCountIsLowerBound = computed((): boolean => this.target().mediaCountIsLowerBound);
   readonly sharedMediaCount = computed((): number =>
     this.isDirectorySharing() && this.recursive() ? this.target().recursiveMediaCount : this.target().mediaCount);
-  readonly currentQuery = computed((): SearchQueryDTO =>
+  readonly currentQuery = computed((): SearchQueryDTO | null =>
     this.isDirectorySharing() ? this.buildDirectoryQuery(this.recursive()) : this.target().searchQuery);
-  readonly sharing = signal<ResponseSharingDTO>(null);
+  readonly sharing = signal<ResponseSharingDTO | null>(null);
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
 
-  modalRef: BsModalRef;
+  modalRef: BsModalRef | null;
   invalidSettings = $localize`Invalid settings`;
 
   private readonly activeShares = signal<ResponseSharingDTO[]>([]);
@@ -127,7 +127,7 @@ export class GalleryShareComponent {
   }
 
   public get IsAdmin() {
-    return this.authService.user().role > UserRoles.Admin;
+    return this.authService.isAuthorized(UserRoles.Developer); // above Admin
   }
 
   private async onContentChange(): Promise<void> {
@@ -170,7 +170,8 @@ export class GalleryShareComponent {
 
   private async updateActiveSharesList() {
     try {
-      if (!this.currentQuery()) {
+      const query = this.currentQuery();
+      if (!query) {
         this.activeShares.set([]);
         return;
       }
@@ -181,7 +182,7 @@ export class GalleryShareComponent {
         this.activeShares.set(lists.flat());
         return;
       }
-      this.activeShares.set(await this.sharingService.getSharingListForQuery(this.currentQuery()));
+      this.activeShares.set(await this.sharingService.getSharingListForQuery(query));
     } catch (e) {
       this.activeShares.set([]);
       console.error(e);
@@ -205,27 +206,30 @@ export class GalleryShareComponent {
   }
 
   async update(): Promise<void> {
-    if (this.sharing() == null || !this.currentQuery()) {
+    const sharing = this.sharing();
+    const query = this.currentQuery();
+    if (sharing == null || !query) {
       return;
     }
     this.urlValid.set(false);
     this.url.set($localize`loading..`);
-    this.sharing.set(this.isDirectorySharing()
+    const updated = this.isDirectorySharing()
       ? await this.sharingService.updateSharingByDirectory(
-        this.sharing().id,
-        this.currentQuery() as DirectorySearch,
+        sharing.id,
+        query as DirectorySearch,
         this.input.password,
         this.calcValidity(),
         this.currentDir()
       )
       : await this.sharingService.updateSharingByQuery(
-        this.sharing().id,
-        this.currentQuery(),
+        sharing.id,
+        query,
         this.input.password,
         this.calcValidity()
-      ));
+      );
+    this.sharing.set(updated);
     this.urlValid.set(true);
-    this.url.set(this.sharingService.getUrl(this.sharing()));
+    this.url.set(this.sharingService.getUrl(updated));
     await this.updateActiveSharesList();
   }
 
@@ -234,25 +238,27 @@ export class GalleryShareComponent {
       this.url.set($localize`Set password.`);
       return;
     }
-    if (!this.currentQuery()) {
+    const query = this.currentQuery();
+    if (!query) {
       this.url.set($localize`Invalid settings`);
       return;
     }
     this.urlValid.set(false);
     this.url.set($localize`loading..`);
-    this.sharing.set(this.isDirectorySharing()
+    const created = this.isDirectorySharing()
       ? await this.sharingService.createSharingByDirectory(
-        this.currentQuery() as DirectorySearch,
+        query as DirectorySearch,
         this.input.password,
         this.calcValidity(),
         this.currentDir()
       )
       : await this.sharingService.createSharingByQuery(
-        this.currentQuery(),
+        query,
         this.input.password,
         this.calcValidity()
-      ));
-    this.url.set(this.sharingService.getUrl(this.sharing()));
+      );
+    this.sharing.set(created);
+    this.url.set(this.sharingService.getUrl(created));
     this.urlValid.set(true);
     await this.updateActiveSharesList();
   }
@@ -263,7 +269,7 @@ export class GalleryShareComponent {
     this.sharing.set(null);
     this.input.password = '';
     if (this.modalRef) {
-      this.modalRef.hide();
+      this.modalRef?.hide();
     }
     this.modalRef = this.modalService.show(template);
   }
@@ -273,7 +279,7 @@ export class GalleryShareComponent {
   }
 
   public hideModal(): void {
-    this.modalRef.hide();
+    this.modalRef?.hide();
     this.modalRef = null;
     this.sharing.set(null);
   }
