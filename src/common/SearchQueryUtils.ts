@@ -156,7 +156,7 @@ export const SearchQueryUtils = {
       if (e && (e as Error).message && (e as Error).message.startsWith(what)) {
         throw e;
       }
-      throw new Error(`${what} is not valid. ${(e as Error)?.message ?? e}`);
+      throw new Error(`${what} is not valid. ${(e as Error)?.message ?? e}`, {cause: e});
     }
   },
   /**
