@@ -82,7 +82,7 @@ export class MediaIcon {
 
   getMediaSize(renderWidth: number, renderHeight: number): number {
     const longerEdge = Math.max(renderWidth, renderHeight);
-    return Utils.findClosestinSorted(longerEdge, MediaIcon.sortedThumbnailSizes);
+    return Utils.findCeilinginSorted(longerEdge, MediaIcon.sortedThumbnailSizes);
   }
 
   /**
