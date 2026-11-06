@@ -131,7 +131,7 @@ export class LightboxService implements OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  private updateQuery(key: string, defValue: boolean | number | string, newValue: boolean | number | string): void {
+  private updateQuery(key: string, defValue: boolean | number | string, newValue: boolean | number | string | null): void {
     // for strings: also treat empty string as null
     if (defValue === newValue || (typeof newValue === 'string' && newValue.trim() === '')) {
       newValue = null;

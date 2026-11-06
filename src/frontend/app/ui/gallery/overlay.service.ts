@@ -3,7 +3,7 @@ import {PageHelper} from '../../model/page.helper';
 
 @Injectable({providedIn: 'root'})
 export class OverlayService {
-  private scrollWidth: number = null;
+  private scrollWidth: number | null = null;
 
   public showOverlay(requester:string): void {
     // disable scrolling
@@ -35,7 +35,7 @@ export class OverlayService {
       const widthWithScroll = inner.offsetWidth;
 
       // remove divs
-      outer.parentNode.removeChild(outer);
+      outer.parentNode?.removeChild(outer);
       this.scrollWidth = widthNoScroll - widthWithScroll;
     }
 

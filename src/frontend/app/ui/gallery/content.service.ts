@@ -7,7 +7,7 @@ export class ContentService {
   private sortingService = inject(GallerySortingService);
   private filterService = inject(FilterService);
 
-  public readonly sortedFilteredContent = computed((): GroupedDirectoryContent =>
+  public readonly sortedFilteredContent = computed((): GroupedDirectoryContent | null =>
     this.sortingService.applySorting(
       this.filterService.filteredContent().content,
       this.sortingService.sorting(),

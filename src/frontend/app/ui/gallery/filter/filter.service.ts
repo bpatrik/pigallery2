@@ -11,7 +11,7 @@ export enum FilterRenderType {
 
 export interface Filter {
   name: string;
-  mapFn: (m: PhotoDTO) => (string | number)[] | (string | number);
+  mapFn: (m: PhotoDTO) => (string | number)[] | (string | number) | undefined;
   renderType: FilterRenderType;
   isArrayValue?: boolean;
 }
@@ -40,7 +40,7 @@ export interface ActiveFilters {
 }
 
 export interface FilteredContent {
-  content: DirectoryContent;
+  content: DirectoryContent | undefined;
   // the active filters with the options and date range of the content
   filters: ActiveFilters;
 }
@@ -52,13 +52,13 @@ export class FilterService {
   public readonly AVAILABLE_FILTERS: Filter[] = [
     {
       name: $localize`Keywords`,
-      mapFn: (m: PhotoDTO): string[] => m.metadata.keywords,
+      mapFn: (m: PhotoDTO): string[] | undefined => m.metadata.keywords,
       renderType: FilterRenderType.enum,
       isArrayValue: true,
     },
     {
       name: $localize`Faces`,
-      mapFn: (m: PhotoDTO): string[] =>
+      mapFn: (m: PhotoDTO): string[] | undefined =>
         m.metadata.faces
           ? m.metadata.faces.map((f) => f.name)
           : ['<' + $localize`no face` + '>'],
@@ -67,7 +67,7 @@ export class FilterService {
     },
     {
       name: $localize`Faces groups`,
-      mapFn: (m: PhotoDTO): string =>
+      mapFn: (m: PhotoDTO): string | undefined =>
         m.metadata.faces
           ?.map((f) => f.name)
           .sort()
@@ -77,52 +77,52 @@ export class FilterService {
     },
     {
       name: $localize`Caption`,
-      mapFn: (m: PhotoDTO): string => m.metadata.caption,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.caption,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Rating`,
-      mapFn: (m: PhotoDTO): number => m.metadata.rating,
+      mapFn: (m: PhotoDTO): number | undefined => m.metadata.rating,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`City`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.city,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.positionData?.city,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`State`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.state,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.positionData?.state,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Country`,
-      mapFn: (m: PhotoDTO): string => m.metadata.positionData?.country,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.positionData?.country,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Camera`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.model,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.model,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Lens`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.lens,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.lens,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`ISO`,
-      mapFn: (m: PhotoDTO): number => m.metadata.cameraData?.ISO,
+      mapFn: (m: PhotoDTO): number | undefined => m.metadata.cameraData?.ISO,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Aperture`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.fStop ? `f/${m.metadata.cameraData?.fStop}` : undefined,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.fStop ? `f/${m.metadata.cameraData?.fStop}` : undefined,
       renderType: FilterRenderType.enum,
     },
     {
       name: $localize`Shutter speed`,
-      mapFn: (m: PhotoDTO): string => {
+      mapFn: (m: PhotoDTO): string | undefined => {
         const f = m.metadata.cameraData?.exposure;
         if (typeof f === 'undefined') {
           return undefined;
@@ -136,14 +136,14 @@ export class FilterService {
     },
     {
       name: $localize`Focal length`,
-      mapFn: (m: PhotoDTO): string => m.metadata.cameraData?.focalLength ? `${m.metadata.cameraData?.focalLength} mm` : undefined,
+      mapFn: (m: PhotoDTO): string | undefined => m.metadata.cameraData?.focalLength ? `${m.metadata.cameraData?.focalLength} mm` : undefined,
       renderType: FilterRenderType.enum,
     },
   ];
 
   // The filter UI edits this object in place (ngModel) and then calls onFilterChange().
   // New content resets the selected options and the date range.
-  public readonly activeFilters = linkedSignal<DirectoryContent, ActiveFilters>({
+  public readonly activeFilters = linkedSignal<DirectoryContent | undefined, ActiveFilters>({
     source: this.contentLoader.originalContent,
     computation: (content, previous) => {
       const filters = previous?.value ?? this.getInitialFilters();
@@ -195,7 +195,7 @@ export class FilterService {
     filters.selectedFilters.forEach((f) => (f.options = []));
   }
 
-  private getStatistic(prefiltered: DirectoryContent): { date: Date, time: number, endTime: number, dateStr: string, count: number, max: number }[] {
+  private getStatistic(prefiltered: DirectoryContent | undefined): { date: Date, time: number, endTime: number, dateStr: string, count: number, max: number }[] {
     if (!prefiltered ||
       !prefiltered.media ||
       prefiltered.media.length === 0) {
@@ -294,7 +294,7 @@ export class FilterService {
     return ret;
   }
 
-  private applyFilters(dirContent: DirectoryContent, afilters: ActiveFilters): DirectoryContent {
+  private applyFilters(dirContent: DirectoryContent | undefined, afilters: ActiveFilters): DirectoryContent | undefined {
     if (!dirContent || !dirContent.media || (!afilters.filtersVisible && !afilters.areFiltersActive)) {
       return dirContent;
     }

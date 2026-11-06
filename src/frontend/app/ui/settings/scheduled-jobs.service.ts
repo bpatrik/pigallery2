@@ -16,7 +16,7 @@ export class ScheduledJobsService {
 
   public readonly progress = signal<Record<string, OnTimerJobProgressDTO>>({});
   public readonly onJobFinish = new Subject<string>();
-  timer: number = null;
+  timer: number | null = null;
   public readonly availableJobs = signal<JobDTO[]>([]);
   public readonly availableMessengers = signal<string[]>([]);
   public readonly jobStartingStopping = signal<Record<string, boolean>>({});
@@ -38,7 +38,7 @@ export class ScheduledJobsService {
     );
   }
 
-  public getConfigTemplate(JobName: string): DynamicConfig[] {
+  public getConfigTemplate(JobName: string): DynamicConfig[] | null {
     const job = this.availableJobs().find(
       (t) => t.Name === JobName
     );
@@ -48,7 +48,7 @@ export class ScheduledJobsService {
     return null;
   }
 
-  public getDefaultConfig(jobName: string): Record<string, unknown> {
+  public getDefaultConfig(jobName: string): Record<string, unknown> | null {
 
     const ct = this.getConfigTemplate(jobName);
     if (!ct) {

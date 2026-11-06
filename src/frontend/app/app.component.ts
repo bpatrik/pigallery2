@@ -38,7 +38,7 @@ export class AppComponent implements OnInit {
     this.title.setTitle(Config.Server.applicationTitle);
   }
 
-  private redirect(authenticated: boolean): Promise<boolean> {
+  private redirect(authenticated: boolean): Promise<boolean> | undefined {
     if (this.navigation.isErrorPage()) { //stay on the error page, do not auto navigate
       return;
     }
@@ -51,6 +51,7 @@ export class AppComponent implements OnInit {
         return this.navigation.toLogin();
       }
     }
+    return undefined;
   }
 
 }

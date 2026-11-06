@@ -37,16 +37,16 @@ export class QueryService {
       query[QueryParams.gallery.map.show] = 'true';
     }
     if (Config.Sharing.enabled === true) {
-      if (this.shareService.isSharing()) {
-        query[QueryParams.gallery.sharingKey_query] =
-          this.shareService.getSharingKey();
+      const sharingKey = this.shareService.getSharingKey();
+      if (this.shareService.isSharing() && sharingKey) {
+        query[QueryParams.gallery.sharingKey_query] = sharingKey;
       }
     }
     return query;
   }
 
-  getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): Record<string, any> {
-    const params: Record<string, any> = {};
+  getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): Record<string, unknown> {
+    const params: Record<string, unknown> = {};
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
         params[QueryParams.gallery.sharingKey_query] =

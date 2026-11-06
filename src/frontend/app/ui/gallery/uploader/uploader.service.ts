@@ -47,7 +47,7 @@ export class UploaderService {
   private MAX_CONCURRENT_UPLOADS = 1;
   private readonly DEFAULT_MAX_CONCURRENT_UPLOADS = 1;
   private readonly MAX_ALLOWED_CONCURRENT_UPLOADS = 10;
-  private speedTimer: any = null;
+  private speedTimer: ReturnType<typeof setInterval> | null = null;
   private lastProgressSum = 0;
   private lastUpdateTimestamp = 0;
 
@@ -62,8 +62,8 @@ export class UploaderService {
         return {
           type: failed > 0 ? 'warning' : 'progress',
           title: expanded ? $localize`Hide details` : $localize`Uploading files: ${toasts.length}:count:`,
-          text: failed > 0 ? $localize`Failed: ${failed}:count:` : null,
-          progress: expanded ? null : Math.round(toasts.reduce((sum, t) => sum + (t.progress ?? 100), 0) / toasts.length),
+          text: failed > 0 ? $localize`Failed: ${failed}:count:` : undefined,
+          progress: expanded ? undefined : Math.round(toasts.reduce((sum, t) => sum + (t.progress ?? 100), 0) / toasts.length),
           // nothing is running anymore: the whole list can be closed
           closable: running === 0,
           onCancel: running > 0 ? (): void => this.cancelAll() : undefined
@@ -76,7 +76,7 @@ export class UploaderService {
     const dir = this.contentLoaderService.content().directory;
     if (!Config.Upload.enabled ||
       !this.authService.isAuthenticated() ||
-      this.authService.user().role < Config.Upload.minimumRole ||
+      !this.authService.isAuthorized(Config.Upload.minimumRole) ||
       !dir) {
       return false;
     }
@@ -98,6 +98,9 @@ export class UploaderService {
     }
     const files = Array.from(filesIn);
     const dirDto = this.contentLoaderService.content().directory;
+    if (!dirDto) { // canUpload() checks it too
+      return;
+    }
     const directory = Utils.concatUrls(dirDto.path, dirDto.name);
     const supportedFiles = files.filter(f =>
       UploadUtils.isUploadableExtension(UploadUtils.getExtension(f.name), Config.Upload.blockedExtensions));
@@ -126,12 +129,12 @@ export class UploaderService {
       if (fileExists) {
         existingFiles.push(f);
       } else {
-        const progressItem: UploadProgress = {
+        // the toast is set right below: its cancel button needs the item
+        const progressItem = {
           name: f.name,
           progress: 0,
           status: 'queued',
-          toast: null
-        };
+        } as UploadProgress;
         progressItem.toast = this.toastService.open({
           type: 'progress',
           color: 'secondary',
@@ -157,7 +160,7 @@ export class UploaderService {
       this.toastService.open({
         type: 'warning',
         title: existingFiles.length === 1 ? existingFiles[0].name : $localize`Files already exist: ${existingFiles.length}:count:`,
-        text: existingFiles.length === 1 ? $localize`File already exists` : null,
+        text: existingFiles.length === 1 ? $localize`File already exists` : undefined,
         timeout: ToastService.TIMEOUT,
         placement: 'bottom-right',
         group: UploaderService.TOAST_GROUP,
@@ -214,7 +217,7 @@ export class UploaderService {
 
   private processQueue(): void {
     while (this.activeUploads < this.MAX_CONCURRENT_UPLOADS && this.uploadQueue.length > 0) {
-      const upload = this.uploadQueue.shift();
+      const upload = this.uploadQueue.shift()!; // the queue is not empty
       this.activeUploads++;
       this._uploadFile(upload);
     }
@@ -230,10 +233,10 @@ export class UploaderService {
 
     const url = '/upload/' + (directory || '');
 
-    progressItem.request = this.networkService.postFormData<any>(url, formData).subscribe({
+    progressItem.request = this.networkService.postFormData<{ filename: string, error: string }[]>(url, formData).subscribe({
       next: (event) => {
         if (event.type === HttpEventType.UploadProgress) {
-          progressItem.progress = Math.round((100 * event.loaded) / event.total);
+          progressItem.progress = Math.round((100 * event.loaded) / (event.total ?? NaN));
           progressItem.toast.update({
             progress: progressItem.progress,
             text: progressItem.progress + '%',
@@ -241,10 +244,10 @@ export class UploaderService {
             ...(progressItem.progress >= 100 ? {onCancel: undefined} : {})
           });
         } else if (event.type === HttpEventType.Response) {
-          const response = event.body as any;
-          const serverErrors = (response && response.result) ? response.result : [];
+          const response = event.body;
+          const serverErrors = response?.result ?? [];
 
-          const serverError = serverErrors.find((e: any) => e.filename === progressItem.name);
+          const serverError = serverErrors.find((e) => e.filename === progressItem.name);
           if (serverError) {
             this.onUploadFailed(progressItem, serverError.error);
           } else {
@@ -252,7 +255,7 @@ export class UploaderService {
             // a success needs no action, so it hides like the other short messages
             progressItem.toast.update({
               type: 'success',
-              text: null,
+              text: undefined,
               progress: 100,
               timeout: ToastService.TIMEOUT,
               closable: true,
@@ -282,7 +285,7 @@ export class UploaderService {
       this.finishBatchIfDone();
       return;
     }
-    progressItem.request.unsubscribe();
+    progressItem.request?.unsubscribe();
     this.onUploadFinished(progressItem);
   }
 

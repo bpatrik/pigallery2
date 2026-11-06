@@ -36,7 +36,7 @@ export class UserService {
     await this.shareService.wait();
     if (Config.Sharing.enabled === true) {
       if (this.shareService.isSharing()) {
-        const query: any = {};
+        const query: Record<string, unknown> = {};
         query[QueryParams.gallery.sharingKey_query] =
             this.shareService.getSharingKey();
         return this.networkService.getJson<UserDTO>('/user/me', query);

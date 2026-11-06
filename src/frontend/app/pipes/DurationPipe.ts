@@ -8,8 +8,8 @@ export const formatDuration = (time: number, separator: ':' | 'string' = 'string
   const s = Math.floor(time / 1000);
 
   if (separator === ':') {
-    const leftPad = (x: any): string =>
-      String(x).length >= 2 ? x : leftPad(`0${x}`);
+    const leftPad = (x: number | string): string =>
+      String(x).length >= 2 ? String(x) : leftPad(`0${x}`);
     return [h || 0, m || 0, s || 0].map(leftPad).join(':');
   }
   let str = '';

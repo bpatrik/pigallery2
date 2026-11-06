@@ -20,7 +20,7 @@ export class BlogService {
     loader: ({params: content}) => this.loadMarkdowns(content)
   });
   // keeps the last loaded markdowns (that were read) while the next ones load; undefined until the first load
-  public readonly groupedMarkdowns = linkedSignal<GroupedMarkdown[], GroupedMarkdown[]>({
+  public readonly groupedMarkdowns = linkedSignal<GroupedMarkdown[] | undefined, GroupedMarkdown[] | undefined>({
     source: () => this.markdownResource.hasValue() ? this.markdownResource.value() : undefined,
     computation: (markdowns, previous) => markdowns ?? previous?.value
   });
@@ -46,7 +46,7 @@ export class BlogService {
    * The markdowns of a date group. Without a date, the ones that go to the top.
    * Undefined while the markdowns are not loaded.
    */
-  getMarkDowns(date: Date): GroupedMarkdown[] {
+  getMarkDowns(date?: Date): GroupedMarkdown[] | undefined {
     const markdowns = this.groupedMarkdowns();
     if (!markdowns) {
       return undefined;

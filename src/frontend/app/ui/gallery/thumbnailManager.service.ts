@@ -30,10 +30,10 @@ export class ThumbnailManagerService {
 export abstract class ThumbnailBase {
   protected readonly loading = signal(false);
   protected readonly available = signal(false);
-  protected readonly src = signal<string>(null);
+  protected readonly src = signal<string | null>(null);
   protected readonly error = signal(false);
-  protected onLoad: () => void = null;
-  protected thumbnailTask: ThumbnailTaskEntity = null;
+  protected onLoad: (() => void) | null = null;
+  protected thumbnailTask: ThumbnailTaskEntity | null = null;
 
   protected constructor(protected thumbnailService: ThumbnailLoaderService) {
   }
@@ -48,7 +48,7 @@ export abstract class ThumbnailBase {
     return this.available();
   }
 
-  get Src(): string {
+  get Src(): string | null {
     return this.src();
   }
 

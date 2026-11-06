@@ -18,7 +18,7 @@ export class NotificationService {
 
   readonly countedNotifications = signal<CountedNotificationDTO[]>([]);
   numberOfNotifications = 0;
-  lastUser: UserDTO = null;
+  lastUser: UserDTO | null = null;
 
   constructor() {
     // More than 3 notifications at once (e.g. server errors at login) would cover the page
@@ -38,8 +38,9 @@ export class NotificationService {
     });
   }
 
-  private onUser(user: UserDTO): void {
+  private onUser(user: UserDTO | null): void {
     if (
+        user &&
         this.authService.isAuthenticated() &&
         (!this.lastUser ||
             this.lastUser.id !== user.id) &&
@@ -114,23 +115,23 @@ export class NotificationService {
     }
   }
 
-  success(text: string, title: string = null): void {
+  success(text: string | null, title: string | null = null): void {
     this.show('success', text, title);
   }
 
-  error(text: string, title?: string): void {
+  error(text: string | null, title?: string | null): void {
     this.show('error', text, title);
   }
 
-  warning(text: string, title?: string): void {
+  warning(text: string | null, title?: string | null): void {
     this.show('warning', text, title);
   }
 
-  info(text: string, title: string = null): void {
+  info(text: string | null, title: string | null = null): void {
     this.show('info', text, title);
   }
 
-  private show(type: ToastType, text: string, title: string): void {
-    this.toastService.open({type, text, title, timeout: ToastService.TIMEOUT, group: NotificationService.TOAST_GROUP});
+  private show(type: ToastType, text: string | null, title?: string | null): void {
+    this.toastService.open({type, text: text ?? undefined, title: title ?? undefined, timeout: ToastService.TIMEOUT, group: NotificationService.TOAST_GROUP});
   }
 }

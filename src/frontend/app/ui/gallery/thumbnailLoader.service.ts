@@ -135,7 +135,7 @@ export class ThumbnailLoaderService {
       priority: ThumbnailLoadingPriority,
       listener: ThumbnailLoadingListener
   ): ThumbnailTaskEntity {
-    let thTask: ThumbnailTask = null;
+    let thTask: ThumbnailTask | null = null;
     // is image already queued?
     for (const item of this.que) {
       if (item.path === path) {
@@ -163,12 +163,12 @@ export class ThumbnailLoaderService {
     return thumbnailTaskEntity;
   }
 
-  private getNextTask(): ThumbnailTask {
+  private getNextTask(): ThumbnailTask | null {
     if (this.que.length === 0) {
       return null;
     }
 
-    let highestPriority: ThumbnailTask = null;
+    let highestPriority: ThumbnailTask | null = null;
     let currentPriority: ThumbnailLoadingPriority = Number.MAX_SAFE_INTEGER;
     for (const item1 of this.que) {
       for (const item of item1.taskEntities) {

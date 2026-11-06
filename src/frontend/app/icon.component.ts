@@ -18,8 +18,8 @@ import { SafeHtmlPipe } from './pipes/SafeHTMLPipe';
 })
 export class IconComponent {
 
-  readonly width = input<number>(undefined);
-  readonly height = input<number>(undefined);
+  readonly width = input<number>();
+  readonly height = input<number>();
 
   protected readonly Config = Config;
 

@@ -125,7 +125,7 @@ export class MapService {
     // Try to get time from GPX points if available
     if (path[0]['time']) {
       startTime = new Date(path[0]['time']);
-      endTime = new Date(path[path.length - 1]['time']);
+      endTime = new Date(path[path.length - 1]['time'] ?? NaN);
     }
 
     let duration = startTime && endTime ? (endTime.getTime() - startTime.getTime()) / 1000 : 0;
@@ -182,8 +182,8 @@ export class MapService {
       const ret: LatLngLiteral[] = [];
       for (const element of Array.from(elements)) {
         const point: LatLngLiteral & { time?: string } = {
-          lat: parseFloat(element.getAttribute('lat')),
-          lng: parseFloat(element.getAttribute('lon'))
+          lat: parseFloat(element.getAttribute('lat') ?? ''),
+          lng: parseFloat(element.getAttribute('lon') ?? '')
         };
         // Get time if available
         const timeElement = element.getElementsByTagName('time')[0];

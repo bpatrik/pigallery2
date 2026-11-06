@@ -6,7 +6,7 @@ import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
 export class DuplicateService {
   private networkService = inject(NetworkService);
 
-  public readonly duplicates = signal<DuplicatesDTO[]>(null);
+  public readonly duplicates = signal<DuplicatesDTO[] | null>(null);
 
   public async getDuplicates(): Promise<void> {
     this.duplicates.set(

@@ -26,7 +26,7 @@ export class SettingsService {
   public readonly configStyle = signal<ConfigStyle>(ConfigStyle.full);
   public readonly settings = signal<IWebConfigClassPrivate<TAGS> & WebConfig>(WebConfigClassBuilder.attachPrivateInterface(new WebConfig()));
   private fetchingSettings = false;
-  public readonly statistic = signal<StatisticDTO>(null);
+  public readonly statistic = signal<StatisticDTO | null>(null);
   // Bumped on every edit of the settings forms. The forms edit the settings states in place, so the views
   // that read another entry's value (hiding, disabling, theme lists) read this to refresh.
   public readonly edits = signal(0);
@@ -34,11 +34,13 @@ export class SettingsService {
   constructor() {
     this.getSettings().catch(console.error);
 
-    if (CookieHelper.get(CookieNames.configPriority) != null) {
-      this.configPriority.set(parseInt(CookieHelper.get(CookieNames.configPriority)));
+    const configPriority = CookieHelper.get(CookieNames.configPriority);
+    if (configPriority != null) {
+      this.configPriority.set(parseInt(configPriority));
     }
-    if (CookieHelper.get(CookieNames.configStyle) != null) {
-      this.configStyle.set(parseInt(CookieHelper.get(CookieNames.configStyle)));
+    const configStyle = CookieHelper.get(CookieNames.configStyle);
+    if (configStyle != null) {
+      this.configStyle.set(parseInt(configStyle));
     }
 
     this.loadStatistic().catch(console.error);
@@ -59,7 +61,7 @@ export class SettingsService {
     }
     this.fetchingSettings = true;
     try {
-      const wcg = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
+      const wcg: IWebConfigClassPrivate<TAGS> & WebConfig = WebConfigClassBuilder.attachPrivateInterface(new WebConfig());
       wcg.load(
           await this.networkService.getJson<Promise<WebConfig>>('/settings')
       );
@@ -71,7 +73,7 @@ export class SettingsService {
   }
 
 
-  public updateSettings(settings: Record<string, any>, settingsPath: string): Promise<void> {
+  public updateSettings(settings: Record<string, any>, settingsPath: string | undefined): Promise<void> {
     return this.networkService.putJson('/settings', {settings, settingsPath});
   }
 

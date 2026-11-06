@@ -43,7 +43,7 @@ export class GalleryService implements OnDestroy {
     this.subscription?.unsubscribe();
   }
 
-  private updateQuery(key: string, defValue: boolean | number, newValue: boolean | number) {
+  private updateQuery(key: string, defValue: boolean | number, newValue: boolean | number | null) {
     if (defValue === newValue) {
       newValue = null;
     }

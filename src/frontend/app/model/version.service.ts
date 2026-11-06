@@ -7,8 +7,8 @@ import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
 export class VersionService {
   private router = inject(Router);
 
-  public readonly version = signal<string>(null);
-  public readonly appVersion = signal<string>(null);
+  public readonly version = signal<string | null>(null);
+  public readonly appVersion = signal<string | null>(null);
 
   public onNewVersion(version: string): void {
     if (this.version() === version) {
