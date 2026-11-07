@@ -16,7 +16,6 @@ import {CookieNames} from '../common/CookieNames';
 import {Router} from './routes/Router';
 import {PhotoProcessing} from './model/fileaccess/fileprocessing/PhotoProcessing';
 import {Event} from '../common/event/Event';
-import {QueryParams} from '../common/QueryParams';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {ConfigClassOptions} from 'typeconfig/common';
 import {ServerConfig} from '../common/config/private/PrivateConfig';
@@ -95,14 +94,6 @@ export class Server {
     // for parsing application/json
     this.app.use(express.json());
     this.app.use(cookieParser());
-
-    // enable token generation but do not check it
-    this.app.post(
-      [Config.Server.apiPath + '/user/login', Config.Server.apiPath + '/share/login'],
-    );
-    this.app.get(
-      [Config.Server.apiPath + '/user/me', Config.Server.apiPath + '/share/:' + QueryParams.gallery.sharingKey_params],
-    );
 
     PhotoProcessing.init();
     Localizations.init();

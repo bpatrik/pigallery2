@@ -40,6 +40,8 @@
     "test/cypress/**/*",
     "extension/**/*",
     "extensions/**/*",
+    // test output, e.g. the media files of Routing.spec (.ts and .mts are video formats too)
+    "test/tmp/**/*",
     // The Angular CLI builds the frontend with src/frontend/tsconfig.*.json
     "src/frontend/**/*"
   ]

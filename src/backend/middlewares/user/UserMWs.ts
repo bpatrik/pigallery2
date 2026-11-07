@@ -3,6 +3,7 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {Utils} from '../../../common/Utils';
 import {Config} from '../../../common/config/private/Config';
+import {RequestParams} from '../RequestParams';
 
 export class UserMWs {
   public static async createUser(
@@ -40,7 +41,7 @@ export class UserMWs {
     }
     if (
       typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined'
+      typeof RequestParams.get(req, 'id') === 'undefined'
     ) {
       return next();
     }
@@ -48,7 +49,7 @@ export class UserMWs {
     try {
       // the sessions of the deleted user end on their next request (see AuthenticationMWs.authenticate)
       await ObjectManagers.getInstance().UserManager.deleteUser(
-        parseInt(req.params.id, 10)
+        parseInt(RequestParams.get(req, 'id'), 10)
       );
       return next();
     } catch (err) {
@@ -66,7 +67,7 @@ export class UserMWs {
     }
     if (
       typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined' ||
+      typeof RequestParams.get(req, 'id') === 'undefined' ||
       typeof req.body === 'undefined' ||
       typeof req.body.newRole === 'undefined'
     ) {
@@ -75,7 +76,7 @@ export class UserMWs {
 
     try {
       await ObjectManagers.getInstance().UserManager.changeRole(
-        parseInt(req.params.id, 10),
+        parseInt(RequestParams.get(req, 'id'), 10),
         req.body.newRole
       );
       return next();
@@ -94,7 +95,7 @@ export class UserMWs {
     }
     if (
       typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined' ||
+      typeof RequestParams.get(req, 'id') === 'undefined' ||
       typeof req.body === 'undefined' ||
       typeof req.body.settings === 'undefined'
     ) {
@@ -103,7 +104,7 @@ export class UserMWs {
 
     try {
       const updatedUser = await ObjectManagers.getInstance().UserManager.updateSettings(
-        parseInt(req.params.id, 10),
+        parseInt(RequestParams.get(req, 'id'), 10),
         req.body.settings
       );
       if (req.session?.context?.user?.id === updatedUser.id) {
@@ -126,14 +127,14 @@ export class UserMWs {
     }
     if (
       typeof req.params === 'undefined' ||
-      typeof req.params.id === 'undefined'
+      typeof RequestParams.get(req, 'id') === 'undefined'
     ) {
       return next();
     }
 
     try {
       await ObjectManagers.getInstance().UserManager.setOidcSubject(
-        parseInt(req.params.id, 10),
+        parseInt(RequestParams.get(req, 'id'), 10),
         null
       );
       return next();

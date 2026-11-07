@@ -18,6 +18,7 @@ import {SearchQueryDTO, SearchQueryTypes,} from '../../common/entities/SearchQue
 import {LocationLookupException} from '../exceptions/LocationLookupException';
 import {ServerTime} from './ServerTimingMWs';
 import {SortByTypes} from '../../common/entities/SortingMethods';
+import {RequestParams} from './RequestParams';
 
 export class GalleryMWs {
   /**
@@ -30,11 +31,11 @@ export class GalleryMWs {
     next: NextFunction
   ): void {
     try {
-      if (!req.params['searchQueryDTO']) {
+      if (!RequestParams.get(req, 'searchQueryDTO')) {
         return next();
       }
 
-      const rawQueryParam = req.params['searchQueryDTO'] as string;
+      const rawQueryParam = RequestParams.get(req, 'searchQueryDTO');
 
       let query: SearchQueryDTO;
       try {
@@ -65,7 +66,7 @@ export class GalleryMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const directoryName = req.params['directory'] || '/';
+    const directoryName = RequestParams.get(req, 'directory') || '/';
     const absoluteDirectoryName = path.join(
       ProjectPath.ImageFolder,
       directoryName
@@ -325,12 +326,12 @@ export class GalleryMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    if (!req.params['mediaPath']) {
+    if (!RequestParams.get(req, 'mediaPath')) {
       return next();
     }
     const fullMediaPath = path.join(
       ProjectPath.ImageFolder,
-      req.params['mediaPath']
+      RequestParams.get(req, 'mediaPath')
     );
 
     // check if file exist
@@ -342,7 +343,7 @@ export class GalleryMWs {
       return next(
         new ErrorDTO(
           ErrorCodes.PATH_ERROR,
-          'no such file:' + req.params['mediaPath'],
+          'no such file:' + RequestParams.get(req, 'mediaPath'),
           'can\'t find file: ' + fullMediaPath
         )
       );
@@ -427,7 +428,7 @@ export class GalleryMWs {
       if (Config.Search.AutoComplete.enabled === false) {
         return next();
       }
-      if (!req.params['value']) {
+      if (!RequestParams.get(req, 'value')) {
         return next();
       }
 
@@ -438,7 +439,7 @@ export class GalleryMWs {
       req.resultPipe =
         await ObjectManagers.getInstance().SearchManager.autocomplete(
           req.session.context,
-          req.params['value'],
+          RequestParams.get(req, 'value'),
           type
         );
       return next();
@@ -495,10 +496,10 @@ export class GalleryMWs {
   ): Promise<void> {
     try {
 
-      if (!req.params['mediaPath']) {
+      if (!RequestParams.get(req, 'mediaPath')) {
         return next();
       }
-      const mediaPath = req.params['mediaPath'];
+      const mediaPath = RequestParams.get(req, 'mediaPath');
 
       req.resultPipe = await ObjectManagers.getInstance().GalleryManager.getMedia(req.session.context, mediaPath);
       return next();

@@ -11,6 +11,7 @@ import {ServerTimeEntry} from '../middlewares/ServerTimingMWs';
 import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
 import {ObjectManagers} from '../model/ObjectManagers';
+import {RequestParams} from '../middlewares/RequestParams';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -60,7 +61,7 @@ export class PublicRouter {
 
     // /<locale>/<page> links (e.g. from the language menu) set the language, then open the same page
     const redirectToLocalePage = (req: Request, res: Response, next: NextFunction) => {
-      const locale = req.params['locale'];
+      const locale = RequestParams.get(req, 'locale');
       if (Config.Server.languages.indexOf(locale) === -1) {
         return next();
       }
@@ -293,31 +294,31 @@ export class PublicRouter {
       [
         '/',
         '/login',
-        '/gallery*',
+        '/gallery{*rest}',
         '/share/:' + QueryParams.gallery.sharingKey_params,
         '/shareLogin',
         '/admin',
         '/duplicates',
         '/faces',
         '/albums',
-        '/search*',
+        '/search{*rest}',
       ],
       AuthenticationMWs.tryAuthenticate,
       addTPl, // add template after authentication was successful
       setLocale,
       renderIndex
     );
-    app.get(['/:locale', '/:locale/*'], redirectToLocalePage);
+    app.get(['/:locale', '/:locale/*page'], redirectToLocalePage);
 
     const renderFile = (subDir = '') => {
       return (req: Request, res: Response) => {
         // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
         // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
-        const hashed = /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(req.params.file);
+        const hashed = /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(RequestParams.get(req, 'file'));
         if (!hashed) {
           res.set('Cache-Control', 'no-cache');
         }
-        res.sendFile(req.params.file, {
+        res.sendFile(RequestParams.get(req, 'file'), {
           // sendFile refuses paths that would leave the root
           root: path.join(ProjectPath.FrontendFolder, req.localePath, subDir),
           dotfiles: 'allow',
@@ -335,7 +336,7 @@ export class PublicRouter {
     };
 
     app.get(
-      '/assets/:file(*)',
+      '/assets/*file',
       setLocale,
       AuthenticationMWs.normalizePathParam('file'),
       renderFile('assets')
