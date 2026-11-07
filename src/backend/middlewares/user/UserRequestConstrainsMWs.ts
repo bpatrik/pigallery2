@@ -3,6 +3,7 @@ import {MoreThanOrEqual} from 'typeorm';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {UserRoles} from '../../../common/entities/UserDTO';
 import {ObjectManagers} from '../../model/ObjectManagers';
+import {RequestParams} from '../RequestParams';
 
 export class UserRequestConstrainsMWs {
   public static forceSelfRequest(
@@ -12,11 +13,11 @@ export class UserRequestConstrainsMWs {
   ): void {
     if (
         typeof req.params === 'undefined' ||
-        typeof req.params.id === 'undefined'
+        typeof RequestParams.get(req, 'id') === 'undefined'
     ) {
       return next();
     }
-    if (req.session.context?.user.id !== parseInt(req.params.id, 10)) {
+    if (req.session.context?.user.id !== parseInt(RequestParams.get(req, 'id'), 10)) {
       res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
@@ -31,12 +32,12 @@ export class UserRequestConstrainsMWs {
   ): void {
     if (
         typeof req.params === 'undefined' ||
-        typeof req.params.id === 'undefined'
+        typeof RequestParams.get(req, 'id') === 'undefined'
     ) {
       return next();
     }
 
-    if (req.session.context?.user.id === parseInt(req.params.id, 10)) {
+    if (req.session.context?.user.id === parseInt(RequestParams.get(req, 'id'), 10)) {
       res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
@@ -51,12 +52,12 @@ export class UserRequestConstrainsMWs {
   ): Promise<void> {
     if (
         typeof req.params === 'undefined' ||
-        typeof req.params.id === 'undefined'
+        typeof RequestParams.get(req, 'id') === 'undefined'
     ) {
       return next();
     }
 
-    if (req.session.context?.user.id !== parseInt(req.params.id, 10)) {
+    if (req.session.context?.user.id !== parseInt(RequestParams.get(req, 'id'), 10)) {
       return next();
     }
 

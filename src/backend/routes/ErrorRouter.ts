@@ -11,7 +11,7 @@ export class ErrorRouter {
   }
 
   private static addApiErrorHandler(app: Express): void {
-    app.use(Config.Server.apiPath + '/*', RenderingMWs.renderError);
+    app.use(Config.Server.apiPath + '/{*rest}', RenderingMWs.renderError);
   }
 
   private static addGenericHandler(app: Express): void {

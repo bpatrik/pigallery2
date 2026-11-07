@@ -58,7 +58,7 @@ export class SharingRouter {
 
   private static addCreateSharing(app: express.Express): void {
     app.post(
-      [Config.Server.apiPath + '/share/:directory(*)', Config.Server.apiPath + '/share/', Config.Server.apiPath + '/share//'],
+      [Config.Server.apiPath + '/share/{*directory}', Config.Server.apiPath + '/share/'],
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.User),
       AuthenticationMWs.normalizePathParam('directory'),
@@ -70,7 +70,7 @@ export class SharingRouter {
 
   private static addUpdateSharing(app: express.Express): void {
     app.put(
-      [Config.Server.apiPath + '/share/:directory(*)', Config.Server.apiPath + '/share/', Config.Server.apiPath + '/share//'],
+      [Config.Server.apiPath + '/share/{*directory}', Config.Server.apiPath + '/share/'],
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.User),
       AuthenticationMWs.normalizePathParam('directory'),

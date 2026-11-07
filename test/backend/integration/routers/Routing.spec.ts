@@ -441,6 +441,12 @@ describe('Routing', () => {
       expect(await sharedDirectory(enc(HIDDEN + '/titkos mappa'))).to.equal(path.join(HIDDEN, 'titkos mappa'));
     });
 
+    it('should authenticate the search, autocomplete and zip routes without a query', async () => {
+      for (const url of [api('/search/'), api('/autocomplete/'), api('/gallery/zip/')]) {
+        expect((await get(url)).status, url).to.equal(401);
+      }
+    });
+
     it('should reject path traversal on sharing', async () => {
       const before = (await ObjectManagers.getInstance().SharingManager.listAll()).length;
       for (const t of TRAVERSALS) {

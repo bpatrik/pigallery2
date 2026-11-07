@@ -3,6 +3,7 @@ import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {Utils} from '../../common/Utils';
 import {Config} from '../../common/config/private/Config';
+import {RequestParams} from './RequestParams';
 
 export class AlbumMWs {
   public static async listAlbums(
@@ -32,12 +33,12 @@ export class AlbumMWs {
     if (Config.Album.enabled === false) {
       return next();
     }
-    if (!req.params['id'] || !Utils.isUInt32(parseInt(req.params['id'], 10))) {
+    if (!RequestParams.get(req, 'id') || !Utils.isUInt32(parseInt(RequestParams.get(req, 'id'), 10))) {
       return next();
     }
     try {
       await ObjectManagers.getInstance().AlbumManager.deleteAlbum(
-        parseInt(req.params['id'], 10)
+        parseInt(RequestParams.get(req, 'id'), 10)
       );
       req.resultPipe = 'ok';
       return next();

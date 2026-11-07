@@ -917,7 +917,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
   });
 
   describe('normalizePathParam', async () => {
-    const run = (p: string): { err: ErrorDTO, value: string } => {
+    const run = (p: string | string[]): { err: ErrorDTO, value: string } => {
       const req: any = {params: {directory: p}};
       let err: ErrorDTO;
       AuthenticationMWs.normalizePathParam('directory')(req, {} as any, (e?: unknown) => {
@@ -940,6 +940,25 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       expect(run('a/../b.jpg')).to.deep.equal({err: undefined, value: 'b.jpg'});
       expect(run('/a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('/a/b.jpg')});
       expect(run('..foo.jpg')).to.deep.equal({err: undefined, value: '..foo.jpg'});
+    });
+
+    // Express 5 gives a wildcard param (/*directory) as its decoded segments
+    it('should join and normalize wildcard params', () => {
+      expect(run(['a', 'b.jpg'])).to.deep.equal({err: undefined, value: path.normalize('a/b.jpg')});
+      expect(run(['árvíz', 'tükör fúró.jpg'])).to.deep.equal({err: undefined, value: path.normalize('árvíz/tükör fúró.jpg')});
+      expect(run(['a', '..', 'b.jpg'])).to.deep.equal({err: undefined, value: 'b.jpg'});
+      expect(run(['', ''])).to.deep.equal({err: undefined, value: path.sep});
+      // a leading '/' makes it absolute, so '..' stops at the base folder
+      expect(run(['', '..', 'x'])).to.deep.equal({err: undefined, value: path.normalize('/x')});
+    });
+
+    it('should reject wildcard params escaping the base folder', () => {
+      // a segment can contain a decoded '/' (from %2F)
+      for (const p of [['..'], ['..', 'x.jpg'], ['a', '..', '..'], ['../x.jpg'], ['a/../..', 'x.jpg']]) {
+        const ret = run(p);
+        expect(ret.err, p.join('|')).to.be.instanceOf(ErrorDTO);
+        expect(ret.err.code, p.join('|')).to.equal(ErrorCodes.INPUT_ERROR);
+      }
     });
   });
 
