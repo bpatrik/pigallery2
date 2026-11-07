@@ -4,11 +4,11 @@ import {DirectorySearch, SearchQueryDTO} from '../../common/entities/SearchQuery
 import {DirectoryAccess} from './DirectoryAccess';
 
 export class SessionContext {
-  user: ContextUser;
+  user!: ContextUser; // set by SessionManager.buildContext()
   // New structured projection with prebuilt SQL and params
   // It also contains the directory allow/block list, so media in a not available directory is filtered out
   projectionQuery?: Brackets;
-  hasDirectoryProjection: boolean;
+  hasDirectoryProjection?: boolean;
   // Which directories the session can open (directory allow / block lists). No restriction by default.
   directoryAccess: DirectoryAccess = new DirectoryAccess(this);
 }

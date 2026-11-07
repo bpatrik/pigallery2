@@ -23,5 +23,5 @@ export class PhotoMetadataEntity
 @ChildEntity()
 export class PhotoEntity extends MediaEntity implements PhotoDTO {
   @Column(() => PhotoMetadataEntity)
-  override metadata: PhotoMetadataEntity;
+  override metadata!: PhotoMetadataEntity;
 }

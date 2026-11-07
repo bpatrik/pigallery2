@@ -16,7 +16,7 @@ const LOG_TAG = '[JobManager]';
 
 export class JobManager implements IJobListener, IObjectManager {
   protected timers: { schedule: JobScheduleDTO; timer: NodeJS.Timeout }[] = [];
-  protected progressManager: JobProgressManager;
+  protected progressManager!: JobProgressManager; // set by init()
 
   protected get JobRunning(): boolean {
     return (

@@ -25,21 +25,22 @@ export class ObjectManagers {
   private static instance: ObjectManagers | null = null;
 
   private readonly managers: IObjectManager[];
-  private galleryManager: GalleryManager;
-  private userManager: UserManager;
-  private searchManager: SearchManager;
-  private sharingManager: SharingManager;
-  private indexingManager: IndexingManager;
-  private personManager: PersonManager;
-  private coverManager: CoverManager;
-  private versionManager: VersionManager;
-  private jobManager: JobManager;
-  private locationManager: LocationManager;
-  private albumManager: AlbumManager;
-  private extensionManager: ExtensionManager;
-  private projectedCacheManager: ProjectedCacheManager;
-  private uploadManager: UploadManager;
-  private sessionManager: SessionManager;
+  // set by init(), before the app uses them
+  private galleryManager!: GalleryManager;
+  private userManager!: UserManager;
+  private searchManager!: SearchManager;
+  private sharingManager!: SharingManager;
+  private indexingManager!: IndexingManager;
+  private personManager!: PersonManager;
+  private coverManager!: CoverManager;
+  private versionManager!: VersionManager;
+  private jobManager!: JobManager;
+  private locationManager!: LocationManager;
+  private albumManager!: AlbumManager;
+  private extensionManager!: ExtensionManager;
+  private projectedCacheManager!: ProjectedCacheManager;
+  private uploadManager!: UploadManager;
+  private sessionManager!: SessionManager;
   private initDone = false;
 
   constructor() {

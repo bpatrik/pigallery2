@@ -7,16 +7,16 @@ import {SessionUser} from '../../SessionContext';
 @Unique(['name'])
 export class UserEntity implements UserDTO,SessionUser {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @Column('smallint')
-  role: UserRoles;
+  role!: UserRoles;
 
   // OIDC issuer and subject ('<iss>|<sub>'), only set in OIDC strict security mode
   @Column({type: 'text', nullable: true})

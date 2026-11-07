@@ -30,9 +30,9 @@ export class ExtensionManager implements IObjectManager {
   public static EXTENSION_API_PATH = Config.Server.apiPath + '/extension';
   public repository: ExtensionRepository = new ExtensionRepository();
 
-  events: IExtensionEvents;
+  events!: IExtensionEvents; // set by initEvents(), which the constructor calls
   extObjects: Record<string, ExtensionObject<unknown>> = {};
-  router: express.Router;
+  router!: express.Router; // set by init() when extensions are enabled, only used then
 
   constructor() {
     this.initEvents();

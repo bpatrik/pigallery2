@@ -12,7 +12,7 @@ import {TestHelper} from '../../../../TestHelper';
  */
 class SmtpSink {
   public readonly messages: { from: string, to: string[], data: string }[] = [];
-  private server: net.Server;
+  private server!: net.Server;
 
   async start(): Promise<number> {
     this.server = net.createServer((socket) => {

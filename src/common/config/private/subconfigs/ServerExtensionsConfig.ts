@@ -44,7 +44,7 @@ export class ServerExtensionsEntryConfig {
       priority: ConfigPriority.advanced
     }
   })
-  configs: GenericConfigType;
+  configs!: GenericConfigType; // loaded from the config or set by the extension
 }
 
 @SubConfigClass<TAGS>({softReadonly: true})

@@ -3,7 +3,7 @@ import {ExtensionListItem} from '../../../common/entities/extension/ExtensionLis
 
 export class ExtensionRepository {
 
-  extensionsList: ExtensionListItem[];
+  extensionsList: ExtensionListItem[] = [];
   lastUpdate = 0;
   private UPDATE_FREQUENCY_MS = 30 * 1000;
 

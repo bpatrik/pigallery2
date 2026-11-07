@@ -12,15 +12,15 @@ export class DirectoryEntity
     implements ParentDirectoryDTO<MediaDTO>, SubDirectoryDTO<MediaDTO> {
   @Index()
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Index()
   @Column(columnCharsetCS)
-  name: string;
+  name!: string;
 
   @Index()
   @Column(columnCharsetCS)
-  path: string;
+  path!: string;
 
   /**
    * last time the directory was modified (from outside, eg.: a new media was added)
@@ -32,7 +32,7 @@ export class DirectoryEntity
       to: (v) => v,
     },
   })
-  public lastModified: number;
+  public lastModified!: number;
 
   /**
    * Last time the directory was fully scanned, not only for a few media to create a cover
@@ -54,17 +54,17 @@ export class DirectoryEntity
   @ManyToOne(() => DirectoryEntity, (directory) => directory.directories, {
     onDelete: 'CASCADE',
   })
-  public parent: DirectoryEntity;
+  public parent!: DirectoryEntity;
 
   @OneToMany(() => DirectoryEntity, (dir) => dir.parent)
-  public directories: DirectoryEntity[];
+  public directories!: DirectoryEntity[];
 
   @OneToOne(() => ProjectedDirectoryCacheEntity, (pdc) => pdc.directory)
-  public cache: ProjectedDirectoryCacheEntity;
+  public cache!: ProjectedDirectoryCacheEntity;
 
   @OneToMany(() => MediaEntity, (media) => media.directory)
-  public media: MediaEntity[];
+  public media!: MediaEntity[];
 
   @OneToMany(() => FileEntity, (file) => file.directory)
-  public metaFile: FileEntity[];
+  public metaFile!: FileEntity[];
 }

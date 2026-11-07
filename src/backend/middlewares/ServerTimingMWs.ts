@@ -3,7 +3,7 @@ import {Config} from '../../common/config/private/Config';
 
 export class ServerTimeEntry {
   public name: string;
-  startHR: [number, number];
+  startHR?: [number, number];
   public endTime: number | null = null;
 
   constructor(name: string) {

@@ -15,7 +15,6 @@ export interface MediaDTOWithThPath extends MediaDTO {
 export abstract class Messenger<C extends Record<string, unknown> = Record<string, unknown>> {
 
   public abstract get Name(): string;
-  protected config: C;
   public readonly ConfigTemplate: DynamicConfig[]  = [];
 
   private async getThumbnail(m: MediaDTO) {

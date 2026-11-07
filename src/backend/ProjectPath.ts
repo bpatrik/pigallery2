@@ -3,15 +3,16 @@ import * as fs from 'node:fs';
 import {PrivateConfigClass} from '../common/config/private/PrivateConfigClass';
 
 export class ProjectPathClass {
-  public Root: string;
-  public ImageFolder: string;
-  public TempFolder: string;
-  public TranscodedFolder: string;
-  public FacesFolder: string;
-  public FrontendFolder: string;
-  public ExtensionFolder: string;
-  public DBFolder: string;
-  private cfg: PrivateConfigClass;
+  // set by reset(), which the constructor calls
+  public Root!: string;
+  public ImageFolder!: string;
+  public TempFolder!: string;
+  public TranscodedFolder!: string;
+  public FacesFolder!: string;
+  public FrontendFolder!: string;
+  public ExtensionFolder!: string;
+  public DBFolder!: string;
+  private cfg!: PrivateConfigClass;
 
   init(cfg: PrivateConfigClass) {
     this.cfg = cfg;

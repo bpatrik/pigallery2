@@ -3,11 +3,10 @@ import NodeGeocoder from 'node-geocoder';
 import {LocationLookupException} from '../../exceptions/LocationLookupException';
 import {LRU} from '../../../common/Utils';
 import {IObjectManager} from './IObjectManager';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
 
 export class LocationManager implements IObjectManager {
-  // onNewDataVersion only need for TypeScript, otherwise the interface is not implemented.
-  readonly onNewDataVersion: (changedDir?: ParentDirectoryDTO) => Promise<void>;
+  // Only declared so TypeScript sees that the class implements the (otherwise all optional) interface.
+  readonly onNewDataVersion?: IObjectManager['onNewDataVersion'];
   readonly geocoder: NodeGeocoder.Geocoder;
   cache = new LRU<GPSMetadata>(100);
 

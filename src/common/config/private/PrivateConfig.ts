@@ -179,7 +179,7 @@ export class UserConfig {
         priority: ConfigPriority.underTheHood
       }
   })
-  name: string;
+  name!: string; // set by the constructor or loaded from the config
 
   @ConfigProperty({
     type: UserRoles,
@@ -201,7 +201,7 @@ export class UserConfig {
       },
     description: $localize`Unencrypted, temporary password. App will encrypt it and delete this.`
   })
-  password: string;
+  password!: string;
 
   @ConfigProperty({
     type: 'string',
@@ -222,7 +222,7 @@ export class UserConfig {
         relevant: () => false // never render this on UI. Only used to indicate that encryption is done.
       } as TAGS,
   })
-  encrypted: boolean;
+  encrypted!: boolean;
 
   constructor(name?: string, password?: string, role?: UserRoles) {
     if (name) {
@@ -892,7 +892,7 @@ export class ScheduledJobTriggerConfig extends JobTriggerConfigBase implements S
   override readonly type = JobTriggerType.scheduled;
 
   @ConfigProperty({type: 'unsignedInt'})
-  override time: number; // data time
+  override time!: number; // data time
 }
 
 @SubConfigClass({softReadonly: true})

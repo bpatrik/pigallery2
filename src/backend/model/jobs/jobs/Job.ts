@@ -13,11 +13,12 @@ declare const global: { gc: () => void };
 export abstract class Job<T extends Record<string, unknown> = Record<string, unknown>> implements IJob<T> {
   public allowParallelRun = false;
   protected progress: JobProgress | null = null;
-  protected config: T;
-  protected prResolve: () => void;
+  // set by start() and the JobListener setter, before the job runs
+  protected config!: T;
+  protected prResolve!: () => void;
   protected IsInstant = false;
-  private jobListener: IJobListener;
-  private soloRun: boolean;
+  private jobListener!: IJobListener;
+  private soloRun!: boolean;
 
   public set JobListener(value: IJobListener) {
     this.jobListener = value;

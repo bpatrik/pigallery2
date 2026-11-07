@@ -26,8 +26,9 @@ const LOG_TAG = '[server]';
 
 export class Server {
   public onStarted = new Event<void>();
-  public app: express.Express;
-  private server: HttpServer;
+  // set by init(), which the constructor calls
+  public app!: express.Express;
+  private server!: HttpServer;
 
   public static instance: Server | null = null;
 
