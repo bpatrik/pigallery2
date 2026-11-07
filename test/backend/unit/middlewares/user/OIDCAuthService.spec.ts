@@ -301,7 +301,7 @@ describe('OIDCAuthService', () => {
         (ObjectManagers as any).instance = {
           UserManager: {
             findOne: async (filter: Partial<UserDTO>) =>
-              users.find(u => Object.keys(filter).every((k: keyof UserDTO) => u[k] === filter[k])) || null,
+              users.find(u => (Object.keys(filter) as (keyof UserDTO)[]).every(k => u[k] === filter[k])) || null,
             setOidcSubject: async (id: number, oidcSubject: string) => {
               const u = users.find(e => e.id === id);
               u!.oidcSubject = oidcSubject;

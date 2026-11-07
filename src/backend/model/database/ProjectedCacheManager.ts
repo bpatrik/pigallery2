@@ -7,7 +7,7 @@ import {ObjectManagers} from '../ObjectManagers';
 import {UserEntity} from './enitites/UserEntity';
 import {SharingEntity} from './enitites/SharingEntity';
 import {IObjectManager} from './IObjectManager';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 import {DiskManager} from '../fileaccess/DiskManager';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {Logger} from '../../Logger';
@@ -29,7 +29,7 @@ export class ProjectedCacheManager implements IObjectManager {
     await this.cleanupNonExistingProjections();
   }
 
-  public async onNewDataVersion(changedDir?: ParentDirectoryDTO): Promise<void> {
+  public async onNewDataVersion(changedDir?: DirectoryPathDTO): Promise<void> {
     if (!changedDir) {
       return;
     }
@@ -300,7 +300,7 @@ export class ProjectedCacheManager implements IObjectManager {
   }
 
   @ExtensionDecorator(e => e.gallery.ProjectedCacheManager.invalidateDirectoryCache)
-  protected async invalidateDirectoryCache(dir: ParentDirectoryDTO) {
+  protected async invalidateDirectoryCache(dir: DirectoryPathDTO) {
     const connection = await SQLConnection.getConnection();
     const dirRepo = connection.getRepository(DirectoryEntity);
 

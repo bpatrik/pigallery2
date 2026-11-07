@@ -389,7 +389,7 @@ describe('MetadataLoader', () => {
   describe('Live Photo', () => {
     const livePhotoDir = path.join(__dirname, '/../../../assets/live_photo');
 
-    before(function () {
+    before(function (this: Mocha.Context) {
       if (!fs.existsSync(livePhotoDir)) {
         this.skip();
       }

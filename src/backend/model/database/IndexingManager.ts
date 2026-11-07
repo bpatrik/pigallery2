@@ -572,7 +572,7 @@ export class IndexingManager {
     }
     if (entities.length < size) {
       return (await repository.insert(entities)).identifiers.map(
-        (i: { id: number }) => i.id
+        (i) => i['id'] as number
       );
     }
     let list: number[] = [];

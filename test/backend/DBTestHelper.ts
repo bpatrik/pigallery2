@@ -89,12 +89,12 @@ export class DBTestHelper {
   static describe(settingsOverride: {
     sqlite?: boolean;
     mysql?: boolean;
-  } = {}): (name: string, tests: (helper?: DBTestHelper) => void) => void {
+  } = {}): (name: string, tests: (helper: DBTestHelper) => void) => void {
     const settings = Utils.clone(DBTestHelper.enable);
     for (const key of Object.keys(settingsOverride)) {
       (settings as any)[key] = (settingsOverride as any)[key];
     }
-    return (name: string, tests: (helper?: DBTestHelper) => void) => {
+    return (name: string, tests: (helper: DBTestHelper) => void) => {
       savedDescribe(name, async () => {
         if (settings.sqlite) {
           const helper = new DBTestHelper(DatabaseType.sqlite);
@@ -104,7 +104,7 @@ export class DBTestHelper {
         }
         if (settings.mysql) {
           const helper = new DBTestHelper(DatabaseType.mysql);
-          savedDescribe('mysql', function(): void {
+          savedDescribe('mysql', function(this: Mocha.Suite): void {
             this.timeout(99999999); // hint for the test environment
             return tests(helper);
           });

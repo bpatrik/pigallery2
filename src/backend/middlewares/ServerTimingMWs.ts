@@ -35,7 +35,7 @@ export const FunctionTime = (id: string, name: string) => {
       return;
     }
 
-    descriptor.value = function (...args: any[]): any {
+    descriptor.value = function (this: unknown, ...args: any[]): any {
       const timer = new ServerTimeEntry(name);
       timer.start();
 
@@ -72,10 +72,10 @@ export const FunctionTime = (id: string, name: string) => {
 };
 
 export const ServerTime = (id: string, name: string) => {
-  return (
+  return <T extends (req: Request, res: Response, next: NextFunction) => void | Promise<void>>(
       target: unknown,
       propertyName: string,
-      descriptor: TypedPropertyDescriptor<(req: unknown, res: unknown, next: () => void) => void>
+      descriptor: TypedPropertyDescriptor<T>
   ): void => {
     if (Config.Server.Log.logServerTiming === false) {
       return;
@@ -89,7 +89,7 @@ export const ServerTime = (id: string, name: string) => {
       const entry = new ServerTimeEntry(name);
       req.timing[id] = entry;
       entry.start();
-      m(req, res, (err?: Error) => {
+      m(req, res, (err?: unknown) => {
         entry.end();
         next(err);
       });

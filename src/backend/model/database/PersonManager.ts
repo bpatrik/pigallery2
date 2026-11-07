@@ -4,7 +4,7 @@ import {PersonDTO} from '../../../common/entities/PersonDTO';
 import {Logger} from '../../Logger';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {PersonJunctionTable} from './enitites/person/PersonJunctionTable';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {SessionContext} from '../SessionContext';
 import {ProjectionAwareManager} from './ProjectionAwareManager';
@@ -91,7 +91,8 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
     }
   }
 
-  protected async invalidateDBCache(changedDir?: ParentDirectoryDTO): Promise<void> {
+  // only a scanned directory comes with its id
+  protected async invalidateDBCache(changedDir?: DirectoryPathDTO & {id?: number}): Promise<void> {
     if (!changedDir || !changedDir.id) {
       await this.invalidateAllDBCache();
       return;

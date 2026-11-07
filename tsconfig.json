@@ -4,9 +4,7 @@
   // which set their own module setup, types and files.
   "compileOnSave": true,
   "compilerOptions": {
-    "strict": false,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    "strict": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
