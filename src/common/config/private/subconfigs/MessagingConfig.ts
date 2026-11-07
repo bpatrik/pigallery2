@@ -7,7 +7,7 @@ declare let $localize: (s: TemplateStringsArray) => string;
 if (typeof $localize === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  global.$localize = (s) => s;
+  global.$localize = (s: TemplateStringsArray) => s;
 }
 
 
@@ -87,7 +87,7 @@ export class EmailMessagingConfig {
         {
           name: $localize`Sender email`,
           priority: ConfigPriority.advanced,
-        } as TAGS,
+        },
     description: $localize`Some services do not allow sending from random e-mail addresses. Set this accordingly.`
   })
   emailFrom: string = 'noreply@pigallery2.com';

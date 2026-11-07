@@ -14,9 +14,9 @@ export interface DirectoryCacheDTO {
   directory?: DirectoryBaseDTO;
   mediaCount: number;
   recursiveMediaCount?: number;
-  youngestMedia?: number;
-  oldestMedia?: number;
-  cover?: CoverPhotoDTO;
+  youngestMedia?: number | null;
+  oldestMedia?: number | null;
+  cover?: CoverPhotoDTO | null;
   valid?: boolean; // does not go to the client side
 }
 
@@ -26,7 +26,7 @@ export interface DirectoryBaseDTO<S extends FileDTO = MediaDTO>
   name: string;
   path: string;
   lastModified: number;
-  lastScanned?: number;
+  lastScanned?: number | null;
   isPartial?: boolean;
   parent: DirectoryBaseDTO<S>;
   directories?: DirectoryBaseDTO<S>[];
@@ -41,7 +41,7 @@ export interface ParentDirectoryDTO<S extends FileDTO = MediaDTO>
   name: string;
   path: string;
   lastModified: number;
-  lastScanned?: number;
+  lastScanned?: number | null;
   isPartial?: boolean;
   parent: ParentDirectoryDTO<S>;
   directories: SubDirectoryDTO<S>[];
@@ -59,7 +59,7 @@ export interface SubDirectoryDTO<S extends FileDTO = MediaDTO>
   name: string;
   path: string;
   lastModified: number;
-  lastScanned: number;
+  lastScanned?: number | null;
   isPartial?: boolean;
   parent: ParentDirectoryDTO<S>;
   cache?: DirectoryCacheDTO;
@@ -90,7 +90,7 @@ export const DirectoryDTOUtils = {
       dir.cache.cover.directory = {
         path: dir.cache.cover.directory.path,
         name: dir.cache.cover.directory.name,
-      } as DirectoryPathDTO;
+      };
 
       // make sure that it is not a same object as one of the photo in the media[]
       // as the next foreach would remove the directory

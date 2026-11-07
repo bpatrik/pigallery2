@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as os from 'node:os';
+import * as path from 'node:path';
 import sharp from 'sharp';
 import {MediaRendererInput, ThumbnailSourceType, VideoRendererFactory} from '../../../../../src/backend/model/fileaccess/PhotoWorker';
 import {VideoConverterInput, VideoConverterWorker} from '../../../../../src/backend/model/fileaccess/VideoConverterWorker';
@@ -80,7 +80,7 @@ describe('Video workers (ffmpeg)', () => {
     it('should reject for a missing file', async () => {
       const i = input('not_existing.mp4', 32, true);
       await expectRejection(render(i));
-      expect(fs.existsSync(i.outPath)).to.be.false;
+      expect(fs.existsSync(i.outPath!)).to.be.false;
     });
   });
 

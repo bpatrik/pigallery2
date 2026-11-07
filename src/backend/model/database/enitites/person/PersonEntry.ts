@@ -9,20 +9,20 @@ import {ProjectedPersonCacheEntity} from './ProjectedPersonCacheEntity';
 export class PersonEntry implements PersonDTO {
   @Index()
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Column(columnCharsetCS)
-  name: string;
+  name!: string;
 
   @Column({default: false})
-  isFavourite: boolean;
+  isFavourite!: boolean;
 
   @OneToMany(() => PersonJunctionTable, (junctionTable) => junctionTable.person)
-  public faces: PersonJunctionTable[];
+  public faces!: PersonJunctionTable[];
 
 
   @OneToOne(() => ProjectedPersonCacheEntity, (ppc) => ppc.person)
-  public cache: ProjectedPersonCacheEntity;
+  public cache!: ProjectedPersonCacheEntity;
 
   // does not store in the DB, temporal fields populated from cache/joins
   missingThumbnail?: boolean;

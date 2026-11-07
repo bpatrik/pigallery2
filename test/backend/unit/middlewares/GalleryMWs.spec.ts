@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import {expect} from 'chai';
 import {Config} from '../../../../src/common/config/private/Config';
 import {GalleryMWs} from '../../../../src/backend/middlewares/GalleryMWs';
@@ -8,7 +8,7 @@ import {ParentDirectoryDTO} from '../../../../src/common/entities/DirectoryDTO';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {GalleryManager} from '../../../../src/backend/model/database/GalleryManager';
-import {promises as fsp} from 'fs';
+import {promises as fsp} from 'node:fs';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
 import {SessionContext} from '../../../../src/backend/model/SessionContext';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
@@ -74,7 +74,7 @@ describe('GalleryMWs', () => {
           media: [photo, video],
           directories: [],
           metaFile: [],
-        } as ParentDirectoryDTO,
+        } as unknown as ParentDirectoryDTO,
         searchResult: null,
       };
 
@@ -95,7 +95,7 @@ describe('GalleryMWs', () => {
           done(err);
         }
       };
-      GalleryMWs.cleanUpGalleryResults(req, null, next);
+      GalleryMWs.cleanUpGalleryResults(req, null!, next);
     });
 
     it('should not pair when contentIdentifiers do not match', (done: (err?: any) => void) => {
@@ -112,7 +112,7 @@ describe('GalleryMWs', () => {
           media: [photo, video],
           directories: [],
           metaFile: [],
-        } as ParentDirectoryDTO,
+        } as unknown as ParentDirectoryDTO,
         searchResult: null,
       };
 
@@ -128,7 +128,7 @@ describe('GalleryMWs', () => {
           done(err);
         }
       };
-      GalleryMWs.cleanUpGalleryResults(req, null, next);
+      GalleryMWs.cleanUpGalleryResults(req, null!, next);
     });
 
     it('should not pair when Live Photo is disabled but should strip contentIdentifier', (done: (err?: any) => void) => {
@@ -145,7 +145,7 @@ describe('GalleryMWs', () => {
           media: [photo, video],
           directories: [],
           metaFile: [],
-        } as ParentDirectoryDTO,
+        } as unknown as ParentDirectoryDTO,
         searchResult: null,
       };
 
@@ -165,7 +165,7 @@ describe('GalleryMWs', () => {
           done(err);
         }
       };
-      GalleryMWs.cleanUpGalleryResults(req, null, next);
+      GalleryMWs.cleanUpGalleryResults(req, null!, next);
       Config.Media.LivePhoto.enabled = true;
     });
 
@@ -202,7 +202,7 @@ describe('GalleryMWs', () => {
           done(err);
         }
       };
-      GalleryMWs.cleanUpGalleryResults(req, null, next);
+      GalleryMWs.cleanUpGalleryResults(req, null!, next);
     });
 
     it('should keep unpaired videos in results', (done: (err?: any) => void) => {
@@ -220,7 +220,7 @@ describe('GalleryMWs', () => {
           media: [photo, video, regularVideo],
           directories: [],
           metaFile: [],
-        } as ParentDirectoryDTO,
+        } as unknown as ParentDirectoryDTO,
         searchResult: null,
       };
 
@@ -240,7 +240,7 @@ describe('GalleryMWs', () => {
           done(err);
         }
       };
-      GalleryMWs.cleanUpGalleryResults(req, null, next);
+      GalleryMWs.cleanUpGalleryResults(req, null!, next);
     });
   });
 
@@ -261,14 +261,14 @@ describe('GalleryMWs', () => {
 
     const callListDirectory = async (directory: string, context: SessionContext, directoryAccess?: DirectoryAccessTypes) => {
       const req: any = {session: {context}, params: {directory}, query: {}, directoryAccess};
-      let status: number = null;
+      let status: number = null!;
       const res: any = {
         status: (s: number) => {
           status = s;
           return res;
         }
       };
-      let nextArgs: any[] = null;
+      let nextArgs: any[] = null!;
       await GalleryMWs.listDirectory(req, res, (...args: any[]) => {
         nextArgs = args;
       });
@@ -278,7 +278,7 @@ describe('GalleryMWs', () => {
     beforeEach(() => {
       origGalleryManager = ObjectManagers.getInstance().GalleryManager;
       origStat = fsp.stat;
-      listArgs = null;
+      listArgs = null!;
       (fsp as any).stat = async () => ({isDirectory: () => true});
       ObjectManagers.getInstance().GalleryManager = {
         listDirectory: async (...args: any[]) => {
@@ -319,7 +319,7 @@ describe('GalleryMWs', () => {
     it('does not load a file outside of the image folder', async () => {
       for (const mediaPath of ['../x.jpg', 'a/../../x.jpg']) {
         const req: any = {params: {mediaPath}};
-        let nextArgs: any[] = null;
+        let nextArgs: any[] = null!;
         await GalleryMWs.loadFile(req, {} as any, (...args: any[]) => {
           nextArgs = args;
         });

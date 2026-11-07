@@ -20,7 +20,7 @@ import {
 import {DirectoryBaseDTO, DirectoryPathDTO} from '../src/common/entities/DirectoryDTO';
 import {FileDTO} from '../src/common/entities/FileDTO';
 import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Config} from '../src/common/config/private/Config';
 import {ProjectPath} from '../src/backend/ProjectPath';
 import {SupportedFormats} from '../src/common/SupportedFormats';
@@ -44,7 +44,7 @@ export class TestHelper {
     SupportedFormats.init(Config);
   }
 
-  public static getDirectoryEntry(parent: DirectoryBaseDTO = null, name = '.'): DirectoryEntity {
+  public static getDirectoryEntry(parent: DirectoryBaseDTO | null = null, name = '.'): DirectoryEntity {
 
     const dir = new DirectoryEntity();
     dir.name = name;
@@ -58,7 +58,7 @@ export class TestHelper {
     // dir.parent = null;
     if (parent !== null) {
       dir.path = DiskManager.pathFromParent(parent);
-      parent.directories.push(dir);
+      parent.directories!.push(dir);
     }
     return dir;
   }
@@ -69,7 +69,7 @@ export class TestHelper {
     sd.height = 400;
     sd.width = 200;
     const m = new PhotoMetadataEntity();
-    m.caption = null;
+    m.caption = null!;
     m.size = sd;
     m.creationDate = 1656069387772;
     m.creationDateOffset = '+02:00';
@@ -77,7 +77,7 @@ export class TestHelper {
     // m.rating = 0; no rating by default
 
     // TODO: remove when typeorm is fixed
-    m.duration = null;
+    m.duration = null!;
     m.bitRate = null;
 
 
@@ -85,8 +85,8 @@ export class TestHelper {
     d.name = name;
     d.directory = (dir as any);
     if ((dir as DirectoryBaseDTO).media) {
-      (dir as DirectoryBaseDTO).media.push(d);
-      (dir as DirectoryBaseDTO).cache.mediaCount++;
+      (dir as DirectoryBaseDTO).media!.push(d);
+      (dir as DirectoryBaseDTO).cache!.mediaCount++;
     }
     d.metadata = m;
     return d;
@@ -113,7 +113,7 @@ export class TestHelper {
     cd.focalLength = 1;
     cd.lens = 'Lens';
     const m = new PhotoMetadataEntity();
-    m.caption = null;
+    m.caption = null!;
     m.keywords = ['apple'];
     m.cameraData = cd;
     m.positionData = pd;
@@ -124,7 +124,7 @@ export class TestHelper {
     // m.rating = 0; no rating by default
 
     // TODO: remove when typeorm is fixed
-    m.duration = null;
+    m.duration = null!;
     m.bitRate = null;
 
 
@@ -132,8 +132,8 @@ export class TestHelper {
     d.name = 'test media.jpg';
     d.directory = (dir as any);
     if ((dir as DirectoryBaseDTO).media) {
-      (dir as DirectoryBaseDTO).media.push(d);
-      (dir as DirectoryBaseDTO).cache.mediaCount++;
+      (dir as DirectoryBaseDTO).media!.push(d);
+      (dir as DirectoryBaseDTO).cache!.mediaCount++;
     }
     d.metadata = m;
     return d;
@@ -145,9 +145,9 @@ export class TestHelper {
     sd.width = 300;
 
     const m = new VideoMetadataEntity();
-    m.caption = null;
-    m.keywords = null;
-    m.rating = null;
+    m.caption = null!;
+    m.keywords = null!;
+    m.rating = null!;
     m.size = sd;
     m.creationDate = 1656069387771;
     m.fileSize = 123456789;
@@ -160,8 +160,8 @@ export class TestHelper {
     d.name = 'test video.mp4';
     d.directory = (dir as any);
     if ((dir as DirectoryBaseDTO).media) {
-      (dir as DirectoryBaseDTO).media.push(d);
-      (dir as DirectoryBaseDTO).cache.mediaCount++;
+      (dir as DirectoryBaseDTO).media!.push(d);
+      (dir as DirectoryBaseDTO).cache!.mediaCount++;
     }
     d.metadata = m;
     return d;
@@ -169,12 +169,12 @@ export class TestHelper {
 
   public static getGPXEntry(dir: DirectoryPathDTO): FileDTO {
     const d: FileDTO = {
-      id: null,
+      id: null!,
       name: 'saturdayRun.gpx',
       directory: dir
     };
     if ((dir as DirectoryBaseDTO).metaFile) {
-      (dir as DirectoryBaseDTO).metaFile.push(d);
+      (dir as DirectoryBaseDTO).metaFile!.push(d);
     }
     return d;
   }
@@ -318,10 +318,10 @@ export class TestHelper {
     return p;
   }
 
-  public static getRandomizedDirectoryEntry(parent: DirectoryBaseDTO = null, forceStr: string = null): DirectoryBaseDTO<MediaDTO> {
+  public static getRandomizedDirectoryEntry(parent: DirectoryBaseDTO | null = null, forceStr: string | null = null): DirectoryBaseDTO<MediaDTO> {
 
     const dir: DirectoryBaseDTO = {
-      id: null,
+      id: null!,
       name: DiskManager.dirName(forceStr || Math.random().toString(36).substring(7)),
       path: DiskManager.pathFromParent({path: '', name: '.'}),
       cache: {
@@ -335,26 +335,26 @@ export class TestHelper {
       media: [],
       lastModified: Date.now(),
       lastScanned: null,
-      parent
+      parent: parent!, // the DTO has no null parent, but a root directory has none
     };
     if (parent !== null) {
       dir.path = DiskManager.pathFromParent(parent);
-      parent.directories.push(dir);
+      parent.directories!.push(dir);
     }
     return dir;
   }
 
-  public static getRandomizedGPXEntry(dir: DirectoryBaseDTO, forceStr: string = null): FileDTO {
+  public static getRandomizedGPXEntry(dir: DirectoryBaseDTO, forceStr: string | null = null): FileDTO {
     const d: FileDTO = {
-      id: null,
+      id: null!,
       name: forceStr + '_' + Math.random().toString(36).substring(7) + '.gpx',
       directory: dir
     };
-    dir.metaFile.push(d);
+    dir.metaFile!.push(d);
     return d;
   }
 
-  public static getRandomizedFace(media: PhotoDTO, forceStr: string = null): FaceRegion {
+  public static getRandomizedFace(media: PhotoDTO, forceStr: string | null = null): FaceRegion {
     const rndStr = (): string => {
       return forceStr + '_' + Math.random().toString(36).substring(7);
     };
@@ -377,7 +377,7 @@ export class TestHelper {
     return f;
   }
 
-  public static getRandomizedPhotoEntry(dir: DirectoryBaseDTO, forceStr: string = null, faces = 2, rating?: RatingTypes): PhotoDTO {
+  public static getRandomizedPhotoEntry(dir: DirectoryBaseDTO, forceStr: string | null = null, faces = 2, rating?: RatingTypes): PhotoDTO {
 
 
     const rndStr = (): string => {
@@ -421,12 +421,12 @@ export class TestHelper {
       creationDateOffset: '+01:00',
       fileSize: rndInt(10000),
       caption: rndStr(),
-      ...(!isNaN(rating) && {rating})
+      ...(rating !== undefined && {rating})
     };
 
 
     const p: PhotoDTO = {
-      id: null,
+      id: null!,
       name: rndStr() + '.jpg',
       directory: dir,
       metadata: m
@@ -436,31 +436,31 @@ export class TestHelper {
       this.getRandomizedFace(p, 'Person ' + i);
     }
 
-    dir.media.push(p);
+    dir.media!.push(p);
     TestHelper.updateDirCache(dir);
     return p;
   }
 
   static updateDirCache(dir: DirectoryBaseDTO): void {
     // Ensure back-references are intact (removeReferences() may null them)
-    dir.media.forEach((m) => (m.directory = dir));
+    dir.media!.forEach((m) => (m.directory = dir));
 
     // Sort media by creation time (newest first) for cache boundaries
-    const sortedByDate = dir.media
+    const sortedByDate = dir.media!
       .slice()
       .sort((a, b): number => b.metadata.creationDate - a.metadata.creationDate);
 
     // Build candidate list for album cover
     // Prefer media from this directory; otherwise, use covers from subdirectories
     const mediaForCover: CoverPhotoDTO[] =
-      dir.media.length > 0
+      dir.media!.length > 0
         ? (dir.media as CoverPhotoDTO[]).slice()
-        : dir.directories
+        : dir.directories!
           .filter((d): boolean => !!d.cache?.cover)
           .map((d): CoverPhotoDTO => {
             // Make sure cover has correct directory reference
-            d.cache.cover.directory = d;
-            return d.cache.cover;
+            d.cache!.cover!.directory = d;
+            return d.cache!.cover!;
           });
 
     // Sort cover candidates by configured method
@@ -475,7 +475,7 @@ export class TestHelper {
     // Update directory cache
     if (dir.cache) {
       dir.cache.mediaCount = sortedByDate.length;
-      dir.cache.recursiveMediaCount = dir.directories.reduce((acc, d) => acc + d.cache.mediaCount, 0) + sortedByDate.length;
+      dir.cache.recursiveMediaCount = dir.directories!.reduce((acc, d) => acc + d.cache!.mediaCount, 0) + sortedByDate.length;
       if (sortedByDate.length > 0) {
         dir.cache.youngestMedia = sortedByDate[0].metadata.creationDate;
         dir.cache.oldestMedia = sortedByDate[sortedByDate.length - 1].metadata.creationDate;

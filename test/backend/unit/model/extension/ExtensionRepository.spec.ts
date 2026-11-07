@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import {ExtensionRepository} from '../../../../../src/backend/model/extension/ExtensionRepository';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
-import path = require('path');
+import path = require('node:path');
 import {TestHelper} from '../../../../TestHelper';
 
 // to help WebStorm to handle the test cases
@@ -33,5 +33,17 @@ describe('ExtensionRepository', () => {
     expect(extensions[0].id).to.equal('manual-extension');
     expect(extensions[0].url).to.equal('https://example.com/manual');
     expect(extensions[0].zipUrl).to.equal(undefined);
+  });
+
+  it('should keep a plain text url that is not a markdown link', () => {
+    const text = `# Pigallery2 extension repository
+
+|     **Name**     | **Url** | **Readme** | **Download** |   |
+|:----------------:|:--------:|:----------:|:------------:|---|
+| Plain extension | https://example.com/plain | [README.md](https://example.com/readme) | |   |`;
+    const extensions = (new ExtensionRepository()).repoMD(text);
+
+    expect(extensions).to.have.length(1);
+    expect(extensions[0].url).to.equal('https://example.com/plain');
   });
 });

@@ -8,6 +8,10 @@ import {Logger} from '../../Logger';
 
 const LOG_TAG = '[OIDCAuthService]';
 
+// claims are JSON values; the ones used here are strings (numbers are accepted too)
+const claimStr = (v: unknown): string =>
+  typeof v === 'string' ? v : (typeof v === 'number' ? String(v) : '');
+
 export class OIDCAuthService {
   private static clientPromise: Promise<Client> | null = null;
 
@@ -23,7 +27,7 @@ export class OIDCAuthService {
     req.session.oidc = {
       state,
       verifier
-    } as any;
+    };
     return client.authorizationUrl({
       scope: Config.Users.oidc.scopes.join(' '),
       state,
@@ -39,7 +43,7 @@ export class OIDCAuthService {
   public static async getUserFromAuthenticationResponse(req: Request): Promise<UserDTO> {
     const storedOidc = req.session.oidc;
     const params = req.query; // code, state
-    if (!storedOidc?.state || params.state !== storedOidc?.state) {
+    if (!storedOidc?.state || params['state'] !== storedOidc?.state) {
       throw new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Invalid OIDC state');
     }
     const client = await this.getClient();
@@ -55,25 +59,25 @@ export class OIDCAuthService {
     const usernameClaim = Config.Users.oidc.usernameClaim || 'preferred_username';
     const emailClaim = Config.Users.oidc.emailClaim || 'email';
     const claims = await this.getClaims(client, tokenSet, [usernameClaim, emailClaim]);
-    const preferredUserName = claims[usernameClaim] || '';
-    const email = claims[emailClaim] || '';
+    const preferredUserName = claimStr(claims[usernameClaim]);
+    const email = claimStr(claims[emailClaim]);
 
     let emailName = '';
     if (email) {
       if (!strict) {
-        emailName = String(email).split('@')[0];
-      } else if (claims.email_verified === true) {
-        emailName = String(email);
+        emailName = email.split('@')[0];
+      } else if (claims['email_verified'] === true) {
+        emailName = email;
       }
     }
-    const matchedName = (preferredUserName || emailName).toString();
+    const matchedName = preferredUserName || emailName;
     if (!matchedName) {
       throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, 'OIDC: missing username/email');
     }
 
     // domain allow-list if configured
     if (Config.Users.oidc.allowedDomains && Config.Users.oidc.allowedDomains.length > 0) {
-      const domain = String(email).split('@')[1] || '';
+      const domain = email.split('@')[1] || '';
       const allowed = Config.Users.oidc.allowedDomains.some(d => d.toLowerCase() === domain.toLowerCase());
       if (!allowed) {
         throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, `Email domain not allowed: ${domain}`);
@@ -85,12 +89,12 @@ export class OIDCAuthService {
       await this.findUser(matchedName);
 
     // cleanup
-    delete (req.session as any).oidc;
+    delete req.session.oidc;
     return user;
   }
 
   private static async findUser(name: string): Promise<UserDTO> {
-    let user: UserDTO = await ObjectManagers.getInstance().UserManager.findOne({name});
+    let user: UserDTO | null = await ObjectManagers.getInstance().UserManager.findOne({name});
     if (!user && Config.Users.oidc.autoCreateUser) {
       user = await this.createUser(name);
     }
@@ -105,13 +109,16 @@ export class OIDCAuthService {
    * Name matching is only used to link a not yet linked user with a limited role.
    */
   private static async findStrictUser(claims: Record<string, unknown>, name: string): Promise<UserDTO> {
-    if (!claims.sub || !claims.iss) {
+    const iss = claims['iss'];
+    const sub = claims['sub'];
+    // the spec requires both to be strings; anything else must not map to a shared subject
+    if (typeof iss !== 'string' || typeof sub !== 'string' || !iss || !sub) {
       throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, 'OIDC: missing sub/iss claim');
     }
-    const subject = claims.iss + '|' + claims.sub;
+    const subject = iss + '|' + sub;
     const userManager = ObjectManagers.getInstance().UserManager;
 
-    let user: UserDTO = await userManager.findOne({oidcSubject: subject});
+    let user: UserDTO | null = await userManager.findOne({oidcSubject: subject});
     if (user) {
       return user;
     }
@@ -165,7 +172,7 @@ export class OIDCAuthService {
     try {
       const userinfo = await client.userinfo(tokenSet.access_token);
       // the spec requires userinfo to belong to the same subject as the ID token
-      if (claims.sub && userinfo.sub !== claims.sub) {
+      if (claims['sub'] && userinfo.sub !== claims['sub']) {
         Logger.warn(LOG_TAG, 'OIDC userinfo subject does not match the ID token, ignoring userinfo');
         return claims;
       }
@@ -175,7 +182,7 @@ export class OIDCAuthService {
         }
       }
     } catch (err) {
-      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo: ' + (err?.message || err));
+      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo: ' + (err instanceof Error ? err.message : String(err)));
     }
     return claims;
   }
@@ -198,7 +205,7 @@ export class OIDCAuthService {
         client_secret: Config.Users.oidc.clientSecret,
         redirect_uris: [Config.Users.oidc.redirectUri],
         response_types: ['code'],
-        id_token_signed_response_alg: this.selectIdTokenAlg(issuer.metadata.id_token_signing_alg_values_supported as string[])
+        id_token_signed_response_alg: this.selectIdTokenAlg(issuer.metadata['id_token_signing_alg_values_supported'] as string[])
       });
     })();
     return this.clientPromise;

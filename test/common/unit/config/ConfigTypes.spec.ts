@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import * as ts from 'typescript';
 import {ServerConfig} from '../../../../src/common/config/private/PrivateConfig';
 
@@ -53,7 +53,7 @@ describe('Config property types', () => {
       if (typeof t === 'function') {
         return 'config';
       }
-      return 'enum:' + Object.keys(t).filter((k) => isNaN(Number(k))).join(',');
+      return 'enum:' + Object.keys(t as object).filter((k) => isNaN(Number(k))).join(',');
     };
     const types: Record<string, string> = {};
     const walk = (cls: any, prefix: string): void => {

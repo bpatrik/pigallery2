@@ -18,6 +18,9 @@ export const ExtensionDecorator = <I extends unknown[], O>(fn: (ee: IExtensionEv
   ) => {
 
     const targetMethod = descriptor.value;
+    if (!targetMethod) {
+      return descriptor;
+    }
     descriptor.value = async function(...args: I) {
       if (!ExtensionDecoratorObject.events) {
         return await targetMethod.apply(this, args);
@@ -31,7 +34,7 @@ export const ExtensionDecorator = <I extends unknown[], O>(fn: (ee: IExtensionEv
       if (eventObj.stopPropagation) {
         return input as O;
       }
-      const out = await targetMethod.apply(this, input);
+      const out = await targetMethod.apply(this, input as I); // without stopPropagation, the before handlers return the input
       return await event.triggerAfter(input as I, out);
     };
 

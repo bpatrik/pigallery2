@@ -8,7 +8,7 @@ import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 sharp.cache(false);
 
 export class PhotoWorker {
-  private static videoRenderer: (input: MediaRendererInput) => Promise<void> = null;
+  private static videoRenderer: ((input: MediaRendererInput) => Promise<void>) | null = null;
 
   public static render(input: SvgRendererInput | MediaRendererInput): Promise<void> {
     if (input.type === ThumbnailSourceType.Photo) {
@@ -17,7 +17,7 @@ export class PhotoWorker {
     if (input.type === ThumbnailSourceType.Video) {
       return this.renderFromVideo(input as MediaRendererInput);
     }
-    throw new Error('Unsupported media type to render thumbnail:' + input.type);
+    throw new Error('Unsupported media type to render thumbnail:' + String(input.type));
   }
 
   public static renderFromImage(input: SvgRendererInput | MediaRendererInput, dryRun = false): Promise<void> {
@@ -81,7 +81,7 @@ export class VideoRendererFactory {
       if (!width || !height || isNaN(width) || isNaN(height)) {
         throw new Error(`[FFmpeg] Can not read video dimension. Found: ${width}x${height}`);
       }
-      const duration = parseFloat(data.format.duration);
+      const duration = parseFloat(data.format.duration ?? '');
       if (isNaN(duration)) {
         throw new Error('[FFmpeg] Can not read video duration: ' + input.mediaPath);
       }
@@ -94,6 +94,9 @@ export class VideoRendererFactory {
           : 'scale=w=trunc(oh*a/2)*2:h=' + Math.min(input.size, height);
       } else {
         scale = 'scale=w=' + input.size + ':h=' + input.size;
+      }
+      if (!input.outPath) {
+        throw new Error('[FFmpeg] No output path for the video thumbnail: ' + input.mediaPath);
       }
 
       await FFmpeg.run([
@@ -165,14 +168,18 @@ export class ImageRendererFactory {
         smartSubsample: (input as MediaRendererInput).smartSubsample
       });
     } else {
-      if ((input as SvgRendererInput).svgString) {
-        processedImg = image.png({effort: 6, quality: input.quality});
+      if (!(input as SvgRendererInput).svgString) {
+        throw new Error('Nothing to render: neither mediaPath nor svgString is set');
       }
+      processedImg = image.png({effort: 6, quality: input.quality});
     }
     // do not save to file
     if (dryRun) {
       await processedImg.toFormat('webp').toBuffer();
       return;
+    }
+    if (!input.outPath) {
+      throw new Error('No output path to render to');
     }
     await processedImg.toFile(input.outPath);
 

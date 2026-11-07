@@ -3,17 +3,17 @@ import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {CustomHeaders} from '../../common/CustomHeaders';
 import {Config} from '../../common/config/private/Config';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 
 export class VersionMWs {
   /**
    * This version data is mainly used to trigger page reload on the client side
    */
-  public static async injectAppVersion(
+  public static injectAppVersion(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {
+  ): void {
     try {
       const clientConfigStr = JSON.stringify(Config.getClientConfig());
       const hash = crypto.createHash('md5').update(Config.Environment.upTime + clientConfigStr).digest('hex');
@@ -27,7 +27,7 @@ export class VersionMWs {
         new ErrorDTO(
           ErrorCodes.GENERAL_ERROR,
           'Can not get app version',
-          err.toString()
+          String(err)
         )
       );
     }
@@ -55,7 +55,7 @@ export class VersionMWs {
         new ErrorDTO(
           ErrorCodes.GENERAL_ERROR,
           'Can not get data version',
-          err.toString()
+          String(err)
         )
       );
     }

@@ -31,7 +31,7 @@ export class PhotoConvertingJob extends FileJob<{
     });
   }
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[PhotoConvertingJob]';
   }
 
@@ -40,14 +40,15 @@ export class PhotoConvertingJob extends FileJob<{
     return true;
   }
 
-  start(
+  override start(
     config: { sizes?: number[]; indexedOnly?: boolean },
     soloRun = false,
     allowParallelRun = false
   ): Promise<void> {
     if (!config || !config.sizes || !Array.isArray(config.sizes) || config.sizes.length === 0) {
       config = config || {};
-      config.sizes = this.ConfigTemplate.find(ct => ct.id == 'sizes').defaultValue as number[];
+      // the constructor adds the sizes to the template
+      config.sizes = this.ConfigTemplate.find(ct => ct.id == 'sizes')!.defaultValue as number[];
     }
     for (const item of config.sizes) {
       if (Config.Media.Photo.thumbnailSizes.indexOf(item) === -1) {
@@ -62,17 +63,17 @@ export class PhotoConvertingJob extends FileJob<{
     return super.start(config, soloRun, allowParallelRun);
   }
 
-  protected async filterMediaFiles(files: FileDTO[]): Promise<FileDTO[]> {
+  protected override async filterMediaFiles(files: FileDTO[]): Promise<FileDTO[]> {
     return files;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
-    return undefined;
+  protected override async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
+    return [];
   }
 
   protected async shouldProcess(mPath: string): Promise<boolean> {
-    for (const item of this.config.sizes) {
+    for (const item of this.config.sizes ?? []) {
       if (!(await PhotoProcessing.convertedPhotoExist(mPath, item))) {
         return true;
       }
@@ -82,9 +83,9 @@ export class PhotoConvertingJob extends FileJob<{
 
   protected async processFile(mPath: string): Promise<void> {
     const isVideo = MediaDTOUtils.isVideoPath(mPath);
-    for (const item of this.config.sizes) {
+    for (const item of this.config.sizes ?? []) {
       // skip hig- res photo creation for video files. App does not use photo preview fore videos in the lightbox
-      if (this.config.maxVideoSize < item && isVideo) {
+      if ((this.config.maxVideoSize ?? Infinity) < item && isVideo) {
         continue;
       }
       await PhotoProcessing.generateThumbnail(

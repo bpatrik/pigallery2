@@ -28,7 +28,7 @@ export class UserManager {
     }
   }
 
-  public async findOne(filter: FindOptionsWhere<UserEntity>): Promise<UserEntity> {
+  public async findOne(filter: FindOptionsWhere<UserEntity>): Promise<UserEntity | null> {
     const connection = await SQLConnection.getConnection();
     const verifyPassword = typeof filter.password == 'string';
     const pass = filter.password as string;
@@ -39,7 +39,7 @@ export class UserManager {
     }
     const user = await connection.getRepository(UserEntity).findOneBy(filter);
 
-    if (verifyPassword && !PasswordHelper.comparePassword(pass, user.password)) {
+    if (verifyPassword && (!user || !PasswordHelper.comparePassword(pass, user.password))) {
       throw new Error('No entry found');
     }
     return user;
@@ -62,6 +62,9 @@ export class UserManager {
     }
     SearchQueryUtils.validateDirectoryList(user.allowDirectoryList, 'User allowDirectoryList');
     SearchQueryUtils.validateDirectoryList(user.blockDirectoryList, 'User blockDirectoryList');
+    if (!user.password) {
+      throw new Error('Password is required');
+    }
     user.password = PasswordHelper.cryptPassword(user.password);
     const ret = await connection.getRepository(UserEntity).save(user);
     ObjectManagers.getInstance().SessionManager.invalidateSessionCache();

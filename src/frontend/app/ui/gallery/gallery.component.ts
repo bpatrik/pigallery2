@@ -103,7 +103,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     )
   );
   public isUploadOver = false;
-  private $counter: Observable<number>;
+  private $counter!: Observable<number>; // set by ngOnInit()
   private subscription: { route: Subscription | null, timer: Subscription | null } = {
     route: null,
     timer: null,

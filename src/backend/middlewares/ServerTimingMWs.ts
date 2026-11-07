@@ -3,8 +3,8 @@ import {Config} from '../../common/config/private/Config';
 
 export class ServerTimeEntry {
   public name: string;
-  startHR: [number, number];
-  public endTime: number = null;
+  startHR?: [number, number];
+  public endTime: number | null = null;
 
   constructor(name: string) {
     this.name = name;
@@ -14,24 +14,28 @@ export class ServerTimeEntry {
     this.startHR = process.hrtime();
   }
 
-  public end(): void {
+  public end(): number {
     const duration = process.hrtime(this.startHR);
     this.endTime = duration[0] * 1e3 + duration[1] * 1e-6;
+    return this.endTime;
   }
 }
 
 export const FunctionTime = (id: string, name: string) => {
-  return (
+  return <A extends unknown[], R>(
     target: unknown,
     propertyName: string,
-    descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
+    descriptor: TypedPropertyDescriptor<(...args: A) => R>
   ): void => {
     if (Config.Server.Log.logServerTiming === false) {
       return;
     }
     const originalMethod = descriptor.value;
+    if (!originalMethod) {
+      return;
+    }
 
-    descriptor.value = function (...args: any[]): any {
+    descriptor.value = function (this: unknown, ...args: A): R {
       const timer = new ServerTimeEntry(name);
       timer.start();
 
@@ -39,57 +43,61 @@ export const FunctionTime = (id: string, name: string) => {
         const result = originalMethod.apply(this, args);
 
         // Handle both sync and async functions
-        if (result && typeof result.then === 'function') {
+        if (result instanceof Promise) {
           // Async function - return a promise that logs timing when resolved
           return result
-            .then((value: any) => {
-              timer.end();
-              console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms`);
+            .then((value: unknown) => {
+              const time = timer.end();
+              console.log(`[${id}] ${name}: ${time.toFixed(2)}ms`);
               return value;
             })
-            .catch((error: any) => {
-              timer.end();
-              console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms (error)`);
+            .catch((error: unknown) => {
+              const time = timer.end();
+              console.log(`[${id}] ${name}: ${time.toFixed(2)}ms (error)`);
               throw error;
-            });
+            }) as R;
         } else {
           // Sync function - log timing immediately
-          timer.end();
-          console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms`);
+          const time = timer.end();
+          console.log(`[${id}] ${name}: ${time.toFixed(2)}ms`);
           return result;
         }
       } catch (error) {
-        timer.end();
-        console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms (error)`);
+        const time = timer.end();
+        console.log(`[${id}] ${name}: ${time.toFixed(2)}ms (error)`);
         throw error;
       }
-    } as any;
+    };
   };
 };
 
 export const ServerTime = (id: string, name: string) => {
-  return (
+  return <T extends (req: Request, res: Response, next: NextFunction) => void | Promise<void>>(
       target: unknown,
       propertyName: string,
-      descriptor: TypedPropertyDescriptor<(req: unknown, res: unknown, next: () => void) => void>
+      descriptor: TypedPropertyDescriptor<T>
   ): void => {
     if (Config.Server.Log.logServerTiming === false) {
       return;
     }
     const m = descriptor.value;
+    if (!m) {
+      return;
+    }
     const customAction = (req: Request, res: Response, next: NextFunction) => {
       req.timing = req.timing || {};
-      req.timing[id] = new ServerTimeEntry(name);
-      req.timing[id].start();
-      m(req, res, (err?: Error) => {
-        req.timing[id].end();
+      const entry = new ServerTimeEntry(name);
+      req.timing[id] = entry;
+      entry.start();
+      // return the promise of an async middleware, so Express catches its rejection
+      return m(req, res, (err?: unknown) => {
+        entry.end();
         next(err);
       });
     };
-    descriptor.value = new Function(
-        'action',
-        'return function ' + m.name + '(...args){ action(...args) };'
-    )(customAction);
+    // keep the name of the middleware
+    Object.defineProperty(customAction, 'name', {value: m.name});
+    descriptor.value = customAction as T;
   };
 };
 
@@ -99,11 +107,11 @@ export class ServerTimingMWs {
   /**
    * Add server timing
    */
-  public static async addServerTiming(
+  public static addServerTiming(
       req: Request,
       res: Response,
       next: NextFunction
-  ): Promise<void> {
+  ): void {
     if (
         (Config.Server.Log.logServerTiming === false && !forcedDebug) ||
         !req.timing

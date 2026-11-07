@@ -45,7 +45,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
     p = TestHelper.getPhotoEntry1(directory);
     p2 = TestHelper.getPhotoEntry2(directory);
     const pFaceLessTmp = TestHelper.getPhotoEntry3(directory);
-    delete pFaceLessTmp.metadata.faces;
+    delete (pFaceLessTmp.metadata as {faces?: unknown}).faces;
     v = TestHelper.getVideoEntry1(directory);
 
     dir = await DBTestHelper.persistTestDir(directory);
@@ -92,10 +92,10 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
 
       const selected = Utils.clone(await pm.get(DBTestHelper.defaultSession, 'Boba Fett'));
       expect(selected).to.not.be.undefined;
-      expect(selected.cache).to.be.not.undefined;
-      expect(selected.cache.count).to.be.greaterThan(0);
-      delete selected.cache;
-      delete person.cache;
+      expect(selected!.cache).to.be.not.undefined;
+      expect(selected!.cache.count).to.be.greaterThan(0);
+      delete (selected! as {cache?: unknown}).cache;
+      delete (person as {cache?: unknown}).cache;
       expect(selected).to.deep.equal(person);
     });
 
@@ -142,17 +142,17 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
       expect(originalPerson).to.not.be.undefined;
 
       await pm.updatePerson('Boba Fett', {
-        id: originalPerson.id,
+        id: originalPerson!.id,
         name: 'Updated Boba Fett',
-        isFavourite: !originalPerson.isFavourite
+        isFavourite: !originalPerson!.isFavourite
       });
 
 
       // Verify the person was actually updated in the database
       const fetchedPerson = await pm.get(DBTestHelper.defaultSession, 'Updated Boba Fett');
       expect(fetchedPerson).to.not.be.undefined;
-      expect(fetchedPerson.name).to.equal('Updated Boba Fett');
-      expect(fetchedPerson.isFavourite).to.equal(!originalPerson.isFavourite);
+      expect(fetchedPerson!.name).to.equal('Updated Boba Fett');
+      expect(fetchedPerson!.isFavourite).to.equal(!originalPerson!.isFavourite);
     });
 
     it('should save new persons', async () => {
@@ -285,7 +285,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
 
       expect(personWithProjection).to.not.be.undefined;
       expect(personWithDefault).to.not.be.undefined;
-      expect(personWithProjection.name).to.equal(personWithDefault.name);
+      expect(personWithProjection!.name).to.equal(personWithDefault!.name);
 
 
       expect(await pm.get(projectionSession, 'Padmé Amidala')).to.be.undefined;
@@ -321,7 +321,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
       // Verify the person exists in the database but not in results
       const dbPerson = await personRepo.findOne({where: {name: 'Test Person Zero Count'}});
       expect(dbPerson).to.not.be.undefined;
-      expect(dbPerson.name).to.equal('Test Person Zero Count');
+      expect(dbPerson!.name).to.equal('Test Person Zero Count');
 
       // Clean up
       await personRepo.remove(savedTestPerson);
@@ -346,7 +346,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
       cacheEntry.person = savedTestPerson;
       cacheEntry.count = 0;
       cacheEntry.valid = true;
-      cacheEntry.sampleRegion = null;
+      cacheEntry.sampleRegion = null!;
       await cacheRepo.save(cacheEntry);
 
       // Reset memory cache to force reload from database
@@ -414,7 +414,7 @@ describe('PersonManager', (sqlHelper: DBTestHelper) => {
       const pm = new PersonManager();
 
       // Should not throw error
-      await pm.onNewDataVersion(null);
+      await pm.onNewDataVersion(null!);
       await pm.onNewDataVersion({} as ParentDirectoryDTO);
       await pm.onNewDataVersion({id: 999999} as ParentDirectoryDTO);
     });

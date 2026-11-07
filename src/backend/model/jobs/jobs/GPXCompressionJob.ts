@@ -12,11 +12,11 @@ export class GPXCompressionJob extends FileJob {
     super({noVideo: true, noPhoto: true, noMetaFile: false});
   }
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[GPXCompressionJob]';
   }
 
-  protected async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
+  protected override async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
     return files.filter(file => file.name.toLowerCase().endsWith('.gpx'));
   }
 

@@ -1,5 +1,5 @@
 export class EventLimit<T> {
-  private lastTriggerValue: T = null;
+  private lastTriggerValue: T | null = null;
 
   private handlers: EventLimitHandler<T>[] = [];
 
@@ -27,12 +27,12 @@ export class EventLimit<T> {
     this.handlers = [];
   }
 
-  public trigger = (data?: T) => {
+  public trigger = (data: T): void => {
     if (this.handlers) {
       this.handlers.slice(0).forEach((h) => {
         if (
             h.limit <= data &&
-            (h.lastTriggerValue < h.limit || h.lastTriggerValue == null)
+            (h.lastTriggerValue == null || h.lastTriggerValue < h.limit)
         ) {
           h.fire(data);
         }
@@ -45,7 +45,7 @@ export class EventLimit<T> {
 }
 
 class EventLimitHandler<T> {
-  public lastTriggerValue: T = null;
+  public lastTriggerValue: T | null = null;
 
   constructor(public limit: T, public handler: (data?: T) => void) {
   }
@@ -62,18 +62,18 @@ class EventLimitHandler<T> {
 class SingleFireEventLimitHandler<T> extends EventLimitHandler<T> {
   public fired = false;
 
-  constructor(public limit: T, public handler: (data?: T) => void) {
+  constructor(public override limit: T, public override handler: (data?: T) => void) {
     super(limit, handler);
   }
 
-  public fire(data?: T): void {
+  public override fire(data?: T): void {
     if (this.fired === false) {
       this.handler(data);
     }
     this.fired = true;
   }
 
-  public isValid(): boolean {
+  public override isValid(): boolean {
     return this.fired === false;
   }
 }

@@ -54,16 +54,16 @@ export const SearchQueryUtils = {
     }
   },
   sortQuery(queryIN: SearchQueryDTO): SearchQueryDTO {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const canonicalize = (value: any): any => {
+    const canonicalize = (value: unknown): unknown => {
       if (Array.isArray(value)) {
-        return value.map((v) => canonicalize(v));
+        return value.map((v: unknown) => canonicalize(v));
       }
       if (value && typeof value === 'object') {
+        const obj = value as Record<string, unknown>;
         const out: Record<string, unknown> = {};
-        const keys = Object.keys(value).sort();
+        const keys = Object.keys(obj).sort();
         for (const k of keys) {
-          const v = canonicalize(value[k]);
+          const v = canonicalize(obj[k]);
           if (v !== undefined) {
             out[k] = v;
           }
@@ -87,17 +87,15 @@ export const SearchQueryUtils = {
       withKeys.sort((a, b) => a.key.localeCompare(b.key));
       if (queryIN.type === SearchQueryTypes.SOME_OF) {
         const so = queryIN as SomeOfSearchQuery;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res: any = {type: queryIN.type};
+        const res: Record<string, unknown> = {type: queryIN.type};
         if (so.min !== undefined) {
-          res.min = so.min;
+          res['min'] = so.min;
         }
-        res.list = withKeys.map((kv) => kv.value);
+        res['list'] = withKeys.map((kv) => kv.value);
         return canonicalize(res) as SearchQueryDTO;
       } else {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res: any = {type: queryIN.type};
-        res.list = withKeys.map((kv) => kv.value);
+        const res: Record<string, unknown> = {type: queryIN.type};
+        res['list'] = withKeys.map((kv) => kv.value);
         return canonicalize(res) as SearchQueryDTO;
       }
     }
@@ -106,21 +104,20 @@ export const SearchQueryUtils = {
   stringifyForComparison(queryIN: SearchQueryDTO): string {
     return JSON.stringify(SearchQueryUtils.sortQuery(queryIN));
   },
-  isQueryEmpty(query: SearchQueryDTO): boolean {
+  isQueryEmpty(query: SearchQueryDTO | null | undefined): boolean {
     return !query ||
       query.type === undefined ||
       (query.type === SearchQueryTypes.any_text && !(query as TextSearch).value);
   },
   // Recursively strip negate:false and matchType:like so that optional/default flags do not break validation
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  stripDefault: (val: any): any => {
+  stripDefault: <T>(val: T): T => {
     if (Array.isArray(val)) {
-      return val.map((v) => SearchQueryUtils.stripDefault(v));
+      return val.map((v: unknown) => SearchQueryUtils.stripDefault(v)) as T;
     }
     if (val && typeof val === 'object') {
       const out: Record<string, unknown> = {};
-      for (const k of Object.keys(val)) {
-        const v = SearchQueryUtils.stripDefault(val[k]);
+      for (const [k, value] of Object.entries(val as Record<string, unknown>)) {
+        const v = SearchQueryUtils.stripDefault(value);
         if (k === 'negate' && v === false) {
           // drop negate:false
           continue;
@@ -132,7 +129,7 @@ export const SearchQueryUtils = {
         // keep everything else, including negate:true and undefined-handled by equalsFilter
         out[k] = v;
       }
-      return out;
+      return out as T;
     }
     return val;
   },
@@ -145,8 +142,8 @@ export const SearchQueryUtils = {
     const sp = new SearchQueryParser();
     try {
       const parsed = sp.parse(sp.stringify(query));
-      const normParsed = SearchQueryUtils.stripDefault(parsed) as SearchQueryDTO;
-      const normQuery = SearchQueryUtils.stripDefault(query) as SearchQueryDTO;
+      const normParsed = SearchQueryUtils.stripDefault(parsed);
+      const normQuery = SearchQueryUtils.stripDefault(query);
       if (!Utils.equalsFilter(normParsed, normQuery) || !Utils.equalsFilter(normQuery, normParsed)) {
         throw new Error(
           `${what} is set to '${sp.stringify(query)}' and it is not valid. It fails on this validation test: Expected: ${JSON.stringify(parsed)} to equal: ${JSON.stringify(query)}`
@@ -163,7 +160,7 @@ export const SearchQueryUtils = {
    * Validates a directory allow / block list.
    * Every entry has to be a directory TextSearch (type: SearchQueryTypes.directory).
    */
-  validateDirectoryList: (list: DirectorySearch[], what = 'Directory list'): void => {
+  validateDirectoryList: (list: DirectorySearch[] | null | undefined, what = 'Directory list'): void => {
     if (list === null || typeof list === 'undefined') {
       return;
     }
@@ -362,19 +359,18 @@ export const SearchQueryUtils = {
       return '';
     }
     query=SearchQueryUtils.stripDefault(query);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const shorten = (obj: any): any => {
+    const shorten = (obj: unknown): unknown => {
       if (Array.isArray(obj)) {
         return obj.map(shorten);
       }
       if (obj && typeof obj === 'object') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res: any = {};
-        for (const key of Object.keys(obj)) {
-          if (key === 'negate' && obj[key] === false) {
+        const o = obj as Record<string, unknown>;
+        const res: Record<string, unknown> = {};
+        for (const key of Object.keys(o)) {
+          if (key === 'negate' && o[key] === false) {
             continue;
           }
-          res[SearchQueryUtils.URLMap[key] || key] = shorten(obj[key]);
+          res[SearchQueryUtils.URLMap[key] || key] = shorten(o[key]);
         }
         return res;
       }
@@ -406,23 +402,23 @@ export const SearchQueryUtils = {
     Object.keys(SearchQueryUtils.URLMap).forEach(key => {
       map[SearchQueryUtils.URLMap[key]] = key;
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const unshorten = (obj: any): any => {
+    const unshorten = (obj: unknown): unknown => {
       if (Array.isArray(obj)) {
         return obj.map(unshorten);
       }
       if (obj && typeof obj === 'object') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const res: any = {};
-        for (const key of Object.keys(obj)) {
+        const o = obj as Record<string, unknown>;
+        const type = o['t'] as SearchQueryTypes | undefined;
+        const res: Record<string, unknown> = {};
+        for (const key of Object.keys(o)) {
           let unshortenedKey = map[key] || key;
-          if (unshortenedKey === 'text' && obj.t !== undefined && !TextSearchQueryTypes.includes(obj.t)) {
+          if (unshortenedKey === 'text' && type !== undefined && !TextSearchQueryTypes.includes(type)) {
             // If it's not a text search, 'v' should map to 'value'
-            if (RangeSearchQueryTypes.includes(obj.t)) {
+            if (RangeSearchQueryTypes.includes(type)) {
               unshortenedKey = 'value';
             }
           }
-          res[unshortenedKey] = unshorten(obj[key]);
+          res[unshortenedKey] = unshorten(o[key]);
         }
         return res;
       }
@@ -439,7 +435,7 @@ export const SearchQueryUtils = {
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return {type: SearchQueryTypes.any_text, value: urlQuery} as TextSearch;
     }
-    return unshorten(parsed);
+    return unshorten(parsed) as SearchQueryDTO;
 
 
   }

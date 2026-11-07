@@ -489,21 +489,21 @@ export class SearchQueryParser {
 
     // parse text search
     const tmp = TextSearchQueryTypes.map((type) => ({
-      key: (this.keywords as never)[SearchQueryTypes[type]] + ':',
+      key: this.keywords[SearchQueryTypes[type] as keyof QueryKeywords] + ':',
       queryTemplate: {type, value: ''} as TextSearch,
     })).concat(
       TextSearchQueryTypes.map((type) => ({
-        key: (this.keywords as never)[SearchQueryTypes[type]] + '!:',
+        key: this.keywords[SearchQueryTypes[type] as keyof QueryKeywords] + '!:',
         queryTemplate: {type, value: '', negate: true} as TextSearch,
       }))
     ).concat(
       TextSearchQueryTypes.map((type) => ({
-        key: (this.keywords as never)[SearchQueryTypes[type]] + '~:',
+        key: this.keywords[SearchQueryTypes[type] as keyof QueryKeywords] + '~:',
         queryTemplate: {type, value: '', matchType: TextSearchQueryMatchTypes.globMatch} as TextSearch,
       }))
     ).concat(
       TextSearchQueryTypes.map((type) => ({
-        key: (this.keywords as never)[SearchQueryTypes[type]] + '!~:',
+        key: this.keywords[SearchQueryTypes[type] as keyof QueryKeywords] + '!~:',
         queryTemplate: {type, value: '', negate: true, matchType: TextSearchQueryMatchTypes.globMatch} as TextSearch,
       }))
     );
@@ -733,7 +733,7 @@ export class SearchQueryParser {
           );
         } else {
           return (
-            (this.keywords as never)[SearchQueryTypes[query.type]] +
+            this.keywords[SearchQueryTypes[query.type] as keyof QueryKeywords] +
             op +
             SearchQueryParser.stringifyText(
               (query as TextSearch).value,
@@ -752,7 +752,7 @@ export class SearchQueryParser {
           return '';
         }
         return (
-          (this.keywords as never)[SearchQueryTypes[query.type]] +
+          this.keywords[SearchQueryTypes[query.type] as keyof QueryKeywords] +
           op +
           SearchQueryParser.stringifyText(
             (query as TextSearch).value,

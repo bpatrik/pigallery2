@@ -46,7 +46,7 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
 
         const u = await um.findOne({name: 'test',password: 'testp'});
         expect(u).to.not.be.null;
-        expect(u.name).to.eql('test');
+        expect(u!.name).to.eql('test');
       });
       it('should return when passwords is not set', async () => {
         // Create a basic user with no queries
@@ -54,7 +54,7 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
 
         const u = await um.findOne({name: 'test'});
         expect(u).to.not.be.null;
-        expect(u.name).to.eql('test');
+        expect(u!.name).to.eql('test');
       });
 
       it('should return null when passwords is  empty string', async () => {
@@ -93,11 +93,11 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
 
       it('should reject changing a user without an id', async () => {
         const um = new UserManager();
-        await expect(um.deleteUser(undefined)).to.be.rejectedWith(Error);
+        await expect(um.deleteUser(undefined!)).to.be.rejectedWith(Error);
         await expect(um.deleteUser(NaN)).to.be.rejectedWith(Error);
-        await expect(um.changeRole(undefined, UserRoles.Guest)).to.be.rejectedWith(Error);
-        await expect(um.setOidcSubject(undefined, 'https://idp|123')).to.be.rejectedWith(Error);
-        await expect(um.updateSettings(undefined, {newPassword: 'x'})).to.be.rejectedWith(Error);
+        await expect(um.changeRole(undefined!, UserRoles.Guest)).to.be.rejectedWith(Error);
+        await expect(um.setOidcSubject(undefined!, 'https://idp|123')).to.be.rejectedWith(Error);
+        await expect(um.updateSettings(undefined!, {newPassword: 'x'})).to.be.rejectedWith(Error);
 
         const users = (await um.find({})).sort((a, b) => a.id - b.id);
         expect(users.map(u => ({name: u.name, role: u.role, oidcSubject: u.oidcSubject}))).to.deep.equal([
@@ -113,10 +113,10 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
         const um = new UserManager();
         const u = await um.findOne({name: 'test'});
 
-        await um.setOidcSubject(u.id, 'https://idp|123');
-        expect((await um.findOne({oidcSubject: 'https://idp|123'})).id).to.eql(u.id);
+        await um.setOidcSubject(u!.id, 'https://idp|123');
+        expect((await um.findOne({oidcSubject: 'https://idp|123'}))!.id).to.eql(u!.id);
 
-        await um.setOidcSubject(u.id, null);
+        await um.setOidcSubject(u!.id, null);
         expect(await um.findOne({oidcSubject: 'https://idp|123'})).to.be.null;
       });
 
@@ -129,8 +129,8 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
         await (SQLConnection as any).schemeSync(connection);
 
         const u = await new UserManager().findOne({name: 'test', password: 'testp'});
-        expect(u.role).to.eql(UserRoles.User);
-        expect(u.oidcSubject).to.be.null;
+        expect(u!.role).to.eql(UserRoles.User);
+        expect(u!.oidcSubject).to.be.null;
       });
     });
   });

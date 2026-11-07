@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import {DataStructureVersion} from '../../../common/DataStructureVersion';
 import {SQLConnection} from './SQLConnection';
 import {DirectoryEntity} from './enitites/DirectoryEntity';
@@ -11,7 +11,7 @@ export class VersionManager implements IObjectManager {
     name: string;
     lastModified: number;
     mediaCount: number;
-  } = null;
+  } | null = null;
 
   async getDataVersion(): Promise<string> {
     if (this.latestDirectoryStatus === null) {

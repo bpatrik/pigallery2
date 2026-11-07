@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as path from 'path';
+import * as path from 'node:path';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {DiskManager} from '../../../../src/backend/model/fileaccess/DiskManager';
 import {TestHelper} from '../../../TestHelper';
@@ -64,11 +64,11 @@ describe('ProjectPath', () => {
   describe('DiskManager.scanDirectory', () => {
     it('should refuse to scan outside the image folder', async () => {
       for (const p of ['..', path.join('..', 'other')]) {
-        let err: Error = null;
+        let err: Error = null!;
         try {
           await DiskManager.scanDirectory(p);
         } catch (e) {
-          err = e;
+          err = e as Error;
         }
         expect(err, p).to.not.be.null;
         expect(err.message, p).to.contain('outside of the image folder');

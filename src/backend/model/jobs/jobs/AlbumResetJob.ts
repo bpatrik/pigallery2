@@ -5,11 +5,11 @@ import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 export class AlbumRestJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Album Reset']];
-  public readonly ConfigTemplate: DynamicConfig[] = null;
-  protected readonly IsInstant = true;
+  public readonly ConfigTemplate: DynamicConfig[] = [];
+  protected override readonly IsInstant = true;
 
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[AlbumRestJob]';
   }
 

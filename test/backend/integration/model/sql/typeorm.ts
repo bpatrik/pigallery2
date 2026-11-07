@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
@@ -51,7 +51,7 @@ describe('Typeorm integration', () => {
     d.path = '.';
     d.lastModified = Date.now();
     d.lastScanned = null;
-    d.parent = null;
+    d.parent = null!;
     d.media = [];
     d.directories = [];
     return d;
@@ -89,7 +89,7 @@ describe('Typeorm integration', () => {
 
     const d = new PhotoEntity();
     d.name = 'test media.jpg';
-    d.directory = null;
+    d.directory = null!;
     d.metadata = m;
     return d;
   };
@@ -198,7 +198,7 @@ describe('Typeorm integration', () => {
     const photo = getPhoto();
     photo.directory = dir;
     const city = photo.metadata.positionData.city;
-    photo.metadata.positionData = null;
+    photo.metadata.positionData = null!;
     await pr.save(photo);
     const photos = await pr
       .createQueryBuilder('media')

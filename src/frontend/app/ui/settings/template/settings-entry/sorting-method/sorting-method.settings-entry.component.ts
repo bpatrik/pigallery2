@@ -10,6 +10,7 @@ import {NgIconComponent} from '@ng-icons/core';
 import {SortingMethodIconComponent} from '../../../../utils/sorting-method-icon/sorting-method-icon.component';
 import {StringifySortingMethod} from '../../../../../pipes/StringifySortingMethod';
 import {NotificationService} from '../../../../../model/notification.service';
+import {errorMessage} from '../../../../../../../common/entities/Error';
 
 @Component({
   selector: 'app-settings-entry-sorting-method',
@@ -46,7 +47,7 @@ export class SortingMethodSettingsEntryComponent
   /**
    * The edited value (part of the settings tree), it is changed in place.
    */
-  private model: SortingMethod;
+  private model!: SortingMethod; // set by writeValue() (ngModel)
   /**
    * A copy of the model for the view, replaced on every change.
    */
@@ -103,7 +104,7 @@ export class SortingMethodSettingsEntryComponent
       }
       this.onChange();
     } catch (e) {
-      this.notificationService.error('Can\t set soritng:' + e.message);
+      this.notificationService.error('Can\t set soritng:' + errorMessage(e));
     }
   }
 

@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import * as path from 'node:path';
 import {ConfigDiagnostics} from '../../../../../src/backend/model/diagnostics/ConfigDiagnostics';
 import {
   NavBarConfig,
@@ -61,7 +62,7 @@ describe('ConfigDiagnostics', () => {
     it('should reject an unknown link type', () => {
       expect(() => ConfigDiagnostics.testNavigationLink({type: 99} as unknown as NavigationLinkConfig))
         .to.throw(/unknown type/);
-      expect(() => ConfigDiagnostics.testNavigationLink(null)).to.throw(/unknown type/);
+      expect(() => ConfigDiagnostics.testNavigationLink(null!)).to.throw(/unknown type/);
     });
   });
 
@@ -76,11 +77,11 @@ describe('ConfigDiagnostics', () => {
         new NavigationLinkConfig(NavigationLinkTypes.gallery),
         new NavigationLinkConfig(NavigationLinkTypes.search),
       ]);
-      let error: Error = null;
+      let error: Error = null!;
       try {
         await ConfigDiagnostics.testNavBarConfig(nb);
       } catch (e) {
-        error = e;
+        error = e as Error;
       }
       expect(error).to.not.equal(null);
       expect(error.message).to.contain('NavBar link #2');
@@ -129,6 +130,25 @@ describe('ConfigDiagnostics', () => {
     it('should reject a version that it cannot read', () => {
       expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '')).to.throw();
       expect(() => ConfigDiagnostics.testLibvipsVersion('', '8.16.1')).to.throw();
+    });
+  });
+
+  describe('testImageFolder', () => {
+
+    it('should accept a readable folder', async () => {
+      await ConfigDiagnostics.testImageFolder(__dirname);
+    });
+
+    it('should reject a missing folder with an Error that names it', async () => {
+      const folder = path.join(__dirname, 'not-existing-képek');
+      let error: unknown = null;
+      try {
+        await ConfigDiagnostics.testImageFolder(folder);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.be.instanceOf(Error);
+      expect((error as Error).message).to.contain(folder);
     });
   });
 

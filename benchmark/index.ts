@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {Config} from '../src/common/config/private/Config';
 import {ProjectPath} from '../src/backend/ProjectPath';
 import {BenchmarkResult, BenchmarkRunner} from './BenchmarkRunner';
@@ -31,7 +31,7 @@ const printHeader = async (statistic: string) => {
     '.' + Utils.zeroPrefix(dt.getMonth() + 1, 2) +
     '.' + dt.getFullYear());
   if (Config.Environment && Config.Environment.buildCommitHash) {
-    printLine('**Version**: v' + Config.Environment.appVersion + ', built at: ' + new Date(Config.Environment.buildTime) + ', git commit:' + Config.Environment.buildCommitHash);
+    printLine('**Version**: v' + Config.Environment.appVersion + ', built at: ' + new Date(Config.Environment.buildTime ?? NaN) + ', git commit:' + Config.Environment.buildCommitHash);
   }
   printLine('**System**: ' + BMConfig.system);
   printLine('\n**Gallery**: ' + statistic + '\n');
@@ -65,8 +65,8 @@ const printExperimentResult = (result: BenchmarkResult, isSubResult = false) => 
         ', directories: ' + (result.contentWrapper.directory.directories?.length ?? 0) +
         ', size: ' + fileSize(JSON.stringify(DirectoryDTOUtils.removeReferences(result.contentWrapper.directory)).length);
     } else {
-      details = 'media: ' + (result.contentWrapper.searchResult.media?.length ?? 0) +
-        ', directories: ' + (result.contentWrapper.searchResult.directories?.length ?? 0) +
+      details = 'media: ' + (result.contentWrapper.searchResult!.media?.length ?? 0) +
+        ', directories: ' + (result.contentWrapper.searchResult!.directories?.length ?? 0) +
         ', size: ' + fileSize(JSON.stringify(result.contentWrapper.searchResult).length);
 
     }

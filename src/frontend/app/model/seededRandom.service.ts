@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 @Injectable({providedIn: 'root'})
 export class SeededRandomService {
   private static readonly baseSeed = Math.random() * 2147483647;
-  private seed: number;
+  private seed!: number; // set by setSeed(), which the constructor calls
 
   constructor() {
     this.setSeed(0);

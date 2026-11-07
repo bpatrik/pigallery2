@@ -1,6 +1,6 @@
-import {promises as fsp, Stats} from 'fs';
-import * as path from 'path';
-import {DirectoryPathDTO, ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
+import {promises as fsp, Stats} from 'node:fs';
+import * as path from 'node:path';
+import {DirectoryCacheDTO, DirectoryPathDTO, ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import {PhotoDTO} from '../../../common/entities/PhotoDTO';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
@@ -19,6 +19,12 @@ import {SessionManager} from '../database/SessionManager';
 
 
 const LOG_TAG = '[DiskManager]';
+
+/**
+ * Placeholder for the fields of a scanned DTO that are set later: the ids and parents when the directory is saved,
+ * the directory of the files by DirectoryDTOUtils.addReferences. Also the metadata of media scanned with noMetadata.
+ */
+const UNSET = null as unknown as never;
 declare const global: { gc: () => void };
 
 export class DiskManager {
@@ -130,7 +136,7 @@ export class DiskManager {
     return (await this.scanDirectory(
       relativeDirectoryName,
       settings
-    )) as ParentDirectoryDTO<FileDTO>;
+    ));
   }
 
   @ExtensionDecorator(e => e.gallery.DiskManager.scanDirectory)
@@ -153,9 +159,15 @@ export class DiskManager {
     const stat = await fsp.stat(
       path.join(ProjectPath.ImageFolder, relativeDirectoryName)
     );
+    const cache: DirectoryCacheDTO = {
+      projectionKey: SessionManager.NO_PROJECTION_KEY,
+      mediaCount: 0,
+      cover: null,
+      valid: false
+    };
     const directory: ParentDirectoryDTO = {
-      id: null,
-      parent: null,
+      id: UNSET,
+      parent: UNSET,
       name: dto.name,
       path: dto.path,
       lastModified: this.calcLastModified(stat),
@@ -163,12 +175,7 @@ export class DiskManager {
       isPartial: settings.coverOnly === true,
       media: [],
       metaFile: [],
-      cache: {
-        projectionKey: SessionManager.NO_PROJECTION_KEY,
-        mediaCount: 0,
-        cover: null,
-        valid: false
-      }
+      cache
     };
     if (!settings.coverOnly) {
       directory.lastScanned = Date.now();
@@ -223,7 +230,7 @@ export class DiskManager {
         } catch (err) {
           NotificationManager.warning(
             'Unknown directory reading error, skipping: ' + path.join(relativeDirectoryName, file),
-            err.toString()
+            String(err)
           );
           console.error(err);
         }
@@ -235,21 +242,24 @@ export class DiskManager {
             continue;
           }
 
-          const photo = {
+          // the id is set when the photo is saved to the DB
+          const scannedPhoto: Omit<PhotoDTO, 'id'> = {
             name: file,
-            directory: null,
+            directory: UNSET,
             metadata:
               settings.noMetadata === true
-                ? null
+                ? UNSET
                 : await MetadataLoader.loadPhotoMetadata(fullFilePath),
-          } as PhotoDTO;
+          };
+          const photo = scannedPhoto as PhotoDTO;
 
-          if (!directory.cache.cover) {
-            directory.cache.cover = Utils.clone(photo);
-
-            directory.cache.cover.directory = {
-              path: directory.path,
-              name: directory.name,
+          if (!cache.cover) {
+            cache.cover = {
+              ...Utils.clone(photo),
+              directory: {
+                path: directory.path,
+                name: directory.name,
+              }
             };
           }
           // add the cover photo to the list of media, so it will be saved to the DB
@@ -264,7 +274,7 @@ export class DiskManager {
           NotificationManager.warning('Media loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            err.toString()
+            String(err)
           );
           console.error(err);
         }
@@ -277,20 +287,21 @@ export class DiskManager {
           ) {
             continue;
           }
-          directory.media.push({
+          const video: Omit<VideoDTO, 'id'> = {
             name: file,
-            directory: null,
+            directory: UNSET,
             metadata:
               settings.noMetadata === true
-                ? null
+                ? UNSET
                 : await MetadataLoader.loadVideoMetadata(fullFilePath),
-          } as VideoDTO);
+          };
+          directory.media.push(video as VideoDTO);
         } catch (e) {
           Logger.warn(
             'Media loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            e.toString()
+            String(e)
           );
         }
       } else if (GPXProcessing.isMetaFile(fullFilePath)) {
@@ -304,37 +315,41 @@ export class DiskManager {
             continue;
           }
 
-          directory.metaFile.push({
+          const metaFile: Omit<FileDTO, 'id'> = {
             name: file,
-            directory: null,
-          } as FileDTO);
+            directory: UNSET,
+          };
+          directory.metaFile.push(metaFile as FileDTO);
         } catch (e) {
           Logger.warn(
             'Metafile loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            e.toString()
+            String(e)
           );
         }
       }
     }
 
-    directory.cache.mediaCount = directory.media.length;
+    cache.mediaCount = directory.media.length;
     // TODO: cache is now calculated purely though DB after indexing of the directory is done.
     // Delete is with caution (double check if it still indeed not used)
     if (!directory.isPartial && !settings.noMetadata) {
-      directory.cache.youngestMedia = Number.MAX_SAFE_INTEGER;
-      directory.cache.oldestMedia = Number.MIN_SAFE_INTEGER;
+      let youngestMedia = Number.MAX_SAFE_INTEGER;
+      let oldestMedia = Number.MIN_SAFE_INTEGER;
 
       directory.media.forEach((m) => {
-          directory.cache.youngestMedia = Math.min(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), directory.cache.youngestMedia);
-          directory.cache.oldestMedia = Math.max(Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset), directory.cache.oldestMedia);
+          const time = Utils.getTimeMS(m.metadata.creationDate, m.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset);
+          youngestMedia = Math.min(time, youngestMedia);
+          oldestMedia = Math.max(time, oldestMedia);
         }
       );
+      cache.youngestMedia = youngestMedia;
+      cache.oldestMedia = oldestMedia;
 
       directory.metaFile.forEach(mf => {
         if (DiskManager.isMarkdown(mf.name)) {
-          (mf as MDFileDTO).date = directory.cache.youngestMedia;
+          (mf as MDFileDTO).date = youngestMedia;
         }
       });
     }

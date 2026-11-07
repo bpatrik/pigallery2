@@ -1,5 +1,5 @@
 import {DirectoryPathDTO} from './DirectoryDTO';
-import {PhotoDTO} from './PhotoDTO';
+import {PhotoMetadata} from './PhotoDTO';
 import {FileDTO} from './FileDTO';
 import {SupportedFormats} from '../SupportedFormats';
 import {Utils} from '../Utils';
@@ -8,8 +8,8 @@ export interface VideoProperties {
   size: MediaDimension;
   fileSize: number;
   duration: number;
-  fps: number;
-  bitRate: number;
+  fps: number | null;
+  bitRate: number | null;
 }
 
 export interface LiveVideoInfo extends VideoProperties {
@@ -47,7 +47,9 @@ export interface MediaDimension {
 
 export const MediaDTOUtils = {
   hasPositionData: (media: MediaDTO): boolean => {
-    const positionData = (media as PhotoDTO).metadata.positionData;
+    // only photos have position data; PhotoMetadata adds it as optional
+    const metadata: PhotoMetadata = media.metadata;
+    const positionData = metadata.positionData;
     return (
         !!positionData &&
         !!(

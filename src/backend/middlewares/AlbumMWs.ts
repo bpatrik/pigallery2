@@ -1,9 +1,11 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
+import {SearchQueryDTO} from '../../common/entities/SearchQueryDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {Utils} from '../../common/Utils';
 import {Config} from '../../common/config/private/Config';
 import {RequestParams} from './RequestParams';
+import {RequestSession} from './RequestSession';
 
 export class AlbumMWs {
   public static async listAlbums(
@@ -16,7 +18,7 @@ export class AlbumMWs {
     }
     try {
       req.resultPipe =
-        await ObjectManagers.getInstance().AlbumManager.getAll(req.session.context);
+        await ObjectManagers.getInstance().AlbumManager.getAll(RequestSession.getContext(req));
       return next();
     } catch (err) {
       return next(
@@ -33,13 +35,12 @@ export class AlbumMWs {
     if (Config.Album.enabled === false) {
       return next();
     }
-    if (!RequestParams.get(req, 'id') || !Utils.isUInt32(parseInt(RequestParams.get(req, 'id'), 10))) {
+    const id = parseInt(RequestParams.get(req, 'id') ?? '', 10);
+    if (!Utils.isUInt32(id)) {
       return next();
     }
     try {
-      await ObjectManagers.getInstance().AlbumManager.deleteAlbum(
-        parseInt(RequestParams.get(req, 'id'), 10)
-      );
+      await ObjectManagers.getInstance().AlbumManager.deleteAlbum(id);
       req.resultPipe = 'ok';
       return next();
     } catch (err) {
@@ -61,10 +62,11 @@ export class AlbumMWs {
     if (Config.Album.enabled === false) {
       return next();
     }
+    const body = req.body as { name?: string, searchQuery?: SearchQueryDTO } | undefined;
     if (
-      typeof req.body === 'undefined' ||
-      typeof req.body.name !== 'string' ||
-      typeof req.body.searchQuery !== 'object'
+      typeof body === 'undefined' ||
+      typeof body.name !== 'string' ||
+      typeof body.searchQuery !== 'object'
     ) {
       return next(
         new ErrorDTO(ErrorCodes.INPUT_ERROR, 'updateSharing filed is missing')
@@ -72,8 +74,8 @@ export class AlbumMWs {
     }
     try {
       await ObjectManagers.getInstance().AlbumManager.addSavedSearch(
-        req.body.name,
-        req.body.searchQuery
+        body.name,
+        body.searchQuery
       );
       req.resultPipe = 'ok';
       return next();

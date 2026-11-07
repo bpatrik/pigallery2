@@ -6,10 +6,10 @@ import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/Searc
 @Entity()
 export class SharingEntity implements BaseSharingDTO {
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Column()
-  sharingKey: string;
+  sharingKey!: string;
 
   /*
   * This query determines what is available for the user through sharing
@@ -20,14 +20,14 @@ export class SharingEntity implements BaseSharingDTO {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  searchQuery: SearchQueryDTO;
+  searchQuery!: SearchQueryDTO | null;
 
   /*
   * This directory search determines what directories are available (can be listed) for the user through sharing.
@@ -39,14 +39,14 @@ export class SharingEntity implements BaseSharingDTO {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  directoryQuery: DirectorySearch;
+  directoryQuery!: DirectorySearch | null;
 
   /**
    * Only of the defaults should be set at most. If none is set the defaultSearchView will be searchQuery
@@ -55,42 +55,42 @@ export class SharingEntity implements BaseSharingDTO {
     type: 'text',
     nullable: true
   })
-  defaultDirectoryView: string;
+  defaultDirectoryView!: string | null;
   @Column({
     type: 'text',
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  defaultSearchView: SearchQueryDTO;
+  defaultSearchView!: SearchQueryDTO | null;
 
   @Column({type: 'text', nullable: true})
-  password: string;
+  password!: string | null;
 
   @Column('bigint', {
     unsigned: true,
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
-  expires: number;
+  expires!: number;
 
   @Column('bigint', {
     unsigned: true,
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
-  timeStamp: number;
+  timeStamp!: number;
 
   @ManyToOne(() => UserEntity, {onDelete: 'CASCADE', nullable: false})
-  creator: UserEntity;
+  creator!: UserEntity;
 }

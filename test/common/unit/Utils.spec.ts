@@ -84,7 +84,7 @@ describe('Utils', () => {
     });
 
     it('should return undefined for malformed input', () => {
-      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees(undefined)).to.be.equal(undefined);
+      expect(Utils.xmpExifGpsCoordinateToDecimalDegrees(undefined!)).to.be.equal(undefined);
       expect(Utils.xmpExifGpsCoordinateToDecimalDegrees('garbage')).to.be.equal(undefined);
       expect(Utils.xmpExifGpsCoordinateToDecimalDegrees('12,.N')).to.be.equal(undefined);
       expect(Utils.xmpExifGpsCoordinateToDecimalDegrees([12, 3, 4] as any)).to.be.equal(undefined);

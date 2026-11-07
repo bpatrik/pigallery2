@@ -1,6 +1,6 @@
 import {ProjectPath} from '../ProjectPath';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {UploadUtils} from '../../common/UploadUtils';
 import {FileAlreadyExists} from '../exceptions/FileAlreadyExists';
 import {ObjectManagers} from './ObjectManagers';
@@ -39,7 +39,7 @@ export class UploadManager {
       try {
         await this.saveFile(directory, file);
       } catch (e) {
-        errors.push({filename: file.originalname, error: e.message});
+        errors.push({filename: file.originalname, error: e instanceof Error ? e.message : String(e)});
       }
     }
     const dto = DiskManager.getDTOFromPath(directory || '');
