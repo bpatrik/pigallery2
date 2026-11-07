@@ -1,4 +1,7 @@
 {
+  // Builds the backend, the shared code, the tests and the benchmark next to their sources (npm run build-backend).
+  // The IDE and ts-node (IDE test runs) use it too. It is also the base of the Angular CLI's src/frontend/tsconfig.*.json,
+  // which set their own module setup, types and files.
   "compileOnSave": true,
   "compilerOptions": {
     "strict": false,
@@ -10,10 +13,10 @@
     "declaration": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "CommonJS",
+    // Node's module system: emits CommonJS (no "type": "module"), and models require(esm) of ESM-only packages
+    "module": "nodenext",
     "useDefineForClassFields": false,
     "types": [
       "node",
@@ -34,6 +37,13 @@
     // load the global typings (e.g. customtypings/ExtendedRequest.d.ts) like tsc does
     "files": true
   },
+  "include": [
+    "src/backend/**/*.ts",
+    "src/common/**/*.ts",
+    "test/**/*.ts",
+    "benchmark/**/*.ts",
+    "gulpfile.ts"
+  ],
   "exclude": [
     "cypress.config.ts",
     // See https://github.com/cypress-io/cypress/issues/7552#issuecomment-763498855
