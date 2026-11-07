@@ -4,6 +4,7 @@ import * as path from 'node:path';
 import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 import {ProjectPath} from '../../ProjectPath';
 import {Utils} from '../../../common/Utils';
+import {GenericConfigType} from 'typeconfig/common';
 
 
 /**
@@ -156,7 +157,8 @@ export class ExtensionConfigTemplateLoader {
       if (!c) {
         c = new ServerExtensionsEntryConfig(ext.folder);
         if (ext.template) {
-          c.configs = new ext.template();
+          // the template class comes from the extension (setConfigTemplate)
+          c.configs = new ext.template() as GenericConfigType;
         }
         config.Extensions.extensions.addProperty(ext.folder, {type: ServerExtensionsEntryConfig}, c);
       }

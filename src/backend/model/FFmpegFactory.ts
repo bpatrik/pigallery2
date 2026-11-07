@@ -4,7 +4,7 @@ export interface FFmpegPaths {
 }
 
 export class FFmpegFactory {
-  private static paths: FFmpegPaths = null;
+  private static paths: FFmpegPaths | null = null;
 
   /**
    * Paths of the ffmpeg and ffprobe executables.
@@ -20,7 +20,7 @@ export class FFmpegFactory {
     return this.paths;
   }
 
-  private static requirePath(load: () => string): string {
+  private static requirePath(load: () => string): string | null {
     try {
       return load();
     } catch {

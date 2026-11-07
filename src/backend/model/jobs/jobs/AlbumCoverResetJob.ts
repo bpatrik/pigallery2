@@ -5,7 +5,7 @@ import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 
 export class AlbumCoverRestJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Album Cover Reset']];
-  public readonly ConfigTemplate: DynamicConfig[] = null;
+  public readonly ConfigTemplate: DynamicConfig[] = [];
   protected override readonly IsInstant = true;
 
 

@@ -92,7 +92,7 @@ export class FFmpeg {
       proc.stderr.setEncoding('utf8');
       proc.stderr.on('data', (chunk: string) => {
         const lines = (partialLine + chunk).split(/\r\n|\r|\n/);
-        partialLine = lines.pop();
+        partialLine = lines.pop() ?? ''; // split() returns at least one item
         lines.forEach(onLine);
       });
       proc.on('error', (err) => {

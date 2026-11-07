@@ -22,7 +22,7 @@ const LOG_TAG = '[ObjectManagers]';
 
 export class ObjectManagers {
 
-  private static instance: ObjectManagers = null;
+  private static instance: ObjectManagers | null = null;
 
   private readonly managers: IObjectManager[];
   private galleryManager: GalleryManager;
@@ -78,7 +78,7 @@ export class ObjectManagers {
   }
 
   public static isReady(): boolean {
-    return this.instance && this.instance.initDone;
+    return !!this.instance?.initDone;
   }
 
 
@@ -120,7 +120,7 @@ export class ObjectManagers {
   }
 
   public async onDataChange(
-    changedDir: DirectoryPathDTO = null
+    changedDir: DirectoryPathDTO | null = null
   ): Promise<void> {
     await this.VersionManager.onNewDataVersion();
 
@@ -129,7 +129,7 @@ export class ObjectManagers {
         continue;
       }
       if (manager.onNewDataVersion) {
-        await manager.onNewDataVersion(changedDir);
+        await manager.onNewDataVersion(changedDir ?? undefined);
       }
     }
   }

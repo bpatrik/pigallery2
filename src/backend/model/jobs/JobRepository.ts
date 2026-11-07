@@ -12,7 +12,7 @@ import {TopPickSendJob} from './jobs/TopPickSendJob';
 import {AlbumCoverRestJob} from './jobs/AlbumCoverResetJob';
 
 export class JobRepository {
-  private static instance: JobRepository = null;
+  private static instance: JobRepository | null = null;
   availableJobs: Record<string, IJob> = {};
 
   public static get Instance(): JobRepository {

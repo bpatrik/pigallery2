@@ -25,7 +25,7 @@ export interface JobProgressDTO {
   logs: JobProgressLogDTO[];
   time: {
     start: number;
-    end: number;
+    end: number | null;
   };
 }
 

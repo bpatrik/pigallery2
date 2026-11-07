@@ -82,8 +82,9 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
 
 
     if (!this.config.indexedOnly) {
-      if (this.directoryQueue.length > 0) {
-        await this.loadADirectoryFromDisk();
+      const directory = this.directoryQueue.shift();
+      if (directory !== undefined) {
+        await this.loadADirectoryFromDisk(directory);
         return true;
       } else if (this.fileQueue.length > 0) {
         this.Progress.Left = this.fileQueue.length;
@@ -105,6 +106,9 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
     }
 
     const filePath = this.fileQueue.shift();
+    if (filePath === undefined) {
+      return true; // nothing loaded yet, the next step loads more or finishes
+    }
     try {
       if ((await this.shouldProcess(filePath)) === true) {
         this.Progress.Processed++;
@@ -128,8 +132,7 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
     return true;
   }
 
-  private async loadADirectoryFromDisk(): Promise<void> {
-    const directory = this.directoryQueue.shift();
+  private async loadADirectoryFromDisk(directory: string): Promise<void> {
     this.Progress.log('scanning directory: ' + directory);
     const scanned = await DiskManager.scanDirectoryNoMetadata(
       directory,

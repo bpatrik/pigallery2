@@ -18,6 +18,9 @@ export const ExtensionDecorator = <I extends unknown[], O>(fn: (ee: IExtensionEv
   ) => {
 
     const targetMethod = descriptor.value;
+    if (!targetMethod) {
+      return descriptor;
+    }
     descriptor.value = async function(...args: I) {
       if (!ExtensionDecoratorObject.events) {
         return await targetMethod.apply(this, args);

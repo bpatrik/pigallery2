@@ -11,8 +11,8 @@ declare const global: { gc: () => void };
 
 
 export abstract class Job<T extends Record<string, unknown> = Record<string, unknown>> implements IJob<T> {
-  public allowParallelRun: boolean = null;
-  protected progress: JobProgress = null;
+  public allowParallelRun = false;
+  protected progress: JobProgress | null = null;
   protected config: T;
   protected prResolve: () => void;
   protected IsInstant = false;
@@ -33,15 +33,21 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
 
   public abstract get ConfigTemplate(): DynamicConfig[];
 
+  /**
+   * The progress of the running job (between start() and the end of the run).
+   */
   public get Progress(): JobProgress {
+    if (!this.progress) {
+      throw new Error('Job is not running: ' + this.Name);
+    }
     return this.progress;
   }
 
   public get InProgress(): boolean {
     return (
-      this.Progress !== null &&
-      (this.Progress.State === JobProgressStates.running ||
-        this.Progress.State === JobProgressStates.cancelling)
+      this.progress !== null &&
+      (this.progress.State === JobProgressStates.running ||
+        this.progress.State === JobProgressStates.cancelling)
     );
   }
 
@@ -146,8 +152,8 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
     process.nextTick(async (): Promise<void> => {
       try {
         if (
-          this.Progress == null ||
-          this.Progress.State !== JobProgressStates.running
+          this.progress == null ||
+          this.progress.State !== JobProgressStates.running
         ) {
           this.onFinish();
           return;
@@ -164,8 +170,10 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
       } catch (e) {
         Logger.error(this.LOG_TAG, 'Job failed with:');
         Logger.error(this.LOG_TAG, e);
-        this.Progress.log('Failed with: ' + (typeof e.toString === 'function') ? e.toString() : JSON.stringify(e));
-        this.Progress.State = JobProgressStates.failed;
+        if (this.progress) {
+          this.progress.log('Failed with: ' + (typeof e.toString === 'function') ? e.toString() : JSON.stringify(e));
+          this.progress.State = JobProgressStates.failed;
+        }
       }
     });
   }

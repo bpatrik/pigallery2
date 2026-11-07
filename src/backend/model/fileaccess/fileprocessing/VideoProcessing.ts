@@ -91,11 +91,11 @@ export class VideoProcessing {
       },
     };
 
-    if (metaData.bitRate > Config.Media.Video.transcoding.bitRate) {
+    if (metaData.bitRate !== null && metaData.bitRate > Config.Media.Video.transcoding.bitRate) {
       renderInput.output.bitRate =
         Config.Media.Video.transcoding.bitRate;
     }
-    if (metaData.fps > Config.Media.Video.transcoding.fps) {
+    if (metaData.fps !== null && metaData.fps > Config.Media.Video.transcoding.fps) {
       renderInput.output.fps = Config.Media.Video.transcoding.fps;
     }
 

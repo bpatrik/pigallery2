@@ -29,7 +29,7 @@ export class JobProgressComponent {
   JobProgressStates = JobProgressStates;
   modalRef: BsModalRef;
   // Reset to the job's last reported time on every new progress, then ticks forward every second.
-  private readonly timeCurrentCopy = linkedSignal<number | undefined>(() => this.progress()?.time.end);
+  private readonly timeCurrentCopy = linkedSignal<number | undefined>(() => this.progress()?.time.end ?? undefined);
 
   constructor() {
     timer(0, 1000).pipe(takeUntilDestroyed()).subscribe(() => {
@@ -73,7 +73,7 @@ export class JobProgressComponent {
       return 0;
     }
     return (
-        ((progress.time.end - progress.time.start) /
+        (((progress.time.end ?? 0) - progress.time.start) /
             progress.steps.processed) *
         (progress.steps.all - progress.steps.skipped)
     );

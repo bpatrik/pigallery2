@@ -7,10 +7,10 @@ import {SQLConnection} from '../../database/SQLConnection';
 
 export class AlbumCoverFillingJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Album Cover Filling']];
-  public readonly ConfigTemplate: DynamicConfig[] = null;
-  directoryToSetCover: { id: number; name: string; path: string }[] = null;
+  public readonly ConfigTemplate: DynamicConfig[] = [];
+  directoryToSetCover: { id: number; name: string; path: string }[] | null = null;
   status: 'Persons' | 'Albums' | 'Directory' = 'Persons';
-  private availableSessions: SessionContext[];
+  private availableSessions: SessionContext[] = [];
 
 
   override get LOG_TAG(): string {
@@ -24,7 +24,7 @@ export class AlbumCoverFillingJob extends Job {
   protected async init(): Promise<void> {
     this.status = 'Persons';
     this.directoryToSetCover = null;
-    this.availableSessions = null;
+    this.availableSessions = [];
   }
 
   protected async step(): Promise<boolean> {
@@ -72,7 +72,7 @@ export class AlbumCoverFillingJob extends Job {
   }
 
   private async stepDirectoryCover(): Promise<boolean> {
-    if (this.directoryToSetCover.length === 0) {
+    if (!this.directoryToSetCover?.length) {
       this.directoryToSetCover =
         await ObjectManagers.getInstance().CoverManager.getPartialDirsWithoutCovers(this.availableSessions.map(s => s.user.projectionKey));
       // double check if there is really no more
@@ -83,7 +83,7 @@ export class AlbumCoverFillingJob extends Job {
       this.Progress.Left = 0;
       return false;
     }
-    const directory = this.directoryToSetCover.shift();
+    const directory = this.directoryToSetCover.shift()!; // not empty, checked above
     this.Progress.log('Setting cover: ' + directory.path + directory.name);
     this.Progress.Left = this.directoryToSetCover.length;
 

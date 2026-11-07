@@ -29,7 +29,7 @@ export class Server {
   public app: express.Express;
   private server: HttpServer;
 
-  public static instance: Server = null;
+  public static instance: Server | null = null;
 
   public static getInstance(): Server {
     if (!this.instance) {
@@ -177,7 +177,7 @@ export class Server {
   private onListening = () => {
     const addr = this.server.address();
     const bind =
-      typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+      typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr?.port;
     Logger.info(LOG_TAG, 'Listening on ' + bind);
     this.onStarted.trigger();
   };

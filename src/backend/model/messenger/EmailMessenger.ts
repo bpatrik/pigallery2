@@ -37,13 +37,13 @@ export class EmailMessenger extends Messenger<{
   constructor() {
     super();
     this.transporter = createTransport({
-      host: Config.Messaging.Email.smtp.host,
-      port: Config.Messaging.Email.smtp.port,
-      secure: Config.Messaging.Email.smtp.secure,
-      requireTLS: Config.Messaging.Email.smtp.requireTLS,
+      host: Config.Messaging.Email.smtp?.host,
+      port: Config.Messaging.Email.smtp?.port,
+      secure: Config.Messaging.Email.smtp?.secure,
+      requireTLS: Config.Messaging.Email.smtp?.requireTLS,
       auth: {
-        user: Config.Messaging.Email.smtp.user,
-        pass: Config.Messaging.Email.smtp.password
+        user: Config.Messaging.Email.smtp?.user,
+        pass: Config.Messaging.Email.smtp?.password
       }
     });
   }

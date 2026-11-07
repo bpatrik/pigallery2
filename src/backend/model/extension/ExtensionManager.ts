@@ -153,7 +153,7 @@ export class ExtensionManager implements IObjectManager {
     Logger.debug(LOG_TAG, `Reloading extension with config key: ${configKey}`);
 
     // Find the unique extension ID by matching the folder name
-    let uniqueExtensionId: string = null;
+    let uniqueExtensionId: string | null = null;
     for (const id of Object.keys(this.extObjects)) {
       if (this.extObjects[id].folder === configKey) {
         uniqueExtensionId = id;
@@ -190,7 +190,7 @@ export class ExtensionManager implements IObjectManager {
     Logger.debug(LOG_TAG, `Deleting extension with config key: ${configKey}`);
 
     // Find the unique extension ID by matching the folder name
-    let uniqueExtensionId: string = null;
+    let uniqueExtensionId: string | null = null;
     for (const id of Object.keys(this.extObjects)) {
       if (this.extObjects[id].folder === configKey) {
         uniqueExtensionId = id;

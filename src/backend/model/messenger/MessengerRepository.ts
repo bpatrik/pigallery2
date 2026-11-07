@@ -4,7 +4,7 @@ import {StdoutMessenger} from './StdoutMessenger';
 
 export class MessengerRepository {
 
-  private static instance: MessengerRepository = null;
+  private static instance: MessengerRepository | null = null;
   messengers: Record<string, Messenger> = {};
 
   public static get Instance(): MessengerRepository {

@@ -20,7 +20,7 @@ export class ExtensionConfigWrapper {
     try {
       // make sure the config file exists by the time we load it.
       // TODO: remove this once typeconfig is fixed and can properly load defaults in arrays
-      if (!fs.existsSync((pc.__options as ConfigClassOptions<ServerConfig>).configPath)) {
+      if (!fs.existsSync((pc.__options as ConfigClassOptions<ServerConfig>).configPath ?? '')) {
         await pc.load();
       }
       await pc.load(); // loading the basic configs, but we do not know the extension config hierarchy yet
@@ -44,7 +44,7 @@ export class ExtensionConfigWrapper {
     try {
       // make sure the config file exists by the time we load it.
       // TODO: remove this once typeconfig is fixed and can properly load defaults in arrays
-      if (!fs.existsSync((pc.__options as ConfigClassOptions<ServerConfig>).configPath)) {
+      if (!fs.existsSync((pc.__options as ConfigClassOptions<ServerConfig>).configPath ?? '')) {
         pc.loadSync();
       }
       pc.loadSync(); // loading the basic configs, but we do not know the extension config hierarchy yet
