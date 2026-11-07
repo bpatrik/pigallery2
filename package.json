@@ -79,7 +79,6 @@
     "@ng-icons/core": "36.1.0",
     "@ng-icons/ionicons": "36.1.0",
     "@ngx-loading-bar/core": "7.0.1",
-    "@types/adm-zip": "0.6.0",
     "@types/archiver": "8.0.0",
     "@types/bcrypt": "6.0.0",
     "@types/chai": "5.2.3",
