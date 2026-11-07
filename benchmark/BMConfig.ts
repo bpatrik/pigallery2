@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
 import * as path from 'path';
+import * as os from 'os';
 import { ConfigClass, ConfigClassBuilder } from 'typeconfig/node';
 import { ConfigProperty, SubConfigClass } from 'typeconfig/common';
 
@@ -48,6 +49,10 @@ export class PrivateConfigClass {
       'Images are loaded from this folder (read permission required)',
   })
   path: string = '/app/data/images';
+  @ConfigProperty({
+    description: 'The benchmark keeps its DB and temp files here. The DB folder is deleted between runs, so it never uses the app DB folder.',
+  })
+  tempFolder: string = path.join(os.tmpdir(), 'pigallery2-benchmark');
   @ConfigProperty({ description: 'Describe your system setup' })
   system: string = '';
   @ConfigProperty({ description: 'Number of times to run the benchmark' })
