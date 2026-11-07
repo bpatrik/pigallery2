@@ -52,7 +52,7 @@ describe('SharingRouter', () => {
   };
 
 
-  const shareLogin = async (srv: Server, sharingKey: string, password?: string): Promise<any> => {
+  const shareLogin = async (srv: Server, sharingKey: string, password?: string | null): Promise<any> => {
     return (request.execute(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharingKey)
       .send({password});

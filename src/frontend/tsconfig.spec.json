@@ -11,7 +11,6 @@
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
-    "strictNullChecks": true,
     "types": [
       "vitest/globals",
       "@angular/localize"

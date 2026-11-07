@@ -80,7 +80,7 @@ describe('Video workers (ffmpeg)', () => {
     it('should reject for a missing file', async () => {
       const i = input('not_existing.mp4', 32, true);
       await expectRejection(render(i));
-      expect(fs.existsSync(i.outPath)).to.be.false;
+      expect(fs.existsSync(i.outPath!)).to.be.false;
     });
   });
 

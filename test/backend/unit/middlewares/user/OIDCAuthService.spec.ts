@@ -304,7 +304,7 @@ describe('OIDCAuthService', () => {
               users.find(u => Object.keys(filter).every((k: keyof UserDTO) => u[k] === filter[k])) || null,
             setOidcSubject: async (id: number, oidcSubject: string) => {
               const u = users.find(e => e.id === id);
-              u.oidcSubject = oidcSubject;
+              u!.oidcSubject = oidcSubject;
               return u;
             },
             createUser: async (user: UserDTO) => {

@@ -61,7 +61,7 @@ describe('ConfigDiagnostics', () => {
     it('should reject an unknown link type', () => {
       expect(() => ConfigDiagnostics.testNavigationLink({type: 99} as unknown as NavigationLinkConfig))
         .to.throw(/unknown type/);
-      expect(() => ConfigDiagnostics.testNavigationLink(null)).to.throw(/unknown type/);
+      expect(() => ConfigDiagnostics.testNavigationLink(null!)).to.throw(/unknown type/);
     });
   });
 
@@ -76,7 +76,7 @@ describe('ConfigDiagnostics', () => {
         new NavigationLinkConfig(NavigationLinkTypes.gallery),
         new NavigationLinkConfig(NavigationLinkTypes.search),
       ]);
-      let error: Error = null;
+      let error: Error = null!;
       try {
         await ConfigDiagnostics.testNavBarConfig(nb);
       } catch (e) {

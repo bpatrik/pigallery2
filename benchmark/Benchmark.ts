@@ -60,10 +60,10 @@ export class Benchmark {
   steps: BenchmarkStep[] = [];
   name: string;
   request: any;
-  beforeEach: () => Promise<any>;
-  afterEach: () => Promise<any>;
-  beforeAll: () => Promise<any>;
-  afterAll: () => Promise<any>;
+  beforeEach?: () => Promise<any>;
+  afterEach?: () => Promise<any>;
+  beforeAll?: () => Promise<any>;
+  afterAll?: () => Promise<any>;
   private readonly bmExpressApp: BMExpressApp;
 
 
@@ -152,7 +152,7 @@ export class Benchmark {
       if (Array.isArray(output)) {
         return {
           name,
-          duration: null,
+          duration: null!,
           items: output,
         };
       }
@@ -160,7 +160,7 @@ export class Benchmark {
       if ((output as ContentWrapper).directory || (output as ContentWrapper).searchResult || (output as ContentWrapper).notModified) {
         return {
           name,
-          duration: null,
+          duration: null!,
           contentWrapper: output as ContentWrapper
         };
       }
@@ -169,7 +169,7 @@ export class Benchmark {
         if (Array.isArray(msg)) {
           return {
             name,
-            duration: null,
+            duration: null!,
             items: msg,
           };
         }
@@ -177,7 +177,7 @@ export class Benchmark {
         if ((msg as ContentWrapper).directory || (msg as ContentWrapper).searchResult || (msg as ContentWrapper).notModified) {
           return {
             name,
-            duration: null,
+            duration: null!,
             contentWrapper: msg as ContentWrapper
           };
         }
@@ -186,7 +186,7 @@ export class Benchmark {
     }
     return {
       name,
-      duration: null
+      duration: null!
     };
   }
 

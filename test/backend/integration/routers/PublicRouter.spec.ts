@@ -290,7 +290,7 @@ describe('PublicRouter', () => {
     const i18n = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../angular.json'), 'utf8')).projects.pigallery2.i18n;
     const locales: string[] = [i18n.sourceLocale.code, ...Object.keys(i18n.locales)];
     let frontendFolder: string;
-    let languages: string[];
+    let languages: string[] | undefined;
     beforeEach(async () => {
       await setUp();
       languages = Config.Server.languages;
@@ -329,7 +329,7 @@ describe('PublicRouter', () => {
   });
 
   describe('Language links', () => {
-    let languages: string[];
+    let languages: string[] | undefined;
     beforeEach(async () => {
       await setUp();
       languages = Config.Server.languages;

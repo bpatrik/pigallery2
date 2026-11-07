@@ -54,7 +54,7 @@ describe('ExtensionManager', () => {
     after(TestHelper.resetConfig);
 
     const expectError = async (fn: () => Promise<void>, msg: string): Promise<void> => {
-      let err: Error = null;
+      let err: Error = null!;
       try {
         await fn();
       } catch (e) {

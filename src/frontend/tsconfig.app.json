@@ -13,7 +13,6 @@
     // Without it, isolatedModules lets the builder transpile with esbuild instead of tsc.
     "emitDecoratorMetadata": false,
     "isolatedModules": true,
-    "strictNullChecks": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true

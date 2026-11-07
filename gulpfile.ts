@@ -20,7 +20,7 @@ const execPr = util.promisify(child_process.exec);
 const translationFolder = 'translate';
 declare const process: NodeJS.Process;
 
-const getSwitch = (name: string, def: string = null): string => {
+const getSwitch = (name: string, def: string | null = null): string | null => {
   name = '--' + name;
   for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i].startsWith(name + '=')) {
@@ -64,7 +64,7 @@ const createDynamicTranslationFile = async (
     ) !== -1;
   const translations = translationXml.xliff.file[0].body[0]['trans-unit'];
   const filtered = translations.filter(
-    (tr): boolean => tr['context-group'].findIndex(hasTsTranslation) !== -1
+    (tr): boolean => tr['context-group']!.findIndex(hasTsTranslation) !== -1
   );
   filtered.forEach((tr): boolean => delete tr['context-group']);
   translationXml.xliff.file[0].body[0]['trans-unit'] = filtered;
@@ -130,10 +130,8 @@ const getLanguages = (): any[] | string[] => {
   });
 
   // get languages to filter
-  let languageFilter: string[] = null;
-  if (getSwitch('languages')) {
-    languageFilter = getSwitch('languages').split(',');
-  }
+  const languageSwitch = getSwitch('languages');
+  const languageFilter = languageSwitch ? languageSwitch.split(',') : null;
 
   let languages = files.map((f: string): string => {
     return f.split('.')[1];
@@ -208,11 +206,12 @@ gulp.task('copy-package', (): any =>
           buildTime: string;
           buildCommitHash: string;
         } => {
-          delete json.devDependencies;
+          delete (json as {devDependencies?: unknown}).devDependencies;
           json.scripts = {start: 'node ./src/backend/index.js'};
 
-          if (getSwitch('skip-opt-packages')) {
-            const skipPackages = getSwitch('skip-opt-packages')
+          const skipOptPackages = getSwitch('skip-opt-packages');
+          if (skipOptPackages) {
+            const skipPackages = skipOptPackages
               .replace(new RegExp(' ', 'g'), ',')
               .split(',');
             for (const pkg of skipPackages) {
@@ -228,7 +227,7 @@ gulp.task('copy-package', (): any =>
             for (const key of Object.keys(json.optionalDependencies)) {
               json.dependencies[key] = json.optionalDependencies[key];
             }
-            delete json.optionalDependencies;
+            delete (json as {optionalDependencies?: unknown}).optionalDependencies;
           }
           json.buildTime = new Date().toISOString();
 
@@ -495,7 +494,7 @@ gulp.task('localize-bundles', async (cb): Promise<void> => {
         }
       }
       for (const bundle of bundles) {
-        fs.renameSync(path.join(dir, bundle), path.join(dir, newNames.get(bundle)));
+        fs.renameSync(path.join(dir, bundle), path.join(dir, newNames.get(bundle)!));
       }
     }
   }

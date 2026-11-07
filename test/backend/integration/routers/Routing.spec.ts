@@ -94,7 +94,7 @@ describe('Routing', () => {
           if ((res.headers['content-type'] || '').includes('json')) {
             json = JSON.parse(text);
           }
-          resolve({path: urlPath, status: res.statusCode, headers: res.headers, body: buf, text, json});
+          resolve({path: urlPath, status: res.statusCode!, headers: res.headers, body: buf, text, json});
         });
       });
       req.on('error', reject);
@@ -415,7 +415,7 @@ describe('Routing', () => {
       await SQLConnection.close();
       const res = await postJson(api('/user/login'),
         {loginCredential: {username: adminUser.name, password: adminUser.password, rememberMe: false} as LoginCredential});
-      cookie = res.headers['set-cookie'];
+      cookie = res.headers['set-cookie']!;
     });
     after(tearDown);
 

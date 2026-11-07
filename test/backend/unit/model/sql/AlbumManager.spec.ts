@@ -55,19 +55,19 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
     const tmpDir: ParentDirectoryDTO = m.directory as ParentDirectoryDTO;
     const tmpM = tmpDir.media;
     const tmpD = tmpDir.directories;
-    const tmpP = tmpDir.cache.cover;
+    const tmpP = tmpDir.cache!.cover;
     const tmpMT = tmpDir.metaFile;
-    delete tmpDir.directories;
-    delete tmpDir.media;
-    delete tmpDir.cache.cover;
-    delete tmpDir.metaFile;
+    delete (tmpDir as {directories?: unknown}).directories;
+    delete (tmpDir as {media?: unknown}).media;
+    delete tmpDir.cache!.cover;
+    delete (tmpDir as {metaFile?: unknown}).metaFile;
     const ret = Utils.clone(m);
-    delete ret.id;
+    delete (ret as {id?: unknown}).id;
     ret.directory = {path: ret.directory.path, name: ret.directory.name};
-    delete ret.metadata;
+    delete (ret as {metadata?: unknown}).metadata;
     tmpDir.directories = tmpD;
     tmpDir.media = tmpM;
-    tmpDir.cache.cover = tmpP;
+    tmpDir.cache!.cover = tmpP;
     tmpDir.metaFile = tmpMT;
     return ret;
   };
@@ -148,10 +148,10 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
       const query: TextSearch = {value: 'árvíz', type: SearchQueryTypes.any_text};
       await am.addSavedSearch('Tükörfúrógép', Utils.clone(query));
 
-      await expect(am.deleteAlbum(undefined)).to.be.rejectedWith(Error);
+      await expect(am.deleteAlbum(undefined!)).to.be.rejectedWith(Error);
       await expect(am.deleteAlbum(NaN)).to.be.rejectedWith(Error);
-      await expect(am.addIfNotExistSavedSearch(undefined, Utils.clone(query), false)).to.be.rejectedWith(Error);
-      await expect(am.addIfNotExistSavedSearch('Other', undefined, false)).to.be.rejectedWith(Error);
+      await expect(am.addIfNotExistSavedSearch(undefined!, Utils.clone(query), false)).to.be.rejectedWith(Error);
+      await expect(am.addIfNotExistSavedSearch('Other', undefined!, false)).to.be.rejectedWith(Error);
 
       expect(await connection.getRepository(AlbumBaseEntity).find()).to.deep.equalInAnyOrder([{
         id: 1,
@@ -227,11 +227,11 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
       expect(defaultAlbum1).to.not.be.undefined;
 
       // The album searching for 'photo1' should have no items under the 'sw1' filename projection
-      if (projectedAlbum1.cache) {
-        expect(projectedAlbum1.cache.itemCount).to.equal(0);
+      if (projectedAlbum1!.cache) {
+        expect(projectedAlbum1!.cache.itemCount).to.equal(0);
       }
-      if (defaultAlbum1.cache) {
-        expect(defaultAlbum1.cache.itemCount).to.equal(1);
+      if (defaultAlbum1!.cache) {
+        expect(defaultAlbum1!.cache.itemCount).to.equal(1);
       }
     });
 

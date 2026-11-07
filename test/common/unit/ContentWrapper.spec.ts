@@ -18,10 +18,10 @@ describe('ContentWrapper', () => {
     }
 
     const content = (cw?.directory ? cw.directory : cw?.searchResult);
-    for (const m of content.media) {
+    for (const m of content!.media) {
       if (MediaDTOUtils.isPhoto(m)) {
-        delete (m as VideoDTO).metadata.bitRate;
-        delete (m as VideoDTO).metadata.duration;
+        delete ((m as VideoDTO).metadata as {bitRate?: unknown}).bitRate;
+        delete ((m as VideoDTO).metadata as {duration?: unknown}).duration;
         if (!(m as PhotoDTO).metadata.caption) {
           delete (m as PhotoDTO).metadata.caption;
         }
@@ -37,11 +37,11 @@ describe('ContentWrapper', () => {
         delete m.missingThumbnails;
       }
     }
-    if (!(content.directories?.length > 0)) {
-      delete content.directories;
+    if (!(content!.directories?.length > 0)) {
+      delete (content! as {directories?: unknown}).directories;
     }
-    for (const metaFile of content.metaFile) {
-      delete metaFile.id;
+    for (const metaFile of content!.metaFile) {
+      delete (metaFile as {id?: unknown}).id;
     }
     return cw;
   };
@@ -200,7 +200,7 @@ describe('ContentWrapper', () => {
       parent.media.push(tmp); // order should not matter
       test(true, 'different order, but same elements');
       tmp = parent.media;
-      parent.media = null;
+      parent.media = null!;
       test(false);
       parent.media = tmp;
       test(true);
@@ -490,7 +490,7 @@ describe('ContentWrapper', () => {
       for (const list of [[], [true], [false], [true, false, true], [false, false, true, true],
         new Array(ContentWrapperUtils.MAX_BITMASK_LENGTH).fill(true),
         new Array(ContentWrapperUtils.MAX_BITMASK_LENGTH).fill(false)]) {
-        expect(ContentWrapperUtils.bitmaskToBooleans(ContentWrapperUtils.booleansToBitmask(list)), JSON.stringify(list))
+        expect(ContentWrapperUtils.bitmaskToBooleans(ContentWrapperUtils.booleansToBitmask(list)!), JSON.stringify(list))
           .to.deep.equal(list);
       }
     });
@@ -503,8 +503,8 @@ describe('ContentWrapper', () => {
       const dir = TestHelper.getDirectoryEntry(null, 'a') as unknown as ParentDirectoryDTO;
       dir.availableParents = [true, false, true];
       const packed = ContentWrapperUtils.pack(ContentWrapperUtils.build(Utils.clone(dir)));
-      expect(packed.directory.availableParents as unknown).to.equal(0b1101);
-      expect(ContentWrapperUtils.unpack(packed).directory.availableParents).to.deep.equal([true, false, true]);
+      expect(packed.directory!.availableParents as unknown).to.equal(0b1101);
+      expect(ContentWrapperUtils.unpack(packed).directory!.availableParents).to.deep.equal([true, false, true]);
     });
 
     it('should keep too long lists as boolean list', () => {
@@ -512,8 +512,8 @@ describe('ContentWrapper', () => {
       const list = new Array(60).fill(true);
       dir.availableParents = list;
       const packed = ContentWrapperUtils.pack(ContentWrapperUtils.build(Utils.clone(dir)));
-      expect(packed.directory.availableParents).to.deep.equal(list);
-      expect(ContentWrapperUtils.unpack(packed).directory.availableParents).to.deep.equal(list);
+      expect(packed.directory!.availableParents).to.deep.equal(list);
+      expect(ContentWrapperUtils.unpack(packed).directory!.availableParents).to.deep.equal(list);
     });
   });
 });

@@ -21,7 +21,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);
 
 
-  let creator: UserDTO = null;
+  let creator: UserDTO = null!;
 
   const setUpSqlDB = async () => {
     await sqlHelper.initDB();
@@ -29,7 +29,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     const conn = await SQLConnection.getConnection();
 
     creator = await conn.getRepository(UserEntity).save({
-      id: null,
+      id: null!,
       name: 'test use',
       password: '',
       role: UserRoles.User
@@ -50,7 +50,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKey',
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
       password: null,
@@ -73,7 +73,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKey',
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
       password: null,
@@ -85,11 +85,11 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     await sm.createSharing(sharing);
     const found = await sm.findOne('testKey');
 
-    expect(found.id).to.not.equals(null);
-    expect(found.sharingKey).to.equals(sharing.sharingKey);
-    expect(found.timeStamp).to.equals(sharing.timeStamp);
-    expect(found.password).to.equals(sharing.password);
-    expect(found.expires).to.equals(sharing.expires);
+    expect(found!.id).to.not.equals(null);
+    expect(found!.sharingKey).to.equals(sharing.sharingKey);
+    expect(found!.timeStamp).to.equals(sharing.timeStamp);
+    expect(found!.password).to.equals(sharing.password);
+    expect(found!.expires).to.equals(sharing.expires);
   });
 
 
@@ -97,7 +97,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKey',
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
       password: null,
@@ -132,7 +132,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKeyWithDirDefault',
       searchQuery: {value: '/vacation*', type: SearchQueryTypes.directory} as TextSearch,
       defaultDirectoryView: '/vacation',
@@ -149,17 +149,17 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     expect(saved.defaultSearchView == null).to.be.true;
 
     const found = await sm.findOne('testKeyWithDirDefault');
-    expect(found.id).to.equals(saved.id);
-    expect(found.searchQuery).to.deep.equals(sharing.searchQuery);
-    expect(found.defaultDirectoryView).to.equals('/vacation');
-    expect(found.defaultSearchView == null).to.be.true;
+    expect(found!.id).to.equals(saved.id);
+    expect(found!.searchQuery).to.deep.equals(sharing.searchQuery);
+    expect(found!.defaultDirectoryView).to.equals('/vacation');
+    expect(found!.defaultSearchView == null).to.be.true;
   });
 
   it('should create sharing with defaultSearchView and not overwrite searchQuery', async () => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKeyWithSearchDefault',
       searchQuery: {value: '/vacation*', type: SearchQueryTypes.directory} as TextSearch,
       defaultSearchView: {value: 'sunset', type: SearchQueryTypes.keyword} as TextSearch,
@@ -176,17 +176,17 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     expect(saved.defaultDirectoryView == null).to.be.true;
 
     const found = await sm.findOne('testKeyWithSearchDefault');
-    expect(found.id).to.equals(saved.id);
-    expect(found.searchQuery).to.deep.equals(sharing.searchQuery);
-    expect(found.defaultSearchView).to.deep.equals(sharing.defaultSearchView);
-    expect(found.defaultDirectoryView == null).to.be.true;
+    expect(found!.id).to.equals(saved.id);
+    expect(found!.searchQuery).to.deep.equals(sharing.searchQuery);
+    expect(found!.defaultSearchView).to.deep.equals(sharing.defaultSearchView);
+    expect(found!.defaultDirectoryView == null).to.be.true;
   });
 
   it('should fail to create sharing if both defaultDirectoryView and defaultSearchView are set', async () => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKeyWithBothDefaults',
       searchQuery: {value: '/vacation*', type: SearchQueryTypes.directory} as TextSearch,
       defaultDirectoryView: '/vacation',
@@ -209,7 +209,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKeyUpdateDir',
       searchQuery: {value: '/vacation*', type: SearchQueryTypes.directory} as TextSearch,
       password: null,
@@ -239,16 +239,16 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     expect(updated.defaultSearchView == null).to.be.true;
 
     const found = await sm.findOne('testKeyUpdateDir');
-    expect(found.searchQuery).to.deep.equals(sharing.searchQuery);
-    expect(found.defaultDirectoryView).to.equals('/vacation/day1');
-    expect(found.defaultSearchView == null).to.be.true;
+    expect(found!.searchQuery).to.deep.equals(sharing.searchQuery);
+    expect(found!.defaultDirectoryView).to.equals('/vacation/day1');
+    expect(found!.defaultSearchView == null).to.be.true;
   });
 
   it('should update sharing with defaultSearchView and not overwrite searchQuery', async () => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKeyUpdateSearch',
       searchQuery: {value: '/vacation*', type: SearchQueryTypes.directory} as TextSearch,
       defaultDirectoryView: '/vacation',
@@ -278,16 +278,16 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     expect(updated.defaultDirectoryView == null).to.be.true;
 
     const found = await sm.findOne('testKeyUpdateSearch');
-    expect(found.searchQuery).to.deep.equals(sharing.searchQuery);
-    expect(found.defaultSearchView).to.deep.equals(update.defaultSearchView);
-    expect(found.defaultDirectoryView == null).to.be.true;
+    expect(found!.searchQuery).to.deep.equals(sharing.searchQuery);
+    expect(found!.defaultSearchView).to.deep.equals(update.defaultSearchView);
+    expect(found!.defaultDirectoryView == null).to.be.true;
   });
 
   it('should fail to update sharing if both defaultDirectoryView and defaultSearchView are set', async () => {
     const sm = new SharingManager();
 
     const sharing: UpdateSharingDTO = {
-      id: null,
+      id: null!,
       sharingKey: 'testKeyUpdateBoth',
       searchQuery: {value: '/vacation*', type: SearchQueryTypes.directory} as TextSearch,
       password: null,
@@ -324,7 +324,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       ({type: SearchQueryTypes.directory, value, matchType: TextSearchQueryMatchTypes.globMatch});
 
     const newSharing = (s: Partial<UpdateSharingDTO>): UpdateSharingDTO => ({
-      id: null,
+      id: null!,
       sharingKey: 'key_' + Math.random().toString(36).substring(7),
       searchQuery: null,
       password: null,
@@ -338,13 +338,13 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       const sm = new SharingManager();
       const saved = await sm.createSharing(newSharing({directoryQuery: dq('/photos/*')}));
       const found = await sm.findOne(saved.sharingKey);
-      expect(found.searchQuery).to.be.null;
-      expect(found.directoryQuery).to.deep.equal(dq('/photos/*'));
+      expect(found!.searchQuery).to.be.null;
+      expect(found!.directoryQuery).to.deep.equal(dq('/photos/*'));
     });
 
     it('should not create sharing without search and directory query', async () => {
       const sm = new SharingManager();
-      let err: Error = null;
+      let err: Error = null!;
       try {
         await sm.createSharing(newSharing({}));
       } catch (e) {
@@ -355,7 +355,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
 
     it('should not create sharing with non directory directory query', async () => {
       const sm = new SharingManager();
-      let err: Error = null;
+      let err: Error = null!;
       try {
         await sm.createSharing(newSharing({directoryQuery: {type: SearchQueryTypes.keyword, value: 'x'} as unknown as DirectorySearch}));
       } catch (e) {
@@ -370,7 +370,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       const updated = await sm.updateSharing({...saved, directoryQuery: dq('/other/*')} as UpdateSharingDTO, true);
       expect(updated.directoryQuery).to.deep.equal(dq('/other/*'));
 
-      let err: Error = null;
+      let err: Error = null!;
       try {
         await sm.updateSharing({...saved, searchQuery: null, directoryQuery: null} as UpdateSharingDTO, true);
       } catch (e) {
@@ -409,7 +409,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
     it('should not delete any sharing without a sharing key', async () => {
       const sm = new SharingManager();
       await create('Kulcs_ő');
-      await expect(sm.deleteSharing(undefined)).to.be.rejectedWith(Error);
+      await expect(sm.deleteSharing(undefined!)).to.be.rejectedWith(Error);
       await expect(sm.deleteSharing('')).to.be.rejectedWith(Error);
       await expect(sm.deleteSharing('not_existing')).to.be.rejectedWith(Error);
       expect((await sm.listAll()).map(s => s.sharingKey)).to.deep.equal(['Kulcs_ő']);
@@ -445,9 +445,9 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
         ...s
       } as UpdateSharingDTO);
       await expect(sm.updateSharing(update({id: undefined}), true)).to.be.rejectedWith(Error);
-      await expect(sm.updateSharing(update({creator: {...creator, id: undefined}}), true)).to.be.rejectedWith(Error);
+      await expect(sm.updateSharing(update({creator: {...creator, id: undefined!}}), true)).to.be.rejectedWith(Error);
       await expect(sm.updateSharing(update({id: saved.id + 1000}), true)).to.be.rejectedWith(Error);
-      expect((await sm.findOne('Kulcs_ő')).expires).to.equal(saved.expires);
+      expect((await sm.findOne('Kulcs_ő'))!.expires).to.equal(saved.expires);
     });
   });
 });

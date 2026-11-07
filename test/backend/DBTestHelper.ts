@@ -67,14 +67,14 @@ export class DBTestHelper {
      *     |- p4
      */
 
-    dir: null,
-    subDir: null,
-    subDir2: null,
-    v: null,
-    p: null,
-    p2: null,
-    p3: null,
-    p4: null
+    dir: null!,
+    subDir: null!,
+    subDir2: null!,
+    v: null!,
+    p: null!,
+    p2: null!,
+    p3: null!,
+    p4: null!
   };
 
   public static get defaultSession(): SessionContext {
@@ -119,7 +119,7 @@ export class DBTestHelper {
       await ObjectManagers.getInstance().init();
     }
     const connection = await SQLConnection.getConnection();
-    ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null);
+    ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null!);
 
 
     await ObjectManagers.getInstance().IndexingManager.saveToDB(directory as ParentDirectoryDTO);
@@ -135,14 +135,14 @@ export class DBTestHelper {
     const gm = new GalleryManagerTest();
 
     const dir = await gm.getParentDirFromId(connection, this.defaultSession,
-      (await gm.getDirIdAndTime(connection, directory.name, path.join(directory.path, path.sep))).id);
+      (await gm.getDirIdAndTime(connection, directory.name, path.join(directory.path, path.sep)))!.id);
 
     const populateDir = async (d: DirectoryBaseDTO) => {
-      for (let i = 0; i < d.directories.length; i++) {
-        d.directories[i] = await gm.getParentDirFromId(connection, this.defaultSession,
-          (await gm.getDirIdAndTime(connection, d.directories[i].name,
-            path.join(DiskManager.pathFromParent(d), path.sep))).id);
-        await populateDir(d.directories[i]);
+      for (let i = 0; i < d.directories!.length; i++) {
+        d.directories![i] = await gm.getParentDirFromId(connection, this.defaultSession,
+          (await gm.getDirIdAndTime(connection, d.directories![i].name,
+            path.join(DiskManager.pathFromParent(d), path.sep)))!.id);
+        await populateDir(d.directories![i]);
       }
     };
     await populateDir(dir);
@@ -202,9 +202,9 @@ export class DBTestHelper {
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir;
     this.testGalleyEntities.v = (this.testGalleyEntities.dir.media.filter(m => m.name === this.testGalleyEntities.v.name)[0] as any);
     this.testGalleyEntities.v.directory = this.testGalleyEntities.dir;
-    this.testGalleyEntities.p3 = (this.testGalleyEntities.dir.directories[0].media[0] as any);
+    this.testGalleyEntities.p3 = (this.testGalleyEntities.dir.directories[0].media![0] as any);
     this.testGalleyEntities.p3.directory = this.testGalleyEntities.dir.directories[0];
-    this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media[0] as any);
+    this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media![0] as any);
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir.directories[1];
   };
 
@@ -250,7 +250,7 @@ export class DBTestHelper {
     Config.Extensions.enabled = false; // make all tests clean
     Config.Database.type = this.dbType;
     if (this.dbType === DatabaseType.mysql) {
-      Config.Database.mysql.database = 'pigallery2_test';
+      Config.Database.mysql!.database = 'pigallery2_test';
     } else {
       Config.Database.dbFolder = TestHelper.TMP_DIR;
       ProjectPath.reset();

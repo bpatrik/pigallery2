@@ -76,7 +76,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       const dirInfo = await galleryManager.getDirIdAndTime(connection, sqlHelper.testGalleyEntities.dir.name, sqlHelper.testGalleyEntities.dir.path);
       expect(dirInfo).to.not.be.null;
 
-      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo.id);
+      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo!.id);
 
       // Verify that all media is returned
       expect(directory.media).to.not.be.empty;
@@ -103,7 +103,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       expect(dirInfo).to.not.be.null;
 
       // Get the directory contents with filtering
-      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo.id);
+      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo!.id);
 
       // Verify that only media matching the query is returned
       expect(directory.media).to.not.be.undefined;
@@ -135,7 +135,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       const dirInfo = await galleryManager.getDirIdAndTime(connection, sqlHelper.testGalleyEntities.dir.name, sqlHelper.testGalleyEntities.dir.path);
       expect(dirInfo).to.not.be.null;
 
-      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo.id);
+      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo!.id);
 
       // The directory itself should still be returned
       expect(directory).to.not.be.undefined;
@@ -163,12 +163,12 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       } as any);
 
       const dirInfo = await galleryManager.getDirIdAndTime(connection, root.name, root.path);
-      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo.id);
+      const directory = await galleryManager.getParentDirFromId(connection, session, dirInfo!.id);
 
       // the media of the child are blocked, but the directory itself is only hidden by the directory block list
       expect((directory.directories || []).map(d => d.name)).to.include(child.name);
       const childInfo = await galleryManager.getDirIdAndTime(connection, child.name, child.path);
-      expect((await galleryManager.getParentDirFromId(connection, session, childInfo.id)).media).to.deep.equal([]);
+      expect((await galleryManager.getParentDirFromId(connection, session, childInfo!.id)).media).to.deep.equal([]);
 
     });
   });
@@ -547,7 +547,7 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
     const list = async (session: SessionContext, relDir: string) => {
       const p = GalleryManager.parseRelativeDirPath(relDir);
       const d = await gm.getDirIdAndTime(conn, p.name, p.parent);
-      const res = await gm.getParentDirFromId(conn, session, d.id);
+      const res = await gm.getParentDirFromId(conn, session, d!.id);
       return {
         dirs: (res.directories || []).map(x => x.name).sort(),
         media: (res.media || []).map(x => x.name.split('_')[0]).sort()
@@ -705,8 +705,8 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       const origGpx = Config.MetaFile.gpx;
       Config.MetaFile.gpx = true;
       try {
-        expect((await gm.getParentDirFromId(conn, s, d.id)).metaFile.map(m => m.name.split('_')[0])).to.deep.equal(['publicTrack']);
-        expect((await gm.getParentDirFromId(conn, s, d.id, false)).metaFile).to.deep.equal([]);
+        expect((await gm.getParentDirFromId(conn, s, d!.id)).metaFile.map(m => m.name.split('_')[0])).to.deep.equal(['publicTrack']);
+        expect((await gm.getParentDirFromId(conn, s, d!.id, false)).metaFile).to.deep.equal([]);
       } finally {
         Config.MetaFile.gpx = origGpx;
       }

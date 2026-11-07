@@ -447,10 +447,10 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
       }));
       expect(context.directoryAccess.allowLists).to.deep.equal([[dq('public')]]);
       expect(context.directoryAccess.blockList).to.deep.equal([dq('private')]);
-      expect(context.directoryAccess.allowQuery.directory).to.be.instanceOf(Brackets);
-      expect(context.directoryAccess.allowQuery.directories).to.be.instanceOf(Brackets);
-      expect(context.directoryAccess.notBlockedQuery.directory).to.be.instanceOf(Brackets);
-      expect(context.directoryAccess.notBlockedQuery.directories).to.be.instanceOf(Brackets);
+      expect(context.directoryAccess.allowQuery!.directory).to.be.instanceOf(Brackets);
+      expect(context.directoryAccess.allowQuery!.directories).to.be.instanceOf(Brackets);
+      expect(context.directoryAccess.notBlockedQuery!.directory).to.be.instanceOf(Brackets);
+      expect(context.directoryAccess.notBlockedQuery!.directories).to.be.instanceOf(Brackets);
       // media in not available directories is filtered too
       expect(context.projectionQuery).to.be.instanceOf(Brackets);
       expect(context.hasDirectoryProjection).to.be.true;
@@ -475,7 +475,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
         const context = await sm.buildContext(user({overrideAllowBlockList: false, allowDirectoryList: [dq('other')]}));
         expect(context.directoryAccess.allowLists).to.deep.equal([[dq('public')]]);
         // plain objects, not the config instances
-        expect(context.directoryAccess.allowLists[0][0]).to.not.be.instanceOf(DirectorySearchConfig);
+        expect(context.directoryAccess.allowLists![0][0]).to.not.be.instanceOf(DirectorySearchConfig);
         expect(context.user.projectionKey).to.equal(sm.createProjectionKey(
           {type: SearchQueryTypes.directory, value: 'public', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch));
       } finally {
@@ -494,7 +494,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
         dq('public') // not an array
       ];
       for (const list of invalid) {
-        let err: Error = null;
+        let err: Error = null!;
         try {
           await sm.buildContext(user({allowDirectoryList: list}));
         } catch (e) {
@@ -569,7 +569,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
             creator: user({overrideAllowBlockList: false, blockDirectoryList: [dq('private')]})
           }));
           expect(global.blockDirectoryList).to.deep.equal([dq('global')]);
-          expect(global.blockDirectoryList[0]).to.not.be.instanceOf(DirectorySearchConfig);
+          expect(global.blockDirectoryList![0]).to.not.be.instanceOf(DirectorySearchConfig);
         } finally {
           Config.Users.blockDirectoryList = [];
         }
@@ -579,7 +579,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
         const sm = new SessionManager();
         const sh = sharing({directoryQuery: dq('public'), creator: user({blockDirectoryList: [dq('private')]})});
         const context = await sm.buildContext(sm.createSharingUser(sh));
-        expect(context.user.projectionKey).to.equal(sm.createProjectionKey(sm.buildAllowListForSharing(sh)));
+        expect(context.user.projectionKey).to.equal(sm.createProjectionKey(sm.buildAllowListForSharing(sh)!));
         // the directory query also filters the media
         const context2 = await sm.buildContext(sm.createSharingUser({...sh, directoryQuery: dq('other')} as SharingEntity));
         expect(context2.user.projectionKey).to.not.equal(context.user.projectionKey);

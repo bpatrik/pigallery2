@@ -53,7 +53,7 @@ describe('Config property types', () => {
       if (typeof t === 'function') {
         return 'config';
       }
-      return 'enum:' + Object.keys(t).filter((k) => isNaN(Number(k))).join(',');
+      return 'enum:' + Object.keys(t as object).filter((k) => isNaN(Number(k))).join(',');
     };
     const types: Record<string, string> = {};
     const walk = (cls: any, prefix: string): void => {

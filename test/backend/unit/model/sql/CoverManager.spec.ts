@@ -66,7 +66,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
     const pFaceLessTmp = TestHelper.getPhotoEntry3(subDir);
     pFaceLessTmp.metadata.rating = 0;
     pFaceLessTmp.metadata.creationDate = 400000;
-    delete pFaceLessTmp.metadata.faces;
+    delete (pFaceLessTmp.metadata as {faces?: unknown}).faces;
     p4 = TestHelper.getPhotoEntry4(subDir2);
     p4.metadata.rating = 5;
     p4.metadata.creationDate = 100;
@@ -75,15 +75,15 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
 
     subDir = dir.directories[0];
     subDir2 = dir.directories[1];
-    p = (subDir.media.filter(m => m.name === p.name)[0] as any);
+    p = (subDir.media!.filter(m => m.name === p.name)[0] as any);
     p.directory = subDir;
-    p2 = (subDir.media.filter(m => m.name === p2.name)[0] as any);
+    p2 = (subDir.media!.filter(m => m.name === p2.name)[0] as any);
     p2.directory = subDir;
-    v = (subDir.media.filter(m => m.name === v.name)[0] as any);
+    v = (subDir.media!.filter(m => m.name === v.name)[0] as any);
     v.directory = subDir;
-    pFaceLess = (subDir.media.filter(m => m.name === pFaceLessTmp.name)[0] as any);
+    pFaceLess = (subDir.media!.filter(m => m.name === pFaceLessTmp.name)[0] as any);
     pFaceLess.directory = subDir;
-    p4 = (subDir2.media[0] as any);
+    p4 = (subDir2.media![0] as any);
     p4.directory = subDir2;
   };
 
@@ -106,15 +106,15 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
     const tmpMT = tmpDir.metaFile;
     delete tmpDir.directories;
     delete tmpDir.media;
-    delete tmpDir.cache.cover;
-    delete tmpDir.cache.valid;
+    delete tmpDir.cache!.cover;
+    delete tmpDir.cache!.valid;
     delete tmpDir.metaFile;
     const ret = Utils.clone(m);
-    delete (ret.directory as DirectoryBaseDTO).id;
+    delete (ret.directory as {id?: unknown}).id;
     delete (ret.directory as DirectoryBaseDTO).lastScanned;
-    delete (ret.directory as DirectoryBaseDTO).lastModified;
+    delete (ret.directory as {lastModified?: unknown}).lastModified;
     delete (ret.directory as DirectoryBaseDTO).cache;
-    delete (ret as PhotoDTO).metadata;
+    delete (ret as {metadata?: unknown}).metadata;
     tmpDir.directories = tmpD;
     tmpDir.media = tmpM;
     tmpDir.metaFile = tmpMT;
@@ -127,7 +127,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
   });
 
   afterEach(() => {
-    Config.AlbumCover.SearchQuery = null;
+    Config.AlbumCover.SearchQuery = null!;
     Config.AlbumCover.Sorting = [new ClientSortingConfig(SortByTypes.Rating, false),
       new ClientSortingConfig(SortByTypes.Date, false)];
   });
@@ -150,7 +150,7 @@ describe('CoverManager', (sqlHelper: DBTestHelper) => {
 
   it('should get cover for saved search', async () => {
     const pm = new CoverManager();
-    Config.AlbumCover.SearchQuery = null;
+    Config.AlbumCover.SearchQuery = null!;
     expect(Utils.clone(await pm.getCoverForAlbum(
       DBTestHelper.defaultSession, {
         searchQuery: {

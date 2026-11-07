@@ -79,7 +79,7 @@ describe('RenderingMWs', () => {
 
     it('should not report an aborted request as an error', async () => {
       const app = express();
-      let sent: Promise<void>;
+      let sent!: Promise<void>; // assigned by the request handler before the client is done
       let received: () => void;
       const requestReceived = new Promise<void>((resolve) => received = resolve);
       app.get('/abort', (req: Request, res: Response, next: NextFunction) => {

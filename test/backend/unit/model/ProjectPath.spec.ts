@@ -64,7 +64,7 @@ describe('ProjectPath', () => {
   describe('DiskManager.scanDirectory', () => {
     it('should refuse to scan outside the image folder', async () => {
       for (const p of ['..', path.join('..', 'other')]) {
-        let err: Error = null;
+        let err: Error = null!;
         try {
           await DiskManager.scanDirectory(p);
         } catch (e) {

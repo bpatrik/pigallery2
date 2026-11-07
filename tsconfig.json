@@ -6,6 +6,7 @@
   "compilerOptions": {
     "strict": false,
     "noImplicitAny": true,
+    "strictNullChecks": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
