@@ -59,6 +59,8 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 
 - Compile backend + tests: `npm run build-backend` (plain `tsc`). Mocha runs the compiled `.js`, so compile before running tests.
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
+  - The server can't start without a frontend build in `dist` (`Localizations.init` reads it), so the integration tests
+    fail in their `before all` hooks and the run hangs. In a fresh worktree, build the frontend or copy `dist/en` from the main checkout first.
   - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
     never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
