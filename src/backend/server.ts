@@ -143,13 +143,7 @@ export class Server {
    *
    * Event listener for HTTP server "error" event.
    */
-  private onError = (error: {
-    errno?: number,
-    code?: string,
-    path?: string,
-    syscall?: string,
-    stack?: string
-  }) => {
+  private onError = (error: NodeJS.ErrnoException) => {
     if (error.syscall !== 'listen') {
       Logger.error(LOG_TAG, 'Server error', error);
       throw error;

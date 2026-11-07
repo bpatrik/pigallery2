@@ -48,6 +48,7 @@ export class ErrorDTO {
     req?: Request
   ) {
     this.detailsStr =
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string -- details is usually a caught Error or a string
       (this.details ? String(this.details) : '') || ErrorCodes[code];
     if (req) {
       this.request = {

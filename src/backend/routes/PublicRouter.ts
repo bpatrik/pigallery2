@@ -148,7 +148,7 @@ export class PublicRouter {
       });
     });
 
-    const getIcon = (theme: 'auto' | string | null = null, paddingPercent = 0): string => {
+    const getIcon = (theme: string | null = null, paddingPercent = 0): string => {
       const vBs = (Config.Server.svgIcon.viewBox || '').split(' ').slice(0, 4).map(s => parseFloat(s));
       vBs[0] = vBs[0] || 0;
       vBs[1] = vBs[1] || 0;

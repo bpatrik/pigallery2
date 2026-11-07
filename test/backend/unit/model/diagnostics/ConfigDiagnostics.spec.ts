@@ -1,4 +1,5 @@
 import {expect} from 'chai';
+import * as path from 'node:path';
 import {ConfigDiagnostics} from '../../../../../src/backend/model/diagnostics/ConfigDiagnostics';
 import {
   NavBarConfig,
@@ -129,6 +130,25 @@ describe('ConfigDiagnostics', () => {
     it('should reject a version that it cannot read', () => {
       expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '')).to.throw();
       expect(() => ConfigDiagnostics.testLibvipsVersion('', '8.16.1')).to.throw();
+    });
+  });
+
+  describe('testImageFolder', () => {
+
+    it('should accept a readable folder', async () => {
+      await ConfigDiagnostics.testImageFolder(__dirname);
+    });
+
+    it('should reject a missing folder with an Error that names it', async () => {
+      const folder = path.join(__dirname, 'not-existing-képek');
+      let error: unknown = null;
+      try {
+        await ConfigDiagnostics.testImageFolder(folder);
+      } catch (e) {
+        error = e;
+      }
+      expect(error).to.be.instanceOf(Error);
+      expect((error as Error).message).to.contain(folder);
     });
   });
 

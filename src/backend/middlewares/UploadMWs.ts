@@ -16,24 +16,25 @@ export class UploadMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    upload(req, res, async (err: unknown) => {
-      if (err) {
-        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, errorMessage(err)));
-      }
+    try {
+      await new Promise<void>((resolve, reject) =>
+        upload(req, res, (err: unknown) => err ? reject(err instanceof Error ? err : new Error(errorMessage(err))) : resolve()));
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, errorMessage(err)));
+    }
 
-      const files = req.files as Express.Multer.File[];
-      if (!files || files.length === 0) {
-        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, 'No files uploaded'));
-      }
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, 'No files uploaded'));
+    }
 
-      try {
-        const directory = RequestParams.get(req, 'directory') || '';
-        req.resultPipe = await ObjectManagers.getInstance().UploadManager.saveFiles(directory, files);
-        return next();
-      } catch (e) {
-        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, e instanceof Error ? e.message : String(e)));
-      }
-    });
+    try {
+      const directory = RequestParams.get(req, 'directory') || '';
+      req.resultPipe = await ObjectManagers.getInstance().UploadManager.saveFiles(directory, files);
+      return next();
+    } catch (e) {
+      return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, errorMessage(e)));
+    }
   }
 
 }

@@ -726,7 +726,7 @@ export class ClientSortingConfig implements SortingMethod {
       name: $localize`Method`,
     },
   })
-  method: number = SortByTypes.Date;
+  method: SortingMethod['method'] = SortByTypes.Date;
   @ConfigProperty({
     type: 'boolean',
     tags: {
@@ -735,7 +735,7 @@ export class ClientSortingConfig implements SortingMethod {
   })
   ascending: boolean = true;
 
-  constructor(method: number = SortByTypes.Date, ascending: boolean = true) {
+  constructor(method: SortingMethod['method'] = SortByTypes.Date, ascending: boolean = true) {
     this.method = method;
     this.ascending = ascending;
   }
@@ -1154,7 +1154,7 @@ export class ThemesConfig {
     } as TAGS,
     description: $localize`Selected theme to use on the site.`
   })
-  selectedTheme: 'default' | string = 'classic';
+  selectedTheme: string = 'classic';
 
   @ConfigProperty({
     type: 'array',

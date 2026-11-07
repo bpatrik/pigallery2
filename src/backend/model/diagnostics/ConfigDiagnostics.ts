@@ -3,6 +3,7 @@ import {Logger} from '../../Logger';
 import {NotificationManager} from '../NotifocationManager';
 import {SQLConnection} from '../database/SQLConnection';
 import * as fs from 'node:fs';
+import {errorMessage} from '../../../common/entities/Error';
 import * as path from 'node:path';
 import {FFmpeg} from '../FFmpeg';
 import {
@@ -185,22 +186,16 @@ export class ConfigDiagnostics {
     await this.checkReadWritePermission(folder);
   }
 
-  static testImageFolder(folder: string): Promise<void> {
+  static async testImageFolder(folder: string): Promise<void> {
     Logger.debug(LOG_TAG, 'Testing images folder');
-    return new Promise((resolve, reject) => {
-      if (!fs.existsSync(folder)) {
-        reject('Images folder not exists: \'' + folder + '\'');
-      }
-      fs.access(folder, fs.constants.R_OK, (err) => {
-        if (err) {
-          reject({
-            message: 'Error during getting read access to images folder',
-            error: err.toString(),
-          });
-        }
-      });
-      resolve();
-    });
+    if (!fs.existsSync(folder)) {
+      throw new Error('Images folder not exists: \'' + folder + '\'');
+    }
+    try {
+      await fs.promises.access(folder, fs.constants.R_OK);
+    } catch (err) {
+      throw new Error('Error during getting read access to images folder: ' + errorMessage(err), {cause: err});
+    }
   }
 
 
@@ -422,7 +417,7 @@ export class ConfigDiagnostics {
     await ConfigDiagnostics.testTempFolder(config.Media.tempFolder);
     await ConfigDiagnostics.testVideoConfig(config.Media.Video, config);
     await ConfigDiagnostics.testMetaFileConfig(config.MetaFile, config);
-    await ConfigDiagnostics.testAlbumsConfig(config.Album, config);
+    ConfigDiagnostics.testAlbumsConfig(config.Album, config);
     await ConfigDiagnostics.testImageFolder(config.Media.folder);
     await ConfigDiagnostics.testPhotoConfig(config.Media.Photo);
     await ConfigDiagnostics.testSearchConfig(config.Search, config);

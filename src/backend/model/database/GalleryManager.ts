@@ -482,7 +482,7 @@ export class GalleryManager {
 
       return dir;
     } catch (e) {
-      Logger.error(LOG_TAG, 'Failed to get parent directory: ' + e);
+      Logger.error(LOG_TAG, 'Failed to get parent directory: ' + String(e));
       Logger.debug(LOG_TAG, query.getQuery(), query.getParameters());
       throw e;
     }

@@ -102,7 +102,7 @@ export class JobProgressManager {
     if (this.timer !== null) {
       return;
     }
-    this.timer = setTimeout(async (): Promise<void> => {
+    this.timer = setTimeout((): void => {
       this.saveDB().catch(console.error);
       this.timer = null;
     }, 5000);

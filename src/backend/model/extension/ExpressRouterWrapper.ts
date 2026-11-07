@@ -53,7 +53,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
               private readonly extLogger: ILogger) {
   }
 
-  public mediaJsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string {
+  public mediaJsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => unknown): string {
     return this.register(paths,
       ...(this.getAuthMWs(minRole).concat([
         async (req: Request, res: Response, next: NextFunction) => {
@@ -79,14 +79,14 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
             next();
           } catch (e) {
             this.extLogger.error(e);
-            next(new Error(`[${this.name}] Error during processing: '${paths}'`));
+            next(new Error(`[${this.name}] Error during processing: '${paths.join(',')}'`));
           }
         },
         RenderingMWs.renderResult
       ])));
   }
 
-  public jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: unknown, user?: UserDTO) => Promise<unknown> | unknown): string {
+  public jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: unknown, user?: UserDTO) => unknown): string {
     return this.register(paths,
       ...(this.getAuthMWs(minRole).concat([
         async (req: Request, res: Response, next: NextFunction) => {
@@ -94,7 +94,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
             req.resultPipe = await cb(req.params, req.body ?? {}, RequestSession.getContext(req).user);
             next();
           } catch {
-            next(new Error(`[${this.name}]Error during processing:${paths}`));
+            next(new Error(`[${this.name}]Error during processing:${paths.join(',')}`));
           }
         },
         RenderingMWs.renderResult
@@ -114,7 +114,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
    */
   private register(paths: readonly string[], ...handlers: express.RequestHandler[]): string {
     const fullPaths = paths.map(p => (Utils.concatUrls('/' + this.name + '/' + p)));
-    const p = ExtensionManager.EXTENSION_API_PATH + fullPaths;
+    const p = ExtensionManager.EXTENSION_API_PATH + fullPaths.join(',');
     try {
       this.router[this.func](fullPaths, ...handlers);
     } catch (e) {

@@ -94,9 +94,9 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
         this.LOG_TAG,
         'Job already running or not supported: ' + this.Name
       );
-      return Promise.reject(
+      return Promise.reject(new Error(
         'Job already running or not supported: ' + this.Name
-      );
+      ));
     }
   }
 
@@ -145,7 +145,8 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
     if (this.IsInstant) {
       this.prResolve();
     }
-    this.jobListener.onJobFinished(this, finishState, this.soloRun);
+    this.jobListener.onJobFinished(this, finishState, this.soloRun)
+      .catch((e) => Logger.error(this.LOG_TAG, 'Error after job finished: ' + this.Name, e));
   }
 
   private run(): void {

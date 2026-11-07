@@ -401,7 +401,7 @@ export class SearchManager {
           .getRepository(FileEntity)
           .createQueryBuilder('file')
           .select(['file', ...this.DIRECTORY_SELECT])
-          .where(`file.directoryId IN(${dIds})`)
+          .where(`file.directoryId IN(${dIds.join(',')})`)
           .leftJoin('file.directory', 'directory')
           .getMany();
       }

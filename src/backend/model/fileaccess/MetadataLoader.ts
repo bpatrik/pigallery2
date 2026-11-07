@@ -510,7 +510,7 @@ export class MetadataLoader {
         metadata.positionData.GPSData.latitude = lat !== undefined && Number.isFinite(lat) && Math.abs(lat) <= 90 ? parseFloat(lat.toFixed(6)) : undefined;
       }
     } catch (err) {
-      Logger.error(LOG_TAG, 'Error during reading of GPS data: ' + err);
+      Logger.error(LOG_TAG, 'Error during reading of GPS data: ' + String(err));
     } finally {
       if (metadata.positionData) {
         Utils.removeNullOrEmptyObj(metadata.positionData);
@@ -824,7 +824,7 @@ export class MetadataLoader {
         return str.trim() || undefined;
       }
     } catch (err) {
-      Logger.silly(LOG_TAG, 'Error parsing Apple MakerNote: ' + err);
+      Logger.silly(LOG_TAG, 'Error parsing Apple MakerNote: ' + String(err));
     }
     return undefined;
   }

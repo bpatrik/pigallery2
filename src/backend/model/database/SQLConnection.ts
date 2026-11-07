@@ -208,15 +208,15 @@ export class SQLConnection {
     try {
       return await initialize(options);
     } catch (e) {
-      if (e instanceof Error && 'sqlMessage' in e && e.sqlMessage === 'Unknown database \'' + options.database + '\'') {
-        Logger.debug(LOG_TAG, 'creating database: ' + options.database);
+      if (e instanceof Error && 'sqlMessage' in e && e.sqlMessage === 'Unknown database \'' + String(options.database) + '\'') {
+        Logger.debug(LOG_TAG, 'creating database: ' + String(options.database));
         const tmpOption = Utils.clone(options);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         delete tmpOption.database;
           const tmpConn = await initialize(tmpOption);
         await tmpConn.query(
-          'CREATE DATABASE IF NOT EXISTS ' + options.database
+          'CREATE DATABASE IF NOT EXISTS ' + String(options.database)
         );
         await tmpConn.destroy();
           return await initialize(options);
@@ -313,7 +313,7 @@ export class SQLConnection {
         ),
       };
     } else {
-      throw new Error('Unsupported database type: ' + config.type);
+      throw new Error('Unsupported database type: ' + String(config.type));
     }
     driver.entities = this.entries;
     driver.synchronize = false;

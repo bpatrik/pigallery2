@@ -7,7 +7,7 @@ export interface IJobListener {
       job: IJob,
       state: JobProgressStates,
       soloRun: boolean
-  ): void;
+  ): Promise<void>;
 
   onProgressUpdate(progress: JobProgress): void;
 }

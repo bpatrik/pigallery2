@@ -440,8 +440,8 @@ export class ExtensionManager implements IObjectManager {
         console.log('Extracted with multiple top-level items.');
       }
     } catch (error) {
-      Logger.error(LOG_TAG, `Error unzipping file: ${error}`);
-      throw new Error(`Failed to unzip file: ${error}`, {cause: error});
+      Logger.error(LOG_TAG, `Error unzipping file: ${String(error)}`);
+      throw new Error(`Failed to unzip file: ${String(error)}`, {cause: error});
     }
   }
 }

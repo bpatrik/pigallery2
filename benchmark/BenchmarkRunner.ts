@@ -307,7 +307,7 @@ export class BenchmarkRunner {
         const indexingJob = new IndexingJob();
 
         indexingJob.JobListener = {
-          onJobFinished: (job: IJob<any>, state: JobProgressStates, soloRun: boolean): void => {
+          onJobFinished: async (job: IJob<any>, state: JobProgressStates, soloRun: boolean): Promise<void> => {
             resolve();
           },
 

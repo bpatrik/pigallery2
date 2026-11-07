@@ -56,15 +56,34 @@ export default tseslint.config(
     files: ["src/common/**/*.ts", "src/backend/**/*.ts"],
     extends: [
       eslint.configs.recommended,
-      ...tseslint.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
       ...tseslint.configs.stylistic,
     ],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       '@typescript-eslint/prefer-for-of': 'off',
       // the jobs override abstract getters (Name, Supported, ...); fields would change when they are set
       '@typescript-eslint/class-literal-property-style': 'off',
       // CommonJS: native modules (sharp, ffmpeg) are loaded lazily, extensions and package.json from runtime paths
       '@typescript-eslint/no-require-imports': 'off',
+      // ErrorDTO is the app's error: thrown or passed to next(), RenderingMWs sends it to the client
+      '@typescript-eslint/only-throw-error': ['error', {
+        allow: [{from: 'file', name: 'ErrorDTO', path: 'src/common/entities/Error.ts'}],
+      }],
+      // TODO(#1293): fixed and turned back on in the next commits
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/unbound-method': 'off',
     }
   },
   {

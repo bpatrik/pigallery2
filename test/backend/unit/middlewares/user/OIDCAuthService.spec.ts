@@ -351,6 +351,13 @@ describe('OIDCAuthService', () => {
         expect(users[1].oidcSubject).to.be.undefined;
       });
 
+      it('should reject a subject that is not a string', async () => {
+        for (const sub of [true, {}, ['alice-sub'], 42]) {
+          await expectLoginError(createClient(createTokenSet({iss: ISS, sub, preferred_username: 'alice'})));
+          expect(users[1].oidcSubject).to.be.undefined;
+        }
+      });
+
       it('should use the full email as fallback name only if verified', async () => {
         users.push({id: 4, name: 'carol', role: UserRoles.User});
         users.push({id: 5, name: 'carol@example.com', role: UserRoles.User});

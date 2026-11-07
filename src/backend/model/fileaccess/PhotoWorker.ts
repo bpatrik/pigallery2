@@ -17,7 +17,7 @@ export class PhotoWorker {
     if (input.type === ThumbnailSourceType.Video) {
       return this.renderFromVideo(input as MediaRendererInput);
     }
-    throw new Error('Unsupported media type to render thumbnail:' + input.type);
+    throw new Error('Unsupported media type to render thumbnail:' + String(input.type));
   }
 
   public static renderFromImage(input: SvgRendererInput | MediaRendererInput, dryRun = false): Promise<void> {

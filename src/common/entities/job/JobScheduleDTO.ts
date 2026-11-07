@@ -1,4 +1,3 @@
-/* eslint-disable no-case-declarations */
 import {MediaPickDTO} from '../MediaPickDTO';
 
 export enum JobTriggerType {

@@ -37,7 +37,7 @@ if (isTesting) {
       enabled: true,
     },
   },
-  onLoadedSync: async (config) => {
+  onLoadedSync: (config) => {
     let changed = false;
     for (let i = 0; i < config.Users.enforcedUsers.length; ++i) {
       const uc = config.Users.enforcedUsers[i];

@@ -268,7 +268,7 @@ export class ProjectedCacheManager implements IObjectManager {
       // Compute cover respecting projection
       coverMedia = await ObjectManagers.getInstance().CoverManager.getCoverForAlbum(session, album);
     } catch (e) {
-      Logger.error(LOG_TAG, `Error computing album cache for album "${album.name}": ` + e);
+      Logger.error(LOG_TAG, `Error computing album cache for album "${album.name}": ` + String(e));
       NotificationManager.warning(`Error computing album cache for album "${album.name}"`);
     }
 

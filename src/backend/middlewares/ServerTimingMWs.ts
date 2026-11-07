@@ -89,15 +89,15 @@ export const ServerTime = (id: string, name: string) => {
       const entry = new ServerTimeEntry(name);
       req.timing[id] = entry;
       entry.start();
-      m(req, res, (err?: unknown) => {
+      // return the promise of an async middleware, so Express catches its rejection
+      return m(req, res, (err?: unknown) => {
         entry.end();
         next(err);
       });
     };
-    descriptor.value = new Function(
-        'action',
-        'return function ' + m.name + '(...args){ action(...args) };'
-    )(customAction);
+    // keep the name of the middleware
+    Object.defineProperty(customAction, 'name', {value: m.name});
+    descriptor.value = customAction as T;
   };
 };
 

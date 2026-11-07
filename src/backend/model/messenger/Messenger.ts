@@ -27,7 +27,7 @@ export abstract class Messenger<C extends Record<string, unknown> = Record<strin
   }
 
 
-  public async send(config: C, input: string | MediaDTO[] | unknown) {
+  public async send(config: C, input: unknown) {
     if (Array.isArray(input) && input.length > 0
       && (input as MediaDTO[])[0]?.name
       && (input as MediaDTO[])[0]?.directory

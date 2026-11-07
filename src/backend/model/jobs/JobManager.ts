@@ -166,22 +166,19 @@ export class JobManager implements IJobListener, IObjectManager {
         nextDate.toLocaleString(undefined, {hour12: false})
       );
 
-      const timer: NodeJS.Timeout = setTimeout(async (): Promise<void> => {
+      const timer: NodeJS.Timeout = setTimeout((): void => {
         this.timers = this.timers.filter((t): boolean => t.timer !== timer);
-        try {
-          await this.run(
-            schedule.jobName,
-            schedule.config,
-            false,
-            schedule.allowParallelRun
-          );
-        } catch (e) {
+        void this.run(
+          schedule.jobName,
+          schedule.config,
+          false,
+          schedule.allowParallelRun
+        ).catch((e) => {
           NotificationManager.warning(
             'Job running error:' + schedule.name,
             String(e)
           );
-        }
-        this.runSchedule(schedule);
+        }).finally(() => this.runSchedule(schedule));
       }, nextDate.getTime() - Date.now());
       this.timers.push({schedule, timer});
     } else {
