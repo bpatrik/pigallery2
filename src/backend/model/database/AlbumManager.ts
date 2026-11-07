@@ -18,6 +18,9 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
     searchQuery: SearchQueryDTO,
     lockedAlbum: boolean
   ): Promise<void> {
+    if (!name || !searchQuery) {
+      throw new Error('Invalid saved search, name or search query is missing');
+    }
     const connection = await SQLConnection.getConnection();
     const album = await connection
       .getRepository(SavedSearchEntity)
@@ -42,6 +45,9 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
   }
 
   public async deleteAlbum(id: number): Promise<void> {
+    if (!Number.isInteger(id)) {
+      throw new Error('Invalid album id: ' + id);
+    }
     const connection = await SQLConnection.getConnection();
     const albumCount = await connection
       .getRepository(AlbumBaseEntity)

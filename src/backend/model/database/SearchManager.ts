@@ -6,7 +6,7 @@ import {PhotoEntity} from './enitites/PhotoEntity';
 import {DirectoryEntity} from './enitites/DirectoryEntity';
 import {MediaEntity} from './enitites/MediaEntity';
 import {PersonEntry} from './enitites/person/PersonEntry';
-import {Brackets, SelectQueryBuilder, WhereExpression} from 'typeorm';
+import {Brackets, SelectQueryBuilder, WhereExpressionBuilder} from 'typeorm';
 import {Config} from '../../../common/config/private/Config';
 import {
   ANDSearchQuery,
@@ -919,7 +919,7 @@ export class SearchManager {
       );
     }
 
-    return new Brackets((q: WhereExpression) => {
+    return new Brackets((q: WhereExpressionBuilder) => {
       const convertGlobToLike = (str: string): string => {
         // Match either an escaped character \\(.) or any unescaped SQL/glob special character
         return str.replace(/\\(.)|([*?%_])/g, (_, escaped, special) => {

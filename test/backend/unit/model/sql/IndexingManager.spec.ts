@@ -4,7 +4,7 @@ import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnec
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
 import {DirectoryBaseDTO, DirectoryDTOUtils, ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
 import {TestHelper} from '../../../../TestHelper';
-import {Connection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import {Utils} from '../../../../../src/common/Utils';
 import {MediaDTO} from '../../../../../src/common/entities/MediaDTO';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
@@ -20,6 +20,12 @@ import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
 import {ClientSortingConfig} from '../../../../../src/common/config/public/ClientConfig';
 import {DiskManager} from '../../../../../src/backend/model/fileaccess/DiskManager';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
+import {DirectoryEntity} from '../../../../../src/backend/model/database/enitites/DirectoryEntity';
+import {MediaEntity} from '../../../../../src/backend/model/database/enitites/MediaEntity';
+import {FileEntity} from '../../../../../src/backend/model/database/enitites/FileEntity';
+import {PersonJunctionTable} from '../../../../../src/backend/model/database/enitites/person/PersonJunctionTable';
+import {PersonEntry} from '../../../../../src/backend/model/database/enitites/person/PersonEntry';
+import {ProjectedDirectoryCacheEntity} from '../../../../../src/backend/model/database/enitites/ProjectedDirectoryCacheEntity';
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const chai = require('chai');
@@ -29,11 +35,11 @@ const {expect} = chai;
 
 class GalleryManagerTest extends GalleryManager {
 
-  public async getDirIdAndTime(connection: Connection, directoryName: string, directoryParent: string) {
+  public async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
     return super.getDirIdAndTime(connection, directoryName, directoryParent);
   }
 
-  public async getParentDirFromId(connection: Connection, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
+  public async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
     return super.getParentDirFromId(connection, session, dir);
   }
 }
@@ -456,7 +462,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     removeIds(selected);
     setPartial(subDir);
     expect(Utils.clone(Utils.removeNullOrEmptyObj(selected)))
-      .to.deep.equalInAnyOrder(Utils.removeNullOrEmptyObj(indexifyReturn(parent)), 'db content:' + await DBTestHelper.printDB());
+      .to.deep.equalInAnyOrder(Utils.removeNullOrEmptyObj(indexifyReturn(parent)), 'db content:' + (await DBTestHelper.printDB()));
   });
 
 
@@ -558,6 +564,85 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
     // selected.directories[0].parent = selected;
     expect(Utils.clone(Utils.removeNullOrEmptyObj(selected)))
       .to.deep.equalInAnyOrder(Utils.removeNullOrEmptyObj(indexifyReturn(subDir)));
+  });
+
+  it('should remove everything under a removed sub directory', async () => {
+    const gm = new GalleryManagerTest();
+    const im = new IndexingManagerTest();
+    const session = DBTestHelper.defaultSession;
+    Config.MetaFile.gpx = true;
+
+    const parent = TestHelper.getRandomizedDirectoryEntry(null, 'Szülő');
+    const photo1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 1);
+    const subDir = TestHelper.getRandomizedDirectoryEntry(parent, 'Árvíztűrő');
+    TestHelper.getRandomizedPhotoEntry(subDir, 'subPhoto1', 2);
+    TestHelper.getRandomizedGPXEntry(subDir, 'GPX1');
+    const subSubDir = TestHelper.getRandomizedDirectoryEntry(subDir, 'tükörfúrógép');
+    TestHelper.getRandomizedPhotoEntry(subSubDir, 'subSubPhoto1', 2);
+    DirectoryDTOUtils.removeReferences(parent);
+
+    const fullParent = Utils.clone(parent) as ParentDirectoryDTO;
+    const fullSubDir = Utils.clone(subDir) as ParentDirectoryDTO;
+    await im.saveToDB(Utils.clone(fullParent));
+    await im.saveToDB(fullSubDir);
+    await im.saveToDB(Utils.clone(subSubDir) as ParentDirectoryDTO);
+
+    const conn = await SQLConnection.getConnection();
+    // builds the projected directory caches
+    for (const d of [parent, subDir, subSubDir]) {
+      await gm.getParentDirFromId(conn, session, (await gm.getDirIdAndTime(conn, d.name, d.path)).id);
+    }
+    const count = async (e: any) => conn.getRepository(e).count();
+    expect(await count(DirectoryEntity)).to.equal(3);
+    expect(await count(MediaEntity)).to.equal(3);
+    expect(await count(FileEntity)).to.equal(1);
+    expect(await count(PersonJunctionTable)).to.equal(5);
+    expect(await count(ProjectedDirectoryCacheEntity)).to.equal(3);
+    const personCount = await count(PersonEntry);
+
+    // the sub directory is gone from the disk
+    fullParent.directories = [];
+    await im.saveToDB(fullParent);
+
+    expect((await conn.getRepository(DirectoryEntity).find()).map(d => d.name)).to.deep.equal([parent.name]);
+    expect((await conn.getRepository(MediaEntity).find()).map(m => m.name)).to.deep.equal([photo1.name]);
+    expect(await count(FileEntity)).to.equal(0);
+    expect(await count(PersonJunctionTable)).to.equal(1);
+    expect((await conn.getRepository(ProjectedDirectoryCacheEntity).createQueryBuilder('c')
+      .leftJoinAndSelect('c.directory', 'd').getMany()).map(c => c.directory.name)).to.deep.equal([parent.name]);
+    // persons are kept (their counts are recalculated on the next listing)
+    expect(await count(PersonEntry)).to.equal(personCount);
+  });
+
+  it('should remove the faces of a removed photo and the cover pointing to it', async () => {
+    const gm = new GalleryManagerTest();
+    const im = new IndexingManagerTest();
+    const session = DBTestHelper.defaultSession;
+
+    const parent = TestHelper.getRandomizedDirectoryEntry(null, 'Szülő');
+    const photo1 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo1', 1, 1);
+    const photo2 = TestHelper.getRandomizedPhotoEntry(parent, 'Photo2', 2, 5);
+    DirectoryDTOUtils.removeReferences(parent);
+    const full = Utils.clone(parent) as ParentDirectoryDTO;
+    await im.saveToDB(Utils.clone(full));
+
+    const conn = await SQLConnection.getConnection();
+    const dirId = (await gm.getDirIdAndTime(conn, parent.name, parent.path)).id;
+    await gm.getParentDirFromId(conn, session, dirId);
+    const cache = () => conn.getRepository(ProjectedDirectoryCacheEntity)
+      .createQueryBuilder('c').leftJoinAndSelect('c.cover', 'cover').getOne();
+    expect((await cache()).cover.name).to.equal(photo2.name);
+    expect(await conn.getRepository(PersonJunctionTable).count()).to.equal(3);
+
+    full.media = full.media.filter(m => m.name !== photo2.name);
+    await im.saveToDB(full);
+
+    expect((await conn.getRepository(MediaEntity).find()).map(m => m.name)).to.deep.equal([photo1.name]);
+    expect(await conn.getRepository(PersonJunctionTable).count()).to.equal(1);
+    const c = await cache();
+    // the cover is set to NULL by the DB and the cache is invalidated
+    expect(c.valid).to.equal(false);
+    expect(c.cover).to.equal(null);
   });
 
   it('should avoid race condition', async () => {

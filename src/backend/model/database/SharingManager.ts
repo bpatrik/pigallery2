@@ -37,10 +37,16 @@ export class SharingManager {
   }
 
   async deleteSharing(sharingKey: string): Promise<void> {
+    if (typeof sharingKey !== 'string' || sharingKey.length === 0) {
+      throw new Error('Invalid sharing key');
+    }
     const connection = await SQLConnection.getConnection();
     const sharing = await connection
       .getRepository(SharingEntity)
       .findOneBy({sharingKey});
+    if (!sharing) {
+      throw new Error('Sharing not found');
+    }
     await connection.getRepository(SharingEntity).remove(sharing);
     ObjectManagers.getInstance().SessionManager.invalidateSessionCache();
   }
@@ -113,12 +119,18 @@ export class SharingManager {
     inSharing: UpdateSharingDTO,
     forceUpdate: boolean
   ): Promise<SharingEntity> {
+    if (!Number.isInteger(inSharing.id) || !Number.isInteger(inSharing.creator?.id)) {
+      throw new Error('Invalid sharing, id or creator is missing');
+    }
     const connection = await SQLConnection.getConnection();
 
     const sharing = await connection.getRepository(SharingEntity).findOneBy({
       id: inSharing.id,
       creator: inSharing.creator.id as unknown,
     });
+    if (!sharing) {
+      throw new Error('Sharing not found');
+    }
 
     if (
       sharing.timeStamp < Date.now() - Config.Sharing.updateTimeout &&

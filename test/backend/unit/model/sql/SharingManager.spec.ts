@@ -1,4 +1,6 @@
+import * as chai from 'chai';
 import {expect} from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {SharingManager} from '../../../../../src/backend/model/database/SharingManager';
 import {UpdateSharingDTO} from '../../../../../src/common/entities/SharingDTO';
@@ -7,6 +9,9 @@ import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {TestHelper} from '../../../../TestHelper';
+import {UserManager} from '../../../../../src/backend/model/database/UserManager';
+
+chai.use(chaiAsPromised);
 
 // to help WebStorm to handle the test cases
 declare const after: any;
@@ -387,6 +392,64 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       const foundForCreator = await sm.listAllForQuery(dq('/photos/*'), creator);
       expect(foundForCreator.map(s => s.sharingKey).sort()).to.deep.equal([byDir.sharingKey, bySearch.sharingKey].sort());
       expect(await sm.listAllForQuery(dq('/photos/*'), {id: creator.id + 1000} as UserDTO)).to.deep.equal([]);
+    });
+  });
+
+  // a lookup with a missing key must not match the first row
+  describe('missing lookup values', () => {
+    const create = (sharingKey: string) => new SharingManager().createSharing({
+      id: null,
+      sharingKey,
+      searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
+      password: null,
+      creator,
+      expires: Date.now() + 100000,
+      timeStamp: Date.now()
+    });
+
+    it('should not delete any sharing without a sharing key', async () => {
+      const sm = new SharingManager();
+      await create('Kulcs_ő');
+      await expect(sm.deleteSharing(undefined)).to.be.rejectedWith(Error);
+      await expect(sm.deleteSharing('')).to.be.rejectedWith(Error);
+      await expect(sm.deleteSharing('not_existing')).to.be.rejectedWith(Error);
+      expect((await sm.listAll()).map(s => s.sharingKey)).to.deep.equal(['Kulcs_ő']);
+      await sm.deleteSharing('Kulcs_ő');
+      expect(await sm.listAll()).to.deep.equal([]);
+    });
+
+    it('should delete the sharings of a deleted user', async () => {
+      const sm = new SharingManager();
+      await create('Kulcs_ő');
+      const conn = await SQLConnection.getConnection();
+      const other = await conn.getRepository(UserEntity).save({name: 'Ödön', password: '', role: UserRoles.User});
+      await sm.createSharing({
+        id: null,
+        sharingKey: 'other_key',
+        searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
+        password: null,
+        creator: other,
+        expires: Date.now() + 100000,
+        timeStamp: Date.now()
+      });
+      await new UserManager().deleteUser(creator.id);
+      const left = await sm.listAll();
+      expect(left.map(s => ({key: s.sharingKey, creator: s.creator.name}))).to.deep.equal([{key: 'other_key', creator: 'Ödön'}]);
+    });
+
+    it('should not update any sharing without an id or creator', async () => {
+      const sm = new SharingManager();
+      const saved = await create('Kulcs_ő');
+      const update = (s: Partial<UpdateSharingDTO>) => ({
+        ...saved,
+        password: null,
+        expires: saved.expires + 1000,
+        ...s
+      } as UpdateSharingDTO);
+      await expect(sm.updateSharing(update({id: undefined}), true)).to.be.rejectedWith(Error);
+      await expect(sm.updateSharing(update({creator: {...creator, id: undefined}}), true)).to.be.rejectedWith(Error);
+      await expect(sm.updateSharing(update({id: saved.id + 1000}), true)).to.be.rejectedWith(Error);
+      expect((await sm.findOne('Kulcs_ő')).expires).to.equal(saved.expires);
     });
   });
 });
