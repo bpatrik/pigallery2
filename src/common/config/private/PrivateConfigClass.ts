@@ -88,7 +88,7 @@ export class PrivateConfigClass extends ServerConfig {
   getClientConfig() {
     return (this as unknown as IConfigClass<TAGS>).toJSON({
       attachVolatile: true,
-      skipTags: {secret: true} as TAGS,
+      skipTags: {secret: true},
       keepTags: {client: true}
     }) as unknown as ClientConfig;
   }

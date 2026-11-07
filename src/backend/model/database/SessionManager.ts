@@ -160,7 +160,7 @@ export class SessionManager {
     // If authentication is not required, expose the unauthenticated session only
     if (Config.Users.authenticationRequired === false) {
       const user = ObjectManagers.getInstance().UserManager.getUnAuthenticatedUser();
-      const ctx = await this.buildContext(user as unknown as SessionUser);
+      const ctx = await this.buildContext(user);
       return [ctx];
     }
 

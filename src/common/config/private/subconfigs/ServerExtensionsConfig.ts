@@ -67,7 +67,7 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
       priority: ConfigPriority.underTheHood,
       dockerSensitive: true,
       uiResetNeeded: {server: true},
-    } as TAGS,
+    },
     description: $localize`Folder where the app stores all extensions. Individual extensions live in their own sub-folders.`,
   })
   folder: string = 'extensions';
@@ -78,7 +78,7 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
       name: $localize`Installed extensions`,
       uiIcon: 'ionList',
       priority: ConfigPriority.advanced
-    } as TAGS
+    }
   })
   extensions = new ConfigMap<ServerExtensionsEntryConfig>();
 

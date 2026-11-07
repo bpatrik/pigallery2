@@ -87,7 +87,7 @@ export class EmailMessagingConfig {
         {
           name: $localize`Sender email`,
           priority: ConfigPriority.advanced,
-        } as TAGS,
+        },
     description: $localize`Some services do not allow sending from random e-mail addresses. Set this accordingly.`
   })
   emailFrom: string = 'noreply@pigallery2.com';

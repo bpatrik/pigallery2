@@ -579,7 +579,7 @@ export class Utils {
       const name = enumType[v];
       return typeof name === 'string' ? name.toLowerCase() : '';
     };
-    return (values as number[])
+    return values
       .map(v => toName(v))
       .filter(s => s && s.length > 0)
       .join(',');

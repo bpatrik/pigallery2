@@ -75,9 +75,9 @@ export default tseslint.config(
       '@typescript-eslint/only-throw-error': ['error', {
         allow: [{from: 'file', name: 'ErrorDTO', path: 'src/common/entities/Error.ts'}],
       }],
-      // TODO(#1293): fixed and turned back on in the next commits
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      // overrides of async hooks (Job.init, FileJob.filter*, Messenger.sendMedia, ...) stay async without awaiting anything
       '@typescript-eslint/require-await': 'off',
+      // TODO(#1293): fixed and turned back on in the next commits
       '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',

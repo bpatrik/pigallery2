@@ -82,11 +82,11 @@ export class PersonMWs {
     }
   }
 
-  public static async cleanUpPersonResults(
+  public static cleanUpPersonResults(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {
+  ): void {
     if (!req.resultPipe) {
       return next();
     }

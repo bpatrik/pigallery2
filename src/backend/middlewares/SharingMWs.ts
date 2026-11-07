@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import {CreateSharingDTO, PublicSharingDTO, UpdateSharingDTO} from '../../common/entities/SharingDTO';
+import {CreateSharingDTO, UpdateSharingDTO} from '../../common/entities/SharingDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {Config} from '../../common/config/private/Config';
@@ -19,7 +19,7 @@ export class SharingMWs {
       value: directoryName,
       matchType: TextSearchQueryMatchTypes.exact_match,
       negate: false
-    } as DirectorySearch;
+    };
   }
 
   public static async getSharing(
@@ -66,7 +66,7 @@ export class SharingMWs {
         {
           sharingKey: sharing.sharingKey,
           passwordProtected: Config.Sharing.passwordRequired || (typeof sharing.password === 'string' && sharing.password !== '')
-        } as PublicSharingDTO;
+        };
 
       return next();
     } catch (err) {

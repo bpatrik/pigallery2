@@ -1,7 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
-import {StatisticDTO} from '../../../common/entities/settings/StatisticDTO';
 import {MessengerRepository} from '../../model/messenger/MessengerRepository';
 import {JobStartDTO} from '../../../common/entities/job/JobDTO';
 import {RequestParams} from '../RequestParams';
@@ -24,7 +23,7 @@ export class AdminMWs {
         videos: await galleryManager.countVideos(),
         diskUsage: await galleryManager.countMediaSize(),
         persons: await personManager.countFaces(),
-      } as StatisticDTO;
+      };
       return next();
     } catch (err) {
       if (err instanceof Error) {

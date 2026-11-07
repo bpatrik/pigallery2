@@ -541,7 +541,7 @@ export class ContentWrapperUtils {
           m.directory = {
             path: (m.directory as DirectoryBaseDTO).path,
             name: (m.directory as DirectoryBaseDTO).name,
-          } as DirectoryPathDTO;
+          };
         } else {
           // for gallery listing, photos belong to one directory,
           // this can be deleted as the directory know its child
@@ -579,7 +579,7 @@ export class ContentWrapperUtils {
       dir.cache.cover.directory = {
         path: dir.cache.cover.directory.path,
         name: dir.cache.cover.directory.name,
-      } as DirectoryPathDTO;
+      };
 
       // make sure that it is a different object as one of the photo in the media[]
       // as the next foreach would remove the directory

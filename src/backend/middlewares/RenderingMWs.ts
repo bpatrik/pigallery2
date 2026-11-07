@@ -8,7 +8,6 @@ import {Logger} from '../Logger';
 import {ResponseSharingDTO} from '../../common/entities/SharingDTO';
 import {Utils} from '../../common/Utils';
 import {LoggerRouter} from '../routes/LoggerRouter';
-import {TAGS} from '../../common/config/public/ClientConfig';
 import {ExtensionConfigWrapper} from '../model/extension/ExtensionConfigWrapper';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
 import {UserEntity} from '../model/database/enitites/UserEntity';
@@ -155,8 +154,8 @@ export class RenderingMWs {
     const originalConfJSON = JSON.parse(JSON.stringify(originalConf.toJSON({
       attachState: true,
       attachVolatile: true,
-      skipTags: {secret: true} as TAGS
-    }) as PrivateConfigClass));
+      skipTags: {secret: true}
+    })));
 
     const message = new Message<PrivateConfigClass>(
       null,

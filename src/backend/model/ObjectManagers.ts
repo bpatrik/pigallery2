@@ -274,10 +274,10 @@ export class ObjectManagers {
 
   set JobManager(value: JobManager) {
     if (this.jobManager) {
-      this.managers.splice(this.managers.indexOf(this.jobManager as IObjectManager), 1);
+      this.managers.splice(this.managers.indexOf(this.jobManager), 1);
     }
     this.jobManager = value;
-    this.managers.push(this.jobManager as IObjectManager);
+    this.managers.push(this.jobManager);
   }
 
   get ExtensionManager(): ExtensionManager {
@@ -286,10 +286,10 @@ export class ObjectManagers {
 
   set ExtensionManager(value: ExtensionManager) {
     if (this.extensionManager) {
-      this.managers.splice(this.managers.indexOf(this.extensionManager as IObjectManager), 1);
+      this.managers.splice(this.managers.indexOf(this.extensionManager), 1);
     }
     this.extensionManager = value;
-    this.managers.push(this.extensionManager as IObjectManager);
+    this.managers.push(this.extensionManager);
   }
 
   get ProjectedCacheManager(): ProjectedCacheManager {
@@ -298,10 +298,10 @@ export class ObjectManagers {
 
   set ProjectedCacheManager(value: ProjectedCacheManager) {
     if (this.projectedCacheManager) {
-      this.managers.splice(this.managers.indexOf(this.projectedCacheManager as IObjectManager), 1);
+      this.managers.splice(this.managers.indexOf(this.projectedCacheManager), 1);
     }
     this.projectedCacheManager = value;
-    this.managers.push(this.projectedCacheManager as IObjectManager);
+    this.managers.push(this.projectedCacheManager);
   }
   get SessionManager(): SessionManager {
     return this.sessionManager;

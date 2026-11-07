@@ -107,11 +107,11 @@ export class ServerTimingMWs {
   /**
    * Add server timing
    */
-  public static async addServerTiming(
+  public static addServerTiming(
       req: Request,
       res: Response,
       next: NextFunction
-  ): Promise<void> {
+  ): void {
     if (
         (Config.Server.Log.logServerTiming === false && !forcedDebug) ||
         !req.timing

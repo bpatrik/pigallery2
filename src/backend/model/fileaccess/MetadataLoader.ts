@@ -324,10 +324,10 @@ export class MetadataLoader {
   private static getOrientation(exif: ExifData): number {
     let orientation = 1; //Orientation 1 is normal
     if (exif.ifd0?.Orientation != undefined) {
-      orientation = parseInt(String(exif.ifd0.Orientation), 10) as number;
+      orientation = parseInt(String(exif.ifd0.Orientation), 10);
     } else if (exif.tiff?.Orientation != undefined) {
       // Fallback to tiff.Orientation for XMP sidecars
-      orientation = parseInt(String(exif.tiff.Orientation), 10) as number;
+      orientation = parseInt(String(exif.tiff.Orientation), 10);
     }
     return orientation;
   }

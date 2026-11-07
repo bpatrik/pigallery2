@@ -445,7 +445,7 @@ export class PathThemeConfig {
       name: $localize`Svg Icon`,
       uiType: 'SVGIconConfig',
       priority: ConfigPriority.advanced
-    } as TAGS,
+    },
     description: $localize`Set the icon of the map marker pin.`,
   })
   svgIcon: SVGIconConfig = new SVGIconConfig('', '');
@@ -578,7 +578,7 @@ export class ClientMapConfig {
     tags: {
       name: $localize`Max Preview Markers`,
       priority: ConfigPriority.underTheHood
-    } as TAGS,
+    },
     description: $localize`Maximum number of markers to be shown on the map preview on the gallery page.`,
   })
   maxPreviewMarkers: number = 50;
@@ -591,7 +591,7 @@ export class ClientMapConfig {
       name: $localize`Path theme groups`,
       githubIssue: 647,
       priority: ConfigPriority.underTheHood
-    } as TAGS,
+    },
     description: $localize`Markers are grouped and themed by these settings`,
   })
   MapPathGroupConfig: MapPathGroupConfig[] = [
@@ -658,7 +658,7 @@ export class ClientMapConfig {
     tags: {
       name: $localize`Bend long path trigger`,
       priority: ConfigPriority.underTheHood
-    } as TAGS,
+    },
     description: $localize`Map will bend the path if two points are this far apart on latitude axes. This intended to bend flight if only the end and the start points are given.`,
   })
   bendLongPathsTrigger: number = 0.5;
@@ -675,7 +675,7 @@ export class NavigationLinkConfig {
     tags: {
       name: $localize`Type`,
       priority: ConfigPriority.advanced
-    } as TAGS
+    }
   })
   type: NavigationLinkTypes = NavigationLinkTypes.gallery;
   @ConfigProperty({
@@ -819,7 +819,7 @@ export class NavBarSortingAndGroupingConfig {
       name: $localize`Default grouping`,
       githubIssue: 706,
       priority: ConfigPriority.advanced,
-    } as TAGS,
+    },
     description: $localize`Default grouping method for photo and video in a directory results.`
   })
   defaultPhotoGroupingMethod: ClientGroupingConfig = new ClientGroupingConfig(GroupByTypes.Date, true);
@@ -1090,7 +1090,7 @@ export class ClientLightboxConfig {
       name: $localize`Titles`,
       priority: ConfigPriority.advanced,
       githubIssue: 801,
-    } as TAGS,
+    },
     description: $localize`Set these to customize the text (caption, location, etc.) in the lightbox that are always visible over the photo (not in the info panel).`
   })
   Titles: ClientLightboxTitleConfig = new ClientLightboxTitleConfig();
@@ -1103,7 +1103,7 @@ export class ThemeConfig {
     type: 'string',
     tags: {
       name: $localize`Name`,
-    } as TAGS,
+    },
     description: $localize`Name of the theme`
   })
   name: string | undefined;
@@ -1111,7 +1111,7 @@ export class ThemeConfig {
     type: 'string',
     tags: {
       name: $localize`Theme`,
-    } as TAGS,
+    },
     description: $localize`Adds these css settings as it is to the end of the body tag of the page.`
   })
   theme: string | undefined;
@@ -1130,7 +1130,7 @@ export class ThemesConfig {
     tags: {
       name: $localize`Enable`,
       githubIssue: 642
-    } as TAGS,
+    },
     description: $localize`Enable themes and color modes.`
   })
   enabled: boolean = true;
@@ -1140,7 +1140,7 @@ export class ThemesConfig {
     tags: {
       name: $localize`Default theme mode`,
       uiDisabled: (sb: ThemesConfig) => !sb.enabled,
-    } as TAGS,
+    },
     description: $localize`Sets the default theme mode that is used for the application.`
   })
   defaultMode: ThemeModes = ThemeModes.auto;
@@ -1151,7 +1151,7 @@ export class ThemesConfig {
       name: $localize`Selected theme`,
       uiDisabled: (sb: ThemesConfig) => !sb.enabled,
       uiType: 'ThemeSelector'
-    } as TAGS,
+    },
     description: $localize`Selected theme to use on the site.`
   })
   selectedTheme: string = 'classic';
@@ -1163,7 +1163,7 @@ export class ThemesConfig {
       name: $localize`Selected theme CSS`, //this is a 'hack' to the UI settings. UI will only show the selected setting's CSS
       uiDisabled: (sb: ThemesConfig) => !sb.enabled,
       relevant: (c: ThemesConfig) => c.selectedTheme !== 'default',
-    } as TAGS,
+    },
     description: $localize`Adds these CSS settings as it is to the end of the body tag of the page.`
   })
   availableThemes: ThemeConfig[] = [
@@ -1242,7 +1242,7 @@ export class ClientGalleryConfig {
       name: $localize`Navigation bar`,
       uiIcon: 'ionMenuOutline',
       priority: ConfigPriority.advanced,
-    } as TAGS
+    }
   })
   NavBar: NavBarConfig = new NavBarConfig();
   @ConfigProperty({
@@ -1262,7 +1262,7 @@ export class ClientGalleryConfig {
       name: $localize`Lightbox`,
       uiIcon: 'ionImageOutline',
       priority: ConfigPriority.advanced,
-    } as TAGS,
+    },
     description: $localize`Photo and video preview window.`
   })
   Lightbox: ClientLightboxConfig = new ClientLightboxConfig();
@@ -1273,7 +1273,7 @@ export class ClientGalleryConfig {
       name: $localize`Themes`,
       uiIcon: 'ionBrushOutline',
       priority: ConfigPriority.advanced,
-    } as TAGS,
+    },
     description: $localize`Pigallery2 uses Bootstrap 5.3 (https://getbootstrap.com/docs/5.3) for design (css, layout). In dark mode it sets 'data-bs-theme="dark"' to the <html> to take advantage bootstrap's color modes. For theming, read more at: https://getbootstrap.com/docs/5.3/customize/color-modes/`
   })
   Themes: ThemesConfig = new ThemesConfig();
@@ -1304,7 +1304,7 @@ export class ClientGalleryConfig {
     tags: {
       name: $localize`Auto update`,
       priority: ConfigPriority.advanced,
-    } as TAGS,
+    },
     description: $localize`makes the gallery poll the backend for new photos in the given directory or search`
   })
   AutoUpdate: AutoUpdateConfig = new AutoUpdateConfig();
@@ -1329,7 +1329,7 @@ export class ClientVideoConfig {
       priority: ConfigPriority.underTheHood,
       uiDisabled: (sb: ClientVideoConfig) => !sb.enabled,
       uiResetNeeded: {db: true}
-    } as TAGS,
+    },
     description: $localize`Video formats that are supported after transcoding (with the built-in ffmpeg support).`
   })
   supportedFormatsWithTranscoding: string[] = ['avi', 'mkv', 'mov', 'wmv', 'flv', 'mts', 'm2ts', 'mpg', '3gp', 'm4v', 'mpeg', 'vob', 'divx', 'xvid', 'ts'];
@@ -1381,7 +1381,7 @@ export class ClientPhotoConfig {
       name: $localize`Thumbnail and photo preview sizes`,
       priority: ConfigPriority.advanced,
       githubIssue: 806
-    } as TAGS,
+    },
     description: $localize`Size of the thumbnails and photo previews. The best matching size will be used (smaller for photo and video thumbnail, bigger for photo preview). More sizes give better quality, but use more storage and CPU to render. If size is 240, that shorter side of the thumbnail will be 240 pixels.`,
   })
   thumbnailSizes: number[] = [320, 540, 1080, 2160];
@@ -1502,8 +1502,8 @@ export class ClientMetaFileConfig {
       name: $localize`*.gpx files`,
       priority: ConfigPriority.advanced,
       uiResetNeeded: {db: true},
-      uiDisabled: (sb, c) => !c.Map.enabled
-    } as TAGS,
+      uiDisabled: (sb: ClientMetaFileConfig, c: ClientConfig) => !c.Map.enabled
+    },
     description: $localize`Reads *.gpx files and renders them on the map.`
   })
   gpx: boolean = true;
@@ -1514,7 +1514,7 @@ export class ClientMetaFileConfig {
       name: $localize`GPX compression`,
       priority: ConfigPriority.advanced,
       uiDisabled: (sb: ClientMetaFileConfig, c: ClientConfig) => !c.Map.enabled || !sb.gpx
-    } as TAGS
+    }
   })
   GPXCompressing: ClientGPXCompressingConfig = new ClientGPXCompressingConfig();
 
@@ -1570,7 +1570,7 @@ export class ClientFacesConfig {
     tags: {
       name: $localize`Default sorting`,
       priority: ConfigPriority.advanced,
-    } as TAGS,
+    },
     description: $localize`Default sorting on the faces page`
   })
   sorting: ClientFaceSortingConfig = new ClientFaceSortingConfig();
@@ -1581,7 +1581,7 @@ export class ClientFacesConfig {
       name: $localize`Override keywords`,
       priority: ConfigPriority.underTheHood,
       uiResetNeeded: {db: true}
-    } as TAGS,
+    },
     description: $localize`If a photo has the same face (person) name and keyword, the app removes the duplicate, keeping the face only.`
   })
   keywordsToPersons: boolean = true;
@@ -1610,7 +1610,7 @@ export class ClientServiceConfig {
     type: 'string',
     tags: {
       name: $localize`Page title`
-    } as TAGS
+    }
   })
   applicationTitle: string = 'PiGallery 2';
 
@@ -1621,7 +1621,7 @@ export class ClientServiceConfig {
       name: $localize`Page public url`,
       hint: typeof window !== 'undefined' ? window?.origin : '',
       uiOptional: true
-    } as TAGS
+    }
   })
   publicUrl: string = '';
 
@@ -1635,7 +1635,7 @@ export class ClientServiceConfig {
       priority: ConfigPriority.advanced,
       uiOptional: true,
       githubIssue: 854
-    } as TAGS
+    }
   })
   urlBase: string = '';
 
@@ -1674,7 +1674,7 @@ export class ClientServiceConfig {
       uiType: 'SVGIconConfig',
       priority: ConfigPriority.advanced,
       githubIssue: 1028,
-    } as TAGS,
+    },
     description: $localize`Sets the icon of the app. Rendered icons are cached in the tmp folder.`,
   })
     // source: https://icons.getbootstrap.com/
@@ -1747,7 +1747,7 @@ export class ClientUserOIDCConfig {
       uiOptional: true,
       relevant: (c: ClientUserOIDCConfig) => c.enabled,
       hint: 'Authentik'
-    } as TAGS,
+    },
     description: $localize`Shown on the login button (client-visible).`
   })
   displayName: string = '';
@@ -1863,7 +1863,7 @@ export class ClientConfig {
     tags: {
       name: $localize`Gallery`,
       uiIcon: 'ionBrowsersOutline'
-    } as TAGS,
+    },
   })
   Gallery: ClientGalleryConfig = new ClientGalleryConfig();
 
@@ -1882,7 +1882,7 @@ export class ClientConfig {
         job: DefaultsJobs[DefaultsJobs['Album Reset']],
         hideProgress: true
       }]
-    } as TAGS,
+    },
   })
   Album: ClientAlbumConfig = new ClientAlbumConfig();
 
@@ -1891,7 +1891,7 @@ export class ClientConfig {
     tags: {
       name: $localize`Search`,
       uiIcon: 'ionSearchOutline'
-    } as TAGS,
+    },
   })
   Search: ClientSearchConfig = new ClientSearchConfig();
 
@@ -1903,7 +1903,7 @@ export class ClientConfig {
     tags: {
       name: $localize`Map`,
       uiIcon: 'ionLocationOutline'
-    } as TAGS,
+    },
   })
   Map: ClientMapConfig = new ClientMapConfig();
 
@@ -1912,7 +1912,7 @@ export class ClientConfig {
     tags: {
       name: $localize`Faces`,
       uiIcon: 'ionPeopleOutline'
-    } as TAGS,
+    },
   })
   Faces: ClientFacesConfig = new ClientFacesConfig();
 
@@ -1922,7 +1922,7 @@ export class ClientConfig {
       name: $localize`Random photo`,
       uiIcon: 'ionShuffleOutline',
       githubIssue: 392
-    } as TAGS,
+    },
     description: $localize`This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.`
   })
   RandomPhoto: ClientRandomPhotoConfig = new ClientRandomPhotoConfig();
@@ -1933,7 +1933,7 @@ export class ClientConfig {
     tags: {
       name: $localize`Extensions`,
       uiIcon: 'ionExtensionPuzzleOutline'
-    } as TAGS,
+    },
   })
   Extensions: ClientExtensionsConfig = new ClientExtensionsConfig();
 
@@ -1942,7 +1942,7 @@ export class ClientConfig {
     tags: {
       name: $localize`Upload`,
       uiIcon: 'ionCloudUploadOutline'
-    } as TAGS,
+    },
   })
   Upload: ClientUploadConfig = new ClientUploadConfig();
 }

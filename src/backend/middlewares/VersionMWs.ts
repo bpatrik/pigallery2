@@ -9,11 +9,11 @@ export class VersionMWs {
   /**
    * This version data is mainly used to trigger page reload on the client side
    */
-  public static async injectAppVersion(
+  public static injectAppVersion(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {
+  ): void {
     try {
       const clientConfigStr = JSON.stringify(Config.getClientConfig());
       const hash = crypto.createHash('md5').update(Config.Environment.upTime + clientConfigStr).digest('hex');

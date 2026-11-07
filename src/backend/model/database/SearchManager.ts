@@ -139,7 +139,7 @@ export class SearchManager {
       (await q.getRawMany())
         .map(
           (r): string[] =>
-            (r.metadataKeywords as string).split(',') as string[]
+            (r.metadataKeywords as string).split(',')
         )
         .forEach((keywords): void => {
           acList.push(
@@ -436,7 +436,7 @@ export class SearchManager {
         // setting covers
         if (result.directories) {
           for (const item of result.directories) {
-            await ObjectManagers.getInstance().GalleryManager.fillCacheForSubDir(connection, session, item as DirectoryEntity);
+            await ObjectManagers.getInstance().GalleryManager.fillCacheForSubDir(connection, session, item);
           }
         }
         // do not show empty directories in search results

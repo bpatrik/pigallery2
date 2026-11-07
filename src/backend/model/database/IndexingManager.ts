@@ -250,7 +250,7 @@ export class IndexingManager {
           lastScanned: scannedDirectory.lastScanned,
           name: scannedDirectory.name,
           path: scannedDirectory.path,
-        } as DirectoryEntity)
+        })
       ).identifiers[0]['id'];
     }
   }

@@ -136,7 +136,7 @@ export class DiskManager {
     return (await this.scanDirectory(
       relativeDirectoryName,
       settings
-    )) as ParentDirectoryDTO<FileDTO>;
+    ));
   }
 
   @ExtensionDecorator(e => e.gallery.DiskManager.scanDirectory)

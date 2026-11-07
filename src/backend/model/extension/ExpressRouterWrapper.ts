@@ -56,7 +56,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
   public mediaJsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => unknown): string {
     return this.register(paths,
       ...(this.getAuthMWs(minRole).concat([
-        async (req: Request, res: Response, next: NextFunction) => {
+        (req: Request, res: Response, next: NextFunction) => {
           req.params['mediaPath'] = req.body?.media;
           next();
         },

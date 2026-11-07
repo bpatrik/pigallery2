@@ -6,7 +6,6 @@ import {ProjectPath} from '../ProjectPath';
 import {AuthenticationMWs} from '../middlewares/user/AuthenticationMWs';
 import {CookieNames} from '../../common/CookieNames';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
-import {UserDTO} from '../../common/entities/UserDTO';
 import {ServerTimeEntry} from '../middlewares/ServerTimingMWs';
 import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
@@ -87,7 +86,7 @@ export class PublicRouter {
           role: req.session.context.user.role,
           usedSharingKey: req.session.context.user.usedSharingKey,
           projectionKey: req.session.context.user.projectionKey,
-        } as UserDTO;
+        };
 
       }
       const confCopy = Config.getClientConfig();

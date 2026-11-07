@@ -18,17 +18,17 @@ export class ThumbnailGeneratorMWs {
     Config.Media.Photo.generateThumbnailMapEntries();
 
   @ServerTime('2.th', 'Thumbnail decoration')
-  public static async addThumbnailInformation(
+  public static addThumbnailInformation(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {
+  ): void {
     if (!req.resultPipe) {
       return next();
     }
 
     try {
-      const cw: ContentWrapper = req.resultPipe as ContentWrapper;
+      const cw: ContentWrapper = req.resultPipe;
       if (cw.notModified === true) {
         return next();
       }

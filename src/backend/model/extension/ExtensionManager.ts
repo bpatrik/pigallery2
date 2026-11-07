@@ -123,7 +123,7 @@ export class ExtensionManager implements IObjectManager {
 
     // Unzip the file
     Logger.silly(LOG_TAG, `Unzipping extension to ${extensionDir}`);
-    await this.unzipFile(zipFilePath, extensionDir);
+    this.unzipFile(zipFilePath, extensionDir);
 
     // Update the configuration
     Logger.silly(LOG_TAG, `Updating configuration for extension ${folder}`);
@@ -393,7 +393,7 @@ export class ExtensionManager implements IObjectManager {
     await pipeline(nodeReadable, fs.createWriteStream(outputPath));
   }
 
-  private async unzipFile(zipFilePath: string, outputPath: string): Promise<void> {
+  private unzipFile(zipFilePath: string, outputPath: string): void {
     try {
       // Extract to temp first
       const tempExtractPath = path.join(outputPath, '__temp_unzip');

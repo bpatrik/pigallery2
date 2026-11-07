@@ -5,7 +5,7 @@ import {DiskManager} from '../fileaccess/DiskManager';
 import {ObjectManagers} from '../ObjectManagers';
 import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {SQLConnection} from './SQLConnection';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../common/entities/SearchQueryDTO';
+import {SearchQueryDTO, SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 import {DirectoryEntity} from './enitites/DirectoryEntity';
 import {Utils} from '../../../common/Utils';
 import {CoverPhotoDTO} from '../../../common/entities/PhotoDTO';
@@ -81,7 +81,7 @@ export class CoverManager {
       !Utils.equalsFilter(Config.AlbumCover.SearchQuery, {
         type: SearchQueryTypes.any_text,
         value: '',
-      } as TextSearch)
+      })
     ) {
       try {
         const coverFilterQuery = await
@@ -180,7 +180,7 @@ export class CoverManager {
       !Utils.equalsFilter(Config.AlbumCover.SearchQuery, {
         type: SearchQueryTypes.any_text,
         value: '',
-      } as TextSearch)
+      })
     ) {
       coverMedia = await coverQuery()
         .andWhere(
