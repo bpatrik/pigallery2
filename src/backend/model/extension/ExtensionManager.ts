@@ -102,14 +102,20 @@ export class ExtensionManager implements IObjectManager {
       throw new Error(`Extension ${extensionId} does not have a zip URL`);
     }
 
+    // the folder name comes from the repository's id, not from the request
+    const folder = extension.id;
+    if (!ExtensionManager.isFolderName(folder)) {
+      throw new Error(`Invalid extension id: ${folder}`);
+    }
+
     // Download the zip file
-    const zipFilePath = path.join(ProjectPath.ExtensionFolder, `${extensionId}.zip`);
+    const zipFilePath = path.join(ProjectPath.ExtensionFolder, `${folder}.zip`);
     Logger.silly(LOG_TAG, `Downloading extension from ${extension.zipUrl} to ${zipFilePath}`);
 
     await this.downloadFile(extension.zipUrl, zipFilePath);
 
     // Create the extension directory
-    const extensionDir = path.join(ProjectPath.ExtensionFolder, extensionId);
+    const extensionDir = path.join(ProjectPath.ExtensionFolder, folder);
     if (!fs.existsSync(extensionDir)) {
       await fs.promises.mkdir(extensionDir, {recursive: true});
     }
@@ -119,13 +125,13 @@ export class ExtensionManager implements IObjectManager {
     await this.unzipFile(zipFilePath, extensionDir);
 
     // Update the configuration
-    Logger.silly(LOG_TAG, `Updating configuration for extension ${extensionId}`);
+    Logger.silly(LOG_TAG, `Updating configuration for extension ${folder}`);
 
-    ExtensionConfigTemplateLoader.Instance.loadSingleExtension(extensionId, Config);
+    ExtensionConfigTemplateLoader.Instance.loadSingleExtension(folder, Config);
 
     // Initialize the extension
-    Logger.silly(LOG_TAG, `Initializing extension ${extensionId}`);
-    await this.initSingleExtension(extensionId);
+    Logger.silly(LOG_TAG, `Initializing extension ${folder}`);
+    await this.initSingleExtension(folder);
 
     // Clean up the temporary file
     if (fs.existsSync(zipFilePath)) {
@@ -163,7 +169,7 @@ export class ExtensionManager implements IObjectManager {
     await this.cleanUpSingleExtension(uniqueExtensionId);
 
     // Re-initialize the extension
-    await this.initSingleExtension(configKey);
+    await this.initSingleExtension(this.extObjects[uniqueExtensionId].folder);
 
     Logger.debug(LOG_TAG, `Extension ${uniqueExtensionId} reloaded successfully`);
   }
@@ -175,6 +181,10 @@ export class ExtensionManager implements IObjectManager {
   public async deleteExtension(configKey: string): Promise<void> {
     if (!Config.Extensions.enabled) {
       throw new Error('Extensions are disabled');
+    }
+
+    if (!ExtensionManager.isFolderName(configKey)) {
+      throw new Error(`Invalid extension config key: ${configKey}`);
     }
 
     Logger.debug(LOG_TAG, `Deleting extension with config key: ${configKey}`);
@@ -196,11 +206,15 @@ export class ExtensionManager implements IObjectManager {
       await this.cleanUpSingleExtension(uniqueExtensionId);
     }
 
-    // Remove the extension folder
-    const extPath = path.join(ProjectPath.ExtensionFolder, configKey);
-    if (fs.existsSync(extPath)) {
+    // Remove the extension folder. Only a folder that is listed in the extension folder:
+    // configKey comes from the request, it never reaches the file path.
+    const folder = fs.existsSync(ProjectPath.ExtensionFolder)
+      ? fs.readdirSync(ProjectPath.ExtensionFolder).find(f => f === configKey)
+      : undefined;
+    if (folder) {
+      const extPath = path.join(ProjectPath.ExtensionFolder, folder);
       Logger.silly(LOG_TAG, `Removing extension folder: ${extPath}`);
-      fs.rmSync(extPath, { recursive: true, force: true });
+      fs.rmSync(extPath, {recursive: true, force: true});
     }
 
     // Remove from configuration
@@ -210,6 +224,14 @@ export class ExtensionManager implements IObjectManager {
     Config.Extensions.extensions.removeProperty(configKey);
 
     Logger.debug(LOG_TAG, `Extension ${configKey} deleted successfully`);
+  }
+
+  /**
+   * An extension folder is a single, plain folder name inside the extension folder.
+   */
+  private static isFolderName(name: string): boolean {
+    return typeof name === 'string' && name !== '' && name !== '.' && name !== '..' &&
+      !/[/\\\0]/.test(name);
   }
 
   getUIExtensionConfigs(): UIExtensionDTO[] {

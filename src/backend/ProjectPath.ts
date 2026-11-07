@@ -39,6 +39,24 @@ export class ProjectPathClass {
     return !(rel === '..' || rel.startsWith('..' + path.sep) || path.isAbsolute(rel));
   }
 
+  /**
+   * Resolves a path from a request (relative to ImageFolder, even with a leading '/') to an absolute path.
+   * Returns null if it would point outside of ImageFolder. Pure string check, no disk access.
+   * Use it wherever a request path reaches the disk: the check sits next to the use,
+   * so it also holds for callers that skip AuthenticationMWs.normalizePathParam (and CodeQL can see it).
+   */
+  public resolveInImageFolder(relativePath: string): string | null {
+    const root = path.resolve(this.ImageFolder);
+    const absolute = path.resolve(path.join(root, relativePath || ''));
+    if (absolute === root) {
+      return root;
+    }
+    if (!absolute.startsWith(root.endsWith(path.sep) ? root : root + path.sep)) {
+      return null;
+    }
+    return absolute;
+  }
+
   reset(): void {
     this.Root = path.join(__dirname, '/../../');
     this.FrontendFolder = path.join(this.Root, 'dist');

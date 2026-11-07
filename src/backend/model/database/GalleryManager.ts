@@ -75,9 +75,11 @@ export class GalleryManager {
         return await getDir(dir.id);
       }
 
-      const stat = fs.statSync(
-        path.join(ProjectPath.ImageFolder, relativeDirectoryName)
-      );
+      const absoluteDirectoryName = ProjectPath.resolveInImageFolder(relativeDirectoryName);
+      if (!absoluteDirectoryName) {
+        throw new Error('Directory is outside of the image folder: ' + relativeDirectoryName);
+      }
+      const stat = fs.statSync(absoluteDirectoryName);
       const lastModified = DiskManager.calcLastModified(stat);
 
       // If it seems that the content did not change, do not work on it

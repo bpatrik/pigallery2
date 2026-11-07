@@ -317,6 +317,28 @@ describe('GalleryMWs', () => {
       expect(notAvailableArgs).to.deep.equal(notExisting.nextArgs);
     });
 
+    it('does not list a directory outside of the image folder', async () => {
+      // fsp.stat is stubbed to "exists": only the path check can stop it
+      for (const dir of ['..', '../other', 'a/../../other']) {
+        const outside = await callListDirectory(dir, sessionContext({}));
+        expect(outside.status, dir).to.equal(404);
+        expect((outside.nextArgs[0] as ErrorDTO).code, dir).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+        expect(listArgs, dir).to.be.null;
+      }
+    });
+
+    it('does not load a file outside of the image folder', async () => {
+      for (const mediaPath of ['../x.jpg', 'a/../../x.jpg']) {
+        const req: any = {params: {mediaPath}};
+        let nextArgs: any[] = null;
+        await GalleryMWs.loadFile(req, {} as any, (...args: any[]) => {
+          nextArgs = args;
+        });
+        expect((nextArgs[0] as ErrorDTO).code, mediaPath).to.equal(ErrorCodes.PATH_ERROR);
+        expect(req.resultPipe, mediaPath).to.be.undefined;
+      }
+    });
+
     it('lists metafiles only for available directories', async () => {
       await callListDirectory('public', sessionContext({}), DirectoryAccessTypes.available);
       expect(listArgs[4].withMetaFiles).to.be.true;
