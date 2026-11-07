@@ -66,16 +66,29 @@ jobs:
       uses: coverallsapp/github-action@v2
       with:
         files: coverage/lcov.info coverage/pigallery2/lcov.info
+
+  # own job, so a failing unit test does not skip the e2e tests (and the other way around)
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Use Node.js 26
+      uses: actions/setup-node@v7
+      with:
+        node-version: 26.x
+    - name: npm install and build
+      run: |
+        npm ci
+        npm run build
     - name: E2E test - Cypress run
-      if: matrix.node-version == '26.x'
       uses: cypress-io/github-action@v7
       env:
         DEBUG: '@cypress/github-action'
       with:
+        install: false # installed above
         start: npm run start-e2e-server
-      # after the test run completes store screenshots
     - uses: actions/upload-artifact@v7
-      if: failure() && matrix.node-version == '26.x' # Store screenshots only on failures
+      if: failure() # Store screenshots only on failures
       with:
          name: cypress-screenshots
          path: test/cypress/screenshots
@@ -106,7 +119,8 @@ jobs:
   # --- MULTI-PLATFORM DOCKER VERIFICATION ---
   build-verify-docker:
     runs-on: ubuntu-latest
-    needs: [test, create-release]
+    # Docker images are only built when all tests pass, the e2e tests included
+    needs: [test, e2e, create-release]
     strategy:
       fail-fast: false # Ensures one platform failure doesn't stop others from testing
       matrix:
