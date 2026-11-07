@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {Server} from '../../../../../src/backend/server';
 import {DatabaseType, ServerConfig} from '../../../../../src/common/config/private/PrivateConfig';

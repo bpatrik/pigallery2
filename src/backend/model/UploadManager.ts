@@ -1,6 +1,6 @@
 import {ProjectPath} from '../ProjectPath';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {UploadUtils} from '../../common/UploadUtils';
 import {FileAlreadyExists} from '../exceptions/FileAlreadyExists';
 import {ObjectManagers} from './ObjectManagers';

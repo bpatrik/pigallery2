@@ -1,5 +1,5 @@
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ContentWrapper} from '../../../common/entities/ContentWrapper';

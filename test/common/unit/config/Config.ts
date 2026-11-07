@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {ExtensionConfigWrapper} from '../../../../src/backend/model/extension/ExtensionConfigWrapper';
 import {TestHelper} from '../../../TestHelper';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 
 describe('Config', () => {

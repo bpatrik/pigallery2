@@ -6,7 +6,7 @@ import {Config} from '../../common/config/private/Config';
 import {QueryParams} from '../../common/QueryParams';
 import {UserRoles} from '../../common/entities/UserDTO';
 import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
 import {UserEntity} from '../model/database/enitites/UserEntity';
 import {RequestParams} from './RequestParams';

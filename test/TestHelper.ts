@@ -20,7 +20,7 @@ import {
 import {DirectoryBaseDTO, DirectoryPathDTO} from '../src/common/entities/DirectoryDTO';
 import {FileDTO} from '../src/common/entities/FileDTO';
 import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Config} from '../src/common/config/private/Config';
 import {ProjectPath} from '../src/backend/ProjectPath';
 import {SupportedFormats} from '../src/common/SupportedFormats';

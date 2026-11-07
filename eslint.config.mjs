@@ -3,6 +3,7 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import angular from "angular-eslint";
 import chaiFriendly from 'eslint-plugin-chai-friendly';
+import {builtinModules} from 'node:module';
 
 export default tseslint.config(
   {
@@ -97,6 +98,12 @@ export default tseslint.config(
         ignoreRestSiblings: true,
       }],
       "@typescript-eslint/no-explicit-any": "warn",
+      // Node built-ins are imported with the node: prefix (node:fs, node:path, ...)
+      "@typescript-eslint/no-restricted-imports": ["error", {
+        paths: builtinModules
+          .filter(name => !name.startsWith('_') && !name.startsWith('node:'))
+          .map(name => ({name, message: `Import it as 'node:${name}'.`})),
+      }],
     },
   },
   {

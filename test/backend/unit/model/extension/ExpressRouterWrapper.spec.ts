@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import express from 'express';
-import * as http from 'http';
-import {AddressInfo} from 'net';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
 import {ExpressRouterWrapper} from '../../../../../src/backend/model/extension/ExpressRouterWrapper';
 import {ILogger} from '../../../../../src/backend/Logger';
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';

@@ -3,7 +3,7 @@ import {PhotoProcessing} from '../fileaccess/fileprocessing/PhotoProcessing';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
 import {ThumbnailSourceType} from '../fileaccess/PhotoWorker';
-import * as path from 'path';
+import * as path from 'node:path';
 import {QueryParams} from '../../../common/QueryParams';
 import {DynamicConfig} from '../../../common/entities/DynamicConfig';
 

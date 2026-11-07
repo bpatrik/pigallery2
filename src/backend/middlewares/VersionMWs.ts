@@ -3,7 +3,7 @@ import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {CustomHeaders} from '../../common/CustomHeaders';
 import {Config} from '../../common/config/private/Config';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 
 export class VersionMWs {
   /**

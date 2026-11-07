@@ -6,7 +6,7 @@ import {Config} from '../../../common/config/private/Config';
 import {PasswordHelper} from '../../model/PasswordHelper';
 import {Utils} from '../../../common/Utils';
 import {QueryParams} from '../../../common/QueryParams';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Logger} from '../../Logger';
 import {SessionUser, SessionContext} from '../../model/SessionContext';
 import {Brackets} from 'typeorm';

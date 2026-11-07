@@ -2,8 +2,8 @@ import {Config} from '../common/config/private/Config';
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import session from 'cookie-session';
-import * as _http from 'http';
-import {Server as HttpServer} from 'http';
+import * as _http from 'node:http';
+import {Server as HttpServer} from 'node:http';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import locale from 'locale';

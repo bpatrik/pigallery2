@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import {Config} from '../../common/config/private/Config';
 import {GPXProcessing} from '../model/fileaccess/fileprocessing/GPXProcessing';
 import {Logger} from '../Logger';

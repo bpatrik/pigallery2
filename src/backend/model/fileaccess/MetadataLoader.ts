@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 import {Config} from '../../../common/config/private/Config';
 import {FaceRegion, PhotoMetadata} from '../../../common/entities/PhotoDTO';
@@ -10,7 +10,7 @@ import {Logger} from '../../Logger';
 import * as exifr from 'exifr';
 import exifReader from 'exif-reader';
 import sharp from 'sharp';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Utils} from '../../../common/Utils';
 import {FFmpeg} from '../FFmpeg';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';

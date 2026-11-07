@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import {DataStructureVersion} from '../../../common/DataStructureVersion';
 import {SQLConnection} from './SQLConnection';
 import {DirectoryEntity} from './enitites/DirectoryEntity';

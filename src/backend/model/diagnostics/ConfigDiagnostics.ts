@@ -2,8 +2,8 @@ import {PrivateConfigClass} from '../../../common/config/private/PrivateConfigCl
 import {Logger} from '../../Logger';
 import {NotificationManager} from '../NotifocationManager';
 import {SQLConnection} from '../database/SQLConnection';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {FFmpeg} from '../FFmpeg';
 import {
   ClientAlbumConfig,

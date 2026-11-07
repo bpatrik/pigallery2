@@ -1,6 +1,6 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
-import * as path from 'path';
+import * as path from 'node:path';
 import * as chai from 'chai';
 import {expect} from 'chai';
 import {SuperAgentStatic} from 'superagent';
@@ -13,7 +13,7 @@ import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {ORSearchQuery, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../src/common/entities/SearchQueryDTO';
 import AdmZip from 'adm-zip';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 
 process.env.NODE_ENV = 'test';

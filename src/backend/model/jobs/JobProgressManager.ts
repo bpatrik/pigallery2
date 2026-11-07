@@ -1,5 +1,5 @@
-import {promises as fsp} from 'fs';
-import * as path from 'path';
+import {promises as fsp} from 'node:fs';
+import * as path from 'node:path';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
 import {JobProgressDTO, JobProgressStates,} from '../../../common/entities/job/JobProgressDTO';

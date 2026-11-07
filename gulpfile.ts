@@ -1,12 +1,12 @@
 import * as gulp from 'gulp';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
-import {promises as fsp} from 'fs';
-import * as path from 'path';
-import * as util from 'util';
+import * as fs from 'node:fs';
+import * as crypto from 'node:crypto';
+import {promises as fsp} from 'node:fs';
+import * as path from 'node:path';
+import * as util from 'node:util';
 import zip from 'gulp-zip';
 import * as xml2js from 'xml2js';
-import * as child_process from 'child_process';
+import * as child_process from 'node:child_process';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import jeditor from 'gulp-json-editor';
@@ -234,7 +234,7 @@ gulp.task('copy-package', (): any =>
 
           try {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            json.buildCommitHash = require('child_process')
+            json.buildCommitHash = require('node:child_process')
               .execSync('git rev-parse HEAD')
               .toString()
               .trim();

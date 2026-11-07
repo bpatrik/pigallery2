@@ -1,6 +1,6 @@
 import {ServerConfig} from './PrivateConfig';
-import * as crypto from 'crypto';
-import * as path from 'path';
+import * as crypto from 'node:crypto';
+import * as path from 'node:path';
 import {ConfigClass} from 'typeconfig/node';
 import {IConfigClass} from 'typeconfig/common';
 import {PasswordHelper} from '../../../backend/model/PasswordHelper';

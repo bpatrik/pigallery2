@@ -1,9 +1,9 @@
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
-import * as fs from 'fs';
-import * as path from 'path';
-import {pipeline} from 'stream/promises';
-import {Readable} from 'stream';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import {pipeline} from 'node:stream/promises';
+import {Readable} from 'node:stream';
 import {IObjectManager} from '../database/IObjectManager';
 import {Logger} from '../../Logger';
 import {IExtensionEvents, IExtensionObject} from './IExtension';
@@ -13,7 +13,7 @@ import * as express from 'express';
 import {SQLConnection} from '../database/SQLConnection';
 import {ExtensionObject} from './ExtensionObject';
 import {ExtensionDecoratorObject} from './ExtensionDecorator';
-import * as util from 'util';
+import * as util from 'node:util';
 import AdmZip from 'adm-zip';
 import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 import {ExtensionRepository} from './ExtensionRepository';
@@ -22,7 +22,7 @@ import {ExtensionConfigTemplateLoader} from './ExtensionConfigTemplateLoader';
 import {Utils} from '../../../common/Utils';
 import {UIExtensionDTO} from '../../../common/entities/extension/IClientUIConfig';
 import {ExtensionConfigWrapper} from './ExtensionConfigWrapper';
-const exec = util.promisify(require('child_process').exec);
+const exec = util.promisify(require('node:child_process').exec);
 const LOG_TAG = '[ExtensionManager]';
 
 export class ExtensionManager implements IObjectManager {

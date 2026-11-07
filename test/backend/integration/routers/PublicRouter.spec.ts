@@ -1,8 +1,8 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';

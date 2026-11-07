@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import {Brackets, DataSource, WhereExpressionBuilder} from 'typeorm';
 import type {SessionContext} from './SessionContext';
 import {SearchQueryUtils} from '../../common/SearchQueryUtils';

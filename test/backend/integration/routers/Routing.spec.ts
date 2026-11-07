@@ -1,11 +1,11 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import * as http from 'http';
-import {AddressInfo} from 'net';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
 import AdmZip from 'adm-zip';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {DBTestHelper} from '../../DBTestHelper';

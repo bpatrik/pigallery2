@@ -1,5 +1,5 @@
-import {promises as fsp, Stats} from 'fs';
-import * as path from 'path';
+import {promises as fsp, Stats} from 'node:fs';
+import * as path from 'node:path';
 import {DirectoryPathDTO, ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import {PhotoDTO} from '../../../common/entities/PhotoDTO';
 import {ProjectPath} from '../../ProjectPath';

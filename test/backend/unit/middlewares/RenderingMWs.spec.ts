@@ -1,6 +1,6 @@
-import * as path from 'path';
-import * as http from 'http';
-import {AddressInfo} from 'net';
+import * as path from 'node:path';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
 import express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import {expect} from 'chai';

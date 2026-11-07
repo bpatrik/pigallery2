@@ -5,7 +5,7 @@ import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
 import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Config} from '../../../../../src/common/config/private/Config';
-import * as path from 'path';
+import * as path from 'node:path';
 import {UserManager} from '../../../../../src/backend/model/database/UserManager';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';

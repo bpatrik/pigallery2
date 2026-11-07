@@ -32,7 +32,7 @@ import {FileEntity} from './enitites/FileEntity';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {GroupSortByTypes, SortByTypes, SortingMethod} from '../../../common/entities/SortingMethods';
 import {SessionContext} from '../SessionContext';
-import * as path from 'path';
+import * as path from 'node:path';
 
 export class SearchManager {
   private DIRECTORY_SELECT = [

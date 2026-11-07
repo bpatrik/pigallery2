@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import * as express from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {ExtensionManager} from '../../../../../src/backend/model/extension/ExtensionManager';
 import {IExtensionObject} from '../../../../../src/backend/model/extension/IExtension';
 import {TestHelper} from '../../../../TestHelper';

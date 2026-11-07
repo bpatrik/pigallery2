@@ -12,7 +12,7 @@ import {DiskManager} from '../fileaccess/DiskManager';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {Logger} from '../../Logger';
 import {SessionManager} from './SessionManager';
-import * as path from 'path';
+import * as path from 'node:path';
 import {SessionContext} from '../SessionContext';
 import {MediaEntity} from './enitites/MediaEntity';
 import {Config} from '../../../common/config/private/Config';

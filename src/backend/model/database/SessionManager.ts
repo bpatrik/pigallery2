@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import {SessionUser, SessionContext} from '../SessionContext';
 import {DirectoryAccess, DirectoryFilter} from '../DirectoryAccess';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';

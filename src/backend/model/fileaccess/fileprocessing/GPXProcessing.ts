@@ -1,5 +1,5 @@
-import * as path from 'path';
-import {constants as fsConstants, promises as fsp} from 'fs';
+import * as path from 'node:path';
+import {constants as fsConstants, promises as fsp} from 'node:fs';
 import * as xml2js from 'xml2js';
 import {ProjectPath} from '../../../ProjectPath';
 import {Config} from '../../../../common/config/private/Config';

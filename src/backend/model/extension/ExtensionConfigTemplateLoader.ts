@@ -1,6 +1,6 @@
 import {PrivateConfigClass} from '../../../common/config/private/PrivateConfigClass';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 import {ProjectPath} from '../../ProjectPath';
 import {Utils} from '../../../common/Utils';

@@ -1,5 +1,5 @@
 import {Express, NextFunction, Request, Response} from 'express';
-import * as path from 'path';
+import * as path from 'node:path';
 import * as ejs from 'ejs';
 import {Config} from '../../common/config/private/Config';
 import {ProjectPath} from '../ProjectPath';

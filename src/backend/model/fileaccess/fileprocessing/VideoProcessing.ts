@@ -1,5 +1,5 @@
-import * as path from 'path';
-import {constants as fsConstants, promises as fsp} from 'fs';
+import * as path from 'node:path';
+import {constants as fsConstants, promises as fsp} from 'node:fs';
 import {ITaskExecuter, TaskExecuter} from '../TaskExecuter';
 import {VideoConverterInput, VideoConverterWorker,} from '../VideoConverterWorker';
 import {MetadataLoader} from '../MetadataLoader';

@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 import {expect} from 'chai';
 import {Config} from '../../../../src/common/config/private/Config';
 import {GalleryMWs} from '../../../../src/backend/middlewares/GalleryMWs';
@@ -8,7 +8,7 @@ import {ParentDirectoryDTO} from '../../../../src/common/entities/DirectoryDTO';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {GalleryManager} from '../../../../src/backend/model/database/GalleryManager';
-import {promises as fsp} from 'fs';
+import {promises as fsp} from 'node:fs';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
 import {SessionContext} from '../../../../src/backend/model/SessionContext';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';

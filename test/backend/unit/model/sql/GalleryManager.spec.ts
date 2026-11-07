@@ -1,5 +1,5 @@
-import fs from 'fs';
-import * as path from 'path';
+import fs from 'node:fs';
+import * as path from 'node:path';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
 import {ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';

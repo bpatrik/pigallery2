@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
@@ -14,7 +14,7 @@ import {DBTestHelper} from '../../../DBTestHelper';
 import {ReIndexingSensitivity} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
-import * as path from 'path';
+import * as path from 'node:path';
 import {AlbumManager} from '../../../../../src/backend/model/database/AlbumManager';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
 import {ClientSortingConfig} from '../../../../../src/common/config/public/ClientConfig';

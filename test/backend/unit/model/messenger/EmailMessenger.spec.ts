@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import * as fs from 'fs';
-import * as net from 'net';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as net from 'node:net';
+import * as path from 'node:path';
 import {EmailMessenger} from '../../../../../src/backend/model/messenger/EmailMessenger';
 import {MediaDTOWithThPath} from '../../../../../src/backend/model/messenger/Messenger';
 import {Config} from '../../../../../src/common/config/private/Config';

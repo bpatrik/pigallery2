@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as path from 'path';
+import * as path from 'node:path';
 import {DBTestHelper} from '../../DBTestHelper';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';

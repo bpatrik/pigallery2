@@ -1,7 +1,7 @@
-import * as path from 'path';
-import {constants as fsConstants, promises as fsp} from 'fs';
-import * as os from 'os';
-import * as crypto from 'crypto';
+import * as path from 'node:path';
+import {constants as fsConstants, promises as fsp} from 'node:fs';
+import * as os from 'node:os';
+import * as crypto from 'node:crypto';
 import {ProjectPath} from '../../../ProjectPath';
 import {Config} from '../../../../common/config/private/Config';
 import {MediaRendererInput, PhotoWorker, SvgRendererInput, ThumbnailSourceType,} from '../PhotoWorker';

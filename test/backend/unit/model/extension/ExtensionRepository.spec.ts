@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import {ExtensionRepository} from '../../../../../src/backend/model/extension/ExtensionRepository';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
-import path = require('path');
+import path = require('node:path');
 import {TestHelper} from '../../../../TestHelper';
 
 // to help WebStorm to handle the test cases

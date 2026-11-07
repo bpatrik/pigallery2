@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';

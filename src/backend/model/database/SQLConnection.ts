@@ -16,7 +16,7 @@ import {DataStructureVersion} from '../../../common/DataStructureVersion';
 import {FileEntity} from './enitites/FileEntity';
 import {PersonEntry} from './enitites/person/PersonEntry';
 import {Utils} from '../../../common/Utils';
-import * as path from 'path';
+import * as path from 'node:path';
 import {DatabaseType, ServerDataBaseConfig, SQLLogLevel,} from '../../../common/config/private/PrivateConfig';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
 import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';

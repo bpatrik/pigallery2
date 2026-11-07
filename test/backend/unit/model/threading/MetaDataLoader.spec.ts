@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {Utils} from '../../../../../src/common/Utils';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';

@@ -4,7 +4,7 @@ import {ConfigClassBuilder} from 'typeconfig/node';
 import {ExtensionConfigTemplateLoader} from './ExtensionConfigTemplateLoader';
 import {NotificationManager} from '../NotifocationManager';
 import {ServerConfig} from '../../../common/config/private/PrivateConfig';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 
 const LOG_TAG = '[ExtensionConfigWrapper]';

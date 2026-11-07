@@ -1,5 +1,5 @@
 import {Job} from './Job';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Logger} from '../../../Logger';
 import {Config} from '../../../../common/config/private/Config';
 import {FileDTO} from '../../../../common/entities/FileDTO';

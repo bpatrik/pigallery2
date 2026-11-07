@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
-import * as path from 'path';
+import * as path from 'node:path';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
 import {TestHelper} from '../../../../TestHelper';
 
