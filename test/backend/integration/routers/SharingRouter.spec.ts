@@ -60,6 +60,35 @@ describe('SharingRouter', () => {
   };
 
 
+  describe('/GET share/:sharingKey/publicInfo', () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const getPublicInfo = async (sharingKey: string): Promise<any> => {
+      return (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/share/' + sharingKey + '/publicInfo');
+    };
+
+    it('should return the public info of an existing sharing', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
+      const res = await getPublicInfo(sharing.sharingKey);
+
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+      res.body.result.should.deep.equal({sharingKey: sharing.sharingKey, passwordProtected: true});
+    });
+
+    it('should return 404 for a not existing sharing', async () => {
+      const res = await getPublicInfo('doesnotexist');
+
+      res.should.have.status(404);
+      res.body.error.should.be.a('object');
+      should.equal(res.body.result, null);
+    });
+  });
+
   describe('/POST share/login', () => {
 
     beforeEach(setUp);

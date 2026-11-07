@@ -332,7 +332,8 @@ export class GalleryLightboxComponent implements OnDestroy {
     }
     const index = this.indexById().get(id);
     if (index === undefined) {
-      // deleted or a stale link: show the first one. The slideshow (photo frame) keeps playing.
+      // Deleted photo or a stale link: intentionally fall back to the first photo (with an info toast) instead of failing.
+      // The photos of a smart photo frame (/frame) can change while it plays; this keeps its slideshow running.
       if (this.goneId !== id) {
         this.goneId = id;
         this.notificationService.info($localize`The photo is not available anymore. Showing the first one.`);
