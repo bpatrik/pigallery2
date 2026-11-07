@@ -4,7 +4,7 @@ import {Config} from '../../common/config/private/Config';
 export class ServerTimeEntry {
   public name: string;
   startHR: [number, number];
-  public endTime: number = null;
+  public endTime: number | null = null;
 
   constructor(name: string) {
     this.name = name;
@@ -14,9 +14,10 @@ export class ServerTimeEntry {
     this.startHR = process.hrtime();
   }
 
-  public end(): void {
+  public end(): number {
     const duration = process.hrtime(this.startHR);
     this.endTime = duration[0] * 1e3 + duration[1] * 1e-6;
+    return this.endTime;
   }
 }
 
@@ -30,6 +31,9 @@ export const FunctionTime = (id: string, name: string) => {
       return;
     }
     const originalMethod = descriptor.value;
+    if (!originalMethod) {
+      return;
+    }
 
     descriptor.value = function (...args: any[]): any {
       const timer = new ServerTimeEntry(name);
@@ -43,24 +47,24 @@ export const FunctionTime = (id: string, name: string) => {
           // Async function - return a promise that logs timing when resolved
           return result
             .then((value: any) => {
-              timer.end();
-              console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms`);
+              const time = timer.end();
+              console.log(`[${id}] ${name}: ${time.toFixed(2)}ms`);
               return value;
             })
             .catch((error: any) => {
-              timer.end();
-              console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms (error)`);
+              const time = timer.end();
+              console.log(`[${id}] ${name}: ${time.toFixed(2)}ms (error)`);
               throw error;
             });
         } else {
           // Sync function - log timing immediately
-          timer.end();
-          console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms`);
+          const time = timer.end();
+          console.log(`[${id}] ${name}: ${time.toFixed(2)}ms`);
           return result;
         }
       } catch (error) {
-        timer.end();
-        console.log(`[${id}] ${name}: ${timer.endTime.toFixed(2)}ms (error)`);
+        const time = timer.end();
+        console.log(`[${id}] ${name}: ${time.toFixed(2)}ms (error)`);
         throw error;
       }
     } as any;
@@ -77,12 +81,16 @@ export const ServerTime = (id: string, name: string) => {
       return;
     }
     const m = descriptor.value;
+    if (!m) {
+      return;
+    }
     const customAction = (req: Request, res: Response, next: NextFunction) => {
       req.timing = req.timing || {};
-      req.timing[id] = new ServerTimeEntry(name);
-      req.timing[id].start();
+      const entry = new ServerTimeEntry(name);
+      req.timing[id] = entry;
+      entry.start();
       m(req, res, (err?: Error) => {
-        req.timing[id].end();
+        entry.end();
         next(err);
       });
     };

@@ -14,7 +14,7 @@ export class SharingManager {
    * A sharing needs at least a media (searchQuery) or a directory (directoryQuery) restriction,
    * otherwise it would show everything the creator can see.
    */
-  private static validateQueries(sharing: UpdateSharingDTO): void {
+  private static validateQueries(sharing: Pick<UpdateSharingDTO, 'searchQuery' | 'directoryQuery'>): void {
     if (SearchQueryUtils.isQueryEmpty(sharing.searchQuery) && !sharing.directoryQuery) {
       throw new Error('Invalid sharing: either searchQuery or directoryQuery needs to be set');
     }
@@ -90,7 +90,7 @@ export class SharingManager {
       .getOne();
   }
 
-  async createSharing(sharing: UpdateSharingDTO): Promise<SharingEntity> {
+  async createSharing(sharing: Omit<UpdateSharingDTO, 'id'>): Promise<SharingEntity> {
     await SharingManager.removeExpiredLink();
     const connection = await SQLConnection.getConnection();
     if (sharing.password) {

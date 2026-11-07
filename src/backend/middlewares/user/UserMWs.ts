@@ -49,7 +49,7 @@ export class UserMWs {
     try {
       // the sessions of the deleted user end on their next request (see AuthenticationMWs.authenticate)
       await ObjectManagers.getInstance().UserManager.deleteUser(
-        parseInt(RequestParams.get(req, 'id'), 10)
+        parseInt(RequestParams.getRequired(req, 'id'), 10)
       );
       return next();
     } catch (err) {
@@ -76,7 +76,7 @@ export class UserMWs {
 
     try {
       await ObjectManagers.getInstance().UserManager.changeRole(
-        parseInt(RequestParams.get(req, 'id'), 10),
+        parseInt(RequestParams.getRequired(req, 'id'), 10),
         req.body.newRole
       );
       return next();
@@ -104,7 +104,7 @@ export class UserMWs {
 
     try {
       const updatedUser = await ObjectManagers.getInstance().UserManager.updateSettings(
-        parseInt(RequestParams.get(req, 'id'), 10),
+        parseInt(RequestParams.getRequired(req, 'id'), 10),
         req.body.settings
       );
       if (req.session?.context?.user?.id === updatedUser.id) {
@@ -134,7 +134,7 @@ export class UserMWs {
 
     try {
       await ObjectManagers.getInstance().UserManager.setOidcSubject(
-        parseInt(RequestParams.get(req, 'id'), 10),
+        parseInt(RequestParams.getRequired(req, 'id'), 10),
         null
       );
       return next();

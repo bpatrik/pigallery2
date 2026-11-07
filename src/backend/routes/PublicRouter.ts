@@ -17,7 +17,6 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      locale?: string;
       localePath?: string;
       tpl?: Record<string, any>;
       timing?: Record<string, ServerTimeEntry>;
@@ -35,7 +34,7 @@ export class PublicRouter {
       let selectedLocale = req.locale;
       if (req.cookies && req.cookies[CookieNames.lang]) {
         if (
-          Config.Server.languages.indexOf(req.cookies[CookieNames.lang]) !== -1
+          (Config.Server.languages ?? []).indexOf(req.cookies[CookieNames.lang]) !== -1
         ) {
           selectedLocale = req.cookies[CookieNames.lang];
         }
@@ -48,8 +47,8 @@ export class PublicRouter {
     // index.html should not be cached as it contains template that can change
     const renderIndex = (req: Request, res: Response, next: NextFunction) => {
       ejs.renderFile(
-        path.join(ProjectPath.FrontendFolder, req.localePath, 'index.html'),
-        res.tpl,
+        path.join(ProjectPath.FrontendFolder, req.localePath ?? req.locale, 'index.html'),
+        res.tpl ?? {},
         (err, str) => {
           if (err) {
             return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, err.message));
@@ -62,7 +61,7 @@ export class PublicRouter {
     // /<locale>/<page> links (e.g. from the language menu) set the language, then open the same page
     const redirectToLocalePage = (req: Request, res: Response, next: NextFunction) => {
       const locale = RequestParams.get(req, 'locale');
-      if (Config.Server.languages.indexOf(locale) === -1) {
+      if (!locale || (Config.Server.languages ?? []).indexOf(locale) === -1) {
         return next();
       }
       res.cookie(CookieNames.lang, locale);
@@ -314,13 +313,14 @@ export class PublicRouter {
       return (req: Request, res: Response) => {
         // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
         // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
-        const hashed = /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(RequestParams.get(req, 'file'));
+        const file = RequestParams.getRequired(req, 'file');
+        const hashed = /-[A-Z0-9]{8}.[a-z0-9]+$/.test(file);
         if (!hashed) {
           res.set('Cache-Control', 'no-cache');
         }
-        res.sendFile(RequestParams.get(req, 'file'), {
+        res.sendFile(file, {
           // sendFile refuses paths that would leave the root
-          root: path.join(ProjectPath.FrontendFolder, req.localePath, subDir),
+          root: path.join(ProjectPath.FrontendFolder, req.localePath ?? req.locale, subDir),
           dotfiles: 'allow',
           ...(hashed ? {
             maxAge: '365d', // number would be in ms

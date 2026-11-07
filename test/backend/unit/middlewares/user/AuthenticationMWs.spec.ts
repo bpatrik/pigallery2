@@ -401,6 +401,25 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       await expectEnded({context: {user: {id: ivy.id, name: 'ivy', role: UserRoles.Admin}}, expires: Date.now() + 10000});
     });
 
+    it('rejects an unknown sharing key with 401', async () => {
+      const req: any = {
+        session: {}, sessionOptions: {}, params: {}, body: {},
+        query: {[QueryParams.gallery.sharingKey_query]: 'no_such_key'}
+      };
+      let status: number | undefined;
+      let err: ErrorDTO | undefined;
+      await AuthenticationMWs.shareLogin(req, {
+        status: (s: number): void => {
+          status = s;
+        }
+      } as any, (e?: any) => {
+        err = e;
+      });
+      expect(status).to.equal(401);
+      expect(err?.code).to.equal(ErrorCodes.CREDENTIAL_NOT_FOUND);
+      expect(req.session.context).to.be.undefined;
+    });
+
     it('ends the guest session of a deleted sharing', async () => {
       const owner = await createUser('owner', UserRoles.Admin);
       const sharingKey = await createSharing(owner);

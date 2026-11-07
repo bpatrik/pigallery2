@@ -398,7 +398,6 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
   // a lookup with a missing key must not match the first row
   describe('missing lookup values', () => {
     const create = (sharingKey: string) => new SharingManager().createSharing({
-      id: null,
       sharingKey,
       searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
       password: null,
@@ -424,7 +423,6 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       const conn = await SQLConnection.getConnection();
       const other = await conn.getRepository(UserEntity).save({name: 'Ödön', password: '', role: UserRoles.User});
       await sm.createSharing({
-        id: null,
         sharingKey: 'other_key',
         searchQuery: {value: '/', type: SearchQueryTypes.directory} as TextSearch,
         password: null,

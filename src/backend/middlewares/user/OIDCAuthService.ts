@@ -90,7 +90,7 @@ export class OIDCAuthService {
   }
 
   private static async findUser(name: string): Promise<UserDTO> {
-    let user: UserDTO = await ObjectManagers.getInstance().UserManager.findOne({name});
+    let user: UserDTO | null = await ObjectManagers.getInstance().UserManager.findOne({name});
     if (!user && Config.Users.oidc.autoCreateUser) {
       user = await this.createUser(name);
     }
@@ -111,7 +111,7 @@ export class OIDCAuthService {
     const subject = claims.iss + '|' + claims.sub;
     const userManager = ObjectManagers.getInstance().UserManager;
 
-    let user: UserDTO = await userManager.findOne({oidcSubject: subject});
+    let user: UserDTO | null = await userManager.findOne({oidcSubject: subject});
     if (user) {
       return user;
     }

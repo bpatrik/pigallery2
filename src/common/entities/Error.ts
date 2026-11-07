@@ -35,7 +35,7 @@ export enum ErrorCodes {
 }
 
 export class ErrorDTO {
-  public detailsStr: string;
+  public detailsStr?: string;
   public request: {
     method: string;
     url: string;
@@ -43,7 +43,7 @@ export class ErrorDTO {
 
   constructor(
     public code: ErrorCodes,
-    public message?: string,
+    public message?: string | null,
     public details?: any,
     req?: Request
   ) {

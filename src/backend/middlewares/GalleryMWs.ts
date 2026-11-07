@@ -18,6 +18,7 @@ import {LocationLookupException} from '../exceptions/LocationLookupException';
 import {ServerTime} from './ServerTimingMWs';
 import {SortByTypes} from '../../common/entities/SortingMethods';
 import {RequestParams} from './RequestParams';
+import {RequestSession} from './RequestSession';
 
 export class GalleryMWs {
   /**
@@ -30,11 +31,10 @@ export class GalleryMWs {
     next: NextFunction
   ): void {
     try {
-      if (!RequestParams.get(req, 'searchQueryDTO')) {
+      const rawQueryParam = RequestParams.get(req, 'searchQueryDTO');
+      if (!rawQueryParam) {
         return next();
       }
-
-      const rawQueryParam = RequestParams.get(req, 'searchQueryDTO');
 
       let query: SearchQueryDTO;
       try {
@@ -84,7 +84,7 @@ export class GalleryMWs {
     try {
       const directory =
         await ObjectManagers.getInstance().GalleryManager.listDirectory(
-          req.session.context,
+          RequestSession.getContext(req),
           directoryName,
           parseInt(
             req.query[QueryParams.gallery.knownLastModified] as string,
@@ -96,7 +96,7 @@ export class GalleryMWs {
           ),
           {
             // sharing without directory query only sees already indexed directories with visible photos
-            allowIndexing: !req.session.context.directoryAccess.byPhotos,
+            allowIndexing: !RequestSession.getContext(req).directoryAccess.byPhotos,
             // parents only show the way to the available directories
             withMetaFiles: access === DirectoryAccessTypes.available
           }
@@ -106,7 +106,7 @@ export class GalleryMWs {
         req.resultPipe = ContentWrapperUtils.build(null, null, true);
         return next();
       }
-      directory.availableParents = req.session.context.directoryAccess.getAvailableParents(directoryName);
+      directory.availableParents = RequestSession.getContext(req).directoryAccess.getAvailableParents(directoryName);
       req.resultPipe = ContentWrapperUtils.build(directory, null);
       return next();
     } catch (err) {
@@ -140,7 +140,7 @@ export class GalleryMWs {
 
       // Get all media items from search
       const searchResult = await ObjectManagers.getInstance().SearchManager.search(
-        req.session.context, query);
+        RequestSession.getContext(req), query);
 
       if (!searchResult.media || searchResult.media.length === 0) {
         return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'No media found for zip'));
@@ -182,8 +182,9 @@ export class GalleryMWs {
 
         // Check if this name was used before
         let uniqueName = media.name;
-        if (usedNames.has(lowerName)) {
-          const count = usedNames.get(lowerName) + 1;
+        const usedCount = usedNames.get(lowerName);
+        if (usedCount !== undefined) {
+          const count = usedCount + 1;
           usedNames.set(lowerName, count);
           uniqueName = baseName + '_' + count + ext;
         } else {
@@ -326,10 +327,11 @@ export class GalleryMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    if (!RequestParams.get(req, 'mediaPath')) {
+    const mediaPath = RequestParams.get(req, 'mediaPath');
+    if (!mediaPath) {
       return next();
     }
-    const fullMediaPath = ProjectPath.resolveInImageFolder(RequestParams.get(req, 'mediaPath'));
+    const fullMediaPath = ProjectPath.resolveInImageFolder(mediaPath);
 
     // check if file exist
     try {
@@ -393,7 +395,7 @@ export class GalleryMWs {
 
       const query: SearchQueryDTO = req.resultPipe as any;
       const result = await ObjectManagers.getInstance().SearchManager.search(
-        req.session.context,
+        RequestSession.getContext(req),
         query
       );
 
@@ -428,7 +430,8 @@ export class GalleryMWs {
       if (Config.Search.AutoComplete.enabled === false) {
         return next();
       }
-      if (!RequestParams.get(req, 'value')) {
+      const value = RequestParams.get(req, 'value');
+      if (!value) {
         return next();
       }
 
@@ -438,8 +441,8 @@ export class GalleryMWs {
       }
       req.resultPipe =
         await ObjectManagers.getInstance().SearchManager.autocomplete(
-          req.session.context,
-          RequestParams.get(req, 'value'),
+          RequestSession.getContext(req),
+          value,
           type
         );
       return next();
@@ -467,7 +470,7 @@ export class GalleryMWs {
 
       const photos =
         await ObjectManagers.getInstance().SearchManager.getNMedia(
-          req.session.context,
+          RequestSession.getContext(req),
           query, [{method: SortByTypes.Random, ascending: null}], 1, true);
       if (!photos || photos.length !== 1) {
         return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'No photo found'));
@@ -496,12 +499,12 @@ export class GalleryMWs {
   ): Promise<void> {
     try {
 
-      if (!RequestParams.get(req, 'mediaPath')) {
+      const mediaPath = RequestParams.get(req, 'mediaPath');
+      if (!mediaPath) {
         return next();
       }
-      const mediaPath = RequestParams.get(req, 'mediaPath');
 
-      req.resultPipe = await ObjectManagers.getInstance().GalleryManager.getMedia(req.session.context, mediaPath);
+      req.resultPipe = await ObjectManagers.getInstance().GalleryManager.getMedia(RequestSession.getContext(req), mediaPath);
       return next();
     } catch (e) {
       return next(

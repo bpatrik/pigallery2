@@ -66,7 +66,7 @@ export class ThumbnailGeneratorMWs {
       return next();
     }
 
-    let erroredItem: PersonEntry = null;
+    let erroredItem: PersonEntry | null = null;
     try {
       const size: number = Config.Media.Photo.personThumbnailSize;
 
@@ -148,7 +148,7 @@ export class ThumbnailGeneratorMWs {
       // load parameters
       const mediaPath = req.resultPipe as string;
       let size: number =
-        parseInt(RequestParams.get(req, 'size'), 10) ||
+        parseInt(RequestParams.get(req, 'size') ?? '', 10) ||
         Config.Media.Photo.thumbnailSizes[0];
 
       // validate size
@@ -218,7 +218,7 @@ export class ThumbnailGeneratorMWs {
     if (typeof directory.media !== 'undefined') {
       ThumbnailGeneratorMWs.addThInfoToPhotos(directory.media, directory);
     }
-    if (directory.cache.cover) {
+    if (directory.cache?.cover) {
       ThumbnailGeneratorMWs.addThInfoToAPhoto(directory.cache.cover, directory);
     }
   }

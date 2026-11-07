@@ -4,6 +4,7 @@ import {ObjectManagers} from '../model/ObjectManagers';
 import {Utils} from '../../common/Utils';
 import {Config} from '../../common/config/private/Config';
 import {RequestParams} from './RequestParams';
+import {RequestSession} from './RequestSession';
 
 export class AlbumMWs {
   public static async listAlbums(
@@ -16,7 +17,7 @@ export class AlbumMWs {
     }
     try {
       req.resultPipe =
-        await ObjectManagers.getInstance().AlbumManager.getAll(req.session.context);
+        await ObjectManagers.getInstance().AlbumManager.getAll(RequestSession.getContext(req));
       return next();
     } catch (err) {
       return next(
@@ -33,13 +34,12 @@ export class AlbumMWs {
     if (Config.Album.enabled === false) {
       return next();
     }
-    if (!RequestParams.get(req, 'id') || !Utils.isUInt32(parseInt(RequestParams.get(req, 'id'), 10))) {
+    const id = parseInt(RequestParams.get(req, 'id') ?? '', 10);
+    if (!Utils.isUInt32(id)) {
       return next();
     }
     try {
-      await ObjectManagers.getInstance().AlbumManager.deleteAlbum(
-        parseInt(RequestParams.get(req, 'id'), 10)
-      );
+      await ObjectManagers.getInstance().AlbumManager.deleteAlbum(id);
       req.resultPipe = 'ok';
       return next();
     } catch (err) {
