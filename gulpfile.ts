@@ -62,7 +62,7 @@ const createDynamicTranslationFile = async (
       (c: any): boolean =>
         c.$['context-type'] === 'sourcefile' && c._.endsWith('.ts')
     ) !== -1;
-  const translations = translationXml.xliff.file[0].body[0]['trans-unit'];
+  const translations = translationXml.xliff.file[0].body[0]['trans-unit'] ?? [];
   const filtered = translations.filter(
     (tr): boolean => tr['context-group']!.findIndex(hasTsTranslation) !== -1
   );

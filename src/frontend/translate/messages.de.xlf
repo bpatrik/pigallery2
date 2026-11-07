@@ -1824,7 +1824,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">209</context>
         </context-group>
-        <target>Autocomplete cache timeout.</target>
+        <target>Autocomplete cache timeout. </target>
       </trans-unit>
       <trans-unit id="2180291763949669799" datatype="html">
         <source>Enable</source>
@@ -3883,18 +3883,12 @@
         <target>Show fewer notifications</target>
       </trans-unit>
       <trans-unit id="3706893844385254004" datatype="html">
-        <source>
-          More notifications: 
-          <x id="count" equiv-text="hidden.length"/>
-        </source>
+        <source>More notifications: <x id="count" equiv-text="hidden.length"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/model/notification.service.ts</context>
           <context context-type="linenumber">31</context>
         </context-group>
-        <target>
-          More notifications: 
-          <x id="count" equiv-text="hidden.length"/>
-        </target>
+        <target>More notifications: <x id="count" equiv-text="hidden.length"/></target>
       </trans-unit>
       <trans-unit id="8398233202919865612" datatype="html">
         <source>h</source>
@@ -4513,7 +4507,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
           <context context-type="linenumber">23,24</context>
         </context-group>
-        <target>Starten Sie den Server neu, um diese Benachrichtigungen zu schließen.</target>
+        <target> Starten Sie den Server neu, um diese Benachrichtigungen zu schließen. </target>
       </trans-unit>
       <trans-unit id="1768748035579543849" datatype="html">
         <source>App version:</source>
@@ -4538,7 +4532,7 @@
           <context context-type="linenumber">91,92</context>
         </context-group>
         <note priority="1" from="description">title of left card in settings page that contains settings contents</note>
-        <target>Menü</target>
+        <target> Menü</target>
       </trans-unit>
       <trans-unit id="5052755121871408908" datatype="html">
         <source>Up time</source>
@@ -4730,7 +4724,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
           <context context-type="linenumber">12,13</context>
         </context-group>
-        <target>No duplicates found</target>
+        <target> No duplicates found </target>
       </trans-unit>
       <trans-unit id="7163150931703189652" datatype="html">
         <source>Something went spectacularly wrong. We've sent our best squirrels to look into it.</source>
@@ -4746,7 +4740,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">16,17</context>
         </context-group>
-        <target>Take me back to safety</target>
+        <target> Take me back to safety </target>
       </trans-unit>
       <trans-unit id="8195169877713600295" datatype="html">
         <source>help me fix this</source>
@@ -4765,24 +4759,12 @@
         <target>How to debug this?</target>
       </trans-unit>
       <trans-unit id="5917461858931004049" datatype="html">
-        <source>
-          To enable full debug logging, set the NODE_ENV environment variable to debug.
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-        </source>
+        <source>To enable full debug logging, set the <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>NODE_ENV<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> environment variable to <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>debug<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">28,29</context>
         </context-group>
-        <target>
-          To enable full debug logging, set the NODE_ENV environment variable to debug.
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-        </target>
+        <target>To enable full debug logging, set the <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>NODE_ENV<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> environment variable to <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>debug<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>.</target>
       </trans-unit>
       <trans-unit id="456108619869570861" datatype="html">
         <source>How to look at the server logs?</source>
@@ -4801,36 +4783,20 @@
         <target>If you're using Docker, you can follow these steps:</target>
       </trans-unit>
       <trans-unit id="803668820873468657" datatype="html">
-        <source>
-          List all containers with docker ps -a to get pigallery2's container.
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-        </source>
+        <source>List all containers with <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker ps -a<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> to get pigallery2's container.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">32,33</context>
         </context-group>
-        <target>
-          List all containers with docker ps -a to get pigallery2's container.
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-        </target>
+        <target>List all containers with <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker ps -a<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> to get pigallery2's container.</target>
       </trans-unit>
       <trans-unit id="3158902713337245438" datatype="html">
-        <source>
-          Get logs for the pigallery2 container: docker logs -f pigallery2
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-        </source>
+        <source>Get logs for the pigallery2 container: <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker logs -f pigallery2<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">33,34</context>
         </context-group>
-        <target>
-          Get logs for the pigallery2 container: docker logs -f pigallery2
-          <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code>"/>
-          <x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code>"/>
-        </target>
+        <target>Get logs for the pigallery2 container: <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker logs -f pigallery2<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/></target>
       </trans-unit>
       <trans-unit id="4337191822861341684" datatype="html">
         <source>For non-Docker setups, check the standard output of the Node.js process.</source>
@@ -4873,20 +4839,12 @@
         <target>should bring up the developer console.</target>
       </trans-unit>
       <trans-unit id="596018110493075337" datatype="html">
-        <source>
-          If you're still stuck, please  report the issue on GitHub . 
-          <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>"/>
-          <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a>"/>
-        </source>
+        <source>If you're still stuck, please <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;"/> report the issue on GitHub <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">39,43</context>
         </context-group>
-        <target>
-          If you're still stuck, please  report the issue on GitHub . 
-          <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;>"/>
-          <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a>"/>
-        </target>
+        <target>If you're still stuck, please <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;"/> report the issue on GitHub <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. </target>
       </trans-unit>
       <trans-unit id="1262530507063329624" datatype="html">
         <source>No faces to show.</source>
@@ -5190,7 +5148,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
           <context context-type="linenumber">47,48</context>
         </context-group>
-        <target>Zu viele Ergebnisse, um sie anzuzeigen. Verfeinere deine Suche.</target>
+        <target> Zu viele Ergebnisse, um sie anzuzeigen. Verfeinere deine Suche. </target>
       </trans-unit>
       <trans-unit id="7819314041543176992" datatype="html">
         <source>Close</source>
@@ -5794,7 +5752,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.html</context>
           <context context-type="linenumber">25,27</context>
         </context-group>
-        <target>Höchstwahrscheinlich ist das Video nicht transkodiert. Dies kann in den Einstellungen erfolgen. Sie müssen diese Videos transkodieren, um sie online ansehen zu können:</target>
+        <target> Höchstwahrscheinlich ist das Video nicht transkodiert. Dies kann in den Einstellungen erfolgen. Sie müssen diese Videos transkodieren, um sie online ansehen zu können: </target>
       </trans-unit>
       <trans-unit id="4845204768169982250" datatype="html">
         <source>The photo is not available anymore. Showing the first one.</source>
@@ -5938,7 +5896,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">83</context>
         </context-group>
-        <target>group</target>
+        <target> group </target>
       </trans-unit>
       <trans-unit id="7266946560591201477" datatype="html">
         <source>Grouping follows sorting</source>
@@ -6002,7 +5960,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/random-query-builder/random-query-builder.gallery.component.html</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>Kopie</target>
+        <target>Kopie </target>
       </trans-unit>
       <trans-unit id="7302779511130922711" datatype="html">
         <source>Loop slideshow</source>
@@ -6582,7 +6540,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">158,159</context>
         </context-group>
-        <target>active share(s) for this folder.</target>
+        <target>active share(s) for this folder. </target>
       </trans-unit>
       <trans-unit id="7113742953059852273" datatype="html">
         <source>Subfolders</source>
@@ -6713,32 +6671,20 @@
         <target>Hide details</target>
       </trans-unit>
       <trans-unit id="7007482846398115512" datatype="html">
-        <source>
-          Uploading files: 
-          <x id="count" equiv-text="toasts.length"/>
-        </source>
+        <source>Uploading files: <x id="count" equiv-text="toasts.length"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <target>
-          Uploading files: 
-          <x id="count" equiv-text="toasts.length"/>
-        </target>
+        <target>Uploading files: <x id="count" equiv-text="toasts.length"/></target>
       </trans-unit>
       <trans-unit id="8332396608065786351" datatype="html">
-        <source>
-          Failed: 
-          <x id="count" equiv-text="failed"/>
-        </source>
+        <source>Failed: <x id="count" equiv-text="failed"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">65</context>
         </context-group>
-        <target>
-          Failed: 
-          <x id="count" equiv-text="failed"/>
-        </target>
+        <target>Failed: <x id="count" equiv-text="failed"/></target>
       </trans-unit>
       <trans-unit id="6532503826534474594" datatype="html">
         <source>Upload is not supported for this directory.</source>
@@ -6765,18 +6711,12 @@
         <target>Queued</target>
       </trans-unit>
       <trans-unit id="3532182196874917619" datatype="html">
-        <source>
-          Files already exist: 
-          <x id="count" equiv-text="existingFiles.length"/>
-        </source>
+        <source>Files already exist: <x id="count" equiv-text="existingFiles.length"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">162</context>
         </context-group>
-        <target>
-          Files already exist: 
-          <x id="count" equiv-text="existingFiles.length"/>
-        </target>
+        <target>Files already exist: <x id="count" equiv-text="existingFiles.length"/></target>
       </trans-unit>
       <trans-unit id="862202801941657955" datatype="html">
         <source>File already exists</source>
@@ -6795,18 +6735,12 @@
         <target>Upload canceled.</target>
       </trans-unit>
       <trans-unit id="1005897192040844293" datatype="html">
-        <source>
-          Uploaded files: 
-          <x id="count" equiv-text="this.batchUploaded"/>
-        </source>
+        <source>Uploaded files: <x id="count" equiv-text="this.batchUploaded"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">336</context>
         </context-group>
-        <target>
-          Uploaded files: 
-          <x id="count" equiv-text="this.batchUploaded"/>
-        </target>
+        <target>Uploaded files: <x id="count" equiv-text="this.batchUploaded"/></target>
       </trans-unit>
       <trans-unit id="6551511810334633089" datatype="html">
         <source>Upload completed.</source>
@@ -6817,20 +6751,12 @@
         <target>Upload completed.</target>
       </trans-unit>
       <trans-unit id="167942783952169868" datatype="html">
-        <source>
-          Uploaded: , failed: 
-          <x id="uploaded" equiv-text="this.batchUploaded"/>
-          <x id="failed" equiv-text="this.batchFailed"/>
-        </source>
+        <source>Uploaded: <x id="uploaded" equiv-text="this.batchUploaded"/>, failed: <x id="failed" equiv-text="this.batchFailed"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">339</context>
         </context-group>
-        <target>
-          Uploaded: , failed: 
-          <x id="uploaded" equiv-text="this.batchUploaded"/>
-          <x id="failed" equiv-text="this.batchFailed"/>
-        </target>
+        <target>Uploaded: <x id="uploaded" equiv-text="this.batchUploaded"/>, failed: <x id="failed" equiv-text="this.batchFailed"/></target>
       </trans-unit>
       <trans-unit id="31528861717579803" datatype="html">
         <source>Upload completed with errors</source>
@@ -6841,18 +6767,12 @@
         <target>Upload completed with errors</target>
       </trans-unit>
       <trans-unit id="6218888260949839774" datatype="html">
-        <source>
-          Failed files: 
-          <x id="count" equiv-text="this.batchFailed"/>
-        </source>
+        <source>Failed files: <x id="count" equiv-text="this.batchFailed"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">342</context>
         </context-group>
-        <target>
-          Failed files: 
-          <x id="count" equiv-text="this.batchFailed"/>
-        </target>
+        <target>Failed files: <x id="count" equiv-text="this.batchFailed"/></target>
       </trans-unit>
       <trans-unit id="205445381296663832" datatype="html">
         <source>Upload failed.</source>
@@ -6876,7 +6796,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/login/login.component.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
-        <target>Benutzername oder Passwort ist falsch</target>
+        <target> Benutzername oder Passwort ist falsch </target>
       </trans-unit>
       <trans-unit id="1017981018329755208" datatype="html">
         <source>Login with</source>
@@ -6908,7 +6828,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/login/login.component.html</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>Anmeldung</target>
+        <target>Anmeldung </target>
       </trans-unit>
       <trans-unit id="1791389700783409961" datatype="html">
         <source>/path/to/folder</source>
@@ -6952,7 +6872,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target>No extensions available.</target>
+        <target> No extensions available. </target>
       </trans-unit>
       <trans-unit id="4902817035128594900" datatype="html">
         <source>Description</source>
@@ -6976,7 +6896,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>Install</target>
+        <target> Install </target>
       </trans-unit>
       <trans-unit id="4545371931284972880" datatype="html">
         <source> Manual installation </source>
@@ -6984,7 +6904,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">77</context>
         </context-group>
-        <target>Manual installation</target>
+        <target> Manual installation </target>
       </trans-unit>
       <trans-unit id="4894835484717268716" datatype="html">
         <source>Installed</source>
@@ -7008,7 +6928,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/gallery-statistic/gallery-statistic.component.html</context>
           <context context-type="linenumber">3,4</context>
         </context-group>
-        <target>Statistik:</target>
+        <target> Statistik: </target>
       </trans-unit>
       <trans-unit id="1205037876874222931" datatype="html">
         <source>Folders</source>
@@ -7072,7 +6992,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
           <context context-type="linenumber">40,41</context>
         </context-group>
-        <target>Keine Inhalte wurden geteilt.</target>
+        <target> Keine Inhalte wurden geteilt. </target>
       </trans-unit>
       <trans-unit id="5253186130625984783" datatype="html">
         <source> It seems that you are running the application in a Docker container. This setting should not be changed in docker. Make sure, that you know what you are doing.
@@ -7081,7 +7001,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">2,5</context>
         </context-group>
-        <target>Es scheint, dass Sie die Anwendung in einem Docker-Container ausführen. Diese Einstellung sollte im Docker nicht geändert werden. Stellen Sie sicher, dass Sie wissen, was Sie tun.</target>
+        <target> Es scheint, dass Sie die Anwendung in einem Docker-Container ausführen. Diese Einstellung sollte im Docker nicht geändert werden. Stellen Sie sicher, dass Sie wissen, was Sie tun. </target>
       </trans-unit>
       <trans-unit id="4948407374074297419" datatype="html">
         <source>Add new</source>
@@ -7133,7 +7053,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.html</context>
           <context context-type="linenumber">218,219</context>
         </context-group>
-        <target>To auto load these values from file: pick an SVG file with a single 'path'. You can use e.g: http://fontawesome.com/icons.</target>
+        <target>To auto load these values from file: pick an SVG file with a single 'path'. You can use e.g: http://fontawesome.com/icons. </target>
       </trans-unit>
       <trans-unit id="2448998566468414760" datatype="html">
         <source>Save &amp; Close</source>
@@ -7265,7 +7185,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
           <context context-type="linenumber">49</context>
         </context-group>
-        <target>Speichern</target>
+        <target>Speichern </target>
       </trans-unit>
       <trans-unit id="5562099532623028109" datatype="html">
         <source>Reset </source>
@@ -7273,7 +7193,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
           <context context-type="linenumber">54</context>
         </context-group>
-        <target>Zurücksetzen</target>
+        <target>Zurücksetzen </target>
       </trans-unit>
       <trans-unit id="1236604279860679031" datatype="html">
         <source>Restart</source>
@@ -7437,7 +7357,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">88</context>
         </context-group>
-        <target>Benutzer hinzufügen</target>
+        <target>Benutzer hinzufügen </target>
       </trans-unit>
       <trans-unit id="7187838764371214919" datatype="html">
         <source>Edit user</source>
@@ -7709,7 +7629,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
           <context context-type="linenumber">4,5</context>
         </context-group>
-        <target>letzter Durchlauf:</target>
+        <target> letzter Durchlauf: </target>
       </trans-unit>
       <trans-unit id="8770180893388957738" datatype="html">
         <source>Run between</source>
@@ -7781,7 +7701,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/progress/job-progress.settings.component.html</context>
           <context context-type="linenumber">130,131</context>
         </context-group>
-        <target>Protokolle</target>
+        <target> Protokolle </target>
       </trans-unit>
       <trans-unit id="6816983613862053954" datatype="html">
         <source>processed</source>
@@ -7901,7 +7821,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">95,96</context>
         </context-group>
-        <target>Stellen Sie die Zeit ein, zu der der Job ausgeführt werden soll.</target>
+        <target>Stellen Sie die Zeit ein, zu der der Job ausgeführt werden soll. </target>
       </trans-unit>
       <trans-unit id="1598058373778280238" datatype="html">
         <source>After:</source>
@@ -7917,7 +7837,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">122,123</context>
         </context-group>
-        <target>Der Job wird ausgeführt, nachdem dieser Job beendet wurde.</target>
+        <target>Der Job wird ausgeführt, nachdem dieser Job beendet wurde. </target>
       </trans-unit>
       <trans-unit id="7479716926471212179" datatype="html">
         <source>At:</source>
@@ -7945,7 +7865,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">188,189</context>
         </context-group>
-        <target>Ermöglicht das Starten des Jobs, auch wenn bereits ein anderer Job ausgeführt wird.</target>
+        <target>Ermöglicht das Starten des Jobs, auch wenn bereits ein anderer Job ausgeführt wird. </target>
       </trans-unit>
       <trans-unit id="3941409331265855477" datatype="html">
         <source> Search query to list photos and videos. </source>
@@ -7953,7 +7873,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">284</context>
         </context-group>
-        <target>Search query to list photos and videos.</target>
+        <target> Search query to list photos and videos. </target>
       </trans-unit>
       <trans-unit id="7699622144571229146" datatype="html">
         <source>Sort by</source>
@@ -7969,7 +7889,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">331</context>
         </context-group>
-        <target>Sorts the photos and videos by this.</target>
+        <target> Sorts the photos and videos by this. </target>
       </trans-unit>
       <trans-unit id="8698515801873408462" datatype="html">
         <source>Pick</source>
@@ -7985,7 +7905,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">351</context>
         </context-group>
-        <target>Number of photos and videos to pick.</target>
+        <target> Number of photos and videos to pick. </target>
       </trans-unit>
       <trans-unit id="5242498003738057671" datatype="html">
         <source>';' separated integers. </source>
@@ -7993,7 +7913,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">386,387</context>
         </context-group>
-        <target>';' getrennte ganze Zahlen.</target>
+        <target>';' getrennte ganze Zahlen. </target>
       </trans-unit>
       <trans-unit id="163671953128893071" datatype="html">
         <source>Add Job</source>
@@ -8017,7 +7937,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">438,439</context>
         </context-group>
-        <target>Wählen Sie einen zu planenden Auftrag aus.</target>
+        <target>Wählen Sie einen zu planenden Auftrag aus. </target>
       </trans-unit>
       <trans-unit id="6188210409712327095" datatype="html">
         <source>Add Job </source>
@@ -8025,7 +7945,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">448</context>
         </context-group>
-        <target>Auftrag hinzufügen</target>
+        <target>Auftrag hinzufügen </target>
       </trans-unit>
       <trans-unit id="1461196514655349848" datatype="html">
         <source>periodic</source>
@@ -8113,7 +8033,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/sharelogin/share-login.component.html</context>
           <context context-type="linenumber">12,13</context>
         </context-group>
-        <target>Unknown sharing key.</target>
+        <target>Unknown sharing key. </target>
       </trans-unit>
       <trans-unit id="6314278975578272694" datatype="html">
         <source>Wrong password</source>
@@ -8129,7 +8049,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/sharelogin/share-login.component.html</context>
           <context context-type="linenumber">39</context>
         </context-group>
-        <target>Eingabe</target>
+        <target>Eingabe </target>
       </trans-unit>
       <trans-unit id="4414648729691064163" datatype="html">
         <source>Cancel all</source>
