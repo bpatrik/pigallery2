@@ -4,7 +4,7 @@ import {PersonDTO} from '../../../common/entities/PersonDTO';
 import {Logger} from '../../Logger';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {PersonJunctionTable} from './enitites/person/PersonJunctionTable';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {SessionContext} from '../SessionContext';
 import {ProjectionAwareManager} from './ProjectionAwareManager';
@@ -25,6 +25,9 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       .where('person.name LIKE :name COLLATE ' + SQL_COLLATE, {name})
       .getOne();
 
+    if (!person) {
+      throw new Error('Person not found: ' + name);
+    }
     if (typeof partialPerson.name !== 'undefined') {
       person.name = partialPerson.name;
     }
@@ -50,7 +53,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       .getCount();
   }
 
-  public async get(session: SessionContext, name: string): Promise<PersonEntry> {
+  public async get(session: SessionContext, name: string): Promise<PersonEntry | undefined> {
     const persons = await this.getAll(session);
     return persons.find((p): boolean => p.name === name);
   }
@@ -88,7 +91,8 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
     }
   }
 
-  protected async invalidateDBCache(changedDir?: ParentDirectoryDTO): Promise<void> {
+  // only a scanned directory comes with its id
+  protected async invalidateDBCache(changedDir?: DirectoryPathDTO & {id?: number}): Promise<void> {
     if (!changedDir || !changedDir.id) {
       await this.invalidateAllDBCache();
       return;

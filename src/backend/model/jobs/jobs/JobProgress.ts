@@ -11,7 +11,7 @@ export class JobProgress {
   private state = JobProgressStates.running;
   private time = {
     start: Date.now() as number,
-    end: null as number,
+    end: null as number | null,
   };
   private logCounter = 0;
   private logs: { id: number; timestamp: string; comment: string }[] = [];

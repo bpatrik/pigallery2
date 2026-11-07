@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {ConfigMap, ConfigProperty, GenericConfigType, IConfigMap, SubConfigClass} from 'typeconfig/common';
+import {ConfigMap, ConfigProperty, GenericConfigType, SubConfigClass} from 'typeconfig/common';
 import {ClientExtensionsConfig, ConfigPriority, TAGS} from '../../public/ClientConfig';
 
 declare let $localize: (s: TemplateStringsArray) => string;
@@ -44,7 +44,7 @@ export class ServerExtensionsEntryConfig {
       priority: ConfigPriority.advanced
     }
   })
-  configs: GenericConfigType;
+  configs!: GenericConfigType; // loaded from the config or set by the extension
 }
 
 @SubConfigClass<TAGS>({softReadonly: true})
@@ -80,7 +80,7 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
       priority: ConfigPriority.advanced
     } as TAGS
   })
-  extensions: IConfigMap<ServerExtensionsEntryConfig> = new ConfigMap();
+  extensions = new ConfigMap<ServerExtensionsEntryConfig>();
 
 
   @ConfigProperty({

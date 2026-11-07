@@ -14,7 +14,7 @@ import {VideoMetadata} from '../../../common/entities/VideoDTO';
 import {MediaRendererInput, SvgRendererInput} from '../fileaccess/PhotoWorker';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {CoverPhotoDTOWithID} from '../database/CoverManager';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO, ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
 import {DirectoryScanSettings} from '../fileaccess/DiskManager';
 import {SessionContext} from '../SessionContext';
 import {IClientMediaButtonConfig, IMediaRequestBodyData} from '../../../common/entities/extension/IClientUIConfig';
@@ -47,19 +47,19 @@ export interface IExtensionEvents {
     CoverManager: {
       getCoverForAlbum: IExtensionEvent<[session: SessionContext, {
         searchQuery: SearchQueryDTO;
-      }], CoverPhotoDTOWithID>;
+      }], CoverPhotoDTOWithID | null>;
       getCoverForDirectory: IExtensionEvent<[
         session: SessionContext, {
           id: number;
           name: string;
           path: string;
-        }], CoverPhotoDTOWithID>
+        }], CoverPhotoDTOWithID | null>
     },
     ProjectedCacheManager: {
       /**
        * Invalidates directory covers and caches for a given directory and every parent
        */
-      invalidateDirectoryCache: IExtensionEvent<[ParentDirectoryDTO], void>;
+      invalidateDirectoryCache: IExtensionEvent<[DirectoryPathDTO], void>;
       /**
        * Returns the projected directory cache for a given directory
        * ProjectedDirectoryCacheEntity contains information, like the number of photos, videos, etc..

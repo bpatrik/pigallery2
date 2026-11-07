@@ -16,8 +16,10 @@ export class UIExtension<C> implements IUIExtension<C> {
   public addMediaButton(buttonConfig: IClientMediaButtonConfig, serverSB: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<void>): void {
     this.buttonConfigs.push(buttonConfig);
     // api path isn't set
-    if (!buttonConfig.apiPath && serverSB) {
-      Logger.warn('[UIExtension]', `Button config ${buttonConfig.name} has no apiPath, but has callback function. This is not supported.`);
+    if (!buttonConfig.apiPath) {
+      if (typeof serverSB === 'function') {
+        Logger.warn('[UIExtension]', `Button config ${buttonConfig.name} has no apiPath, but has callback function. This is not supported.`);
+      }
       return;
     }
     this.extensionObject.RESTApi.post.mediaJsonResponse([buttonConfig.apiPath], buttonConfig.minUserRole || UserRoles.LimitedGuest, !buttonConfig.skipDirectoryInvalidation, serverSB);

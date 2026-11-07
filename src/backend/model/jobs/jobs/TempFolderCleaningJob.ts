@@ -1,6 +1,6 @@
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {Job} from './Job';
 import {ProjectPath} from '../../../ProjectPath';
 import {GPXProcessing} from '../../fileaccess/fileprocessing/GPXProcessing';
@@ -10,7 +10,7 @@ import { DynamicConfig } from '../../../../common/entities/DynamicConfig';
 
 export class TempFolderCleaningJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Temp Folder Cleaning']];
-  public readonly ConfigTemplate: DynamicConfig[] = null;
+  public readonly ConfigTemplate: DynamicConfig[] = [];
   public readonly Supported: boolean = true;
   directoryQueue: string[] = [];
   private tempRootCleaned = false;
@@ -21,7 +21,7 @@ export class TempFolderCleaningJob extends Job {
     this.directoryQueue.push(ProjectPath.TranscodedFolder);
   }
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[TempFolderCleaningJob]';
   }
 
@@ -84,6 +84,10 @@ export class TempFolderCleaningJob extends Job {
 
   protected async stepConvertedDirectory(): Promise<boolean> {
     const filePath = this.directoryQueue.shift();
+    if (filePath === undefined) {
+      this.Progress.Left = 0;
+      return false;
+    }
     const stat = await fs.promises.stat(filePath);
 
     this.Progress.Left = this.directoryQueue.length;

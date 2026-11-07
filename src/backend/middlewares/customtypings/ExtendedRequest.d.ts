@@ -13,14 +13,15 @@ declare global {
       body?: {
         loginCredential?: LoginCredential;
       };
-      locale?: string;
+      // set by the locale middleware (see server.ts), defaults to 'en'
+      locale: string;
       // Stored in the session cookie. Travels to the client side
       session: {
         context?: SessionContext;
         rememberMe?: boolean;
         expires: number;
         // see SessionManager.getSessionStamp
-        stamp?: string;
+        stamp?: string | null;
         oidc?: {
           state: string;
           verifier: string;

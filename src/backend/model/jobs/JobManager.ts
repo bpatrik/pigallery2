@@ -16,7 +16,7 @@ const LOG_TAG = '[JobManager]';
 
 export class JobManager implements IJobListener, IObjectManager {
   protected timers: { schedule: JobScheduleDTO; timer: NodeJS.Timeout }[] = [];
-  protected progressManager: JobProgressManager = null;
+  protected progressManager!: JobProgressManager; // set by init()
 
   protected get JobRunning(): boolean {
     return (
@@ -114,7 +114,7 @@ export class JobManager implements IJobListener, IObjectManager {
         } catch (e) {
           NotificationManager.warning(
             'Job running error:' + item.name,
-            e.toString()
+            String(e)
           );
         }
       }
@@ -145,7 +145,7 @@ export class JobManager implements IJobListener, IObjectManager {
     Config.Jobs.scheduled.forEach((s): void => this.runSchedule(s));
   }
 
-  protected findJob(jobName: string): IJob {
+  protected findJob(jobName: string): IJob | undefined {
     return this.getAvailableJobs().find((t): boolean => t.Name === jobName);
   }
 
@@ -178,7 +178,7 @@ export class JobManager implements IJobListener, IObjectManager {
         } catch (e) {
           NotificationManager.warning(
             'Job running error:' + schedule.name,
-            e.toString()
+            String(e)
           );
         }
         this.runSchedule(schedule);

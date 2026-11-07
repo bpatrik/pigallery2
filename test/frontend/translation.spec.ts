@@ -1,6 +1,6 @@
 import {ProjectPath} from '../../src/backend/ProjectPath';
-import {promises as fsp} from 'fs';
-import * as path from 'path';
+import {promises as fsp} from 'node:fs';
+import * as path from 'node:path';
 
 const chai = require('chai');
 const {expect} = chai;

@@ -139,8 +139,8 @@ describe('OIDCAuthService', () => {
 
       const claims = await OIDCAuthService.getClaims(client as any, tokenSet, ['preferred_username', 'email']);
 
-      expect(claims.preferred_username).to.equal('alice');
-      expect(claims.email).to.equal('alice@example.com');
+      expect(claims['preferred_username']).to.equal('alice');
+      expect(claims['email']).to.equal('alice@example.com');
     });
 
     it('should ignore userinfo of a different subject', async () => {
@@ -301,10 +301,10 @@ describe('OIDCAuthService', () => {
         (ObjectManagers as any).instance = {
           UserManager: {
             findOne: async (filter: Partial<UserDTO>) =>
-              users.find(u => Object.keys(filter).every((k: keyof UserDTO) => u[k] === filter[k])) || null,
+              users.find(u => (Object.keys(filter) as (keyof UserDTO)[]).every(k => u[k] === filter[k])) || null,
             setOidcSubject: async (id: number, oidcSubject: string) => {
               const u = users.find(e => e.id === id);
-              u.oidcSubject = oidcSubject;
+              u!.oidcSubject = oidcSubject;
               return u;
             },
             createUser: async (user: UserDTO) => {

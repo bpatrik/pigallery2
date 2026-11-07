@@ -11,6 +11,6 @@ export interface NotificationDTO {
   request?: {
     method: string;
     url: string;
-    statusCode: number;
+    statusCode?: number;
   };
 }

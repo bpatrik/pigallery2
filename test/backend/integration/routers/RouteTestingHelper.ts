@@ -1,5 +1,6 @@
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
+import {SessionManager} from '../../../../src/backend/model/database/SessionManager';
 import {Utils} from '../../../../src/common/Utils';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import * as chai from 'chai';
@@ -10,7 +11,7 @@ const should = chai.should();
 export class RouteTestingHelper {
 
 
-  static async createSharing(testUser: UserDTO, password: string = null): Promise<SharingEntity> {
+  static async createSharing(testUser: UserDTO, password: string | null = null): Promise<SharingEntity> {
     const sharing = {
       sharingKey: 'sharing_test_key_' + Date.now(),
       searchQuery: {type: SearchQueryTypes.directory, value: 'test', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
@@ -32,7 +33,7 @@ export class RouteTestingHelper {
       usedSharingKey: sharing.sharingKey,
     } as UserDTO;
     const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(sharing as any);
-    u.projectionKey = ObjectManagers.getInstance().SessionManager.createProjectionKey(q);
+    u.projectionKey = q ? ObjectManagers.getInstance().SessionManager.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
 
     return u;
   }

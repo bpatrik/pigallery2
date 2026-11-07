@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import express from 'express';
-import * as http from 'http';
-import {AddressInfo} from 'net';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
 import {ExpressRouterWrapper} from '../../../../../src/backend/model/extension/ExpressRouterWrapper';
 import {ILogger} from '../../../../../src/backend/Logger';
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
@@ -63,7 +63,7 @@ describe('ExpressRouterWrapper', () => {
         headers: body ? {'Content-Type': 'application/json'} : {}}, (res) => {
         let text = '';
         res.on('data', (c) => text += c);
-        res.on('end', () => resolve({status: res.statusCode, json: text.startsWith('{') ? JSON.parse(text) : null}));
+        res.on('end', () => resolve({status: res.statusCode!, json: text.startsWith('{') ? JSON.parse(text) : null}));
       });
       req.on('error', reject);
       if (body) {
@@ -73,9 +73,9 @@ describe('ExpressRouterWrapper', () => {
     });
 
   it('should register Express 5 paths', async () => {
-    api.get.jsonResponse(['/item/:id'], null, (params) => ({id: params.id}));
-    api.get.jsonResponse(['/files/*path'], null, (params) => ({path: params.path}));
-    api.get.jsonResponse(['/opt{/:name}'], null, (params) => ({name: params.name ?? null}));
+    api.get.jsonResponse(['/item/:id'], null!, (params) => ({id: params!['id']}));
+    api.get.jsonResponse(['/files/*path'], null!, (params) => ({path: params!['path']}));
+    api.get.jsonResponse(['/opt{/:name}'], null!, (params) => ({name: params!['name'] ?? null}));
 
     expect((await request('GET', '/test-ext/item/%C3%A1rv%C3%ADz')).json.result).to.deep.equal({id: 'árvíz'});
     expect((await request('GET', '/test-ext/files/a/b%2Fc.jpg')).json.result).to.deep.equal({path: ['a', 'b/c.jpg']});
@@ -102,9 +102,9 @@ describe('ExpressRouterWrapper', () => {
     const mixed: string[] = ['/mixed', '/mixed/:id?'];
     const ok: string[] = ['/still-ok'];
 
-    expect(() => api.get.jsonResponse(oldPaths, null, () => 'legacy')).to.not.throw();
-    expect(() => api.get.jsonResponse(mixed, null, () => 'mixed')).to.not.throw();
-    expect(() => api.get.jsonResponse(ok, null, () => 'ok')).to.not.throw();
+    expect(() => api.get.jsonResponse(oldPaths, null!, () => 'legacy')).to.not.throw();
+    expect(() => api.get.jsonResponse(mixed, null!, () => 'mixed')).to.not.throw();
+    expect(() => api.get.jsonResponse(ok, null!, () => 'ok')).to.not.throw();
 
     expect(errors).to.have.lengthOf(2);
     expect(errors[0]).to.contain('/legacy/*').and.to.contain('Express 5');
@@ -116,8 +116,8 @@ describe('ExpressRouterWrapper', () => {
   });
 
   it('should pass an empty body to the callback without a JSON body', async () => {
-    api.get.jsonResponse(['/body'], null, (params, body) => ({body}));
-    api.post.jsonResponse(['/body'], null, (params, body) => ({body}));
+    api.get.jsonResponse(['/body'], null!, (params, body) => ({body}));
+    api.post.jsonResponse(['/body'], null!, (params, body) => ({body}));
 
     expect((await request('GET', '/test-ext/body')).json.result).to.deep.equal({body: {}});
     expect((await request('POST', '/test-ext/body', {a: 'á'})).json.result).to.deep.equal({body: {a: 'á'}});

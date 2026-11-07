@@ -29,7 +29,7 @@ export class LoggerRouter {
           req.method,
           req.url,
           res.statusCode,
-          Date.now() - req._startTime + 'ms'
+          Date.now() - (req._startTime ?? NaN) + 'ms'
       );
       return res;
     };

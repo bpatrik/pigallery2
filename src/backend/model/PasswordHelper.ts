@@ -7,9 +7,12 @@ export class PasswordHelper {
   }
 
   public static comparePassword(
-      password: string,
-      encryptedPassword: string
+      password: string | null | undefined,
+      encryptedPassword: string | null | undefined
   ): boolean {
+    if (typeof password !== 'string' || typeof encryptedPassword !== 'string') {
+      return false; // bcrypt would throw
+    }
     try {
       return bcrypt.compareSync(password, encryptedPassword);
       // eslint-disable-next-line no-empty

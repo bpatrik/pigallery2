@@ -6,10 +6,10 @@ import {DirectorySearch, SearchQueryDTO} from '../../../../common/entities/Searc
 @Entity()
 export class SharingEntity implements BaseSharingDTO {
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Column()
-  sharingKey: string;
+  sharingKey!: string;
 
   /*
   * This query determines what is available for the user through sharing
@@ -27,7 +27,7 @@ export class SharingEntity implements BaseSharingDTO {
       },
     },
   })
-  searchQuery: SearchQueryDTO;
+  searchQuery!: SearchQueryDTO | null;
 
   /*
   * This directory search determines what directories are available (can be listed) for the user through sharing.
@@ -46,7 +46,7 @@ export class SharingEntity implements BaseSharingDTO {
       },
     },
   })
-  directoryQuery: DirectorySearch;
+  directoryQuery!: DirectorySearch | null;
 
   /**
    * Only of the defaults should be set at most. If none is set the defaultSearchView will be searchQuery
@@ -55,7 +55,7 @@ export class SharingEntity implements BaseSharingDTO {
     type: 'text',
     nullable: true
   })
-  defaultDirectoryView: string;
+  defaultDirectoryView!: string | null;
   @Column({
     type: 'text',
     nullable: true,
@@ -68,10 +68,10 @@ export class SharingEntity implements BaseSharingDTO {
       },
     },
   })
-  defaultSearchView: SearchQueryDTO;
+  defaultSearchView!: SearchQueryDTO | null;
 
   @Column({type: 'text', nullable: true})
-  password: string;
+  password!: string | null;
 
   @Column('bigint', {
     unsigned: true,
@@ -80,7 +80,7 @@ export class SharingEntity implements BaseSharingDTO {
       to: (v) => v,
     },
   })
-  expires: number;
+  expires!: number;
 
   @Column('bigint', {
     unsigned: true,
@@ -89,8 +89,8 @@ export class SharingEntity implements BaseSharingDTO {
       to: (v) => v,
     },
   })
-  timeStamp: number;
+  timeStamp!: number;
 
   @ManyToOne(() => UserEntity, {onDelete: 'CASCADE', nullable: false})
-  creator: UserEntity;
+  creator!: UserEntity;
 }

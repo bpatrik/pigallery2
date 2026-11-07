@@ -1,8 +1,8 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
@@ -16,7 +16,7 @@ import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
 import {TestHelper} from '../../../TestHelper';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 
@@ -52,7 +52,7 @@ describe('SharingRouter', () => {
   };
 
 
-  const shareLogin = async (srv: Server, sharingKey: string, password?: string): Promise<any> => {
+  const shareLogin = async (srv: Server, sharingKey: string, password?: string | null): Promise<any> => {
     return (request.execute(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharingKey)
       .send({password});

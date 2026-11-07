@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import * as fs from 'fs';
-import * as net from 'net';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as net from 'node:net';
+import * as path from 'node:path';
 import {EmailMessenger} from '../../../../../src/backend/model/messenger/EmailMessenger';
 import {MediaDTOWithThPath} from '../../../../../src/backend/model/messenger/Messenger';
 import {Config} from '../../../../../src/common/config/private/Config';
@@ -12,7 +12,7 @@ import {TestHelper} from '../../../../TestHelper';
  */
 class SmtpSink {
   public readonly messages: { from: string, to: string[], data: string }[] = [];
-  private server: net.Server;
+  private server!: net.Server;
 
   async start(): Promise<number> {
     this.server = net.createServer((socket) => {
@@ -104,12 +104,12 @@ describe('EmailMessenger', () => {
     sink.messages.length = 0;
     const port = await sink.start();
     Config.Messaging.Email.emailFrom = 'gallery@example.com';
-    Config.Messaging.Email.smtp.host = '127.0.0.1';
-    Config.Messaging.Email.smtp.port = port;
-    Config.Messaging.Email.smtp.secure = false;
-    Config.Messaging.Email.smtp.requireTLS = false;
-    Config.Messaging.Email.smtp.user = 'tester';
-    Config.Messaging.Email.smtp.password = 'secret';
+    Config.Messaging.Email.smtp!.host = '127.0.0.1';
+    Config.Messaging.Email.smtp!.port = port;
+    Config.Messaging.Email.smtp!.secure = false;
+    Config.Messaging.Email.smtp!.requireTLS = false;
+    Config.Messaging.Email.smtp!.user = 'tester';
+    Config.Messaging.Email.smtp!.password = 'secret';
     Config.Server.applicationTitle = 'Teszt Galéria';
   });
   afterEach(async () => {

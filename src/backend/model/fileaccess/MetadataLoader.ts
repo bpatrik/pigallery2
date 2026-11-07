@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 import {Config} from '../../../common/config/private/Config';
 import {FaceRegion, PhotoMetadata} from '../../../common/entities/PhotoDTO';
@@ -10,7 +10,7 @@ import {Logger} from '../../Logger';
 import * as exifr from 'exifr';
 import exifReader from 'exif-reader';
 import sharp from 'sharp';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Utils} from '../../../common/Utils';
 import {FFmpeg} from '../FFmpeg';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
@@ -26,9 +26,9 @@ sharp.cache(false);
 const ExifrFsReader = exifr.fileReaders.get('fs');
 exifr.fileReaders.set('fs', class extends ExifrFsReader {
   async open(): Promise<void> {
-    if (this.fh === undefined) {
-      this.fh = await this.fs.open(this.input, 'r');
-      this.size = (await this.fh.stat()).size;
+    if (this['fh'] === undefined) {
+      this['fh'] = await this['fs'].open(this['input'], 'r');
+      this['size'] = (await this['fh'].stat()).size;
     }
   }
 });
@@ -70,7 +70,7 @@ export class MetadataLoader {
 
       try {
         for (const stream of data.streams) {
-          if (stream.width) {
+          if (stream.width && stream.height) {
             metadata.size.width = stream.width;
             metadata.size.height = stream.height;
 
@@ -86,25 +86,25 @@ export class MetadataLoader {
             }
 
             if (
-              Utils.isInt32(Math.floor(parseFloat(stream.duration) * 1000))
+              Utils.isInt32(Math.floor(parseFloat(stream.duration ?? '') * 1000))
             ) {
               metadata.duration = Math.floor(
-                parseFloat(stream.duration) * 1000
+                parseFloat(stream.duration ?? '') * 1000
               );
             }
 
-            if (Utils.isInt32(parseInt(stream.bit_rate, 10))) {
-              metadata.bitRate = parseInt(stream.bit_rate, 10) || null;
+            if (Utils.isInt32(parseInt(stream.bit_rate ?? '', 10))) {
+              metadata.bitRate = parseInt(stream.bit_rate ?? '', 10) || null;
             }
-            if (Utils.isInt32(parseInt(stream.avg_frame_rate, 10))) {
-              metadata.fps = parseInt(stream.avg_frame_rate, 10) || null;
+            if (Utils.isInt32(parseInt(stream.avg_frame_rate ?? '', 10))) {
+              metadata.fps = parseInt(stream.avg_frame_rate ?? '', 10) || null;
             }
             if (
               stream.tags !== undefined &&
-              typeof stream.tags.creation_time === 'string'
+              typeof stream.tags['creation_time'] === 'string'
             ) {
               metadata.creationDate =
-                Date.parse(stream.tags.creation_time) ||
+                Date.parse(stream.tags['creation_time']) ||
                 metadata.creationDate;
             }
             break;
@@ -133,10 +133,10 @@ export class MetadataLoader {
 
         if (
           data.format.tags !== undefined &&
-          typeof data.format.tags.creation_time === 'string'
+          typeof data.format.tags['creation_time'] === 'string'
         ) {
           metadata.creationDate =
-            Date.parse(data.format.tags.creation_time) ||
+            Date.parse(data.format.tags['creation_time']) ||
             metadata.creationDate;
         }
 
@@ -244,7 +244,9 @@ export class MetadataLoader {
         } catch {
           try {
             const m = await sharp(fullPath, {failOnError: false}).metadata();
-            MetadataLoader.mapMetadata(metadata, this.mapExifReader(exifReader(m.exif)), true);
+            if (m.exif) {
+              MetadataLoader.mapMetadata(metadata, this.mapExifReader(exifReader(m.exif)), true);
+            }
           } catch {
             // ignoring errors
           }
@@ -386,7 +388,8 @@ export class MetadataLoader {
 
   private static mapTimestampAndOffset(metadata: PhotoMetadata, exif: any) {
     //This method looks for date tags matching the priorized list 'DateTags' of 'MetadataCreationDate'
-    let ts: string, offset: string;
+    let ts: string | undefined = undefined;
+    let offset: string | undefined = undefined;
     for (let i = 0; i < DateTags.length; i++) {
       const [mainpath, extrapath, extratype] = DateTags[i];
       [ts, offset] = extractTSAndOffset(mainpath, extrapath, extratype);
@@ -399,7 +402,9 @@ export class MetadataLoader {
           const [tsonly] = Utils.splitTimestampAndOffset(ts);
           for (let j = i + 1; j < DateTags.length; j++) {
             const [exts, exOffset] = extractTSAndOffset(DateTags[j][0], DateTags[j][1], DateTags[j][2]);
-            if (exts && exOffset && Math.abs(Utils.timestampToMS(tsonly, null) - Utils.timestampToMS(exts, null)) < 30000) {
+            const tsonlyMS = Utils.timestampToMS(tsonly);
+            const extsMS = Utils.timestampToMS(exts);
+            if (exts && exOffset && tsonlyMS !== undefined && extsMS !== undefined && Math.abs(tsonlyMS - extsMS) < 30000) {
               //if there is an offset and the found timestamp is within 30 seconds of the extra timestamp, we will use the offset from the found timestamp
               offset = exOffset;
               break;
@@ -414,7 +419,10 @@ export class MetadataLoader {
     //---- End of mapTimestampAndOffset logic ----
 
     //---- Helper functions for mapTimestampAndOffset ----
-    function getValue(exif: any, path: string): any {
+    function getValue(exif: any, path: string | undefined): any {
+      if (!path) {
+        return undefined;
+      }
       const pathElements = path.split('.');
       let currentObject: any = exif;
       for (const pathElm of pathElements) {
@@ -427,7 +435,7 @@ export class MetadataLoader {
       return currentObject;
     }
 
-    function extractTSAndOffset(mainpath: string, extrapath: string, extratype: string) {
+    function extractTSAndOffset(mainpath: string, extrapath: string | undefined, extratype: string | undefined): [string | undefined, string | undefined] {
       let offset: string | undefined = undefined;
       //line below is programmatic way of finding a timestamp in the exif object. For example "xmp.CreateDate", from the DateTags list
       //ts = exif.xmp?.CreateDate
@@ -439,8 +447,7 @@ export class MetadataLoader {
             offset = getValue(exif, extrapath);
           }
         } else if (extratype == 'T') { //date only in main tag, time in the extra tag
-          ts = Utils.toIsoTimestampString(ts, getValue(exif, extrapath));
-          [ts, offset] = Utils.splitTimestampAndOffset(ts);
+          [ts, offset] = Utils.splitTimestampAndOffset(Utils.toIsoTimestampString(ts, getValue(exif, extrapath)));
         }
       }
       return [ts, offset];
@@ -495,8 +502,8 @@ export class MetadataLoader {
         // malformed EXIF can produce NaN or out-of-range values; those would break the DB save
         const lon = metadata.positionData.GPSData.longitude;
         const lat = metadata.positionData.GPSData.latitude;
-        metadata.positionData.GPSData.longitude = Number.isFinite(lon) && Math.abs(lon) <= 180 ? parseFloat(lon.toFixed(6)) : undefined;
-        metadata.positionData.GPSData.latitude = Number.isFinite(lat) && Math.abs(lat) <= 90 ? parseFloat(lat.toFixed(6)) : undefined;
+        metadata.positionData.GPSData.longitude = lon !== undefined && Number.isFinite(lon) && Math.abs(lon) <= 180 ? parseFloat(lon.toFixed(6)) : undefined;
+        metadata.positionData.GPSData.latitude = lat !== undefined && Number.isFinite(lat) && Math.abs(lat) <= 90 ? parseFloat(lat.toFixed(6)) : undefined;
       }
     } catch (err) {
       Logger.error(LOG_TAG, 'Error during reading of GPS data: ' + err);
@@ -623,7 +630,7 @@ export class MetadataLoader {
             );
           }
 
-          if (type !== 'Face' || !name) {
+          if (type !== 'Face' || !name || !box) {
             continue;
           }
 
@@ -638,12 +645,13 @@ export class MetadataLoader {
       }
       if (faces.length > 0) {
         metadata.faces = faces; // save faces
-        if (Config.Faces.keywordsToPersons) {
+        const keywords = metadata.keywords;
+        if (Config.Faces.keywordsToPersons && keywords) {
           // remove faces from keywords
           metadata.faces.forEach((f) => {
-            const index = metadata.keywords.indexOf(f.name);
+            const index = keywords.indexOf(f.name);
             if (index !== -1) {
-              metadata.keywords.splice(index, 1);
+              keywords.splice(index, 1);
             }
           });
         }

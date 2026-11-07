@@ -82,10 +82,10 @@ export class AdminMWs {
     next: NextFunction
   ): Promise<void> {
     try {
-      const id = RequestParams.get(req, 'id');
+      const id = RequestParams.getRequired(req, 'id');
       // Express 5 leaves req.body undefined without a JSON body; the job then runs with its defaults
       const jobStart: JobStartDTO = req.body ?? {};
-      const JobConfig: Record<string, unknown> = jobStart.config;
+      const JobConfig: Record<string, unknown> = jobStart.config ?? {};
       const soloRun: boolean = jobStart.soloRun;
       const allowParallelRun: boolean = jobStart.allowParallelRun;
       await ObjectManagers.getInstance().JobManager.run(
@@ -118,7 +118,7 @@ export class AdminMWs {
 
   public static stopJob(req: Request, res: Response, next: NextFunction): void {
     try {
-      const id = RequestParams.get(req, 'id');
+      const id = RequestParams.getRequired(req, 'id');
       ObjectManagers.getInstance().JobManager.stop(id);
       req.resultPipe = 'ok';
       return next();

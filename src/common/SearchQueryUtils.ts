@@ -106,7 +106,7 @@ export const SearchQueryUtils = {
   stringifyForComparison(queryIN: SearchQueryDTO): string {
     return JSON.stringify(SearchQueryUtils.sortQuery(queryIN));
   },
-  isQueryEmpty(query: SearchQueryDTO): boolean {
+  isQueryEmpty(query: SearchQueryDTO | null | undefined): boolean {
     return !query ||
       query.type === undefined ||
       (query.type === SearchQueryTypes.any_text && !(query as TextSearch).value);
@@ -163,7 +163,7 @@ export const SearchQueryUtils = {
    * Validates a directory allow / block list.
    * Every entry has to be a directory TextSearch (type: SearchQueryTypes.directory).
    */
-  validateDirectoryList: (list: DirectorySearch[], what = 'Directory list'): void => {
+  validateDirectoryList: (list: DirectorySearch[] | null | undefined, what = 'Directory list'): void => {
     if (list === null || typeof list === 'undefined') {
       return;
     }

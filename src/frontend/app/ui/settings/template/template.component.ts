@@ -14,7 +14,7 @@ import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientCo
 import {Utils} from '../../../../../common/Utils';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {WebConfigClassBuilder} from 'typeconfig/web';
-import {ErrorDTO} from '../../../../../common/entities/Error';
+import {errorMessage, isErrorDTO} from '../../../../../common/entities/Error';
 import {ISettingsComponent} from './ISettingsComponent';
 import {CustomSettingsEntries} from './CustomSettingsEntries';
 import {NgIconComponent} from '@ng-icons/core';
@@ -331,8 +331,8 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       return true;
     } catch (err) {
       console.error(err);
-      if (err.message) {
-        this.error.set((err as ErrorDTO).message ?? null);
+      if (isErrorDTO(err) || err instanceof Error) {
+        this.error.set(err.message ?? null);
       }
     }
 
@@ -384,7 +384,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       );
     } catch (err) {
       console.error(err);
-      this.notification.error($localize`Failed to delete extension`, err);
+      this.notification.error($localize`Failed to delete extension`, errorMessage(err));
     } finally {
       this.inProgress.set(false);
     }
@@ -403,7 +403,7 @@ export class TemplateComponent implements OnInit, ISettingsComponent {
       );
     } catch (err) {
       console.error(err);
-      this.notification.error($localize`Failed to reload extension`, err);
+      this.notification.error($localize`Failed to reload extension`, errorMessage(err));
     } finally {
       this.inProgress.set(false);
     }

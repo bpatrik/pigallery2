@@ -22,24 +22,25 @@ const LOG_TAG = '[ObjectManagers]';
 
 export class ObjectManagers {
 
-  private static instance: ObjectManagers = null;
+  private static instance: ObjectManagers | null = null;
 
   private readonly managers: IObjectManager[];
-  private galleryManager: GalleryManager;
-  private userManager: UserManager;
-  private searchManager: SearchManager;
-  private sharingManager: SharingManager;
-  private indexingManager: IndexingManager;
-  private personManager: PersonManager;
-  private coverManager: CoverManager;
-  private versionManager: VersionManager;
-  private jobManager: JobManager;
-  private locationManager: LocationManager;
-  private albumManager: AlbumManager;
-  private extensionManager: ExtensionManager;
-  private projectedCacheManager: ProjectedCacheManager;
-  private uploadManager: UploadManager;
-  private sessionManager: SessionManager;
+  // set by init(), before the app uses them
+  private galleryManager!: GalleryManager;
+  private userManager!: UserManager;
+  private searchManager!: SearchManager;
+  private sharingManager!: SharingManager;
+  private indexingManager!: IndexingManager;
+  private personManager!: PersonManager;
+  private coverManager!: CoverManager;
+  private versionManager!: VersionManager;
+  private jobManager!: JobManager;
+  private locationManager!: LocationManager;
+  private albumManager!: AlbumManager;
+  private extensionManager!: ExtensionManager;
+  private projectedCacheManager!: ProjectedCacheManager;
+  private uploadManager!: UploadManager;
+  private sessionManager!: SessionManager;
   private initDone = false;
 
   constructor() {
@@ -78,7 +79,7 @@ export class ObjectManagers {
   }
 
   public static isReady(): boolean {
-    return this.instance && this.instance.initDone;
+    return !!this.instance?.initDone;
   }
 
 
@@ -120,7 +121,7 @@ export class ObjectManagers {
   }
 
   public async onDataChange(
-    changedDir: DirectoryPathDTO = null
+    changedDir: DirectoryPathDTO | null = null
   ): Promise<void> {
     await this.VersionManager.onNewDataVersion();
 
@@ -129,7 +130,7 @@ export class ObjectManagers {
         continue;
       }
       if (manager.onNewDataVersion) {
-        await manager.onNewDataVersion(changedDir);
+        await manager.onNewDataVersion(changedDir ?? undefined);
       }
     }
   }

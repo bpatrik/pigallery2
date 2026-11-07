@@ -5,7 +5,7 @@ import {AuthenticationService} from '../../../model/network/authentication.servi
 import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
 import {Utils} from '../../../../../common/Utils';
-import {ErrorCodes, ErrorDTO} from '../../../../../common/entities/Error';
+import {ErrorCodes, ErrorDTO, errorMessage, isErrorDTO} from '../../../../../common/entities/Error';
 import {UsersSettingsService} from './users.service';
 import {SettingsService} from '../settings.service';
 
@@ -135,7 +135,7 @@ export class UsersComponent implements OnInit {
       await this.getUsersList();
       this.childModal()?.hide();
     } catch (e) {
-      const err: ErrorDTO = e;
+      const err: Partial<ErrorDTO> = isErrorDTO(e) ? e : {message: errorMessage(e)};
       this.notification.error(
         err.message + ', ' + err.details,
         $localize`User creation error!`
@@ -222,7 +222,7 @@ export class UsersComponent implements OnInit {
       await this.getUsersList();
       this.editModal()?.hide();
     } catch (e) {
-      const err: ErrorDTO = e;
+      const err: Partial<ErrorDTO> = isErrorDTO(e) ? e : {message: errorMessage(e)};
       this.notification.error(
         (err?.message || '') + (err?.details ? ', ' + err.details : ''),
         $localize`Could not save user settings`

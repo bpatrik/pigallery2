@@ -165,7 +165,7 @@ export class ContentWrapperUtils {
     return true;
   }
 
-  static equalsMedia(d1: FileDTO | undefined, d2: FileDTO | undefined): boolean {
+  static equalsMedia(d1: FileDTO | null | undefined, d2: FileDTO | null | undefined): boolean {
     if (d1 === d2) {
       return true;
     }

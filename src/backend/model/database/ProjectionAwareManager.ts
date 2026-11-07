@@ -1,6 +1,6 @@
 import {IObjectManager} from './IObjectManager';
 import {SessionContext} from '../SessionContext';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 
 /**
  * Base class for managers that handle projection-aware caching.
@@ -25,7 +25,7 @@ export abstract class ProjectionAwareManager<T> implements IObjectManager {
     return entities;
   }
 
-  public async invalidateCache(changedDir?: ParentDirectoryDTO): Promise<void> {
+  public async invalidateCache(changedDir?: DirectoryPathDTO): Promise<void> {
     await this.invalidateDBCache(changedDir);
     this.resetMemoryCache();
   }
@@ -34,7 +34,7 @@ export abstract class ProjectionAwareManager<T> implements IObjectManager {
    * Default implementation of onNewDataVersion that invalidates cache.
    * Subclasses can override for more specific behavior.
    */
-  public async onNewDataVersion(changedDir?: ParentDirectoryDTO): Promise<void> {
+  public async onNewDataVersion(changedDir?: DirectoryPathDTO): Promise<void> {
     await this.invalidateCache(changedDir);
   }
 
@@ -55,7 +55,7 @@ export abstract class ProjectionAwareManager<T> implements IObjectManager {
    * Abstract method that subclasses must implement to invalidate
    * projection-aware cache entries in the database
    */
-  protected abstract invalidateDBCache(changedDir?: ParentDirectoryDTO): Promise<void>;
+  protected abstract invalidateDBCache(changedDir?: DirectoryPathDTO): Promise<void>;
 
   /**
    * Get cached entities for the given session projection

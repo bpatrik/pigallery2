@@ -1,12 +1,12 @@
 import * as gulp from 'gulp';
-import * as fs from 'fs';
-import * as crypto from 'crypto';
-import {promises as fsp} from 'fs';
-import * as path from 'path';
-import * as util from 'util';
+import * as fs from 'node:fs';
+import * as crypto from 'node:crypto';
+import {promises as fsp} from 'node:fs';
+import * as path from 'node:path';
+import * as util from 'node:util';
 import zip from 'gulp-zip';
 import * as xml2js from 'xml2js';
-import * as child_process from 'child_process';
+import * as child_process from 'node:child_process';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import jeditor from 'gulp-json-editor';
@@ -20,7 +20,7 @@ const execPr = util.promisify(child_process.exec);
 const translationFolder = 'translate';
 declare const process: NodeJS.Process;
 
-const getSwitch = (name: string, def: string = null): string => {
+const getSwitch = (name: string, def: string | null = null): string | null => {
   name = '--' + name;
   for (let i = 0; i < process.argv.length; i++) {
     if (process.argv[i].startsWith(name + '=')) {
@@ -40,7 +40,7 @@ gulp.task('build-backend', async (): Promise<void> => {
   try {
     await execPr('tsc -p tsconfig.release.json');
   } catch (e) {
-    console.error(e.stdout); // tsc prints its errors to stdout
+    console.error((e as {stdout?: string}).stdout); // tsc prints its errors to stdout
     throw e;
   }
 });
@@ -64,7 +64,7 @@ const createDynamicTranslationFile = async (
     ) !== -1;
   const translations = translationXml.xliff.file[0].body[0]['trans-unit'];
   const filtered = translations.filter(
-    (tr): boolean => tr['context-group'].findIndex(hasTsTranslation) !== -1
+    (tr): boolean => tr['context-group']!.findIndex(hasTsTranslation) !== -1
   );
   filtered.forEach((tr): boolean => delete tr['context-group']);
   translationXml.xliff.file[0].body[0]['trans-unit'] = filtered;
@@ -115,7 +115,7 @@ const createFrontendTask = (
       console.error(stderr);
     } catch (e) {
       console.error(e);
-      cb(e);
+      cb(e as Error);
     }
   });
 };
@@ -130,10 +130,8 @@ const getLanguages = (): any[] | string[] => {
   });
 
   // get languages to filter
-  let languageFilter: string[] = null;
-  if (getSwitch('languages')) {
-    languageFilter = getSwitch('languages').split(',');
-  }
+  const languageSwitch = getSwitch('languages');
+  const languageFilter = languageSwitch ? languageSwitch.split(',') : null;
 
   let languages = files.map((f: string): string => {
     return f.split('.')[1];
@@ -208,11 +206,12 @@ gulp.task('copy-package', (): any =>
           buildTime: string;
           buildCommitHash: string;
         } => {
-          delete json.devDependencies;
+          delete (json as {devDependencies?: unknown}).devDependencies;
           json.scripts = {start: 'node ./src/backend/index.js'};
 
-          if (getSwitch('skip-opt-packages')) {
-            const skipPackages = getSwitch('skip-opt-packages')
+          const skipOptPackages = getSwitch('skip-opt-packages');
+          if (skipOptPackages) {
+            const skipPackages = skipOptPackages
               .replace(new RegExp(' ', 'g'), ',')
               .split(',');
             for (const pkg of skipPackages) {
@@ -228,13 +227,13 @@ gulp.task('copy-package', (): any =>
             for (const key of Object.keys(json.optionalDependencies)) {
               json.dependencies[key] = json.optionalDependencies[key];
             }
-            delete json.optionalDependencies;
+            delete (json as {optionalDependencies?: unknown}).optionalDependencies;
           }
           json.buildTime = new Date().toISOString();
 
           try {
             // eslint-disable-next-line @typescript-eslint/no-var-requires
-            json.buildCommitHash = require('child_process')
+            json.buildCommitHash = require('node:child_process')
               .execSync('git rev-parse HEAD')
               .toString()
               .trim();
@@ -282,7 +281,7 @@ gulp.task('extract-locale', async (cb): Promise<any> => {
     cb();
   } catch (e) {
     console.error(e);
-    return cb(e);
+    return cb(e as Error);
   }
 });
 
@@ -307,7 +306,7 @@ const translate = async (
     cb();
   } catch (e) {
     console.error(e);
-    return cb(e);
+    return cb(e as Error);
   }
 };
 const merge = async (list: any[], cb: (err?: any) => void): Promise<void> => {
@@ -331,7 +330,7 @@ const merge = async (list: any[], cb: (err?: any) => void): Promise<void> => {
     cb();
   } catch (e) {
     console.error(e);
-    return cb(e);
+    return cb(e as Error);
   }
 };
 
@@ -495,7 +494,7 @@ gulp.task('localize-bundles', async (cb): Promise<void> => {
         }
       }
       for (const bundle of bundles) {
-        fs.renameSync(path.join(dir, bundle), path.join(dir, newNames.get(bundle)));
+        fs.renameSync(path.join(dir, bundle), path.join(dir, newNames.get(bundle)!));
       }
     }
   }

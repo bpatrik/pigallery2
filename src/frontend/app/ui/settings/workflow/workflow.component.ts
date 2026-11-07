@@ -115,7 +115,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     this.jobsService.availableJobs().map(job => ({name: job.Name, label: this.backendTextService.getJobName(job.Name)})));
 
 
-  error: string;
+  error = '';
 
   constructor() {
     this.JobTriggerTypeMap = [

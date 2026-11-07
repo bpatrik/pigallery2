@@ -53,7 +53,7 @@ describe = DBTestHelper.describe(); // fake it os IDE plays nicely (recognize th
 
 class SearchManagerTest extends SearchManager {
 
-  public flattenSameOfQueries(query: SearchQueryDTO): SearchQueryDTO {
+  public override flattenSameOfQueries(query: SearchQueryDTO): SearchQueryDTO {
     return super.flattenSameOfQueries(query);
   }
 
@@ -101,11 +101,11 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     p = TestHelper.getPhotoEntry1(directory);
     p.metadata.creationDate = testNow;
     p.metadata.creationDateOffset = '+02:00';
-    p.metadata.keywords.push('question mark?');
+    p.metadata.keywords!.push('question mark?');
     p2 = TestHelper.getPhotoEntry2(directory);
     p2.metadata.creationDate = testNow - 60 * 60 * 24 * 1000;
     p2.metadata.creationDateOffset = '+02:00';
-    p2.metadata.keywords.push('underscore_');
+    p2.metadata.keywords!.push('underscore_');
     v = TestHelper.getVideoEntry1(directory);
     v.metadata.creationDate = testNow - 60 * 60 * 24 * 7 * 1000;
     v.metadata.creationDateOffset = '+02:00';
@@ -116,7 +116,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     p4.metadata.creationDate = d.getTime() - 60 * 60 * 24 * (Utils.isDateFromLeapYear(d) ? 367 : 366) * 1000;
     p4.metadata.creationDateOffset = '+02:00';
     const pFaceLessTmp = TestHelper.getPhotoEntry3(subDir);
-    delete pFaceLessTmp.metadata.faces;
+    delete (pFaceLessTmp.metadata as {faces?: unknown}).faces;
     d = new Date(testNow);
     //we create a date 1 month and 1 day before now
     d = Utils.addMonthToDate(d, -1); //subtract 1 month in the "human way"
@@ -135,9 +135,9 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     gpx.directory = dir;
     v = (dir.media.filter(m => m.name === v.name)[0] as any);
     v.directory = dir;
-    p4 = (dir.directories[1].media[0] as any);
+    p4 = (dir.directories[1].media![0] as any);
     p4.directory = dir.directories[1];
-    pFaceLess = (dir.directories[0].media[0] as any);
+    pFaceLess = (dir.directories[0].media![0] as any);
     pFaceLess.directory = dir.directories[0];
   };
 
@@ -221,10 +221,10 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     delete tmpDir.metaFile;
     const ret = Utils.clone(m);
     delete (ret.directory as DirectoryBaseDTO).lastScanned;
-    delete (ret.directory as DirectoryBaseDTO).lastModified;
+    delete (ret.directory as {lastModified?: unknown}).lastModified;
     delete (ret.directory as DirectoryBaseDTO).cache;
     if ((ret as PhotoDTO).metadata &&
-      ((ret as PhotoDTO).metadata as PhotoMetadata).faces && !((ret as PhotoDTO).metadata as PhotoMetadata).faces.length) {
+      ((ret as PhotoDTO).metadata as PhotoMetadata).faces && !((ret as PhotoDTO).metadata as PhotoMetadata).faces!.length) {
       delete ((ret as PhotoDTO).metadata as PhotoMetadata).faces;
     }
     tmpDir.directories = tmpD;
@@ -239,7 +239,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
   const searchifyDir = (d: DirectoryBaseDTO): DirectoryBaseDTO => {
     const tmpM = d.media;
     const tmpD = d.directories;
-    const tmpP = d.cache.cover;
+    const tmpP = d.cache!.cover;
     const tmpMT = d.metaFile;
     delete d.directories;
     delete d.media;
@@ -248,7 +248,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
     delete ret.cache?.id;
     d.directories = tmpD;
     d.media = tmpM;
-    d.cache.cover = tmpP;
+    d.cache!.cover = tmpP;
     d.metaFile = tmpMT;
     ret.isPartial = true;
     return ret;
@@ -502,7 +502,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
       let query: SearchQueryDTO = {
         type: SearchQueryTypes.AND,
-        list: [{value: p.metadata.faces[0].name, type: SearchQueryTypes.person} as TextSearch,
+        list: [{value: p.metadata.faces![0].name, type: SearchQueryTypes.person} as TextSearch,
           {value: p2.metadata.caption, type: SearchQueryTypes.caption} as TextSearch]
       } as ANDSearchQuery;
 
@@ -515,7 +515,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       } as SearchResultDTO));
       query = ({
         type: SearchQueryTypes.AND,
-        list: [{value: p.metadata.faces[0].name, type: SearchQueryTypes.person} as TextSearch,
+        list: [{value: p.metadata.faces![0].name, type: SearchQueryTypes.person} as TextSearch,
           {value: p.metadata.caption, type: SearchQueryTypes.caption} as TextSearch]
       } as ANDSearchQuery);
       expect(await sm.search(DBTestHelper.defaultSession, query)).to.deep.equalInAnyOrder(removeDir({
@@ -541,7 +541,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         list: [{
           type: SearchQueryTypes.AND,
           list: [{value: 'a', type: SearchQueryTypes.person} as TextSearch,
-            {value: p.metadata.keywords[0], type: SearchQueryTypes.keyword} as TextSearch]
+            {value: p.metadata.keywords![0], type: SearchQueryTypes.keyword} as TextSearch]
         } as ANDSearchQuery,
           {value: p.metadata.caption, type: SearchQueryTypes.caption} as TextSearch
         ]
@@ -575,7 +575,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       } as SearchResultDTO));
       query = ({
         type: SearchQueryTypes.OR,
-        list: [{value: p.metadata.faces[0].name, type: SearchQueryTypes.person} as TextSearch,
+        list: [{value: p.metadata.faces![0].name, type: SearchQueryTypes.person} as TextSearch,
           {value: p2.metadata.caption, type: SearchQueryTypes.caption} as TextSearch]
       } as ORSearchQuery);
       expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query))).to.deep.equalInAnyOrder(removeDir({
@@ -588,7 +588,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
       query = ({
         type: SearchQueryTypes.OR,
-        list: [{value: p.metadata.faces[0].name, type: SearchQueryTypes.person} as TextSearch,
+        list: [{value: p.metadata.faces![0].name, type: SearchQueryTypes.person} as TextSearch,
           {value: p.metadata.caption, type: SearchQueryTypes.caption} as TextSearch]
       } as ORSearchQuery);
       expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query))).to.deep.equalInAnyOrder(removeDir({
@@ -614,7 +614,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         list: [{
           type: SearchQueryTypes.OR,
           list: [{value: 'a', type: SearchQueryTypes.person} as TextSearch,
-            {value: p.metadata.keywords[0], type: SearchQueryTypes.keyword} as TextSearch]
+            {value: p.metadata.keywords![0], type: SearchQueryTypes.keyword} as TextSearch]
         } as ORSearchQuery,
           {value: p.metadata.caption, type: SearchQueryTypes.caption} as TextSearch
         ]
@@ -633,8 +633,8 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         type: SearchQueryTypes.OR,
         list: [{
           type: SearchQueryTypes.OR,
-          list: [{value: p.metadata.keywords[0], type: SearchQueryTypes.keyword} as TextSearch,
-            {value: p2.metadata.keywords[0], type: SearchQueryTypes.keyword} as TextSearch]
+          list: [{value: p.metadata.keywords![0], type: SearchQueryTypes.keyword} as TextSearch,
+            {value: p2.metadata.keywords![0], type: SearchQueryTypes.keyword} as TextSearch]
         } as ORSearchQuery,
           {value: pFaceLess.metadata.caption, type: SearchQueryTypes.caption} as TextSearch
         ]
@@ -1183,8 +1183,8 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       const sm = new SearchManager();
 
       const cloned = Utils.clone(searchifyDir(subDir));
-      cloned.cache.valid = true;
-      cloned.cache.cover = {
+      cloned.cache!.valid = true;
+      cloned.cache!.cover = {
         directory: {
           name: subDir.name,
           path: subDir.path
@@ -1266,11 +1266,11 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         const sm = new SearchManager();
         // e.g. legacy saved search with 'text' instead of 'value'
         const query = {text: 'Landscape', type: SearchQueryTypes.keyword} as unknown as TextSearch;
-        let error: Error = null;
+        let error: Error = null!;
         try {
           await sm.search(DBTestHelper.defaultSession, query);
         } catch (e) {
-          error = e;
+          error = e as Error;
         }
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.contain('Invalid search query');
@@ -1804,13 +1804,13 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         p7.metadata.creationDateOffset = '+02:00';
 
         subDir2 = await DBTestHelper.persistTestDir(subDir2) as any;
-        p4 = subDir2.media[0];
+        p4 = subDir2.media![0];
         p4.directory = subDir2;
-        p5 = subDir2.media[1];
+        p5 = subDir2.media![1];
         p5.directory = subDir2;
-        p6 = subDir2.media[2];
+        p6 = subDir2.media![2];
         p6.directory = subDir2;
-        p7 = subDir2.media[3];
+        p7 = subDir2.media![3];
         p7.directory = subDir2;
         Config.Search.listDirectories = false;
         Config.Search.listMetafiles = false;

@@ -21,5 +21,5 @@ export class SavedSearchEntity
       },
     },
   })
-  searchQuery: SearchQueryDTO;
+  searchQuery!: SearchQueryDTO;
 }

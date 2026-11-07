@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {Server} from '../../../../../src/backend/server';
 import {DatabaseType, ServerConfig} from '../../../../../src/common/config/private/PrivateConfig';
@@ -11,7 +11,7 @@ import {TestHelper} from '../../../../TestHelper';
 import * as chai from 'chai';
 import {default as chaiHttp, request} from 'chai-http';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 
@@ -42,7 +42,7 @@ describe('SettingsRouter', () => {
       Config.Users.unAuthenticatedUserRole = UserRoles.Admin;
       const originalSettings = await ExtensionConfigWrapper.original();
 
-      originalSettings.Environment.upTime = null;
+      originalSettings.Environment.upTime = null!;
       const originalJSON = JSON.parse(JSON.stringify(originalSettings.toJSON({
         attachState: true,
         attachVolatile: true,
@@ -55,7 +55,7 @@ describe('SettingsRouter', () => {
       result.should.have.status(200);
       result.body.should.be.a('object');
       should.equal(result.body.error, null);
-      (result.body.result as ServerConfig).Environment.upTime = null;
+      (result.body.result as ServerConfig).Environment.upTime = null!;
       result.body.result.should.deep.equal(originalJSON);
     });
   });

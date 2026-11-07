@@ -2,8 +2,8 @@ import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {LoginCredential} from '../../../../src/common/entities/LoginCredential';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
@@ -22,7 +22,7 @@ declare const after: any;
 declare const beforeEach: any;
 declare const afterEach: any;
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 

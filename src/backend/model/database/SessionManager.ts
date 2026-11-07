@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import {SessionUser, SessionContext} from '../SessionContext';
 import {DirectoryAccess, DirectoryFilter} from '../DirectoryAccess';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
@@ -18,11 +18,11 @@ export class SessionManager {
   public static readonly NO_PROJECTION_KEY = crypto.createHash('md5').update('No Key').digest('hex');
 
   // Session stamps by user id or sharing key (see getSessionStamp), so they do not need a DB query per request.
-  private stamps = new Map<string, { stamp: string, expires?: number }>();
+  private stamps = new Map<string, { stamp: string | null, expires?: number }>();
   private stampGeneration = 0;
 
-  private static andQueries(...queries: SearchQueryDTO[]): SearchQueryDTO {
-    const list = queries.filter(q => !SearchQueryUtils.isQueryEmpty(q));
+  private static andQueries(...queries: (SearchQueryDTO | null | undefined)[]): SearchQueryDTO | null {
+    const list = queries.filter((q): q is SearchQueryDTO => !SearchQueryUtils.isQueryEmpty(q));
     if (list.length === 0) {
       return null;
     }
@@ -63,7 +63,7 @@ export class SessionManager {
    * Sessions are stored in the cookie, a session is only valid while its stamp is unchanged,
    * so deleting or changing the user or sharing ends it. Null if the row does not exist or the sharing expired.
    */
-  public async getSessionStamp(user: SessionUser): Promise<string> {
+  public async getSessionStamp(user: SessionUser): Promise<string | null> {
     const key = user.usedSharingKey ? 'sharing:' + user.usedSharingKey : 'user:' + user.id;
     let entry = this.stamps.get(key);
     if (!entry) {
@@ -79,7 +79,7 @@ export class SessionManager {
         this.stamps.set(key, entry);
       }
     }
-    return entry.expires < Date.now() ? null : entry.stamp;
+    return entry.expires !== undefined && entry.expires < Date.now() ? null : entry.stamp;
   }
 
   /**
@@ -90,7 +90,7 @@ export class SessionManager {
     this.stamps.clear();
   }
 
-  private async loadSessionRow(user: SessionUser): Promise<UserEntity | SharingEntity> {
+  private async loadSessionRow(user: SessionUser): Promise<UserEntity | SharingEntity | null> {
     const connection = await SQLConnection.getConnection();
     if (user.usedSharingKey) {
       // not using SharingManager.findOne, that also deletes the expired sharings
@@ -109,7 +109,7 @@ export class SessionManager {
   /**
    * Returns with the final projection query (media and directory allow/block lists) of a sharing.
    */
-  public buildAllowListForSharing(sharing: SharingEntity): SearchQueryDTO {
+  public buildAllowListForSharing(sharing: SharingEntity): SearchQueryDTO | null {
     return this.getQueryForUser(this.createSharingUser(sharing));
   }
 
@@ -120,8 +120,7 @@ export class SessionManager {
 
   public async buildContext(user: SessionUser): Promise<SessionContext> {
     const context = new SessionContext();
-    context.user = user;
-    context.user.projectionKey = SessionManager.NO_PROJECTION_KEY;
+    context.user = Object.assign(user, {projectionKey: SessionManager.NO_PROJECTION_KEY});
     const finalQuery = this.getQueryForUser(user);
 
     if (finalQuery) {
@@ -142,15 +141,16 @@ export class SessionManager {
     if (dirAccess.allowLists.length > 0) {
       access.allowLists = dirAccess.allowLists;
       access.allowQuery = await this.buildDirectoryFilter(SessionManager.andQueries(
-        ...dirAccess.allowLists.map(l => SearchQueryUtils.directoryListToQuery(l))));
+        ...dirAccess.allowLists.map(l => SearchQueryUtils.directoryListToQuery(l))), 'directory allow list');
     }
     if (user.usedSharingKey && !user.sharingDirectoryQuery) {
       access.byPhotos = true;
     }
     if (dirAccess.blockList.length > 0) {
       access.blockList = dirAccess.blockList;
+      const blockQuery = SearchQueryUtils.directoryListToQuery(dirAccess.blockList);
       access.notBlockedQuery = await this.buildDirectoryFilter(
-        SearchQueryUtils.negate(SearchQueryUtils.directoryListToQuery(dirAccess.blockList)));
+        blockQuery ? SearchQueryUtils.negate(blockQuery) : null, 'directory block list');
     }
     context.directoryAccess = new DirectoryAccess(context, access);
     return context;
@@ -179,19 +179,22 @@ export class SessionManager {
     return sessions;
   }
 
-  private async buildDirectoryFilter(query: SearchQueryDTO): Promise<DirectoryFilter> {
+  private async buildDirectoryFilter(query: SearchQueryDTO | null, what: string): Promise<DirectoryFilter> {
     const sm = ObjectManagers.getInstance().SearchManager;
-    return {
-      directory: await sm.prepareAndBuildWhereQuery(query, true),
-      directories: await sm.prepareAndBuildWhereQuery(query, true, {directory: 'directories'})
-    };
+    const directory = query ? await sm.prepareAndBuildWhereQuery(query, true) : null;
+    const directories = query ? await sm.prepareAndBuildWhereQuery(query, true, {directory: 'directories'}) : null;
+    // fail closed: a list that does not filter directories should not silently expose everything
+    if (!directory || !directories) {
+      throw new Error('Invalid ' + what + ': ' + JSON.stringify(query));
+    }
+    return {directory, directories};
   }
 
   /**
    * Returns the media and the directory allow/block lists combined.
    * Media that is in a not available directory is also not available.
    */
-  private getQueryForUser(user: SessionUser): SearchQueryDTO {
+  private getQueryForUser(user: SessionUser): SearchQueryDTO | null {
     const lists = this.getDirectoryListsForUser(user);
     // directoryListToQuery throws on invalid entries.
     // Fail closed: a misconfigured directory list should not silently expose everything
@@ -204,13 +207,13 @@ export class SessionManager {
     );
   }
 
-  private getMediaQueryForUser(user: SessionUser): SearchQueryDTO {
+  private getMediaQueryForUser(user: SessionUser): SearchQueryDTO | null {
     const blockQuery = user.overrideAllowBlockList ? user.blockQuery : Config.Users.blockQuery;
     const allowQuery = user.overrideAllowBlockList ? user.allowQuery : Config.Users.allowQuery;
 
     return SessionManager.andQueries(
       allowQuery,
-      !SearchQueryUtils.isQueryEmpty(blockQuery) ? SearchQueryUtils.negate(blockQuery) : null
+      blockQuery && !SearchQueryUtils.isQueryEmpty(blockQuery) ? SearchQueryUtils.negate(blockQuery) : null
     );
   }
 
@@ -219,7 +222,7 @@ export class SessionManager {
    */
   private getDirectoryListsForUser(user: SessionUser): { allow: DirectorySearch[], block: DirectorySearch[] } {
     // plain copies, so config objects do not end up in the session
-    const copy = (list: DirectorySearch[]): DirectorySearch[] =>
+    const copy = (list: DirectorySearch[] | null | undefined): DirectorySearch[] =>
       (list || []).map(d => ({type: d.type, value: d.value, matchType: d.matchType, negate: d.negate}));
     return {
       allow: copy(user.overrideAllowBlockList ? user.allowDirectoryList : Config.Users.allowDirectoryList),

@@ -55,7 +55,7 @@ export class CoverManager {
     session: SessionContext,
     album: {
       searchQuery: SearchQueryDTO;
-    }): Promise<CoverPhotoDTOWithID> {
+    }): Promise<CoverPhotoDTOWithID | null> {
     const albumQuery: Brackets = await
       ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(album.searchQuery);
     const connection = await SQLConnection.getConnection();
@@ -174,7 +174,7 @@ export class CoverManager {
       return query;
     };
 
-    let coverMedia: CoverPhotoDTOWithID = null;
+    let coverMedia: CoverPhotoDTOWithID | null = null;
     if (
       Config.AlbumCover.SearchQuery &&
       !Utils.equalsFilter(Config.AlbumCover.SearchQuery, {

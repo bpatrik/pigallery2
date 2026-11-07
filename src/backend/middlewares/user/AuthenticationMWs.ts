@@ -6,13 +6,14 @@ import {Config} from '../../../common/config/private/Config';
 import {PasswordHelper} from '../../model/PasswordHelper';
 import {Utils} from '../../../common/Utils';
 import {QueryParams} from '../../../common/QueryParams';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Logger} from '../../Logger';
 import {SessionUser, SessionContext} from '../../model/SessionContext';
 import {Brackets} from 'typeorm';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../model/DirectoryAccess';
 import {OIDCAuthService} from './OIDCAuthService';
 import {RequestParams} from '../RequestParams';
+import {RequestSession} from '../RequestSession';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -116,9 +117,9 @@ export class AuthenticationMWs {
       next: NextFunction
     ): Promise<void> {
       try {
-        const p: string = RequestParams.get(req, paramName);
+        const p = RequestParams.getRequired(req, paramName);
 
-        if (!await ObjectManagers.getInstance().GalleryManager.authoriseMetaFile(req.session.context, p)) {
+        if (!await ObjectManagers.getInstance().GalleryManager.authoriseMetaFile(RequestSession.getContext(req), p)) {
           res.sendStatus(404); // same as not existing
           return;
         }
@@ -182,9 +183,9 @@ export class AuthenticationMWs {
       next: NextFunction
     ): Promise<void> {
       try {
-        const mediaRelPath: string = RequestParams.get(req, paramName);
+        const mediaRelPath = RequestParams.getRequired(req, paramName);
 
-        if (!await ObjectManagers.getInstance().GalleryManager.authoriseMedia(req.session.context, mediaRelPath)) {
+        if (!await ObjectManagers.getInstance().GalleryManager.authoriseMedia(RequestSession.getContext(req), mediaRelPath)) {
           res.sendStatus(404); // same as a not existing media, so it can't be used to probe paths
           return;
         }
@@ -208,7 +209,9 @@ export class AuthenticationMWs {
       res: Response,
       next: NextFunction
     ): void {
-      if (req.session.context?.user.role < role) {
+      // fail closed: a request without session is not authorised
+      const userRole = req.session.context?.user.role;
+      if (userRole === undefined || userRole < role) {
         res.status(401);
         return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
       }
@@ -224,11 +227,9 @@ export class AuthenticationMWs {
     if (Config.Sharing.enabled === false) {
       return next();
     }
+    const sharingKey = AuthenticationMWs.getSharingKey(req);
     // not enough parameter
-    if (
-      !req.query[QueryParams.gallery.sharingKey_query] &&
-      !RequestParams.get(req, QueryParams.gallery.sharingKey_params)
-    ) {
+    if (!sharingKey) {
       return next(
         new ErrorDTO(ErrorCodes.INPUT_ERROR, 'no sharing key provided')
       );
@@ -236,9 +237,6 @@ export class AuthenticationMWs {
 
     try {
       const password = (req.body ? req.body.password : null) || null;
-      const sharingKey: string =
-        (req.query[QueryParams.gallery.sharingKey_query] as string) ||
-        RequestParams.get(req, QueryParams.gallery.sharingKey_params);
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
 
       if (
@@ -248,7 +246,7 @@ export class AuthenticationMWs {
             sharing.password) &&
           !PasswordHelper.comparePassword(password, sharing.password))
       ) {
-        Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` with sharing:' + sharing.sharingKey + ', bad password');
+        Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` with sharing:' + sharingKey + ', bad password');
         res.status(401);
         return next(new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND));
       }
@@ -303,6 +301,9 @@ export class AuthenticationMWs {
         name: req.body.loginCredential.username,
         password: req.body.loginCredential.password,
       });
+      if (!user) {
+        throw new Error('No entry found');
+      }
       await AuthenticationMWs.startSession(req, user, req.body.loginCredential.rememberMe);
       return next();
     } catch (err) {
@@ -426,19 +427,18 @@ export class AuthenticationMWs {
     return !(context.directoryAccess instanceof DirectoryAccess);
   }
 
-  private static getSharingKey(req: Request) {
+  private static getSharingKey(req: Request): string | undefined {
     return (req.query[QueryParams.gallery.sharingKey_query] as string) ||
       RequestParams.get(req, QueryParams.gallery.sharingKey_params);
   }
 
-  private static async getSharingUser(req: Request): Promise<SessionUser> {
+  private static async getSharingUser(req: Request): Promise<SessionUser | null> {
+    const sharingKey = this.getSharingKey(req);
     if (
-      Config.Sharing.enabled === false || !(typeof this.getSharingKey(req) === 'string' && this.getSharingKey(req) !== '')
+      Config.Sharing.enabled === false || !(typeof sharingKey === 'string' && sharingKey !== '')
     ) {
       return null;
     }
-
-    const sharingKey: string = this.getSharingKey(req);
     const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
     if (!sharing || sharing.expires < Date.now()) {
       return null;

@@ -8,15 +8,15 @@ import {columnCharsetCS} from './EntityUtils';
 export class FileEntity implements FileDTO {
   @Index()
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Column(columnCharsetCS)
-  name: string;
+  name!: string;
 
   @Index()
   @ManyToOne(() => DirectoryEntity, (directory) => directory.metaFile, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  directory: DirectoryEntity;
+  directory!: DirectoryEntity;
 }

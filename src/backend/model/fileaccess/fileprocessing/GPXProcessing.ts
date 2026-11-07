@@ -1,5 +1,5 @@
-import * as path from 'path';
-import {constants as fsConstants, promises as fsp} from 'fs';
+import * as path from 'node:path';
+import {constants as fsConstants, promises as fsp} from 'node:fs';
 import * as xml2js from 'xml2js';
 import {ProjectPath} from '../../../ProjectPath';
 import {Config} from '../../../../common/config/private/Config';
@@ -116,7 +116,7 @@ export class GPXProcessing {
         if (i === 0 || i >= list.length - 1) { // always keep the first and last items
           return true;
         }
-        const timeDelta = (Date.parse(list[i]?.time?.[0]) - Date.parse(list[i - 1]?.time?.[0])); // mill sec.
+        const timeDelta = (Date.parse(list[i]?.time?.[0] ?? '') - Date.parse(list[i - 1]?.time?.[0] ?? '')); // mill sec.
         const dist = distance(list[i - 1], list[i]); // meters
 
         // if time is not available, consider it as all points are created the same time

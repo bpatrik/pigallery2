@@ -11,6 +11,6 @@ export class MDFileEntity extends FileEntity implements MDFileDTO {
       to: (v) => v,
     },
   })
-  date: number; // same date as the youngest photo in a folder
+  date!: number; // same date as the youngest photo in a folder
 
 }

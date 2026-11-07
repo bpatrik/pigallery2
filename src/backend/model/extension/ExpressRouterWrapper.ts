@@ -9,6 +9,7 @@ import {ILogger} from '../../Logger';
 import {ExtensionManager} from './ExtensionManager';
 import {Utils} from '../../../common/Utils';
 import {GalleryMWs} from '../../middlewares/GalleryMWs';
+import {RequestSession} from '../../middlewares/RequestSession';
 import {MediaEntity} from '../database/enitites/MediaEntity';
 import {SQLConnection} from '../database/SQLConnection';
 import {Repository} from 'typeorm';
@@ -68,7 +69,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
             const connection = await SQLConnection.getConnection();
             await cb(req.params,
               req.body ?? {},
-              req.session.context.user,
+              RequestSession.getContext(req).user,
               media,
               connection.getRepository(MediaEntity));
             if (invalidateDirectory) {
@@ -90,7 +91,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
       ...(this.getAuthMWs(minRole).concat([
         async (req: Request, res: Response, next: NextFunction) => {
           try {
-            req.resultPipe = await cb(req.params, req.body ?? {}, req.session.context.user);
+            req.resultPipe = await cb(req.params, req.body ?? {}, RequestSession.getContext(req).user);
             next();
           } catch {
             next(new Error(`[${this.name}]Error during processing:${paths}`));

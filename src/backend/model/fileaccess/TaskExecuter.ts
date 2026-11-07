@@ -10,11 +10,14 @@ export class TaskExecuter<I, O> implements ITaskExecuter<I, O> {
   private taskInProgress = 0;
   private readonly el = new EventLoopHandler();
   private run = async () => {
-    if (this.taskQue.isEmpty() || this.taskInProgress >= this.size) {
+    if (this.taskInProgress >= this.size) {
+      return;
+    }
+    const task = this.taskQue.get();
+    if (!task) {
       return;
     }
     this.taskInProgress++;
-    const task = this.taskQue.get();
     try {
       task.promise.resolve(await this.worker(task.data));
     } catch (err) {

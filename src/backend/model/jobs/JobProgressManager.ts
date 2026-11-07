@@ -1,5 +1,5 @@
-import {promises as fsp} from 'fs';
-import * as path from 'path';
+import {promises as fsp} from 'node:fs';
+import * as path from 'node:path';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
 import {JobProgressDTO, JobProgressStates,} from '../../../common/entities/job/JobProgressDTO';
@@ -14,7 +14,7 @@ export class JobProgressManager {
     progresses: {},
   };
   private readonly dbPath: string;
-  private timer: NodeJS.Timeout = null;
+  private timer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.dbPath = path.join(ProjectPath.DBFolder, 'jobs.db');
@@ -68,7 +68,7 @@ export class JobProgressManager {
         Object.keys(this.db.progresses).length >
         Config.Jobs.maxSavedProgress
         ) {
-      let min: string = null;
+      let min: string | null = null;
       for (const key of Object.keys(this.db.progresses)) {
         if (
             min === null ||
@@ -76,6 +76,9 @@ export class JobProgressManager {
         ) {
           min = key;
         }
+      }
+      if (min === null) {
+        break;
       }
       delete this.db.progresses[min];
     }

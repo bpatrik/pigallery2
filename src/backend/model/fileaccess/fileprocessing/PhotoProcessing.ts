@@ -1,7 +1,7 @@
-import * as path from 'path';
-import {constants as fsConstants, promises as fsp} from 'fs';
-import * as os from 'os';
-import * as crypto from 'crypto';
+import * as path from 'node:path';
+import {constants as fsConstants, promises as fsp} from 'node:fs';
+import * as os from 'node:os';
+import * as crypto from 'node:crypto';
 import {ProjectPath} from '../../../ProjectPath';
 import {Config} from '../../../../common/config/private/Config';
 import {MediaRendererInput, PhotoWorker, SvgRendererInput, ThumbnailSourceType,} from '../PhotoWorker';
@@ -13,7 +13,14 @@ import {SVGIconConfig} from '../../../../common/config/public/ClientConfig';
 
 export class PhotoProcessing {
   private static initDone = false;
-  private static taskQue: ITaskExecuter<MediaRendererInput | SvgRendererInput, void> = null;
+  private static taskQueInstance: ITaskExecuter<MediaRendererInput | SvgRendererInput, void> | null = null;
+
+  private static get taskQue(): ITaskExecuter<MediaRendererInput | SvgRendererInput, void> {
+    if (!this.taskQueInstance) {
+      throw new Error('PhotoProcessing is not initialized');
+    }
+    return this.taskQueInstance;
+  }
   private static readonly CONVERTED_EXTENSION = '.webp';
 
   public static init(): void {
@@ -30,7 +37,7 @@ export class PhotoProcessing {
       Config.Media.Photo.concurrentThumbnailGenerations = Math.min(Config.Media.Photo.concurrentThumbnailGenerations, Config.Media.Photo.concurrentThumbnailGenerationsLimit);
     }
 
-    this.taskQue = new TaskExecuter(
+    this.taskQueInstance = new TaskExecuter(
       Config.Media.Photo.concurrentThumbnailGenerations,
       (input): Promise<void> => PhotoWorker.render(input)
     );
@@ -51,6 +58,10 @@ export class PhotoProcessing {
     );
     const size: number = Config.Media.Photo.personThumbnailSize;
     const faceRegion = person.cache.sampleRegion.media.metadata.faces.find(f => f.name === person.name);
+    if (!faceRegion?.box) {
+      throw new Error('No face region for person: ' + person.name);
+    }
+    const box = faceRegion.box;
     // generate thumbnail path
     const thPath = PhotoProcessing.generatePersonThumbnailPath(
       mediaPath,
@@ -68,14 +79,32 @@ export class PhotoProcessing {
 
     const margin = {
       x: Math.round(
-        faceRegion.box.width *
+        box.width *
         Config.Media.Photo.personFaceMargin
       ),
       y: Math.round(
-        faceRegion.box.height *
+        box.height *
         Config.Media.Photo.personFaceMargin
       ),
     };
+    const cut = {
+      left: Math.round(
+        Math.max(0, box.left - margin.x / 2)
+      ),
+      top: Math.round(
+        Math.max(0, box.top - margin.y / 2)
+      ),
+      width: box.width + margin.x,
+      height: box.height + margin.y,
+    };
+    cut.width = Math.min(
+      cut.width,
+      photo.metadata.size.width - cut.left
+    );
+    cut.height = Math.min(
+      cut.height,
+      photo.metadata.size.height - cut.top
+    );
 
     // run on other thread
     const input = {
@@ -84,28 +113,11 @@ export class PhotoProcessing {
       size,
       outPath: thPath,
       makeSquare: false,
-      cut: {
-        left: Math.round(
-          Math.max(0, faceRegion.box.left - margin.x / 2)
-        ),
-        top: Math.round(
-          Math.max(0, faceRegion.box.top - margin.y / 2)
-        ),
-        width: faceRegion.box.width + margin.x,
-        height: faceRegion.box.height + margin.y,
-      },
+      cut,
       useLanczos3: Config.Media.Photo.useLanczos3,
       quality: Config.Media.Photo.quality,
       smartSubsample: Config.Media.Photo.smartSubsample,
     } as MediaRendererInput;
-    input.cut.width = Math.min(
-      input.cut.width,
-      photo.metadata.size.width - input.cut.left
-    );
-    input.cut.height = Math.min(
-      input.cut.height,
-      photo.metadata.size.height - input.cut.top
-    );
 
     await fsp.mkdir(ProjectPath.FacesFolder, {recursive: true});
     await PhotoProcessing.taskQue.execute(input);
@@ -127,9 +139,12 @@ export class PhotoProcessing {
 
   public static generatePersonThumbnailPath(
     mediaPath: string,
-    faceRegion: FaceRegion,
+    faceRegion: FaceRegion | undefined,
     size: number
   ): string {
+    if (!faceRegion?.box) {
+      throw new Error('No face region to generate a person thumbnail for: ' + mediaPath);
+    }
     return path.join(
       ProjectPath.FacesFolder,
       crypto
@@ -289,7 +304,7 @@ export class PhotoProcessing {
       animate: Config.Media.Photo.animateGif
     } as MediaRendererInput;
 
-    const outDir = path.dirname(input.outPath);
+    const outDir = path.dirname(outPath);
 
     await fsp.mkdir(outDir, {recursive: true});
     await this.taskQue.execute(input);
@@ -342,7 +357,7 @@ viewBox="${svgIcon.viewBox || '0 0 512 512'}">d="${svgIcon.items}</svg>`,
       smartSubsample: Config.Media.Photo.smartSubsample,
     } as SvgRendererInput;
 
-    const outDir = path.dirname(input.outPath);
+    const outDir = path.dirname(hashedOutPath);
 
     await fsp.mkdir(outDir, {recursive: true});
     await this.taskQue.execute(input);

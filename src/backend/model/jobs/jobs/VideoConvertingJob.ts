@@ -14,7 +14,7 @@ export class VideoConvertingJob extends FileJob {
   }
 
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[VideoConvertingJob]';
   }
 
