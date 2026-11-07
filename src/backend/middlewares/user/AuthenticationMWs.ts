@@ -12,6 +12,7 @@ import {SessionUser, SessionContext} from '../../model/SessionContext';
 import {Brackets} from 'typeorm';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../model/DirectoryAccess';
 import {OIDCAuthService} from './OIDCAuthService';
+import {RequestParams} from '../RequestParams';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -95,7 +96,7 @@ export class AuthenticationMWs {
       res: Response,
       next: NextFunction
     ): void {
-      const p = path.normalize(req.params[paramName] || path.sep);
+      const p = path.normalize(RequestParams.get(req, paramName) || path.sep);
       // normalize() resolves inner '..' segments, only a leading one can escape the base folder
       if (p === '..' || p.startsWith('..' + path.sep)) {
         return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'Invalid path'));
@@ -115,7 +116,7 @@ export class AuthenticationMWs {
       next: NextFunction
     ): Promise<void> {
       try {
-        const p: string = req.params[paramName];
+        const p: string = RequestParams.get(req, paramName);
 
         if (!await ObjectManagers.getInstance().GalleryManager.authoriseMetaFile(req.session.context, p)) {
           res.sendStatus(404); // same as not existing
@@ -146,7 +147,7 @@ export class AuthenticationMWs {
       next: NextFunction
     ): Promise<void> {
       try {
-        const dirRelPath: string = req.params[paramName] || path.sep;
+        const dirRelPath: string = RequestParams.get(req, paramName) || path.sep;
         const access = req.session.context?.directoryAccess
           ? await req.session.context.directoryAccess.getAccess(dirRelPath)
           : DirectoryAccessTypes.none;
@@ -164,9 +165,10 @@ export class AuthenticationMWs {
   }
 
   /**
-   * The response for not existing and not available directories. They need to be the same.
+   * The response for not existing and not available directories. They need to be the same:
+   * GalleryMWs.listDirectory answers not existing directories with the same status and error.
    */
-  public static directoryNotFound(res: Response, next: NextFunction): void {
+  private static directoryNotFound(res: Response, next: NextFunction): void {
     res.status(404);
     return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
   }
@@ -180,7 +182,7 @@ export class AuthenticationMWs {
       next: NextFunction
     ): Promise<void> {
       try {
-        const mediaRelPath: string = req.params[paramName];
+        const mediaRelPath: string = RequestParams.get(req, paramName);
 
         if (!await ObjectManagers.getInstance().GalleryManager.authoriseMedia(req.session.context, mediaRelPath)) {
           res.sendStatus(404); // same as a not existing media, so it can't be used to probe paths
@@ -225,7 +227,7 @@ export class AuthenticationMWs {
     // not enough parameter
     if (
       !req.query[QueryParams.gallery.sharingKey_query] &&
-      !req.params[QueryParams.gallery.sharingKey_params]
+      !RequestParams.get(req, QueryParams.gallery.sharingKey_params)
     ) {
       return next(
         new ErrorDTO(ErrorCodes.INPUT_ERROR, 'no sharing key provided')
@@ -236,7 +238,7 @@ export class AuthenticationMWs {
       const password = (req.body ? req.body.password : null) || null;
       const sharingKey: string =
         (req.query[QueryParams.gallery.sharingKey_query] as string) ||
-        (req.params[QueryParams.gallery.sharingKey_params] as string);
+        RequestParams.get(req, QueryParams.gallery.sharingKey_params);
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
 
       if (
@@ -426,7 +428,7 @@ export class AuthenticationMWs {
 
   private static getSharingKey(req: Request) {
     return (req.query[QueryParams.gallery.sharingKey_query] as string) ||
-      (req.params[QueryParams.gallery.sharingKey_params] as string);
+      RequestParams.get(req, QueryParams.gallery.sharingKey_params);
   }
 
   private static async getSharingUser(req: Request): Promise<SessionUser> {

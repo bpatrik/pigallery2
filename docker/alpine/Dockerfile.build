@@ -1,6 +1,6 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:22-alpine3.23 AS builder
+FROM node:26-alpine3.24 AS builder
 
 ENV SHARP_FORCE_GLOBAL_LIBVIPS=1
 # inspired by https://github.com/lovell/sharp/issues/4273 and https://github.com/lovell/sharp/issues/4267
@@ -24,8 +24,8 @@ RUN apk add --no-cache --update \
 
 COPY pigallery2-release /app
 WORKDIR /app
-RUN npm install --no-package-lock --save-dev node-addon-api@8.5.0 node-gyp@11.5.0  && \
-    npm prune --production && \
+RUN npm install --no-package-lock --save-dev node-addon-api@8.9.2 node-gyp@13.1.0  && \
+    npm prune --omit=dev && \
     npm cache clean --force
 
 
@@ -37,7 +37,7 @@ RUN mkdir -p /app/data/config && \
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:22-alpine3.23 AS main
+FROM node:26-alpine3.24 AS main
 WORKDIR /app
 ENV NODE_ENV=production \
     # overrides only the default value of the settings (the actual value can be overwritten through config.json)

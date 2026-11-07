@@ -11,6 +11,7 @@ import {MediaDTO} from '../../../common/entities/MediaDTO';
 import {PhotoProcessing} from '../../model/fileaccess/fileprocessing/PhotoProcessing';
 import {ServerTime} from '../ServerTimingMWs';
 import {PersonEntry} from '../../model/database/enitites/person/PersonEntry';
+import {RequestParams} from '../RequestParams';
 
 export class ThumbnailGeneratorMWs {
   private static ThumbnailMapEntries =
@@ -147,7 +148,7 @@ export class ThumbnailGeneratorMWs {
       // load parameters
       const mediaPath = req.resultPipe as string;
       let size: number =
-        parseInt(req.params.size, 10) ||
+        parseInt(RequestParams.get(req, 'size'), 10) ||
         Config.Media.Photo.thumbnailSizes[0];
 
       // validate size

@@ -11,9 +11,11 @@ import {ReIndexingSensitivity} from '../../../../src/common/config/private/Priva
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
-import {ANDSearchQuery, DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {ANDSearchQuery, DirectorySearch, ORSearchQuery, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
+import AdmZip from 'adm-zip';
+import * as fs from 'fs';
 
 process.env.NODE_ENV = 'test';
 chai.should();
@@ -344,6 +346,58 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
       (result.should as any).have.status(200);
       expect(result.headers['content-type']).to.equal('image/jpeg');
       expect(result.headers['cache-control']).to.equal('no-store');
+    });
+  });
+
+  describe('/GET /api/gallery/zip/', async () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const getZip = async (query: SearchQueryDTO): Promise<{ status: number, headers: Record<string, string>, body: Buffer }> =>
+      (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/zip/' + encodeURIComponent(JSON.stringify(query)))
+        .buffer(true)
+        .parse((res, cb) => {
+          const chunks: Buffer[] = [];
+          res.on('data', (c: Buffer) => chunks.push(c));
+          res.on('end', () => cb(null, Buffer.concat(chunks)));
+        });
+
+    it('should zip the search result with unique file names', async () => {
+      // the search needs the folders in the DB
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('sidecar', true);
+
+      const result = await getZip({
+        type: SearchQueryTypes.OR,
+        list: [
+          {type: SearchQueryTypes.file_name, value: 'Chars'} as TextSearch,
+          {type: SearchQueryTypes.file_name, value: 'öüóőúéáű'} as TextSearch
+        ]
+      } as ORSearchQuery);
+
+      (result.should as any).have.status(200);
+      expect(result.headers['content-type']).to.equal('application/zip');
+      expect(result.headers['content-disposition']).to.equal('attachment; filename=SearchResults.zip');
+
+      const entries = new AdmZip(result.body).getEntries();
+      expect(entries.map(e => e.entryName).sort()).to.deep.equal([
+        'Chars.jpg', 'Chars_2.jpg', 'Chars_exiftool.jpg', 'Chars_exiftool_2.jpg', 'test image öüóőúéáű-.,.jpg'
+      ]);
+      const assets = path.join(__dirname, '../../assets');
+      const sources = ['Chars.jpg', 'Chars_exiftool.jpg', 'sidecar/Chars.jpg', 'sidecar/Chars_exiftool.jpg', 'test image öüóőúéáű-.,.jpg']
+        .map(f => fs.readFileSync(path.join(assets, f)));
+      for (const e of entries) {
+        expect(sources.some(s => s.equals(e.getData())), e.entryName).to.be.true;
+      }
+    });
+
+    it('should not zip an empty search result', async () => {
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
+      const result = await getZip({type: SearchQueryTypes.file_name, value: 'no_such_file'} as TextSearch);
+      expect(result.headers['content-type']).to.contain('application/json');
+      expect(JSON.parse(result.body.toString('utf8')).error.code).to.equal(ErrorCodes.INPUT_ERROR);
     });
   });
 

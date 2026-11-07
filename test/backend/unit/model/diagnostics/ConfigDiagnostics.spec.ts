@@ -106,6 +106,39 @@ describe('ConfigDiagnostics', () => {
     });
   });
 
+  describe('testLibvipsVersion', () => {
+
+    it('should accept a libvips that is as new as sharp needs', () => {
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '8.16.1')).to.not.throw();
+    });
+
+    it('should accept a newer libvips than sharp needs', () => {
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '8.16.2')).to.not.throw();
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '8.18.0')).to.not.throw();
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '9.0.0')).to.not.throw();
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.9.1', '8.10.0')).to.not.throw();
+    });
+
+    it('should reject an older libvips than sharp needs', () => {
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.17.3', '8.17.2')).to.throw(/8\.17\.3.*8\.17\.2/);
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.17.3', '8.16.1')).to.throw(/8\.17\.3.*8\.16\.1/);
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.17.3', '7.99.99')).to.throw(/8\.17\.3.*7\.99\.99/);
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.10.0', '8.9.1')).to.throw(/8\.10\.0.*8\.9\.1/);
+    });
+
+    it('should reject a version that it cannot read', () => {
+      expect(() => ConfigDiagnostics.testLibvipsVersion('>=8.16.1', '')).to.throw();
+      expect(() => ConfigDiagnostics.testLibvipsVersion('', '8.16.1')).to.throw();
+    });
+  });
+
+  describe('testSharp', () => {
+
+    it('should pass with the installed sharp and its libvips', async () => {
+      await ConfigDiagnostics.testSharp();
+    });
+  });
+
   describe('removeUnsupportedPhotoExtensions', () => {
     const originalRender = PhotoWorker.renderFromImage;
     const originalFormats = Config.Media.Photo.supportedFormats.slice();

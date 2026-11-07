@@ -1,7 +1,6 @@
 import {Logger} from '../../Logger';
 import {promises as fsp} from 'fs';
-import {FfmpegCommand} from 'fluent-ffmpeg';
-import {FFmpegFactory} from '../FFmpegFactory';
+import {FFmpeg} from '../FFmpeg';
 import {FFmpegPresets, videoCodecType, videoFormatType, videoResolutionType,} from '../../../common/config/private/PrivateConfig';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 
@@ -24,7 +23,6 @@ export interface VideoConverterInput {
 }
 
 export class VideoConverterWorker {
-  private static ffmpeg = FFmpegFactory.get();
 
   @ExtensionDecorator(e => e.gallery.VideoConverter.convert)
   public static async convert(input: VideoConverterInput): Promise<void> {
@@ -34,70 +32,40 @@ export class VideoConverterWorker {
     await fsp.rename(input.output.path, origPath);
   }
 
-  private static _convert(input: VideoConverterInput): Promise<void> {
-    if (this.ffmpeg == null) {
-      this.ffmpeg = FFmpegFactory.get();
+  /**
+   * ffmpeg arguments in the order fluent-ffmpeg used to build them.
+   */
+  public static buildArgs(input: VideoConverterInput): string[] {
+    const args = [...FFmpeg.splitOptions(input.input.customOptions), '-i', input.videoPath, '-y'];
+    if (input.output.bitRate) {
+      args.push('-b:v', input.output.bitRate / 1024 + 'k');
     }
+    args.push('-vcodec', input.output.codec);
+    if (input.output.fps) {
+      args.push('-r', '' + input.output.fps);
+    }
+    if (input.output.resolution) {
+      // keeps the aspect ratio with an even width
+      args.push('-filter:v', 'scale=w=trunc(oh*a/2)*2:h=' + input.output.resolution);
+    }
+    // Constant Rate Factor (CRF)
+    if (input.output.crf) {
+      args.push('-crf', '' + input.output.crf);
+    }
+    if (input.output.preset) {
+      args.push('-preset', FFmpegPresets[input.output.preset]);
+    }
+    args.push(...FFmpeg.splitOptions(input.output.customOptions));
+    // force the output format, the .part extension does not tell it
+    args.push('-f', input.output.format, input.output.path);
+    return args;
+  }
 
-    return new Promise((resolve, reject) => {
-      Logger.silly('[FFmpeg] transcoding video: ' + input.videoPath);
-
-      const command: FfmpegCommand = this.ffmpeg(input.videoPath);
-      let executedCmd = '';
-      command
-          .on('start', (cmd: string) => {
-            Logger.silly('[FFmpeg] running:' + cmd);
-            executedCmd = cmd;
-          })
-          .on('end', () => {
-            resolve();
-          })
-          .on('error', (e: any) => {
-            reject('[FFmpeg] ' + e.toString() + ' executed: ' + executedCmd);
-          })
-          .on('stderr', function(line: string) {
-            // Although this is under `stderr` event, all of ffmpeg output come here.
-            Logger.debug('[FFmpeg] ' + line);
-          });
-
-      // set custom input options
-      if (input.input.customOptions) {
-        command.inputOptions(input.input.customOptions);
-      }
-      // set video bitrate
-      if (input.output.bitRate) {
-        command.videoBitrate(input.output.bitRate / 1024 + 'k');
-      }
-      // set target codec
-      command.videoCodec(input.output.codec);
-      if (input.output.resolution) {
-        command.size('?x' + input.output.resolution);
-      }
-
-      // set fps
-      if (input.output.fps) {
-        command.fps(input.output.fps);
-      }
-
-      // set Constant Rate Factor (CRF)
-      if (input.output.crf) {
-        command.addOption(['-crf ' + input.output.crf]);
-      }
-
-      // set preset
-      if (input.output.preset) {
-        command.addOption(['-preset ' + FFmpegPresets[input.output.preset]]);
-      }
-      // set any additional commands
-      if (input.output.customOptions) {
-        command.addOption(input.output.customOptions);
-      }
-      // set output format to force
-      command
-          .format(input.output.format)
-          // save to file
-          .save(input.output.path);
+  private static _convert(input: VideoConverterInput): Promise<void> {
+    Logger.silly('[FFmpeg] transcoding video: ' + input.videoPath);
+    return FFmpeg.run(this.buildArgs(input), {
+      onStart: (cmd: string) => Logger.silly('[FFmpeg] running:' + cmd),
+      onStderrLine: (line: string) => Logger.debug('[FFmpeg] ' + line)
     });
   }
 }
-

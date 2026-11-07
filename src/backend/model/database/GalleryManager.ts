@@ -6,7 +6,7 @@ import {SQLConnection} from './SQLConnection';
 import {PhotoEntity} from './enitites/PhotoEntity';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
-import {Connection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import {MediaEntity} from './enitites/MediaEntity';
 import {VideoEntity} from './enitites/VideoEntity';
 import {Logger} from '../../Logger';
@@ -75,9 +75,11 @@ export class GalleryManager {
         return await getDir(dir.id);
       }
 
-      const stat = fs.statSync(
-        path.join(ProjectPath.ImageFolder, relativeDirectoryName)
-      );
+      const absoluteDirectoryName = ProjectPath.resolveInImageFolder(relativeDirectoryName);
+      if (!absoluteDirectoryName) {
+        throw new Error('Directory is outside of the image folder: ' + relativeDirectoryName);
+      }
+      const stat = fs.statSync(absoluteDirectoryName);
       const lastModified = DiskManager.calcLastModified(stat);
 
       // If it seems that the content did not change, do not work on it
@@ -311,7 +313,7 @@ export class GalleryManager {
    * Sets cover for the directory and caches it in the DB
    */
   public async fillCacheForSubDir(
-    connection: Connection,
+    connection: DataSource,
     session: SessionContext,
     dir: SubDirectoryDTO
   ): Promise<void> {
@@ -376,7 +378,7 @@ export class GalleryManager {
     return session.directoryAccess.isAvailable(path.dirname(p));
   }
 
-  protected async getDirIdAndTime(connection: Connection, name: string, path: string): Promise<{
+  protected async getDirIdAndTime(connection: DataSource, name: string, path: string): Promise<{
     id: number,
     lastScanned: number,
     lastModified: number
@@ -396,7 +398,7 @@ export class GalleryManager {
   }
 
   protected async getParentDirFromId(
-    connection: Connection,
+    connection: DataSource,
     session: SessionContext,
     partialDirId: number,
     withMetaFiles = true

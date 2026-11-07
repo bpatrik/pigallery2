@@ -39,7 +39,7 @@ export class ExtensionMWs {
   ): Promise<void> {
     try {
       // Extract the extension ID from the request body
-      const extensionId = req.body.id;
+      const extensionId = req.body?.id;
 
       if (!extensionId) {
         return next(
@@ -85,7 +85,7 @@ export class ExtensionMWs {
       // Extract the config key (folder name) from the request body
       // Note: The request parameter is called 'path' for backwards compatibility,
       // but it represents the config key used in Config.Extensions.extensions
-      const configKey = req.body.path;
+      const configKey = req.body?.path;
 
       if (!configKey) {
         return next(
@@ -131,7 +131,7 @@ export class ExtensionMWs {
       // Extract the config key (folder name) from the request body
       // Note: The request parameter is called 'path' for backwards compatibility,
       // but it represents the config key used in Config.Extensions.extensions
-      const configKey = req.body.path;
+      const configKey = req.body?.path;
 
       if (!configKey) {
         return next(

@@ -4,6 +4,7 @@ import {ObjectManagers} from '../model/ObjectManagers';
 import {PersonDTO,} from '../../common/entities/PersonDTO';
 import {Utils} from '../../common/Utils';
 import {PersonEntry} from '../model/database/enitites/person/PersonEntry';
+import {RequestParams} from './RequestParams';
 
 export class PersonMWs {
   public static async updatePerson(
@@ -11,15 +12,15 @@ export class PersonMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    if (!req.params['name']) {
+    if (!RequestParams.get(req, 'name')) {
       return next();
     }
 
     try {
-      const name = req.params['name'] as string;
+      const name = RequestParams.get(req, 'name');
       await ObjectManagers.getInstance().PersonManager.updatePerson(
         name,
-        req.body as PersonDTO
+        (req.body ?? {}) as PersonDTO
       );
       req.resultPipe = await ObjectManagers.getInstance().PersonManager.get(req.session.context, name);
       return next();
@@ -39,13 +40,13 @@ export class PersonMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    if (!req.params['name']) {
+    if (!RequestParams.get(req, 'name')) {
       return next();
     }
 
     try {
       req.resultPipe = await ObjectManagers.getInstance().PersonManager.get(req.session.context,
-        req.params['name'] as string
+        RequestParams.get(req, 'name')
       );
       return next();
     } catch (err) {

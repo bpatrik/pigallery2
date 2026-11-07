@@ -4,12 +4,12 @@ import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {Config} from '../../common/config/private/Config';
 import {QueryParams} from '../../common/QueryParams';
-import * as path from 'path';
 import {UserRoles} from '../../common/entities/UserDTO';
 import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
 import * as crypto from 'crypto';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
 import {UserEntity} from '../model/database/enitites/UserEntity';
+import {RequestParams} from './RequestParams';
 
 export class SharingMWs {
   private static exactDirectoryQuery(directoryName: string): DirectorySearch {
@@ -30,7 +30,7 @@ export class SharingMWs {
       if (Config.Sharing.enabled === false) {
         return next();
       }
-      const sharingKey = req.params[QueryParams.gallery.sharingKey_params];
+      const sharingKey = RequestParams.get(req, QueryParams.gallery.sharingKey_params);
 
       req.resultPipe =
         await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
@@ -55,7 +55,7 @@ export class SharingMWs {
       if (Config.Sharing.enabled === false) {
         return next();
       }
-      const sharingKey = req.params[QueryParams.gallery.sharingKey_params];
+      const sharingKey = RequestParams.get(req, QueryParams.gallery.sharingKey_params);
 
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       req.resultPipe =
@@ -114,7 +114,8 @@ export class SharingMWs {
         }
       }
 
-      const directoryName = path.normalize(req.params['directory'] || '/');
+      // normalized by AuthenticationMWs.normalizePathParam
+      const directoryName = RequestParams.get(req, 'directory');
 
       const searchQuery = createSharing.searchQuery || null;
       // without any query, the sharing is about the directory (legacy directory sharing)
@@ -188,7 +189,8 @@ export class SharingMWs {
         );
       }
       const updateSharing: CreateSharingDTO = req.body.updateSharing;
-      const directoryName = path.normalize(req.params['directory'] || '/');
+      // normalized by AuthenticationMWs.normalizePathParam
+      const directoryName = RequestParams.get(req, 'directory');
 
       const searchQuery = updateSharing.searchQuery || null;
       // without any query, the sharing is about the directory (legacy directory sharing)
@@ -259,13 +261,13 @@ export class SharingMWs {
       }
       if (
         typeof req.params === 'undefined' ||
-        typeof req.params['sharingKey'] === 'undefined'
+        typeof RequestParams.get(req, 'sharingKey') === 'undefined'
       ) {
         return next(
           new ErrorDTO(ErrorCodes.INPUT_ERROR, 'sharingKey is missing')
         );
       }
-      const sharingKey: string = req.params['sharingKey'];
+      const sharingKey: string = RequestParams.get(req, 'sharingKey');
 
       // Check if user has the right to delete sharing.
       if (req.session.context?.user.role < UserRoles.Admin) {

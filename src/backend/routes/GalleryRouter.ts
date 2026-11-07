@@ -30,9 +30,22 @@ export class GalleryRouter {
     this.addAutoComplete(app);
   }
 
+  /**
+   * Path of a media file route: `<apiPath>/gallery/content/<mediaPath>.<format><suffix>`.
+   * Express 5 (path-to-regexp 8) has no regex params, so it is a RegExp; its named groups become the params.
+   * As before, the format is case-insensitive and mediaPath is decoded as a whole (`%2F` is a '/').
+   * @param formats file extensions without the dot
+   * @param suffix RegExp source after the file name (e.g. '/icon')
+   */
+  private static mediaRoute(formats: string[], suffix = ''): RegExp {
+    const escape = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('^' + escape(Config.Server.apiPath + '/gallery/content/') +
+      '(?<mediaPath>.*\\.(?:' + formats.map(escape).join('|') + '))' + suffix + '\\/?$', 'i');
+  }
+
   protected static addDirectoryList(app: Express): void {
     app.get(
-      [Config.Server.apiPath + '/gallery/content/:directory(*)', Config.Server.apiPath + '/gallery/', Config.Server.apiPath + '/gallery//'],
+      [Config.Server.apiPath + '/gallery/content/{*directory}', Config.Server.apiPath + '/gallery/', Config.Server.apiPath + '/gallery/{/}'],
       // common part
       AuthenticationMWs.authenticate,
       // sharing users can only list the directories of the sharing
@@ -52,7 +65,7 @@ export class GalleryRouter {
 
   protected static addDirectoryZip(app: Express): void {
     app.get(
-      [Config.Server.apiPath + '/gallery/zip/:searchQueryDTO(*)'],
+      [Config.Server.apiPath + '/gallery/zip/{*searchQueryDTO}'],
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
@@ -67,9 +80,7 @@ export class GalleryRouter {
   protected static addGetImage(app: Express): void {
     app.get(
       [
-        Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-        SupportedFormats.Photos.join('|') +
-        '))',
+        GalleryRouter.mediaRoute(SupportedFormats.Photos),
       ],
       // common part
       AuthenticationMWs.authenticate,
@@ -86,9 +97,7 @@ export class GalleryRouter {
   protected static addGetVideo(app: Express): void {
     app.get(
       [
-        Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-        SupportedFormats.Videos.join('|') +
-        '))',
+        GalleryRouter.mediaRoute(SupportedFormats.Videos),
       ],
       // common part
       AuthenticationMWs.authenticate,
@@ -105,9 +114,7 @@ export class GalleryRouter {
   protected static addGetBestFitVideo(app: Express): void {
     app.get(
       [
-        Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-        SupportedFormats.Videos.join('|') +
-        '))/bestFit',
+        GalleryRouter.mediaRoute(SupportedFormats.Videos, '/bestFit'),
       ],
       // common part
       AuthenticationMWs.authenticate,
@@ -125,9 +132,7 @@ export class GalleryRouter {
   protected static addGetMetaFile(app: Express): void {
     app.get(
       [
-        Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-        SupportedFormats.MetaFiles.join('|') +
-        '))',
+        GalleryRouter.mediaRoute(SupportedFormats.MetaFiles),
       ],
       // common part
       AuthenticationMWs.authenticate,
@@ -144,9 +149,7 @@ export class GalleryRouter {
   protected static addGetBestFitMetaFile(app: Express): void {
     app.get(
       [
-        Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-        SupportedFormats.MetaFiles.join('|') +
-        '))/bestFit',
+        GalleryRouter.mediaRoute(SupportedFormats.MetaFiles, '/bestFit'),
       ],
       // common part
       AuthenticationMWs.authenticate,
@@ -163,7 +166,7 @@ export class GalleryRouter {
 
   protected static addRandom(app: Express): void {
     app.get(
-      [Config.Server.apiPath + '/gallery/random/:searchQueryDTO(*)'],
+      [Config.Server.apiPath + '/gallery/random/{*searchQueryDTO}'],
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.LimitedGuest),
@@ -185,9 +188,7 @@ export class GalleryRouter {
    */
   protected static addGetResizedPhoto(app: Express): void {
     app.get(
-      Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-      SupportedFormats.Photos.join('|') +
-      '))/:size',
+      GalleryRouter.mediaRoute(SupportedFormats.Photos, '/(?<size>[^/]+?)'),
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.normalizePathParam('mediaPath'),
@@ -203,9 +204,7 @@ export class GalleryRouter {
 
   protected static addGetVideoThumbnail(app: Express): void {
     app.get(
-      Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-      SupportedFormats.Videos.join('|') +
-      '))/:size',
+      GalleryRouter.mediaRoute(SupportedFormats.Videos, '/(?<size>[^/]+?)'),
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.normalizePathParam('mediaPath'),
@@ -221,9 +220,7 @@ export class GalleryRouter {
 
   protected static addGetVideoIcon(app: Express): void {
     app.get(
-      Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-      SupportedFormats.Videos.join('|') +
-      '))/icon',
+      GalleryRouter.mediaRoute(SupportedFormats.Videos, '/icon'),
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.normalizePathParam('mediaPath'),
@@ -239,9 +236,7 @@ export class GalleryRouter {
 
   protected static addGetImageIcon(app: Express): void {
     app.get(
-      Config.Server.apiPath + '/gallery/content/:mediaPath(*\\.(' +
-      SupportedFormats.Photos.join('|') +
-      '))/icon',
+      GalleryRouter.mediaRoute(SupportedFormats.Photos, '/icon'),
       // common part
       AuthenticationMWs.authenticate,
       AuthenticationMWs.normalizePathParam('mediaPath'),
@@ -257,7 +252,7 @@ export class GalleryRouter {
 
   protected static addSearch(app: Express): void {
     app.get(
-      Config.Server.apiPath + '/search/:searchQueryDTO(*)',
+      Config.Server.apiPath + '/search/{*searchQueryDTO}',
       // common part
       AuthenticationMWs.authenticate,
       // LimitedGuest is allowed, as search based sharings are rendered through this endpoint.
@@ -277,7 +272,7 @@ export class GalleryRouter {
 
   protected static addAutoComplete(app: Express): void {
     app.get(
-      Config.Server.apiPath + '/autocomplete/:value(*)',
+      Config.Server.apiPath + '/autocomplete/{*value}',
       // common part
       AuthenticationMWs.authenticate,
       // sharing users (LimitedGuest) can't search, so they don't need autocomplete either

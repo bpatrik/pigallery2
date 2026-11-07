@@ -19,8 +19,10 @@ export class UploadManager {
     if (Config.Upload.enabled === false) {
       throw new Error('Upload is disabled');
     }
-    const relativeDir = directory || '';
-    const fullDirPath = path.join(ProjectPath.ImageFolder, relativeDir);
+    const fullDirPath = ProjectPath.resolveInImageFolder(directory);
+    if (!fullDirPath) {
+      throw new Error('Invalid upload path: ' + directory);
+    }
 
     if (Config.Upload.enforcedDirectoryConfig === true) {
       const hasUploadConf = Object.keys(PG2ConfMap.upload).some(filename => {
@@ -47,8 +49,10 @@ export class UploadManager {
   }
 
   public async saveFile(directory: string, file: Express.Multer.File): Promise<void> {
-    const relativeDir = directory || '';
-    const fullDirPath = path.resolve(path.join(ProjectPath.ImageFolder, relativeDir));
+    const fullDirPath = ProjectPath.resolveInImageFolder(directory);
+    if (!fullDirPath) {
+      throw new Error('Invalid upload path: ' + directory);
+    }
 
     const filename = file.originalname;
     // the filename must be a plain name, no path components

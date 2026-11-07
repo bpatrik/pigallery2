@@ -1,6 +1,6 @@
 #-----------------BUILDER-----------------
 #-----------------------------------------
-FROM node:22-trixie AS builder
+FROM node:26-trixie AS builder
 # LABEL maintainer="Patrik J. Braun"
 
 ENV SHARP_FORCE_GLOBAL_LIBVIPS=1
@@ -16,18 +16,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 gi
 # copying only package{-lock}.json to make node_modules cachable
 RUN git clone https://github.com/bpatrik/pigallery2.git /build
 WORKDIR /build
-RUN npm install --unsafe-perm \
+RUN npm install \
     && mkdir -p /build/release/data/config \
     && mkdir -p /build/release/data/db \
     && mkdir -p /build/release/data/images \
     && mkdir -p /build/release/data/tmp \
     && npm run create-release
 WORKDIR /build/release
-RUN npm install --unsafe-perm --no-package-lock node-addon-api@8.5.0 node-gyp@11.5.0
+RUN npm install --no-package-lock node-addon-api@8.9.2 node-gyp@13.1.0
 
 #-----------------MAIN--------------------
 #-----------------------------------------
-FROM node:22-trixie-slim AS main
+FROM node:26-trixie-slim AS main
 WORKDIR /app
 ENV NODE_ENV=production \
     # overrides only the default value of the settings (the actualy value can be overwritten through config.json)

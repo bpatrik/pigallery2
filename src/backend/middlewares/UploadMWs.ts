@@ -2,6 +2,7 @@ import {NextFunction, Request, Response} from 'express';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import multer = require('multer');
+import {RequestParams} from './RequestParams';
 
 const storage = multer.memoryStorage();
 // browsers send the file name as UTF-8, while multer decodes it as latin1 by default (#1263).
@@ -26,7 +27,7 @@ export class UploadMWs {
       }
 
       try {
-        const directory = req.params['directory'] || '';
+        const directory = RequestParams.get(req, 'directory') || '';
         req.resultPipe = await ObjectManagers.getInstance().UploadManager.saveFiles(directory, files);
         return next();
       } catch (e) {

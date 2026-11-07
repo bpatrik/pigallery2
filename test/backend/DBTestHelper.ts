@@ -8,7 +8,7 @@ import {DirectoryBaseDTO, ParentDirectoryDTO, SubDirectoryDTO} from '../../src/c
 import {ObjectManagers} from '../../src/backend/model/ObjectManagers';
 import {DiskManager} from '../../src/backend/model/fileaccess/DiskManager';
 import {GalleryManager} from '../../src/backend/model/database/GalleryManager';
-import {Connection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import {Utils} from '../../src/common/Utils';
 import {TestHelper} from '../TestHelper';
 import {VideoDTO} from '../../src/common/entities/VideoDTO';
@@ -26,11 +26,11 @@ const savedDescribe = describe;
 
 class GalleryManagerTest extends GalleryManager {
 
-  public async getDirIdAndTime(connection: Connection, directoryName: string, directoryParent: string) {
+  public async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
     return super.getDirIdAndTime(connection, directoryName, directoryParent);
   }
 
-  public async getParentDirFromId(connection: Connection, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
+  public async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
     return super.getParentDirFromId(connection, session, dir);
   }
 
@@ -289,7 +289,7 @@ export class DBTestHelper {
    * DELETE + resetting AUTO_INCREMENT is several times faster than TRUNCATE on InnoDB.
    * Returns false if it failed (e.g. a test dropped some tables).
    */
-  private static async truncateMysql(conn: Connection): Promise<boolean> {
+  private static async truncateMysql(conn: DataSource): Promise<boolean> {
     const versionTable = conn.getMetadata(VersionEntity).tableName;
     const tables = new Set(conn.entityMetadatas.map(m => m.tableName));
     tables.delete(versionTable);

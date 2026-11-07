@@ -11,7 +11,6 @@ import {GalleryManager} from '../../../../src/backend/model/database/GalleryMana
 import {promises as fsp} from 'fs';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
 import {SessionContext} from '../../../../src/backend/model/SessionContext';
-import {AuthenticationMWs} from '../../../../src/backend/middlewares/user/AuthenticationMWs';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
@@ -391,18 +390,30 @@ describe('GalleryMWs', () => {
       expect((notExisting.nextArgs[0] as ErrorDTO).code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
       expect(listArgs).to.be.null;
 
-      const res: any = {
-        status: (s: number) => {
-          res.statusCode = s;
-          return res;
-        }
-      };
-      let notAvailableArgs: any[] = null;
-      AuthenticationMWs.directoryNotFound(res, (...args: any[]) => {
-        notAvailableArgs = args;
-      });
-      expect(res.statusCode).to.equal(notExisting.status);
-      expect(notAvailableArgs).to.deep.equal(notExisting.nextArgs);
+      // AuthenticationMWs.authoriseDirectory answers not available directories with the same error (see its spec)
+      expect(notExisting.nextArgs).to.deep.equal([new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found')]);
+    });
+
+    it('does not list a directory outside of the image folder', async () => {
+      // fsp.stat is stubbed to "exists": only the path check can stop it
+      for (const dir of ['..', '../other', 'a/../../other']) {
+        const outside = await callListDirectory(dir, sessionContext({}));
+        expect(outside.status, dir).to.equal(404);
+        expect((outside.nextArgs[0] as ErrorDTO).code, dir).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+        expect(listArgs, dir).to.be.null;
+      }
+    });
+
+    it('does not load a file outside of the image folder', async () => {
+      for (const mediaPath of ['../x.jpg', 'a/../../x.jpg']) {
+        const req: any = {params: {mediaPath}};
+        let nextArgs: any[] = null;
+        await GalleryMWs.loadFile(req, {} as any, (...args: any[]) => {
+          nextArgs = args;
+        });
+        expect((nextArgs[0] as ErrorDTO).code, mediaPath).to.equal(ErrorCodes.PATH_ERROR);
+        expect(req.resultPipe, mediaPath).to.be.undefined;
+      }
     });
 
     it('lists metafiles only for available directories', async () => {

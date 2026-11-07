@@ -115,21 +115,30 @@ describe('Typeorm integration', () => {
 
   it('should open and close connection', async () => {
     const conn = await SQLConnection.getConnection();
-    expect(conn.isConnected).to.equal(true);
+    expect(conn.isInitialized).to.equal(true);
     await SQLConnection.close();
-    expect(conn.isConnected).to.equal(false);
+    expect(conn.isInitialized).to.equal(false);
   });
 
   it('should open and close connection twice', async () => {
     let conn = await SQLConnection.getConnection();
-    expect(conn.isConnected).to.equal(true);
+    expect(conn.isInitialized).to.equal(true);
     await SQLConnection.close();
-    expect(conn.isConnected).to.equal(false);
+    expect(conn.isInitialized).to.equal(false);
 
     conn = await SQLConnection.getConnection();
-    expect(conn.isConnected).to.equal(true);
+    expect(conn.isInitialized).to.equal(true);
     await SQLConnection.close();
-    expect(conn.isConnected).to.equal(false);
+    expect(conn.isInitialized).to.equal(false);
+  });
+
+  it('should try a connection twice, also while the app is connected', async () => {
+    const conn = await SQLConnection.getConnection();
+    expect(await SQLConnection.tryConnection(Config.Database)).to.equal(true);
+    expect(await SQLConnection.tryConnection(Config.Database)).to.equal(true);
+    // the tried connection is a separate one
+    expect(conn.isInitialized).to.equal(true);
+    expect((await conn.getRepository(VersionEntity).find()).length).to.equal(1);
   });
 
   it('should add a user', async () => {
@@ -212,12 +221,12 @@ describe('Typeorm integration', () => {
     photo.directory = dir2;
     await await conn.getRepository(PhotoEntity).save(photo);
     await SQLConnection.close();
-    expect(conn.isConnected).to.equal(false);
+    expect(conn.isInitialized).to.equal(false);
 
     conn = await SQLConnection.getConnection();
-    expect(conn.isConnected).to.equal(true);
+    expect(conn.isInitialized).to.equal(true);
     await SQLConnection.close();
-    expect(conn.isConnected).to.equal(false);
+    expect(conn.isInitialized).to.equal(false);
   });
 
 });

@@ -237,7 +237,7 @@ export class GalleryGridComponent
     };
     let diffFound = false;
     let i = 0;
-    let j = 0;
+    let j: number;
 
     for (; i < mediaGroups.length && i < groups.length; ++i) {
 

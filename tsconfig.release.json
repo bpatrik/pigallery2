@@ -1,0 +1,13 @@
+{
+  // Compiles the backend into release/ for `npm run create-release` (gulp task build-backend)
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "release"
+  },
+  "include": [
+    "src/common/**/*.ts",
+    "src/backend/**/*.ts",
+    "benchmark/**/*.ts"
+  ]
+}

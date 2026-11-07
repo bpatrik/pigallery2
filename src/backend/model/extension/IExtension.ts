@@ -6,7 +6,7 @@ import {ProjectPathClass} from '../../ProjectPath';
 import {ILogger} from '../../Logger';
 import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {ParamsDictionary} from 'express-serve-static-core';
-import {Connection, Repository} from 'typeorm';
+import {DataSource, Repository} from 'typeorm';
 import {DynamicConfig} from '../../../common/entities/DynamicConfig';
 import {MediaDTOWithThPath} from '../messenger/Messenger';
 import {PhotoMetadata} from '../../../common/entities/PhotoDTO';
@@ -64,7 +64,7 @@ export interface IExtensionEvents {
        * Returns the projected directory cache for a given directory
        * ProjectedDirectoryCacheEntity contains information, like the number of photos, videos, etc..
        */
-      getCacheForDirectory: IExtensionEvent<[connection: Connection, session: SessionContext, dir: {
+      getCacheForDirectory: IExtensionEvent<[connection: DataSource, session: SessionContext, dir: {
         id: number,
         name: string,
         path: string
@@ -119,36 +119,65 @@ export interface IMediaRequestBody {
   media: string;
 }
 
+type IdentifierStart = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't'
+  | 'u' | 'v' | 'w' | 'x' | 'y' | 'z' | Uppercase<'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p' | 'q'
+  | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'> | '_' | '$';
+
+// true if a ':' or '*' in the path is not followed by a parameter name
+type HasUnnamedParam<P extends string> =
+  P extends `${string}${':' | '*'}${infer Rest}`
+    ? Rest extends `${IdentifierStart}${string}` ? HasUnnamedParam<Rest> : true
+    : false;
+
+/**
+ * A REST api path, relative to the extension base endpoint, in Express 5 (path-to-regexp 8) syntax:
+ * `:name` for a param, `*name` for a wildcard (its param is the array of the path segments) and `{...}` for an optional part.
+ * The Express 4 syntax is rejected: regex params (`:id(\\d+)`), `:id?`, unnamed wildcards (`*`) and the reserved `()[]?+!` characters.
+ * See https://expressjs.com/en/guide/migrating-5.html#path-syntax
+ * At runtime, a path that Express 5 can't parse is logged and not registered.
+ */
+export type ExtensionRoutePath<P extends string> =
+  P extends `${string}${'(' | ')' | '[' | ']' | '?' | '+' | '!'}${string}`
+    ? 'Express 4 path syntax is not supported (no regex params, no ?, +, !, [ or ]); use {...} for optional parts'
+    : HasUnnamedParam<P> extends true
+      ? 'Every : and * needs a parameter name (e.g. *path), see the Express 5 path syntax'
+      : P;
+
+/**
+ * Checks every path of a route literal at compile time, see {@link ExtensionRoutePath}.
+ */
+export type ExtensionRoutePaths<P extends readonly string[]> = { readonly [K in keyof P]: ExtensionRoutePath<P[K]> };
+
 export interface IExtensionRESTRoute {
   /**
    * Looks for req.body.media for the media path and calls the callback with that media entry.
    * Sends a pigallery2 standard JSON object with payload or error message back to the client.
-   * @param paths RESTapi path, relative to the extension base endpoint
+   * @param paths RESTapi paths, relative to the extension base endpoint, see {@link ExtensionRoutePath}
    * @param invalidateDirectory set to false to prevent invalidating the directory.
    * Invalidation is resource-intensive and should be avoided if media or its directory is not changed.
    * @param minRole set to null to omit auer check (ie make the endpoint public)
-   * @param cb function callback
+   * @param cb function callback. `body` is `{}` if the request has no JSON body.
    * @return newly added REST api path
    */
-  mediaJsonResponse(paths: string[], minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string;
+  mediaJsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string;
 
   /**
    * Sends a pigallery2 standard JSON object with payload or error message back to the client.
-   * @param paths RESTapi path, relative to the extension base endpoint
+   * @param paths RESTapi paths, relative to the extension base endpoint, see {@link ExtensionRoutePath}
    * @param minRole set to null to omit auer check (ie make the endpoint public)
-   * @param cb function callback
+   * @param cb function callback. `body` is `{}` if the request has no JSON body.
    * @return newly added REST api path
    */
-  jsonResponse(paths: string[], minRole: UserRoles, cb: (params?: ParamsDictionary, body?: any, user?: UserDTO) => Promise<unknown> | unknown): string;
+  jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: any, user?: UserDTO) => Promise<unknown> | unknown): string;
 
   /**
-   * Exposes a standard expressjs middleware
-   * @param paths RESTapi path, relative to the extension base endpoint
+   * Exposes a standard expressjs (Express 5) middleware
+   * @param paths RESTapi paths, relative to the extension base endpoint, see {@link ExtensionRoutePath}
    * @param minRole set to null to omit auer check (ie make the endpoint public)
-   * @param mw expressjs middleware
+   * @param mw expressjs middleware. `req.body` is `undefined` if the request has no JSON body.
    * @return newly added REST api path
    */
-  rawMiddleware(paths: string[], minRole: UserRoles, mw: (req: Request, res: Response, next: NextFunction) => void | Promise<void>): string;
+  rawMiddleware<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, mw: (req: Request, res: Response, next: NextFunction) => void | Promise<void>): string;
 }
 
 export interface IExtensionRESTApi {
@@ -163,7 +192,7 @@ export interface IExtensionDB {
   /**
    * Returns with a typeorm SQL connection
    */
-  getSQLConnection(): Promise<Connection>;
+  getSQLConnection(): Promise<DataSource>;
 
   /**
    * Adds SQL tables to typeorm

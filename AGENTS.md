@@ -59,6 +59,8 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 
 - Compile backend + tests: `npm run build-backend` (plain `tsc`). Mocha runs the compiled `.js`, so compile before running tests.
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
+  - The server can't start without a frontend build in `dist` (`Localizations.init` reads it), so the integration tests
+    fail in their `before all` hooks and the run hangs. In a fresh worktree, build the frontend or copy `dist/en` from the main checkout first.
   - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
     never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
@@ -165,6 +167,8 @@ Pitfalls seen so far:
 - Avoid heavy queries, N+1 queries and loading full tables on the server; prefer projections and pagination.
 - Keep TypeORM queries portable between SQLite and MySQL.
 - Changed any TypeORM entity? Bump `DataStructureVersion` in `src/common/DataStructureVersion.ts`.
+- sharp's `config.libvips` must not exceed the oldest libvips of the Alpine and Debian images (they build sharp against
+  the distro libvips). `ConfigDiagnostics.testSharp` fails the Docker build otherwise.
 - Every `@ConfigProperty` needs an explicit `type` (and `arrayType` for arrays): the frontend is built without decorator metadata,
   so typeconfig can't infer it there. `test/common/unit/config/ConfigTypes.spec.ts` checks this and snapshots the resolved types;
   after an intended config change, regenerate the snapshot with `UPDATE_CONFIG_SNAPSHOT=true`.
@@ -183,6 +187,8 @@ Pitfalls seen so far:
   (word order and suffixes differ between languages), expect much longer words than in English without breaking the layout,
   format dates and numbers by locale, and don't assume a "first name last name" order.
 - Prefer implementing new features as extensions when feasible (see contribution guide).
+- Breaking changes to the extension API: make the TypeScript types reject the old usage, and handle it gracefully at runtime
+  (log and skip, never crash the app or open a hole), so an old extension stays safe. List them in the PR for the release notes.
 
 ## Code style
 
@@ -209,3 +215,4 @@ Pitfalls seen so far:
 Only relevant when working with the maintainer, Patrik J. Braun.
 
 - Works on Windows (Git Bash and PowerShell). `python` there is only the Microsoft Store stub; use `perl` or `node` for scripted edits.
+- Single maintainer: after opening a PR, don't watch its CI or reviews unless asked. The maintainer reports problems.

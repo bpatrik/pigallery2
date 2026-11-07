@@ -1,4 +1,6 @@
 import 'reflect-metadata';
+import * as path from 'path';
+import * as fs from 'fs';
 import {Config} from '../src/common/config/private/Config';
 import {ProjectPath} from '../src/backend/ProjectPath';
 import {BenchmarkResult, BenchmarkRunner} from './BenchmarkRunner';
@@ -8,6 +10,10 @@ import {DirectoryDTOUtils} from '../src/common/entities/DirectoryDTO';
 
 
 Config.Media.folder = BMConfig.path;
+// BenchmarkRunner deletes the DB folder, so never point it at the app's own DB
+Config.Database.dbFolder = path.join(BMConfig.tempFolder, 'db');
+Config.Media.tempFolder = path.join(BMConfig.tempFolder, 'tmp');
+fs.mkdirSync(Config.Media.tempFolder, {recursive: true});
 ProjectPath.reset();
 const RUNS = BMConfig.RUNS;
 
@@ -55,12 +61,12 @@ const printExperimentResult = (result: BenchmarkResult, isSubResult = false) => 
   }
   if (result.contentWrapper) {
     if (result.contentWrapper.directory) {
-      details = 'media: ' + result.contentWrapper.directory.media.length +
-        ', directories: ' + result.contentWrapper.directory.directories.length +
+      details = 'media: ' + (result.contentWrapper.directory.media?.length ?? 0) +
+        ', directories: ' + (result.contentWrapper.directory.directories?.length ?? 0) +
         ', size: ' + fileSize(JSON.stringify(DirectoryDTOUtils.removeReferences(result.contentWrapper.directory)).length);
     } else {
-      details = 'media: ' + result.contentWrapper.searchResult.media.length +
-        ', directories: ' + result.contentWrapper.searchResult.directories.length +
+      details = 'media: ' + (result.contentWrapper.searchResult.media?.length ?? 0) +
+        ', directories: ' + (result.contentWrapper.searchResult.directories?.length ?? 0) +
         ', size: ' + fileSize(JSON.stringify(result.contentWrapper.searchResult).length);
 
     }
