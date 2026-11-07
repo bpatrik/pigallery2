@@ -11,7 +11,6 @@ import {GalleryManager} from '../../../../src/backend/model/database/GalleryMana
 import {promises as fsp} from 'fs';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
 import {SessionContext} from '../../../../src/backend/model/SessionContext';
-import {AuthenticationMWs} from '../../../../src/backend/middlewares/user/AuthenticationMWs';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
 import {DirectorySearch, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {TestHelper} from '../../../TestHelper';
@@ -303,18 +302,8 @@ describe('GalleryMWs', () => {
       expect((notExisting.nextArgs[0] as ErrorDTO).code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
       expect(listArgs).to.be.null;
 
-      const res: any = {
-        status: (s: number) => {
-          res.statusCode = s;
-          return res;
-        }
-      };
-      let notAvailableArgs: any[] = null;
-      AuthenticationMWs.directoryNotFound(res, (...args: any[]) => {
-        notAvailableArgs = args;
-      });
-      expect(res.statusCode).to.equal(notExisting.status);
-      expect(notAvailableArgs).to.deep.equal(notExisting.nextArgs);
+      // AuthenticationMWs.authoriseDirectory answers not available directories with the same error (see its spec)
+      expect(notExisting.nextArgs).to.deep.equal([new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found')]);
     });
 
     it('does not list a directory outside of the image folder', async () => {

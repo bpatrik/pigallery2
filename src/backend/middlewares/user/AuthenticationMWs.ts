@@ -165,9 +165,10 @@ export class AuthenticationMWs {
   }
 
   /**
-   * The response for not existing and not available directories. They need to be the same.
+   * The response for not existing and not available directories. They need to be the same:
+   * GalleryMWs.listDirectory answers not existing directories with the same status and error.
    */
-  public static directoryNotFound(res: Response, next: NextFunction): void {
+  private static directoryNotFound(res: Response, next: NextFunction): void {
     res.status(404);
     return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
   }
