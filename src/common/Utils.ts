@@ -24,54 +24,50 @@ export class Utils {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static removeNullOrEmptyObj<T extends Record<string, any>>(obj: T): T {
+  static removeNullOrEmptyObj<T extends object>(obj: T): T {
     if (typeof obj !== 'object' || obj == null) {
       return obj;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if ((obj as any)._____removeNullOrEmptyObjvisiting) {
+    const o = obj as Record<string, unknown>;
+    if (o['_____removeNullOrEmptyObjvisiting']) {
       throw new Error('Recursive call detected');
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (obj as any)._____removeNullOrEmptyObjvisiting = true;
-    const keys = Object.keys(obj);
+    o['_____removeNullOrEmptyObjvisiting'] = true;
+    const keys = Object.keys(o);
     for (const key of keys) {
-      if (obj[key] !== null && typeof obj[key] === 'object') {
-        if (Utils.removeNullOrEmptyObj(obj[key])) {
-          if (Object.keys(obj[key]).length === 0) {
-            delete obj[key];
+      const value = o[key];
+      if (value !== null && typeof value === 'object') {
+        if (Utils.removeNullOrEmptyObj(value)) {
+          if (Object.keys(value).length === 0) {
+            delete o[key];
           }
         }
-      } else if (obj[key] === null || obj[key] === undefined) {
-        delete obj[key];
+      } else if (value === null || value === undefined) {
+        delete o[key];
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (obj as any)._____removeNullOrEmptyObjvisiting;
+    delete o['_____removeNullOrEmptyObjvisiting'];
     return obj;
   }
 
   static clone<T>(object: T): T {
-    return JSON.parse(JSON.stringify(object));
+    return JSON.parse(JSON.stringify(object)) as T;
   }
 
   static shallowClone<T>(object: T): T {
     const c: T = {} as T;
     for (const e of Object.entries(object as object)) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (c as Record<string, any>)[e[0]] = e[1];
+      (c as Record<string, unknown>)[e[0]] = e[1];
     }
     return c;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static zeroPrefix(number: any, length: number): string {
-    if (!isNaN(number)) {
+  static zeroPrefix(number: number | string, length: number): string {
+    if (!isNaN(Number(number))) {
       const zerosToAdd = Math.max(length - String(number).length, 0);
       return '0'.repeat(zerosToAdd) + number;
     } else {
-      return '0'.repeat(number);
+      return '0'.repeat(Number(number));
     }
   }
 
@@ -79,8 +75,7 @@ export class Utils {
   /**
    * Checks if the two input (let them be objects or arrays or just primitives) are equal
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static equalsFilter(object: any, filter: any, skipProp: string[] = []): boolean {
+  static equalsFilter(object: unknown, filter: unknown, skipProp: string[] = []): boolean {
     if (typeof filter !== 'object' || filter == null) {
       return object === filter;
     }
@@ -88,19 +83,21 @@ export class Utils {
       return false;
     }
 
-    if (Array.isArray(object) && object.length !== filter.length) {
+    const o = object as Record<string, unknown>;
+    const f = filter as Record<string, unknown>;
+    if (Array.isArray(object) && object.length !== f['length']) {
       return false;
     }
-    const keys = Object.keys(filter);
+    const keys = Object.keys(f);
     for (const key of keys) {
       if (skipProp.includes(key)) {
         continue;
       }
-      if (typeof filter[key] === 'object') {
-        if (Utils.equalsFilter(object[key], filter[key], skipProp) === false) {
+      if (typeof f[key] === 'object') {
+        if (Utils.equalsFilter(o[key], f[key], skipProp) === false) {
           return false;
         }
-      } else if (object[key] !== filter[key]) {
+      } else if (o[key] !== f[key]) {
         return false;
       }
     }
@@ -200,16 +197,14 @@ export class Utils {
 
 
   //function to calculate offset from exif.exif.gpsTimeStamp or exif.gps.GPSDateStamp + exif.gps.GPSTimestamp
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static getTimeOffsetByGPSStamp(timestamp: string, gpsTimeStamp: string, gps: any) {
+  static getTimeOffsetByGPSStamp(timestamp: string, gpsTimeStamp: string, gps?: { GPSDateStamp?: string, GPSTimeStamp?: (number | string)[] }) {
     let UTCTimestamp = gpsTimeStamp;
     if (!UTCTimestamp &&
       gps &&
       gps.GPSDateStamp &&
       gps.GPSTimeStamp) { //else use exif.gps.GPS*Stamp if available
       //GPS timestamp is always UTC (+00:00)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      UTCTimestamp = gps.GPSDateStamp.replaceAll(':', '-') + ' ' + gps.GPSTimeStamp.map((num: any) => Utils.zeroPrefix(num, 2)).join(':');
+      UTCTimestamp = gps.GPSDateStamp.replaceAll(':', '-') + ' ' + gps.GPSTimeStamp.map((num) => Utils.zeroPrefix(num, 2)).join(':');
     }
     if (UTCTimestamp && timestamp) {
       //offset in minutes is the difference between gps timestamp, and given timestamp
@@ -303,13 +298,12 @@ export class Utils {
     return size.toFixed(2) + postFixes[index];
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static getUnique(arr: any[]) {
+  static getUnique<T>(arr: T[]): T[] {
     return arr.filter((value, index, arr) => arr.indexOf(value) === index);
   }
 
   static createRange(from: number, to: number): number[] {
-    const arr = new Array(to - from + 1);
+    const arr = new Array<number>(to - from + 1);
     let c = to - from + 1;
     while (c--) {
       arr[c] = to--;
@@ -345,47 +339,6 @@ export class Utils {
 
     return url.substring(0, url.length - 1);
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static updateKeys(targetObject: any, sourceObject: any): void {
-    Object.keys(sourceObject).forEach((key): void => {
-      if (typeof targetObject[key] === 'undefined') {
-        return;
-      }
-      if (typeof targetObject[key] === 'object') {
-        Utils.updateKeys(targetObject[key], sourceObject[key]);
-      } else {
-        targetObject[key] = sourceObject[key];
-      }
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static setKeys(targetObject: any, sourceObject: any): void {
-    Object.keys(sourceObject).forEach((key): void => {
-      if (typeof targetObject[key] === 'object') {
-        Utils.setKeys(targetObject[key], sourceObject[key]);
-      } else {
-        targetObject[key] = sourceObject[key];
-      }
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static setKeysForced(targetObject: any, sourceObject: any): void {
-    Object.keys(sourceObject).forEach((key): void => {
-      if (typeof sourceObject[key] === 'object') {
-        if (typeof targetObject[key] === 'undefined') {
-          targetObject[key] = {};
-        }
-        Utils.setKeysForced(targetObject[key], sourceObject[key]);
-      } else {
-        targetObject[key] = sourceObject[key];
-      }
-    });
-  }
-
-
 
   public static findClosest(num: number, arr: number[]): number {
     let curr = arr[0];
@@ -442,7 +395,7 @@ export class Utils {
 
   public static decodeHTMLChars(text: string): string {
     if (text) {
-      const newtext = text.replace(/&#([0-9]{1,3});/gi, function(match, numStr) {
+      const newtext = text.replace(/&#([0-9]{1,3});/gi, function(match, numStr: string) {
         return String.fromCharCode(parseInt(numStr, 10));
       });
       return newtext.replace(/&[^;]+;/g, function(match) {
@@ -475,29 +428,6 @@ export class Utils {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static getAnyX(num: number, arr: any[], start = 0): any[][] {
-    if (num <= 0 || num > arr.length || start >= arr.length) {
-      return [];
-    }
-    if (num <= 1) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return arr.slice(start).map((e): any[] => [e]);
-    }
-    if (num === arr.length - start) {
-      return [arr.slice(start)];
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ret: any[][] = [];
-    for (let i = start; i < arr.length; ++i) {
-      Utils.getAnyX(num - 1, arr, i + 1).forEach((a): void => {
-        a.push(arr[i]);
-        ret.push(a);
-      });
-    }
-    return ret;
-  }
-
   public static xmpExifGpsCoordinateToDecimalDegrees(text: string): number | undefined {
     if (!text || typeof text !== 'string') {
       return undefined;
@@ -525,8 +455,7 @@ export class Utils {
     // Fallback to the full name
     return filename;
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static enumToArray(EnumType: any): { key: number; value: string }[] {
+  public static enumToArray(EnumType: Record<string, string | number>): { key: number; value: string }[] {
     const arr: { key: number; value: string }[] = [];
     for (const enumMember in EnumType) {
       // eslint-disable-next-line no-prototype-builtins
@@ -535,14 +464,13 @@ export class Utils {
       }
       const key = parseInt(enumMember, 10);
       if (key >= 0) {
-        arr.push({key, value: EnumType[enumMember]});
+        arr.push({key, value: EnumType[enumMember] as string});
       }
     }
     return arr;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static isValidEnumInt(EnumType: any, value: number) {
+  public static isValidEnumInt(EnumType: Record<number, string | number>, value: number) {
     return typeof EnumType[value] === 'string';
   }
 

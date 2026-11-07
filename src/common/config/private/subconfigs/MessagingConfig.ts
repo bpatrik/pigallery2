@@ -7,7 +7,7 @@ declare let $localize: (s: TemplateStringsArray) => string;
 if (typeof $localize === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  global.$localize = (s) => s;
+  global.$localize = (s: TemplateStringsArray) => s;
 }
 
 

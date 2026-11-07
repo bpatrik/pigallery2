@@ -75,12 +75,10 @@ export class PrivateConfigClass extends ServerConfig {
       ];
     }
 
-    this.Environment.appVersion =
-      require('../../../../package.json').version;
-    this.Environment.buildTime =
-      require('../../../../package.json').buildTime;
-    this.Environment.buildCommitHash =
-      require('../../../../package.json').buildCommitHash;
+    const pkg = require('../../../../package.json') as { version?: string, buildTime?: string, buildCommitHash?: string };
+    this.Environment.appVersion = pkg.version;
+    this.Environment.buildTime = pkg.buildTime;
+    this.Environment.buildCommitHash = pkg.buildCommitHash;
     this.Environment.upTime = upTime;
     this.Environment.isDocker = !!process.env['PI_DOCKER'];
   }
