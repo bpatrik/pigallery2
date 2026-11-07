@@ -1,5 +1,5 @@
 export class EventLimit<T> {
-  private lastTriggerValue: T = null;
+  private lastTriggerValue: T | null = null;
 
   private handlers: EventLimitHandler<T>[] = [];
 
@@ -27,12 +27,12 @@ export class EventLimit<T> {
     this.handlers = [];
   }
 
-  public trigger = (data?: T) => {
+  public trigger = (data: T): void => {
     if (this.handlers) {
       this.handlers.slice(0).forEach((h) => {
         if (
             h.limit <= data &&
-            (h.lastTriggerValue < h.limit || h.lastTriggerValue == null)
+            (h.lastTriggerValue == null || h.lastTriggerValue < h.limit)
         ) {
           h.fire(data);
         }
@@ -45,7 +45,7 @@ export class EventLimit<T> {
 }
 
 class EventLimitHandler<T> {
-  public lastTriggerValue: T = null;
+  public lastTriggerValue: T | null = null;
 
   constructor(public limit: T, public handler: (data?: T) => void) {
   }
