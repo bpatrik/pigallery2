@@ -80,7 +80,7 @@ describe('ConfigDiagnostics', () => {
       try {
         await ConfigDiagnostics.testNavBarConfig(nb);
       } catch (e) {
-        error = e;
+        error = e as Error;
       }
       expect(error).to.not.equal(null);
       expect(error.message).to.contain('NavBar link #2');

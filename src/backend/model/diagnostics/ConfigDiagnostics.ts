@@ -118,12 +118,12 @@ export class ConfigDiagnostics {
     try {
       await FFmpeg.run(['-codecs']);
     } catch (err) {
-      throw new Error('Error accessing ffmpeg, cant find executable: ' + err.toString(), {cause: err});
+      throw new Error('Error accessing ffmpeg, cant find executable: ' + String(err), {cause: err});
     }
     try {
       await FFmpeg.probe(__dirname + '/blank.jpg');
     } catch (err) {
-      throw new Error('Error accessing ffmpeg-probe, cant find executable: ' + err.toString(), {cause: err});
+      throw new Error('Error accessing ffmpeg-probe, cant find executable: ' + String(err), {cause: err});
     }
   }
 
@@ -451,8 +451,8 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testDatabase(Config.Database);
     } catch (ex) {
-      const err: Error = ex;
-      Logger.warn(LOG_TAG, '[SQL error]', err.toString());
+      const err = String(ex);
+      Logger.warn(LOG_TAG, '[SQL error]', err);
       Logger.error(
         LOG_TAG,
         'Error during initializing SQL DB, check DB connection and settings'
@@ -463,12 +463,12 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testSharp();
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
 
       Logger.error(
         LOG_TAG,
         'The \'sharp\' node module is missing or does not work, so photos cannot be processed:',
-        err.toString()
+        err
       );
       process.exit(1);
     }
@@ -476,22 +476,22 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testTempFolder(Config.Media.tempFolder);
     } catch (ex) {
-      const err: Error = ex;
-      NotificationManager.error('Thumbnail folder error', err.toString());
-      Logger.error(LOG_TAG, 'Thumbnail folder error', err.toString());
+      const err = String(ex);
+      NotificationManager.error('Thumbnail folder error', err);
+      Logger.error(LOG_TAG, 'Thumbnail folder error', err);
     }
 
     try {
       await ConfigDiagnostics.testVideoConfig(Config.Media.Video, Config);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Video support error, switching off..' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG,errorText,
-        err.toString()
+        err
       );
       Config.Media.Video.enabled = false;
     }
@@ -502,14 +502,14 @@ export class ConfigDiagnostics {
         Config
       );
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Meta file support error, switching off gpx..' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.MetaFile.gpx = false;
     }
@@ -517,14 +517,14 @@ export class ConfigDiagnostics {
     try {
        ConfigDiagnostics.testAlbumsConfig(Config.Album, Config);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Albums support error, switching off..' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.Album.enabled = false;
     }
@@ -532,31 +532,31 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testImageFolder(Config.Media.folder);
     } catch (ex) {
-      const err: Error = ex;
-      NotificationManager.error('Images folder error', err.toString());
-      Logger.error(LOG_TAG, 'Images folder error', err.toString());
+      const err = String(ex);
+      NotificationManager.error('Images folder error', err);
+      Logger.error(LOG_TAG, 'Images folder error', err);
     }
     try {
       await ConfigDiagnostics.testPhotoConfig(
         Config.Media.Photo
       );
     } catch (ex) {
-      const err: Error = ex;
-      NotificationManager.error('Thumbnail settings error', err.toString());
-      Logger.error(LOG_TAG, 'Thumbnail settings error', err.toString());
+      const err = String(ex);
+      NotificationManager.error('Thumbnail settings error', err);
+      Logger.error(LOG_TAG, 'Thumbnail settings error', err);
     }
 
     try {
       await ConfigDiagnostics.testSearchConfig(Config.Search, Config);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Search is not supported with these settings. Disabling temporally. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.Search.enabled = false;
     }
@@ -564,14 +564,14 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testAlbumCoverConfig(Config.AlbumCover);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Cover settings are not valid, resetting search query' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.AlbumCover.SearchQuery = {
         type: SearchQueryTypes.any_text,
@@ -582,14 +582,14 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testNavBarConfig(Config.Gallery.NavBar);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Some NavBar links are not valid, they are hidden until you fix them. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       ConfigDiagnostics.removeInvalidNavigationLinks(Config.Gallery.NavBar);
     }
@@ -597,14 +597,14 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testFacesConfig(Config.Faces, Config);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Faces are not supported with these settings. Disabling temporally. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.Faces.enabled = false;
     }
@@ -612,14 +612,14 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testTasksConfig(Config.Jobs, Config);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Some Tasks are not supported with these settings. Disabling temporally. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.Faces.enabled = false;
     }
@@ -627,14 +627,14 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testSharingConfig(Config.Sharing, Config);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Sharing is not supported with these settings. Disabling temporally. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       Config.Sharing.enabled = false;
     }
@@ -645,16 +645,16 @@ export class ConfigDiagnostics {
         Config
       );
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Random Media is not supported with these settings. Disabling temporally.. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(
         errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG,
         errorText,
-        err.toString()
+        err
       );
       Config.Sharing.enabled = false;
     }
@@ -662,16 +662,16 @@ export class ConfigDiagnostics {
     try {
       await ConfigDiagnostics.testMapConfig(Config.Map);
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Maps is not supported with these settings. Using open street maps temporally. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(
         errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG,
         errorText,
-        err.toString()
+        err
       );
       Config.Map.mapProvider = MapProviders.OpenStreetMap;
     }
@@ -682,14 +682,14 @@ export class ConfigDiagnostics {
         Config.Jobs,
       );
     } catch (ex) {
-      const err: Error = ex;
+      const err = String(ex);
       const errorText = 'Jobs error. Resetting config to default for now to let the app start up. ' + ConfigDiagnostics.adjustConfigWarn;
       NotificationManager.warning(errorText,
-        err.toString()
+        err
       );
       Logger.warn(
         LOG_TAG, errorText,
-        err.toString()
+        err
       );
       const pc = ConfigClassBuilder.attachPrivateInterface(new PrivateConfigClass());
       Config.Jobs.scheduled = pc.Jobs.scheduled;

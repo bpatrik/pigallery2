@@ -208,7 +208,7 @@ export class SQLConnection {
     try {
       return await initialize(options);
     } catch (e) {
-      if (e.sqlMessage === 'Unknown database \'' + options.database + '\'') {
+      if (e instanceof Error && 'sqlMessage' in e && e.sqlMessage === 'Unknown database \'' + options.database + '\'') {
         Logger.debug(LOG_TAG, 'creating database: ' + options.database);
         const tmpOption = Utils.clone(options);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -271,7 +271,7 @@ export class SQLConnection {
       Logger.warn(
         LOG_TAG,
         'Could not move users to the new db scheme, deleting them. Details:' +
-        e.toString()
+        String(e)
       );
     }
   }

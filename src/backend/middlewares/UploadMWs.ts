@@ -31,7 +31,7 @@ export class UploadMWs {
         req.resultPipe = await ObjectManagers.getInstance().UploadManager.saveFiles(directory, files);
         return next();
       } catch (e) {
-        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, e.message || e));
+        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, e instanceof Error ? e.message : String(e)));
       }
     });
   }

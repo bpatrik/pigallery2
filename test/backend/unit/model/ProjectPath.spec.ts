@@ -68,7 +68,7 @@ describe('ProjectPath', () => {
         try {
           await DiskManager.scanDirectory(p);
         } catch (e) {
-          err = e;
+          err = e as Error;
         }
         expect(err, p).to.not.be.null;
         expect(err.message, p).to.contain('outside of the image folder');

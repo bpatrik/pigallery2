@@ -1270,7 +1270,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         try {
           await sm.search(DBTestHelper.defaultSession, query);
         } catch (e) {
-          error = e;
+          error = e as Error;
         }
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.contain('Invalid search query');

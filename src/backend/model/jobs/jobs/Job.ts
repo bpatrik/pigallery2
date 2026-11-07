@@ -172,7 +172,7 @@ export abstract class Job<T extends Record<string, unknown> = Record<string, unk
         Logger.error(this.LOG_TAG, 'Job failed with:');
         Logger.error(this.LOG_TAG, e);
         if (this.progress) {
-          this.progress.log('Failed with: ' + (typeof e.toString === 'function') ? e.toString() : JSON.stringify(e));
+          this.progress.log('Failed with: ' + String(e));
           this.progress.State = JobProgressStates.failed;
         }
       }

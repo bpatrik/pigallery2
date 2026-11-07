@@ -175,7 +175,7 @@ export class OIDCAuthService {
         }
       }
     } catch (err) {
-      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo: ' + (err?.message || err));
+      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo: ' + (err instanceof Error ? err.message : String(err)));
     }
     return claims;
   }

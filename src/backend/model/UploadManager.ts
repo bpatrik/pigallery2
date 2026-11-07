@@ -39,7 +39,7 @@ export class UploadManager {
       try {
         await this.saveFile(directory, file);
       } catch (e) {
-        errors.push({filename: file.originalname, error: e.message});
+        errors.push({filename: file.originalname, error: e instanceof Error ? e.message : String(e)});
       }
     }
     const dto = DiskManager.getDTOFromPath(directory || '');

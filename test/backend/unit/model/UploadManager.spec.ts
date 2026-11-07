@@ -59,7 +59,7 @@ describe('UploadManager', () => {
       await uploadManager.saveFile('', file);
       expect.fail('Should have thrown an error');
     } catch (e) {
-      expect(e.message).to.contain('Unsupported file format');
+      expect((e as Error).message).to.contain('Unsupported file format');
     }
   });
 
@@ -73,7 +73,7 @@ describe('UploadManager', () => {
         await uploadManager.saveFile('traversal_test', file);
         expect.fail('Should have thrown an error for: ' + name);
       } catch (e) {
-        expect(e.message, name).to.contain('Invalid filename');
+        expect((e as Error).message, name).to.contain('Invalid filename');
       }
     }
     expect(fs.existsSync(path.join(testDir, 'escape.jpg'))).to.be.false;
@@ -89,7 +89,7 @@ describe('UploadManager', () => {
       await uploadManager.saveFile('../outside_dir', file);
       expect.fail('Should have thrown an error');
     } catch (e) {
-      expect(e.message).to.contain('Invalid upload path');
+      expect((e as Error).message).to.contain('Invalid upload path');
     }
     expect(fs.existsSync(path.join(testDir, '..', 'outside_dir'))).to.be.false;
   });
@@ -108,7 +108,7 @@ describe('UploadManager', () => {
       await uploadManager.saveFiles('../outside_conf_dir', [file]);
       expect.fail('Should have thrown an error');
     } catch (e) {
-      expect(e.message).to.contain('Invalid upload path');
+      expect((e as Error).message).to.contain('Invalid upload path');
     } finally {
       Config.Upload.enforcedDirectoryConfig = false;
       fs.rmSync(outsideDir, {recursive: true, force: true});
@@ -125,7 +125,7 @@ describe('UploadManager', () => {
         await uploadManager.saveFile('blocked_test', file);
         expect.fail('Should have thrown an error for: ' + name);
       } catch (e) {
-        expect(e.message, name).to.contain('Unsupported file format');
+        expect((e as Error).message, name).to.contain('Unsupported file format');
       }
     }
   });
@@ -158,7 +158,7 @@ describe('UploadManager', () => {
       await uploadManager.saveFile('blocked_jpg_test', file);
       expect.fail('Should have thrown an error');
     } catch (e) {
-      expect(e.message).to.contain('Unsupported file format');
+      expect((e as Error).message).to.contain('Unsupported file format');
     } finally {
       Config.Upload.blockedExtensions = blocked;
     }
@@ -195,7 +195,7 @@ describe('UploadManager', () => {
       await uploadManager.saveFiles('', [file]);
       expect.fail('Should have thrown an error');
     } catch (e) {
-      expect(e.message).to.equal('Upload is disabled');
+      expect((e as Error).message).to.equal('Upload is disabled');
     } finally {
       Config.Upload.enabled = true;
     }
@@ -211,7 +211,7 @@ describe('UploadManager', () => {
       await uploadManager.saveFiles('no_config_dir', [file]);
       expect.fail('Should have thrown an error');
     } catch (e) {
-      expect(e.message).to.equal('Upload is not enabled in this directory');
+      expect((e as Error).message).to.equal('Upload is not enabled in this directory');
     } finally {
       Config.Upload.enforcedDirectoryConfig = false;
     }

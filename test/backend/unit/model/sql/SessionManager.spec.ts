@@ -498,7 +498,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
         try {
           await sm.buildContext(user({allowDirectoryList: list}));
         } catch (e) {
-          err = e;
+          err = e as Error;
         }
         expect(err, JSON.stringify(list)).to.not.be.null;
       }

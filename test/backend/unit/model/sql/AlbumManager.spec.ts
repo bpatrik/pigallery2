@@ -132,7 +132,7 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
         await am.deleteAlbum(2);
         expect(false).to.be.equal(true); // should not reach
       } catch (e) {
-        expect(e.message).to.equal('Could not delete album, id: 2. Album id is not found or the album is locked.');
+        expect((e as Error).message).to.equal('Could not delete album, id: 2. Album id is not found or the album is locked.');
       }
       expect(await connection.getRepository(AlbumBaseEntity).find()).to.deep.equalInAnyOrder([{
         id: 2,

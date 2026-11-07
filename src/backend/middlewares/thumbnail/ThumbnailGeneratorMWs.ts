@@ -49,7 +49,7 @@ export class ThumbnailGeneratorMWs {
         new ErrorDTO(
           ErrorCodes.INTERNAL,
           'error during postprocessing result (adding thumbnail info)',
-          error.toString()
+          String(error)
         )
       );
     }
@@ -101,7 +101,7 @@ export class ThumbnailGeneratorMWs {
         new ErrorDTO(
           ErrorCodes.INTERNAL,
           `Error during postprocessing result: adding thumbnail info for persons. Failed on: person ${erroredItem?.name}, at ${erroredItem?.cache?.sampleRegion?.media?.name} `,
-          error.toString()
+          String(error)
         )
       );
     }
@@ -127,7 +127,7 @@ export class ThumbnailGeneratorMWs {
         new ErrorDTO(
           ErrorCodes.THUMBNAIL_GENERATION_ERROR,
           'Error during generating face thumbnail: ' + person.name,
-          error.toString()
+          String(error)
         )
       );
     }
@@ -169,7 +169,7 @@ export class ThumbnailGeneratorMWs {
           new ErrorDTO(
             ErrorCodes.THUMBNAIL_GENERATION_ERROR,
             'Error during generating thumbnail: ' + mediaPath,
-            error.toString()
+            String(error)
           )
         );
       }
@@ -205,7 +205,7 @@ export class ThumbnailGeneratorMWs {
           new ErrorDTO(
             ErrorCodes.THUMBNAIL_GENERATION_ERROR,
             'Error during generating thumbnail: ' + mediaPath,
-            error.toString()
+            String(error)
           )
         );
       }

@@ -230,7 +230,7 @@ export class DiskManager {
         } catch (err) {
           NotificationManager.warning(
             'Unknown directory reading error, skipping: ' + path.join(relativeDirectoryName, file),
-            err.toString()
+            String(err)
           );
           console.error(err);
         }
@@ -274,7 +274,7 @@ export class DiskManager {
           NotificationManager.warning('Media loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            err.toString()
+            String(err)
           );
           console.error(err);
         }
@@ -301,7 +301,7 @@ export class DiskManager {
             'Media loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            e.toString()
+            String(e)
           );
         }
       } else if (GPXProcessing.isMetaFile(fullFilePath)) {
@@ -325,7 +325,7 @@ export class DiskManager {
             'Metafile loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            e.toString()
+            String(e)
           );
         }
       }

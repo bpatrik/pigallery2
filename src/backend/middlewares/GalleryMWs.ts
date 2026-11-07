@@ -43,7 +43,7 @@ export class GalleryMWs {
         return next(
           new ErrorDTO(
             ErrorCodes.INPUT_ERROR,
-            'Invalid search query JSON: ' + parseError.message,
+            'Invalid search query JSON: ' + (parseError as SyntaxError).message, // JSON.parse only throws SyntaxError
             parseError
           )
         );
@@ -486,7 +486,7 @@ export class GalleryMWs {
       return next(
         new ErrorDTO(
           ErrorCodes.GENERAL_ERROR,
-          'Can\'t get random photo: ' + e.toString()
+          'Can\'t get random photo: ' + String(e)
         )
       );
     }
@@ -510,7 +510,7 @@ export class GalleryMWs {
       return next(
         new ErrorDTO(
           ErrorCodes.GENERAL_ERROR,
-          'Can\'t get random photo: ' + e.toString()
+          'Can\'t get random photo: ' + String(e)
         )
       );
     }

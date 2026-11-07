@@ -114,7 +114,7 @@ export class JobManager implements IJobListener, IObjectManager {
         } catch (e) {
           NotificationManager.warning(
             'Job running error:' + item.name,
-            e.toString()
+            String(e)
           );
         }
       }
@@ -178,7 +178,7 @@ export class JobManager implements IJobListener, IObjectManager {
         } catch (e) {
           NotificationManager.warning(
             'Job running error:' + schedule.name,
-            e.toString()
+            String(e)
           );
         }
         this.runSchedule(schedule);

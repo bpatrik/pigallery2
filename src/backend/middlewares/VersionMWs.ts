@@ -27,7 +27,7 @@ export class VersionMWs {
         new ErrorDTO(
           ErrorCodes.GENERAL_ERROR,
           'Can not get app version',
-          err.toString()
+          String(err)
         )
       );
     }
@@ -55,7 +55,7 @@ export class VersionMWs {
         new ErrorDTO(
           ErrorCodes.GENERAL_ERROR,
           'Can not get data version',
-          err.toString()
+          String(err)
         )
       );
     }

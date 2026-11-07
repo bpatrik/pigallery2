@@ -58,7 +58,7 @@ describe('ExtensionManager', () => {
       try {
         await fn();
       } catch (e) {
-        err = e;
+        err = e as Error;
       }
       expect(err, msg).to.not.be.null;
       expect(err.message).to.contain(msg);

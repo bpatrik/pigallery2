@@ -31,7 +31,7 @@ export class ExtensionConfigWrapper {
       console.error(e);
       if (showDetailedError) {
         console.error(LOG_TAG, 'This is most likely due to: 1) you added a bad configuration in the server.json OR 2) The configuration changed in the latest release.');
-        NotificationManager.error('Can\'t load config. Reverting to default. This is most likely due to: 1) you added a bad configuration in the server.json OR 2) The configuration changed in the latest release.', (e.toString ? e.toString() : JSON.stringify(e)));
+        NotificationManager.error('Can\'t load config. Reverting to default. This is most likely due to: 1) you added a bad configuration in the server.json OR 2) The configuration changed in the latest release.', String(e));
       }
     }
     return pc;
@@ -54,7 +54,7 @@ export class ExtensionConfigWrapper {
       console.error(e);
       if (showDetailedError) {
         console.error(LOG_TAG, 'This is most likely due to: 1) you added a bad configuration in the server.json OR 2) The configuration changed in the latest release.');
-        NotificationManager.error('Ca\'nt load config. Reverting to default. This is most likely due to: 1) you added a bad configuration in the server.json OR 2) The configuration changed in the latest release.', (e.toString ? e.toString() : JSON.stringify(e)));
+        NotificationManager.error('Ca\'nt load config. Reverting to default. This is most likely due to: 1) you added a bad configuration in the server.json OR 2) The configuration changed in the latest release.', String(e));
       }
     }
     return pc;

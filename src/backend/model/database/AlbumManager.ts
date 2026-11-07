@@ -134,7 +134,7 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
           id: a.id,
           searchQuery: a.searchQuery,
           name: a.name,
-          error: e.toString()
+          error: String(e)
         });
       }
     }

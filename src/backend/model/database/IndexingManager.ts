@@ -108,7 +108,7 @@ export class IndexingManager {
     } catch (error) {
       NotificationManager.warning(
         'Unknown indexing error for: ' + relativeDirectoryName,
-        error.toString()
+        String(error)
       );
       console.error(error);
       throw error;

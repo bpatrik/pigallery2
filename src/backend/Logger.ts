@@ -11,8 +11,8 @@ if (forcedDebug === true) {
   );
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type LoggerArgs = (string | number | (() => string) | Record<any, unknown> | Error);
+// Anything console.log prints, e.g. a caught error (which is unknown). A function is called and its result logged.
+export type LoggerArgs = unknown;
 export type LoggerFunction = (...args: LoggerArgs[]) => void;
 
 export interface ILogger {

@@ -122,10 +122,10 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
       console.error(e);
       Logger.error(
         LOG_TAG,
-        'Error during processing file:' + filePath + ', ' + e.toString()
+        'Error during processing file:' + filePath + ', ' + String(e)
       );
       this.Progress.log(
-        'Error during processing file:' + filePath + ', ' + e.toString()
+        'Error during processing file:' + filePath + ', ' + String(e)
       );
     }
 

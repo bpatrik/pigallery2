@@ -40,7 +40,7 @@ gulp.task('build-backend', async (): Promise<void> => {
   try {
     await execPr('tsc -p tsconfig.release.json');
   } catch (e) {
-    console.error(e.stdout); // tsc prints its errors to stdout
+    console.error((e as {stdout?: string}).stdout); // tsc prints its errors to stdout
     throw e;
   }
 });
@@ -115,7 +115,7 @@ const createFrontendTask = (
       console.error(stderr);
     } catch (e) {
       console.error(e);
-      cb(e);
+      cb(e as Error);
     }
   });
 };
@@ -281,7 +281,7 @@ gulp.task('extract-locale', async (cb): Promise<any> => {
     cb();
   } catch (e) {
     console.error(e);
-    return cb(e);
+    return cb(e as Error);
   }
 });
 
@@ -306,7 +306,7 @@ const translate = async (
     cb();
   } catch (e) {
     console.error(e);
-    return cb(e);
+    return cb(e as Error);
   }
 };
 const merge = async (list: any[], cb: (err?: any) => void): Promise<void> => {
@@ -330,7 +330,7 @@ const merge = async (list: any[], cb: (err?: any) => void): Promise<void> => {
     cb();
   } catch (e) {
     console.error(e);
-    return cb(e);
+    return cb(e as Error);
   }
 };
 

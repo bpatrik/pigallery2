@@ -201,7 +201,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       await sm.createSharing(sharing);
       expect.fail('should have thrown error');
     } catch (err) {
-      expect(err.message).to.contain('cannot be set at the same time');
+      expect((err as Error).message).to.contain('cannot be set at the same time');
     }
   });
 
@@ -314,7 +314,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       await sm.updateSharing(update, false);
       expect.fail('should have thrown error');
     } catch (err) {
-      expect(err.message).to.contain('cannot be set at the same time');
+      expect((err as Error).message).to.contain('cannot be set at the same time');
     }
   });
 
@@ -348,7 +348,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       try {
         await sm.createSharing(newSharing({}));
       } catch (e) {
-        err = e;
+        err = e as Error;
       }
       expect(err).to.not.be.null;
     });
@@ -359,7 +359,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       try {
         await sm.createSharing(newSharing({directoryQuery: {type: SearchQueryTypes.keyword, value: 'x'} as unknown as DirectorySearch}));
       } catch (e) {
-        err = e;
+        err = e as Error;
       }
       expect(err).to.not.be.null;
     });
@@ -374,7 +374,7 @@ describe('SharingManager', (sqlHelper: DBTestHelper) => {
       try {
         await sm.updateSharing({...saved, searchQuery: null, directoryQuery: null} as UpdateSharingDTO, true);
       } catch (e) {
-        err = e;
+        err = e as Error;
       }
       expect(err).to.not.be.null;
     });
