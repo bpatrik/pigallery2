@@ -301,7 +301,10 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       uiResetNeeded: {server: true},
       uiOptional:true,
       relevant: (c: ServerUserOIDCConfig) => c.enabled,
-      hint: 'https://auth.example.com/application/o/pigallery2/'
+      hint: 'https://auth.example.com/application/o/pigallery2/',
+      uiWarning: (v: unknown) => typeof v === 'string' && v.trim().toLowerCase().startsWith('http://') ?
+        $localize`With an http:// Issuer URL, the provider can't be verified and the login can be read on the network. Use it only for local tests.` :
+        undefined
     },
     description: $localize`OIDC provider Issuer URL`
   })
