@@ -17,7 +17,7 @@ export class DirectoriesComponent implements OnChanges {
   private container = inject(ElementRef);
 
   readonly directories = input.required<SubDirectoryDTO[]>();
-  size: number;
+  size!: number; // set by updateSize(), which ngOnInit() calls
   isDesktop: boolean;
 
   constructor() {

@@ -39,7 +39,7 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   readonly url = signal('');
 
 
-  modalRef: BsModalRef | null;
+  modalRef: BsModalRef | null = null;
 
   private readonly subscription: Subscription | null = null;
 

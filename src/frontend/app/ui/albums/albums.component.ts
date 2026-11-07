@@ -45,7 +45,7 @@ export class AlbumsComponent implements OnInit {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
   };
-  private modalRef: BsModalRef | null;
+  private modalRef: BsModalRef | null = null;
 
   constructor() {
     this.albumsService.getAlbums().catch(console.error);

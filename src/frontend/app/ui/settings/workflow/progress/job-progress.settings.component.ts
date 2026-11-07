@@ -27,7 +27,7 @@ export class JobProgressComponent {
 
   readonly progress = input<JobProgressDTO>();
   JobProgressStates = JobProgressStates;
-  modalRef: BsModalRef;
+  modalRef!: BsModalRef; // set by openModal(), before the modal (the only user) shows
   // Reset to the job's last reported time on every new progress, then ticks forward every second.
   private readonly timeCurrentCopy = linkedSignal<number | undefined>(() => this.progress()?.time.end ?? undefined);
 

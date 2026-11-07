@@ -107,9 +107,9 @@ export class ControlsLightboxComponent implements OnDestroy {
     return {width: frame.width, height: frame.width / photoAspect};
   });
 
-  private ctx: CanvasRenderingContext2D | null;
+  private ctx: CanvasRenderingContext2D | null = null;
   private visibilityTimer: number | null = null;
-  private timerSub: Subscription | null;
+  private timerSub: Subscription | null = null;
   // the drag and the zoom when the current pan or pinch started
   private panStart: { x: number, y: number } | null = null;
   private pinchStart: number | null = null;

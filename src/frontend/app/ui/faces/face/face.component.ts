@@ -30,7 +30,7 @@ export class FaceComponent implements OnInit, OnDestroy {
   readonly size = input.required<number>();
 
   public thumbnail: PersonThumbnail | null = null;
-  public searchQueryDTOstr: string;
+  public searchQueryDTOstr!: string; // set by ngOnInit()
 
   public readonly canUpdate = computed((): boolean =>
     this.authenticationService.isAuthorized(Config.Faces.writeAccessMinRole)

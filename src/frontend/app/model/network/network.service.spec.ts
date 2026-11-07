@@ -31,7 +31,7 @@ describe('NetworkService Success tests', () => {
       (networkService: NetworkService) => {
         networkService
             .getJson(testUrl)
-            .then((res: string) => {
+            .then((res) => {
               expect(res).toBe(testResponse);
             })
             .catch((err) => {
@@ -51,7 +51,7 @@ describe('NetworkService Success tests', () => {
       (networkService: NetworkService) => {
         networkService
             .postJson(testUrl, testData)
-            .then((res: string) => {
+            .then((res) => {
               expect(res).toBe(testResponse);
             })
             .catch((err) => {
@@ -67,7 +67,7 @@ describe('NetworkService Success tests', () => {
 
         networkService
             .postJson(testUrl)
-            .then((res: string) => {
+            .then((res) => {
               expect(res).toBe(testResponse);
             })
             .catch((err) => {

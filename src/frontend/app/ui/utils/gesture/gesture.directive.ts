@@ -192,9 +192,14 @@ export class GestureDirective implements OnDestroy {
 
   // Listen on the window, so the gesture continues when the pointer moves over the lightbox controls.
   private listen(on: boolean): void {
-    const method = on ? 'addEventListener' : 'removeEventListener';
-    window[method]('pointermove', this.onPointerMove);
-    window[method]('pointerup', this.onPointerUp);
-    window[method]('pointercancel', this.onPointerUp);
+    if (on) {
+      window.addEventListener('pointermove', this.onPointerMove);
+      window.addEventListener('pointerup', this.onPointerUp);
+      window.addEventListener('pointercancel', this.onPointerUp);
+    } else {
+      window.removeEventListener('pointermove', this.onPointerMove);
+      window.removeEventListener('pointerup', this.onPointerUp);
+      window.removeEventListener('pointercancel', this.onPointerUp);
+    }
   }
 }

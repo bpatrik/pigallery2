@@ -61,3 +61,11 @@ export class ErrorDTO {
     return '[' + ErrorCodes[this.code] + '] ' + this.message + this.detailsStr;
   }
 }
+
+// A caught error is unknown: the server rejects with an ErrorDTO (a plain object, not an instance),
+// the NetworkService with a message string, and anything else with an Error.
+export const isErrorDTO = (e: unknown): e is ErrorDTO =>
+  typeof e === 'object' && e !== null && 'code' in e;
+
+export const errorMessage = (e: unknown): string =>
+  typeof e === 'object' && e !== null && 'message' in e && typeof e.message === 'string' ? e.message : String(e);

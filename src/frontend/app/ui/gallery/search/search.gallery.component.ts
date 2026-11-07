@@ -51,9 +51,9 @@ export class GallerySearchComponent implements OnDestroy {
     key: SearchQueryTypes;
   }[];
   public saveSearchName = '';
-  private searchModalRef: BsModalRef | null;
+  private searchModalRef: BsModalRef | null = null;
   private readonly subscription: Subscription | null = null;
-  private saveSearchModalRef: BsModalRef | null;
+  private saveSearchModalRef: BsModalRef | null = null;
 
   constructor() {
     this.SearchQueryTypes = SearchQueryTypes;

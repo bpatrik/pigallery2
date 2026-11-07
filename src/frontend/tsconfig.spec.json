@@ -8,8 +8,6 @@
     "moduleResolution": "bundler",
     "emitDecoratorMetadata": false,
     "isolatedModules": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
     "noPropertyAccessFromIndexSignature": true,
     "types": [
       "vitest/globals",
