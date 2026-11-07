@@ -80,6 +80,7 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
   then `npx cypress run`. It covers login, gallery (filters, lightbox, URL deep links), search, faces and sharing.
   - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
     git-ignored test folders (e.g. `demo/images/sub_dir`, `demo/images2`) that CI doesn't have.
+    `demo/images` is also the public demo page: don't add test-only files or folders to it.
   - Cypress 16 removed `Cypress.env()`. A throwaway spec outside the repo must be plain `.js`:
     `npx cypress run --spec <path> --config specPattern=<path>`.
   - If the browser doesn't start (EPERM on a Cypress profile folder, "closed unexpectedly"), retry or use another `--browser`.
