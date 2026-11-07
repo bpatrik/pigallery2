@@ -6,6 +6,8 @@
   "compilerOptions": {
     "strict": false,
     "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,

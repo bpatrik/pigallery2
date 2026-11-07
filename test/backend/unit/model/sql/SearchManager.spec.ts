@@ -53,7 +53,7 @@ describe = DBTestHelper.describe(); // fake it os IDE plays nicely (recognize th
 
 class SearchManagerTest extends SearchManager {
 
-  public flattenSameOfQueries(query: SearchQueryDTO): SearchQueryDTO {
+  public override flattenSameOfQueries(query: SearchQueryDTO): SearchQueryDTO {
     return super.flattenSameOfQueries(query);
   }
 

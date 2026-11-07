@@ -44,28 +44,28 @@ export interface BenchmarkResult {
 
 export class BMIndexingManager extends IndexingManager {
 
-  public async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
+  public override async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
     return super.saveToDB(scannedDirectory);
   }
 }
 
 
 class BMGalleryRouter extends GalleryRouter {
-  public static addDirectoryList(app: Express): void {
+  public static override addDirectoryList(app: Express): void {
     GalleryRouter.addDirectoryList(app);
   }
 
-  public static addSearch(app: Express): void {
+  public static override addSearch(app: Express): void {
     GalleryRouter.addSearch(app);
   }
 
-  public static addAutoComplete(app: Express): void {
+  public static override addAutoComplete(app: Express): void {
     GalleryRouter.addAutoComplete(app);
   }
 }
 
 class BMPersonRouter extends PersonRouter {
-  public static addGetPersons(app: Express): void {
+  public static override addGetPersons(app: Express): void {
     PersonRouter.addGetPersons(app);
   }
 }

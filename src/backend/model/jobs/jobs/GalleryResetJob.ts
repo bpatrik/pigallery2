@@ -6,10 +6,10 @@ import {DynamicConfig} from '../../../../common/entities/DynamicConfig';
 export class GalleryRestJob extends Job {
   public readonly Name = DefaultsJobs[DefaultsJobs['Gallery Reset']];
   public readonly ConfigTemplate: DynamicConfig[] = null;
-  protected readonly IsInstant = true;
+  protected override readonly IsInstant = true;
 
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[GalleryRestJob]';
   }
 

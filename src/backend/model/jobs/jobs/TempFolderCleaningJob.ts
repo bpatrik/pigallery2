@@ -21,7 +21,7 @@ export class TempFolderCleaningJob extends Job {
     this.directoryQueue.push(ProjectPath.TranscodedFolder);
   }
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[TempFolderCleaningJob]';
   }
 

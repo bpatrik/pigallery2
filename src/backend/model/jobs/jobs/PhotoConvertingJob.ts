@@ -31,7 +31,7 @@ export class PhotoConvertingJob extends FileJob<{
     });
   }
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[PhotoConvertingJob]';
   }
 
@@ -40,7 +40,7 @@ export class PhotoConvertingJob extends FileJob<{
     return true;
   }
 
-  start(
+  override start(
     config: { sizes?: number[]; indexedOnly?: boolean },
     soloRun = false,
     allowParallelRun = false
@@ -62,12 +62,12 @@ export class PhotoConvertingJob extends FileJob<{
     return super.start(config, soloRun, allowParallelRun);
   }
 
-  protected async filterMediaFiles(files: FileDTO[]): Promise<FileDTO[]> {
+  protected override async filterMediaFiles(files: FileDTO[]): Promise<FileDTO[]> {
     return files;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
+  protected override async filterMetaFiles(files: FileDTO[]): Promise<FileDTO[]> {
     return undefined;
   }
 

@@ -13,7 +13,7 @@ export class EmailMessenger extends Messenger<{
   emailText: string,
 }> {
   public readonly Name = DefaultMessengers[DefaultMessengers.Email];
-  public readonly ConfigTemplate: DynamicConfig[] = [{
+  public override readonly ConfigTemplate: DynamicConfig[] = [{
     id: 'emailTo',
     type: 'string-array',
     name: backendTexts.emailTo.name,

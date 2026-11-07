@@ -13,7 +13,7 @@ export class AlbumCoverFillingJob extends Job {
   private availableSessions: SessionContext[];
 
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[AlbumCoverFillingJob]';
   }
 

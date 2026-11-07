@@ -62,18 +62,18 @@ class EventLimitHandler<T> {
 class SingleFireEventLimitHandler<T> extends EventLimitHandler<T> {
   public fired = false;
 
-  constructor(public limit: T, public handler: (data?: T) => void) {
+  constructor(public override limit: T, public override handler: (data?: T) => void) {
     super(limit, handler);
   }
 
-  public fire(data?: T): void {
+  public override fire(data?: T): void {
     if (this.fired === false) {
       this.handler(data);
     }
     this.fired = true;
   }
 
-  public isValid(): boolean {
+  public override isValid(): boolean {
     return this.fired === false;
   }
 }

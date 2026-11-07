@@ -6,15 +6,15 @@ import {GPXProcessing} from '../../fileaccess/fileprocessing/GPXProcessing';
  * Deletes all gpx file from the tmp folder
  */
 export class GPXCompressionResetJob extends TempFolderCleaningJob {
-  public readonly Name = DefaultsJobs[DefaultsJobs['Delete Compressed GPX']];
+  public override readonly Name = DefaultsJobs[DefaultsJobs['Delete Compressed GPX']];
 
   // returns false if the file is GPX
-  protected async isValidFile(filePath: string): Promise<boolean> {
+  protected override async isValidFile(filePath: string): Promise<boolean> {
     return !GPXProcessing.isGPXFile(filePath);
   }
 
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[GPXCompressionResetJob]';
   }
 

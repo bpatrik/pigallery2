@@ -40,11 +40,11 @@ describe = DBTestHelper.describe();
 
 class GalleryManagerTest extends GalleryManager {
 
-  public async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
+  public override async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
     return super.getDirIdAndTime(connection, directoryName, directoryParent);
   }
 
-  public async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number, withMetaFiles = true): Promise<ParentDirectoryDTO> {
+  public override async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number, withMetaFiles = true): Promise<ParentDirectoryDTO> {
     return super.getParentDirFromId(connection, session, dir, withMetaFiles);
   }
 }

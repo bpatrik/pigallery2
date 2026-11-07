@@ -35,11 +35,11 @@ const {expect} = chai;
 
 class GalleryManagerTest extends GalleryManager {
 
-  public async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
+  public override async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
     return super.getDirIdAndTime(connection, directoryName, directoryParent);
   }
 
-  public async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
+  public override async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
     return super.getParentDirFromId(connection, session, dir);
   }
 }
@@ -47,11 +47,11 @@ class GalleryManagerTest extends GalleryManager {
 class IndexingManagerTest extends IndexingManager {
 
 
-  public async queueForSave(scannedDirectory: ParentDirectoryDTO): Promise<void> {
+  public override async queueForSave(scannedDirectory: ParentDirectoryDTO): Promise<void> {
     return super.queueForSave(scannedDirectory);
   }
 
-  public async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
+  public override async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
     return await super.saveToDB(scannedDirectory);
   }
 }
@@ -839,7 +839,7 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
       const completedSaves: string[] = [];
 
       class IMWithDelay extends IndexingManager {
-        public async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
+        public override async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
           // mimic original concurrency guard
           (this as any).isSaving = true;
           try {
