@@ -63,7 +63,8 @@ export class ProjectedCacheManager implements IObjectManager {
     for (const s of shares) {
       try {
         const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(s);
-        const key = ObjectManagers.getInstance().SessionManager.createProjectionKey(q);
+        // same as SessionManager.buildContext: no projection query, no projection key
+        const key = q ? ObjectManagers.getInstance().SessionManager.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
         activeKeys.add(key);
       } catch (e) {
         // an invalid sharing can't be opened, so it has no projection
@@ -129,8 +130,8 @@ export class ProjectedCacheManager implements IObjectManager {
       .getRawOne();
 
     const mediaCount: number = agg?.mediaCount != null ? parseInt(agg.mediaCount as any, 10) : 0;
-    const oldestMedia: number = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
-    const youngestMedia: number = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
+    const oldestMedia: number | null = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
+    const youngestMedia: number | null = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
 
     // Compute recursive media count under projection (includes children) using single SQL query
     const recQb = mediaRepo
@@ -200,11 +201,12 @@ export class ProjectedCacheManager implements IObjectManager {
     const row = await this.getCacheForDirectory(connection, session, dir);
     const ret = await cacheRepo.save(row);
     // we would not select these either
-    delete ret.projectionKey;
-    delete ret.directory;
-    delete ret.id;
+    const partial: Partial<ProjectedDirectoryCacheEntity> = ret;
+    delete partial.projectionKey;
+    delete partial.directory;
+    delete partial.id;
     if (ret.cover) {
-      delete ret.cover.id;
+      delete (ret.cover as Partial<MediaEntity>).id;
     }
     return ret;
   }
@@ -269,8 +271,8 @@ export class ProjectedCacheManager implements IObjectManager {
     }
 
     const itemCount: number = agg?.itemCount != null ? parseInt(agg.itemCount as any, 10) : 0;
-    const oldestMedia: number = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
-    const youngestMedia: number = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
+    const oldestMedia: number | null = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
+    const youngestMedia: number | null = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
 
     if (!row) {
       row = new ProjectedAlbumCacheEntity();
@@ -287,11 +289,12 @@ export class ProjectedCacheManager implements IObjectManager {
 
     const ret = await cacheRepo.save(row);
     // we would not select these either
-    delete ret.projectionKey;
-    delete ret.album;
-    delete ret.id;
+    const partial: Partial<ProjectedAlbumCacheEntity> = ret;
+    delete partial.projectionKey;
+    delete partial.album;
+    delete partial.id;
     if (ret.cover) {
-      delete ret.cover.id;
+      delete (ret.cover as Partial<MediaEntity>).id;
     }
     return ret;
   }

@@ -29,10 +29,10 @@ export class ProjectedDirectoryCacheEntity implements DirectoryCacheDTO {
   recursiveMediaCount?: number;
 
   @Column('bigint', {nullable: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
-  oldestMedia: number;
+  oldestMedia: number | null;
 
   @Column('bigint', {nullable: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
-  youngestMedia: number;
+  youngestMedia: number | null;
 
   @ManyToOne(() => MediaEntity, {onDelete: 'SET NULL', nullable: true})
   cover: MediaEntity;

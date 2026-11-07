@@ -42,7 +42,7 @@ export class GalleryManager {
       allowIndexing?: boolean, // if false, only the DB is used, the directory is never (re)indexed
       withMetaFiles?: boolean // if false, metafiles are not listed (the directory content is not available)
     } = {}
-  ): Promise<ParentDirectoryDTO> {
+  ): Promise<ParentDirectoryDTO | null> {
     const directoryPath = GalleryManager.parseRelativeDirPath(
       relativeDirectoryName
     );
@@ -135,6 +135,9 @@ export class GalleryManager {
       );
       const connection = await SQLConnection.getConnection();
       const dir = await this.getDirIdAndTime(connection, directoryPath.name, directoryPath.parent);
+      if (!dir) {
+        throw new Error('Directory is not indexed');
+      }
       return await getDir(dir.id);
     }
     const indexed = await ObjectManagers.getInstance().IndexingManager.indexDirectory(relativeDirectoryName);
@@ -292,7 +295,7 @@ export class GalleryManager {
    */
   public async selectDirStructure(
     relativeDirectoryName: string
-  ): Promise<DirectoryEntity> {
+  ): Promise<DirectoryEntity | null> {
     const directoryPath = GalleryManager.parseRelativeDirPath(
       relativeDirectoryName
     );
@@ -325,7 +328,7 @@ export class GalleryManager {
     dir.isPartial = true;
   }
 
-  async getMedia(session: SessionContext, mediaPath: string): Promise<MediaEntity> {
+  async getMedia(session: SessionContext, mediaPath: string): Promise<MediaEntity | null> {
     // Validate media is available under projectionQuery
     const fileName = path.basename(mediaPath);
     const dirRelPath = path.dirname(mediaPath);
@@ -380,9 +383,9 @@ export class GalleryManager {
 
   protected async getDirIdAndTime(connection: DataSource, name: string, path: string): Promise<{
     id: number,
-    lastScanned: number,
+    lastScanned?: number | null,
     lastModified: number
-  }> {
+  } | null> {
     return await connection
       .getRepository(DirectoryEntity)
       .createQueryBuilder('directory')
@@ -415,6 +418,9 @@ export class GalleryManager {
 
     try {
       const dir = await query.getOne();
+      if (!dir) {
+        throw new Error('Directory not found: ' + partialDirId);
+      }
 
       if (!dir.cache?.valid) {
         dir.cache = await ObjectManagers.getInstance().ProjectedCacheManager.setAndGetCacheForDirectory(connection, session, dir);

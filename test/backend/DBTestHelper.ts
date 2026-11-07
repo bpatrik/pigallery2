@@ -14,7 +14,7 @@ import {TestHelper} from '../TestHelper';
 import {VideoDTO} from '../../src/common/entities/VideoDTO';
 import {PhotoDTO} from '../../src/common/entities/PhotoDTO';
 import {Logger} from '../../src/backend/Logger';
-import {SessionUser, SessionContext} from '../../src/backend/model/SessionContext';
+import {ContextUser, SessionContext} from '../../src/backend/model/SessionContext';
 import {SessionManager} from '../../src/backend/model/database/SessionManager';
 import {DirectoryEntity} from '../../src/backend/model/database/enitites/DirectoryEntity';
 import {MediaEntity} from '../../src/backend/model/database/enitites/MediaEntity';
@@ -79,7 +79,7 @@ export class DBTestHelper {
 
   public static get defaultSession(): SessionContext {
     const session = new SessionContext();
-    session.user = {projectionKey: SessionManager.NO_PROJECTION_KEY} as SessionUser;
+    session.user = {projectionKey: SessionManager.NO_PROJECTION_KEY} as ContextUser;
     return session;
   }
 

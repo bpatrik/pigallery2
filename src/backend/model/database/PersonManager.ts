@@ -25,6 +25,9 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       .where('person.name LIKE :name COLLATE ' + SQL_COLLATE, {name})
       .getOne();
 
+    if (!person) {
+      throw new Error('Person not found: ' + name);
+    }
     if (typeof partialPerson.name !== 'undefined') {
       person.name = partialPerson.name;
     }
@@ -50,7 +53,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       .getCount();
   }
 
-  public async get(session: SessionContext, name: string): Promise<PersonEntry> {
+  public async get(session: SessionContext, name: string): Promise<PersonEntry | undefined> {
     const persons = await this.getAll(session);
     return persons.find((p): boolean => p.name === name);
   }

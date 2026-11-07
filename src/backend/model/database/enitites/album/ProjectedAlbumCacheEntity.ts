@@ -24,10 +24,10 @@ export class ProjectedAlbumCacheEntity implements AlbumCacheDTO {
   itemCount: number; // Number of media items in album under projection
 
   @Column('bigint', {nullable: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
-  oldestMedia: number; // Oldest media timestamp in album under projection
+  oldestMedia: number | null; // Oldest media timestamp in album under projection
 
   @Column('bigint', {nullable: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
-  youngestMedia: number; // Youngest media timestamp in album under projection
+  youngestMedia: number | null; // Youngest media timestamp in album under projection
 
   @ManyToOne(() => MediaEntity, {onDelete: 'SET NULL', nullable: true})
   cover: MediaEntity; // Album cover under projection

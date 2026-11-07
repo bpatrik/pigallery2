@@ -11,7 +11,7 @@ export class VersionManager implements IObjectManager {
     name: string;
     lastModified: number;
     mediaCount: number;
-  } = null;
+  } | null = null;
 
   async getDataVersion(): Promise<string> {
     if (this.latestDirectoryStatus === null) {

@@ -80,7 +80,7 @@ export class SharingManager {
     return await q.getMany();
   }
 
-  async findOne(sharingKey: string): Promise<SharingEntity> {
+  async findOne(sharingKey: string): Promise<SharingEntity | null> {
     await SharingManager.removeExpiredLink();
     const connection = await SQLConnection.getConnection();
     return await connection.getRepository(SharingEntity)
@@ -119,14 +119,15 @@ export class SharingManager {
     inSharing: UpdateSharingDTO,
     forceUpdate: boolean
   ): Promise<SharingEntity> {
-    if (!Number.isInteger(inSharing.id) || !Number.isInteger(inSharing.creator?.id)) {
+    const creatorId = inSharing.creator?.id;
+    if (!Number.isInteger(inSharing.id) || creatorId === undefined || !Number.isInteger(creatorId)) {
       throw new Error('Invalid sharing, id or creator is missing');
     }
     const connection = await SQLConnection.getConnection();
 
     const sharing = await connection.getRepository(SharingEntity).findOneBy({
       id: inSharing.id,
-      creator: inSharing.creator.id as unknown,
+      creator: {id: creatorId},
     });
     if (!sharing) {
       throw new Error('Sharing not found');

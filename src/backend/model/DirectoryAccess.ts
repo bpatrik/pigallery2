@@ -118,11 +118,11 @@ export class DirectoryAccess {
   /**
    * Directories in search results and autocomplete need to be available (not just parents)
    */
-  public isListedInSearch(cache: DirectoryCacheDTO): boolean {
+  public isListedInSearch(cache: DirectoryCacheDTO | undefined): boolean {
     if (this.byPhotos) {
-      return cache?.mediaCount > 0;
+      return (cache?.mediaCount ?? 0) > 0;
     }
-    return cache?.recursiveMediaCount > 0;
+    return (cache?.recursiveMediaCount ?? 0) > 0;
   }
 
   /**
@@ -153,11 +153,11 @@ export class DirectoryAccess {
       SearchQueryUtils.normalizeDirectoryPath(path.join(d.path, d.name));
 
     if (this.byPhotos) {
-      return subDirs.filter(d => !this.isBlocked(relPath(d)) && d.cache?.recursiveMediaCount > 0);
+      return subDirs.filter(d => !this.isBlocked(relPath(d)) && (d.cache?.recursiveMediaCount ?? 0) > 0);
     }
 
     // first path segments (below the listed directory) of the available directories, only loaded if needed
-    let availableBelow: Set<string> = null;
+    let availableBelow: Set<string> | null = null;
     const parentRelPath = relPath(parent);
     const getAvailableBelow = async (): Promise<Set<string>> => {
       if (availableBelow === null) {
@@ -223,7 +223,7 @@ export class DirectoryAccess {
     if (dir.cache.mediaCount > 0) {
       return DirectoryAccessTypes.available;
     }
-    if (dir.cache.recursiveMediaCount > 0) {
+    if ((dir.cache.recursiveMediaCount ?? 0) > 0) {
       return DirectoryAccessTypes.parent;
     }
     return DirectoryAccessTypes.none;

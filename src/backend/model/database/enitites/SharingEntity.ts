@@ -27,7 +27,7 @@ export class SharingEntity implements BaseSharingDTO {
       },
     },
   })
-  searchQuery: SearchQueryDTO;
+  searchQuery: SearchQueryDTO | null;
 
   /*
   * This directory search determines what directories are available (can be listed) for the user through sharing.
@@ -46,7 +46,7 @@ export class SharingEntity implements BaseSharingDTO {
       },
     },
   })
-  directoryQuery: DirectorySearch;
+  directoryQuery: DirectorySearch | null;
 
   /**
    * Only of the defaults should be set at most. If none is set the defaultSearchView will be searchQuery
@@ -55,7 +55,7 @@ export class SharingEntity implements BaseSharingDTO {
     type: 'text',
     nullable: true
   })
-  defaultDirectoryView: string;
+  defaultDirectoryView: string | null;
   @Column({
     type: 'text',
     nullable: true,
@@ -68,10 +68,10 @@ export class SharingEntity implements BaseSharingDTO {
       },
     },
   })
-  defaultSearchView: SearchQueryDTO;
+  defaultSearchView: SearchQueryDTO | null;
 
   @Column({type: 'text', nullable: true})
-  password: string;
+  password: string | null;
 
   @Column('bigint', {
     unsigned: true,

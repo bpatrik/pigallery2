@@ -27,8 +27,8 @@ import {DiskManager} from '../fileaccess/DiskManager';
 const LOG_TAG = '[IndexingManager]';
 
 export class IndexingManager {
-  SavingReady: Promise<void> = null;
-  private SavingReadyPR: () => void = null;
+  SavingReady: Promise<void> | null = null;
+  private SavingReadyPR: (() => void) | null = null;
   private savingQueue: { dir: ParentDirectoryDTO; promise: Promise<void>; resolve: () => void; reject: (e: any) => void }[] = [];
   private isSaving = false;
 
@@ -164,18 +164,18 @@ export class IndexingManager {
         entry.dir.path === scannedDirectory.path &&
         entry.dir.lastModified === scannedDirectory.lastModified &&
         entry.dir.lastScanned === scannedDirectory.lastScanned &&
-        (entry.dir.media || entry.dir.media.length) ===
-        (scannedDirectory.media || scannedDirectory.media.length) &&
-        (entry.dir.metaFile || entry.dir.metaFile.length) ===
-        (scannedDirectory.metaFile || scannedDirectory.metaFile.length)
+        // same scan result (the lists are compared by reference, so a new scan of the same directory is queued again)
+        entry.dir.media === scannedDirectory.media &&
+        entry.dir.metaFile === scannedDirectory.metaFile
     );
     if (existingIndex !== -1) {
       return this.savingQueue[existingIndex].promise;
     }
 
     // queue for saving
-    let resolveFn: () => void;
-    let rejectFn: (e: any) => void;
+    // assigned synchronously by the Promise executor below
+    let resolveFn!: () => void;
+    let rejectFn!: (e: any) => void;
     const promise = new Promise<void>((resolve, reject): void => {
       resolveFn = resolve;
       rejectFn = reject;
@@ -230,7 +230,7 @@ export class IndexingManager {
   ): Promise<number> {
     const directoryRepository = connection.getRepository(DirectoryEntity);
 
-    const currentDir: DirectoryEntity = await directoryRepository
+    const currentDir: DirectoryEntity | null = await directoryRepository
       .createQueryBuilder('directory')
       .where('directory.name = :name AND directory.path = :path', {
         name: scannedDirectory.name,
@@ -266,7 +266,7 @@ export class IndexingManager {
     await directoryRepository
       .createQueryBuilder()
       .update(DirectoryEntity)
-      .set({parent: currentDirId as unknown})
+      .set({parent: {id: currentDirId}})
       .where('path = :path', {
         path: DiskManager.pathFromParent(scannedDirectory),
       })
@@ -303,7 +303,7 @@ export class IndexingManager {
         await this.saveMedia(
           connection,
           d.identifiers[0]['id'],
-          directory.media
+          directory.media ?? []
         );
       }
     }
@@ -332,7 +332,7 @@ export class IndexingManager {
     const metaFilesToInsert = [];
     const MDFilesToUpdate = [];
     for (const item of scannedDirectory.metaFile) {
-      let metaFile: FileDTO = null;
+      let metaFile: FileDTO | null = null;
       for (let j = 0; j < indexedMetaFiles.length; j++) {
         if (indexedMetaFiles[j].name === item.name) {
           metaFile = indexedMetaFiles[j];
@@ -341,11 +341,9 @@ export class IndexingManager {
         }
       }
       if (metaFile == null) {
-        // not in DB yet
-        item.directory = null;
-        metaFile = Utils.clone(item);
-        item.directory = scannedDirectory;
-        metaFile.directory = {id: currentDirID} as DirectoryBaseDTO;
+        // not in DB yet; the parent reference is circular, so it is left out of the clone
+        const {directory: _directory, ...file} = item;
+        metaFile = {...Utils.clone(file), directory: {id: currentDirID} as DirectoryBaseDTO};
         metaFilesToInsert.push(metaFile);
       } else if ((item as MDFileDTO).date) {
         if ((item as MDFileDTO).date != (metaFile as MDFileDTO).date) {
@@ -395,7 +393,7 @@ export class IndexingManager {
     };
     const personsPerPhoto: { faces: { name: string, mediaId?: number }[]; mediaName: string }[] = [];
     for (let i = 0; i < media.length; i++) {
-      let mediaItem: MediaDTO = null;
+      let mediaItem: MediaDTO | null = null;
       for (let j = 0; j < indexedMedia.length; j++) {
         if (indexedMedia[j].name === media[i].name) {
           mediaItem = indexedMedia[j];
@@ -404,24 +402,22 @@ export class IndexingManager {
         }
       }
 
-      const scannedFaces: { name: string }[] = (media[i].metadata as PhotoMetadata).faces || [];
-      if ((media[i].metadata as PhotoMetadata).faces) {
+      const faces = (media[i].metadata as PhotoMetadata).faces;
+      const scannedFaces: { name: string }[] = faces || [];
+      if (faces) {
         // if it has faces, cache them
         // make the list distinct (some photos may contain the same person multiple times)
         (media[i].metadata as PhotoMetadataEntity).persons = [
-          ...new Set(
-            (media[i].metadata as PhotoMetadata).faces.map((f) => f.name)
-          ),
+          ...new Set(faces.map((f) => f.name)),
         ];
       }
       (media[i].metadata as PhotoMetadataEntity).personsLength = (media[i].metadata as PhotoMetadataEntity)?.persons?.length || 0;
 
 
       if (mediaItem == null) {
-        // Media not in DB yet
-        media[i].directory = null;
-        mediaItem = Utils.clone(media[i]);
-        mediaItem.directory = {id: parentDirId} as DirectoryBaseDTO;
+        // Media not in DB yet; the parent reference is circular, so it is left out of the clone
+        const {directory: _directory, ...newMedia} = media[i];
+        mediaItem = {...Utils.clone(newMedia), directory: {id: parentDirId} as DirectoryBaseDTO};
         (MediaDTOUtils.isPhoto(mediaItem)
             ? mediaChange.insertP
             : mediaChange.insertV
@@ -506,7 +502,7 @@ export class IndexingManager {
     const faceToInsert: { person: { id: number }, media: { id: number } }[] = [];
     for (let i = 0; i < scannedFaces.length; i++) {
       // was the Person - media connection already indexed
-      let face: PersonJunctionTable = null;
+      let face: PersonJunctionTable | null = null;
       for (let j = 0; j < indexedFaces.length; j++) {
         if (indexedFaces[j].person.name === scannedFaces[i].name) {
           face = indexedFaces[j];
@@ -517,9 +513,10 @@ export class IndexingManager {
 
       if (face == null) {
         faceToInsert.push({
+          // saveAll() above saved every scanned person
           person: savedPersons.find(
             (p) => p.name === scannedFaces[i].name
-          ),
+          )!,
           media: {id: scannedFaces[i].mediaId}
         });
       }

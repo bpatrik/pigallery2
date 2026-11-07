@@ -9,10 +9,10 @@ export class ColumnCharsetCS implements ColumnOptions {
         : 'utf8';
   }
 
-  public get collation(): string {
+  public get collation(): string | undefined {
     return Config.Database.type === DatabaseType.mysql
         ? 'utf8mb4_bin'
-        : null;
+        : undefined;
   }
 }
 

@@ -20,7 +20,7 @@ export class UserEntity implements UserDTO,SessionUser {
 
   // OIDC issuer and subject ('<iss>|<sub>'), only set in OIDC strict security mode
   @Column({type: 'text', nullable: true})
-  oidcSubject?: string;
+  oidcSubject?: string | null;
 
   // only if this set to true, will the per-user allow/blocklist be considered
   @Column({type: 'boolean', default: false})
@@ -38,7 +38,7 @@ export class UserEntity implements UserDTO,SessionUser {
       },
     },
   })
-  allowQuery?: SearchQueryDTO;
+  allowQuery?: SearchQueryDTO | null;
 
   @Column({
     type: 'text',
@@ -52,7 +52,7 @@ export class UserEntity implements UserDTO,SessionUser {
       },
     },
   })
-  blockQuery?: SearchQueryDTO;
+  blockQuery?: SearchQueryDTO | null;
 
   @Column({
     type: 'text',
@@ -66,7 +66,7 @@ export class UserEntity implements UserDTO,SessionUser {
       },
     },
   })
-  allowDirectoryList?: DirectorySearch[];
+  allowDirectoryList?: DirectorySearch[] | null;
 
   @Column({
     type: 'text',
@@ -80,5 +80,5 @@ export class UserEntity implements UserDTO,SessionUser {
       },
     },
   })
-  blockDirectoryList?: DirectorySearch[];
+  blockDirectoryList?: DirectorySearch[] | null;
 }

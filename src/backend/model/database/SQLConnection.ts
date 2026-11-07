@@ -17,7 +17,7 @@ import {FileEntity} from './enitites/FileEntity';
 import {PersonEntry} from './enitites/person/PersonEntry';
 import {Utils} from '../../../common/Utils';
 import * as path from 'node:path';
-import {DatabaseType, ServerDataBaseConfig, SQLLogLevel,} from '../../../common/config/private/PrivateConfig';
+import {DatabaseType, MySQLConfig, ServerDataBaseConfig, SQLiteConfig, SQLLogLevel,} from '../../../common/config/private/PrivateConfig';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
 import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {NotificationManager} from '../NotifocationManager';
@@ -52,7 +52,7 @@ export class SQLConnection {
     ProjectedPersonCacheEntity,
     ProjectedAlbumCacheEntity
   ];
-  private static connection: DataSource = null;
+  private static connection: DataSource | null = null;
   private static FIXED_SQL_TABLE = [
     'sqlite_sequence'
   ];
@@ -119,6 +119,10 @@ export class SQLConnection {
           Logger.info(LOG_TAG, 'Saving enforced user: ' + uc.name);
           const a = new UserEntity();
           a.name = uc.name;
+          if (!uc.encryptedPassword) {
+            // the config loader encrypts the password of every enforced user
+            throw new Error('Enforced user has no password: ' + uc.name);
+          }
           a.password = uc.encryptedPassword;
           a.role = uc.role;
           await userRepository.save(a);
@@ -180,7 +184,7 @@ export class SQLConnection {
     } else {
       currentTables = (await conn.query(`SELECT table_name
                                          FROM information_schema.tables ` +
-        `WHERE table_schema = '${Config.Database.mysql.database}'`))
+        `WHERE table_schema = '${SQLConnection.getMySQLConfig(Config.Database).database}'`))
         .map((r: { table_name: string }) => r.table_name);
     }
 
@@ -191,7 +195,7 @@ export class SQLConnection {
   }
 
   public static getSQLiteDB(config: ServerDataBaseConfig): string {
-    return path.join(ProjectPath.getAbsolutePath(config.dbFolder), Config.Database.sqlite.DBFileName);
+    return path.join(ProjectPath.getAbsolutePath(config.dbFolder), SQLConnection.getSQLiteConfig(Config.Database).DBFileName);
   }
 
   private static async createConnection(
@@ -273,16 +277,31 @@ export class SQLConnection {
   }
 
 
+  private static getMySQLConfig(config: ServerDataBaseConfig): MySQLConfig {
+    if (!config.mysql) {
+      throw new Error('MySQL is selected, but its config is missing');
+    }
+    return config.mysql;
+  }
+
+  private static getSQLiteConfig(config: ServerDataBaseConfig): SQLiteConfig {
+    if (!config.sqlite) {
+      throw new Error('SQLite is selected, but its config is missing');
+    }
+    return config.sqlite;
+  }
+
   private static getDriver(config: ServerDataBaseConfig): Writeable<DataSourceOptions> {
     let driver: Writeable<DataSourceOptions>;
     if (config.type === DatabaseType.mysql) {
+      const mysql = SQLConnection.getMySQLConfig(config);
       driver = {
         type: 'mysql',
-        host: config.mysql.host,
-        port: config.mysql.port,
-        username: config.mysql.username,
-        password: config.mysql.password,
-        database: config.mysql.database,
+        host: mysql.host,
+        port: mysql.port,
+        username: mysql.username,
+        password: mysql.password,
+        database: mysql.database,
         charset: 'utf8mb4',
       };
     } else if (config.type === DatabaseType.sqlite) {
@@ -290,9 +309,11 @@ export class SQLConnection {
         type: 'better-sqlite3',
         database: path.join(
           ProjectPath.getAbsolutePath(config.dbFolder),
-          config.sqlite.DBFileName
+          SQLConnection.getSQLiteConfig(config).DBFileName
         ),
       };
+    } else {
+      throw new Error('Unsupported database type: ' + config.type);
     }
     driver.entities = this.entries;
     driver.synchronize = false;

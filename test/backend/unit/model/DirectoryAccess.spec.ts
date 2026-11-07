@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import {DBTestHelper} from '../../DBTestHelper';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
-import {SessionUser, SessionContext} from '../../../../src/backend/model/SessionContext';
+import {ContextUser, SessionUser, SessionContext} from '../../../../src/backend/model/SessionContext';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {SharingEntity} from '../../../../src/backend/model/database/enitites/SharingEntity';
@@ -73,7 +73,7 @@ describe('DirectoryAccess', (sqlHelper: DBTestHelper) => {
   describe('session context', () => {
     it('a new session context has no directory restriction', async () => {
       const s = new SessionContext();
-      s.user = {} as SessionUser;
+      s.user = {} as ContextUser;
       expect(s.directoryAccess).to.be.instanceOf(DirectoryAccess);
       expect(await accessOf(s, ['/', 'public/sub'])).to.deep.equal({'/': available, 'public/sub': available});
     });

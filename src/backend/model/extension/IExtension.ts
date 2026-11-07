@@ -47,13 +47,13 @@ export interface IExtensionEvents {
     CoverManager: {
       getCoverForAlbum: IExtensionEvent<[session: SessionContext, {
         searchQuery: SearchQueryDTO;
-      }], CoverPhotoDTOWithID>;
+      }], CoverPhotoDTOWithID | null>;
       getCoverForDirectory: IExtensionEvent<[
         session: SessionContext, {
           id: number;
           name: string;
           path: string;
-        }], CoverPhotoDTOWithID>
+        }], CoverPhotoDTOWithID | null>
     },
     ProjectedCacheManager: {
       /**

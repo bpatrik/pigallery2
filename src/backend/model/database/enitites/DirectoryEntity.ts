@@ -46,7 +46,7 @@ export class DirectoryEntity
       to: (v) => v,
     },
   })
-  public lastScanned: number;
+  public lastScanned?: number | null;
 
   isPartial?: boolean;
 
