@@ -101,7 +101,7 @@
             </h6>
 
             <div class="row">
-              @for (type of sortingByTypes; track type) {
+              @for (type of visibleSortingByTypes(); track type) {
                 <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
                   [class.active]="sortingService.sorting().method === type.key"
                   (click)="setSortingBy(type.key)">
@@ -136,7 +136,7 @@
             <div class="col p-1">
               <h6 class="ps-2" i18n>Grouping</h6>
               <div class="row">
-                @for (type of groupingByTypes; track type) {
+                @for (type of visibleGroupingByTypes(); track type) {
                   <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
                     [class.active]="sortingService.grouping().method === type.key"
                     (click)="setGroupingBy(type.key)">

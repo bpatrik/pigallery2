@@ -17,6 +17,7 @@ export enum SortByDirectionalTypes {
   Rating = 30,
   PersonCount = 40,
   FileSize = 50,
+  Directory = 60,
 }
 
 // These cant be set asc or desc

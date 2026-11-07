@@ -22,6 +22,13 @@
                 </h6>
               </div>
             }
+            @case (GroupByTypes.Directory) {
+              <div class="mt-4 mb-3">
+                <h6 class="ms-2">
+                  <ng-icon class="me-1" name="ionFolderOutline" />{{ group.name }}
+                </h6>
+              </div>
+            }
             @default {
               <div class="mt-4 mb-3"><h6 class="ms-2">{{ group.name }}</h6></div>
             }

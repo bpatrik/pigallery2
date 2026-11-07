@@ -1267,11 +1267,13 @@ The following files can be placed in gallery directories to customize behavior (
 | File Name | Processing Side | Description |
 | --- | --- | --- |
 | `.order_ascending_date.pg2conf` | Client | Forces the directory contents to be sorted by date in ascending order. |
+| `.order_ascending_directory.pg2conf` | Client | Forces the directory contents to be sorted by directory in ascending order. |
 | `.order_ascending_filesize.pg2conf` | Client | Forces the directory contents to be sorted by filesize in ascending order. |
 | `.order_ascending_name.pg2conf` | Client | Forces the directory contents to be sorted by name in ascending order. |
 | `.order_ascending_personcount.pg2conf` | Client | Forces the directory contents to be sorted by personcount in ascending order. |
 | `.order_ascending_rating.pg2conf` | Client | Forces the directory contents to be sorted by rating in ascending order. |
 | `.order_descending_date.pg2conf` | Client | Forces the directory contents to be sorted by date in descending order. |
+| `.order_descending_directory.pg2conf` | Client | Forces the directory contents to be sorted by directory in descending order. |
 | `.order_descending_filesize.pg2conf` | Client | Forces the directory contents to be sorted by filesize in descending order. |
 | `.order_descending_name.pg2conf` | Client | Forces the directory contents to be sorted by name in descending order. |
 | `.order_descending_personcount.pg2conf` | Client | Forces the directory contents to be sorted by personcount in descending order. |

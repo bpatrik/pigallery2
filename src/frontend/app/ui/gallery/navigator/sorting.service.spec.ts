@@ -2,12 +2,11 @@ import {TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
 import {GallerySortingService} from './sorting.service';
 import {GalleryCacheService} from '../cache.gallery.service';
-import {ContentLoaderService} from '../contentLoader.service';
+import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 import {ContentWrapper, ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
-import {DirectoryContent} from '../contentLoader.service';
 
 // stores the sorting and grouping per folder, like the localStorage based cache
 class FakeGalleryCacheService {
@@ -153,6 +152,52 @@ describe('GallerySortingService', () => {
       const first = names(dc, random);
       expect([...first[0]].sort()).toEqual(dc.media.map((m) => m.name).sort());
       expect(names(dc, random)).toEqual(first);
+    });
+
+    it('should not interleave media of same-named directories when sorting', () => {
+      const root = {path: './', name: '.'};
+      const summer2020 = {path: '2020/', name: 'Summer'};
+      const summer2021 = {path: '2021/', name: 'Summer'};
+      const dirMedia = (name: string, directory: { path: string; name: string }): MediaDTO =>
+        ({name, directory, metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO);
+
+      const res = service.applySorting({
+        directories: [],
+        metaFile: [],
+        media: [
+          dirMedia('1.jpg', summer2020),
+          dirMedia('2.jpg', summer2021),
+          dirMedia('r.jpg', root),
+          dirMedia('3.jpg', summer2020),
+          dirMedia('4.jpg', summer2021),
+        ]
+      }, {method: SortByTypes.Directory, ascending: true}, noGrouping);
+
+      expect(res!.mediaGroups.length).toBe(1);
+      expect(res!.mediaGroups[0].media.map((m) => m.name)).toEqual(['r.jpg', '1.jpg', '3.jpg', '2.jpg', '4.jpg']);
+    });
+
+    it('should group media by directory path, keeping same-named directories separate', () => {
+      const root = {path: './', name: '.'};
+      const summer2020 = {path: '2020/', name: 'Summer'};
+      const summer2021 = {path: '2021/', name: 'Summer'};
+      const dirMedia = (name: string, directory: { path: string; name: string }): MediaDTO =>
+        ({name, directory, metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO);
+
+      const res = service.applySorting({
+        directories: [],
+        metaFile: [],
+        media: [
+          dirMedia('1.jpg', summer2020),
+          dirMedia('2.jpg', summer2021),
+          dirMedia('r.jpg', root),
+          dirMedia('3.jpg', summer2020),
+          dirMedia('4.jpg', summer2021),
+        ]
+      }, {method: SortByTypes.Directory, ascending: true}, {method: GroupByTypes.Directory, ascending: true});
+
+      expect(res!.mediaGroups.map((g) => g.name)).toEqual(['Home', '2020/Summer', '2021/Summer']);
+      expect(res!.mediaGroups.map((g) => g.media.map((m) => m.name))).toEqual([['r.jpg'], ['1.jpg', '3.jpg'], ['2.jpg', '4.jpg']]);
     });
   });
 });
