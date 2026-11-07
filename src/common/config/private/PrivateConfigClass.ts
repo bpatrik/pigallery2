@@ -6,12 +6,11 @@ import {IConfigClass} from 'typeconfig/common';
 import {PasswordHelper} from '../../../backend/model/PasswordHelper';
 import {ClientConfig, TAGS} from '../public/ClientConfig';
 
-declare const process: any;
 const upTime = new Date().toISOString();
 // TODO: Refactor Config to be injectable globally.
 // This is a bad habit to let the Config know if its in a testing env.
-const isTesting = process.env['NODE_ENV'] == true || ['afterEach', 'after', 'beforeEach', 'before', 'describe', 'it']
-  .every((fn) => (global as any)[fn] instanceof Function);
+const isTesting = process.env['NODE_ENV'] === '1' || ['afterEach', 'after', 'beforeEach', 'before', 'describe', 'it']
+  .every((fn) => (globalThis as Record<string, unknown>)[fn] instanceof Function);
 if (isTesting) {
   console.log('Running Config in testing mode');
 }
@@ -83,7 +82,7 @@ export class PrivateConfigClass extends ServerConfig {
     this.Environment.buildCommitHash =
       require('../../../../package.json').buildCommitHash;
     this.Environment.upTime = upTime;
-    this.Environment.isDocker = !!process.env.PI_DOCKER;
+    this.Environment.isDocker = !!process.env['PI_DOCKER'];
   }
 
   getClientConfig() {

@@ -22,10 +22,10 @@ export class ServerTimeEntry {
 }
 
 export const FunctionTime = (id: string, name: string) => {
-  return (
+  return <A extends unknown[], R>(
     target: unknown,
     propertyName: string,
-    descriptor: TypedPropertyDescriptor<(...args: any[]) => any>
+    descriptor: TypedPropertyDescriptor<(...args: A) => R>
   ): void => {
     if (Config.Server.Log.logServerTiming === false) {
       return;
@@ -35,7 +35,7 @@ export const FunctionTime = (id: string, name: string) => {
       return;
     }
 
-    descriptor.value = function (this: unknown, ...args: any[]): any {
+    descriptor.value = function (this: unknown, ...args: A): R {
       const timer = new ServerTimeEntry(name);
       timer.start();
 
@@ -43,19 +43,19 @@ export const FunctionTime = (id: string, name: string) => {
         const result = originalMethod.apply(this, args);
 
         // Handle both sync and async functions
-        if (result && typeof result.then === 'function') {
+        if (result instanceof Promise) {
           // Async function - return a promise that logs timing when resolved
           return result
-            .then((value: any) => {
+            .then((value: unknown) => {
               const time = timer.end();
               console.log(`[${id}] ${name}: ${time.toFixed(2)}ms`);
               return value;
             })
-            .catch((error: any) => {
+            .catch((error: unknown) => {
               const time = timer.end();
               console.log(`[${id}] ${name}: ${time.toFixed(2)}ms (error)`);
               throw error;
-            });
+            }) as R;
         } else {
           // Sync function - log timing immediately
           const time = timer.end();
@@ -67,7 +67,7 @@ export const FunctionTime = (id: string, name: string) => {
         console.log(`[${id}] ${name}: ${time.toFixed(2)}ms (error)`);
         throw error;
       }
-    } as any;
+    };
   };
 };
 

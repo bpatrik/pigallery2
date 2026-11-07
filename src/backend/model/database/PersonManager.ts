@@ -108,9 +108,9 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
         .innerJoin('pjt.person', 'person')
         .where('d.id = :dirId', {dirId: changedDir.id})
         .select('DISTINCT person.id', 'pid')
-        .getRawMany();
+        .getRawMany<{ pid: string }>();
 
-      const pids = rows.map((r: any) => parseInt(r.pid, 10)).filter((n: number) => !isNaN(n));
+      const pids = rows.map((r) => parseInt(r.pid, 10)).filter((n: number) => !isNaN(n));
       if (pids.length === 0) {
         return;
       }
@@ -203,7 +203,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
         .clone()
         .select(['pjt.person as personId', 'COUNT(*) as count'])
         .groupBy('pjt.person')
-        .getRawMany();
+        .getRawMany<{ personId: string, count: string }>();
       // Compute sample regions per person (best rated/newest photo)
       // Use individual queries per person to ensure compatibility with older SQLite versions
       const topSamples: Record<number, number> = {};
@@ -235,7 +235,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       }
 
       // Build count lookup
-      const counts = countResults.reduce((acc: Record<number, number>, r: any) => {
+      const counts = countResults.reduce((acc: Record<number, number>, r) => {
         acc[parseInt(r.personId, 10)] = parseInt(r.count, 10);
         return acc;
       }, {});
@@ -265,15 +265,15 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
         if (cacheEntry) {
           // Update existing entry
           cacheEntry.count = count;
-          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as any : null;
+          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as PersonJunctionTable : null;
           cacheEntry.valid = true;
         } else {
           // Create new entry
           cacheEntry = new ProjectedPersonCacheEntity();
           cacheEntry.projectionKey = projectionKey;
-          cacheEntry.person = {id: person.id} as any;
+          cacheEntry.person = {id: person.id} as PersonEntry;
           cacheEntry.count = count;
-          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as any : null;
+          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as PersonJunctionTable : null;
           cacheEntry.valid = true;
         }
 

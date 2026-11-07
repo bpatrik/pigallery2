@@ -333,7 +333,7 @@ export class SharingMWs {
       if (!req.resultPipe) {
         return next();
       }
-      const query: SearchQueryDTO = req.resultPipe as any;
+      const query = req.resultPipe as SearchQueryDTO;
       if (RequestSession.getContext(req).user.role >= UserRoles.Admin) {
         req.resultPipe =
           await ObjectManagers.getInstance().SharingManager.listAllForQuery(query);

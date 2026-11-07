@@ -165,7 +165,7 @@ export class SessionManager {
     }
 
     // List all users and build a session context for each
-    const users = await ObjectManagers.getInstance().UserManager.find({} as any);
+    const users = await ObjectManagers.getInstance().UserManager.find({});
     const sessions: SessionContext[] = [];
     for (const u of users as unknown as SessionUser[]) {
       try {
@@ -173,7 +173,7 @@ export class SessionManager {
         sessions.push(ctx);
       } catch (e) {
         // Log and continue on individual user context build failure to ensure we return other sessions
-        Logger.warn(LOG_TAG, 'Failed to build session context for user id=' + (u as any)?.id + ': ' + (e as Error)?.message);
+        Logger.warn(LOG_TAG, 'Failed to build session context for user id=' + u?.id + ': ' + (e as Error)?.message);
       }
     }
     return sessions;

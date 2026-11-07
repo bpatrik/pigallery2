@@ -44,11 +44,11 @@ export class ErrorDTO {
   constructor(
     public code: ErrorCodes,
     public message?: string | null,
-    public details?: any,
+    public details?: unknown,
     req?: Request
   ) {
     this.detailsStr =
-      (this.details ? this.details.toString() : '') || ErrorCodes[code];
+      (this.details ? String(this.details) : '') || ErrorCodes[code];
     if (req) {
       this.request = {
         method: req.method,

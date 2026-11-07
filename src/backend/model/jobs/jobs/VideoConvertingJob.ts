@@ -4,8 +4,6 @@ import {FileJob} from './FileJob';
 import {VideoProcessing} from '../../fileaccess/fileprocessing/VideoProcessing';
 import {Logger} from '../../../Logger';
 
-declare const global: any;
-
 export class VideoConvertingJob extends FileJob {
   public readonly Name = DefaultsJobs[DefaultsJobs['Video Converting']];
 

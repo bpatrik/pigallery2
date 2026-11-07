@@ -168,7 +168,7 @@ export interface IExtensionRESTRoute {
    * @param cb function callback. `body` is `{}` if the request has no JSON body.
    * @return newly added REST api path
    */
-  jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: any, user?: UserDTO) => Promise<unknown> | unknown): string;
+  jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: unknown, user?: UserDTO) => Promise<unknown> | unknown): string;
 
   /**
    * Exposes a standard expressjs (Express 5) middleware

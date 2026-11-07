@@ -18,6 +18,10 @@ import {DateTags} from './MetadataCreationDate';
 
 const {imageSizeFromFile} = require('image-size/fromFile');
 const LOG_TAG = '[MetadataLoader]';
+// exifr returns loosely shaped tag groups (ifd0, exif, gps, iptc, xmp, ...) and types them as any itself;
+// mapping every tag to a typed shape is not worth it here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ExifData = any;
 
 sharp.cache(false);
 
@@ -166,7 +170,7 @@ export class MetadataLoader {
 
         for (const sidecarPath of sidecarPaths) {
           if (fs.existsSync(sidecarPath)) {
-            const sidecarData: any = await exifr.sidecar(sidecarPath);
+            const sidecarData: ExifData = await exifr.sidecar(sidecarPath);
             if (sidecarData !== undefined) {
               // sidecar should not change the video dimension
               MetadataLoader.mapMetadata(metadata, sidecarData, false);
@@ -264,7 +268,7 @@ export class MetadataLoader {
 
           for (const sidecarPath of sidecarPaths) {
             if (fs.existsSync(sidecarPath)) {
-              const sidecarData: any = await exifr.sidecar(sidecarPath, exifrOptions);
+              const sidecarData: ExifData = await exifr.sidecar(sidecarPath, exifrOptions);
               if (sidecarData !== undefined) {
                 //note that since side cars are loaded last, data loaded here overwrites embedded metadata (in Pigallery2, not in the actual files)
                 // sidecar should not change the image dimension
@@ -294,7 +298,7 @@ export class MetadataLoader {
     return metadata;
   }
 
-  private static mapMetadata(metadata: PhotoMetadata | VideoMetadata, exif: any, mapDimension = true) {
+  private static mapMetadata(metadata: PhotoMetadata | VideoMetadata, exif: ExifData, mapDimension = true) {
     //replace adobe xap-section with xmp to reuse parsing
     if (Object.hasOwn(exif, 'xap')) {
       exif['xmp'] = exif['xap'];
@@ -317,18 +321,18 @@ export class MetadataLoader {
     }
   }
 
-  private static getOrientation(exif: any): number {
+  private static getOrientation(exif: ExifData): number {
     let orientation = 1; //Orientation 1 is normal
     if (exif.ifd0?.Orientation != undefined) {
-      orientation = parseInt(exif.ifd0.Orientation as any, 10) as number;
+      orientation = parseInt(String(exif.ifd0.Orientation), 10) as number;
     } else if (exif.tiff?.Orientation != undefined) {
       // Fallback to tiff.Orientation for XMP sidecars
-      orientation = parseInt(exif.tiff.Orientation as any, 10) as number;
+      orientation = parseInt(String(exif.tiff.Orientation), 10) as number;
     }
     return orientation;
   }
 
-  private static mapImageDimensions(metadata: PhotoMetadata, exif: any, orientation: number) {
+  private static mapImageDimensions(metadata: PhotoMetadata, exif: ExifData, orientation: number) {
     if (metadata.size.width <= 0) {
       metadata.size.width = exif.ifd0?.ImageWidth || exif.exif?.ExifImageWidth || metadata.size.width;
     }
@@ -348,7 +352,7 @@ export class MetadataLoader {
     }
   }
 
-  private static mapKeywords(metadata: PhotoMetadata, exif: any) {
+  private static mapKeywords(metadata: PhotoMetadata, exif: ExifData) {
     if (exif.dc &&
       exif.dc.subject &&
       exif.dc.subject.length > 0) {
@@ -378,15 +382,15 @@ export class MetadataLoader {
     }
   }
 
-  private static mapTitle(metadata: PhotoMetadata, exif: any) {
+  private static mapTitle(metadata: PhotoMetadata, exif: ExifData) {
     metadata.title = exif.dc?.title?.value || Utils.asciiToUTF8(exif.iptc?.ObjectName) || metadata.title || exif.photoshop?.Headline || exif.acdsee?.caption; //acdsee caption holds the title when data is saved by digikam. Used as last resort if iptc and dc do not contain the data
   }
 
-  private static mapCaption(metadata: PhotoMetadata, exif: any) {
+  private static mapCaption(metadata: PhotoMetadata, exif: ExifData) {
     metadata.caption = exif.dc?.description?.value || Utils.asciiToUTF8(exif.iptc?.Caption) || metadata.caption || exif.ifd0?.ImageDescription || exif.exif?.UserComment?.value || exif.Iptc4xmpCore?.ExtDescrAccessibility?.value || exif.acdsee?.notes;
   }
 
-  private static mapTimestampAndOffset(metadata: PhotoMetadata, exif: any) {
+  private static mapTimestampAndOffset(metadata: PhotoMetadata, exif: ExifData) {
     //This method looks for date tags matching the priorized list 'DateTags' of 'MetadataCreationDate'
     let ts: string | undefined = undefined;
     let offset: string | undefined = undefined;
@@ -419,12 +423,12 @@ export class MetadataLoader {
     //---- End of mapTimestampAndOffset logic ----
 
     //---- Helper functions for mapTimestampAndOffset ----
-    function getValue(exif: any, path: string | undefined): any {
+    function getValue(exif: ExifData, path: string | undefined): ExifData {
       if (!path) {
         return undefined;
       }
       const pathElements = path.split('.');
-      let currentObject: any = exif;
+      let currentObject: ExifData = exif;
       for (const pathElm of pathElements) {
         const tmp = currentObject[pathElm];
         if (tmp === undefined) {
@@ -456,7 +460,7 @@ export class MetadataLoader {
 
   }
 
-  private static mapCameraData(metadata: PhotoMetadata, exif: any) {
+  private static mapCameraData(metadata: PhotoMetadata, exif: ExifData) {
     metadata.cameraData = metadata.cameraData || {};
     metadata.cameraData.make = exif.ifd0?.Make || exif.tiff?.Make || metadata.cameraData.make;
 
@@ -490,7 +494,7 @@ export class MetadataLoader {
     }
   }
 
-  private static mapGPS(metadata: PhotoMetadata, exif: any) {
+  private static mapGPS(metadata: PhotoMetadata, exif: ExifData) {
     try {
       if (exif.gps || (exif.exif && exif.exif.GPSLatitude && exif.exif.GPSLongitude)) {
         metadata.positionData = metadata.positionData || {};
@@ -517,7 +521,7 @@ export class MetadataLoader {
     }
   }
 
-  private static mapToponyms(metadata: PhotoMetadata, exif: any) {
+  private static mapToponyms(metadata: PhotoMetadata, exif: ExifData) {
     //Function to convert html code for special characters into their corresponding character (used in exif.photoshop-section)
 
     metadata.positionData = metadata.positionData || {};
@@ -532,7 +536,7 @@ export class MetadataLoader {
     }
   }
 
-  private static mapRating(metadata: PhotoMetadata, exif: any) {
+  private static mapRating(metadata: PhotoMetadata, exif: ExifData) {
     if (exif.xmp &&
       exif.xmp.Rating !== undefined) {
       const rting = Math.round(exif.xmp.Rating);
@@ -548,7 +552,7 @@ export class MetadataLoader {
     }
   }
 
-  private static mapFaces(metadata: PhotoMetadata, exif: any, orientation: number) {
+  private static mapFaces(metadata: PhotoMetadata, exif: ExifData, orientation: number) {
     //xmp."mwg-rs" section
     if (exif['mwg-rs'] &&
       exif['mwg-rs'].Regions) {
@@ -659,12 +663,12 @@ export class MetadataLoader {
     }
   }
 
-  private static mapExifReader(exif: exifReader.Exif): any {
+  private static mapExifReader(exif: exifReader.Exif): ExifData {
     if (!exif) {
       return {};
     }
 
-    const result: any = {};
+    const result: ExifData = {};
 
     // Map Image tags to ifd0 (this is where exifr puts TIFF/IFD0 data)
     if (exif.Image) {
@@ -753,7 +757,7 @@ export class MetadataLoader {
    * Tag reference: ExifTool Apple.pm by Phil Harvey
    * (https://github.com/exiftool/exiftool)
    */
-  static parseAppleMakerNoteContentId(makerNote: any): string | undefined {
+  static parseAppleMakerNoteContentId(makerNote: unknown): string | undefined {
     try {
       let buf: Buffer;
       if (Buffer.isBuffer(makerNote)) {

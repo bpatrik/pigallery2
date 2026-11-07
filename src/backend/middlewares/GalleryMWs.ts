@@ -136,7 +136,7 @@ export class GalleryMWs {
 
     // Handle search-query-based zip
     try {
-      const query: SearchQueryDTO = req.resultPipe as any;
+      const query = req.resultPipe as SearchQueryDTO;
 
       // Get all media items from search
       const searchResult = await ObjectManagers.getInstance().SearchManager.search(
@@ -393,7 +393,7 @@ export class GalleryMWs {
         return next();
       }
 
-      const query: SearchQueryDTO = req.resultPipe as any;
+      const query = req.resultPipe as SearchQueryDTO;
       const result = await ObjectManagers.getInstance().SearchManager.search(
         RequestSession.getContext(req),
         query
@@ -466,7 +466,7 @@ export class GalleryMWs {
         return next();
       }
 
-      const query: SearchQueryDTO = req.resultPipe as any;
+      const query = req.resultPipe as SearchQueryDTO;
 
       const photos =
         await ObjectManagers.getInstance().SearchManager.getNMedia(

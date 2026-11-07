@@ -49,7 +49,11 @@ export class PhotoProcessing {
     person: PersonEntry
   ): Promise<string> {
     // load parameters
-    const photo: PhotoDTO = person.cache.sampleRegion.media;
+    const sampleRegion = person.cache.sampleRegion;
+    if (!sampleRegion) {
+      throw new Error('No sample region for person: ' + person.name);
+    }
+    const photo: PhotoDTO = sampleRegion.media;
     const mediaPath = path.join(
       ProjectPath.ImageFolder,
       photo.directory.path,
@@ -57,7 +61,7 @@ export class PhotoProcessing {
       photo.name
     );
     const size: number = Config.Media.Photo.personThumbnailSize;
-    const faceRegion = person.cache.sampleRegion.media.metadata.faces.find(f => f.name === person.name);
+    const faceRegion = sampleRegion.media.metadata.faces.find(f => f.name === person.name);
     if (!faceRegion?.box) {
       throw new Error('No face region for person: ' + person.name);
     }

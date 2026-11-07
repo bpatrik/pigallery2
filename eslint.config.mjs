@@ -107,8 +107,8 @@ export default tseslint.config(
     },
   },
   {
-    // the frontend is strictNullChecks and any-free (#1249); the backend still has some
-    files: ["src/frontend/**/*.ts"],
+    // src is any-free (#1249, #1294)
+    files: ["src/**/*.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
     },

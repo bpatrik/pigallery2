@@ -33,7 +33,7 @@ export class ProjectedPersonCacheEntity implements PersonCacheDTO{
     onDelete: 'SET NULL',
     nullable: true,
   })
-  sampleRegion!: PersonJunctionTable;
+  sampleRegion!: PersonJunctionTable | null;
 
   // if false, sample (or other aggregates) need recomputation
   @Column({ type: 'boolean', default: true })

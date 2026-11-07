@@ -15,6 +15,8 @@ import {SessionManager} from './SessionManager';
 import * as path from 'node:path';
 import {SessionContext} from '../SessionContext';
 import {MediaEntity} from './enitites/MediaEntity';
+import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
+import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {Config} from '../../../common/config/private/Config';
 import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
@@ -129,9 +131,9 @@ export class ProjectedCacheManager implements IObjectManager {
       ])
       .getRawOne();
 
-    const mediaCount: number = agg?.mediaCount != null ? parseInt(agg.mediaCount as any, 10) : 0;
-    const oldestMedia: number | null = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
-    const youngestMedia: number | null = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
+    const mediaCount: number = agg?.mediaCount != null ? parseInt(String(agg.mediaCount), 10) : 0;
+    const oldestMedia: number | null = agg?.oldest != null ? parseInt(String(agg.oldest), 10) : null;
+    const youngestMedia: number | null = agg?.youngest != null ? parseInt(String(agg.youngest), 10) : null;
 
     // Compute recursive media count under projection (includes children) using single SQL query
     const recQb = mediaRepo
@@ -158,7 +160,7 @@ export class ProjectedCacheManager implements IObjectManager {
       recQb.andWhere(session.projectionQuery);
     }
     const aggRec = await recQb.select(['COUNT(*) as cnt']).getRawOne();
-    const recursiveMediaCount = aggRec?.cnt != null ? parseInt(aggRec.cnt as any, 10) : 0;
+    const recursiveMediaCount = aggRec?.cnt != null ? parseInt(String(aggRec.cnt), 10) : 0;
 
 
     // Compute cover respecting projection
@@ -179,14 +181,14 @@ export class ProjectedCacheManager implements IObjectManager {
       row = new ProjectedDirectoryCacheEntity();
       row.projectionKey = projectionKey;
       // Avoid fetching the full directory graph; assign relation by id only
-      row.directory = {id: dir.id} as any;
+      row.directory = {id: dir.id} as DirectoryEntity;
     }
 
     row.mediaCount = mediaCount || 0;
     row.recursiveMediaCount = recursiveMediaCount || 0;
     row.oldestMedia = oldestMedia ?? null;
     row.youngestMedia = youngestMedia ?? null;
-    row.cover = coverMedia as any;
+    row.cover = coverMedia as MediaEntity; // only its id is saved
     row.valid = true;
 
     return row;
@@ -214,7 +216,7 @@ export class ProjectedCacheManager implements IObjectManager {
   public async setAndGetCacheForAlbum(connection: DataSource, session: SessionContext, album: {
     name: string,
     id: number,
-    searchQuery: any
+    searchQuery: SearchQueryDTO
   }): Promise<ProjectedAlbumCacheEntity> {
 
 
@@ -264,27 +266,27 @@ export class ProjectedCacheManager implements IObjectManager {
 
 
       // Compute cover respecting projection
-      coverMedia = await ObjectManagers.getInstance().CoverManager.getCoverForAlbum(session, album as any);
+      coverMedia = await ObjectManagers.getInstance().CoverManager.getCoverForAlbum(session, album);
     } catch (e) {
       Logger.error(LOG_TAG, `Error computing album cache for album "${album.name}": ` + e);
       NotificationManager.warning(`Error computing album cache for album "${album.name}"`);
     }
 
-    const itemCount: number = agg?.itemCount != null ? parseInt(agg.itemCount as any, 10) : 0;
-    const oldestMedia: number | null = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
-    const youngestMedia: number | null = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
+    const itemCount: number = agg?.itemCount != null ? parseInt(String(agg.itemCount), 10) : 0;
+    const oldestMedia: number | null = agg?.oldest != null ? parseInt(String(agg.oldest), 10) : null;
+    const youngestMedia: number | null = agg?.youngest != null ? parseInt(String(agg.youngest), 10) : null;
 
     if (!row) {
       row = new ProjectedAlbumCacheEntity();
       row.projectionKey = projectionKey;
       // Avoid fetching the full album graph; assign relation by id only
-      row.album = {id: album.id} as any;
+      row.album = {id: album.id} as AlbumBaseEntity;
     }
 
     row.itemCount = itemCount || 0;
     row.oldestMedia = oldestMedia ?? null;
     row.youngestMedia = youngestMedia ?? null;
-    row.cover = coverMedia as any;
+    row.cover = coverMedia as MediaEntity; // only its id is saved
     row.valid = true;
 
     const ret = await cacheRepo.save(row);

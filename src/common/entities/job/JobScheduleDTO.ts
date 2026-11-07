@@ -35,7 +35,7 @@ export interface AfterJobTrigger extends JobTrigger {
 export interface JobScheduleDTO {
   name: string;
   jobName: string;
-  config: Record<string, string | number | string[] | number[] | MediaPickDTO[]>;
+  config: Record<string, string | number | boolean | string[] | number[] | MediaPickDTO[]>;
   allowParallelRun: boolean;
   trigger:
       | NeverJobTrigger

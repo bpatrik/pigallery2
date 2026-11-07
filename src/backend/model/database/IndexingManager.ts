@@ -29,7 +29,7 @@ const LOG_TAG = '[IndexingManager]';
 export class IndexingManager {
   SavingReady: Promise<void> | null = null;
   private SavingReadyPR: (() => void) | null = null;
-  private savingQueue: { dir: ParentDirectoryDTO; promise: Promise<void>; resolve: () => void; reject: (e: any) => void }[] = [];
+  private savingQueue: { dir: ParentDirectoryDTO; promise: Promise<void>; resolve: () => void; reject: (e: unknown) => void }[] = [];
   private isSaving = false;
 
   get IsSavingInProgress(): boolean {
@@ -175,7 +175,7 @@ export class IndexingManager {
     // queue for saving
     // assigned synchronously by the Promise executor below
     let resolveFn!: () => void;
-    let rejectFn!: (e: any) => void;
+    let rejectFn!: (e: unknown) => void;
     const promise = new Promise<void>((resolve, reject): void => {
       resolveFn = resolve;
       rejectFn = reject;

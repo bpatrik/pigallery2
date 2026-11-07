@@ -18,12 +18,12 @@ declare global {
   namespace Express {
     interface Request {
       localePath?: string;
-      tpl?: Record<string, any>;
+      tpl?: Record<string, unknown>;
       timing?: Record<string, ServerTimeEntry>;
     }
 
     interface Response {
-      tpl?: Record<string, any>;
+      tpl?: Record<string, unknown>;
     }
   }
 }

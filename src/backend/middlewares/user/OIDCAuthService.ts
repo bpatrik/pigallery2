@@ -23,7 +23,7 @@ export class OIDCAuthService {
     req.session.oidc = {
       state,
       verifier
-    } as any;
+    };
     return client.authorizationUrl({
       scope: Config.Users.oidc.scopes.join(' '),
       state,
@@ -85,7 +85,7 @@ export class OIDCAuthService {
       await this.findUser(matchedName);
 
     // cleanup
-    delete (req.session as any).oidc;
+    delete req.session.oidc;
     return user;
   }
 

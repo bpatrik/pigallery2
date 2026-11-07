@@ -67,7 +67,8 @@ export interface TAGS {
   client?: true,
   priority?: ConfigPriority,
   name?: string,
-  relevant?: (c: any) => boolean,
+  // method syntax, so a callback can type c as the config class it is declared in
+  relevant?(c: unknown): boolean,
   dockerSensitive?: boolean,
   hint?: string, // UI hint
   githubIssue?: number,
@@ -79,7 +80,7 @@ export interface TAGS {
   uiOptions?: (string | number)[], //Hint for the UI about the recommended options
   uiAllowSpaces?: boolean
   uiOptional?: boolean; //makes the tag not "required"
-  uiDisabled?: (subConfig: any, config: ClientConfig) => boolean
+  uiDisabled?(subConfig: unknown, config: ClientConfig): boolean
   uiJob?: {
     job: string,
     hideProgress?: boolean,
@@ -553,7 +554,7 @@ export class ClientMapConfig {
     tags:
       {
         name: $localize`Mapbox access token`,
-        relevant: (c: any) => c.mapProvider === MapProviders.Mapbox,
+        relevant: (c: ClientMapConfig) => c.mapProvider === MapProviders.Mapbox,
         priority: ConfigPriority.advanced
       },
     description: $localize`MapBox needs an access token to work, create one at https://www.mapbox.com.`,
@@ -564,7 +565,7 @@ export class ClientMapConfig {
     arrayType: MapLayers,
     description: $localize`The map module will use these urls to fetch the map tiles.`,
     tags: {
-      relevant: (c: any) => c.mapProvider === MapProviders.Custom,
+      relevant: (c: ClientMapConfig) => c.mapProvider === MapProviders.Custom,
       name: $localize`Custom Layers`,
       priority: ConfigPriority.advanced
     }
@@ -1444,7 +1445,7 @@ export class ClientGPXCompressingConfig {
       name: $localize`Enable GPX compressing`,
       priority: ConfigPriority.advanced,
       githubIssue: 504,
-      uiDisabled: (sc: any, c: ClientConfig) => !c.Map.enabled
+      uiDisabled: (sc: unknown, c: ClientConfig) => !c.Map.enabled
     },
     description: $localize`Enables lossy (based on delta time and distance. Too frequent points are removed) GPX compression.`
   })
@@ -1512,7 +1513,7 @@ export class ClientMetaFileConfig {
     tags: {
       name: $localize`GPX compression`,
       priority: ConfigPriority.advanced,
-      uiDisabled: (sb, c) => !c.Map.enabled || !sb.gpx
+      uiDisabled: (sb: ClientMetaFileConfig, c: ClientConfig) => !c.Map.enabled || !sb.gpx
     } as TAGS
   })
   GPXCompressing: ClientGPXCompressingConfig = new ClientGPXCompressingConfig();
@@ -1744,7 +1745,7 @@ export class ClientUserOIDCConfig {
       name: $localize`Display name`,
       priority: ConfigPriority.advanced,
       uiOptional: true,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ClientUserOIDCConfig) => c.enabled,
       hint: 'Authentik'
     } as TAGS,
     description: $localize`Shown on the login button (client-visible).`
@@ -1775,7 +1776,7 @@ export class ClientUserConfig {
       name: $localize`Default user right`,
       priority: ConfigPriority.advanced,
       uiResetNeeded: {server: true},
-      relevant: (c: any) => c.authenticationRequired === false
+      relevant: (c: ClientUserConfig) => c.authenticationRequired === false
     },
     description: $localize`Default user right when password protection is disabled.`,
   })

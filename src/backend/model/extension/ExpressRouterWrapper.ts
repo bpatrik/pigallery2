@@ -86,7 +86,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
       ])));
   }
 
-  public jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: any, user?: UserDTO) => Promise<unknown> | unknown): string {
+  public jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: unknown, user?: UserDTO) => Promise<unknown> | unknown): string {
     return this.register(paths,
       ...(this.getAuthMWs(minRole).concat([
         async (req: Request, res: Response, next: NextFunction) => {

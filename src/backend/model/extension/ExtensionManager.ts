@@ -4,6 +4,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {pipeline} from 'node:stream/promises';
 import {Readable} from 'node:stream';
+import type {ReadableStream as NodeReadableStream} from 'node:stream/web';
 import {IObjectManager} from '../database/IObjectManager';
 import {Logger} from '../../Logger';
 import {IExtensionEvents, IExtensionObject} from './IExtension';
@@ -386,7 +387,7 @@ export class ExtensionManager implements IObjectManager {
       throw new Error(`Unexpected response ${response.statusText}`);
     }
 
-    const nodeReadable = Readable.fromWeb(response.body as any);
+    const nodeReadable = Readable.fromWeb(response.body as NodeReadableStream); // the DOM and the node:stream/web ReadableStream types differ
 
     // Pipe the response body to a file
     await pipeline(nodeReadable, fs.createWriteStream(outputPath));

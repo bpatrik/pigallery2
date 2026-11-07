@@ -5,7 +5,7 @@ export interface TaskQueEntry<I, O> {
   promise: {
     obj: Promise<O>;
     resolve: (ret: O) => void;
-    reject: (err: any) => void;
+    reject: (err: unknown) => void;
   };
 }
 
@@ -47,7 +47,7 @@ export class TaskQue<I, O> {
   private putNewTask(input: I): TaskQueEntry<I, O> {
     // assigned synchronously by the Promise executor
     let resolve!: (ret: O) => void;
-    let reject!: (err: any) => void;
+    let reject!: (err: unknown) => void;
     const obj = new Promise<O>((res, rej) => {
       resolve = res;
       reject = rej;

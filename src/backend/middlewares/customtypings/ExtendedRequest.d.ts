@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {LoginCredential} from '../../../common/entities/LoginCredential';
 import {SessionContext} from '../../model/SessionContext';
 import {DirectoryAccessTypes} from '../../model/DirectoryAccess';
@@ -30,7 +29,7 @@ declare global {
     }
 
     interface Response {
-      tpl?: Record<string, any>;
+      tpl?: Record<string, unknown>;
     }
 
   }

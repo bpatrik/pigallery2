@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {ObjectManagers} from '../model/ObjectManagers';
-import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
+import {ErrorCodes, ErrorDTO, errorMessage} from '../../common/entities/Error';
 import multer = require('multer');
 import {RequestParams} from './RequestParams';
 
@@ -16,9 +16,9 @@ export class UploadMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    upload(req, res, async (err: any) => {
+    upload(req, res, async (err: unknown) => {
       if (err) {
-        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, err.message));
+        return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, errorMessage(err)));
       }
 
       const files = req.files as Express.Multer.File[];
