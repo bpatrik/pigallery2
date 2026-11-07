@@ -12,7 +12,8 @@ import {promises as fsp} from 'fs';
 import {DirectoryAccess, DirectoryAccessTypes} from '../../../../src/backend/model/DirectoryAccess';
 import {SessionContext} from '../../../../src/backend/model/SessionContext';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
-import {DirectorySearch, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 import {TestHelper} from '../../../TestHelper';
 
 declare const before: any;
@@ -241,6 +242,93 @@ describe('GalleryMWs', () => {
         }
       };
       GalleryMWs.cleanUpGalleryResults(req, null, next);
+    });
+  });
+
+  describe('parseSearchQuery', () => {
+    it('should parse URLified search query', (done: (err?: any) => void) => {
+      const originalQuery: TextSearch = {
+        type: SearchQueryTypes.any_text,
+        value: '',
+      };
+      const req: any = {
+        params: {
+          searchQueryDTO: SearchQueryUtils.urlify(originalQuery),
+        },
+      };
+      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
+        try {
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal(originalQuery);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    });
+
+    it('should keep % sequences in the search text', (done: (err?: any) => void) => {
+      const originalQuery: TextSearch = {
+        type: SearchQueryTypes.keyword,
+        value: 'a%20b',
+        matchType: TextSearchQueryMatchTypes.exact_match,
+      };
+      const req: any = {
+        params: {
+          searchQueryDTO: SearchQueryUtils.urlify(originalQuery),
+        },
+      };
+      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
+        try {
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal(originalQuery);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    });
+
+    it('should parse full JSON search query', (done: (err?: any) => void) => {
+      const originalQuery: TextSearch = {
+        type: SearchQueryTypes.keyword,
+        value: 'Landscape',
+        matchType: TextSearchQueryMatchTypes.exact_match,
+      };
+      const req: any = {
+        params: {
+          searchQueryDTO: JSON.stringify(originalQuery),
+        },
+      };
+      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
+        try {
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal(originalQuery);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+    });
+
+    it('should fall back to any-text search on non-JSON input', (done: (err?: any) => void) => {
+      const req: any = {
+        params: {
+          searchQueryDTO: '{invalid-json',
+        },
+      };
+      GalleryMWs.parseSearchQuery(req, null, (err?: any) => {
+        try {
+          expect(err).to.be.undefined;
+          expect(req.resultPipe).to.deep.equal({
+            type: SearchQueryTypes.any_text,
+            value: '{invalid-json',
+          });
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
     });
   });
 

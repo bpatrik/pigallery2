@@ -1800,6 +1800,7 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         // exactly 1 year ago keeps today's day; the every-year patterns match by day
         const d = new Date(testNow);
         d.setUTCFullYear(d.getUTCFullYear() - 1);
+        d.setUTCHours(10, 0, 0, 0);
         p7.metadata.creationDate = d.getTime();
         p7.metadata.creationDateOffset = '+02:00';
 

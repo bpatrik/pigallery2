@@ -1,11 +1,11 @@
-import { Component, OnDestroy, TemplateRef, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, TemplateRef, computed, inject, linkedSignal } from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {NetworkService} from '../../../model/network/network.service';
 import {Subscription} from 'rxjs';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
+import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
 import {ActivatedRoute, Params} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {SearchQueryParserService} from '../search/search-query-parser.service';
@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 import {CopyDirective} from '../../utils/copy/copy.directive';
 import { GallerySearchQueryBuilderComponent } from '../search/query-builder/query-bulder.gallery.component';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
+import {Utils} from '../../../../../common/Utils';
 
 @Component({
     selector: 'app-gallery-random-query-builder',
@@ -34,12 +35,45 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private modalService = inject(BsModalService);
 
-  public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
+  public readonly searchQueryDTO = linkedSignal<string | null, SearchQueryDTO>({
+    source: (): string | null => {
+      const dir = this.contentLoaderService.content()?.directory;
+      if (!dir) {
+        return null;
+      }
+      return SearchQueryUtils.normalizeDirectoryPath(
+        Utils.concatUrls(dir.path, dir.name)
+      );
+    },
+    computation: (directory, prev): SearchQueryDTO => {
+      if (prev && prev.source === directory) {
+        return prev.value;
+      }
+      if (!directory) {
+        return {
+          type: SearchQueryTypes.any_text,
+          value: '',
+        } as TextSearch;
+      }
+      return {
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.globMatch,
+        value: directory + '/*',
+      } as DirectorySearch;
+    },
+  });
+
   readonly enabled = computed((): boolean => !!this.contentLoaderService.content()?.directory);
-  readonly url = signal('');
 
+  get HTMLSearchQuery(): string {
+    return SearchQueryUtils.urlify(this.searchQueryDTO());
+  }
 
-  modalRef: BsModalRef | null;
+  readonly url = computed((): string => NetworkService.buildUrl(
+    Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random') + '/' + encodeURIComponent(this.HTMLSearchQuery)
+  ));
+
+  modalRef: BsModalRef | null = null;
 
   private readonly subscription: Subscription | null = null;
 
@@ -51,19 +85,12 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
       const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
       if (searchQuery) {
         this.searchQueryDTO.set(searchQuery);
-        this.onQueryChange();
       }
     });
   }
 
-  get HTMLSearchQuery(): string {
-    return SearchQueryUtils.urlify(this.searchQueryDTO());
-  }
-
   onQueryChange(): void {
-    this.url.set(NetworkService.buildUrl(
-        Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random/') + '/' + this.HTMLSearchQuery
-    ));
+    // url is computed reactively from searchQueryDTO
   }
 
   ngOnDestroy(): void {
@@ -82,7 +109,6 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
 
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});
     document.body.style.paddingRight = '0px';
-    this.onQueryChange();
     return false;
   }
 
