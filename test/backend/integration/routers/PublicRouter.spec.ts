@@ -286,6 +286,48 @@ describe('PublicRouter', () => {
     });
   });
 
+  describe('index.html rendering', () => {
+    const i18n = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../angular.json'), 'utf8')).projects.pigallery2.i18n;
+    const locales: string[] = [i18n.sourceLocale.code, ...Object.keys(i18n.locales)];
+    let frontendFolder: string;
+    let languages: string[];
+    beforeEach(async () => {
+      await setUp();
+      languages = Config.Server.languages;
+      Config.Server.languages = locales;
+      frontendFolder = ProjectPath.FrontendFolder;
+      ProjectPath.FrontendFolder = path.join(TestHelper.TMP_DIR, 'frontend');
+      // the real template, marked with its locale
+      const template = fs.readFileSync(path.join(__dirname, '../../../../src/frontend/index.html'), 'utf8');
+      for (const l of locales) {
+        fs.mkdirSync(path.join(ProjectPath.FrontendFolder, l), {recursive: true});
+        fs.writeFileSync(path.join(ProjectPath.FrontendFolder, l, 'index.html'), '<!-- locale:' + l + ' -->\n' + template);
+      }
+    });
+    afterEach(async () => {
+      fs.rmSync(ProjectPath.FrontendFolder, {recursive: true, force: true});
+      ProjectPath.FrontendFolder = frontendFolder;
+      Config.Server.languages = languages;
+      await tearDown();
+    });
+
+    it('should render the template of every locale', async () => {
+      Config.Server.customHTMLHead = '<meta name="custom-head" content="árvíztűrő">';
+      for (const l of locales) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic)
+          .get('/').set('Cookie', 'pigallery2-lang=' + l);
+        res.should.have.status(200);
+        expect(res.text, l).to.contain('<!-- locale:' + l + ' -->');
+        expect(res.text, l).to.not.contain('<%');
+        expect(res.text, l).to.contain('<base href="' + Config.Server.getAppUrl() + '"/>');
+        expect(res.text, l).to.contain('<meta name="custom-head" content="árvíztűrő">');
+        shouldHaveInjectedUser(res, null);
+        const config = res.text.substring(res.text.indexOf('ConfigInject: ') + 'ConfigInject: '.length, res.text.indexOf(', UIExtensionConfigs'));
+        expect(JSON.parse(config).Server.applicationTitle, l).to.equal(Config.Server.applicationTitle);
+      }
+    });
+  });
+
   describe('Language links', () => {
     let languages: string[];
     beforeEach(async () => {

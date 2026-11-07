@@ -1,5 +1,5 @@
 import {DBTestHelper} from '../../../DBTestHelper';
-import {Connection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
@@ -30,7 +30,7 @@ describe('AlbumCoverFillingJob', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
-  let connection: Connection;
+  let connection: DataSource;
 
   const waitForJobToFinish = async (jobName: string, timeout = 5000): Promise<void> => {
     const start = Date.now();

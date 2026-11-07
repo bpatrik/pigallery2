@@ -13,7 +13,7 @@ export class UploadRouter {
 
   private static addUpload(app: express.Express): void {
     app.post(
-      [Config.Server.apiPath + '/upload/:directory(*)', Config.Server.apiPath + '/upload/', Config.Server.apiPath + '/upload//'],
+      [Config.Server.apiPath + '/upload/{*directory}', Config.Server.apiPath + '/upload/'],
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(Config.Upload.minimumRole),
       AuthenticationMWs.normalizePathParam('directory'),

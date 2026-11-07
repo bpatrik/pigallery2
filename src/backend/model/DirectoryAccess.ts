@@ -1,5 +1,5 @@
 import * as path from 'path';
-import {Brackets, Connection, WhereExpressionBuilder} from 'typeorm';
+import {Brackets, DataSource, WhereExpressionBuilder} from 'typeorm';
 import type {SessionContext} from './SessionContext';
 import {SearchQueryUtils} from '../../common/SearchQueryUtils';
 import {SQLConnection} from './database/SQLConnection';
@@ -233,7 +233,7 @@ export class DirectoryAccess {
    * Returns the available (allowed and not blocked) directories below the given directory
    */
   private async getAvailableDirectoriesBelow(dirPath: string, onlyOne: boolean): Promise<{ path: string, name: string }[]> {
-    const connection: Connection = await SQLConnection.getConnection();
+    const connection: DataSource = await SQLConnection.getConnection();
     const qb = connection
       .getRepository(DirectoryEntity)
       .createQueryBuilder('directory')

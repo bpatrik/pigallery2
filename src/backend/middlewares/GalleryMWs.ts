@@ -1,12 +1,11 @@
 import * as path from 'path';
 import {promises as fsp} from 'fs';
-import archiver from 'archiver';
+import {ZipArchive} from 'archiver';
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {ParentDirectoryDTO,} from '../../common/entities/DirectoryDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {DirectoryAccessTypes} from '../model/DirectoryAccess';
-import {AuthenticationMWs} from './user/AuthenticationMWs';
 import {ContentWrapper, ContentWrapperUtils} from '../../common/entities/ContentWrapper';
 import {ProjectPath} from '../ProjectPath';
 import {Config} from '../../common/config/private/Config';
@@ -18,6 +17,7 @@ import {SearchQueryDTO, SearchQueryTypes,} from '../../common/entities/SearchQue
 import {LocationLookupException} from '../exceptions/LocationLookupException';
 import {ServerTime} from './ServerTimingMWs';
 import {SortByTypes} from '../../common/entities/SortingMethods';
+import {RequestParams} from './RequestParams';
 
 export class GalleryMWs {
   /**
@@ -30,11 +30,11 @@ export class GalleryMWs {
     next: NextFunction
   ): void {
     try {
-      if (!req.params['searchQueryDTO']) {
+      if (!RequestParams.get(req, 'searchQueryDTO')) {
         return next();
       }
 
-      const rawQueryParam = req.params['searchQueryDTO'] as string;
+      const rawQueryParam = RequestParams.get(req, 'searchQueryDTO');
 
       let query: SearchQueryDTO;
       try {
@@ -65,19 +65,20 @@ export class GalleryMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    const directoryName = req.params['directory'] || '/';
-    const absoluteDirectoryName = path.join(
-      ProjectPath.ImageFolder,
-      directoryName
-    );
+    const directoryName = RequestParams.get(req, 'directory') || '/';
+    const absoluteDirectoryName = ProjectPath.resolveInImageFolder(directoryName);
     // set by AuthenticationMWs.authoriseDirectory
     const access = req.directoryAccess ?? DirectoryAccessTypes.available;
+    let isDirectory = false;
     try {
-      if ((await fsp.stat(absoluteDirectoryName)).isDirectory() === false) {
-        return AuthenticationMWs.directoryNotFound(res, next);
-      }
+      isDirectory = !!absoluteDirectoryName && (await fsp.stat(absoluteDirectoryName)).isDirectory();
     } catch {
-      return AuthenticationMWs.directoryNotFound(res, next);
+      // not existing
+    }
+    if (!isDirectory) {
+      // the same answer as AuthenticationMWs.authoriseDirectory gives for not available directories
+      res.status(404);
+      return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
     }
 
     try {
@@ -148,7 +149,7 @@ export class GalleryMWs {
       res.set('Content-Type', 'application/zip');
       res.set('Content-Disposition', 'attachment; filename=SearchResults.zip');
 
-      const archive = archiver('zip', {
+      const archive = new ZipArchive({
         store: true, // disable compression
       });
 
@@ -325,16 +326,16 @@ export class GalleryMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
-    if (!req.params['mediaPath']) {
+    if (!RequestParams.get(req, 'mediaPath')) {
       return next();
     }
-    const fullMediaPath = path.join(
-      ProjectPath.ImageFolder,
-      req.params['mediaPath']
-    );
+    const fullMediaPath = ProjectPath.resolveInImageFolder(RequestParams.get(req, 'mediaPath'));
 
     // check if file exist
     try {
+      if (!fullMediaPath) {
+        throw new Error('Path is outside of the image folder');
+      }
       if ((await fsp.stat(fullMediaPath)).isDirectory()) {
         return next();
       }
@@ -342,7 +343,7 @@ export class GalleryMWs {
       return next(
         new ErrorDTO(
           ErrorCodes.PATH_ERROR,
-          'no such file:' + req.params['mediaPath'],
+          'no such file:' + RequestParams.get(req, 'mediaPath'),
           'can\'t find file: ' + fullMediaPath
         )
       );
@@ -427,7 +428,7 @@ export class GalleryMWs {
       if (Config.Search.AutoComplete.enabled === false) {
         return next();
       }
-      if (!req.params['value']) {
+      if (!RequestParams.get(req, 'value')) {
         return next();
       }
 
@@ -438,7 +439,7 @@ export class GalleryMWs {
       req.resultPipe =
         await ObjectManagers.getInstance().SearchManager.autocomplete(
           req.session.context,
-          req.params['value'],
+          RequestParams.get(req, 'value'),
           type
         );
       return next();
@@ -495,10 +496,10 @@ export class GalleryMWs {
   ): Promise<void> {
     try {
 
-      if (!req.params['mediaPath']) {
+      if (!RequestParams.get(req, 'mediaPath')) {
         return next();
       }
-      const mediaPath = req.params['mediaPath'];
+      const mediaPath = RequestParams.get(req, 'mediaPath');
 
       req.resultPipe = await ObjectManagers.getInstance().GalleryManager.getMedia(req.session.context, mediaPath);
       return next();

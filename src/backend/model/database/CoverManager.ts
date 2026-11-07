@@ -1,5 +1,5 @@
 import {Config} from '../../../common/config/private/Config';
-import {Brackets, SelectQueryBuilder, WhereExpression} from 'typeorm';
+import {Brackets, SelectQueryBuilder, WhereExpressionBuilder} from 'typeorm';
 import {MediaEntity} from './enitites/MediaEntity';
 import {DiskManager} from '../fileaccess/DiskManager';
 import {ObjectManagers} from '../ObjectManagers';
@@ -143,7 +143,7 @@ export class CoverManager {
         .innerJoin('media.directory', 'directory')
         .select(['media.name', 'media.id', ...CoverManager.DIRECTORY_SELECT])
         .where(
-          new Brackets((q: WhereExpression) => {
+          new Brackets((q: WhereExpressionBuilder) => {
             q.where('media.directory = :dir', {
               dir: dir.id,
             });

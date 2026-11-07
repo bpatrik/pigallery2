@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import {Connection, createConnection, DataSourceOptions, getConnection, LoggerOptions,} from 'typeorm';
+import {DataSource, DataSourceOptions, LoggerOptions} from 'typeorm';
 import {UserEntity} from './enitites/UserEntity';
 import {UserRoles} from '../../../common/entities/UserDTO';
 import {PhotoEntity} from './enitites/PhotoEntity';
@@ -52,7 +52,7 @@ export class SQLConnection {
     ProjectedPersonCacheEntity,
     ProjectedAlbumCacheEntity
   ];
-  private static connection: Connection = null;
+  private static connection: DataSource = null;
   private static FIXED_SQL_TABLE = [
     'sqlite_sequence'
   ];
@@ -72,7 +72,7 @@ export class SQLConnection {
     await (await this.getConnection()).synchronize();
   }
 
-  public static async getConnection(): Promise<Connection> {
+  public static async getConnection(): Promise<DataSource> {
     if (this.connection == null) {
       const options = this.getDriver(Config.Database);
 
@@ -91,16 +91,12 @@ export class SQLConnection {
   public static async tryConnection(
     config: ServerDataBaseConfig
   ): Promise<boolean> {
+    const conn = await this.createConnection(this.getDriver(config));
     try {
-      await getConnection('test').destroy();
-      // eslint-disable-next-line no-empty
-    } catch {
+      await SQLConnection.schemeSync(conn);
+    } finally {
+      await conn.destroy();
     }
-    const options = this.getDriver(config);
-    options.name = 'test';
-    const conn = await this.createConnection(options);
-    await SQLConnection.schemeSync(conn);
-    await conn.destroy();
     return true;
   }
 
@@ -200,12 +196,13 @@ export class SQLConnection {
 
   private static async createConnection(
     options: DataSourceOptions
-  ): Promise<Connection> {
-    if (options.type === 'sqlite' || options.type === 'better-sqlite3') {
-      return await createConnection(options);
+  ): Promise<DataSource> {
+    const initialize = (o: DataSourceOptions): Promise<DataSource> => new DataSource(o).initialize();
+    if (options.type === 'better-sqlite3') {
+      return await initialize(options);
     }
     try {
-      return await createConnection(options);
+      return await initialize(options);
     } catch (e) {
       if (e.sqlMessage === 'Unknown database \'' + options.database + '\'') {
         Logger.debug(LOG_TAG, 'creating database: ' + options.database);
@@ -213,18 +210,18 @@ export class SQLConnection {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         delete tmpOption.database;
-        const tmpConn = await createConnection(tmpOption);
+          const tmpConn = await initialize(tmpOption);
         await tmpConn.query(
           'CREATE DATABASE IF NOT EXISTS ' + options.database
         );
         await tmpConn.destroy();
-        return await createConnection(options);
+          return await initialize(options);
       }
       throw e;
     }
   }
 
-  private static async schemeSync(connection: Connection): Promise<void> {
+  private static async schemeSync(connection: DataSource): Promise<void> {
     let version = null;
     try {
       version = (await connection.getRepository(VersionEntity).find())[0];

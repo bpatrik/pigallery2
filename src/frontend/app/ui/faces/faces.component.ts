@@ -29,7 +29,7 @@ export class FacesComponent implements OnInit {
     const sorting = this.facesService.sorting();
     // sorting a copy: the service's array must not change in place
     return [...this.facesService.persons()].sort((p1: PersonDTO, p2: PersonDTO) => {
-      let res = 0;
+      let res: number;
       if (sorting.method === SortByDirectionalTypes.PersonCount) {
         res = (p1.cache?.count || 0) - (p2.cache?.count || 0);
       } else {

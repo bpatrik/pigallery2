@@ -94,6 +94,27 @@ describe('UploadManager', () => {
     expect(fs.existsSync(path.join(testDir, '..', 'outside_dir'))).to.be.false;
   });
 
+  it('should reject a directory outside of the image folder when checking the directory config', async () => {
+    Config.Upload.enforcedDirectoryConfig = true;
+    // a directory config outside the image folder must not enable the upload
+    const outsideDir = path.join(testDir, '..', 'outside_conf_dir');
+    fs.mkdirSync(outsideDir, {recursive: true});
+    fs.writeFileSync(path.join(outsideDir, '.uploader.pg2conf'), '');
+    try {
+      const file: any = {
+        originalname: 'outside.jpg',
+        buffer: Buffer.from('test content')
+      };
+      await uploadManager.saveFiles('../outside_conf_dir', [file]);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      expect(e.message).to.contain('Invalid upload path');
+    } finally {
+      Config.Upload.enforcedDirectoryConfig = false;
+      fs.rmSync(outsideDir, {recursive: true, force: true});
+    }
+  });
+
   it('should not accept blocked extensions by default', async () => {
     for (const name of ['.uploader.pg2conf', 'sorting.PG2CONF', 'image.svg']) {
       const file: any = {

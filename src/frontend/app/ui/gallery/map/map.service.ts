@@ -162,13 +162,12 @@ export class MapService {
     );
 
     // Look for name in metadata first, then in track
-    let name = '';
     const metadata = gpx.getElementsByTagName('metadata')?.[0];
     // Only look for direct name children of metadata, don't include author>name
     const metadataName = Array.from(metadata?.children || [])
       .find(child => child.tagName === 'name')?.textContent;
     const trkName = gpx.getElementsByTagName('trk')?.[0]?.getElementsByTagName('name')?.[0]?.textContent;
-    name = metadataName || trkName || '';
+    const name = metadataName || trkName || '';
 
     // Get author from metadata
     const author = gpx.getElementsByTagName('metadata')?.[0]?.getElementsByTagName('author')?.[0]?.getElementsByTagName('name')?.[0]?.textContent;

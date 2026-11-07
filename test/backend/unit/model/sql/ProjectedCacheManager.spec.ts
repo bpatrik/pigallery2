@@ -1,5 +1,5 @@
 import {DBTestHelper} from '../../../DBTestHelper';
-import {Connection} from 'typeorm';
+import {DataSource} from 'typeorm';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {ProjectedCacheManager} from '../../../../../src/backend/model/database/ProjectedCacheManager';
 import {DirectoryEntity} from '../../../../../src/backend/model/database/enitites/DirectoryEntity';
@@ -31,7 +31,7 @@ describe = DBTestHelper.describe();
 describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);
   describe = tmpDescribe;
-  let connection: Connection;
+  let connection: DataSource;
   let pcm: ProjectedCacheManager;
 
   const setup = async () => {
@@ -247,7 +247,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
     it('should get cover for directory with search filter', async () => {
       // Under subDir with search queries
       Config.AlbumCover.SearchQuery = {type: SearchQueryTypes.any_text, value: 'Boba'} as TextSearch;
-      let saved = await pcm.setAndGetCacheForDirectory(connection, DBTestHelper.defaultSession as any, {
+      await pcm.setAndGetCacheForDirectory(connection, DBTestHelper.defaultSession as any, {
         id: subDir.id,
         name: subDir.name,
         path: subDir.path
@@ -256,7 +256,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       expect(row!.cover!).to.deep.equal(coverify(p));
 
       Config.AlbumCover.SearchQuery = {type: SearchQueryTypes.any_text, value: 'Derem'} as TextSearch;
-      saved = await pcm.setAndGetCacheForDirectory(connection, DBTestHelper.defaultSession as any, {
+      let saved = await pcm.setAndGetCacheForDirectory(connection, DBTestHelper.defaultSession as any, {
         id: subDir.id,
         name: subDir.name,
         path: subDir.path

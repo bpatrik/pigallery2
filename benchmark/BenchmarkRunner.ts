@@ -30,7 +30,6 @@ import {
 } from '../src/common/entities/SearchQueryDTO';
 import {defaultQueryKeywords, SearchQueryParser} from '../src/common/SearchQueryParser';
 import {ParentDirectoryDTO} from '../src/common/entities/DirectoryDTO';
-import {SessionManager} from '../src/backend/model/database/SessionManager';
 import {SessionContext} from '../src/backend/model/SessionContext';
 
 
@@ -80,11 +79,15 @@ export class BenchmarkRunner {
     query: {},
     session: {}
   };
-  private session: SessionContext;
 
   constructor(public RUNS: number) {
     Config.Users.authenticationRequired = false;
-    this.session = {user: {projectionKey: SessionManager.NO_PROJECTION_KEY}} as SessionContext;
+  }
+
+  // Same context as AuthenticationMWs.authenticate builds when authentication is not required
+  private async getSession(): Promise<SessionContext> {
+    const user = ObjectManagers.getInstance().UserManager.getUnAuthenticatedUser();
+    return ObjectManagers.getInstance().SessionManager.buildContext(user);
   }
 
   async bmSaveDirectory(): Promise<BenchmarkResult[]> {
@@ -153,11 +156,11 @@ export class BenchmarkRunner {
     await this.setupDB();
 
     const queryParser = new SearchQueryParser(defaultQueryKeywords);
-    const names = (await ObjectManagers.getInstance().PersonManager.getAll(this.session)).sort((a, b) => b.cache.count - a.cache.count);
+    const names = (await ObjectManagers.getInstance().PersonManager.getAll(await this.getSession())).sort((a, b) => b.cache.count - a.cache.count);
     const queries: { query: SearchQueryDTO, description: string }[] = TextSearchQueryTypes.map(t => {
       const q = {
-        type: t, text: 'a'
-      };
+        type: t, value: 'a'
+      } as TextSearch;
       return {
         query: q, description: queryParser.stringify(q)
       };
@@ -238,7 +241,7 @@ export class BenchmarkRunner {
 
   async bmAutocomplete(text: string): Promise<BenchmarkResult[]> {
     const req = Utils.clone(this.requestTemplate);
-    req.params.text = text;
+    req.params.value = text;
     const bm = new Benchmark('Auto complete for `' + text + '`', req, null, null,
       async (): Promise<void> => {
         await this.setupDB();
@@ -258,7 +261,7 @@ export class BenchmarkRunner {
       ', videos: ' + await gm.countVideos() +
       ', diskUsage : ' + Utils.renderDataSize(await gm.countMediaSize()) +
       ', persons : ' + await pm.countFaces() +
-      ', unique persons (faces): ' + (await pm.getAll(this.session)).length;
+      ', unique persons (faces): ' + (await pm.getAll(await this.getSession())).length;
 
   }
 
@@ -266,13 +269,14 @@ export class BenchmarkRunner {
     if (this.inited === false) {
       await this.setupDB();
 
+      const session = await this.getSession();
       const gm = new GalleryManager();
       let biggest = 0;
       let biggestPath = '/';
       const queue = ['/'];
       while (queue.length > 0) {
         const dirPath = queue.shift();
-        const dir = await gm.listDirectory(this.session, dirPath);
+        const dir = await gm.listDirectory(session, dirPath);
         dir.directories.forEach((d): number => queue.push(path.join(d.path + d.name)));
         if (biggest < dir.media.length) {
           biggestPath = path.join(dir.path + dir.name);

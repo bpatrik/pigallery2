@@ -66,6 +66,48 @@ describe('UserManager', (sqlHelper: DBTestHelper) => {
 
     });
 
+    // a lookup with a missing value must not match the first row (e.g.: the admin)
+    describe('missing lookup values', async () => {
+      beforeEach(async () => {
+        await ObjectManagers.getInstance().UserManager.createUser({
+          name: 'Árvíztűrő',
+          password: 'pass',
+          role: UserRoles.Admin
+        } as UserDTO);
+      });
+
+      it('should reject findOne without a value', async () => {
+        const um = new UserManager();
+        await expect(um.findOne({name: undefined})).to.be.rejectedWith(Error);
+        await expect(um.findOne({id: undefined})).to.be.rejectedWith(Error);
+        await expect(um.findOne({oidcSubject: undefined})).to.be.rejectedWith(Error);
+        await expect(um.findOne({name: undefined, password: 'testp'})).to.be.rejectedWith(Error);
+        await expect(um.findOne({})).to.be.rejectedWith(Error);
+      });
+
+      it('should reject find with an undefined value', async () => {
+        const um = new UserManager();
+        await expect(um.find({name: undefined})).to.be.rejectedWith(Error);
+        expect((await um.find({})).length).to.eql(2);
+      });
+
+      it('should reject changing a user without an id', async () => {
+        const um = new UserManager();
+        await expect(um.deleteUser(undefined)).to.be.rejectedWith(Error);
+        await expect(um.deleteUser(NaN)).to.be.rejectedWith(Error);
+        await expect(um.changeRole(undefined, UserRoles.Guest)).to.be.rejectedWith(Error);
+        await expect(um.setOidcSubject(undefined, 'https://idp|123')).to.be.rejectedWith(Error);
+        await expect(um.updateSettings(undefined, {newPassword: 'x'})).to.be.rejectedWith(Error);
+
+        const users = (await um.find({})).sort((a, b) => a.id - b.id);
+        expect(users.map(u => ({name: u.name, role: u.role, oidcSubject: u.oidcSubject}))).to.deep.equal([
+          {name: 'test', role: UserRoles.User, oidcSubject: null},
+          {name: 'Árvíztűrő', role: UserRoles.Admin, oidcSubject: null}
+        ]);
+        expect(await um.findOne({name: 'test', password: 'testp'})).to.not.be.null;
+      });
+    });
+
     describe('oidc', async () => {
       it('should set and unset the OIDC subject', async () => {
         const um = new UserManager();

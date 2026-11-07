@@ -11,12 +11,14 @@ import {SavedSearchDTO} from '../../../../../src/common/entities/album/SavedSear
 import {ProjectedAlbumCacheEntity} from '../../../../../src/backend/model/database/enitites/album/ProjectedAlbumCacheEntity';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {TestHelper} from '../../../../TestHelper';
+import chaiAsPromised from 'chai-as-promised';
 
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const chai = require('chai');
 
 chai.use(deepEqualInAnyOrder);
+chai.use(chaiAsPromised);
 const {expect} = chai;
 
 // to help WebStorm to handle the test cases
@@ -136,6 +138,25 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
         id: 2,
         name: 'Test Album2',
         locked: true,
+        searchQuery: query
+      } as SavedSearchDTO]);
+    });
+    // a lookup with a missing value must not match the first row
+    it('should not delete or skip albums without an id or name', async () => {
+      const am = new AlbumManager();
+      const connection = await SQLConnection.getConnection();
+      const query: TextSearch = {value: 'árvíz', type: SearchQueryTypes.any_text};
+      await am.addSavedSearch('Tükörfúrógép', Utils.clone(query));
+
+      await expect(am.deleteAlbum(undefined)).to.be.rejectedWith(Error);
+      await expect(am.deleteAlbum(NaN)).to.be.rejectedWith(Error);
+      await expect(am.addIfNotExistSavedSearch(undefined, Utils.clone(query), false)).to.be.rejectedWith(Error);
+      await expect(am.addIfNotExistSavedSearch('Other', undefined, false)).to.be.rejectedWith(Error);
+
+      expect(await connection.getRepository(AlbumBaseEntity).find()).to.deep.equalInAnyOrder([{
+        id: 1,
+        name: 'Tükörfúrógép',
+        locked: false,
         searchQuery: query
       } as SavedSearchDTO]);
     });
