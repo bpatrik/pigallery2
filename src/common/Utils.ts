@@ -167,7 +167,7 @@ export class Utils {
   }
 
   //function to convert timestamp into milliseconds taking offset into account
-  static timestampToMS(timestamp: string, offset?: string): number | undefined {
+  static timestampToMS(timestamp: string | undefined, offset?: string): number | undefined {
     if (!timestamp) {
       return undefined;
     }
@@ -183,7 +183,7 @@ export class Utils {
     return Date.parse(formattedTimestamp);
   }
 
-  static splitTimestampAndOffset(timestamp: string): [string | undefined, string | undefined] {
+  static splitTimestampAndOffset(timestamp: string | undefined): [string | undefined, string | undefined] {
     if (!timestamp) {
       return [undefined, undefined];
     }

@@ -3,9 +3,9 @@ import {Utils} from '../../../common/Utils';
 export interface TaskQueEntry<I, O> {
   data: I;
   promise: {
-    obj: Promise<O> | null;
-    resolve: ((ret: O) => void) | null;
-    reject: ((err: any) => void) | null;
+    obj: Promise<O>;
+    resolve: (ret: O) => void;
+    reject: (err: any) => void;
   };
 }
 
@@ -21,9 +21,11 @@ export class TaskQue<I, O> {
     return this.getSameTask(input) || this.putNewTask(input);
   }
 
-  public get(): TaskQueEntry<I, O> {
-    const task = this.tasks.shift() as TaskQueEntry<I, O>;
-    this.processing.push(task);
+  public get(): TaskQueEntry<I, O> | undefined {
+    const task = this.tasks.shift();
+    if (task) {
+      this.processing.push(task);
+    }
     return task;
   }
 
@@ -35,29 +37,26 @@ export class TaskQue<I, O> {
     this.processing.splice(index, 1);
   }
 
-  private getSameTask(input: I): TaskQueEntry<I, O> {
-    return (this.tasks.find((t) => Utils.equalsFilter(t.data, input)) ||
+  private getSameTask(input: I): TaskQueEntry<I, O> | undefined {
+    return this.tasks.find((t) => Utils.equalsFilter(t.data, input)) ||
         this.processing.find((t) =>
             Utils.equalsFilter(t.data, input)
-        )) as TaskQueEntry<I, O>;
+        );
   }
 
   private putNewTask(input: I): TaskQueEntry<I, O> {
+    // assigned synchronously by the Promise executor
+    let resolve!: (ret: O) => void;
+    let reject!: (err: any) => void;
+    const obj = new Promise<O>((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
     const taskEntry: TaskQueEntry<I, O> = {
       data: input,
-      promise: {
-        obj: null,
-        resolve: null,
-        reject: null,
-      },
+      promise: {obj, resolve, reject},
     };
     this.tasks.push(taskEntry);
-    taskEntry.promise.obj = new Promise<O>(
-        (resolve: (ret: O) => void, reject: (err: any) => void) => {
-          taskEntry.promise.reject = reject;
-          taskEntry.promise.resolve = resolve;
-        }
-    );
     return taskEntry;
   }
 }

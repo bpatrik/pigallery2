@@ -156,7 +156,7 @@ export class MediaMetadataEntity implements MediaMetadata {
 
 
   @Column('int', {unsigned: true})
-  bitRate: number;
+  bitRate: number | null;
 
   @Column('int', {unsigned: true})
   duration: number;

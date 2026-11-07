@@ -8,8 +8,8 @@ export interface VideoProperties {
   size: MediaDimension;
   fileSize: number;
   duration: number;
-  fps: number;
-  bitRate: number;
+  fps: number | null;
+  bitRate: number | null;
 }
 
 export interface LiveVideoInfo extends VideoProperties {
