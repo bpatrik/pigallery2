@@ -26,6 +26,11 @@ In the PiGallery2 web interface, go to **Settings** -> **Users** and enable **Op
 
 ![screen](assets/authentik6.png)
 
+The **Issuer URL** works with or without its trailing slash, and you can also enter the full discovery URL (ending in `/.well-known/openid-configuration`).
+
+Use an `https://` Issuer URL. An `http://` Issuer URL works too, for local test setups: PiGallery2 then logs a warning and talks to the provider over plain http.
+With an `https://` Issuer URL, PiGallery2 refuses provider endpoints that are not `https://`.
+
 ## Who can log in as whom
 
 By default, PiGallery2 matches the OIDC login to an app user by name (the `preferred_username` claim, or the part of the email before the `@`).
