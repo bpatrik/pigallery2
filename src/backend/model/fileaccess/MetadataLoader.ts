@@ -41,6 +41,13 @@ export class MetadataLoader {
     fileSize: 0,
   };
 
+  /**
+   * True if exifr returned nothing but errors (with mergeOutput: false it reports them in an 'errors' section).
+   */
+  private static isOnlyErrors(exif: Record<string, unknown> | undefined): boolean {
+    return !!exif && Array.isArray(exif.errors) && Object.keys(exif).every(k => k === 'errors');
+  }
+
   @ExtensionDecorator(e => e.gallery.MetadataLoader.loadVideoMetadata)
   public static async loadVideoMetadata(fullPath: string): Promise<VideoMetadata> {
     const metadata: VideoMetadata = {
@@ -233,7 +240,14 @@ export class MetadataLoader {
 
       try {
         try {
-          const exif = await exifr.parse(fullPath, exifrOptions);
+          let exif = await exifr.parse(fullPath, exifrOptions);
+          if (MetadataLoader.isOnlyErrors(exif)) {
+            // exifr reads files in chunks and fails on segments that start right before the end of the first chunk,
+            // losing all metadata (https://github.com/MikeKovarik/exifr/issues/141). Reading the whole file works.
+            // (options.chunked is documented, but missing from exifr's typings)
+            const wholeFile: {[key: string]: boolean} = {...exifrOptions, chunked: false};
+            exif = await exifr.parse(fullPath, wholeFile);
+          }
           MetadataLoader.mapMetadata(metadata, exif, true);
           if (exif?.makerNote) {
             const contentId = MetadataLoader.parseAppleMakerNoteContentId(exif.makerNote);
