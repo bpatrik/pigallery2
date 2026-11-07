@@ -61,6 +61,7 @@ export class SharingRouter {
       [Config.Server.apiPath + '/share/:directory(*)', Config.Server.apiPath + '/share/', Config.Server.apiPath + '/share//'],
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.User),
+      AuthenticationMWs.normalizePathParam('directory'),
       SharingMWs.createSharing,
       ServerTimingMWs.addServerTiming,
       RenderingMWs.renderSharing
@@ -72,6 +73,7 @@ export class SharingRouter {
       [Config.Server.apiPath + '/share/:directory(*)', Config.Server.apiPath + '/share/', Config.Server.apiPath + '/share//'],
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(UserRoles.User),
+      AuthenticationMWs.normalizePathParam('directory'),
       SharingMWs.updateSharing,
       ServerTimingMWs.addServerTiming,
       RenderingMWs.renderSharing

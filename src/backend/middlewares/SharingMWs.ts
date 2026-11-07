@@ -4,7 +4,6 @@ import {ObjectManagers} from '../model/ObjectManagers';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {Config} from '../../common/config/private/Config';
 import {QueryParams} from '../../common/QueryParams';
-import * as path from 'path';
 import {UserRoles} from '../../common/entities/UserDTO';
 import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../common/entities/SearchQueryDTO';
 import * as crypto from 'crypto';
@@ -114,7 +113,8 @@ export class SharingMWs {
         }
       }
 
-      const directoryName = path.normalize(req.params['directory'] || '/');
+      // normalized by AuthenticationMWs.normalizePathParam
+      const directoryName = req.params['directory'];
 
       const searchQuery = createSharing.searchQuery || null;
       // without any query, the sharing is about the directory (legacy directory sharing)
@@ -188,7 +188,8 @@ export class SharingMWs {
         );
       }
       const updateSharing: CreateSharingDTO = req.body.updateSharing;
-      const directoryName = path.normalize(req.params['directory'] || '/');
+      // normalized by AuthenticationMWs.normalizePathParam
+      const directoryName = req.params['directory'];
 
       const searchQuery = updateSharing.searchQuery || null;
       // without any query, the sharing is about the directory (legacy directory sharing)

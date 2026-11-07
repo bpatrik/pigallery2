@@ -441,6 +441,16 @@ describe('Routing', () => {
       expect(await sharedDirectory(enc(HIDDEN + '/titkos mappa'))).to.equal(path.join(HIDDEN, 'titkos mappa'));
     });
 
+    it('should reject path traversal on sharing', async () => {
+      const before = (await ObjectManagers.getInstance().SharingManager.listAll()).length;
+      for (const t of TRAVERSALS) {
+        shouldHaveError(await createSharing(t), ErrorCodes.INPUT_ERROR);
+        shouldHaveError(await call('PUT', api('/share/' + t), {Cookie: cookie, 'Content-Type': 'application/json'},
+          JSON.stringify({updateSharing: {id: 1, valid: 60 * 1000}})), ErrorCodes.INPUT_ERROR);
+      }
+      expect((await ObjectManagers.getInstance().SharingManager.listAll()).length).to.equal(before);
+    });
+
     const upload = (dir: string): Promise<Res> => {
       const boundary = 'routing-test-boundary';
       const body = Buffer.concat([
