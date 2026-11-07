@@ -16,7 +16,7 @@ import AdmZip from 'adm-zip';
 import * as fs from 'node:fs';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 chai.should();
 chai.use(chaiHttp);
 

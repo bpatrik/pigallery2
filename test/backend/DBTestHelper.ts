@@ -42,8 +42,8 @@ export class DBTestHelper {
 
   private static mysqlSchemeBuilt = false;
   static enable = {
-    sqlite: process.env.TEST_SQLITE !== 'false',
-    mysql: process.env.TEST_MYSQL !== 'false'
+    sqlite: process.env['TEST_SQLITE'] !== 'false',
+    mysql: process.env['TEST_MYSQL'] !== 'false'
   };
   public static readonly savedDescribe = savedDescribe;
   public readonly testGalleyEntities: {

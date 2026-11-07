@@ -40,7 +40,7 @@ export class Server {
   }
 
   constructor(listen = true) {
-    if (!(process.env.NODE_ENV === 'production')) {
+    if (!(process.env['NODE_ENV'] === 'production')) {
       Logger.info(
         LOG_TAG,
         'Running in DEBUG mode, set env variable NODE_ENV=production to disable '

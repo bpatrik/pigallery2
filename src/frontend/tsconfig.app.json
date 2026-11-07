@@ -12,8 +12,7 @@
     // Angular needs no decorator metadata, and the config classes set their types explicitly.
     // Without it, isolatedModules lets the builder transpile with esbuild instead of tsc.
     "emitDecoratorMetadata": false,
-    "isolatedModules": true,
-    "noPropertyAccessFromIndexSignature": true
+    "isolatedModules": true
   },
   "files": [
     "./main.ts"

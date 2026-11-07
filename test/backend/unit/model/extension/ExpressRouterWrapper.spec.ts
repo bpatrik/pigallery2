@@ -73,9 +73,9 @@ describe('ExpressRouterWrapper', () => {
     });
 
   it('should register Express 5 paths', async () => {
-    api.get.jsonResponse(['/item/:id'], null!, (params) => ({id: params!.id}));
-    api.get.jsonResponse(['/files/*path'], null!, (params) => ({path: params!.path}));
-    api.get.jsonResponse(['/opt{/:name}'], null!, (params) => ({name: params!.name ?? null}));
+    api.get.jsonResponse(['/item/:id'], null!, (params) => ({id: params!['id']}));
+    api.get.jsonResponse(['/files/*path'], null!, (params) => ({path: params!['path']}));
+    api.get.jsonResponse(['/opt{/:name}'], null!, (params) => ({name: params!['name'] ?? null}));
 
     expect((await request('GET', '/test-ext/item/%C3%A1rv%C3%ADz')).json.result).to.deep.equal({id: 'árvíz'});
     expect((await request('GET', '/test-ext/files/a/b%2Fc.jpg')).json.result).to.deep.equal({path: ['a', 'b/c.jpg']});

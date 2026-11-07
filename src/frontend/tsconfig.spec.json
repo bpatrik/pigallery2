@@ -8,7 +8,6 @@
     "moduleResolution": "bundler",
     "emitDecoratorMetadata": false,
     "isolatedModules": true,
-    "noPropertyAccessFromIndexSignature": true,
     "types": [
       "vitest/globals",
       "@angular/localize"

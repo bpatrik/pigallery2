@@ -16,7 +16,7 @@ import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 chai.should();
 const {expect} = chai;
 chai.use(chaiHttp);

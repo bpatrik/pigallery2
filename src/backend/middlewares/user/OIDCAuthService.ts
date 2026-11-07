@@ -39,7 +39,7 @@ export class OIDCAuthService {
   public static async getUserFromAuthenticationResponse(req: Request): Promise<UserDTO> {
     const storedOidc = req.session.oidc;
     const params = req.query; // code, state
-    if (!storedOidc?.state || params.state !== storedOidc?.state) {
+    if (!storedOidc?.state || params['state'] !== storedOidc?.state) {
       throw new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Invalid OIDC state');
     }
     const client = await this.getClient();
@@ -62,7 +62,7 @@ export class OIDCAuthService {
     if (email) {
       if (!strict) {
         emailName = String(email).split('@')[0];
-      } else if (claims.email_verified === true) {
+      } else if (claims['email_verified'] === true) {
         emailName = String(email);
       }
     }
@@ -105,10 +105,10 @@ export class OIDCAuthService {
    * Name matching is only used to link a not yet linked user with a limited role.
    */
   private static async findStrictUser(claims: Record<string, unknown>, name: string): Promise<UserDTO> {
-    if (!claims.sub || !claims.iss) {
+    if (!claims['sub'] || !claims['iss']) {
       throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, 'OIDC: missing sub/iss claim');
     }
-    const subject = claims.iss + '|' + claims.sub;
+    const subject = claims['iss'] + '|' + claims['sub'];
     const userManager = ObjectManagers.getInstance().UserManager;
 
     let user: UserDTO | null = await userManager.findOne({oidcSubject: subject});
@@ -165,7 +165,7 @@ export class OIDCAuthService {
     try {
       const userinfo = await client.userinfo(tokenSet.access_token);
       // the spec requires userinfo to belong to the same subject as the ID token
-      if (claims.sub && userinfo.sub !== claims.sub) {
+      if (claims['sub'] && userinfo.sub !== claims['sub']) {
         Logger.warn(LOG_TAG, 'OIDC userinfo subject does not match the ID token, ignoring userinfo');
         return claims;
       }
@@ -198,7 +198,7 @@ export class OIDCAuthService {
         client_secret: Config.Users.oidc.clientSecret,
         redirect_uris: [Config.Users.oidc.redirectUri],
         response_types: ['code'],
-        id_token_signed_response_alg: this.selectIdTokenAlg(issuer.metadata.id_token_signing_alg_values_supported as string[])
+        id_token_signed_response_alg: this.selectIdTokenAlg(issuer.metadata['id_token_signing_alg_values_supported'] as string[])
       });
     })();
     return this.clientPromise;

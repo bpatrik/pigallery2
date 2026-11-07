@@ -79,9 +79,9 @@ export class PublicRouter {
 
       res.tpl = {};
 
-      res.tpl.user = null;
+      res.tpl['user'] = null;
       if (req.session.context?.user) {
-        res.tpl.user = {
+        res.tpl['user'] = {
           id: req.session.context.user.id,
           name: req.session.context.user.name,
           role: req.session.context.user.role,
@@ -99,13 +99,13 @@ export class PublicRouter {
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
-      res.tpl.Config = confCopy;
-      res.tpl.baseHref = Config.Server.getAppUrl();
-      res.tpl.customHTMLHead = Config.Server.customHTMLHead;
+      res.tpl['Config'] = confCopy;
+      res.tpl['baseHref'] = Config.Server.getAppUrl();
+      res.tpl['customHTMLHead'] = Config.Server.customHTMLHead;
       const selectedTheme = Config.Gallery.Themes.availableThemes.find(th => th.name === Config.Gallery.Themes.selectedTheme)?.theme || '';
-      res.tpl.usedTheme = selectedTheme;
+      res.tpl['usedTheme'] = selectedTheme;
 
-      res.tpl.UIExtensionConfigs = ObjectManagers.getInstance().ExtensionManager.getUIExtensionConfigs();
+      res.tpl['UIExtensionConfigs'] = ObjectManagers.getInstance().ExtensionManager.getUIExtensionConfigs();
 
       return next();
     };

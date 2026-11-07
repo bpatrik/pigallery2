@@ -26,9 +26,9 @@ sharp.cache(false);
 const ExifrFsReader = exifr.fileReaders.get('fs');
 exifr.fileReaders.set('fs', class extends ExifrFsReader {
   async open(): Promise<void> {
-    if (this.fh === undefined) {
-      this.fh = await this.fs.open(this.input, 'r');
-      this.size = (await this.fh.stat()).size;
+    if (this['fh'] === undefined) {
+      this['fh'] = await this['fs'].open(this['input'], 'r');
+      this['size'] = (await this['fh'].stat()).size;
     }
   }
 });
@@ -101,10 +101,10 @@ export class MetadataLoader {
             }
             if (
               stream.tags !== undefined &&
-              typeof stream.tags.creation_time === 'string'
+              typeof stream.tags['creation_time'] === 'string'
             ) {
               metadata.creationDate =
-                Date.parse(stream.tags.creation_time) ||
+                Date.parse(stream.tags['creation_time']) ||
                 metadata.creationDate;
             }
             break;
@@ -133,10 +133,10 @@ export class MetadataLoader {
 
         if (
           data.format.tags !== undefined &&
-          typeof data.format.tags.creation_time === 'string'
+          typeof data.format.tags['creation_time'] === 'string'
         ) {
           metadata.creationDate =
-            Date.parse(data.format.tags.creation_time) ||
+            Date.parse(data.format.tags['creation_time']) ||
             metadata.creationDate;
         }
 

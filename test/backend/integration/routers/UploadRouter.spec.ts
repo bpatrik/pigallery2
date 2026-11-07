@@ -22,7 +22,7 @@ declare const after: any;
 declare const beforeEach: any;
 declare const afterEach: any;
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 

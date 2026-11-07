@@ -21,7 +21,7 @@ import {Utils} from '../../../../src/common/Utils';
 import {LoginCredential} from '../../../../src/common/entities/LoginCredential';
 import {Logger} from '../../../../src/backend/Logger';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 chai.should();
 
 /**

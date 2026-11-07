@@ -16,10 +16,10 @@ describe('Config', () => {
     process.env['default-Media-tempFolder'] = 'test/test';
     const conf = ExtensionConfigWrapper.originalSync();
     expect(conf.Media.tempFolder).to.be.equal('test/test');
-    expect(ConfigClassBuilder.attachPrivateInterface(conf.Media).__defaults.tempFolder).to.be.equal('test/test');
+    expect(ConfigClassBuilder.attachPrivateInterface(conf.Media).__defaults['tempFolder']).to.be.equal('test/test');
     expect(process.env['default-Media-tempFolder']).to.be.equal('test/test');
     const conf2 = ExtensionConfigWrapper.originalSync();
-    expect(ConfigClassBuilder.attachPrivateInterface(conf2.Media).__defaults.tempFolder).to.be.equal('test/test');
+    expect(ConfigClassBuilder.attachPrivateInterface(conf2.Media).__defaults['tempFolder']).to.be.equal('test/test');
     expect(conf2.Media.tempFolder).to.be.equal('test/test');
   });
 });

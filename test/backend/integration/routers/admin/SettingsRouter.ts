@@ -11,7 +11,7 @@ import {TestHelper} from '../../../../TestHelper';
 import * as chai from 'chai';
 import {default as chaiHttp, request} from 'chai-http';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
 
