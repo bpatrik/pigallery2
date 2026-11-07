@@ -185,6 +185,8 @@ Pitfalls seen so far:
   (word order and suffixes differ between languages), expect much longer words than in English without breaking the layout,
   format dates and numbers by locale, and don't assume a "first name last name" order.
 - Prefer implementing new features as extensions when feasible (see contribution guide).
+- Breaking changes to the extension API: make the TypeScript types reject the old usage, and handle it gracefully at runtime
+  (log and skip, never crash the app or open a hole), so an old extension stays safe. List them in the PR for the release notes.
 
 ## Code style
 
