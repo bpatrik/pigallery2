@@ -6,7 +6,6 @@ import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
 import {ParentDirectoryDTO,} from '../../common/entities/DirectoryDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {DirectoryAccessTypes} from '../model/DirectoryAccess';
-import {AuthenticationMWs} from './user/AuthenticationMWs';
 import {ContentWrapper, ContentWrapperUtils} from '../../common/entities/ContentWrapper';
 import {ProjectPath} from '../ProjectPath';
 import {Config} from '../../common/config/private/Config';
@@ -67,18 +66,19 @@ export class GalleryMWs {
     next: NextFunction
   ): Promise<void> {
     const directoryName = RequestParams.get(req, 'directory') || '/';
-    const absoluteDirectoryName = path.join(
-      ProjectPath.ImageFolder,
-      directoryName
-    );
+    const absoluteDirectoryName = ProjectPath.resolveInImageFolder(directoryName);
     // set by AuthenticationMWs.authoriseDirectory
     const access = req.directoryAccess ?? DirectoryAccessTypes.available;
+    let isDirectory = false;
     try {
-      if ((await fsp.stat(absoluteDirectoryName)).isDirectory() === false) {
-        return AuthenticationMWs.directoryNotFound(res, next);
-      }
+      isDirectory = !!absoluteDirectoryName && (await fsp.stat(absoluteDirectoryName)).isDirectory();
     } catch {
-      return AuthenticationMWs.directoryNotFound(res, next);
+      // not existing
+    }
+    if (!isDirectory) {
+      // the same answer as AuthenticationMWs.authoriseDirectory gives for not available directories
+      res.status(404);
+      return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
     }
 
     try {
@@ -329,13 +329,13 @@ export class GalleryMWs {
     if (!RequestParams.get(req, 'mediaPath')) {
       return next();
     }
-    const fullMediaPath = path.join(
-      ProjectPath.ImageFolder,
-      RequestParams.get(req, 'mediaPath')
-    );
+    const fullMediaPath = ProjectPath.resolveInImageFolder(RequestParams.get(req, 'mediaPath'));
 
     // check if file exist
     try {
+      if (!fullMediaPath) {
+        throw new Error('Path is outside of the image folder');
+      }
       if ((await fsp.stat(fullMediaPath)).isDirectory()) {
         return next();
       }

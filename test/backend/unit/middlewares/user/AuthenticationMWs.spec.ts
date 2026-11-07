@@ -1150,6 +1150,8 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         expect(r.status, d).to.equal(404);
         expect(r.nextArgs[0], d).to.be.instanceOf(ErrorDTO);
         expect((r.nextArgs[0] as ErrorDTO).code, d).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+        // GalleryMWs.listDirectory answers not existing directories with the same error (see its spec)
+        expect(r.nextArgs, d).to.deep.equal([new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found')]);
         expect(r.req.directoryAccess, d).to.be.undefined;
       }
     });
