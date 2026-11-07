@@ -10,10 +10,13 @@ export class EventLoopHandler {
   * next tick is super fast, but does not help much with the event loop as it does not allow a full event loop cycle
   * https://medium.com/dkatalis/eventloop-in-nodejs-settimeout-setimmediate-vs-process-nexttick-37c852c67acb
   * */
-  step(fn: () => Promise<void> | void) {
+  step(fn: () => void) {
 
     this.eventCounter = this.eventCounter % 10;
-    const eventFN = this.eventCounter++ === 1 ? setImmediate : process.nextTick;
-    eventFN(fn);
+    if (this.eventCounter++ === 1) {
+      setImmediate(fn);
+    } else {
+      process.nextTick(fn);
+    }
   }
 }

@@ -46,42 +46,42 @@ export const createLoggerWrapper = (TAG: string): ILogger => ({
 });
 
 export class Logger {
-  public static silly(...args: LoggerArgs[]): void {
+  public static silly(this: void, ...args: LoggerArgs[]): void {
     if (!forcedDebug && Config.Server.Log.level < LogLevel.silly) {
       return;
     }
     Logger.log(`[\x1b[35mSILLY\x1b[0m]`, console.debug, ...args);
   }
 
-  public static debug(...args: LoggerArgs[]): void {
+  public static debug(this: void, ...args: LoggerArgs[]): void {
     if (!forcedDebug && Config.Server.Log.level < LogLevel.debug) {
       return;
     }
     Logger.log(`[\x1b[34mDEBUG\x1b[0m]`, console.debug, ...args);
   }
 
-  public static verbose(...args: LoggerArgs[]): void {
+  public static verbose(this: void, ...args: LoggerArgs[]): void {
     if (!forcedDebug && Config.Server.Log.level < LogLevel.verbose) {
       return;
     }
     Logger.log(`[\x1b[36mVERBS\x1b[0m]`, console.debug, ...args);
   }
 
-  public static info(...args: LoggerArgs[]): void {
+  public static info(this: void, ...args: LoggerArgs[]): void {
     if (!forcedDebug && Config.Server.Log.level < LogLevel.info) {
       return;
     }
     Logger.log(`[\x1b[32mINFO_\x1b[0m]`, console.log, ...args);
   }
 
-  public static warn(...args: LoggerArgs[]): void {
+  public static warn(this: void, ...args: LoggerArgs[]): void {
     if (!forcedDebug && Config.Server.Log.level < LogLevel.warn) {
       return;
     }
     Logger.log(`[\x1b[33mWARN_\x1b[0m]`, console.warn, ...args);
   }
 
-  public static error(...args: LoggerArgs[]): void {
+  public static error(this: void, ...args: LoggerArgs[]): void {
     Logger.log(`[\x1b[31mERROR\x1b[0m]`, console.error, ...args);
   }
 

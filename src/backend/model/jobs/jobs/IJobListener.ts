@@ -9,5 +9,6 @@ export interface IJobListener {
       soloRun: boolean
   ): Promise<void>;
 
-  onProgressUpdate(progress: JobProgress): void;
+  // a property, not a method: Job passes it on as a callback
+  onProgressUpdate: (progress: JobProgress) => void;
 }

@@ -77,7 +77,12 @@ export default tseslint.config(
       }],
       // overrides of async hooks (Job.init, FileJob.filter*, Messenger.sendMedia, ...) stay async without awaiting anything
       '@typescript-eslint/require-await': 'off',
-      // TODO(#1293): fixed and turned back on in the next commits
+    }
+  },
+  {
+    // routers list the static middlewares of the *MWs classes, which don't use `this`
+    files: ["src/backend/routes/**/*.ts", "src/backend/model/extension/ExpressRouterWrapper.ts"],
+    rules: {
       '@typescript-eslint/unbound-method': 'off',
     }
   },

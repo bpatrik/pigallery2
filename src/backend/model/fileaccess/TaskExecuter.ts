@@ -25,7 +25,9 @@ export class TaskExecuter<I, O> implements ITaskExecuter<I, O> {
     }
     this.taskQue.ready(task);
     this.taskInProgress--;
-    this.el.step(this.run);
+    this.el.step(() => {
+      this.run().catch(console.error);
+    });
   };
 
   constructor(private size: number, private worker: (input: I) => Promise<O>) {
