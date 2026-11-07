@@ -89,15 +89,16 @@ export class SharingMWs {
       if (Config.Sharing.enabled === false) {
         return next();
       }
+      const body = req.body as { createSharing?: CreateSharingDTO } | undefined;
       if (
-        typeof req.body === 'undefined' ||
-        typeof req.body.createSharing === 'undefined'
+        typeof body === 'undefined' ||
+        typeof body.createSharing === 'undefined'
       ) {
         return next(
           new ErrorDTO(ErrorCodes.INPUT_ERROR, 'createSharing filed is missing')
         );
       }
-      const createSharing: CreateSharingDTO = req.body.createSharing;
+      const createSharing = body.createSharing;
 
       if (Config.Sharing.passwordRequired && !createSharing.password) {
 
@@ -184,15 +185,16 @@ export class SharingMWs {
       if (Config.Sharing.enabled === false) {
         return next();
       }
+      const body = req.body as { updateSharing?: CreateSharingDTO } | undefined;
       if (
-        typeof req.body === 'undefined' ||
-        typeof req.body.updateSharing === 'undefined'
+        typeof body === 'undefined' ||
+        typeof body.updateSharing === 'undefined'
       ) {
         return next(
           new ErrorDTO(ErrorCodes.INPUT_ERROR, 'updateSharing filed is missing')
         );
       }
-      const updateSharing: CreateSharingDTO = req.body.updateSharing;
+      const updateSharing = body.updateSharing;
       if (typeof updateSharing.id !== 'number') {
         throw new Error('Invalid sharing, id is missing');
       }

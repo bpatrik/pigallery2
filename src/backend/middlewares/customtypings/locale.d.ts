@@ -2,7 +2,7 @@
 declare module 'locale' {
   import {RequestHandler} from 'express';
 
-  function locale(supported: string[], defaultLocale: string): RequestHandler;
+  function locale(supported: string[] | undefined, defaultLocale: string): RequestHandler;
 
   export = locale;
 }

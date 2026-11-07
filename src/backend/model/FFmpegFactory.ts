@@ -13,8 +13,8 @@ export class FFmpegFactory {
   public static getPaths(): FFmpegPaths {
     if (this.paths === null) {
       this.paths = {
-        ffmpeg: this.requirePath(() => require('ffmpeg-static')) || process.env['FFMPEG_PATH'] || 'ffmpeg',
-        ffprobe: this.requirePath(() => require('ffprobe-static').path) || process.env['FFPROBE_PATH'] || 'ffprobe'
+        ffmpeg: this.requirePath(() => require('ffmpeg-static') as string) || process.env['FFMPEG_PATH'] || 'ffmpeg',
+        ffprobe: this.requirePath(() => (require('ffprobe-static') as { path: string }).path) || process.env['FFPROBE_PATH'] || 'ffprobe'
       };
     }
     return this.paths;

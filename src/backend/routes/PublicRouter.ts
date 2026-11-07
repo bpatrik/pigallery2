@@ -31,11 +31,12 @@ export class PublicRouter {
   public static route(app: Express): void {
     const setLocale = (req: Request, res: Response, next: NextFunction) => {
       let selectedLocale = req.locale;
-      if (req.cookies && req.cookies[CookieNames.lang]) {
+      const langCookie = (req.cookies as Record<string, string | undefined> | undefined)?.[CookieNames.lang];
+      if (langCookie) {
         if (
-          (Config.Server.languages ?? []).indexOf(req.cookies[CookieNames.lang]) !== -1
+          (Config.Server.languages ?? []).indexOf(langCookie) !== -1
         ) {
-          selectedLocale = req.cookies[CookieNames.lang];
+          selectedLocale = langCookie;
         }
       }
       res.cookie(CookieNames.lang, selectedLocale);

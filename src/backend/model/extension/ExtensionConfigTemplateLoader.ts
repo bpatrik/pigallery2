@@ -5,6 +5,7 @@ import {ServerExtensionsEntryConfig} from '../../../common/config/private/subcon
 import {ProjectPath} from '../../ProjectPath';
 import {Utils} from '../../../common/Utils';
 import {GenericConfigType} from 'typeconfig/common';
+import {IServerExtensionConfig} from './IExtension';
 
 
 /**
@@ -109,7 +110,7 @@ export class ExtensionConfigTemplateLoader {
     let template: { folder: string, template?: new() => unknown } = {folder: extFolder};
 
     if (fs.existsSync(configExtPath)) {
-      const extCfg = require(configExtPath);
+      const extCfg = require(configExtPath) as Partial<IServerExtensionConfig<unknown>> | undefined;
       if (typeof extCfg?.initConfig === 'function') {
         extCfg?.initConfig({
           setConfigTemplate: (templateClass: new() => unknown): void => {

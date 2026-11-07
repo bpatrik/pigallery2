@@ -157,12 +157,12 @@ export class GalleryManager {
 
   async countMediaSize(): Promise<number> {
     const connection = await SQLConnection.getConnection();
-    const {sum} = await connection
+    const row = await connection
       .getRepository(MediaEntity)
       .createQueryBuilder('media')
       .select('SUM(media.metadata.fileSize)', 'sum')
-      .getRawOne();
-    return sum || 0;
+      .getRawOne<{ sum: number | null }>();
+    return row?.sum || 0;
   }
 
   async countPhotos(): Promise<number> {

@@ -20,7 +20,7 @@ export class SharingEntity implements BaseSharingDTO {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
@@ -39,7 +39,7 @@ export class SharingEntity implements BaseSharingDTO {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
@@ -61,7 +61,7 @@ export class SharingEntity implements BaseSharingDTO {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
@@ -76,8 +76,8 @@ export class SharingEntity implements BaseSharingDTO {
   @Column('bigint', {
     unsigned: true,
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
   expires!: number;
@@ -85,8 +85,8 @@ export class SharingEntity implements BaseSharingDTO {
   @Column('bigint', {
     unsigned: true,
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
   timeStamp!: number;

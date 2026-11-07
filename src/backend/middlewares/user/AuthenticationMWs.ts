@@ -14,6 +14,7 @@ import {DirectoryAccess, DirectoryAccessTypes} from '../../model/DirectoryAccess
 import {OIDCAuthService} from './OIDCAuthService';
 import {RequestParams} from '../RequestParams';
 import {RequestSession} from '../RequestSession';
+import {LoginCredential} from '../../../common/entities/LoginCredential';
 
 const LOG_TAG = 'AuthenticationMWs';
 
@@ -236,7 +237,8 @@ export class AuthenticationMWs {
     }
 
     try {
-      const password = (req.body ? req.body.password : null) || null;
+      const body = req.body as { password?: string } | undefined;
+      const password = (body ? body.password : null) || null;
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
 
       if (
@@ -279,13 +281,14 @@ export class AuthenticationMWs {
     }
 
     // not enough parameters
+    const body = req.body as { loginCredential?: Partial<LoginCredential> } | undefined;
     if (
-      typeof req.body === 'undefined' ||
-      typeof req.body.loginCredential === 'undefined' ||
-      typeof req.body.loginCredential.username !== 'string' ||
-      typeof req.body.loginCredential.password !== 'string' ||
-      req.body.loginCredential.username.length === 0 ||
-      req.body.loginCredential.password.length === 0
+      typeof body === 'undefined' ||
+      typeof body.loginCredential === 'undefined' ||
+      typeof body.loginCredential.username !== 'string' ||
+      typeof body.loginCredential.password !== 'string' ||
+      body.loginCredential.username.length === 0 ||
+      body.loginCredential.password.length === 0
     ) {
       Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` no user or password provided');
       return next(
@@ -295,19 +298,20 @@ export class AuthenticationMWs {
         )
       );
     }
+    const credential = body.loginCredential;
     try {
       // let's find the user
       const user = await ObjectManagers.getInstance().UserManager.findOne({
-        name: req.body.loginCredential.username,
-        password: req.body.loginCredential.password,
+        name: credential.username,
+        password: credential.password,
       });
       if (!user) {
         throw new Error('No entry found');
       }
-      await AuthenticationMWs.startSession(req, user, req.body.loginCredential.rememberMe);
+      await AuthenticationMWs.startSession(req, user, credential.rememberMe);
       return next();
     } catch (err) {
-      Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` for user:' + req.body.loginCredential.username
+      Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` for user:' + credential.username
         + ', bad password');
       return next(
         new ErrorDTO(

@@ -88,7 +88,7 @@ export class GPXProcessing {
 
     await fsp.mkdir(outDir, {recursive: true});
     const gpxStr = await fsp.readFile(filePath);
-    const gpxObj = await (new xml2js.Parser()).parseStringPromise(gpxStr);
+    const gpxObj = await (new xml2js.Parser()).parseStringPromise(gpxStr) as { gpx?: { trk?: { trkseg: { trkpt: gpxEntry[] }[] }[] } };
 
     if (gpxObj.gpx?.trk?.[0].trkseg[0]) { // only compress paths if there is any
       const distance = (entry1: gpxEntry, entry2: gpxEntry) => {

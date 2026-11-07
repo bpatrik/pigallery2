@@ -155,7 +155,7 @@ export class RenderingMWs {
       attachState: true,
       attachVolatile: true,
       skipTags: {secret: true}
-    })));
+    }))) as PrivateConfigClass;
 
     const message = new Message<PrivateConfigClass>(
       null,

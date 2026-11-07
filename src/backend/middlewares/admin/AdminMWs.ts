@@ -83,7 +83,7 @@ export class AdminMWs {
     try {
       const id = RequestParams.getRequired(req, 'id');
       // Express 5 leaves req.body undefined without a JSON body; the job then runs with its defaults
-      const jobStart: JobStartDTO = req.body ?? {};
+      const jobStart = (req.body ?? {}) as JobStartDTO;
       const JobConfig: Record<string, unknown> = jobStart.config ?? {};
       const soloRun: boolean = jobStart.soloRun;
       const allowParallelRun: boolean = jobStart.allowParallelRun;

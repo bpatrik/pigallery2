@@ -16,10 +16,11 @@ import {FFmpeg} from '../FFmpeg';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {DateTags} from './MetadataCreationDate';
 
-const {imageSizeFromFile} = require('image-size/fromFile');
+const {imageSizeFromFile} = require('image-size/fromFile') as typeof import('image-size/fromFile');
 const LOG_TAG = '[MetadataLoader]';
 // exifr returns loosely shaped tag groups (ifd0, exif, gps, iptc, xmp, ...) and types them as any itself;
 // mapping every tag to a typed shape is not worth it here.
+/* eslint-disable @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ExifData = any;
 

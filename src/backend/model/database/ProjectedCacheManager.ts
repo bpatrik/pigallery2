@@ -23,6 +23,8 @@ import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCache
 import {NotificationManager} from '../NotifocationManager';
 
 const LOG_TAG = '[ProjectedCacheManager]';
+// raw aggregates come back as numbers or strings, depending on the driver
+type RawNumber = string | number | null;
 
 export class ProjectedCacheManager implements IObjectManager {
 
@@ -129,7 +131,7 @@ export class ProjectedCacheManager implements IObjectManager {
         'MIN(media.metadata.creationDate) as oldest',
         'MAX(media.metadata.creationDate) as youngest',
       ])
-      .getRawOne();
+      .getRawOne<{ mediaCount: RawNumber, oldest: RawNumber, youngest: RawNumber }>();
 
     const mediaCount: number = agg?.mediaCount != null ? parseInt(String(agg.mediaCount), 10) : 0;
     const oldestMedia: number | null = agg?.oldest != null ? parseInt(String(agg.oldest), 10) : null;
@@ -159,7 +161,7 @@ export class ProjectedCacheManager implements IObjectManager {
     if (session.projectionQuery) {
       recQb.andWhere(session.projectionQuery);
     }
-    const aggRec = await recQb.select(['COUNT(*) as cnt']).getRawOne();
+    const aggRec = await recQb.select(['COUNT(*) as cnt']).getRawOne<{ cnt: RawNumber }>();
     const recursiveMediaCount = aggRec?.cnt != null ? parseInt(String(aggRec.cnt), 10) : 0;
 
 
@@ -262,7 +264,7 @@ export class ProjectedCacheManager implements IObjectManager {
           'MIN(media.metadata.creationDate) as oldest',
           'MAX(media.metadata.creationDate) as youngest',
         ])
-        .getRawOne();
+        .getRawOne<{ itemCount: RawNumber, oldest: RawNumber, youngest: RawNumber }>();
 
 
       // Compute cover respecting projection

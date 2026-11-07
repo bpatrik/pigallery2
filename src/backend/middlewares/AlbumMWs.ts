@@ -1,5 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
+import {SearchQueryDTO} from '../../common/entities/SearchQueryDTO';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {Utils} from '../../common/Utils';
 import {Config} from '../../common/config/private/Config';
@@ -61,10 +62,11 @@ export class AlbumMWs {
     if (Config.Album.enabled === false) {
       return next();
     }
+    const body = req.body as { name?: string, searchQuery?: SearchQueryDTO } | undefined;
     if (
-      typeof req.body === 'undefined' ||
-      typeof req.body.name !== 'string' ||
-      typeof req.body.searchQuery !== 'object'
+      typeof body === 'undefined' ||
+      typeof body.name !== 'string' ||
+      typeof body.searchQuery !== 'object'
     ) {
       return next(
         new ErrorDTO(ErrorCodes.INPUT_ERROR, 'updateSharing filed is missing')
@@ -72,8 +74,8 @@ export class AlbumMWs {
     }
     try {
       await ObjectManagers.getInstance().AlbumManager.addSavedSearch(
-        req.body.name,
-        req.body.searchQuery
+        body.name,
+        body.searchQuery
       );
       req.resultPipe = 'ok';
       return next();

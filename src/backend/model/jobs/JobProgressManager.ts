@@ -58,7 +58,7 @@ export class JobProgressManager {
       return;
     }
     const data = await fsp.readFile(this.dbPath, 'utf8');
-    const db = JSON.parse(data);
+    const db = JSON.parse(data) as typeof this.db;
     if (db.version !== JobProgressManager.VERSION) {
       return;
     }

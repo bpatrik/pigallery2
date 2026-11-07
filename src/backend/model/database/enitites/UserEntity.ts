@@ -31,7 +31,7 @@ export class UserEntity implements UserDTO,SessionUser {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
@@ -45,7 +45,7 @@ export class UserEntity implements UserDTO,SessionUser {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
@@ -59,7 +59,7 @@ export class UserEntity implements UserDTO,SessionUser {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
@@ -73,7 +73,7 @@ export class UserEntity implements UserDTO,SessionUser {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;

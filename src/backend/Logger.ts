@@ -120,7 +120,7 @@ export class Logger {
     }
     args.forEach((element: LoggerArgs, index: number) => {
       if (typeof element === 'function') {
-        args[index] = element(); //execute function, put resulting string in the array
+        args[index] = (element as () => unknown)(); //execute function, put resulting string in the array
       }
     });
     fn(date + tag + LOG_TAG, ...args);

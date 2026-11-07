@@ -90,8 +90,8 @@ export class MediaMetadataEntity implements MediaMetadata {
    */
   @Column('bigint', {
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
   @Index()
@@ -99,14 +99,14 @@ export class MediaMetadataEntity implements MediaMetadata {
 
   @Column('smallint', {
     transformer: {
-      from: (v) => Utils.getOffsetString(v), //from database repr. as smallint (minutes) to string (+/-HH:MM)
-      to: (v) => Utils.getOffsetMinutes(v), //from entiry repr. as string (+/-HH:MM) to smallint (minutes)
+      from: (v: number) => Utils.getOffsetString(v), //from database repr. as smallint (minutes) to string (+/-HH:MM)
+      to: (v: string | undefined) => Utils.getOffsetMinutes(v), //from entiry repr. as string (+/-HH:MM) to smallint (minutes)
     },
   })
   creationDateOffset?: string;
 
 
-  @Column('bigint', {unsigned: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
+  @Column('bigint', {unsigned: true, transformer: {from: (v: string | null) => v == null ? null : parseInt(v, 10), to: (v: unknown) => v}})
   fileSize!: number;
 
   @Column(columnCharsetCSWith({

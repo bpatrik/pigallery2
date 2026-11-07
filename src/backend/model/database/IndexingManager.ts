@@ -54,8 +54,8 @@ export class IndexingManager {
           'Saving saved-searches to DB from:',
           fullMediaPath
         );
-        const savedSearches: { name: string; searchQuery: SearchQueryDTO }[] =
-          JSON.parse(await fs.promises.readFile(fullMediaPath, 'utf8'));
+        const savedSearches =
+          JSON.parse(await fs.promises.readFile(fullMediaPath, 'utf8')) as { name: string; searchQuery: SearchQueryDTO }[];
         for (const s of savedSearches) {
           await ObjectManagers.getInstance().AlbumManager.addIfNotExistSavedSearch(
             s.name,
@@ -251,7 +251,7 @@ export class IndexingManager {
           name: scannedDirectory.name,
           path: scannedDirectory.path,
         })
-      ).identifiers[0]['id'];
+      ).identifiers[0]['id'] as number;
     }
   }
 
@@ -302,7 +302,7 @@ export class IndexingManager {
 
         await this.saveMedia(
           connection,
-          d.identifiers[0]['id'],
+          d.identifiers[0]['id'] as number,
           directory.media ?? []
         );
       }
@@ -580,7 +580,7 @@ export class IndexingManager {
       list = list.concat(
         (
           await repository.insert(entities.slice(i * size, (i + 1) * size))
-        ).identifiers.map((ids) => ids['id'])
+        ).identifiers.map((ids) => ids['id'] as number)
       );
     }
     return list;

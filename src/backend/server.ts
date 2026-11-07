@@ -69,7 +69,7 @@ export class Server {
         ).configPath +
         ':'
     );
-    Logger.verbose(LOG_TAG, () => JSON.stringify(Config.toJSON({attachDescription: false}), (k, v) => {
+    Logger.verbose(LOG_TAG, () => JSON.stringify(Config.toJSON({attachDescription: false}), (k, v: unknown) => {
       const MAX_LENGTH = 80;
       if (typeof v === 'string' && v.length > MAX_LENGTH) {
         v = v.slice(0, MAX_LENGTH - 3) + '...';

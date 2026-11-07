@@ -4,6 +4,8 @@ import {ObjectManagers} from '../../model/ObjectManagers';
 import {Utils} from '../../../common/Utils';
 import {Config} from '../../../common/config/private/Config';
 import {RequestParams} from '../RequestParams';
+import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
+import {UserSettingsDTO} from '../../../common/entities/UserSettingsDTO';
 
 export class UserMWs {
   public static async createUser(
@@ -14,16 +16,17 @@ export class UserMWs {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
     }
+    const body = req.body as { newUser?: UserDTO } | undefined;
     if (
-      typeof req.body === 'undefined' ||
-      typeof req.body.newUser === 'undefined'
+      typeof body === 'undefined' ||
+      typeof body.newUser === 'undefined'
     ) {
       return next();
     }
 
     try {
       await ObjectManagers.getInstance().UserManager.createUser(
-        req.body.newUser
+        body.newUser
       );
       return next();
     } catch (err) {
@@ -65,11 +68,12 @@ export class UserMWs {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
     }
+    const body = req.body as { newRole?: UserRoles } | undefined;
     if (
       typeof req.params === 'undefined' ||
       typeof RequestParams.get(req, 'id') === 'undefined' ||
-      typeof req.body === 'undefined' ||
-      typeof req.body.newRole === 'undefined'
+      typeof body === 'undefined' ||
+      typeof body.newRole === 'undefined'
     ) {
       return next();
     }
@@ -77,7 +81,7 @@ export class UserMWs {
     try {
       await ObjectManagers.getInstance().UserManager.changeRole(
         parseInt(RequestParams.getRequired(req, 'id'), 10),
-        req.body.newRole
+        body.newRole
       );
       return next();
     } catch (err) {
@@ -93,11 +97,12 @@ export class UserMWs {
     if (Config.Users.authenticationRequired === false) {
       return next(new ErrorDTO(ErrorCodes.USER_MANAGEMENT_DISABLED));
     }
+    const body = req.body as { settings?: UserSettingsDTO } | undefined;
     if (
       typeof req.params === 'undefined' ||
       typeof RequestParams.get(req, 'id') === 'undefined' ||
-      typeof req.body === 'undefined' ||
-      typeof req.body.settings === 'undefined'
+      typeof body === 'undefined' ||
+      typeof body.settings === 'undefined'
     ) {
       return next();
     }
@@ -105,7 +110,7 @@ export class UserMWs {
     try {
       const updatedUser = await ObjectManagers.getInstance().UserManager.updateSettings(
         parseInt(RequestParams.getRequired(req, 'id'), 10),
-        req.body.settings
+        body.settings
       );
       if (req.session?.context?.user?.id === updatedUser.id) {
         //clean up after a change

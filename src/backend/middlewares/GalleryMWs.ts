@@ -38,7 +38,7 @@ export class GalleryMWs {
 
       let query: SearchQueryDTO;
       try {
-        query = JSON.parse(rawQueryParam);
+        query = JSON.parse(rawQueryParam) as SearchQueryDTO;
       } catch (parseError) {
         return next(
           new ErrorDTO(

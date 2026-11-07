@@ -7,7 +7,7 @@ import {Readable} from 'node:stream';
 import type {ReadableStream as NodeReadableStream} from 'node:stream/web';
 import {IObjectManager} from '../database/IObjectManager';
 import {Logger} from '../../Logger';
-import {IExtensionEvents, IExtensionObject} from './IExtension';
+import {IExtensionEvents, IExtensionObject, IServerExtension} from './IExtension';
 import {Server} from '../../server';
 import {ExtensionEvent} from './ExtensionEvent';
 import * as express from 'express';
@@ -23,7 +23,7 @@ import {ExtensionConfigTemplateLoader} from './ExtensionConfigTemplateLoader';
 import {Utils} from '../../../common/Utils';
 import {UIExtensionDTO} from '../../../common/entities/extension/IClientUIConfig';
 import {ExtensionConfigWrapper} from './ExtensionConfigWrapper';
-const exec = util.promisify(require('node:child_process').exec);
+const exec = util.promisify((require('node:child_process') as typeof import('node:child_process')).exec);
 const LOG_TAG = '[ExtensionManager]';
 
 export class ExtensionManager implements IObjectManager {
@@ -326,13 +326,13 @@ export class ExtensionManager implements IObjectManager {
           cwd: extPath
         });
       }
-      const pkg = require(packageJsonPath);
+      const pkg = require(packageJsonPath) as { name?: string };
       if (pkg.name) {
         extName = pkg.name;
       }
     }
 
-    const ext = require(serverExtPath);
+    const ext = require(serverExtPath) as Partial<IServerExtension<unknown>> | undefined;
     if (typeof ext?.init === 'function') {
       Logger.debug(LOG_TAG, 'Running init on extension: ' + folderName);
       await ext?.init(this.createUniqueExtensionObject(extName, folderName));
@@ -362,7 +362,7 @@ export class ExtensionManager implements IObjectManager {
 
     const serverExt = path.join(extObj.folder, 'server.js');
     if (fs.existsSync(serverExt)) {
-      const ext = require(serverExt);
+      const ext = require(serverExt) as Partial<IServerExtension<unknown>> | undefined;
       if (typeof ext?.cleanUp === 'function') {
         Logger.debug(LOG_TAG, 'Running cleanUp on extension: ' + extObj.extensionName);
         await ext?.cleanUp(extObj);

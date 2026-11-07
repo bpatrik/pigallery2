@@ -12,8 +12,8 @@ export class VideoMetadataEntity
     unsigned: true,
     nullable: true,
     transformer: {
-      from: (v) => parseInt(v, 10) || null,
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10) || null,
+      to: (v: unknown) => v,
     },
   })
   override duration!: number;

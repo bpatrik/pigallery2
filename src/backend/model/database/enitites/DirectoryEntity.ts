@@ -28,8 +28,8 @@ export class DirectoryEntity
   @Column('bigint', {
     unsigned: true,
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
   public lastModified!: number;
@@ -42,8 +42,8 @@ export class DirectoryEntity
     nullable: true,
     unsigned: true,
     transformer: {
-      from: (v) => parseInt(v, 10) || null,
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10) || null,
+      to: (v: unknown) => v,
     },
   })
   public lastScanned?: number | null;

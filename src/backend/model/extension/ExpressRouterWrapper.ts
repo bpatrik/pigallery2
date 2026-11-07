@@ -57,7 +57,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
     return this.register(paths,
       ...(this.getAuthMWs(minRole).concat([
         (req: Request, res: Response, next: NextFunction) => {
-          req.params['mediaPath'] = req.body?.media;
+          req.params['mediaPath'] = (req.body as IMediaRequestBody | undefined)?.media as string;
           next();
         },
         AuthenticationMWs.normalizePathParam('mediaPath'),
@@ -68,7 +68,7 @@ export class ExpressRouteWrapper implements IExtensionRESTRoute {
             const media = req.resultPipe as MediaEntity;
             const connection = await SQLConnection.getConnection();
             await cb(req.params,
-              req.body ?? {},
+              (req.body ?? {}) as IMediaRequestBody,
               RequestSession.getContext(req).user,
               media,
               connection.getRepository(MediaEntity));

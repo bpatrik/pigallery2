@@ -78,11 +78,6 @@ export default tseslint.config(
       // overrides of async hooks (Job.init, FileJob.filter*, Messenger.sendMedia, ...) stay async without awaiting anything
       '@typescript-eslint/require-await': 'off',
       // TODO(#1293): fixed and turned back on in the next commits
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/unbound-method': 'off',
     }
   },

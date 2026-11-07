@@ -131,7 +131,7 @@ export class ConfigDiagnostics {
 
   static testSharp(): void {
     Logger.debug(LOG_TAG, 'Testing sharp package');
-    const sharp = require('sharp');
+    const sharp = require('sharp') as typeof import('sharp');
     sharp();
     ConfigDiagnostics.testLibvipsVersion(ConfigDiagnostics.getSharpPackageJson().config.libvips, sharp.versions.vips);
   }
@@ -144,7 +144,7 @@ export class ConfigDiagnostics {
     while (dir !== path.dirname(dir)) {
       const pkgPath = path.join(dir, 'package.json');
       if (fs.existsSync(pkgPath)) {
-        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as { name?: string, config: { libvips: string } };
         if (pkg.name === 'sharp') {
           return pkg;
         }
@@ -368,10 +368,10 @@ export class ConfigDiagnostics {
   static async removeUnsupportedPhotoExtensions(config: ClientPhotoConfig): Promise<void> {
     Logger.verbose(LOG_TAG, 'Checking for supported image formats');
 
-    const sharp = require('sharp');
+    const sharp = require('sharp') as typeof import('sharp');
     let text = '';
-    for (const f in sharp.format) {
-      text += `${f}: {\n\tid:${JSON.stringify(sharp.format[f].id)},\n\tinput:${JSON.stringify(sharp.format[f].input)},\n\toutput:${JSON.stringify(sharp.format[f].output)}}\n`;
+    for (const [f, format] of Object.entries(sharp.format) as [string, import('sharp').AvailableFormatInfo][]) {
+      text += `${f}: {\n\tid:${JSON.stringify(format.id)},\n\tinput:${JSON.stringify(format.input)},\n\toutput:${JSON.stringify(format.output)}}\n`;
     }
     Logger.silly(LOG_TAG, 'Sharp supports:\n' + text);
     Logger.silly(LOG_TAG, 'Sharp versions:' + JSON.stringify(sharp.versions));

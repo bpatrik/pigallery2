@@ -179,13 +179,13 @@ export class SQLConnection {
     let currentTables: string[];
 
     if (Config.Database.type === DatabaseType.sqlite) {
-      currentTables = (await conn.query('SELECT name FROM sqlite_master  WHERE type=\'table\''))
-        .map((r: { name: string }) => r.name);
+      currentTables = (await conn.query<{ name: string }[]>('SELECT name FROM sqlite_master  WHERE type=\'table\''))
+        .map((r) => r.name);
     } else {
-      currentTables = (await conn.query(`SELECT table_name
+      currentTables = (await conn.query<{ table_name: string }[]>(`SELECT table_name
                                          FROM information_schema.tables ` +
         `WHERE table_schema = '${SQLConnection.getMySQLConfig(Config.Database).database}'`))
-        .map((r: { table_name: string }) => r.table_name);
+        .map((r) => r.table_name);
     }
 
     const tableToDrop = currentTables.filter(ct => !validTableNames.includes(ct));

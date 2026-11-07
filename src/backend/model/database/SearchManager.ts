@@ -136,10 +136,10 @@ export class SearchManager {
       }
 
       q.limit(Config.Search.AutoComplete.ItemsPerCategory.keyword);
-      (await q.getRawMany())
+      (await q.getRawMany<{ metadataKeywords: string }>())
         .map(
           (r): string[] =>
-            (r.metadataKeywords as string).split(',')
+            r.metadataKeywords.split(',')
         )
         .forEach((keywords): void => {
           acList.push(
@@ -176,7 +176,7 @@ export class SearchManager {
                 Config.Search.AutoComplete.ItemsPerCategory.person
               )
               .orderBy('cache.count', 'DESC')
-              .getRawMany()
+              .getRawMany<{ name: string }>()
           ).map((r) => r.name),
           SearchQueryTypes.person
         )
@@ -225,7 +225,7 @@ export class SearchManager {
         .limit(Config.Search.AutoComplete.ItemsPerCategory.position);
       (
 
-        await q.getRawMany()
+        await q.getRawMany<{ city: string | null, country: string | null, state: string | null }>()
       )
         .filter((pm): boolean => !!pm)
         .map(
@@ -272,7 +272,7 @@ export class SearchManager {
       partialResult.push(
         this.encapsulateAutoComplete(
           (
-            await q.getRawMany()
+            await q.getRawMany<{ name: string }>()
           ).map((r) => r.name),
           SearchQueryTypes.file_name
         )
@@ -303,7 +303,7 @@ export class SearchManager {
       partialResult.push(
         this.encapsulateAutoComplete(
           (
-            await q.getRawMany()
+            await q.getRawMany<{ caption: string }>()
           ).map((r) => r.caption),
           SearchQueryTypes.caption
         )
@@ -934,7 +934,7 @@ export class SearchManager {
     return new Brackets((q: WhereExpressionBuilder) => {
       const convertGlobToLike = (str: string): string => {
         // Match either an escaped character \\(.) or any unescaped SQL/glob special character
-        return str.replace(/\\(.)|([*?%_])/g, (_, escaped, special) => {
+        return str.replace(/\\(.)|([*?%_])/g, (_: string, escaped: string | undefined, special: string | undefined) => {
           if (escaped) {
             if (escaped === '*' || escaped === '?') {
               return escaped;
