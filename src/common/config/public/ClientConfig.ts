@@ -81,6 +81,7 @@ export interface TAGS {
   uiAllowSpaces?: boolean
   uiOptional?: boolean; //makes the tag not "required"
   uiDisabled?(subConfig: unknown, config: ClientConfig): boolean
+  uiWarning?(value: unknown): string | undefined // a warning about the current value, shown under the setting
   uiJob?: {
     job: string,
     hideProgress?: boolean,

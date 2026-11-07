@@ -173,6 +173,10 @@ export class SettingsEntryComponent
     return Utils.equalsFilter(this.st.value, this.st.original);
   }
 
+  get warning(): string | undefined {
+    return this.st.tags?.uiWarning?.(this.st.value);
+  }
+
   get shouldHide(): boolean {
     this.settingsService.edits(); // depends on other entries: refresh after every edit
     return !!this.st.shouldHide && this.st.shouldHide();
