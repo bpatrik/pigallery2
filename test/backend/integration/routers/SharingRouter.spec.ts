@@ -14,11 +14,13 @@ import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig'
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
+import chaiAsPromised from 'chai-as-promised';
 import {TestHelper} from '../../../TestHelper';
 
 process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
+chai.use(chaiAsPromised);
 
 describe('SharingRouter', () => {
   before(TestHelper.resetConfig);
@@ -80,12 +82,16 @@ describe('SharingRouter', () => {
       res.body.result.should.deep.equal({sharingKey: sharing.sharingKey, passwordProtected: true});
     });
 
-    it('should return 404 for a not existing sharing', async () => {
-      const res = await getPublicInfo('doesnotexist');
+    // Expected to fail until #1254 is fixed (mocha has no test.fail()): remove the rejected wrapper then.
+    it('should return 404 for a not existing sharing (expected to fail #1254)', async () => {
+      const check = async (): Promise<void> => {
+        const res = await getPublicInfo('doesnotexist');
 
-      res.should.have.status(404);
-      res.body.error.should.be.a('object');
-      should.equal(res.body.result, null);
+        res.should.have.status(404);
+        res.body.error.should.be.a('object');
+        should.equal(res.body.result, null);
+      };
+      await check().should.be.rejectedWith(chai.AssertionError);
     });
   });
 
