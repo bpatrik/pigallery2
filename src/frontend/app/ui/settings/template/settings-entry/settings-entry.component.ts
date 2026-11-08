@@ -30,6 +30,7 @@ import { SafeHtmlPipe } from '../../../../pipes/SafeHTMLPipe';
 import {DirectorySearchListSettingsComponent} from '../../directory-search-list/directory-search-list.settings.component';
 import {RecursiveState, Stateful, StatefulConfig} from '../RecursiveState';
 import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
+import {errorMessage} from '../../../../../../common/entities/Error';
 
 interface OptionView {
   key: number | string;
@@ -70,10 +71,10 @@ export class SettingsEntryComponent
   private modalService = inject(BsModalService);
 
   name: string | undefined;
-  required: boolean;
+  required!: boolean; // set by ngOnChanges()
   dockerWarning: boolean | undefined;
   experimental: boolean | undefined;
-  placeholder: string;
+  placeholder!: string; // set by ngOnChanges()
   allowSpaces = false;
   description: string | undefined;
   // set by writeValue (ngModel), not by an input, so it is a signal to refresh the view
@@ -85,8 +86,8 @@ export class SettingsEntryComponent
   isNumberArray = false;
   isNumber = false;
   HTMLInputType = 'text';
-  title: string;
-  idName: string;
+  title!: string; // set by ngOnChanges()
+  idName!: string; // set by ngOnChanges()
   private readonly GUID = Utils.GUID();
   NavigationLinkTypes = NavigationLinkTypes;
   readonly newDirectorySearch = (): DirectorySearch => new (this.st.arrayType as new () => DirectorySearch)();
@@ -97,7 +98,7 @@ export class SettingsEntryComponent
   optionsView: OptionView[] = [];
   navigationLinkTypeOptions: OptionView[] = [];
   userRoleOptions: OptionView[] = [];
-  newThemeModalRef: BsModalRef | null;
+  newThemeModalRef: BsModalRef | null = null;
   iconModal: {
     ref?: BsModalRef,
     error?: string
@@ -170,6 +171,10 @@ export class SettingsEntryComponent
       return true;
     }
     return Utils.equalsFilter(this.st.value, this.st.original);
+  }
+
+  get warning(): string | undefined {
+    return this.st.tags?.uiWarning?.(this.st.value);
   }
 
   get shouldHide(): boolean {
@@ -419,14 +424,14 @@ export class SettingsEntryComponent
   public onTouched = (): void => {
     // empty
   };
-  newThemeName: string;
+  newThemeName = '';
 
   public writeValue(obj: RecursiveState): void {
     this.state.set(obj);
     this.ngOnChanges();
   }
 
-  public registerOnChange(fn: (v: never) => void): void {
+  public registerOnChange(fn: (v: unknown) => void): void {
     this.onChange = fn;
   }
 
@@ -547,7 +552,7 @@ export class SettingsEntryComponent
       } catch (e) {
         console.error(e);
         if (this.iconModal) {
-          this.iconModal.error = 'Can\'t parse SVG file: ' + e.toState;
+          this.iconModal.error = 'Can\'t parse SVG file: ' + errorMessage(e);
         }
       }
       this.onChange(null);

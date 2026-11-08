@@ -10,11 +10,14 @@ export class TaskExecuter<I, O> implements ITaskExecuter<I, O> {
   private taskInProgress = 0;
   private readonly el = new EventLoopHandler();
   private run = async () => {
-    if (this.taskQue.isEmpty() || this.taskInProgress >= this.size) {
+    if (this.taskInProgress >= this.size) {
+      return;
+    }
+    const task = this.taskQue.get();
+    if (!task) {
       return;
     }
     this.taskInProgress++;
-    const task = this.taskQue.get();
     try {
       task.promise.resolve(await this.worker(task.data));
     } catch (err) {
@@ -22,7 +25,9 @@ export class TaskExecuter<I, O> implements ITaskExecuter<I, O> {
     }
     this.taskQue.ready(task);
     this.taskInProgress--;
-    this.el.step(this.run);
+    this.el.step(() => {
+      this.run().catch(console.error);
+    });
   };
 
   constructor(private size: number, private worker: (input: I) => Promise<O>) {

@@ -10,4 +10,15 @@ export class RequestParams {
     const value = req.params[name];
     return Array.isArray(value) ? value.join('/') : value;
   }
+
+  /**
+   * Reads a path param that the route always has (see get()).
+   */
+  public static getRequired(req: Request, name: string): string {
+    const value = RequestParams.get(req, name);
+    if (value === undefined) {
+      throw new Error('Missing path param: ' + name);
+    }
+    return value;
+  }
 }

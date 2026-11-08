@@ -1,7 +1,6 @@
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
-import {StatisticDTO} from '../../../common/entities/settings/StatisticDTO';
 import {MessengerRepository} from '../../model/messenger/MessengerRepository';
 import {JobStartDTO} from '../../../common/entities/job/JobDTO';
 import {RequestParams} from '../RequestParams';
@@ -24,7 +23,7 @@ export class AdminMWs {
         videos: await galleryManager.countVideos(),
         diskUsage: await galleryManager.countMediaSize(),
         persons: await personManager.countFaces(),
-      } as StatisticDTO;
+      };
       return next();
     } catch (err) {
       if (err instanceof Error) {
@@ -82,10 +81,10 @@ export class AdminMWs {
     next: NextFunction
   ): Promise<void> {
     try {
-      const id = RequestParams.get(req, 'id');
+      const id = RequestParams.getRequired(req, 'id');
       // Express 5 leaves req.body undefined without a JSON body; the job then runs with its defaults
-      const jobStart: JobStartDTO = req.body ?? {};
-      const JobConfig: Record<string, unknown> = jobStart.config;
+      const jobStart = (req.body ?? {}) as JobStartDTO;
+      const JobConfig: Record<string, unknown> = jobStart.config ?? {};
       const soloRun: boolean = jobStart.soloRun;
       const allowParallelRun: boolean = jobStart.allowParallelRun;
       await ObjectManagers.getInstance().JobManager.run(
@@ -118,7 +117,7 @@ export class AdminMWs {
 
   public static stopJob(req: Request, res: Response, next: NextFunction): void {
     try {
-      const id = RequestParams.get(req, 'id');
+      const id = RequestParams.getRequired(req, 'id');
       ObjectManagers.getInstance().JobManager.stop(id);
       req.resultPipe = 'ok';
       return next();

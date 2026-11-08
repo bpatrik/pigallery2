@@ -13,10 +13,10 @@ export interface PublicSharingDTO extends SharingDTOKey {
 
 export interface BaseSharingDTO extends SharingDTOKey {
   id: number;
-  defaultSearchView?: SearchQueryDTO;
-  defaultDirectoryView?: string;
-  searchQuery: SearchQueryDTO;
-  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
+  defaultSearchView?: SearchQueryDTO | null;
+  defaultDirectoryView?: string | null;
+  searchQuery: SearchQueryDTO | null;
+  directoryQuery?: DirectorySearch | null; // the directories that are available through the sharing
   sharingKey: string;
   expires: number;
   timeStamp: number;
@@ -26,10 +26,10 @@ export interface BaseSharingDTO extends SharingDTOKey {
 
 export interface ResponseSharingDTO extends BaseSharingDTO, PublicSharingDTO {
   id: number;
-  defaultSearchView?: SearchQueryDTO;
-  defaultDirectoryView?: string;
-  searchQuery: SearchQueryDTO;
-  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
+  defaultSearchView?: SearchQueryDTO | null;
+  defaultDirectoryView?: string | null;
+  searchQuery: SearchQueryDTO | null;
+  directoryQuery?: DirectorySearch | null; // the directories that are available through the sharing
   sharingKey: string;
   expires: number;
   timeStamp: number;
@@ -39,12 +39,12 @@ export interface ResponseSharingDTO extends BaseSharingDTO, PublicSharingDTO {
 
 export interface UpdateSharingDTO extends BaseSharingDTO {
   id: number;
-  defaultSearchView?: SearchQueryDTO;
-  defaultDirectoryView?: string;
-  searchQuery: SearchQueryDTO;
-  directoryQuery?: DirectorySearch; // the directories that are available through the sharing
+  defaultSearchView?: SearchQueryDTO | null;
+  defaultDirectoryView?: string | null;
+  searchQuery: SearchQueryDTO | null;
+  directoryQuery?: DirectorySearch | null; // the directories that are available through the sharing
   sharingKey: string;
-  password?: string;
+  password?: string | null;
   expires: number;
   timeStamp: number;
   creator?: UserDTO; // does not travel to client side

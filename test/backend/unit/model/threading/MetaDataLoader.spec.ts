@@ -1,8 +1,8 @@
 import {expect} from 'chai';
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {Utils} from '../../../../../src/common/Utils';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';
@@ -214,10 +214,10 @@ describe('MetadataLoader', () => {
       for (const i of [3, 6, 8]) {
         const embedded = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, `/../../../assets/sidecar/orientation/photo.${i}.embedded.jpg`));
         const sidecar = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, `/../../../assets/sidecar/orientation/photo.${i}.embedded_sidecar.jpg`));
-        delete embedded.fileSize;
-        delete sidecar.fileSize;
-        delete embedded.creationDate;
-        delete sidecar.creationDate;
+        delete (embedded as {fileSize?: unknown}).fileSize;
+        delete (sidecar as {fileSize?: unknown}).fileSize;
+        delete (embedded as {creationDate?: unknown}).creationDate;
+        delete (sidecar as {creationDate?: unknown}).creationDate;
         expect(Utils.clone(embedded)).to.be.deep.equal(Utils.clone(sidecar), `processing: photo.${i}.embedded.jpg`);
       }
     });
@@ -313,16 +313,16 @@ describe('MetadataLoader', () => {
       it('Landscape ' + i, async () => {
         const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/orientation/Landscape_' + i + '.jpg'));
         const expected = require(path.join(__dirname, '/../../../assets/orientation/Landscape.json'));
-        delete data.fileSize;
-        delete data.creationDate;
+        delete (data as {fileSize?: unknown}).fileSize;
+        delete (data as {creationDate?: unknown}).creationDate;
         delete data.creationDateOffset;
         expect(Utils.clone(data)).to.be.deep.equal(expected);
       });
       it('Portrait ' + i, async () => {
         const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/orientation/Portrait_' + i + '.jpg'));
         const expected = require(path.join(__dirname, '/../../../assets/orientation/Portrait.json'));
-        delete data.fileSize;
-        delete data.creationDate;
+        delete (data as {fileSize?: unknown}).fileSize;
+        delete (data as {creationDate?: unknown}).creationDate;
         delete data.creationDateOffset;
         expect(Utils.clone(data)).to.be.deep.equal(expected);
       });
@@ -352,7 +352,7 @@ describe('MetadataLoader', () => {
   it('should respect mp4 rotate transformation', async () => {
     const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/video_rotate.mp4'));
     const expected = require(path.join(__dirname, '/../../../assets/video_rotate.json'));
-    delete data.duration;
+    delete (data as {duration?: unknown}).duration;
     delete expected.duration;
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
@@ -389,7 +389,7 @@ describe('MetadataLoader', () => {
   describe('Live Photo', () => {
     const livePhotoDir = path.join(__dirname, '/../../../assets/live_photo');
 
-    before(function () {
+    before(function (this: Mocha.Context) {
       if (!fs.existsSync(livePhotoDir)) {
         this.skip();
       }

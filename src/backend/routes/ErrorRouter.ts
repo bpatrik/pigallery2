@@ -16,8 +16,8 @@ export class ErrorRouter {
 
   private static addGenericHandler(app: Express): void {
     app.use(
-        (err: any, req: Request, res: Response, next: NextFunction): any => {
-          if (err.name === 'UnauthorizedError') {
+        (err: unknown, req: Request, res: Response, next: NextFunction): void => {
+          if (err instanceof Error && err.name === 'UnauthorizedError') {
             // jwt authentication error
             res.status(401);
             return next(

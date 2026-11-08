@@ -34,7 +34,7 @@ export interface JobStartDTO {
 }
 
 export const JobDTOUtils = {
-  getHashName: (jobName: string, config: any = {}) => {
+  getHashName: (jobName: string, config: Record<string, unknown> = {}) => {
     const sorted = Object.keys(config).sort().reduce((ret, key) => `${ret},${key}:${JSON.stringify(config[key])}`, '');
     return jobName + '-' + JSON.stringify(sorted);
   },

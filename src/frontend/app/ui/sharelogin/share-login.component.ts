@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
-import {ErrorCodes} from '../../../../common/entities/Error';
+import {ErrorCodes, isErrorDTO} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
 import {NavigationService} from '../../model/navigation.service';
 import {ShareService} from '../gallery/share.service';
@@ -25,7 +25,7 @@ export class ShareLoginComponent implements OnInit {
   private authService = inject(AuthenticationService);
   private navigation = inject(NavigationService);
 
-  password: string;
+  password = '';
   readonly loginError = signal(false);
   readonly inProgress = signal(false);
   title: string;
@@ -48,7 +48,7 @@ export class ShareLoginComponent implements OnInit {
       await this.authService.shareLogin(this.password);
     } catch (error) {
       if (
-          (error && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) ||
+          (isErrorDTO(error) && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) ||
           error === 'Unauthorized'
       ) {
         this.loginError.set(true);

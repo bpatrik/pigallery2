@@ -3,6 +3,7 @@ import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import angular from "angular-eslint";
 import chaiFriendly from 'eslint-plugin-chai-friendly';
+import {builtinModules} from 'node:module';
 
 export default tseslint.config(
   {
@@ -55,15 +56,34 @@ export default tseslint.config(
     files: ["src/common/**/*.ts", "src/backend/**/*.ts"],
     extends: [
       eslint.configs.recommended,
-      ...tseslint.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
       ...tseslint.configs.stylistic,
     ],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       '@typescript-eslint/prefer-for-of': 'off',
       // the jobs override abstract getters (Name, Supported, ...); fields would change when they are set
       '@typescript-eslint/class-literal-property-style': 'off',
       // CommonJS: native modules (sharp, ffmpeg) are loaded lazily, extensions and package.json from runtime paths
       '@typescript-eslint/no-require-imports': 'off',
+      // ErrorDTO is the app's error: thrown or passed to next(), RenderingMWs sends it to the client
+      '@typescript-eslint/only-throw-error': ['error', {
+        allow: [{from: 'file', name: 'ErrorDTO', path: 'src/common/entities/Error.ts'}],
+      }],
+      // overrides of async hooks (Job.init, FileJob.filter*, Messenger.sendMedia, ...) stay async without awaiting anything
+      '@typescript-eslint/require-await': 'off',
+    }
+  },
+  {
+    // routers list the static middlewares of the *MWs classes, which don't use `this`
+    files: ["src/backend/routes/**/*.ts", "src/backend/model/extension/ExpressRouterWrapper.ts"],
+    rules: {
+      '@typescript-eslint/unbound-method': 'off',
     }
   },
   {
@@ -97,11 +117,17 @@ export default tseslint.config(
         ignoreRestSiblings: true,
       }],
       "@typescript-eslint/no-explicit-any": "warn",
+      // Node built-ins are imported with the node: prefix (node:fs, node:path, ...)
+      "@typescript-eslint/no-restricted-imports": ["error", {
+        paths: builtinModules
+          .filter(name => !name.startsWith('_') && !name.startsWith('node:'))
+          .map(name => ({name, message: `Import it as 'node:${name}'.`})),
+      }],
     },
   },
   {
-    // the frontend is strictNullChecks and any-free (#1249); the backend still has some
-    files: ["src/frontend/**/*.ts"],
+    // src is any-free (#1249, #1294)
+    files: ["src/**/*.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
     },

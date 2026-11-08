@@ -8,18 +8,18 @@ import {ProjectedAlbumCacheEntity} from './ProjectedAlbumCacheEntity';
 export class AlbumBaseEntity implements AlbumBaseDTO {
   @Index()
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Index()
   @Column(columnCharsetCS)
-  name: string;
+  name!: string;
 
   /**
    * Locked albums are not possible to remove
    */
   @Column({default: false})
-  locked: boolean;
+  locked!: boolean;
 
   @OneToOne(() => ProjectedAlbumCacheEntity, (c) => c.album)
-  public cache: ProjectedAlbumCacheEntity;
+  public cache!: ProjectedAlbumCacheEntity;
 }

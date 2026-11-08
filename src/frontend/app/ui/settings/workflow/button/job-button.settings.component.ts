@@ -1,6 +1,6 @@
 import { Component, TemplateRef, inject, input, output, computed } from '@angular/core';
 import {JobProgressStates, OnTimerJobProgressDTO,} from '../../../../../../common/entities/job/JobProgressDTO';
-import {ErrorDTO} from '../../../../../../common/entities/Error';
+import {isErrorDTO} from '../../../../../../common/entities/Error';
 import {ScheduledJobsService} from '../../scheduled-jobs.service';
 import {NotificationService} from '../../../../model/notification.service';
 import {JobDTOUtils} from '../../../../../../common/entities/job/JobDTO';
@@ -31,7 +31,7 @@ export class JobButtonComponent {
   readonly danger = input(false);
   JobProgressStates = JobProgressStates;
   readonly jobError = output<string>();
-  private modalRef: BsModalRef | null;
+  private modalRef: BsModalRef | null = null;
   private defaultConfig: Record<string, unknown> | undefined;
   readonly JobName = computed<string | null>(() => this.backendTextService.getJobName(this.jobName()));
   readonly JobDescription = computed<string | null>(() => this.backendTextService.getJobDescription(this.jobName()));
@@ -107,8 +107,8 @@ export class JobButtonComponent {
       return true;
     } catch (err) {
       console.log(err);
-      if (err.message) {
-        this.jobError.emit((err as ErrorDTO).message ?? '');
+      if (isErrorDTO(err) || err instanceof Error) {
+        this.jobError.emit(err.message ?? '');
       }
     }
 
@@ -127,8 +127,8 @@ export class JobButtonComponent {
       return true;
     } catch (err) {
       console.error(err);
-      if (err.message) {
-        this.jobError.emit((err as ErrorDTO).message ?? '');
+      if (isErrorDTO(err) || err instanceof Error) {
+        this.jobError.emit(err.message ?? '');
       }
     }
     return false;

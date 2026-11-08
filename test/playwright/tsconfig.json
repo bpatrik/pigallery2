@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["**/*.ts", "../../playwright.config.ts"],
+  // the root tsconfig excludes this folder
+  "exclude": [],
+  "compilerOptions": {
+    "noEmit": true,
+    // process.env.CI, like in the Playwright docs
+    "noPropertyAccessFromIndexSignature": false
+  }
+}

@@ -16,7 +16,7 @@ export class DuplicatesPhotoComponent implements OnInit, OnDestroy {
 
   readonly media = input.required<MediaDTO>();
 
-  thumbnail: IconThumbnail;
+  thumbnail!: IconThumbnail; // set by ngOnInit()
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getIcon(new MediaIcon(this.media()));

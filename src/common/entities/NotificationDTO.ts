@@ -7,10 +7,10 @@ export enum NotificationType {
 export interface NotificationDTO {
   type: NotificationType;
   message: string;
-  details?: any;
+  details?: unknown;
   request?: {
     method: string;
     url: string;
-    statusCode: number;
+    statusCode?: number;
   };
 }

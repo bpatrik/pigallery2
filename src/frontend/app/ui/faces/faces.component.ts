@@ -24,7 +24,7 @@ export class FacesComponent implements OnInit {
   private piTitleService = inject(PiTitleService);
 
   readonly container = viewChild<ElementRef>('container');
-  public size: number;
+  public size!: number; // set by updateSize(), which ngOnInit() calls
   private readonly sortedPersons: Signal<PersonDTO[]> = computed(() => {
     const sorting = this.facesService.sorting();
     // sorting a copy: the service's array must not change in place

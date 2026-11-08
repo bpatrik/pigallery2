@@ -1,6 +1,6 @@
 import {Config} from '../../../common/config/private/Config';
 import {Request} from 'express';
-import {Client, generators, Issuer, TokenSet} from 'openid-client';
+import * as oidc from 'openid-client';
 import {UserDTO} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ObjectManagers} from '../../model/ObjectManagers';
@@ -8,28 +8,33 @@ import {Logger} from '../../Logger';
 
 const LOG_TAG = '[OIDCAuthService]';
 
+// claims are JSON values; the ones used here are strings (numbers are accepted too)
+const claimStr = (v: unknown): string =>
+  typeof v === 'string' ? v : (typeof v === 'number' ? String(v) : '');
+
 export class OIDCAuthService {
-  private static clientPromise: Promise<Client> | null = null;
+  private static configurationPromise: Promise<oidc.Configuration> | null = null;
 
   /**
    * Step 1 of the OIDC authorization code flow: the URL of the authentication request at the provider.
    * The provider sends the authentication response back to Users.oidc.redirectUri.
    */
   public static async getAuthenticationRequestUrl(req: Request): Promise<string> {
-    const client = await this.getClient();
-    const state = generators.state();
-    const verifier = generators.codeVerifier();
-    const challenge = generators.codeChallenge(verifier);
+    const configuration = await this.getConfiguration();
+    const state = oidc.randomState();
+    const verifier = oidc.randomPKCECodeVerifier();
+    const challenge = await oidc.calculatePKCECodeChallenge(verifier);
     req.session.oidc = {
       state,
       verifier
-    } as any;
-    return client.authorizationUrl({
+    };
+    return oidc.buildAuthorizationUrl(configuration, {
+      redirect_uri: Config.Users.oidc.redirectUri,
       scope: Config.Users.oidc.scopes.join(' '),
       state,
       code_challenge: challenge,
       code_challenge_method: 'S256'
-    });
+    }).href;
   }
 
   /**
@@ -39,41 +44,44 @@ export class OIDCAuthService {
   public static async getUserFromAuthenticationResponse(req: Request): Promise<UserDTO> {
     const storedOidc = req.session.oidc;
     const params = req.query; // code, state
-    if (!storedOidc?.state || params.state !== storedOidc?.state) {
+    if (!storedOidc?.state || params['state'] !== storedOidc?.state) {
       throw new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Invalid OIDC state');
     }
-    const client = await this.getClient();
-    const tokenSet: TokenSet = await client.callback(
-      Config.Users.oidc.redirectUri,
-      params,
-      {
-        state: storedOidc?.state,
-        code_verifier: storedOidc?.verifier
+    const configuration = await this.getConfiguration();
+    // The provider knows the redirect URI, not the URL of this request (e.g.: behind a reverse proxy).
+    const callbackUrl = new URL(Config.Users.oidc.redirectUri);
+    for (const [key, value] of Object.entries(params)) {
+      if (typeof value === 'string') {
+        callbackUrl.searchParams.set(key, value);
       }
-    );
+    }
+    const tokens = await oidc.authorizationCodeGrant(configuration, callbackUrl, {
+      expectedState: storedOidc.state,
+      pkceCodeVerifier: storedOidc.verifier
+    });
     const strict = Config.Users.oidc.strictSecurity;
     const usernameClaim = Config.Users.oidc.usernameClaim || 'preferred_username';
     const emailClaim = Config.Users.oidc.emailClaim || 'email';
-    const claims = await this.getClaims(client, tokenSet, [usernameClaim, emailClaim]);
-    const preferredUserName = claims[usernameClaim] || '';
-    const email = claims[emailClaim] || '';
+    const claims = await this.getClaims(configuration, tokens, [usernameClaim, emailClaim]);
+    const preferredUserName = claimStr(claims[usernameClaim]);
+    const email = claimStr(claims[emailClaim]);
 
     let emailName = '';
     if (email) {
       if (!strict) {
-        emailName = String(email).split('@')[0];
-      } else if (claims.email_verified === true) {
-        emailName = String(email);
+        emailName = email.split('@')[0];
+      } else if (claims['email_verified'] === true) {
+        emailName = email;
       }
     }
-    const matchedName = (preferredUserName || emailName).toString();
+    const matchedName = preferredUserName || emailName;
     if (!matchedName) {
       throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, 'OIDC: missing username/email');
     }
 
     // domain allow-list if configured
     if (Config.Users.oidc.allowedDomains && Config.Users.oidc.allowedDomains.length > 0) {
-      const domain = String(email).split('@')[1] || '';
+      const domain = email.split('@')[1] || '';
       const allowed = Config.Users.oidc.allowedDomains.some(d => d.toLowerCase() === domain.toLowerCase());
       if (!allowed) {
         throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, `Email domain not allowed: ${domain}`);
@@ -85,12 +93,12 @@ export class OIDCAuthService {
       await this.findUser(matchedName);
 
     // cleanup
-    delete (req.session as any).oidc;
+    delete req.session.oidc;
     return user;
   }
 
   private static async findUser(name: string): Promise<UserDTO> {
-    let user: UserDTO = await ObjectManagers.getInstance().UserManager.findOne({name});
+    let user: UserDTO | null = await ObjectManagers.getInstance().UserManager.findOne({name});
     if (!user && Config.Users.oidc.autoCreateUser) {
       user = await this.createUser(name);
     }
@@ -105,13 +113,16 @@ export class OIDCAuthService {
    * Name matching is only used to link a not yet linked user with a limited role.
    */
   private static async findStrictUser(claims: Record<string, unknown>, name: string): Promise<UserDTO> {
-    if (!claims.sub || !claims.iss) {
+    const iss = claims['iss'];
+    const sub = claims['sub'];
+    // the spec requires both to be strings; anything else must not map to a shared subject
+    if (typeof iss !== 'string' || typeof sub !== 'string' || !iss || !sub) {
       throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, 'OIDC: missing sub/iss claim');
     }
-    const subject = claims.iss + '|' + claims.sub;
+    const subject = iss + '|' + sub;
     const userManager = ObjectManagers.getInstance().UserManager;
 
-    let user: UserDTO = await userManager.findOne({oidcSubject: subject});
+    let user: UserDTO | null = await userManager.findOne({oidcSubject: subject});
     if (user) {
       return user;
     }
@@ -141,66 +152,84 @@ export class OIDCAuthService {
   }
 
   /**
-   * Prefers RS256 (openid-client default) if the provider supports it,
-   * otherwise the first algorithm the provider advertises (e.g.: PS256, ES256).
-   */
-  public static selectIdTokenAlg(supported?: string[]): string {
-    if (!supported || supported.length === 0 || supported.includes('RS256')) {
-      return 'RS256';
-    }
-    return supported[0];
-  }
-
-  /**
    * Returns the ID token claims. Some providers only return
    * some claims (e.g.: preferred_username, email) from the userinfo endpoint,
    * so if any of the required ones is missing, they are filled from there.
    * ID token claims always take precedence.
    */
-  public static async getClaims(client: Client, tokenSet: TokenSet, requiredClaims: string[]): Promise<Record<string, unknown>> {
-    const claims: Record<string, unknown> = {...tokenSet.claims()};
-    if (requiredClaims.every(c => !!claims[c]) || !tokenSet.access_token) {
+  private static async getClaims(configuration: oidc.Configuration,
+                                 tokens: oidc.TokenEndpointResponse & oidc.TokenEndpointResponseHelpers,
+                                 requiredClaims: string[]): Promise<Record<string, unknown>> {
+    const idToken = tokens.claims();
+    if (!idToken) {
+      throw new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND, 'OIDC: missing ID token');
+    }
+    const claims: Record<string, unknown> = {...idToken};
+    if (requiredClaims.every(c => !!claims[c])) {
       return claims;
     }
     try {
-      const userinfo = await client.userinfo(tokenSet.access_token);
-      // the spec requires userinfo to belong to the same subject as the ID token
-      if (claims.sub && userinfo.sub !== claims.sub) {
-        Logger.warn(LOG_TAG, 'OIDC userinfo subject does not match the ID token, ignoring userinfo');
-        return claims;
-      }
+      // fails if userinfo belongs to a different subject than the ID token (the spec requires them to match)
+      const userinfo = await oidc.fetchUserInfo(configuration, tokens.access_token, idToken.sub);
       for (const key of Object.keys(userinfo)) {
         if (!claims[key]) {
           claims[key] = userinfo[key];
         }
       }
     } catch (err) {
-      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo: ' + (err?.message || err));
+      Logger.warn(LOG_TAG, 'Failed to fetch OIDC userinfo, using the ID token claims only: ' +
+        (err instanceof Error ? err.message : String(err)));
     }
     return claims;
   }
 
-  private static async getClient(): Promise<Client> {
-    if (this.clientPromise) {
-      return this.clientPromise;
+  /**
+   * The provider's discovery document URL. Like with openid-client 5, the issuer URL setting
+   * may also be the discovery document URL itself.
+   * The discovery document doesn't have to repeat the issuer URL setting character by character
+   * (e.g.: a missing trailing slash). The ID tokens are still checked against the issuer it names.
+   */
+  private static getDiscoveryUrl(issuerUrl: string): URL {
+    const url = new URL(issuerUrl);
+    if (!url.pathname.includes('/.well-known/')) {
+      url.pathname = url.pathname.replace(/\/?$/, '/.well-known/openid-configuration');
     }
-    if (!Config.Users.oidc.enabled) {
-      throw new Error('OIDC is not enabled');
+    return url;
+  }
+
+  private static discover(issuerUrl: string): Promise<oidc.Configuration> {
+    const discoveryUrl = this.getDiscoveryUrl(issuerUrl);
+    const execute: ((configuration: oidc.Configuration) => void)[] = [];
+    if (discoveryUrl.protocol === 'http:') {
+      // for local test setups: the provider can't be authenticated over http, and the tokens can be read on the way
+      Logger.warn(LOG_TAG, 'OIDC issuer URL is not https, allowing insecure requests to the provider');
+      execute.push(oidc.allowInsecureRequests);
     }
-    const issuerUrl = Config.Users.oidc.issuerUrl;
-    if (!issuerUrl) {
-      throw new Error('OIDC issuerUrl is not configured');
-    }
-    this.clientPromise = (async () => {
-      const issuer = await Issuer.discover(issuerUrl);
-      return new issuer.Client({
-        client_id: Config.Users.oidc.clientId,
-        client_secret: Config.Users.oidc.clientSecret,
-        redirect_uris: [Config.Users.oidc.redirectUri],
-        response_types: ['code'],
-        id_token_signed_response_alg: this.selectIdTokenAlg(issuer.metadata.id_token_signing_alg_values_supported as string[])
+    const secret = Config.Users.oidc.clientSecret;
+    return oidc.discovery(
+      discoveryUrl,
+      Config.Users.oidc.clientId,
+      undefined,
+      secret ? oidc.ClientSecretBasic(secret) : oidc.None(),
+      {execute}
+    );
+  }
+
+  private static getConfiguration(): Promise<oidc.Configuration> {
+    if (!this.configurationPromise) {
+      if (!Config.Users.oidc.enabled) {
+        throw new Error('OIDC is not enabled');
+      }
+      const issuerUrl = Config.Users.oidc.issuerUrl;
+      if (!issuerUrl) {
+        throw new Error('OIDC issuerUrl is not configured');
+      }
+      // a failed discovery (e.g.: the provider is down) is not kept, the next login tries again
+      this.configurationPromise = this.discover(issuerUrl).catch((err: unknown) => {
+        this.configurationPromise = null;
+        throw err;
       });
-    })();
-    return this.clientPromise;
+    }
+    return this.configurationPromise;
   }
 }

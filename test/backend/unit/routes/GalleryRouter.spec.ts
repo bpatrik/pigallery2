@@ -57,7 +57,7 @@ describe('GalleryRouter', () => {
 
       const size = mediaRoute(['jpg'], '/(?<size>[^/]+?)');
       const m = size.exec('/pgapi/gallery/content/a/b.jpg/240/');
-      expect(m.groups).to.deep.equal({mediaPath: 'a/b.jpg', size: '240'});
+      expect(m!.groups).to.deep.equal({mediaPath: 'a/b.jpg', size: '240'});
       expect(size.exec('/pgapi/gallery/content/a.jpg/240/x')).to.equal(null);
     });
 

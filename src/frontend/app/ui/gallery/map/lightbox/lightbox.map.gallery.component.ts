@@ -96,8 +96,9 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
     maxZoom: 2,
     center: latLng(0, 0),
   };
-  defLayer: TileLayer;
-  darkLayer: TileLayer;
+  // set by the constructor, which throws without them
+  defLayer!: TileLayer;
+  darkLayer!: TileLayer;
   mapLayerControl: Control.Layers;
   private subscription: { route: Subscription | null } = {route: null};
   private smallIconSize = new Point(
@@ -154,7 +155,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
     }[],
   }[] = [];
   private thumbnailsOnLoad: ThumbnailBase[] = [];
-  private leafletMap: Map;
+  private leafletMap!: Map; // set by onMapReady(), before the map shows
   private longPathSEPairs: Record<string, number> = {}; // stores how often a long distance path pair comes up
 
   constructor() {

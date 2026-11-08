@@ -1,6 +1,6 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
-import * as path from 'path';
+import * as path from 'node:path';
 import * as chai from 'chai';
 import {expect} from 'chai';
 import {SuperAgentStatic} from 'superagent';
@@ -15,9 +15,9 @@ import {ANDSearchQuery, DirectorySearch, ORSearchQuery, SearchQueryDTO, SearchQu
 import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import AdmZip from 'adm-zip';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 chai.should();
 chai.use(chaiHttp);
 
@@ -290,11 +290,11 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
     });
 
     it('should keep % sequences in search text through Express routing', async () => {
-      let receivedQuery: SearchQueryDTO = null;
+      let receivedQuery: SearchQueryDTO | null = null;
       const origGetNMedia = ObjectManagers.getInstance().SearchManager.getNMedia;
-      ObjectManagers.getInstance().SearchManager.getNMedia = async (context: any, query: SearchQueryDTO, ...args: any[]) => {
-        receivedQuery = query;
-        return origGetNMedia.call(ObjectManagers.getInstance().SearchManager, context, query, ...args);
+      ObjectManagers.getInstance().SearchManager.getNMedia = async (...args: Parameters<typeof origGetNMedia>) => {
+        receivedQuery = args[1];
+        return origGetNMedia.apply(ObjectManagers.getInstance().SearchManager, args);
       };
       try {
         const originalQuery: TextSearch = {

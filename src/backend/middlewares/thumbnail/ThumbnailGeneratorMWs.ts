@@ -1,5 +1,5 @@
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {NextFunction, Request, Response} from 'express';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {ContentWrapper} from '../../../common/entities/ContentWrapper';
@@ -18,17 +18,17 @@ export class ThumbnailGeneratorMWs {
     Config.Media.Photo.generateThumbnailMapEntries();
 
   @ServerTime('2.th', 'Thumbnail decoration')
-  public static async addThumbnailInformation(
+  public static addThumbnailInformation(
     req: Request,
     res: Response,
     next: NextFunction
-  ): Promise<void> {
+  ): void {
     if (!req.resultPipe) {
       return next();
     }
 
     try {
-      const cw: ContentWrapper = req.resultPipe as ContentWrapper;
+      const cw: ContentWrapper = req.resultPipe;
       if (cw.notModified === true) {
         return next();
       }
@@ -49,7 +49,7 @@ export class ThumbnailGeneratorMWs {
         new ErrorDTO(
           ErrorCodes.INTERNAL,
           'error during postprocessing result (adding thumbnail info)',
-          error.toString()
+          String(error)
         )
       );
     }
@@ -66,7 +66,7 @@ export class ThumbnailGeneratorMWs {
       return next();
     }
 
-    let erroredItem: PersonEntry = null;
+    let erroredItem: PersonEntry | null = null;
     try {
       const size: number = Config.Media.Photo.personThumbnailSize;
 
@@ -101,7 +101,7 @@ export class ThumbnailGeneratorMWs {
         new ErrorDTO(
           ErrorCodes.INTERNAL,
           `Error during postprocessing result: adding thumbnail info for persons. Failed on: person ${erroredItem?.name}, at ${erroredItem?.cache?.sampleRegion?.media?.name} `,
-          error.toString()
+          String(error)
         )
       );
     }
@@ -127,7 +127,7 @@ export class ThumbnailGeneratorMWs {
         new ErrorDTO(
           ErrorCodes.THUMBNAIL_GENERATION_ERROR,
           'Error during generating face thumbnail: ' + person.name,
-          error.toString()
+          String(error)
         )
       );
     }
@@ -148,7 +148,7 @@ export class ThumbnailGeneratorMWs {
       // load parameters
       const mediaPath = req.resultPipe as string;
       let size: number =
-        parseInt(RequestParams.get(req, 'size'), 10) ||
+        parseInt(RequestParams.get(req, 'size') ?? '', 10) ||
         Config.Media.Photo.thumbnailSizes[0];
 
       // validate size
@@ -169,7 +169,7 @@ export class ThumbnailGeneratorMWs {
           new ErrorDTO(
             ErrorCodes.THUMBNAIL_GENERATION_ERROR,
             'Error during generating thumbnail: ' + mediaPath,
-            error.toString()
+            String(error)
           )
         );
       }
@@ -205,7 +205,7 @@ export class ThumbnailGeneratorMWs {
           new ErrorDTO(
             ErrorCodes.THUMBNAIL_GENERATION_ERROR,
             'Error during generating thumbnail: ' + mediaPath,
-            error.toString()
+            String(error)
           )
         );
       }
@@ -218,7 +218,7 @@ export class ThumbnailGeneratorMWs {
     if (typeof directory.media !== 'undefined') {
       ThumbnailGeneratorMWs.addThInfoToPhotos(directory.media, directory);
     }
-    if (directory.cache.cover) {
+    if (directory.cache?.cover) {
       ThumbnailGeneratorMWs.addThInfoToAPhoto(directory.cache.cover, directory);
     }
   }

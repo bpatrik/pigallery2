@@ -3,7 +3,7 @@ import {ExtensionListItem} from '../../../common/entities/extension/ExtensionLis
 
 export class ExtensionRepository {
 
-  extensionsList: ExtensionListItem[];
+  extensionsList: ExtensionListItem[] = [];
   lastUpdate = 0;
   private UPDATE_FREQUENCY_MS = 30 * 1000;
 
@@ -24,8 +24,9 @@ export class ExtensionRepository {
     // source: https://davidwells.io/snippets/regex-match-markdown-links
     const regex = /^\[.*]\(((?:\/|https?:\/\/)[\S./?=#]+)\)$/;
 
-    if (text.match(regex).length > 0) {
-      return text.match(regex)[0].match(/https?:\/\/[\S./?=#]+/)[0].slice(0, -1);
+    const link = text.match(regex)?.[0].match(/https?:\/\/[\S./?=#]+/);
+    if (link) {
+      return link[0].slice(0, -1);
     }
     return text;
   }

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import * as path from 'path';
+import * as path from 'node:path';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {Utils} from '../../../../../src/common/Utils';

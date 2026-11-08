@@ -22,40 +22,40 @@ export class LoggerRouter {
     }
     req.logged = true;
     const end = res.end;
-    res.end = (a?: any, b?: any, c?: any) => {
+    res.end = ((...args: Parameters<typeof end>) => {
       res.end = end;
-      res.end(a, b, c);
+      res.end(...args);
       loggerFn(
           req.method,
           req.url,
           res.statusCode,
-          Date.now() - req._startTime + 'ms'
+          Date.now() - (req._startTime ?? NaN) + 'ms'
       );
       return res;
-    };
+    }) as typeof end;
   }
 
   public static route(app: Express): void {
     /* Save start time for all requests */
-    app.use((req: Request, res: Response, next: NextFunction): any => {
+    app.use((req: Request, res: Response, next: NextFunction): void => {
       req._startTime = Date.now();
       return next();
     });
 
-    app.get(Config.Server.apiPath + '{*rest}', (req: Request, res: Response, next: NextFunction): any => {
+    app.get(Config.Server.apiPath + '{*rest}', (req: Request, res: Response, next: NextFunction): void => {
       LoggerRouter.log(Logger.verbose, req, res);
       return next();
     });
 
     app.get(
         '/node_modules{*rest}',
-        (req: Request, res: Response, next: NextFunction): any => {
+        (req: Request, res: Response, next: NextFunction): void => {
           LoggerRouter.log(Logger.silly, req, res);
           return next();
         }
     );
 
-    app.use((req: Request, res: Response, next: NextFunction): any => {
+    app.use((req: Request, res: Response, next: NextFunction): void => {
       LoggerRouter.log(Logger.debug, req, res);
       return next();
     });

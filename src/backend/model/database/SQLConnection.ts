@@ -16,8 +16,8 @@ import {DataStructureVersion} from '../../../common/DataStructureVersion';
 import {FileEntity} from './enitites/FileEntity';
 import {PersonEntry} from './enitites/person/PersonEntry';
 import {Utils} from '../../../common/Utils';
-import * as path from 'path';
-import {DatabaseType, ServerDataBaseConfig, SQLLogLevel,} from '../../../common/config/private/PrivateConfig';
+import * as path from 'node:path';
+import {DatabaseType, MySQLConfig, ServerDataBaseConfig, SQLiteConfig, SQLLogLevel,} from '../../../common/config/private/PrivateConfig';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
 import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {NotificationManager} from '../NotifocationManager';
@@ -52,7 +52,7 @@ export class SQLConnection {
     ProjectedPersonCacheEntity,
     ProjectedAlbumCacheEntity
   ];
-  private static connection: DataSource = null;
+  private static connection: DataSource | null = null;
   private static FIXED_SQL_TABLE = [
     'sqlite_sequence'
   ];
@@ -119,6 +119,10 @@ export class SQLConnection {
           Logger.info(LOG_TAG, 'Saving enforced user: ' + uc.name);
           const a = new UserEntity();
           a.name = uc.name;
+          if (!uc.encryptedPassword) {
+            // the config loader encrypts the password of every enforced user
+            throw new Error('Enforced user has no password: ' + uc.name);
+          }
           a.password = uc.encryptedPassword;
           a.role = uc.role;
           await userRepository.save(a);
@@ -175,13 +179,13 @@ export class SQLConnection {
     let currentTables: string[];
 
     if (Config.Database.type === DatabaseType.sqlite) {
-      currentTables = (await conn.query('SELECT name FROM sqlite_master  WHERE type=\'table\''))
-        .map((r: { name: string }) => r.name);
+      currentTables = (await conn.query<{ name: string }[]>('SELECT name FROM sqlite_master  WHERE type=\'table\''))
+        .map((r) => r.name);
     } else {
-      currentTables = (await conn.query(`SELECT table_name
+      currentTables = (await conn.query<{ table_name: string }[]>(`SELECT table_name
                                          FROM information_schema.tables ` +
-        `WHERE table_schema = '${Config.Database.mysql.database}'`))
-        .map((r: { table_name: string }) => r.table_name);
+        `WHERE table_schema = '${SQLConnection.getMySQLConfig(Config.Database).database}'`))
+        .map((r) => r.table_name);
     }
 
     const tableToDrop = currentTables.filter(ct => !validTableNames.includes(ct));
@@ -191,7 +195,7 @@ export class SQLConnection {
   }
 
   public static getSQLiteDB(config: ServerDataBaseConfig): string {
-    return path.join(ProjectPath.getAbsolutePath(config.dbFolder), Config.Database.sqlite.DBFileName);
+    return path.join(ProjectPath.getAbsolutePath(config.dbFolder), SQLConnection.getSQLiteConfig(Config.Database).DBFileName);
   }
 
   private static async createConnection(
@@ -204,15 +208,15 @@ export class SQLConnection {
     try {
       return await initialize(options);
     } catch (e) {
-      if (e.sqlMessage === 'Unknown database \'' + options.database + '\'') {
-        Logger.debug(LOG_TAG, 'creating database: ' + options.database);
+      if (e instanceof Error && 'sqlMessage' in e && e.sqlMessage === 'Unknown database \'' + String(options.database) + '\'') {
+        Logger.debug(LOG_TAG, 'creating database: ' + String(options.database));
         const tmpOption = Utils.clone(options);
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         delete tmpOption.database;
           const tmpConn = await initialize(tmpOption);
         await tmpConn.query(
-          'CREATE DATABASE IF NOT EXISTS ' + options.database
+          'CREATE DATABASE IF NOT EXISTS ' + String(options.database)
         );
         await tmpConn.destroy();
           return await initialize(options);
@@ -267,22 +271,37 @@ export class SQLConnection {
       Logger.warn(
         LOG_TAG,
         'Could not move users to the new db scheme, deleting them. Details:' +
-        e.toString()
+        String(e)
       );
     }
   }
 
 
+  private static getMySQLConfig(config: ServerDataBaseConfig): MySQLConfig {
+    if (!config.mysql) {
+      throw new Error('MySQL is selected, but its config is missing');
+    }
+    return config.mysql;
+  }
+
+  private static getSQLiteConfig(config: ServerDataBaseConfig): SQLiteConfig {
+    if (!config.sqlite) {
+      throw new Error('SQLite is selected, but its config is missing');
+    }
+    return config.sqlite;
+  }
+
   private static getDriver(config: ServerDataBaseConfig): Writeable<DataSourceOptions> {
     let driver: Writeable<DataSourceOptions>;
     if (config.type === DatabaseType.mysql) {
+      const mysql = SQLConnection.getMySQLConfig(config);
       driver = {
         type: 'mysql',
-        host: config.mysql.host,
-        port: config.mysql.port,
-        username: config.mysql.username,
-        password: config.mysql.password,
-        database: config.mysql.database,
+        host: mysql.host,
+        port: mysql.port,
+        username: mysql.username,
+        password: mysql.password,
+        database: mysql.database,
         charset: 'utf8mb4',
       };
     } else if (config.type === DatabaseType.sqlite) {
@@ -290,9 +309,11 @@ export class SQLConnection {
         type: 'better-sqlite3',
         database: path.join(
           ProjectPath.getAbsolutePath(config.dbFolder),
-          config.sqlite.DBFileName
+          SQLConnection.getSQLiteConfig(config).DBFileName
         ),
       };
+    } else {
+      throw new Error('Unsupported database type: ' + String(config.type));
     }
     driver.entities = this.entries;
     driver.synchronize = false;

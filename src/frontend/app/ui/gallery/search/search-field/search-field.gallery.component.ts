@@ -45,7 +45,7 @@ export class GallerySearchFieldComponent
   readonly placeholder = input<string>();
   public readonly rawSearchText = signal('');
   public readonly searchQueryDTO = signal<SearchQueryDTO | undefined>(undefined);
-  private searchModalRef: BsModalRef | null;
+  private searchModalRef: BsModalRef | null = null;
 
   public async openSearchModal(template: TemplateRef<unknown>): Promise<void> {
     this.searchModalRef = this.modalService.show(template, {

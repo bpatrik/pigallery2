@@ -14,7 +14,7 @@ import {VideoMetadata} from '../../../common/entities/VideoDTO';
 import {MediaRendererInput, SvgRendererInput} from '../fileaccess/PhotoWorker';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {CoverPhotoDTOWithID} from '../database/CoverManager';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO, ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
 import {DirectoryScanSettings} from '../fileaccess/DiskManager';
 import {SessionContext} from '../SessionContext';
 import {IClientMediaButtonConfig, IMediaRequestBodyData} from '../../../common/entities/extension/IClientUIConfig';
@@ -47,19 +47,19 @@ export interface IExtensionEvents {
     CoverManager: {
       getCoverForAlbum: IExtensionEvent<[session: SessionContext, {
         searchQuery: SearchQueryDTO;
-      }], CoverPhotoDTOWithID>;
+      }], CoverPhotoDTOWithID | null>;
       getCoverForDirectory: IExtensionEvent<[
         session: SessionContext, {
           id: number;
           name: string;
           path: string;
-        }], CoverPhotoDTOWithID>
+        }], CoverPhotoDTOWithID | null>
     },
     ProjectedCacheManager: {
       /**
        * Invalidates directory covers and caches for a given directory and every parent
        */
-      invalidateDirectoryCache: IExtensionEvent<[ParentDirectoryDTO], void>;
+      invalidateDirectoryCache: IExtensionEvent<[DirectoryPathDTO], void>;
       /**
        * Returns the projected directory cache for a given directory
        * ProjectedDirectoryCacheEntity contains information, like the number of photos, videos, etc..
@@ -159,7 +159,7 @@ export interface IExtensionRESTRoute {
    * @param cb function callback. `body` is `{}` if the request has no JSON body.
    * @return newly added REST api path
    */
-  mediaJsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => Promise<unknown> | unknown): string;
+  mediaJsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, invalidateDirectory: boolean, cb: (params: ParamsDictionary, body: IMediaRequestBody, user: UserDTO, media: MediaEntity, repository: Repository<MediaEntity>) => unknown): string;
 
   /**
    * Sends a pigallery2 standard JSON object with payload or error message back to the client.
@@ -168,7 +168,7 @@ export interface IExtensionRESTRoute {
    * @param cb function callback. `body` is `{}` if the request has no JSON body.
    * @return newly added REST api path
    */
-  jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: any, user?: UserDTO) => Promise<unknown> | unknown): string;
+  jsonResponse<const P extends readonly string[]>(paths: ExtensionRoutePaths<P>, minRole: UserRoles, cb: (params?: ParamsDictionary, body?: unknown, user?: UserDTO) => unknown): string;
 
   /**
    * Exposes a standard expressjs (Express 5) middleware

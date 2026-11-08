@@ -29,7 +29,7 @@ export class GalleryDirectoryComponent implements OnInit, OnDestroy {
   thumbnail: Thumbnail | null = null;
 
   public get SamplePhoto(): CoverPhotoDTO | undefined {
-    return this.directory().cache?.cover;
+    return this.directory().cache?.cover ?? undefined;
   }
 
   // TODO: implement scroll

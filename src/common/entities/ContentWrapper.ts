@@ -1,7 +1,8 @@
 import {DirectoryBaseDTO, DirectoryPathDTO, ParentDirectoryDTO} from './DirectoryDTO';
 import {SearchResultDTO} from './SearchResultDTO';
 import {Utils} from '../Utils';
-import {MediaDTO, MediaDTOUtils} from './MediaDTO';
+import {LiveVideoInfo, MediaDimension, MediaDTO, MediaDTOUtils, RatingTypes} from './MediaDTO';
+import {FaceRegionBox, GPSMetadata} from './PhotoDTO';
 import {FileDTO} from './FileDTO';
 
 
@@ -42,85 +43,113 @@ export interface PackedContentWrapperWithError extends PackedContentWrapper {
 }
 
 /**
- * The packer renames and drops the fields of the DTOs in place, so a field's type changes while packing.
- * The interfaces below list the field names (DTO and packed) of each level; their values stay loosely typed.
+ * The packer renames and drops the fields of the DTOs in place.
+ * The interfaces below list both the DTO and the packed field names of each level,
+ * so the same object can be read before and after a field is renamed.
+ * Map fields (e.g. `l` of the camera) hold the index of the value in PackedContentWrapper.map.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type Loose = any;
-
-interface PackedFile {
-  id?: Loose;
-  directory?: Loose;
-  d?: Loose;
-  name?: Loose;
-  n?: Loose;
-  missingThumbnails?: Loose;
-  t?: Loose;
-  liveVideoPath?: Loose;
-  l?: Loose;
-  liveVideoInfo?: Loose;
-  li?: Loose;
-  metadata?: Loose;
-  m?: Loose;
-}
-
-interface PackedMetadata {
-  size?: Loose;
-  d?: Loose;
-  fileSize?: Loose;
-  s?: Loose;
-  creationDate?: Loose;
-  t?: Loose;
-  creationDateOffset?: Loose;
-  o?: Loose;
-  rating?: Loose;
-  r?: Loose;
-  caption?: Loose;
-  a?: Loose;
-  faces?: Loose;
-  f?: Loose;
-  keywords?: Loose;
-  k?: Loose;
-  cameraData?: Loose;
-  c?: Loose;
-  positionData?: Loose;
-  p?: Loose;
+interface PackedFace {
+  name: string;
+  box?: FaceRegionBox;
+  b?: number[]; // [top, left, height, width]
 }
 
 interface PackedCameraData {
-  lens?: Loose;
-  l?: Loose;
-  make?: Loose;
-  m?: Loose;
-  model?: Loose;
-  o?: Loose;
-  ISO?: Loose;
-  i?: Loose;
-  fStop?: Loose;
-  s?: Loose;
-  exposure?: Loose;
-  e?: Loose;
-  focalLength?: Loose;
-  a?: Loose;
+  lens?: string;
+  l?: number;
+  make?: string;
+  m?: number;
+  model?: string;
+  o?: number;
+  ISO?: number;
+  i?: number;
+  fStop?: number;
+  s?: number;
+  exposure?: number;
+  e?: number;
+  focalLength?: number;
+  a?: number;
 }
 
 interface PackedPositionData {
-  country?: Loose;
-  c?: Loose;
-  city?: Loose;
-  cy?: Loose;
-  state?: Loose;
-  s?: Loose;
-  GPSData?: Loose;
-  g?: Loose;
+  country?: string;
+  c?: number;
+  city?: string;
+  cy?: number;
+  state?: string;
+  s?: number;
+  GPSData?: GPSMetadata;
+  g?: (number | undefined)[]; // [latitude, longitude]
+}
+
+interface PackedMetadata {
+  size?: MediaDimension;
+  d?: number[]; // [width, height]
+  fileSize?: number;
+  s?: number;
+  creationDate?: number;
+  t?: number; // in seconds
+  creationDateOffset?: string;
+  o?: number; // in minutes
+  rating?: RatingTypes;
+  r?: RatingTypes;
+  caption?: string;
+  a?: string;
+  faces?: PackedFace[];
+  f?: number[][]; // [...box, name]
+  keywords?: string[];
+  k?: number[];
+  cameraData?: PackedCameraData;
+  c?: PackedCameraData;
+  positionData?: PackedPositionData;
+  p?: PackedPositionData;
+  // video only, dropped from photos
+  bitRate?: number | null;
+  duration?: number;
+}
+
+interface PackedFile {
+  id?: number;
+  directory?: DirectoryPathDTO & { id?: number };
+  d?: number;
+  name?: string;
+  n?: string;
+  missingThumbnails?: number;
+  t?: number;
+  liveVideoPath?: string;
+  l?: string;
+  liveVideoInfo?: LiveVideoInfo;
+  li?: LiveVideoInfo;
+  metadata?: PackedMetadata;
+  m?: PackedMetadata;
 }
 
 interface PackedDirectory {
-  cache?: Loose;
-  media?: Loose;
-  metaFile?: Loose;
-  directories?: Loose;
+  parent?: unknown;
+  cache?: {
+    id?: number;
+    projectionKey?: string;
+    directory?: unknown;
+    valid?: boolean;
+    cover?: { id?: number; directory: DirectoryPathDTO } | null;
+  };
+  media?: MediaDTO[];
+  metaFile?: PackedFile[];
+  directories?: PackedDirectory[];
 }
+
+/**
+ * Index of the value in the map, adds it if it is not there yet
+ */
+const toIndex = (map: string[], reverseMap: Map<string, number>, value: string): number => {
+  let index = reverseMap.get(value);
+  if (index === undefined) {
+    index = map.length;
+    reverseMap.set(value, index);
+    map.push(value);
+  }
+  return index;
+};
 
 export class ContentWrapperUtils {
   // the list length marker bit also needs to fit into a safe integer (2^53)
@@ -165,7 +194,7 @@ export class ContentWrapperUtils {
     return true;
   }
 
-  static equalsMedia(d1: FileDTO | undefined, d2: FileDTO | undefined): boolean {
+  static equalsMedia(d1: FileDTO | null | undefined, d2: FileDTO | null | undefined): boolean {
     if (d1 === d2) {
       return true;
     }
@@ -376,14 +405,14 @@ export class ContentWrapperUtils {
     return cw;
   }
 
-  private static mapify(cw: PackedContentWrapper, mediaIn: FileDTO, isSearchResult: boolean): void {
+
+  private static mapify(cw: PackedContentWrapper, media: PackedFile, isSearchResult: boolean): void {
     const reverseMap = cw.reverseMap!; // pack() sets it for the time of packing
-    const media = mediaIn as PackedFile;
     if (isSearchResult) {
       const k = JSON.stringify(media.directory);
       if (!reverseMap.directories.has(k)) {
         reverseMap.directories.set(k, cw.map.directories.length);
-        cw.map.directories.push(media.directory);
+        cw.map.directories.push(media.directory!);
       }
       media.d = reverseMap.directories.get(k);
       delete media.directory;
@@ -409,13 +438,13 @@ export class ContentWrapperUtils {
     }
 
     if (media.metadata) {
-      const metadata = media.metadata as PackedMetadata;
-      metadata.d = [metadata.size.width, metadata.size.height];
+      const metadata = media.metadata;
+      metadata.d = [metadata.size!.width, metadata.size!.height];
       delete metadata.size;
       metadata.s = metadata.fileSize;
       delete metadata.fileSize;
 
-      metadata.t = metadata.creationDate / 1000; // skip millies
+      metadata.t = metadata.creationDate! / 1000; // skip millies
       delete metadata.creationDate;
 
       if (metadata.creationDateOffset) {
@@ -433,53 +462,27 @@ export class ContentWrapperUtils {
       }
 
       if (metadata.faces) {
-        for (let i = 0; i < metadata.faces.length; ++i) {
-          const name = metadata.faces[i].name;
-          if (!reverseMap.faces.has(name)) {
-            reverseMap.faces.set(name, cw.map.faces.length);
-            cw.map.faces.push(name);
-          }
-          metadata.faces[i] = [...metadata.faces[i].b, reverseMap.faces.get(name)];
-        }
-
-        metadata.f = metadata.faces;
+        metadata.f = metadata.faces.map(face => [...face.b!, toIndex(cw.map.faces, reverseMap.faces, face.name)]);
         delete metadata.faces;
       }
 
       if (metadata.keywords) {
-        for (let i = 0; i < metadata.keywords.length; ++i) {
-          const k = metadata.keywords[i];
-          if (!reverseMap.keywords.has(k)) {
-            reverseMap.keywords.set(k, cw.map.keywords.length);
-            cw.map.keywords.push(k);
-          }
-          metadata.keywords[i] = reverseMap.keywords.get(k);
-        }
-        metadata.k = metadata.keywords;
+        metadata.k = metadata.keywords.map(k => toIndex(cw.map.keywords, reverseMap.keywords, k));
         delete metadata.keywords;
       }
-      const mapifyOne = <K extends string>(map: string[], reverseMapOne: Map<string, number>,
-                                         obj: Partial<Record<K, Loose>>, key: K, mappedKey: K) => {
-
-        const k: string = obj[key];
-
-        if (!reverseMapOne.has(k)) {
-          reverseMapOne.set(k, map.length);
-          map.push(k);
-        }
-        obj[mappedKey] = reverseMapOne.get(k);
-        delete obj[key];
-      };
       if (metadata.cameraData) {
-        const cameraData = metadata.cameraData as PackedCameraData;
+        const cameraData = metadata.cameraData;
         if (cameraData.lens) {
-          mapifyOne(cw.map.lens, reverseMap.lens, cameraData, 'lens', 'l');
+          cameraData.l = toIndex(cw.map.lens, reverseMap.lens, cameraData.lens);
+          delete cameraData.lens;
         }
         if (cameraData.make) {
-          mapifyOne(cw.map.camera, reverseMap.camera, cameraData, 'make', 'm');
+          cameraData.m = toIndex(cw.map.camera, reverseMap.camera, cameraData.make);
+          delete cameraData.make;
         }
         if (cameraData.model) {
-          mapifyOne(cw.map.camera, reverseMap.camera, cameraData, 'model', 'o');
+          cameraData.o = toIndex(cw.map.camera, reverseMap.camera, cameraData.model);
+          delete cameraData.model;
         }
 
         if (cameraData.ISO) {
@@ -503,15 +506,18 @@ export class ContentWrapperUtils {
         delete metadata.cameraData;
       }
       if (metadata.positionData) {
-        const positionData = metadata.positionData as PackedPositionData;
+        const positionData = metadata.positionData;
         if (positionData.country) {
-          mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'country', 'c');
+          positionData.c = toIndex(cw.map.keywords, reverseMap.keywords, positionData.country);
+          delete positionData.country;
         }
         if (positionData.city) {
-          mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'city', 'cy');
+          positionData.cy = toIndex(cw.map.keywords, reverseMap.keywords, positionData.city);
+          delete positionData.city;
         }
         if (positionData.state) {
-          mapifyOne(cw.map.keywords, reverseMap.keywords, positionData, 'state', 's');
+          positionData.s = toIndex(cw.map.keywords, reverseMap.keywords, positionData.state);
+          delete positionData.state;
         }
 
         if (positionData.GPSData) {
@@ -533,15 +539,16 @@ export class ContentWrapperUtils {
     // clean up media
     for (let i = 0; i < media.length; ++i) {
       const m = media[i] as PackedFile;
+      const metadata: PackedMetadata = media[i].metadata;
       delete m.id;
 
       if (m.directory) {
         if (isSearchResult) {
           // keep the directory for search result
           m.directory = {
-            path: (m.directory as DirectoryBaseDTO).path,
-            name: (m.directory as DirectoryBaseDTO).name,
-          } as DirectoryPathDTO;
+            path: m.directory.path,
+            name: m.directory.name,
+          };
         } else {
           // for gallery listing, photos belong to one directory,
           // this can be deleted as the directory know its child
@@ -549,25 +556,24 @@ export class ContentWrapperUtils {
         }
       }
 
-      if (MediaDTOUtils.isPhoto(m as MediaDTO)) {
-        delete m.metadata.bitRate;
-        delete m.metadata.duration;
+      if (MediaDTOUtils.isPhoto(media[i])) {
+        delete metadata.bitRate;
+        delete metadata.duration;
 
         // compress faces
-        if (m.metadata.faces) {
-          for (let j = 0; j < m.metadata.faces.length; ++j) {
-            const f = m.metadata.faces[j];
-            f.b = [f.box.top, f.box.left, f.box.height, f.box.width];
+        if (metadata.faces) {
+          for (const f of metadata.faces) {
+            f.b = [f.box!.top, f.box!.left, f.box!.height, f.box!.width];
             delete f.box;
           }
         }
-        ContentWrapperUtils.mapify(cw, m as MediaDTO, isSearchResult);
-      } else if (MediaDTOUtils.isVideo(m as MediaDTO)) {
-        delete m.metadata.caption;
-        delete m.metadata.cameraData;
-        delete m.metadata.faces;
-        delete m.metadata.positionData;
-        ContentWrapperUtils.mapify(cw, m as MediaDTO, isSearchResult);
+        ContentWrapperUtils.mapify(cw, m, isSearchResult);
+      } else if (MediaDTOUtils.isVideo(media[i])) {
+        delete metadata.caption;
+        delete metadata.cameraData;
+        delete metadata.faces;
+        delete metadata.positionData;
+        ContentWrapperUtils.mapify(cw, m, isSearchResult);
       }
       Utils.removeNullOrEmptyObj(m);
     }
@@ -579,7 +585,7 @@ export class ContentWrapperUtils {
       dir.cache.cover.directory = {
         path: dir.cache.cover.directory.path,
         name: dir.cache.cover.directory.name,
-      } as DirectoryPathDTO;
+      };
 
       // make sure that it is a different object as one of the photo in the media[]
       // as the next foreach would remove the directory
@@ -591,21 +597,21 @@ export class ContentWrapperUtils {
     }
 
     if (dir.metaFile) {
-      for (let i = 0; i < dir.metaFile.length; ++i) {
+      for (const metaFile of dir.metaFile) {
         if (isSearchResult) {
-          delete dir.metaFile[i].directory.id;
+          delete metaFile.directory!.id;
         } else {
-          delete dir.metaFile[i].directory;
+          delete metaFile.directory;
         }
-        delete dir.metaFile[i].id;
-        ContentWrapperUtils.mapify(cw, dir.metaFile[i], isSearchResult);
+        delete metaFile.id;
+        ContentWrapperUtils.mapify(cw, metaFile, isSearchResult);
       }
     }
     if (dir.directories) {
-      for (let i = 0; i < dir.directories.length; ++i) {
+      for (const subDir of dir.directories) {
         // first remove the parent otherwise it will be a infinite recursion
-        delete dir.directories[i].parent;
-        ContentWrapperUtils.packDirectory(cw, dir.directories[i]);
+        delete subDir.parent;
+        ContentWrapperUtils.packDirectory(cw, subDir as DirectoryBaseDTO);
       }
     }
 
@@ -619,16 +625,10 @@ export class ContentWrapperUtils {
     Utils.removeNullOrEmptyObj(dir);
   }
 
-  private static deMapify(cw: PackedContentWrapper, mediaIn: FileDTO, isSearchResult: boolean): void {
-
-    const deMapifyOne = <K extends string>(map: unknown[],
-                                           obj: Partial<Record<K, Loose>>, key: K, mappedKey: K) => {
-      obj[key] = map[obj[mappedKey]];
-      delete obj[mappedKey];
-    };
-    const media = mediaIn as PackedFile;
+  private static deMapify(cw: PackedContentWrapper, media: PackedFile, isSearchResult: boolean): void {
     if (isSearchResult) {
-      deMapifyOne(cw.map.directories, media, 'directory', 'd');
+      media.directory = cw.map.directories[media.d!];
+      delete media.d;
     }
 
     if (media.n) {
@@ -649,13 +649,13 @@ export class ContentWrapperUtils {
     }
 
     if (media.m) {
-      media.metadata = media.m;
+      const metadata = media.m;
+      media.metadata = metadata;
       delete media.m;
-      const metadata = media.metadata as PackedMetadata;
 
       metadata.size = {
-        width: metadata.d[0],
-        height: metadata.d[1],
+        width: metadata.d![0],
+        height: metadata.d![1],
       };
       delete metadata.d;
 
@@ -685,48 +685,37 @@ export class ContentWrapperUtils {
 
 
       if (metadata.f) {
-        metadata.faces = metadata.f;
+        metadata.faces = metadata.f.map(boxArr => ({
+          box: {
+            top: boxArr[0],
+            left: boxArr[1],
+            height: boxArr[2],
+            width: boxArr[3],
+          },
+          name: cw.map.faces[boxArr[4]]
+        }));
         delete metadata.f;
-        for (let j = 0; j < metadata.faces.length; ++j) {
-          const boxArr: number[] = metadata.faces[j];
-          metadata.faces[j] = {
-            box: {
-              top: boxArr[0],
-              left: boxArr[1],
-              height: boxArr[2],
-              width: boxArr[3],
-            },
-            name: boxArr[4]
-          };
-        }
-
-        for (let i = 0; i < metadata.faces.length; ++i) {
-          metadata.faces[i].name = cw.map.faces[metadata.faces[i].name];
-
-        }
-
       }
       if (metadata.k) {
-
-        metadata.keywords = metadata.k;
+        metadata.keywords = metadata.k.map(k => cw.map.keywords[k]);
         delete metadata.k;
-        for (let i = 0; i < metadata.keywords.length; ++i) {
-          metadata.keywords[i] = cw.map.keywords[metadata.keywords[i]];
-        }
       }
       if (metadata.c) {
-        metadata.cameraData = metadata.c;
+        const cameraData = metadata.c;
+        metadata.cameraData = cameraData;
         delete metadata.c;
-        const cameraData = metadata.cameraData as PackedCameraData;
 
         if (typeof cameraData.l !== 'undefined') {
-          deMapifyOne(cw.map.lens, cameraData, 'lens', 'l');
+          cameraData.lens = cw.map.lens[cameraData.l];
+          delete cameraData.l;
         }
         if (typeof cameraData.m !== 'undefined') {
-          deMapifyOne(cw.map.camera, cameraData, 'make', 'm');
+          cameraData.make = cw.map.camera[cameraData.m];
+          delete cameraData.m;
         }
         if (typeof cameraData.o !== 'undefined') {
-          deMapifyOne(cw.map.camera, cameraData, 'model', 'o');
+          cameraData.model = cw.map.camera[cameraData.o];
+          delete cameraData.o;
         }
 
         if (typeof cameraData.i !== 'undefined') {
@@ -748,17 +737,20 @@ export class ContentWrapperUtils {
 
       }
       if (metadata.p) {
-        metadata.positionData = metadata.p;
+        const positionData = metadata.p;
+        metadata.positionData = positionData;
         delete metadata.p;
-        const positionData = metadata.positionData as PackedPositionData;
         if (typeof positionData.c !== 'undefined') {
-          deMapifyOne(cw.map.keywords, positionData, 'country', 'c');
+          positionData.country = cw.map.keywords[positionData.c];
+          delete positionData.c;
         }
         if (typeof positionData.cy !== 'undefined') {
-          deMapifyOne(cw.map.keywords, positionData, 'city', 'cy');
+          positionData.city = cw.map.keywords[positionData.cy];
+          delete positionData.cy;
         }
         if (typeof positionData.s !== 'undefined') {
-          deMapifyOne(cw.map.keywords, positionData, 'state', 's');
+          positionData.state = cw.map.keywords[positionData.s];
+          delete positionData.s;
         }
 
         if (positionData.g) {
@@ -811,4 +803,3 @@ export class ContentWrapperUtils {
 
   }
 }
-

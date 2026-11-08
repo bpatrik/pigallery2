@@ -14,11 +14,11 @@ export const PG2ConfMap: { sorting: Record<string, SortingMethod>, upload: Recor
 
 Utils.enumToArray(SortByTypes).forEach(kv => {
   if (!Utils.isValidEnumInt(SortByDirectionalTypes, kv.key)) {
-    PG2ConfMap.sorting['.order_random.pg2conf'] = {method: kv.key, ascending: null} as SortingMethod;
+    PG2ConfMap.sorting['.order_random.pg2conf'] = {method: kv.key, ascending: null};
     return;
   }
-  PG2ConfMap.sorting['.order_descending_' + kv.value.toLowerCase() + '.pg2conf'] = {method: kv.key, ascending: false} as SortingMethod;
-  PG2ConfMap.sorting['.order_ascending_' + kv.value.toLowerCase() + '.pg2conf'] = {method: kv.key, ascending: true} as SortingMethod;
+  PG2ConfMap.sorting['.order_descending_' + kv.value.toLowerCase() + '.pg2conf'] = {method: kv.key, ascending: false};
+  PG2ConfMap.sorting['.order_ascending_' + kv.value.toLowerCase() + '.pg2conf'] = {method: kv.key, ascending: true};
 });
 
 /**

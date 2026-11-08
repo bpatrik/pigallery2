@@ -8,69 +8,69 @@ import {Utils} from '../../../../common/Utils';
 
 export class MediaDimensionEntity implements MediaDimension {
   @Column('int')
-  width: number;
+  width!: number;
 
   @Column('int')
-  height: number;
+  height!: number;
 }
 
 export class CameraMetadataEntity implements CameraMetadata {
   @Column('int', {nullable: true, unsigned: true})
-  ISO: number;
+  ISO!: number;
 
   @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
   }))
-  model: string;
+  model!: string;
 
   @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
   }))
-  make: string;
+  make!: string;
 
   @Column('float', {nullable: true})
-  fStop: number;
+  fStop!: number;
 
   @Column('float', {nullable: true})
-  exposure: number;
+  exposure!: number;
 
   @Column('float', {nullable: true})
-  focalLength: number;
+  focalLength!: number;
 
   @Column('text', {nullable: true})
-  lens: string;
+  lens!: string;
 }
 
 export class GPSMetadataEntity implements GPSMetadata {
   @Column('float', {nullable: true})
-  latitude: number;
+  latitude!: number;
   @Column('float', {nullable: true})
-  longitude: number;
+  longitude!: number;
 }
 
 export class PositionMetaDataEntity implements PositionMetaData {
   @Column(() => GPSMetadataEntity)
-  GPSData: GPSMetadataEntity;
+  GPSData!: GPSMetadataEntity;
 
   @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
   }))
-  country: string;
+  country!: string;
 
   @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
   }))
-  state: string;
+  state!: string;
 
   @Column(columnCharsetCSWith({
     type: 'text',
     nullable: true,
   }))
-  city: string;
+  city!: string;
 }
 
 export class MediaMetadataEntity implements MediaMetadata {
@@ -81,7 +81,7 @@ export class MediaMetadataEntity implements MediaMetadata {
   title?: string;
 
   @Column(() => MediaDimensionEntity)
-  size: MediaDimensionEntity;
+  size!: MediaDimensionEntity;
 
   /**
    * Date in local timezone
@@ -90,48 +90,48 @@ export class MediaMetadataEntity implements MediaMetadata {
    */
   @Column('bigint', {
     transformer: {
-      from: (v) => parseInt(v, 10),
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10),
+      to: (v: unknown) => v,
     },
   })
   @Index()
-  creationDate: number;
+  creationDate!: number;
 
   @Column('smallint', {
     transformer: {
-      from: (v) => Utils.getOffsetString(v), //from database repr. as smallint (minutes) to string (+/-HH:MM)
-      to: (v) => Utils.getOffsetMinutes(v), //from entiry repr. as string (+/-HH:MM) to smallint (minutes)
+      from: (v: number) => Utils.getOffsetString(v), //from database repr. as smallint (minutes) to string (+/-HH:MM)
+      to: (v: string | undefined) => Utils.getOffsetMinutes(v), //from entiry repr. as string (+/-HH:MM) to smallint (minutes)
     },
   })
   creationDateOffset?: string;
 
 
-  @Column('bigint', {unsigned: true, transformer: {from: (v) => v == null ? null : parseInt(v, 10), to: (v) => v}})
-  fileSize: number;
+  @Column('bigint', {unsigned: true, transformer: {from: (v: string | null) => v == null ? null : parseInt(v, 10), to: (v: unknown) => v}})
+  fileSize!: number;
 
   @Column(columnCharsetCSWith({
     type: 'simple-array',
   }))
-  keywords: string[];
+  keywords!: string[];
 
   @Column(() => CameraMetadataEntity)
-  cameraData: CameraMetadataEntity;
+  cameraData!: CameraMetadataEntity;
 
   @Column(() => PositionMetaDataEntity)
-  positionData: PositionMetaDataEntity;
+  positionData!: PositionMetaDataEntity;
 
   @Column('tinyint', {unsigned: true})
   @Index()
-  rating: 0 | 1 | 2 | 3 | 4 | 5;
+  rating!: 0 | 1 | 2 | 3 | 4 | 5;
 
   @OneToMany(() => PersonJunctionTable, (junctionTable) => junctionTable.media)
-  personJunction: PersonJunctionTable[];
+  personJunction!: PersonJunctionTable[];
 
   @Column(columnCharsetCSWith({
     type: 'simple-json',
     nullable: true,
   }))
-  faces: FaceRegion[];
+  faces!: FaceRegion[];
 
   /**
    * Caches the list of persons. Only used for searching
@@ -141,7 +141,7 @@ export class MediaMetadataEntity implements MediaMetadata {
     select: false,
     nullable: true,
   }))
-  persons: string[];
+  persons!: string[];
 
   /**
    * Caches the list of persons' length. Only used for searching
@@ -152,17 +152,17 @@ export class MediaMetadataEntity implements MediaMetadata {
     nullable: false,
     default: 0
   })
-  personsLength: number;
+  personsLength!: number;
 
 
   @Column('int', {unsigned: true})
-  bitRate: number;
+  bitRate!: number | null;
 
   @Column('int', {unsigned: true})
-  duration: number;
+  duration!: number;
 
   @Column({type: 'text', nullable: true})
-  contentIdentifier: string;
+  contentIdentifier!: string;
 }
 
 // TODO: fix inheritance once its working in typeorm
@@ -172,24 +172,24 @@ export class MediaMetadataEntity implements MediaMetadata {
 export abstract class MediaEntity implements MediaDTO {
   @Index()
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Column(columnCharsetCS)
-  name: string;
+  name!: string;
 
   @Index()
   @ManyToOne(() => DirectoryEntity, (directory) => directory.media, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  directory: DirectoryEntity;
+  directory!: DirectoryEntity;
 
   @Column(() => MediaMetadataEntity)
-  metadata: MediaMetadataEntity;
+  metadata!: MediaMetadataEntity;
 
-  missingThumbnails: number;
+  missingThumbnails!: number;
 
-  liveVideoPath: string;
+  liveVideoPath!: string;
 
-  liveVideoInfo: LiveVideoInfo;
+  liveVideoInfo!: LiveVideoInfo;
 }

@@ -4,6 +4,7 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {UserRoles} from '../../../common/entities/UserDTO';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {RequestParams} from '../RequestParams';
+import {RequestSession} from '../RequestSession';
 
 export class UserRequestConstrainsMWs {
   public static forceSelfRequest(
@@ -17,7 +18,7 @@ export class UserRequestConstrainsMWs {
     ) {
       return next();
     }
-    if (req.session.context?.user.id !== parseInt(RequestParams.get(req, 'id'), 10)) {
+    if (RequestSession.getContext(req).user.id !== parseInt(RequestParams.getRequired(req, 'id'), 10)) {
       res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
@@ -37,7 +38,7 @@ export class UserRequestConstrainsMWs {
       return next();
     }
 
-    if (req.session.context?.user.id === parseInt(RequestParams.get(req, 'id'), 10)) {
+    if (RequestSession.getContext(req).user.id === parseInt(RequestParams.getRequired(req, 'id'), 10)) {
       res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
@@ -57,7 +58,7 @@ export class UserRequestConstrainsMWs {
       return next();
     }
 
-    if (req.session.context?.user.id !== parseInt(RequestParams.get(req, 'id'), 10)) {
+    if (RequestSession.getContext(req).user.id !== parseInt(RequestParams.getRequired(req, 'id'), 10)) {
       return next();
     }
 

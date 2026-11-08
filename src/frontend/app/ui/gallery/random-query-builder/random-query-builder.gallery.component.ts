@@ -72,7 +72,6 @@ export class RandomQueryBuilderGalleryComponent implements OnDestroy {
   readonly url = computed((): string => NetworkService.buildUrl(
     Config.Server.getPublicUrl(Config.Server.apiPath, '/gallery/random') + '/' + encodeURIComponent(this.HTMLSearchQuery)
   ));
-
   modalRef: BsModalRef | null = null;
 
   private readonly subscription: Subscription | null = null;

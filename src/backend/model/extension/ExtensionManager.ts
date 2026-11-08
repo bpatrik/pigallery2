@@ -1,19 +1,20 @@
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
-import * as fs from 'fs';
-import * as path from 'path';
-import {pipeline} from 'stream/promises';
-import {Readable} from 'stream';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import {pipeline} from 'node:stream/promises';
+import {Readable} from 'node:stream';
+import type {ReadableStream as NodeReadableStream} from 'node:stream/web';
 import {IObjectManager} from '../database/IObjectManager';
 import {Logger} from '../../Logger';
-import {IExtensionEvents, IExtensionObject} from './IExtension';
+import {IExtensionEvents, IExtensionObject, IServerExtension} from './IExtension';
 import {Server} from '../../server';
 import {ExtensionEvent} from './ExtensionEvent';
 import * as express from 'express';
 import {SQLConnection} from '../database/SQLConnection';
 import {ExtensionObject} from './ExtensionObject';
 import {ExtensionDecoratorObject} from './ExtensionDecorator';
-import * as util from 'util';
+import * as util from 'node:util';
 import AdmZip from 'adm-zip';
 import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 import {ExtensionRepository} from './ExtensionRepository';
@@ -22,7 +23,7 @@ import {ExtensionConfigTemplateLoader} from './ExtensionConfigTemplateLoader';
 import {Utils} from '../../../common/Utils';
 import {UIExtensionDTO} from '../../../common/entities/extension/IClientUIConfig';
 import {ExtensionConfigWrapper} from './ExtensionConfigWrapper';
-const exec = util.promisify(require('child_process').exec);
+const exec = util.promisify((require('node:child_process') as typeof import('node:child_process')).exec);
 const LOG_TAG = '[ExtensionManager]';
 
 export class ExtensionManager implements IObjectManager {
@@ -30,9 +31,9 @@ export class ExtensionManager implements IObjectManager {
   public static EXTENSION_API_PATH = Config.Server.apiPath + '/extension';
   public repository: ExtensionRepository = new ExtensionRepository();
 
-  events: IExtensionEvents;
+  events!: IExtensionEvents; // set by initEvents(), which the constructor calls
   extObjects: Record<string, ExtensionObject<unknown>> = {};
-  router: express.Router;
+  router!: express.Router; // set by init() when extensions are enabled, only used then
 
   constructor() {
     this.initEvents();
@@ -122,7 +123,7 @@ export class ExtensionManager implements IObjectManager {
 
     // Unzip the file
     Logger.silly(LOG_TAG, `Unzipping extension to ${extensionDir}`);
-    await this.unzipFile(zipFilePath, extensionDir);
+    this.unzipFile(zipFilePath, extensionDir);
 
     // Update the configuration
     Logger.silly(LOG_TAG, `Updating configuration for extension ${folder}`);
@@ -153,7 +154,7 @@ export class ExtensionManager implements IObjectManager {
     Logger.debug(LOG_TAG, `Reloading extension with config key: ${configKey}`);
 
     // Find the unique extension ID by matching the folder name
-    let uniqueExtensionId: string = null;
+    let uniqueExtensionId: string | null = null;
     for (const id of Object.keys(this.extObjects)) {
       if (this.extObjects[id].folder === configKey) {
         uniqueExtensionId = id;
@@ -190,7 +191,7 @@ export class ExtensionManager implements IObjectManager {
     Logger.debug(LOG_TAG, `Deleting extension with config key: ${configKey}`);
 
     // Find the unique extension ID by matching the folder name
-    let uniqueExtensionId: string = null;
+    let uniqueExtensionId: string | null = null;
     for (const id of Object.keys(this.extObjects)) {
       if (this.extObjects[id].folder === configKey) {
         uniqueExtensionId = id;
@@ -325,13 +326,13 @@ export class ExtensionManager implements IObjectManager {
           cwd: extPath
         });
       }
-      const pkg = require(packageJsonPath);
+      const pkg = require(packageJsonPath) as { name?: string };
       if (pkg.name) {
         extName = pkg.name;
       }
     }
 
-    const ext = require(serverExtPath);
+    const ext = require(serverExtPath) as Partial<IServerExtension<unknown>> | undefined;
     if (typeof ext?.init === 'function') {
       Logger.debug(LOG_TAG, 'Running init on extension: ' + folderName);
       await ext?.init(this.createUniqueExtensionObject(extName, folderName));
@@ -361,7 +362,7 @@ export class ExtensionManager implements IObjectManager {
 
     const serverExt = path.join(extObj.folder, 'server.js');
     if (fs.existsSync(serverExt)) {
-      const ext = require(serverExt);
+      const ext = require(serverExt) as Partial<IServerExtension<unknown>> | undefined;
       if (typeof ext?.cleanUp === 'function') {
         Logger.debug(LOG_TAG, 'Running cleanUp on extension: ' + extObj.extensionName);
         await ext?.cleanUp(extObj);
@@ -386,13 +387,13 @@ export class ExtensionManager implements IObjectManager {
       throw new Error(`Unexpected response ${response.statusText}`);
     }
 
-    const nodeReadable = Readable.fromWeb(response.body as any);
+    const nodeReadable = Readable.fromWeb(response.body as NodeReadableStream); // the DOM and the node:stream/web ReadableStream types differ
 
     // Pipe the response body to a file
     await pipeline(nodeReadable, fs.createWriteStream(outputPath));
   }
 
-  private async unzipFile(zipFilePath: string, outputPath: string): Promise<void> {
+  private unzipFile(zipFilePath: string, outputPath: string): void {
     try {
       // Extract to temp first
       const tempExtractPath = path.join(outputPath, '__temp_unzip');
@@ -439,8 +440,8 @@ export class ExtensionManager implements IObjectManager {
         console.log('Extracted with multiple top-level items.');
       }
     } catch (error) {
-      Logger.error(LOG_TAG, `Error unzipping file: ${error}`);
-      throw new Error(`Failed to unzip file: ${error}`, {cause: error});
+      Logger.error(LOG_TAG, `Error unzipping file: ${String(error)}`);
+      throw new Error(`Failed to unzip file: ${String(error)}`, {cause: error});
     }
   }
 }

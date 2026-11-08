@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import * as express from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {ExtensionManager} from '../../../../../src/backend/model/extension/ExtensionManager';
 import {IExtensionObject} from '../../../../../src/backend/model/extension/IExtension';
 import {TestHelper} from '../../../../TestHelper';
@@ -54,11 +54,11 @@ describe('ExtensionManager', () => {
     after(TestHelper.resetConfig);
 
     const expectError = async (fn: () => Promise<void>, msg: string): Promise<void> => {
-      let err: Error = null;
+      let err: Error = null!;
       try {
         await fn();
       } catch (e) {
-        err = e;
+        err = e as Error;
       }
       expect(err, msg).to.not.be.null;
       expect(err.message).to.contain(msg);

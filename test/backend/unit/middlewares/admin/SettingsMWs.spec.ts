@@ -46,7 +46,7 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
         done(err);
       }
     };
-    SettingsMWs.updateSettings(req, null, next);
+    SettingsMWs.updateSettings(req, null!, next);
 
 
   });
@@ -89,7 +89,7 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
         done(err);
       }
     };
-    SettingsMWs.updateSettings(req, null, next2);
+    SettingsMWs.updateSettings(req, null!, next2);
 
   });
 

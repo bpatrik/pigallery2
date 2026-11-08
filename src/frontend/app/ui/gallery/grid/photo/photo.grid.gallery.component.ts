@@ -46,7 +46,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   readonly imageRef = viewChild<ElementRef>('img');
   readonly container = viewChild.required<ElementRef>('photoContainer');
 
-  thumbnail: Thumbnail;
+  thumbnail!: Thumbnail; // set by ngOnInit()
   readonly infoBarVisible = signal(false);
   animationTimer: number | null = null;
 
@@ -55,7 +55,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean | null = null;
   loaded = false;
-  public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[];
+  public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
   readonly isVideo = computed((): boolean => this.gridMedia().isVideo());
   readonly isLivePhoto = computed((): boolean => this.gridMedia().isLivePhoto());
@@ -141,10 +141,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
     this.extensionService.UIExtensionConfig.forEach(config => {
       if (config.mediaButtons) {
         const buttons: IClientMediaButtonConfigWithBaseApiPath[] = Utils.clone(config.mediaButtons)
-          .map((b: IClientMediaButtonConfigWithBaseApiPath) => {
-            b.extensionBasePath = config.extensionBasePath;
-            return b;
-          });
+          .map((b): IClientMediaButtonConfigWithBaseApiPath => ({...b, extensionBasePath: config.extensionBasePath}));
 
         allButtons.push(...buttons);
       }

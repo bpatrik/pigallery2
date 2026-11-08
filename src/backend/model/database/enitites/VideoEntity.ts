@@ -6,24 +6,24 @@ export class VideoMetadataEntity
     extends MediaMetadataEntity
     implements VideoMetadata {
   @Column('int')
-  bitRate: number;
+  override bitRate!: number | null;
 
   @Column('bigint', {
     unsigned: true,
     nullable: true,
     transformer: {
-      from: (v) => parseInt(v, 10) || null,
-      to: (v) => v,
+      from: (v: string) => parseInt(v, 10) || null,
+      to: (v: unknown) => v,
     },
   })
-  duration: number;
+  override duration!: number;
 
   @Column('int')
-  fps: number;
+  fps!: number | null;
 }
 
 @ChildEntity()
 export class VideoEntity extends MediaEntity implements VideoDTO {
   @Column(() => VideoMetadataEntity)
-  metadata: VideoMetadataEntity;
+  override metadata!: VideoMetadataEntity;
 }

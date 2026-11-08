@@ -22,24 +22,25 @@ const LOG_TAG = '[ObjectManagers]';
 
 export class ObjectManagers {
 
-  private static instance: ObjectManagers = null;
+  private static instance: ObjectManagers | null = null;
 
   private readonly managers: IObjectManager[];
-  private galleryManager: GalleryManager;
-  private userManager: UserManager;
-  private searchManager: SearchManager;
-  private sharingManager: SharingManager;
-  private indexingManager: IndexingManager;
-  private personManager: PersonManager;
-  private coverManager: CoverManager;
-  private versionManager: VersionManager;
-  private jobManager: JobManager;
-  private locationManager: LocationManager;
-  private albumManager: AlbumManager;
-  private extensionManager: ExtensionManager;
-  private projectedCacheManager: ProjectedCacheManager;
-  private uploadManager: UploadManager;
-  private sessionManager: SessionManager;
+  // set by init(), before the app uses them
+  private galleryManager!: GalleryManager;
+  private userManager!: UserManager;
+  private searchManager!: SearchManager;
+  private sharingManager!: SharingManager;
+  private indexingManager!: IndexingManager;
+  private personManager!: PersonManager;
+  private coverManager!: CoverManager;
+  private versionManager!: VersionManager;
+  private jobManager!: JobManager;
+  private locationManager!: LocationManager;
+  private albumManager!: AlbumManager;
+  private extensionManager!: ExtensionManager;
+  private projectedCacheManager!: ProjectedCacheManager;
+  private uploadManager!: UploadManager;
+  private sessionManager!: SessionManager;
   private initDone = false;
 
   constructor() {
@@ -78,7 +79,7 @@ export class ObjectManagers {
   }
 
   public static isReady(): boolean {
-    return this.instance && this.instance.initDone;
+    return !!this.instance?.initDone;
   }
 
 
@@ -120,7 +121,7 @@ export class ObjectManagers {
   }
 
   public async onDataChange(
-    changedDir: DirectoryPathDTO = null
+    changedDir: DirectoryPathDTO | null = null
   ): Promise<void> {
     await this.VersionManager.onNewDataVersion();
 
@@ -129,7 +130,7 @@ export class ObjectManagers {
         continue;
       }
       if (manager.onNewDataVersion) {
-        await manager.onNewDataVersion(changedDir);
+        await manager.onNewDataVersion(changedDir ?? undefined);
       }
     }
   }
@@ -273,10 +274,10 @@ export class ObjectManagers {
 
   set JobManager(value: JobManager) {
     if (this.jobManager) {
-      this.managers.splice(this.managers.indexOf(this.jobManager as IObjectManager), 1);
+      this.managers.splice(this.managers.indexOf(this.jobManager), 1);
     }
     this.jobManager = value;
-    this.managers.push(this.jobManager as IObjectManager);
+    this.managers.push(this.jobManager);
   }
 
   get ExtensionManager(): ExtensionManager {
@@ -285,10 +286,10 @@ export class ObjectManagers {
 
   set ExtensionManager(value: ExtensionManager) {
     if (this.extensionManager) {
-      this.managers.splice(this.managers.indexOf(this.extensionManager as IObjectManager), 1);
+      this.managers.splice(this.managers.indexOf(this.extensionManager), 1);
     }
     this.extensionManager = value;
-    this.managers.push(this.extensionManager as IObjectManager);
+    this.managers.push(this.extensionManager);
   }
 
   get ProjectedCacheManager(): ProjectedCacheManager {
@@ -297,10 +298,10 @@ export class ObjectManagers {
 
   set ProjectedCacheManager(value: ProjectedCacheManager) {
     if (this.projectedCacheManager) {
-      this.managers.splice(this.managers.indexOf(this.projectedCacheManager as IObjectManager), 1);
+      this.managers.splice(this.managers.indexOf(this.projectedCacheManager), 1);
     }
     this.projectedCacheManager = value;
-    this.managers.push(this.projectedCacheManager as IObjectManager);
+    this.managers.push(this.projectedCacheManager);
   }
   get SessionManager(): SessionManager {
     return this.sessionManager;

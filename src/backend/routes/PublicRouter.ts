@@ -1,12 +1,11 @@
 import {Express, NextFunction, Request, Response} from 'express';
-import * as path from 'path';
+import * as path from 'node:path';
 import * as ejs from 'ejs';
 import {Config} from '../../common/config/private/Config';
 import {ProjectPath} from '../ProjectPath';
 import {AuthenticationMWs} from '../middlewares/user/AuthenticationMWs';
 import {CookieNames} from '../../common/CookieNames';
 import {ErrorCodes, ErrorDTO} from '../../common/entities/Error';
-import {UserDTO} from '../../common/entities/UserDTO';
 import {ServerTimeEntry} from '../middlewares/ServerTimingMWs';
 import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
@@ -17,14 +16,13 @@ declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
-      locale?: string;
       localePath?: string;
-      tpl?: Record<string, any>;
+      tpl?: Record<string, unknown>;
       timing?: Record<string, ServerTimeEntry>;
     }
 
     interface Response {
-      tpl?: Record<string, any>;
+      tpl?: Record<string, unknown>;
     }
   }
 }
@@ -33,11 +31,12 @@ export class PublicRouter {
   public static route(app: Express): void {
     const setLocale = (req: Request, res: Response, next: NextFunction) => {
       let selectedLocale = req.locale;
-      if (req.cookies && req.cookies[CookieNames.lang]) {
+      const langCookie = (req.cookies as Record<string, string | undefined> | undefined)?.[CookieNames.lang];
+      if (langCookie) {
         if (
-          Config.Server.languages.indexOf(req.cookies[CookieNames.lang]) !== -1
+          (Config.Server.languages ?? []).indexOf(langCookie) !== -1
         ) {
-          selectedLocale = req.cookies[CookieNames.lang];
+          selectedLocale = langCookie;
         }
       }
       res.cookie(CookieNames.lang, selectedLocale);
@@ -48,8 +47,8 @@ export class PublicRouter {
     // index.html should not be cached as it contains template that can change
     const renderIndex = (req: Request, res: Response, next: NextFunction) => {
       ejs.renderFile(
-        path.join(ProjectPath.FrontendFolder, req.localePath, 'index.html'),
-        res.tpl,
+        path.join(ProjectPath.FrontendFolder, req.localePath ?? req.locale, 'index.html'),
+        res.tpl ?? {},
         (err, str) => {
           if (err) {
             return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, err.message));
@@ -62,7 +61,7 @@ export class PublicRouter {
     // /<locale>/<page> links (e.g. from the language menu) set the language, then open the same page
     const redirectToLocalePage = (req: Request, res: Response, next: NextFunction) => {
       const locale = RequestParams.get(req, 'locale');
-      if (Config.Server.languages.indexOf(locale) === -1) {
+      if (!locale || (Config.Server.languages ?? []).indexOf(locale) === -1) {
         return next();
       }
       res.cookie(CookieNames.lang, locale);
@@ -80,15 +79,15 @@ export class PublicRouter {
 
       res.tpl = {};
 
-      res.tpl.user = null;
+      res.tpl['user'] = null;
       if (req.session.context?.user) {
-        res.tpl.user = {
+        res.tpl['user'] = {
           id: req.session.context.user.id,
           name: req.session.context.user.name,
           role: req.session.context.user.role,
           usedSharingKey: req.session.context.user.usedSharingKey,
           projectionKey: req.session.context.user.projectionKey,
-        } as UserDTO;
+        };
 
       }
       const confCopy = Config.getClientConfig();
@@ -100,13 +99,13 @@ export class PublicRouter {
           .replace(/>/g, '&gt;')
           .replace(/"/g, '&quot;')
           .replace(/'/g, '&#039;');
-      res.tpl.Config = confCopy;
-      res.tpl.baseHref = Config.Server.getAppUrl();
-      res.tpl.customHTMLHead = Config.Server.customHTMLHead;
+      res.tpl['Config'] = confCopy;
+      res.tpl['baseHref'] = Config.Server.getAppUrl();
+      res.tpl['customHTMLHead'] = Config.Server.customHTMLHead;
       const selectedTheme = Config.Gallery.Themes.availableThemes.find(th => th.name === Config.Gallery.Themes.selectedTheme)?.theme || '';
-      res.tpl.usedTheme = selectedTheme;
+      res.tpl['usedTheme'] = selectedTheme;
 
-      res.tpl.UIExtensionConfigs = ObjectManagers.getInstance().ExtensionManager.getUIExtensionConfigs();
+      res.tpl['UIExtensionConfigs'] = ObjectManagers.getInstance().ExtensionManager.getUIExtensionConfigs();
 
       return next();
     };
@@ -149,7 +148,7 @@ export class PublicRouter {
       });
     });
 
-    const getIcon = (theme: 'auto' | string | null = null, paddingPercent = 0): string => {
+    const getIcon = (theme: string | null = null, paddingPercent = 0): string => {
       const vBs = (Config.Server.svgIcon.viewBox || '').split(' ').slice(0, 4).map(s => parseFloat(s));
       vBs[0] = vBs[0] || 0;
       vBs[1] = vBs[1] || 0;
@@ -314,13 +313,14 @@ export class PublicRouter {
       return (req: Request, res: Response) => {
         // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
         // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
-        const hashed = /-[A-Z0-9]{8}\.[a-z0-9]+$/.test(RequestParams.get(req, 'file'));
+        const file = RequestParams.getRequired(req, 'file');
+        const hashed = /-[A-Z0-9]{8}.[a-z0-9]+$/.test(file);
         if (!hashed) {
           res.set('Cache-Control', 'no-cache');
         }
-        res.sendFile(RequestParams.get(req, 'file'), {
+        res.sendFile(file, {
           // sendFile refuses paths that would leave the root
-          root: path.join(ProjectPath.FrontendFolder, req.localePath, subDir),
+          root: path.join(ProjectPath.FrontendFolder, req.localePath ?? req.locale, subDir),
           dotfiles: 'allow',
           ...(hashed ? {
             maxAge: '365d', // number would be in ms

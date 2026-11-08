@@ -1,6 +1,6 @@
 import {Config} from '../../src/common/config/private/Config';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {SQLConnection} from '../../src/backend/model/database/SQLConnection';
 import {DatabaseType} from '../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../src/backend/ProjectPath';
@@ -14,7 +14,7 @@ import {TestHelper} from '../TestHelper';
 import {VideoDTO} from '../../src/common/entities/VideoDTO';
 import {PhotoDTO} from '../../src/common/entities/PhotoDTO';
 import {Logger} from '../../src/backend/Logger';
-import {SessionUser, SessionContext} from '../../src/backend/model/SessionContext';
+import {ContextUser, SessionContext} from '../../src/backend/model/SessionContext';
 import {SessionManager} from '../../src/backend/model/database/SessionManager';
 import {DirectoryEntity} from '../../src/backend/model/database/enitites/DirectoryEntity';
 import {MediaEntity} from '../../src/backend/model/database/enitites/MediaEntity';
@@ -26,11 +26,11 @@ const savedDescribe = describe;
 
 class GalleryManagerTest extends GalleryManager {
 
-  public async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
+  public override async getDirIdAndTime(connection: DataSource, directoryName: string, directoryParent: string) {
     return super.getDirIdAndTime(connection, directoryName, directoryParent);
   }
 
-  public async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
+  public override async getParentDirFromId(connection: DataSource, session: SessionContext, dir: number): Promise<ParentDirectoryDTO> {
     return super.getParentDirFromId(connection, session, dir);
   }
 
@@ -42,8 +42,8 @@ export class DBTestHelper {
 
   private static mysqlSchemeBuilt = false;
   static enable = {
-    sqlite: process.env.TEST_SQLITE !== 'false',
-    mysql: process.env.TEST_MYSQL !== 'false'
+    sqlite: process.env['TEST_SQLITE'] !== 'false',
+    mysql: process.env['TEST_MYSQL'] !== 'false'
   };
   public static readonly savedDescribe = savedDescribe;
   public readonly testGalleyEntities: {
@@ -67,19 +67,19 @@ export class DBTestHelper {
      *     |- p4
      */
 
-    dir: null,
-    subDir: null,
-    subDir2: null,
-    v: null,
-    p: null,
-    p2: null,
-    p3: null,
-    p4: null
+    dir: null!,
+    subDir: null!,
+    subDir2: null!,
+    v: null!,
+    p: null!,
+    p2: null!,
+    p3: null!,
+    p4: null!
   };
 
   public static get defaultSession(): SessionContext {
     const session = new SessionContext();
-    session.user = {projectionKey: SessionManager.NO_PROJECTION_KEY} as SessionUser;
+    session.user = {projectionKey: SessionManager.NO_PROJECTION_KEY} as ContextUser;
     return session;
   }
 
@@ -89,12 +89,12 @@ export class DBTestHelper {
   static describe(settingsOverride: {
     sqlite?: boolean;
     mysql?: boolean;
-  } = {}): (name: string, tests: (helper?: DBTestHelper) => void) => void {
+  } = {}): (name: string, tests: (helper: DBTestHelper) => void) => void {
     const settings = Utils.clone(DBTestHelper.enable);
     for (const key of Object.keys(settingsOverride)) {
       (settings as any)[key] = (settingsOverride as any)[key];
     }
-    return (name: string, tests: (helper?: DBTestHelper) => void) => {
+    return (name: string, tests: (helper: DBTestHelper) => void) => {
       savedDescribe(name, async () => {
         if (settings.sqlite) {
           const helper = new DBTestHelper(DatabaseType.sqlite);
@@ -104,7 +104,7 @@ export class DBTestHelper {
         }
         if (settings.mysql) {
           const helper = new DBTestHelper(DatabaseType.mysql);
-          savedDescribe('mysql', function(): void {
+          savedDescribe('mysql', function(this: Mocha.Suite): void {
             this.timeout(99999999); // hint for the test environment
             return tests(helper);
           });
@@ -119,7 +119,7 @@ export class DBTestHelper {
       await ObjectManagers.getInstance().init();
     }
     const connection = await SQLConnection.getConnection();
-    ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null);
+    ObjectManagers.getInstance().IndexingManager.indexDirectory = () => Promise.resolve(null!);
 
 
     await ObjectManagers.getInstance().IndexingManager.saveToDB(directory as ParentDirectoryDTO);
@@ -135,14 +135,14 @@ export class DBTestHelper {
     const gm = new GalleryManagerTest();
 
     const dir = await gm.getParentDirFromId(connection, this.defaultSession,
-      (await gm.getDirIdAndTime(connection, directory.name, path.join(directory.path, path.sep))).id);
+      (await gm.getDirIdAndTime(connection, directory.name, path.join(directory.path, path.sep)))!.id);
 
     const populateDir = async (d: DirectoryBaseDTO) => {
-      for (let i = 0; i < d.directories.length; i++) {
-        d.directories[i] = await gm.getParentDirFromId(connection, this.defaultSession,
-          (await gm.getDirIdAndTime(connection, d.directories[i].name,
-            path.join(DiskManager.pathFromParent(d), path.sep))).id);
-        await populateDir(d.directories[i]);
+      for (let i = 0; i < d.directories!.length; i++) {
+        d.directories![i] = await gm.getParentDirFromId(connection, this.defaultSession,
+          (await gm.getDirIdAndTime(connection, d.directories![i].name,
+            path.join(DiskManager.pathFromParent(d), path.sep)))!.id);
+        await populateDir(d.directories![i]);
       }
     };
     await populateDir(dir);
@@ -202,9 +202,9 @@ export class DBTestHelper {
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir;
     this.testGalleyEntities.v = (this.testGalleyEntities.dir.media.filter(m => m.name === this.testGalleyEntities.v.name)[0] as any);
     this.testGalleyEntities.v.directory = this.testGalleyEntities.dir;
-    this.testGalleyEntities.p3 = (this.testGalleyEntities.dir.directories[0].media[0] as any);
+    this.testGalleyEntities.p3 = (this.testGalleyEntities.dir.directories[0].media![0] as any);
     this.testGalleyEntities.p3.directory = this.testGalleyEntities.dir.directories[0];
-    this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media[0] as any);
+    this.testGalleyEntities.p4 = (this.testGalleyEntities.dir.directories[1].media![0] as any);
     this.testGalleyEntities.p2.directory = this.testGalleyEntities.dir.directories[1];
   };
 
@@ -250,7 +250,7 @@ export class DBTestHelper {
     Config.Extensions.enabled = false; // make all tests clean
     Config.Database.type = this.dbType;
     if (this.dbType === DatabaseType.mysql) {
-      Config.Database.mysql.database = 'pigallery2_test';
+      Config.Database.mysql!.database = 'pigallery2_test';
     } else {
       Config.Database.dbFolder = TestHelper.TMP_DIR;
       ProjectPath.reset();

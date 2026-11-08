@@ -8,10 +8,6 @@
     "moduleResolution": "bundler",
     "emitDecoratorMetadata": false,
     "isolatedModules": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noPropertyAccessFromIndexSignature": true,
-    "strictNullChecks": true,
     "types": [
       "vitest/globals",
       "@angular/localize"
