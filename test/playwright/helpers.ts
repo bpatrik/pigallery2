@@ -35,8 +35,8 @@ export const scrollUntilAttached = async (page: Page, locator: Locator): Promise
  * Waits until the photos of the grid that are on the screen are loaded (no loading placeholder, no broken image).
  * The server generates the thumbnails on the first request, so they can come later than the content.
  */
-export const expectVisiblePhotosLoaded = async (page: Page): Promise<void> => {
-  await expect(page.locator('app-gallery-grid .photo-container > img').first()).toBeVisible();
+export const expectVisiblePhotosLoaded = async (page: Page, timeout?: number): Promise<void> => {
+  await expect(page.locator('app-gallery-grid .photo-container > img').first()).toBeVisible({timeout});
   await expect.poll(() => page.evaluate(() => {
     const inView = (el: Element): boolean => {
       const r = el.getBoundingClientRect();
@@ -46,7 +46,7 @@ export const expectVisiblePhotosLoaded = async (page: Page): Promise<void> => {
     const notLoaded = [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-container > img')]
       .filter(inView).filter(img => !img.complete || img.naturalWidth === 0);
     return loading.length + notLoaded.length;
-  }), {message: 'photos on the screen that are not loaded'}).toBe(0);
+  }), {message: 'photos on the screen that are not loaded', timeout}).toBe(0);
 };
 
 /**

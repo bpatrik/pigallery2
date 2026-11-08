@@ -56,6 +56,7 @@ The photo folder is never modified.
 ## Build and test
 
 Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` files.
+Use reasonable deadlines: usually nothing should run for more than 3 minutes, so set a timeout and investigate instead of waiting longer.
 
 - Compile backend + tests: `npm run build-backend` (plain `tsc`). Mocha runs the compiled `.js`, so compile before running tests.
 - Backend tests: `npm run test-backend` (config in `.mocharc.js`).
@@ -90,7 +91,8 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
   - Browser: `npx playwright install chromium` once. Cloud sessions have a Chromium in `/opt/pw-browsers` but can't download one;
     if its revision differs from what `@playwright/test` expects, symlink the expected `chromium-<rev>` and
     `chromium_headless_shell-<rev>` folders there to the installed ones.
-  - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens`.
+  - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens` saves them to `test/playwright/screenshots`.
+    It starts its own server (`start-docs-e2e-server`) on the maintainer's `demo/images2/docs/puerto rico` photos, which are not in git.
   - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `build.yml`).
 - Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
   read only the summary:

@@ -32,7 +32,7 @@ export default defineConfig({
 
   // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.
   webServer: {
-    command: 'npm run start-e2e-server',
+    command: process.env.DOCS_SCREENSHOTS ? 'npm run start-docs-e2e-server' : 'npm run start-e2e-server',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
   },
