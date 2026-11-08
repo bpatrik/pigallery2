@@ -13,8 +13,7 @@ test/frontend/**/*.js
 test/frontend/**/*.js.map
 test/common/**/*.js
 test/common/**/*.js.map
-test/e2e/**/*.js
-test/e2e/**/*.js.map
+/test/e2e/
 test/*.js
 test/*.js.map
 test/tmp/*
