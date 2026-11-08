@@ -109,19 +109,31 @@ jobs:
         npm rebuild ffmpeg-static && node -e "$check" && exit 0
         echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
         exit 1
-    - name: E2E test - Cypress run
-      uses: cypress-io/github-action@v7
-      env:
-        DEBUG: '@cypress/github-action'
-      with:
-        install: false # installed above
-        start: npm run start-e2e-server
+    - name: Install Playwright browser
+      run: npx playwright install --with-deps chromium
+    - name: E2E test - Playwright
+      run: npm run test-e2e
+    - name: E2E test summary
+      if: ${{ !cancelled() && hashFiles('test-results/results.json') != '' }}
+      run: |
+        jq -r '
+          def count(s): map(select(.status == s)) | length;
+          "### E2E tests (Playwright)",
+          "",
+          "| Spec | Passed | Failed | Flaky | Skipped |",
+          "| --- | --: | --: | --: | --: |",
+          (.suites[] | [.. | objects | select(has("expectedStatus"))] as $t
+            | "| \(.file) | \($t | count("expected")) | \($t | count("unexpected")) | \($t | count("flaky")) | \($t | count("skipped")) |"),
+          "| **All (\(.stats.duration / 1000 | floor) s)** | **\(.stats.expected)** | **\(.stats.unexpected)** | **\(.stats.flaky)** | **\(.stats.skipped)** |",
+          "",
+          "Passed includes the expected failures of test.fail(). Details: the playwright-report artifact."
+        ' test-results/results.json >> "$GITHUB_STEP_SUMMARY"
     - uses: actions/upload-artifact@v7
-      if: failure() # Store screenshots only on failures
+      if: ${{ !cancelled() }}
       with:
-         name: cypress-screenshots
-         path: test/cypress/screenshots
-         if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
 
   create-release:
     runs-on: [ubuntu-latest]

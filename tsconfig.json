@@ -47,9 +47,8 @@
     "gulpfile.ts"
   ],
   "exclude": [
-    "cypress.config.ts",
-    // See https://github.com/cypress-io/cypress/issues/7552#issuecomment-763498855
-    "test/cypress/**/*",
+    // Playwright runs the e2e tests from the .ts files (test/playwright/tsconfig.json)
+    "test/playwright/**/*",
     "extension/**/*",
     "extensions/**/*",
     // test output, e.g. the media files of Routing.spec (.ts and .mts are video formats too)
