@@ -2,6 +2,7 @@
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/bpatrik/pigallery2)
 [![Coverage Status](https://coveralls.io/repos/github/bpatrik/pigallery2/badge.svg?branch=master)](https://coveralls.io/github/bpatrik/pigallery2?branch=master)
 [![Docker build](https://github.com/bpatrik/pigallery2/workflows/docker-buildx/badge.svg)](https://github.com/bpatrik/pigallery2/actions)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/bpatrik)
 
 PiGallery2 is a **fast** directory-first photo gallery website, optimized for running on low-resource servers (especially on Raspberry Pi).
 
@@ -34,6 +35,13 @@ For more detailed information, please see our [Documentation Website](http://bpa
 ## 🤝 Contributing
 Contributions are welcome! Please read our [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing) to get started.
 Using an AI coding agent? See [AGENTS.md](AGENTS.md).
+
+## ❤️ Support
+PiGallery2 is free, and I build it alone in my free time, which, since my daughter was born, mostly means nap time 👶.
+WebStorm and AI coding agents help me make the most of those short windows.
+
+If PiGallery2 makes your photos a bit nicer to browse, consider [sponsoring me on GitHub](https://github.com/sponsors/bpatrik).
+A coffee is plenty, and pizza or a date night with my wife is even better 🍕.
 
 ## ⭐ Star History
 [![Star History Chart](https://api.star-history.com/svg?repos=bpatrik/pigallery2&type=date&legend=top-left)](https://www.star-history.com/#bpatrik/pigallery2&type=date&legend=top-left)
