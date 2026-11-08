@@ -81,14 +81,15 @@ test.describe('Gallery', () => {
     await scrollUntilAttached(page, photo(page, 'IMG_5910.jpg'));
     const squirrel = photo(page, 'IMG_5910.jpg');
     await squirrel.scrollIntoViewIfNeeded();
-    await expect(squirrel).toBeInViewport({ratio: 1});
+    // 0.99: the hover animation scales the photo a bit, so it can be off by a fraction of a pixel
+    await expect(squirrel).toBeInViewport({ratio: 0.99});
     await squirrel.hover();
 
     // the info bar slides up over the photo (it is below the photo, hidden, until then)
     const container = squirrel.locator('..');
     const info = container.locator('.info');
     await expect(info).toBeVisible();
-    await expect(info).toBeInViewport({ratio: 1});
+    await expect(info).toBeInViewport({ratio: 0.99});
     await expect.poll(async () => {
       const c = await container.boundingBox();
       const i = await info.boundingBox();
