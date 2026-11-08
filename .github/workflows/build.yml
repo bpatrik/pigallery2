@@ -47,6 +47,20 @@ jobs:
         npm ci
         npm run build
 
+    - name: Check the ffmpeg and ffprobe binaries
+      # ffmpeg-static downloads ffmpeg in its install script and npm ci does not fail when that download does.
+      # Without the binary, the video tests fail with 'spawn ffmpeg ENOENT'. Retry the download once, then fail with a clear error.
+      run: |
+        check='const fs = require("fs"); const {execFileSync} = require("child_process");
+          for (const p of [require("ffmpeg-static"), require("ffprobe-static").path]) {
+            fs.accessSync(p, fs.constants.X_OK); console.log(p + ": " + execFileSync(p, ["-version"]).toString().split("\n")[0]);
+          }'
+        node -e "$check" && exit 0
+        echo "::warning::ffmpeg-static or ffprobe-static binary is missing, re-running the ffmpeg-static install script"
+        npm rebuild ffmpeg-static && node -e "$check" && exit 0
+        echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
+        exit 1
+
     - name: lint
       run: |
         npm run lint
@@ -80,6 +94,19 @@ jobs:
       run: |
         npm ci
         npm run build
+    - name: Check the ffmpeg and ffprobe binaries
+      # ffmpeg-static downloads ffmpeg in its install script and npm ci does not fail when that download does.
+      # Without the binary, the video tests fail with 'spawn ffmpeg ENOENT'. Retry the download once, then fail with a clear error.
+      run: |
+        check='const fs = require("fs"); const {execFileSync} = require("child_process");
+          for (const p of [require("ffmpeg-static"), require("ffprobe-static").path]) {
+            fs.accessSync(p, fs.constants.X_OK); console.log(p + ": " + execFileSync(p, ["-version"]).toString().split("\n")[0]);
+          }'
+        node -e "$check" && exit 0
+        echo "::warning::ffmpeg-static or ffprobe-static binary is missing, re-running the ffmpeg-static install script"
+        npm rebuild ffmpeg-static && node -e "$check" && exit 0
+        echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
+        exit 1
     - name: E2E test - Cypress run
       uses: cypress-io/github-action@v7
       env:
