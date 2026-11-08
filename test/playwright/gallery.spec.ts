@@ -1,5 +1,5 @@
 import {expect, Page, test} from '@playwright/test';
-import {isGalleryContent, loadedImageWidth, loginWithUi, notLoggedIn, scrollUntilAttached} from './helpers';
+import {expectLightboxPhoto, isGalleryContent, loginWithUi, notLoggedIn, scrollUntilAttached} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
 const lightboxTitle = (page: Page, text: string) =>
@@ -79,12 +79,16 @@ test.describe('Gallery', () => {
     // these photos should be visible
     await scrollUntilAttached(page, photo(page, 'IMG_6220.jpg'));
     await scrollUntilAttached(page, photo(page, 'IMG_5910.jpg'));
-    await photo(page, 'IMG_5910.jpg').hover();
+    const squirrel = photo(page, 'IMG_5910.jpg');
+    await squirrel.scrollIntoViewIfNeeded();
+    await expect(squirrel).toBeInViewport({ratio: 1});
+    await squirrel.hover();
 
     // the info bar slides up over the photo (it is below the photo, hidden, until then)
-    const container = photo(page, 'IMG_5910.jpg').locator('..');
+    const container = squirrel.locator('..');
     const info = container.locator('.info');
     await expect(info).toBeVisible();
+    await expect(info).toBeInViewport({ratio: 1});
     await expect.poll(async () => {
       const c = await container.boundingBox();
       const i = await info.boundingBox();
@@ -106,29 +110,22 @@ test.describe('Gallery', () => {
 
     const thumbnail = photo(page, 'IMG_5910.jpg');
     await scrollUntilAttached(page, thumbnail);
-    await expect.poll(() => loadedImageWidth(thumbnail)).toBeGreaterThan(0);
-    const thumbnailWidth = await loadedImageWidth(thumbnail);
     await thumbnail.click();
     await expect(lightboxTitle(page, 'Squirrel at berkely')).toBeVisible();
     await expect(lightboxFaceNames(page).filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
 
-    // the lightbox shows the thumbnail until the large photo is loaded, then only the large photo
-    const lightboxImages = page.locator('app-gallery-lightbox-media img');
-    await expect(lightboxImages).toHaveCount(1);
-    await expect(lightboxImages).toHaveAttribute('alt', 'IMG_5910.jpg');
-    await expect(lightboxImages).toBeVisible();
-    await expect.poll(() => loadedImageWidth(lightboxImages)).toBeGreaterThan(thumbnailWidth * 2);
+    await expectLightboxPhoto(page, 'IMG_5910.jpg');
   });
 
 
   test('Gallery should auto play in lightbox', async ({page}) => {
     await page.goto('/gallery/?p=IMG_5910.jpg');
 
-    await expect(page.locator('app-gallery-lightbox-media img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expectLightboxPhoto(page, 'IMG_5910.jpg');
     await page.locator('.controls-background ng-icon[name="ionPlayOutline"]').click();
 
     // autoplay default delay is 5s, then the next photo loads (slow when all tests run, e.g. in UI mode)
-    await expect(page.locator('app-gallery-lightbox-media img[alt="IMG_6220.jpg"]')).toBeAttached({timeout: 15000});
+    await expectLightboxPhoto(page, 'IMG_6220.jpg', 15000);
   });
 
   test('Gallery should auto open lightbox for IMG_5910.jpg', async ({page}) => {

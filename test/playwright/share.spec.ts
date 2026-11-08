@@ -1,4 +1,5 @@
 import {expect, Page, test} from '@playwright/test';
+import {expectVisiblePhotosLoaded} from './helpers';
 
 // The e2e server serves the demo/images folder.
 // timestamps has big_ben.jpg, dupl is an other directory next to it (without big_ben.jpg).
@@ -65,6 +66,14 @@ const logout = async (page: Page): Promise<void> => {
   await loggedOut;
 };
 
+/**
+ * A sharing always shows how long its link is available (e.g.: Link availability: 29 days, 23:59:58).
+ * It updates every second, so it shows up a second after the page loads.
+ */
+const expectCountDown = async (page: Page): Promise<void> => {
+  await expect(page.locator('nav').getByText(/Link availability\s*:\s*\d+\s*days\s*,\s*\d\d:\d\d\s*:\d\d/)).toBeVisible();
+};
+
 const getSharingKey = (link: string): string => new URL(link).pathname.split('/').pop() ?? '';
 
 /**
@@ -77,6 +86,7 @@ const openSharingAsGuest = async (page: Page, link: string, url: RegExp): Promis
     await page.goto(link);
     await expect(page.locator('app-gallery')).toBeAttached({timeout: 15000});
   });
+  await expectCountDown(page);
 };
 
 const loginToSharing = async (page: Page, link: string, password: string): Promise<void> => {
@@ -84,6 +94,7 @@ const loginToSharing = async (page: Page, link: string, password: string): Promi
   await page.locator('input#password').fill(password);
   await page.locator('button#button-share-login').click();
   await expect(page.locator('app-gallery')).toBeAttached({timeout: 15000});
+  await expectCountDown(page);
 };
 
 test.describe('Share', () => {
@@ -98,6 +109,7 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expectVisiblePhotosLoaded(page);
       // the parents are shown, but they can't be opened
       await expect(page.locator('#directory-path li').first().locator('a')).toHaveCount(0);
       await expect(page.locator('#directory-path li').last()).toContainText('timestamps');
@@ -111,6 +123,7 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expectVisiblePhotosLoaded(page);
     });
 
     test('Open password protected sharing with logged in user', async ({page}) => {
@@ -121,6 +134,9 @@ test.describe('Share', () => {
         await expect(page.locator('.mb-0 > :nth-child(1) > .nav-link')).toContainText('Gallery');
       });
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
+      // a logged in user sees the sharing as a sharing too
+      await expectCountDown(page);
+      await expectVisiblePhotosLoaded(page);
     });
 
     test('Sharing without subfolders should not open subfolders', async ({page}) => {
@@ -137,6 +153,8 @@ test.describe('Share', () => {
       await page.goto('/gallery/timestamps');
       await expect(page).not.toHaveURL(/timestamps/);
       await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+      await expectCountDown(page);
+      await expectVisiblePhotosLoaded(page);
     });
 
     test('Sharing with subfolders should open subfolders', async ({page}) => {
@@ -148,6 +166,7 @@ test.describe('Share', () => {
       await expectContent(page, /\/pgapi\/gallery\/content\/timestamps(\?|$)/, () =>
         page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'}).click());
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expectVisiblePhotosLoaded(page);
     });
 
     test('Share dialog should list the sharings with and without subfolders', async ({page}) => {
@@ -186,6 +205,7 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(/\/search\//);
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expectVisiblePhotosLoaded(page);
       // only the directories with shared photos (and their parents) can be opened
       expect((await page.request.get('/pgapi/gallery/content/timestamps')).status()).toBe(200);
       expect((await page.request.get('/pgapi/gallery/content/')).status()).toBe(200);

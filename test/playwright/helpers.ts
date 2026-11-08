@@ -32,7 +32,40 @@ export const scrollUntilAttached = async (page: Page, locator: Locator): Promise
 };
 
 /**
- * The natural width of a loaded image, 0 while it is loading.
+ * Waits until the photos of the grid that are on the screen are loaded (no loading placeholder, no broken image).
+ * The server generates the thumbnails on the first request, so they can come later than the content.
  */
-export const loadedImageWidth = (img: Locator): Promise<number> =>
-  img.evaluate((el: HTMLImageElement) => el.complete ? el.naturalWidth : 0);
+export const expectVisiblePhotosLoaded = async (page: Page): Promise<void> => {
+  await expect(page.locator('app-gallery-grid .photo-container > img').first()).toBeVisible();
+  await expect.poll(() => page.evaluate(() => {
+    const inView = (el: Element): boolean => {
+      const r = el.getBoundingClientRect();
+      return r.bottom > 0 && r.top < window.innerHeight;
+    };
+    const loading = [...document.querySelectorAll('app-gallery-grid app-gallery-grid-photo-loading')].filter(inView);
+    const notLoaded = [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-container > img')]
+      .filter(inView).filter(img => !img.complete || img.naturalWidth === 0);
+    return loading.length + notLoaded.length;
+  }), {message: 'photos on the screen that are not loaded'}).toBe(0);
+};
+
+/**
+ * Waits until the lightbox shows the photo in high resolution: the lightbox shows the thumbnail
+ * (upscaled, sometimes together with the loading large photo) until the large photo is loaded, then only the large photo.
+ */
+export const expectLightboxPhoto = async (page: Page, name: string, timeout?: number): Promise<void> => {
+  await expect.poll(() => page.locator('app-gallery-lightbox-media img').evaluateAll((imgs: HTMLImageElement[]) => {
+    if (imgs.length !== 1) {
+      return imgs.length + ' images: ' + imgs.map(i => i.getAttribute('src')).join(', ');
+    }
+    const img = imgs[0];
+    if (!img.complete || img.naturalWidth === 0) {
+      return 'loading: ' + img.getAttribute('src');
+    }
+    const shownWidth = Math.round(img.getBoundingClientRect().width);
+    if (img.naturalWidth < shownWidth) {
+      return 'upscaled (' + img.naturalWidth + 'px shown as ' + shownWidth + 'px): ' + img.getAttribute('src');
+    }
+    return img.alt;
+  }), {message: 'the lightbox shows the large photo', timeout}).toBe(name);
+};

@@ -1,6 +1,6 @@
 // Unhappy paths of the critical user journeys (#1254): the user should get a clear message, not an empty or wrong page.
 import {expect, Page, test} from '@playwright/test';
-import {notLoggedIn} from './helpers';
+import {expectLightboxPhoto, notLoggedIn} from './helpers';
 
 const NOT_EXISTING_SHARING = '/share/doesnotexist';
 // what a missing or invalid sharing link should tell the user
@@ -94,7 +94,7 @@ test.describe('Errors', () => {
       await content;
 
       await expect(page).toHaveURL(url => url.search === '?p=IMG_5910.jpg');
-      await expect(page.locator('app-gallery-lightbox-media img[alt="IMG_5910.jpg"]')).toBeVisible();
+      await expectLightboxPhoto(page, 'IMG_5910.jpg');
       await expect(page.locator('app-toast-card[role="status"]').filter({hasText: 'not available'})).toBeVisible();
     });
   });
