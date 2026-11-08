@@ -15,6 +15,7 @@ import {Utils} from '../../../common/Utils';
 import {FFmpeg} from '../FFmpeg';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {DateTags} from './MetadataCreationDate';
+import {VideoTimeZone} from './VideoTimeZone';
 
 const {imageSizeFromFile} = require('image-size/fromFile') as typeof import('image-size/fromFile');
 const LOG_TAG = '[MetadataLoader]';
@@ -73,6 +74,8 @@ export class MetadataLoader {
 
       const data = await FFmpeg.probe(fullPath);
 
+      // true if creationDate comes from creation_time (UTC), not from the file system
+      let isCreationTimeUTC = false;
       try {
         for (const stream of data.streams) {
           if (stream.width && stream.height) {
@@ -111,6 +114,7 @@ export class MetadataLoader {
               metadata.creationDate =
                 Date.parse(stream.tags['creation_time']) ||
                 metadata.creationDate;
+              isCreationTimeUTC = !!Date.parse(stream.tags.creation_time);
             }
             break;
           }
@@ -143,6 +147,14 @@ export class MetadataLoader {
           metadata.creationDate =
             Date.parse(data.format.tags['creation_time']) ||
             metadata.creationDate;
+          isCreationTimeUTC = isCreationTimeUTC || !!Date.parse(data.format.tags.creation_time);
+        }
+
+        // creation_time has no offset, find it in vendor tags or from the GPS position
+        const videoDate = VideoTimeZone.getDate(data.format.tags as Record<string, unknown>, metadata.creationDate, isCreationTimeUTC);
+        metadata.creationDate = videoDate.creationDate;
+        if (videoDate.creationDateOffset) {
+          metadata.creationDateOffset = videoDate.creationDateOffset;
         }
 
         // Extract Apple Live Photo Content Identifier from MOV companion videos

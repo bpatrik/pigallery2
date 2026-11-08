@@ -386,6 +386,96 @@ describe('MetadataLoader', () => {
     }
   });
 
+  describe('video timezone offset', () => {
+    const root = path.join(__dirname, '/../../../assets/video_timezone');
+    const load = (file: string) => MetadataLoader.loadVideoMetadata(path.join(root, file));
+
+    it('should use local time and offset of com.apple.quicktime.creationdate (+HHMM)', async () => {
+      const data = await load('creationdate.mp4');
+      // creation_time is 2025-07-11T15:44:38Z, creationdate 2025-07-11T09:44:38-0600: same instant
+      expect(data.creationDate).to.equal(Date.parse('2025-07-11T15:44:38Z'));
+      expect(data.creationDateOffset).to.equal('-06:00');
+    });
+
+    it('should use local time and offset of com.apple.quicktime.creationdate (+HH:MM)', async () => {
+      const data = await load('creationdate_colon.mov');
+      expect(data.creationDate).to.equal(Date.parse('2026-06-20T14:00:00Z'));
+      expect(data.creationDateOffset).to.equal('+02:00');
+    });
+
+    it('should prefer com.apple.quicktime.creationdate over a different creation_time', async () => {
+      // exported or copied videos get a new creation_time, creationdate keeps the capture time
+      const data = await load('creationdate_differs.mov');
+      expect(data.creationDate).to.equal(Date.parse('2026-03-23T15:57:19+01:00'));
+      expect(data.creationDateOffset).to.equal('+01:00');
+    });
+
+    it('should prefer the XMP sidecar over com.apple.quicktime.creationdate', async () => {
+      const data = await load('creationdate_sidecar.mp4');
+      expect(data.creationDate).to.equal(Date.parse('2020-01-02T03:04:05+01:00'));
+      expect(data.creationDateOffset).to.equal('+01:00');
+    });
+
+    it('should use the offset of com.samsung.android.utc_offset', async () => {
+      const data = await load('utc_offset.mp4');
+      expect(data.creationDate).to.equal(Date.parse('2026-01-15T09:00:00Z'));
+      expect(data.creationDateOffset).to.equal('+01:00');
+    });
+
+    it('should prefer com.samsung.android.utc_offset over the GPS position', async () => {
+      const data = await load('utc_offset_and_gps.mp4');
+      expect(data.creationDate).to.equal(Date.parse('2026-01-15T09:00:00Z'));
+      expect(data.creationDateOffset).to.equal('+09:00');
+    });
+
+    it('should use the timezone at the GPS position (summer time)', async () => {
+      const data = await load('gps_summer.mp4');
+      expect(data.creationDate).to.equal(Date.parse('2025-08-15T06:00:00Z'));
+      expect(data.creationDateOffset).to.equal('+02:00');
+    });
+
+    it('should use the timezone at the GPS position (winter time)', async () => {
+      const data = await load('gps_winter.mp4');
+      expect(data.creationDate).to.equal(Date.parse('2025-12-15T06:00:00Z'));
+      expect(data.creationDateOffset).to.equal('+01:00');
+    });
+
+    it('should use the timezone at the com.apple.quicktime.location.ISO6709 position', async () => {
+      const data = await load('gps_iso6709.mov');
+      expect(data.creationDate).to.equal(Date.parse('2025-07-11T03:00:00Z'));
+      expect(data.creationDateOffset).to.equal('+09:00');
+    });
+
+    it('should not add an offset to the file system date', async () => {
+      const data = await load('gps_no_creation_time.mp4');
+      expect(data.creationDate).to.equal(fs.statSync(path.join(root, 'gps_no_creation_time.mp4')).mtime.getTime());
+      expect(data.creationDateOffset).to.be.undefined;
+    });
+
+    it('should keep creation_time without offset if there is nothing to find it from', async () => {
+      const data = await load('no_tags.mp4');
+      expect(data.creationDate).to.equal(Date.parse('2025-08-15T06:00:00Z'));
+      expect(data.creationDateOffset).to.be.undefined;
+    });
+
+    it('should not change the existing test videos', async () => {
+      for (const file of ['video.mp4', 'video_rotate.mp4', 'video_mkv.mkv']) {
+        const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets', file));
+        expect(data.creationDateOffset, file).to.be.undefined;
+      }
+    });
+
+    it('should sort videos and photos taken at the same time together', async () => {
+      // photo taken at the same moment as gps_summer.mp4: 08:00:00 local time, OffsetTimeOriginal +02:00
+      const photoDate = Utils.timestampToMS('2025:08:15 08:00:00', '+02:00');
+      const video = await load('gps_summer.mp4');
+      for (const localTime of [true, false]) {
+        expect(Utils.getTimeMS(video.creationDate, video.creationDateOffset, localTime), 'localTime: ' + localTime)
+          .to.equal(Utils.getTimeMS(photoDate, '+02:00', localTime));
+      }
+    });
+  });
+
   describe('Live Photo', () => {
     const livePhotoDir = path.join(__dirname, '/../../../assets/live_photo');
 
