@@ -6,5 +6,5 @@ import {ConfigState} from 'typeconfig/common';
 @WebConfigClass({softReadonly: true})
 export class WebConfig extends ServerConfig {
   @ConfigState()
-  State: any;
+  State!: Record<string, unknown>; // set by typeconfig
 }

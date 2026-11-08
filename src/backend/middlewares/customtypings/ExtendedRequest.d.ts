@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {LoginCredential} from '../../../common/entities/LoginCredential';
 import {SessionContext} from '../../model/SessionContext';
 import {DirectoryAccessTypes} from '../../model/DirectoryAccess';
@@ -13,14 +12,15 @@ declare global {
       body?: {
         loginCredential?: LoginCredential;
       };
-      locale?: string;
+      // set by the locale middleware (see server.ts), defaults to 'en'
+      locale: string;
       // Stored in the session cookie. Travels to the client side
       session: {
         context?: SessionContext;
         rememberMe?: boolean;
         expires: number;
         // see SessionManager.getSessionStamp
-        stamp?: string;
+        stamp?: string | null;
         oidc?: {
           state: string;
           verifier: string;
@@ -29,7 +29,7 @@ declare global {
     }
 
     interface Response {
-      tpl?: Record<string, any>;
+      tpl?: Record<string, unknown>;
     }
 
   }

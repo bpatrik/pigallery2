@@ -115,7 +115,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     this.jobsService.availableJobs().map(job => ({name: job.Name, label: this.backendTextService.getJobName(job.Name)})));
 
 
-  error: string;
+  error = '';
 
   constructor() {
     this.JobTriggerTypeMap = [
@@ -347,7 +347,7 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
   }
 
 
-  AsMediaPickDTOArray(configElement: string | number | string[] | number[] | MediaPickDTO[]): MediaPickDTO[] {
+  AsMediaPickDTOArray(configElement: string | number | boolean | string[] | number[] | MediaPickDTO[]): MediaPickDTO[] {
     return configElement as MediaPickDTO[];
   }
 
@@ -355,11 +355,11 @@ export class WorkflowComponent implements ControlValueAccessor, Validator, OnIni
     configElement.splice(i, 1);
   }
 
-  AddNewSorting(configElement: string | number | string[] | number[] | MediaPickDTO[] | SortingMethod[]): void {
+  AddNewSorting(configElement: string | number | boolean | string[] | number[] | MediaPickDTO[] | SortingMethod[]): void {
     (configElement as SortingMethod[]).push({method: SortByTypes.Date, ascending: true});
   }
 
-  AddNewMediaPickDTO(configElement: string | number | string[] | number[] | MediaPickDTO[]): void {
+  AddNewMediaPickDTO(configElement: string | number | boolean | string[] | number[] | MediaPickDTO[]): void {
     (configElement as MediaPickDTO[]).push({
       searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
       sortBy: [{method: SortByTypes.Rating, ascending: true},

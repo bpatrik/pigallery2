@@ -1,6 +1,6 @@
-import * as path from 'path';
-import * as http from 'http';
-import {AddressInfo} from 'net';
+import * as path from 'node:path';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
 import express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import {expect} from 'chai';
@@ -79,7 +79,7 @@ describe('RenderingMWs', () => {
 
     it('should not report an aborted request as an error', async () => {
       const app = express();
-      let sent: Promise<void>;
+      let sent!: Promise<void>; // assigned by the request handler before the client is done
       let received: () => void;
       const requestReceived = new Promise<void>((resolve) => received = resolve);
       app.get('/abort', (req: Request, res: Response, next: NextFunction) => {

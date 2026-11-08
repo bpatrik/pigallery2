@@ -4,7 +4,7 @@ import {DefaultMessengers} from '../../../common/entities/job/JobDTO';
 
 export class StdoutMessenger extends Messenger {
   public readonly Name = DefaultMessengers[DefaultMessengers.Stdout];
-  public readonly ConfigTemplate: DynamicConfig[] = [];
+  public override readonly ConfigTemplate: DynamicConfig[] = [];
 
   constructor() {
     super();

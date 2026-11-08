@@ -6,6 +6,7 @@ import {NetworkService} from '../../../../../model/network/network.service';
 import {Utils} from '../../../../../../../common/Utils';
 import {ContentLoaderService} from '../../../contentLoader.service';
 import {IMediaRequestBodyData} from '../../../../../../../common/entities/extension/IClientUIConfig';
+import {errorMessage} from '../../../../../../../common/entities/Error';
 
 export interface MediaButtonModalData {
   button: IClientMediaButtonConfigWithBaseApiPath;
@@ -59,7 +60,7 @@ export class MediaButtonModalService {
 
     } catch (error) {
       // Show error notification
-      this.notificationService.error($localize`Action failed:` + (error.message || error));
+      this.notificationService.error($localize`Action failed:` + errorMessage(error));
       console.error('Media button action failed:', error);
     }
 

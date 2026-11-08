@@ -4,7 +4,7 @@ import {PersonDTO} from '../../../common/entities/PersonDTO';
 import {Logger} from '../../Logger';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {PersonJunctionTable} from './enitites/person/PersonJunctionTable';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {SessionContext} from '../SessionContext';
 import {ProjectionAwareManager} from './ProjectionAwareManager';
@@ -25,6 +25,9 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       .where('person.name LIKE :name COLLATE ' + SQL_COLLATE, {name})
       .getOne();
 
+    if (!person) {
+      throw new Error('Person not found: ' + name);
+    }
     if (typeof partialPerson.name !== 'undefined') {
       person.name = partialPerson.name;
     }
@@ -50,7 +53,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       .getCount();
   }
 
-  public async get(session: SessionContext, name: string): Promise<PersonEntry> {
+  public async get(session: SessionContext, name: string): Promise<PersonEntry | undefined> {
     const persons = await this.getAll(session);
     return persons.find((p): boolean => p.name === name);
   }
@@ -88,7 +91,8 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
     }
   }
 
-  protected async invalidateDBCache(changedDir?: ParentDirectoryDTO): Promise<void> {
+  // only a scanned directory comes with its id
+  protected async invalidateDBCache(changedDir?: DirectoryPathDTO & {id?: number}): Promise<void> {
     if (!changedDir || !changedDir.id) {
       await this.invalidateAllDBCache();
       return;
@@ -104,9 +108,9 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
         .innerJoin('pjt.person', 'person')
         .where('d.id = :dirId', {dirId: changedDir.id})
         .select('DISTINCT person.id', 'pid')
-        .getRawMany();
+        .getRawMany<{ pid: string }>();
 
-      const pids = rows.map((r: any) => parseInt(r.pid, 10)).filter((n: number) => !isNaN(n));
+      const pids = rows.map((r) => parseInt(r.pid, 10)).filter((n: number) => !isNaN(n));
       if (pids.length === 0) {
         return;
       }
@@ -199,7 +203,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
         .clone()
         .select(['pjt.person as personId', 'COUNT(*) as count'])
         .groupBy('pjt.person')
-        .getRawMany();
+        .getRawMany<{ personId: string, count: string }>();
       // Compute sample regions per person (best rated/newest photo)
       // Use individual queries per person to ensure compatibility with older SQLite versions
       const topSamples: Record<number, number> = {};
@@ -231,7 +235,7 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
       }
 
       // Build count lookup
-      const counts = countResults.reduce((acc: Record<number, number>, r: any) => {
+      const counts = countResults.reduce((acc: Record<number, number>, r) => {
         acc[parseInt(r.personId, 10)] = parseInt(r.count, 10);
         return acc;
       }, {});
@@ -261,15 +265,15 @@ export class PersonManager extends ProjectionAwareManager<PersonEntry> {
         if (cacheEntry) {
           // Update existing entry
           cacheEntry.count = count;
-          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as any : null;
+          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as PersonJunctionTable : null;
           cacheEntry.valid = true;
         } else {
           // Create new entry
           cacheEntry = new ProjectedPersonCacheEntity();
           cacheEntry.projectionKey = projectionKey;
-          cacheEntry.person = {id: person.id} as any;
+          cacheEntry.person = {id: person.id} as PersonEntry;
           cacheEntry.count = count;
-          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as any : null;
+          cacheEntry.sampleRegion = sampleRegionId ? {id: sampleRegionId} as PersonJunctionTable : null;
           cacheEntry.valid = true;
         }
 

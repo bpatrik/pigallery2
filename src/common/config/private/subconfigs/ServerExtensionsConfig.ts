@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {ConfigMap, ConfigProperty, GenericConfigType, IConfigMap, SubConfigClass} from 'typeconfig/common';
+import {ConfigMap, ConfigProperty, GenericConfigType, SubConfigClass} from 'typeconfig/common';
 import {ClientExtensionsConfig, ConfigPriority, TAGS} from '../../public/ClientConfig';
 
 declare let $localize: (s: TemplateStringsArray) => string;
@@ -7,7 +7,7 @@ declare let $localize: (s: TemplateStringsArray) => string;
 if (typeof $localize === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  global.$localize = (s) => s;
+  global.$localize = (s: TemplateStringsArray) => s;
 }
 
 @SubConfigClass<TAGS>({softReadonly: true})
@@ -44,7 +44,7 @@ export class ServerExtensionsEntryConfig {
       priority: ConfigPriority.advanced
     }
   })
-  configs: GenericConfigType;
+  configs!: GenericConfigType; // loaded from the config or set by the extension
 }
 
 @SubConfigClass<TAGS>({softReadonly: true})
@@ -67,7 +67,7 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
       priority: ConfigPriority.underTheHood,
       dockerSensitive: true,
       uiResetNeeded: {server: true},
-    } as TAGS,
+    },
     description: $localize`Folder where the app stores all extensions. Individual extensions live in their own sub-folders.`,
   })
   folder: string = 'extensions';
@@ -78,9 +78,9 @@ export class ServerExtensionsConfig extends ClientExtensionsConfig {
       name: $localize`Installed extensions`,
       uiIcon: 'ionList',
       priority: ConfigPriority.advanced
-    } as TAGS
+    }
   })
-  extensions: IConfigMap<ServerExtensionsEntryConfig> = new ConfigMap();
+  extensions = new ConfigMap<ServerExtensionsEntryConfig>();
 
 
   @ConfigProperty({

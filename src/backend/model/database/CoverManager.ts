@@ -5,7 +5,7 @@ import {DiskManager} from '../fileaccess/DiskManager';
 import {ObjectManagers} from '../ObjectManagers';
 import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {SQLConnection} from './SQLConnection';
-import {SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../common/entities/SearchQueryDTO';
+import {SearchQueryDTO, SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 import {DirectoryEntity} from './enitites/DirectoryEntity';
 import {Utils} from '../../../common/Utils';
 import {CoverPhotoDTO} from '../../../common/entities/PhotoDTO';
@@ -55,7 +55,7 @@ export class CoverManager {
     session: SessionContext,
     album: {
       searchQuery: SearchQueryDTO;
-    }): Promise<CoverPhotoDTOWithID> {
+    }): Promise<CoverPhotoDTOWithID | null> {
     const albumQuery: Brackets = await
       ObjectManagers.getInstance().SearchManager.prepareAndBuildWhereQuery(album.searchQuery);
     const connection = await SQLConnection.getConnection();
@@ -81,7 +81,7 @@ export class CoverManager {
       !Utils.equalsFilter(Config.AlbumCover.SearchQuery, {
         type: SearchQueryTypes.any_text,
         value: '',
-      } as TextSearch)
+      })
     ) {
       try {
         const coverFilterQuery = await
@@ -174,13 +174,13 @@ export class CoverManager {
       return query;
     };
 
-    let coverMedia: CoverPhotoDTOWithID = null;
+    let coverMedia: CoverPhotoDTOWithID | null = null;
     if (
       Config.AlbumCover.SearchQuery &&
       !Utils.equalsFilter(Config.AlbumCover.SearchQuery, {
         type: SearchQueryTypes.any_text,
         value: '',
-      } as TextSearch)
+      })
     ) {
       coverMedia = await coverQuery()
         .andWhere(

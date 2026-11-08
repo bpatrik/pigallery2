@@ -8,7 +8,7 @@ import {EMPTY, firstValueFrom, from, Subject, timer} from 'rxjs';
 import {Config} from '../../../../common/config/public/Config';
 import {ShareService} from './share.service';
 import {QueryParams} from '../../../../common/QueryParams';
-import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
+import {ErrorCodes, ErrorDTO, errorMessage, isErrorDTO} from '../../../../common/entities/Error';
 import {Router} from '@angular/router';
 import {filter, startWith, switchMap} from 'rxjs/operators';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
@@ -186,10 +186,10 @@ export class ContentLoaderService {
           directory: null,
           searchResult: null
         } as PackedContentWrapperWithError;
-        if (e.code === ErrorCodes.LocationLookUp_ERROR) {
-          cw.error = $localize`Cannot find location` + ': ' + e.message;
+        if (isErrorDTO(e) && e.code === ErrorCodes.LocationLookUp_ERROR) {
+          cw.error = $localize`Cannot find location` + ': ' + errorMessage(e);
         } else {
-          cw.error = $localize`Unknown server error` + ': ' + e.message;
+          cw.error = $localize`Unknown server error` + ': ' + errorMessage(e);
         }
       }
     }

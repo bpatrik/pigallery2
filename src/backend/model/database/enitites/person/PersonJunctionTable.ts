@@ -10,19 +10,19 @@ import {MediaEntity} from '../MediaEntity';
 export class PersonJunctionTable {
   @Index()
   @PrimaryGeneratedColumn({unsigned: true})
-  id: number;
+  id!: number;
 
   @Index()
   @ManyToOne(() => MediaEntity, (media) => media.metadata.faces, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  media: MediaEntity;
+  media!: MediaEntity;
 
   @Index()
   @ManyToOne(() => PersonEntry, (person) => person.faces, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  person: PersonEntry;
+  person!: PersonEntry;
 }

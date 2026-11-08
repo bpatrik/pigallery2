@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from '../../model/network/authentication.service';
-import {ErrorCodes} from '../../../../common/entities/Error';
+import {ErrorCodes, isErrorDTO} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
 import {NavigationService} from '../../model/navigation.service';
 import {LanguageComponent} from '../language/language.component';
@@ -52,7 +52,7 @@ export class LoginComponent implements OnInit {
     try {
       await this.authService.login(this.loginCredential);
     } catch (error) {
-      if (error && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) {
+      if (isErrorDTO(error) && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) {
         this.loginError.set(true);
       }
     }

@@ -3,7 +3,7 @@ import {PhotoProcessing} from '../fileaccess/fileprocessing/PhotoProcessing';
 import {ProjectPath} from '../../ProjectPath';
 import {Config} from '../../../common/config/private/Config';
 import {ThumbnailSourceType} from '../fileaccess/PhotoWorker';
-import * as path from 'path';
+import * as path from 'node:path';
 import {QueryParams} from '../../../common/QueryParams';
 import {DynamicConfig} from '../../../common/entities/DynamicConfig';
 
@@ -15,7 +15,6 @@ export interface MediaDTOWithThPath extends MediaDTO {
 export abstract class Messenger<C extends Record<string, unknown> = Record<string, unknown>> {
 
   public abstract get Name(): string;
-  protected config: C;
   public readonly ConfigTemplate: DynamicConfig[]  = [];
 
   private async getThumbnail(m: MediaDTO) {
@@ -28,7 +27,7 @@ export abstract class Messenger<C extends Record<string, unknown> = Record<strin
   }
 
 
-  public async send(config: C, input: string | MediaDTO[] | unknown) {
+  public async send(config: C, input: unknown) {
     if (Array.isArray(input) && input.length > 0
       && (input as MediaDTO[])[0]?.name
       && (input as MediaDTO[])[0]?.directory

@@ -5,7 +5,7 @@ import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
 import {UserDTO, UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Config} from '../../../../../src/common/config/private/Config';
-import * as path from 'path';
+import * as path from 'node:path';
 import {UserManager} from '../../../../../src/backend/model/database/UserManager';
 import {DirectorySearch, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
@@ -66,7 +66,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
           done(err);
         }
       };
-      AuthenticationMWs.authenticate(req, null, next);
+      AuthenticationMWs.authenticate(req, null!, next);
 
     });
 
@@ -198,7 +198,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         session, sessionOptions: {}, params: {},
         query: sharingKey ? {[QueryParams.gallery.sharingKey_query]: sharingKey} : {}
       };
-      let status: number = null;
+      let status: number = null!;
       const res: any = {
         status: (s: number) => {
           status = s;
@@ -235,14 +235,14 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         body: {loginCredential: {username: name, password: 'pass', rememberMe}}
       };
       let err: any = 'not-called';
-      await AuthenticationMWs.login(req, null, (e?: any) => {
+      await AuthenticationMWs.login(req, null!, (e?: any) => {
         err = e;
       });
       expect(err).to.be.undefined;
       return toCookie(req.session);
     };
 
-    const createSharing = async (creator: UserDTO, password: string = null, expires = Date.now() + 100000) => {
+    const createSharing = async (creator: UserDTO, password: string | null = null, expires = Date.now() + 100000) => {
       const sharingKey = 'key_' + Math.random().toString(36).substring(2);
       await ObjectManagers.getInstance().SharingManager.createSharing({
         sharingKey,
@@ -255,7 +255,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       return sharingKey;
     };
 
-    const shareLogin = async (sharingKey: string, password: string = null) => {
+    const shareLogin = async (sharingKey: string, password: string | null = null) => {
       const req: any = {
         session: {}, sessionOptions: {}, params: {}, body: {password},
         query: {[QueryParams.gallery.sharingKey_query]: sharingKey}
@@ -319,7 +319,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const req: any = {session, sessionOptions: {}, params: {id: '' + session.context.user.id}, body};
       for (const m of [mw, AuthenticationMWs.refreshSession]) {
         let err: any = 'not-called';
-        await m(req, null, (e?: any) => {
+        await m(req, null!, (e?: any) => {
           err = e;
         });
         expect(err).to.be.undefined;
@@ -349,8 +349,8 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const target = await createUser('target');
       const session = await login('admin2');
       const req: any = {session, sessionOptions: {}, params: {id: '' + target.id}, body: {newRole: UserRoles.Admin}};
-      await UserMWs.changeRole(req, null, (): void => undefined);
-      await AuthenticationMWs.refreshSession(req, null, (): void => undefined);
+      await UserMWs.changeRole(req, null!, (): void => undefined);
+      await AuthenticationMWs.refreshSession(req, null!, (): void => undefined);
       expect(req.session.stamp).to.equal(session.stamp);
       expect(req.session.context.user.name).to.equal('admin2');
     });
@@ -358,11 +358,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     it('starts a remembered session on OIDC login', async () => {
       const olga = await createUser('olga');
       const origGetUser = OIDCAuthService.getUserFromAuthenticationResponse;
-      OIDCAuthService.getUserFromAuthenticationResponse = async () => ObjectManagers.getInstance().UserManager.findOne({id: olga.id});
+      OIDCAuthService.getUserFromAuthenticationResponse = async () => ObjectManagers.getInstance().UserManager.findOne({id: olga.id}) as Promise<UserDTO>;
       const req: any = {session: {}, sessionOptions: {}, query: {}, params: {}};
       let err: any = 'not-called';
       try {
-        await AuthenticationMWs.oidcLogin(req, null, (e?: any) => {
+        await AuthenticationMWs.oidcLogin(req, null!, (e?: any) => {
           err = e;
         });
       } finally {
@@ -401,6 +401,25 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       await expectEnded({context: {user: {id: ivy.id, name: 'ivy', role: UserRoles.Admin}}, expires: Date.now() + 10000});
     });
 
+    it('rejects an unknown sharing key with 401', async () => {
+      const req: any = {
+        session: {}, sessionOptions: {}, params: {}, body: {},
+        query: {[QueryParams.gallery.sharingKey_query]: 'no_such_key'}
+      };
+      let status: number | undefined;
+      let err: ErrorDTO | undefined;
+      await AuthenticationMWs.shareLogin(req, {
+        status: (s: number): void => {
+          status = s;
+        }
+      } as any, (e?: any) => {
+        err = e;
+      });
+      expect(status).to.equal(401);
+      expect(err?.code).to.equal(ErrorCodes.CREDENTIAL_NOT_FOUND);
+      expect(req.session.context).to.be.undefined;
+    });
+
     it('ends the guest session of a deleted sharing', async () => {
       const owner = await createUser('owner', UserRoles.Admin);
       const sharingKey = await createSharing(owner);
@@ -413,7 +432,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
     it('ends the guest session of an expired sharing', async () => {
       const owner = await createUser('owner', UserRoles.Admin);
-      const sharingKey = await createSharing(owner, null, Date.now() + 300);
+      const sharingKey = await createSharing(owner, null!, Date.now() + 300);
       const session = await shareLogin(sharingKey);
       await expectAlive(toCookie(session));
       await new Promise(resolve => setTimeout(resolve, 400));
@@ -435,11 +454,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       await expectAlive(toCookie(session));
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       await ObjectManagers.getInstance().SharingManager.updateSharing({
-        id: sharing.id,
+        id: sharing!.id,
         creator: owner,
         password: 'other',
-        searchQuery: sharing.searchQuery,
-        expires: sharing.expires
+        searchQuery: sharing!.searchQuery,
+        expires: sharing!.expires
       } as any, true);
       await expectEnded(toCookie(session), sharingKey);
     });
@@ -450,11 +469,11 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const session = await shareLogin(sharingKey);
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       await ObjectManagers.getInstance().SharingManager.updateSharing({
-        id: sharing.id,
+        id: sharing!.id,
         creator: owner,
         password: null,
         searchQuery: {type: SearchQueryTypes.directory, value: 'other', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
-        expires: sharing.expires
+        expires: sharing!.expires
       } as any, true);
       const s = await expectAlive(toCookie(session), sharingKey);
       expect(s.stamp).to.not.equal(session.stamp);
@@ -476,7 +495,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
           done(err);
         }
       };
-      AuthenticationMWs.inverseAuthenticate(req, null, next);
+      AuthenticationMWs.inverseAuthenticate(req, null!, next);
 
     });
 
@@ -495,7 +514,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         expect(err.code).to.be.eql(ErrorCodes.ALREADY_AUTHENTICATED);
         done();
       };
-      AuthenticationMWs.inverseAuthenticate(req, null, next);
+      AuthenticationMWs.inverseAuthenticate(req, null!, next);
 
     });
   });
@@ -520,7 +539,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
           done(err);
         }
       };
-      AuthenticationMWs.authorise(UserRoles.LimitedGuest)(req, null, next);
+      AuthenticationMWs.authorise(UserRoles.LimitedGuest)(req, null!, next);
 
     });
 
@@ -563,7 +582,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
           expect(err.code).to.be.eql(ErrorCodes.INPUT_ERROR);
           done();
         };
-        AuthenticationMWs.login(req, null, next);
+        AuthenticationMWs.login(req, null!, next);
 
       });
 
@@ -582,7 +601,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
             done(err);
           }
         };
-        AuthenticationMWs.login(req, null, next);
+        AuthenticationMWs.login(req, null!, next);
 
 
       });
@@ -603,7 +622,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
             done(err);
           }
         };
-        AuthenticationMWs.login(req, null, next);
+        AuthenticationMWs.login(req, null!, next);
 
 
       });
@@ -637,7 +656,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         }
       } as any;
 
-      AuthenticationMWs.login(req, null, next);
+      AuthenticationMWs.login(req, null!, next);
     });
 
     it('should call next with error on not finding user', (done: (err?: any) => void) => {
@@ -665,7 +684,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
           return Promise.reject(null);
         }
       } as UserManager;
-      AuthenticationMWs.login(req, null, next);
+      AuthenticationMWs.login(req, null!, next);
 
 
     });
@@ -716,7 +735,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       };
 
 
-      AuthenticationMWs.login(req, null, next);
+      AuthenticationMWs.login(req, null!, next);
     });
 
     it('should create context with allowQuery', (done: (err?: any) => void) => {
@@ -772,7 +791,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       };
 
 
-      AuthenticationMWs.login(req, null, next);
+      AuthenticationMWs.login(req, null!, next);
     });
 
     it('should create context with blockQuery', (done: (err?: any) => void) => {
@@ -836,7 +855,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         return testContext;
       };
 
-      AuthenticationMWs.login(req, null, next);
+      AuthenticationMWs.login(req, null!, next);
     });
 
     it('should create context with both allowQuery and blockQuery', (done: (err?: any) => void) => {
@@ -912,14 +931,14 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         return testContext;
       };
 
-      AuthenticationMWs.login(req, null, next);
+      AuthenticationMWs.login(req, null!, next);
     });
   });
 
   describe('normalizePathParam', async () => {
-    const run = (p: string | string[]): { err: ErrorDTO, value: string } => {
+    const run = (p: string | string[]): { err: ErrorDTO | undefined, value: string } => {
       const req: any = {params: {directory: p}};
-      let err: ErrorDTO;
+      let err: ErrorDTO | undefined;
       AuthenticationMWs.normalizePathParam('directory')(req, {} as any, (e?: unknown) => {
         err = e as ErrorDTO;
       });
@@ -930,12 +949,12 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       for (const p of ['..', '../', '../..', 'a/../..', '../x.jpg', 'a/../../x.jpg', '..\\x.jpg'.replace('\\', path.sep)]) {
         const ret = run(p);
         expect(ret.err, p).to.be.instanceOf(ErrorDTO);
-        expect(ret.err.code, p).to.equal(ErrorCodes.INPUT_ERROR);
+        expect(ret.err!.code, p).to.equal(ErrorCodes.INPUT_ERROR);
       }
     });
 
     it('should normalize paths inside the base folder', () => {
-      expect(run(undefined)).to.deep.equal({err: undefined, value: path.sep});
+      expect(run(undefined!)).to.deep.equal({err: undefined, value: path.sep});
       expect(run('a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('a/b.jpg')});
       expect(run('a/../b.jpg')).to.deep.equal({err: undefined, value: 'b.jpg'});
       expect(run('/a/b.jpg')).to.deep.equal({err: undefined, value: path.normalize('/a/b.jpg')});
@@ -957,7 +976,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       for (const p of [['..'], ['..', 'x.jpg'], ['a', '..', '..'], ['../x.jpg'], ['a/../..', 'x.jpg']]) {
         const ret = run(p);
         expect(ret.err, p.join('|')).to.be.instanceOf(ErrorDTO);
-        expect(ret.err.code, p.join('|')).to.equal(ErrorCodes.INPUT_ERROR);
+        expect(ret.err!.code, p.join('|')).to.equal(ErrorCodes.INPUT_ERROR);
       }
     });
   });
@@ -1094,7 +1113,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
           done(err);
         }
       };
-      AuthenticationMWs.logout(req, null, next);
+      AuthenticationMWs.logout(req, null!, next);
 
     });
 
@@ -1111,14 +1130,14 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
     const authorise = async (context: SessionContext, directory: string) => {
       const req: any = {session: {context}, params: {directory: path.normalize(directory)}, query: {}};
-      let status: number = null;
+      let status: number = null!;
       const res: any = {
         status: (s: number) => {
           status = s;
           return res;
         }
       };
-      let nextArgs: any[] = null;
+      let nextArgs: any[] = null!;
       await AuthenticationMWs.authoriseDirectory('directory')(req, res, (...args: any[]) => {
         nextArgs = args;
       });
@@ -1179,7 +1198,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
 
     it('fails closed', async () => {
-      const r = await authorise(undefined, 'public');
+      const r = await authorise(undefined!, 'public');
       expect(r.status).to.equal(404);
       const ctx = await userContext({});
       (ctx.directoryAccess as any).blockList = {}; // broken context

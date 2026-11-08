@@ -34,7 +34,6 @@ locale.source.xlf
 test.*
 test2.*
 /db/
-/test/cypress/screenshots/
 /extensions/
 /extension/lib/
 *.sublime-project
@@ -50,14 +49,16 @@ test2.*
 /*.js.*
 /*.js.map
 /sendmail/
-/test/cypress/e2e/fb-messenger.*
-/test/cypress/support/*.js*
-/test/cypress/support/*.js.map
-/test/cypress/e2e/*.cy.js*
-/test/cypress/e2e/*.cy.js.map
 /docs/index.html.js*
 /bm_config.json
-/cypress.env.json
 /wiki/
 /site/
 /.junie/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/test/playwright/.auth/
+/test/playwright/screenshots/

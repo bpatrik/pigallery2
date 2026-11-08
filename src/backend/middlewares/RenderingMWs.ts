@@ -8,9 +8,9 @@ import {Logger} from '../Logger';
 import {ResponseSharingDTO} from '../../common/entities/SharingDTO';
 import {Utils} from '../../common/Utils';
 import {LoggerRouter} from '../routes/LoggerRouter';
-import {TAGS} from '../../common/config/public/ClientConfig';
 import {ExtensionConfigWrapper} from '../model/extension/ExtensionConfigWrapper';
 import {SharingEntity} from '../model/database/enitites/SharingEntity';
+import {UserEntity} from '../model/database/enitites/UserEntity';
 import {Config} from '../../common/config/private/Config';
 
 const forcedDebug = process.env['NODE_ENV'] === 'debug';
@@ -76,8 +76,8 @@ export class RenderingMWs {
     const rs = shares.map((s): ResponseSharingDTO => {
       const ret = s as unknown as ResponseSharingDTO;
       ret.passwordProtected = Config.Sharing.passwordRequired || (typeof s.password === 'string' && s.password !== '');
-      delete s.password;
-      delete s.creator.password;
+      delete (s as Partial<SharingEntity>).password;
+      delete (s.creator as Partial<UserEntity>).password;
       return ret;
     });
     return RenderingMWs.renderMessage(res, rs);
@@ -150,12 +150,12 @@ export class RenderingMWs {
   ): Promise<void> {
     const originalConf = await ExtensionConfigWrapper.original();
     // These are sensitive information, do not send to the client side
-    originalConf.Server.sessionSecret = null;
+    originalConf.Server.sessionSecret = [];
     const originalConfJSON = JSON.parse(JSON.stringify(originalConf.toJSON({
       attachState: true,
       attachVolatile: true,
-      skipTags: {secret: true} as TAGS
-    }) as PrivateConfigClass));
+      skipTags: {secret: true}
+    }))) as PrivateConfigClass;
 
     const message = new Message<PrivateConfigClass>(
       null,

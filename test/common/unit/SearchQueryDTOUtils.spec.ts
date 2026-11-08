@@ -330,7 +330,7 @@ describe('SearchQueryDTOUtils.validateDirectoryList', () => {
 
 describe('SearchQueryDTOUtils.directoryListToQuery', () => {
   it('should return null for empty list', () => {
-    expect(SearchQueryUtils.directoryListToQuery(null)).to.be.null;
+    expect(SearchQueryUtils.directoryListToQuery(null!)).to.be.null;
     expect(SearchQueryUtils.directoryListToQuery([])).to.be.null;
   });
 
@@ -493,7 +493,7 @@ describe('SearchQueryDTOUtils.parseURLifiedQuery', () => {
 
   it('should return null for an empty query', () => {
     expect(SearchQueryUtils.parseURLifiedQuery('')).to.be.null;
-    expect(SearchQueryUtils.parseURLifiedQuery(undefined)).to.be.null;
+    expect(SearchQueryUtils.parseURLifiedQuery(undefined!)).to.be.null;
   });
 
   it('should parse an urlified query', () => {

@@ -2,8 +2,8 @@ import {Config} from '../src/common/config/private/Config';
 import {ObjectManagers} from '../src/backend/model/ObjectManagers';
 import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
 import {IndexingManager} from '../src/backend/model/database/IndexingManager';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {Utils} from '../src/common/Utils';
 import {DatabaseType, ReIndexingSensitivity} from '../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../src/backend/ProjectPath';
@@ -44,35 +44,35 @@ export interface BenchmarkResult {
 
 export class BMIndexingManager extends IndexingManager {
 
-  public async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
+  public override async saveToDB(scannedDirectory: ParentDirectoryDTO): Promise<void> {
     return super.saveToDB(scannedDirectory);
   }
 }
 
 
 class BMGalleryRouter extends GalleryRouter {
-  public static addDirectoryList(app: Express): void {
+  public static override addDirectoryList(app: Express): void {
     GalleryRouter.addDirectoryList(app);
   }
 
-  public static addSearch(app: Express): void {
+  public static override addSearch(app: Express): void {
     GalleryRouter.addSearch(app);
   }
 
-  public static addAutoComplete(app: Express): void {
+  public static override addAutoComplete(app: Express): void {
     GalleryRouter.addAutoComplete(app);
   }
 }
 
 class BMPersonRouter extends PersonRouter {
-  public static addGetPersons(app: Express): void {
+  public static override addGetPersons(app: Express): void {
     PersonRouter.addGetPersons(app);
   }
 }
 
 export class BenchmarkRunner {
   inited = false;
-  private biggestDirPath: string = null;
+  private biggestDirPath: string = null!; // set by init(), which every benchmark awaits first
   private readonly requestTemplate: any = {
     requestPipe: null,
     params: {},
@@ -93,7 +93,7 @@ export class BenchmarkRunner {
   async bmSaveDirectory(): Promise<BenchmarkResult[]> {
     const dir = await DiskManager.scanDirectory(this.biggestDirPath);
     const bm = new Benchmark('Saving directory to DB', null,
-      (): Promise<void> => this.resetDB(), null,
+      (): Promise<void> => this.resetDB(), undefined,
       async (): Promise<void> => {
         await this.init();
         await this.setupDB();
@@ -110,8 +110,8 @@ export class BenchmarkRunner {
 
   async bmScanDirectory(): Promise<BenchmarkResult[]> {
     await this.init();
-    const bm = new Benchmark('Scanning directory', {}, null,
-      null,
+    const bm = new Benchmark('Scanning directory', {}, undefined,
+      undefined,
       async (): Promise<void> => {
         await this.init();
       });
@@ -129,7 +129,7 @@ export class BenchmarkRunner {
       async (): Promise<void> => {
         await ObjectManagers.reset();
         await ObjectManagers.getInstance().init();
-      }, null,
+      }, undefined,
       async (): Promise<void> => {
         Config.Indexing.reIndexingSensitivity = ReIndexingSensitivity.low;
         await this.init();
@@ -143,7 +143,7 @@ export class BenchmarkRunner {
     const bm = new Benchmark('Listing Faces', Utils.clone(this.requestTemplate), async (): Promise<void> => {
         await ObjectManagers.reset();
         await ObjectManagers.getInstance().init();
-      }, null,
+      }, undefined,
       async (): Promise<void> => {
         Config.Indexing.reIndexingSensitivity = ReIndexingSensitivity.low;
         await this.setupDB();
@@ -227,7 +227,7 @@ export class BenchmarkRunner {
       const req = Utils.clone(this.requestTemplate);
       req.params.searchQueryDTO = JSON.stringify(entry.query);
 
-      const bm = new Benchmark('Searching for `' + entry.description + '`', req, null, null,
+      const bm = new Benchmark('Searching for `' + entry.description + '`', req, undefined, undefined,
         async (): Promise<void> => {
           await this.setupDB();
         });
@@ -242,7 +242,7 @@ export class BenchmarkRunner {
   async bmAutocomplete(text: string): Promise<BenchmarkResult[]> {
     const req = Utils.clone(this.requestTemplate);
     req.params.value = text;
-    const bm = new Benchmark('Auto complete for `' + text + '`', req, null, null,
+    const bm = new Benchmark('Auto complete for `' + text + '`', req, undefined, undefined,
       async (): Promise<void> => {
         await this.setupDB();
       });
@@ -275,12 +275,12 @@ export class BenchmarkRunner {
       let biggestPath = '/';
       const queue = ['/'];
       while (queue.length > 0) {
-        const dirPath = queue.shift();
+        const dirPath = queue.shift()!;
         const dir = await gm.listDirectory(session, dirPath);
-        dir.directories.forEach((d): number => queue.push(path.join(d.path + d.name)));
-        if (biggest < dir.media.length) {
-          biggestPath = path.join(dir.path + dir.name);
-          biggest = dir.media.length;
+        dir!.directories.forEach((d): number => queue.push(path.join(d.path + d.name)));
+        if (biggest < dir!.media.length) {
+          biggestPath = path.join(dir!.path + dir!.name);
+          biggest = dir!.media.length;
         }
       }
       this.biggestDirPath = biggestPath;
@@ -307,7 +307,7 @@ export class BenchmarkRunner {
         const indexingJob = new IndexingJob();
 
         indexingJob.JobListener = {
-          onJobFinished: (job: IJob<any>, state: JobProgressStates, soloRun: boolean): void => {
+          onJobFinished: async (job: IJob<any>, state: JobProgressStates, soloRun: boolean): Promise<void> => {
             resolve();
           },
 

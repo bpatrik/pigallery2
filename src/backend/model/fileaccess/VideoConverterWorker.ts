@@ -1,5 +1,5 @@
 import {Logger} from '../../Logger';
-import {promises as fsp} from 'fs';
+import {promises as fsp} from 'node:fs';
 import {FFmpeg} from '../FFmpeg';
 import {FFmpegPresets, videoCodecType, videoFormatType, videoResolutionType,} from '../../../common/config/private/PrivateConfig';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';

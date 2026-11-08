@@ -7,20 +7,24 @@ import {ObjectManagers} from '../ObjectManagers';
 import {UserEntity} from './enitites/UserEntity';
 import {SharingEntity} from './enitites/SharingEntity';
 import {IObjectManager} from './IObjectManager';
-import {ParentDirectoryDTO} from '../../../common/entities/DirectoryDTO';
+import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
 import {DiskManager} from '../fileaccess/DiskManager';
 import {ExtensionDecorator} from '../extension/ExtensionDecorator';
 import {Logger} from '../../Logger';
 import {SessionManager} from './SessionManager';
-import * as path from 'path';
+import * as path from 'node:path';
 import {SessionContext} from '../SessionContext';
 import {MediaEntity} from './enitites/MediaEntity';
+import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
+import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {Config} from '../../../common/config/private/Config';
 import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {NotificationManager} from '../NotifocationManager';
 
 const LOG_TAG = '[ProjectedCacheManager]';
+// raw aggregates come back as numbers or strings, depending on the driver
+type RawNumber = string | number | null;
 
 export class ProjectedCacheManager implements IObjectManager {
 
@@ -29,7 +33,7 @@ export class ProjectedCacheManager implements IObjectManager {
     await this.cleanupNonExistingProjections();
   }
 
-  public async onNewDataVersion(changedDir?: ParentDirectoryDTO): Promise<void> {
+  public async onNewDataVersion(changedDir?: DirectoryPathDTO): Promise<void> {
     if (!changedDir) {
       return;
     }
@@ -63,7 +67,8 @@ export class ProjectedCacheManager implements IObjectManager {
     for (const s of shares) {
       try {
         const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(s);
-        const key = ObjectManagers.getInstance().SessionManager.createProjectionKey(q);
+        // same as SessionManager.buildContext: no projection query, no projection key
+        const key = q ? ObjectManagers.getInstance().SessionManager.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
         activeKeys.add(key);
       } catch (e) {
         // an invalid sharing can't be opened, so it has no projection
@@ -126,11 +131,11 @@ export class ProjectedCacheManager implements IObjectManager {
         'MIN(media.metadata.creationDate) as oldest',
         'MAX(media.metadata.creationDate) as youngest',
       ])
-      .getRawOne();
+      .getRawOne<{ mediaCount: RawNumber, oldest: RawNumber, youngest: RawNumber }>();
 
-    const mediaCount: number = agg?.mediaCount != null ? parseInt(agg.mediaCount as any, 10) : 0;
-    const oldestMedia: number = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
-    const youngestMedia: number = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
+    const mediaCount: number = agg?.mediaCount != null ? parseInt(String(agg.mediaCount), 10) : 0;
+    const oldestMedia: number | null = agg?.oldest != null ? parseInt(String(agg.oldest), 10) : null;
+    const youngestMedia: number | null = agg?.youngest != null ? parseInt(String(agg.youngest), 10) : null;
 
     // Compute recursive media count under projection (includes children) using single SQL query
     const recQb = mediaRepo
@@ -156,8 +161,8 @@ export class ProjectedCacheManager implements IObjectManager {
     if (session.projectionQuery) {
       recQb.andWhere(session.projectionQuery);
     }
-    const aggRec = await recQb.select(['COUNT(*) as cnt']).getRawOne();
-    const recursiveMediaCount = aggRec?.cnt != null ? parseInt(aggRec.cnt as any, 10) : 0;
+    const aggRec = await recQb.select(['COUNT(*) as cnt']).getRawOne<{ cnt: RawNumber }>();
+    const recursiveMediaCount = aggRec?.cnt != null ? parseInt(String(aggRec.cnt), 10) : 0;
 
 
     // Compute cover respecting projection
@@ -178,14 +183,14 @@ export class ProjectedCacheManager implements IObjectManager {
       row = new ProjectedDirectoryCacheEntity();
       row.projectionKey = projectionKey;
       // Avoid fetching the full directory graph; assign relation by id only
-      row.directory = {id: dir.id} as any;
+      row.directory = {id: dir.id} as DirectoryEntity;
     }
 
     row.mediaCount = mediaCount || 0;
     row.recursiveMediaCount = recursiveMediaCount || 0;
     row.oldestMedia = oldestMedia ?? null;
     row.youngestMedia = youngestMedia ?? null;
-    row.cover = coverMedia as any;
+    row.cover = coverMedia as MediaEntity; // only its id is saved
     row.valid = true;
 
     return row;
@@ -200,11 +205,12 @@ export class ProjectedCacheManager implements IObjectManager {
     const row = await this.getCacheForDirectory(connection, session, dir);
     const ret = await cacheRepo.save(row);
     // we would not select these either
-    delete ret.projectionKey;
-    delete ret.directory;
-    delete ret.id;
+    const partial: Partial<ProjectedDirectoryCacheEntity> = ret;
+    delete partial.projectionKey;
+    delete partial.directory;
+    delete partial.id;
     if (ret.cover) {
-      delete ret.cover.id;
+      delete (ret.cover as Partial<MediaEntity>).id;
     }
     return ret;
   }
@@ -212,7 +218,7 @@ export class ProjectedCacheManager implements IObjectManager {
   public async setAndGetCacheForAlbum(connection: DataSource, session: SessionContext, album: {
     name: string,
     id: number,
-    searchQuery: any
+    searchQuery: SearchQueryDTO
   }): Promise<ProjectedAlbumCacheEntity> {
 
 
@@ -258,46 +264,47 @@ export class ProjectedCacheManager implements IObjectManager {
           'MIN(media.metadata.creationDate) as oldest',
           'MAX(media.metadata.creationDate) as youngest',
         ])
-        .getRawOne();
+        .getRawOne<{ itemCount: RawNumber, oldest: RawNumber, youngest: RawNumber }>();
 
 
       // Compute cover respecting projection
-      coverMedia = await ObjectManagers.getInstance().CoverManager.getCoverForAlbum(session, album as any);
+      coverMedia = await ObjectManagers.getInstance().CoverManager.getCoverForAlbum(session, album);
     } catch (e) {
-      Logger.error(LOG_TAG, `Error computing album cache for album "${album.name}": ` + e);
+      Logger.error(LOG_TAG, `Error computing album cache for album "${album.name}": ` + String(e));
       NotificationManager.warning(`Error computing album cache for album "${album.name}"`);
     }
 
-    const itemCount: number = agg?.itemCount != null ? parseInt(agg.itemCount as any, 10) : 0;
-    const oldestMedia: number = agg?.oldest != null ? parseInt(agg.oldest as any, 10) : null;
-    const youngestMedia: number = agg?.youngest != null ? parseInt(agg.youngest as any, 10) : null;
+    const itemCount: number = agg?.itemCount != null ? parseInt(String(agg.itemCount), 10) : 0;
+    const oldestMedia: number | null = agg?.oldest != null ? parseInt(String(agg.oldest), 10) : null;
+    const youngestMedia: number | null = agg?.youngest != null ? parseInt(String(agg.youngest), 10) : null;
 
     if (!row) {
       row = new ProjectedAlbumCacheEntity();
       row.projectionKey = projectionKey;
       // Avoid fetching the full album graph; assign relation by id only
-      row.album = {id: album.id} as any;
+      row.album = {id: album.id} as AlbumBaseEntity;
     }
 
     row.itemCount = itemCount || 0;
     row.oldestMedia = oldestMedia ?? null;
     row.youngestMedia = youngestMedia ?? null;
-    row.cover = coverMedia as any;
+    row.cover = coverMedia as MediaEntity; // only its id is saved
     row.valid = true;
 
     const ret = await cacheRepo.save(row);
     // we would not select these either
-    delete ret.projectionKey;
-    delete ret.album;
-    delete ret.id;
+    const partial: Partial<ProjectedAlbumCacheEntity> = ret;
+    delete partial.projectionKey;
+    delete partial.album;
+    delete partial.id;
     if (ret.cover) {
-      delete ret.cover.id;
+      delete (ret.cover as Partial<MediaEntity>).id;
     }
     return ret;
   }
 
   @ExtensionDecorator(e => e.gallery.ProjectedCacheManager.invalidateDirectoryCache)
-  protected async invalidateDirectoryCache(dir: ParentDirectoryDTO) {
+  protected async invalidateDirectoryCache(dir: DirectoryPathDTO) {
     const connection = await SQLConnection.getConnection();
     const dirRepo = connection.getRepository(DirectoryEntity);
 

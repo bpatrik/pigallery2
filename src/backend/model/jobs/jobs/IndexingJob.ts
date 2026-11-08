@@ -1,6 +1,6 @@
 import {ObjectManagers} from '../../ObjectManagers';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {Job} from './Job';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';
 import {JobProgressStates} from '../../../../common/entities/job/JobProgressDTO';
@@ -27,7 +27,7 @@ export class IndexingJob<
     },
   ];
 
-  get LOG_TAG(): string {
+  override get LOG_TAG(): string {
     return '[IndexingJob]';
   }
 
@@ -41,17 +41,17 @@ export class IndexingJob<
   }
 
   protected async step(): Promise<boolean> {
-    if (this.directoriesToIndex.length === 0) {
+    const directory = this.directoriesToIndex.shift();
+    if (directory === undefined) {
       if (ObjectManagers.getInstance().IndexingManager.IsSavingInProgress) {
         await ObjectManagers.getInstance().IndexingManager.SavingReady;
       }
       this.Progress.Left = 0;
       return false;
     }
-    const directory = this.directoriesToIndex.shift();
     this.Progress.Left = this.directoriesToIndex.length;
 
-    let scanned: ParentDirectoryDTO<FileDTO>;
+    let scanned: ParentDirectoryDTO<FileDTO> | null = null;
     let dirChanged = true;
 
     try {

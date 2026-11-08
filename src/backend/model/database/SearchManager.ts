@@ -6,7 +6,7 @@ import {PhotoEntity} from './enitites/PhotoEntity';
 import {DirectoryEntity} from './enitites/DirectoryEntity';
 import {MediaEntity} from './enitites/MediaEntity';
 import {PersonEntry} from './enitites/person/PersonEntry';
-import {Brackets, SelectQueryBuilder, WhereExpressionBuilder} from 'typeorm';
+import {Brackets, ObjectLiteral, SelectQueryBuilder, WhereExpressionBuilder} from 'typeorm';
 import {Config} from '../../../common/config/private/Config';
 import {
   ANDSearchQuery,
@@ -32,7 +32,7 @@ import {FileEntity} from './enitites/FileEntity';
 import {SQL_COLLATE} from './enitites/EntityUtils';
 import {GroupSortByTypes, SortByTypes, SortingMethod} from '../../../common/entities/SortingMethods';
 import {SessionContext} from '../SessionContext';
-import * as path from 'path';
+import * as path from 'node:path';
 
 export class SearchManager {
   private DIRECTORY_SELECT = [
@@ -43,7 +43,7 @@ export class SearchManager {
   // makes all search query params unique, so typeorm won't mix them
   private queryIdBase = 0;
 
-  public static setSorting<T>(
+  public static setSorting<T extends ObjectLiteral>(
     query: SelectQueryBuilder<T>,
     sortings: SortingMethod[]
   ): SelectQueryBuilder<T> {
@@ -141,10 +141,10 @@ export class SearchManager {
       }
 
       q.limit(Config.Search.AutoComplete.ItemsPerCategory.keyword);
-      (await q.getRawMany())
+      (await q.getRawMany<{ metadataKeywords: string }>())
         .map(
           (r): string[] =>
-            (r.metadataKeywords as string).split(',') as string[]
+            r.metadataKeywords.split(',')
         )
         .forEach((keywords): void => {
           acList.push(
@@ -181,7 +181,7 @@ export class SearchManager {
                 Config.Search.AutoComplete.ItemsPerCategory.person
               )
               .orderBy('cache.count', 'DESC')
-              .getRawMany()
+              .getRawMany<{ name: string }>()
           ).map((r) => r.name),
           SearchQueryTypes.person
         )
@@ -230,7 +230,7 @@ export class SearchManager {
         .limit(Config.Search.AutoComplete.ItemsPerCategory.position);
       (
 
-        await q.getRawMany()
+        await q.getRawMany<{ city: string | null, country: string | null, state: string | null }>()
       )
         .filter((pm): boolean => !!pm)
         .map(
@@ -277,7 +277,7 @@ export class SearchManager {
       partialResult.push(
         this.encapsulateAutoComplete(
           (
-            await q.getRawMany()
+            await q.getRawMany<{ name: string }>()
           ).map((r) => r.name),
           SearchQueryTypes.file_name
         )
@@ -308,7 +308,7 @@ export class SearchManager {
       partialResult.push(
         this.encapsulateAutoComplete(
           (
-            await q.getRawMany()
+            await q.getRawMany<{ caption: string }>()
           ).map((r) => r.caption),
           SearchQueryTypes.caption
         )
@@ -351,10 +351,11 @@ export class SearchManager {
     while (result.length < Config.Search.AutoComplete.ItemsPerCategory.maxItems) {
       let adding = false;
       for (let i = 0; i < partialResult.length; ++i) {
-        if (partialResult[i].length <= 0) {
+        const item = partialResult[i].shift(); // first elements are more important
+        if (!item) {
           continue;
         }
-        result.push(partialResult[i].shift()); // first elements are more important
+        result.push(item);
         adding = true;
       }
       if (!adding) {
@@ -405,7 +406,7 @@ export class SearchManager {
           .getRepository(FileEntity)
           .createQueryBuilder('file')
           .select(['file', ...this.DIRECTORY_SELECT])
-          .where(`file.directoryId IN(${dIds})`)
+          .where(`file.directoryId IN(${dIds.join(',')})`)
           .leftJoin('file.directory', 'directory')
           .getMany();
       }
@@ -440,7 +441,7 @@ export class SearchManager {
         // setting covers
         if (result.directories) {
           for (const item of result.directories) {
-            await ObjectManagers.getInstance().GalleryManager.fillCacheForSubDir(connection, session, item as DirectoryEntity);
+            await ObjectManagers.getInstance().GalleryManager.fillCacheForSubDir(connection, session, item);
           }
         }
         // do not show empty directories in search results
@@ -488,15 +489,21 @@ export class SearchManager {
     return await q.getCount();
   }
 
+  public prepareAndBuildWhereQuery(queryIN: SearchQueryDTO, directoryOnly?: false, aliases?: Record<string, string>): Promise<Brackets>;
+  /**
+   * directoryOnly: null if the query has no directory related part
+   */
+  public prepareAndBuildWhereQuery(queryIN: SearchQueryDTO, directoryOnly: boolean, aliases?: Record<string, string>): Promise<Brackets | null>;
   public async prepareAndBuildWhereQuery(
     queryIN: SearchQueryDTO, directoryOnly = false,
-    aliases: Record<string, string> = {}): Promise<Brackets> {
+    aliases: Record<string, string> = {}): Promise<Brackets | null> {
     let query = await this.prepareQuery(queryIN);
     if (directoryOnly) {
-      query = this.filterDirectoryQuery(query);
-      if (query === null) {
+      const dirQuery = this.filterDirectoryQuery(query);
+      if (dirQuery === null) {
         return null;
       }
+      query = dirQuery;
     }
     return this.buildWhereQuery(query, directoryOnly, aliases);
   }
@@ -552,6 +559,10 @@ export class SearchManager {
         const earth = 6378.137; // radius of the earth in kilometer
         const latDelta = 1 / (((2 * Math.PI) / 360) * earth); // 1 km in degree
         const lonDelta = 1 / (((2 * Math.PI) / 360) * earth); // 1 km in degree
+        const gps = (query as DistanceSearch).from.GPSData;
+        if (gps?.latitude == null || gps.longitude == null) {
+          throw new Error('Distance search query has no GPS coordinates');
+        }
 
         // TODO: properly handle latitude / longitude boundaries
         const trimRange = (value: number, min: number, max: number): number => {
@@ -559,26 +570,26 @@ export class SearchManager {
         };
 
         const minLat = trimRange(
-          (query as DistanceSearch).from.GPSData.latitude -
+          gps.latitude -
           (query as DistanceSearch).distance * latDelta,
           -90,
           90
         );
         const maxLat = trimRange(
-          (query as DistanceSearch).from.GPSData.latitude +
+          gps.latitude +
           (query as DistanceSearch).distance * latDelta,
           -90,
           90
         );
         const minLon = trimRange(
-          (query as DistanceSearch).from.GPSData.longitude -
+          gps.longitude -
           ((query as DistanceSearch).distance * lonDelta) /
           Math.cos(minLat * (Math.PI / 180)),
           -180,
           180
         );
         const maxLon = trimRange(
-          (query as DistanceSearch).from.GPSData.longitude +
+          gps.longitude +
           ((query as DistanceSearch).distance * lonDelta) /
           Math.cos(maxLat * (Math.PI / 180)),
           -180,
@@ -732,7 +743,7 @@ export class SearchManager {
             tq.frequency === DatePatternFrequency.weeks_ago ||
             tq.frequency === DatePatternFrequency.days_ago)) {
 
-            if (isNaN(tq.agoNumber)) {
+            if (tq.agoNumber == null || isNaN(tq.agoNumber)) {
               throw new Error('ago number is missing on date pattern search query with frequency: ' + DatePatternFrequency[tq.frequency] + ', ago number: ' + tq.agoNumber);
             }
             const to = new Date();
@@ -909,10 +920,11 @@ export class SearchManager {
         `Invalid search query: Unknown query type: ${SearchQueryTypes[query.type]}(type: ${query.type})`
       );
     }
-    if ((query as TextSearch).matchType !== TextSearchQueryMatchTypes.globMatch) {
+    const matchType = (query as TextSearch).matchType;
+    if (matchType !== TextSearchQueryMatchTypes.globMatch) {
 
       throw new Error(
-        `Invalid text search query match type: ${TextSearchQueryMatchTypes[(query as TextSearch).matchType]}, it should be glob`
+        `Invalid text search query match type: ${matchType === undefined ? matchType : TextSearchQueryMatchTypes[matchType]}, it should be glob`
       );
     }
 
@@ -927,7 +939,7 @@ export class SearchManager {
     return new Brackets((q: WhereExpressionBuilder) => {
       const convertGlobToLike = (str: string): string => {
         // Match either an escaped character \\(.) or any unescaped SQL/glob special character
-        return str.replace(/\\(.)|([*?%_])/g, (_, escaped, special) => {
+        return str.replace(/\\(.)|([*?%_])/g, (_: string, escaped: string | undefined, special: string | undefined) => {
           if (escaped) {
             if (escaped === '*' || escaped === '?') {
               return escaped;
@@ -1168,7 +1180,7 @@ export class SearchManager {
           num: number,
           arr: SearchQueryDTO[],
           start = 0
-        ): SearchQueryDTO[] => {
+        ): SearchQueryDTO[] | null => {
           if (num <= 0 || num > arr.length || start >= arr.length) {
             return null;
           }
@@ -1232,7 +1244,7 @@ export class SearchManager {
    * See SearchQueryUtils.matchDirectorySearch for the same logic without DB.
    */
   protected expandDirectoryGlobs(query: SearchQueryDTO): SearchQueryDTO {
-    if ((query as SearchListQuery).list) {
+    if (Array.isArray((query as SearchListQuery).list)) {
       (query as SearchListQuery).list = (query as SearchListQuery).list.map(q => this.expandDirectoryGlobs(q));
       return query;
     }
@@ -1265,16 +1277,10 @@ export class SearchManager {
   }
 
   protected convertMatchTypeToGlob(query: SearchQueryDTO): SearchQueryDTO {
-    if ((query as ANDSearchQuery | ORSearchQuery).list) {
-      for (
-        let i = 0;
-        i < (query as ANDSearchQuery | ORSearchQuery).list.length;
-        ++i
-      ) {
-        (query as ANDSearchQuery | ORSearchQuery).list[i] =
-          this.convertMatchTypeToGlob(
-            (query as ANDSearchQuery | ORSearchQuery).list[i]
-          );
+    const list: unknown = (query as ANDSearchQuery | ORSearchQuery).list;
+    if (Array.isArray(list)) {
+      for (let i = 0; i < list.length; ++i) {
+        list[i] = this.convertMatchTypeToGlob(list[i] as SearchQueryDTO);
       }
     }
     if (
@@ -1313,7 +1319,7 @@ export class SearchManager {
         this.queryIdBase = 0;
       }
     }
-    if ((queryIN as SearchListQuery).list) {
+    if (Array.isArray((queryIN as SearchListQuery).list)) {
       (queryIN as SearchListQuery).list.forEach((q) =>
         this.assignQueryIDs(q, id)
       );
@@ -1328,27 +1334,27 @@ export class SearchManager {
   /**
    * Returns only those parts of a query tree that only contains directory-related search queries
    */
-  private filterDirectoryQuery(query: SearchQueryDTO): SearchQueryDTO {
+  private filterDirectoryQuery(query: SearchQueryDTO): SearchQueryDTO | null {
     switch (query.type) {
       case SearchQueryTypes.AND:
-        const andRet = {
-          type: SearchQueryTypes.AND,
-          list: (query as SearchListQuery).list.map((q) =>
-            this.filterDirectoryQuery(q)
-          ),
-        } as ANDSearchQuery;
+        const andList = (query as SearchListQuery).list.map((q) =>
+          this.filterDirectoryQuery(q)
+        );
         // if any of the queries contain non dir query the whole and query is a non dir query
-        if (andRet.list.indexOf(null) !== -1) {
+        if (andList.indexOf(null) !== -1) {
           return null;
         }
-        return andRet;
+        return {
+          type: SearchQueryTypes.AND,
+          list: andList.filter((q): q is SearchQueryDTO => q !== null),
+        } as ANDSearchQuery;
 
       case SearchQueryTypes.OR:
         const orRet = {
           type: SearchQueryTypes.OR,
           list: (query as SearchListQuery).list
             .map((q) => this.filterDirectoryQuery(q))
-            .filter((q) => q !== null),
+            .filter((q): q is SearchQueryDTO => q !== null),
         } as ORSearchQuery;
         if (orRet.list.length === 0) {
           return null;
@@ -1367,26 +1373,17 @@ export class SearchManager {
   }
 
   private async getGPSData(query: SearchQueryDTO): Promise<SearchQueryDTO> {
-    if ((query as ANDSearchQuery | ORSearchQuery).list) {
-      for (
-        let i = 0;
-        i < (query as ANDSearchQuery | ORSearchQuery).list.length;
-        ++i
-      ) {
-        (query as ANDSearchQuery | ORSearchQuery).list[i] =
-          await this.getGPSData(
-            (query as ANDSearchQuery | ORSearchQuery).list[i]
-          );
+    const list: unknown = (query as ANDSearchQuery | ORSearchQuery).list;
+    if (Array.isArray(list)) {
+      for (let i = 0; i < list.length; ++i) {
+        list[i] = await this.getGPSData(list[i] as SearchQueryDTO);
       }
     }
-    if (
-      query.type === SearchQueryTypes.distance &&
-      (query as DistanceSearch).from.value
-    ) {
-      (query as DistanceSearch).from.GPSData =
-        await ObjectManagers.getInstance().LocationManager.getGPSData(
-          (query as DistanceSearch).from.value
-        );
+    if (query.type === SearchQueryTypes.distance) {
+      const from = (query as DistanceSearch).from;
+      if (from.value) {
+        from.GPSData = await ObjectManagers.getInstance().LocationManager.getGPSData(from.value);
+      }
     }
     return query;
   }

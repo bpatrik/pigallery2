@@ -29,8 +29,8 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   readonly mapLightbox = viewChild(GalleryMapLightboxComponent);
   readonly mapElement = viewChild.required<ElementRef>('map');
 
-  leafletMap: Map;
-  layers: { light: TileLayer, dark: TileLayer };
+  leafletMap?: Map; // set by onMapReady()
+  layers!: { light: TileLayer, dark: TileLayer }; // set by initThemeModes(), which the constructor calls
 
   options: MapOptions = {
     zoomControl: false,

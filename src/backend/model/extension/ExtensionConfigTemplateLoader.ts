@@ -1,9 +1,11 @@
 import {PrivateConfigClass} from '../../../common/config/private/PrivateConfigClass';
-import * as fs from 'fs';
-import * as path from 'path';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import {ServerExtensionsEntryConfig} from '../../../common/config/private/subconfigs/ServerExtensionsConfig';
 import {ProjectPath} from '../../ProjectPath';
 import {Utils} from '../../../common/Utils';
+import {GenericConfigType} from 'typeconfig/common';
+import {IServerExtensionConfig} from './IExtension';
 
 
 /**
@@ -108,7 +110,7 @@ export class ExtensionConfigTemplateLoader {
     let template: { folder: string, template?: new() => unknown } = {folder: extFolder};
 
     if (fs.existsSync(configExtPath)) {
-      const extCfg = require(configExtPath);
+      const extCfg = require(configExtPath) as Partial<IServerExtensionConfig<unknown>> | undefined;
       if (typeof extCfg?.initConfig === 'function') {
         extCfg?.initConfig({
           setConfigTemplate: (templateClass: new() => unknown): void => {
@@ -156,7 +158,8 @@ export class ExtensionConfigTemplateLoader {
       if (!c) {
         c = new ServerExtensionsEntryConfig(ext.folder);
         if (ext.template) {
-          c.configs = new ext.template();
+          // the template class comes from the extension (setConfigTemplate)
+          c.configs = new ext.template() as GenericConfigType;
         }
         config.Extensions.extensions.addProperty(ext.folder, {type: ServerExtensionsEntryConfig}, c);
       }

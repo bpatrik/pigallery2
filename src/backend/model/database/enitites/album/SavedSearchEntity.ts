@@ -13,7 +13,7 @@ export class SavedSearchEntity
     transformer: {
       // used to deserialize your data from db field value
       from: (val: string) => {
-        return JSON.parse(val);
+        return JSON.parse(val) as unknown;
       },
       // used to serialize your data to db field
       to: (val: object) => {
@@ -21,5 +21,5 @@ export class SavedSearchEntity
       },
     },
   })
-  searchQuery: SearchQueryDTO;
+  searchQuery!: SearchQueryDTO;
 }

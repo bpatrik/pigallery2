@@ -54,7 +54,7 @@ import {Config} from '../../../../../common/config/public/Config';
     // Enum option names for selects
     readonly LightBoxTitleTextsArr = Utils.enumToArray(LightBoxTitleTexts).map(v=>v.value);
 
-  modalRef: BsModalRef | null;
+  modalRef: BsModalRef | null = null;
 
   private readonly subscription: Subscription | null = null;
 

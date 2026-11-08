@@ -38,7 +38,7 @@ declare let $localize: (s: TemplateStringsArray) => string;
 if (typeof $localize === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  global.$localize = (s) => s;
+  global.$localize = (s: TemplateStringsArray) => s;
 }
 
 
@@ -179,7 +179,7 @@ export class UserConfig {
         priority: ConfigPriority.underTheHood
       }
   })
-  name: string;
+  name!: string; // set by the constructor or loaded from the config
 
   @ConfigProperty({
     type: UserRoles,
@@ -201,7 +201,7 @@ export class UserConfig {
       },
     description: $localize`Unencrypted, temporary password. App will encrypt it and delete this.`
   })
-  password: string;
+  password!: string;
 
   @ConfigProperty({
     type: 'string',
@@ -220,9 +220,9 @@ export class UserConfig {
       {
         priority: ConfigPriority.underTheHood,
         relevant: () => false // never render this on UI. Only used to indicate that encryption is done.
-      } as TAGS,
+      },
   })
-  encrypted: boolean;
+  encrypted!: boolean;
 
   constructor(name?: string, password?: string, role?: UserRoles) {
     if (name) {
@@ -247,7 +247,7 @@ export class ServerDataBaseConfig {
         priority: ConfigPriority.advanced,
         uiResetNeeded: {db: true},
         githubIssue: 573
-      } as TAGS,
+      },
     description: $localize`SQLite is recommended.`
   })
   type: DatabaseType = DatabaseType.sqlite;
@@ -270,7 +270,7 @@ export class ServerDataBaseConfig {
       {
         name: $localize`SQLite`,
         uiResetNeeded: {db: true},
-        relevant: (c: any) => c.type === DatabaseType.sqlite,
+        relevant: (c: ServerDataBaseConfig) => c.type === DatabaseType.sqlite,
       }
   })
   sqlite?: SQLiteConfig = new SQLiteConfig();
@@ -281,7 +281,7 @@ export class ServerDataBaseConfig {
       {
         name: $localize`MySQL`,
         uiResetNeeded: {db: true},
-        relevant: (c: any) => c.type === DatabaseType.mysql,
+        relevant: (c: ServerDataBaseConfig) => c.type === DatabaseType.mysql,
       }
   })
   mysql?: MySQLConfig = new MySQLConfig();
@@ -300,9 +300,12 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       priority: ConfigPriority.advanced,
       uiResetNeeded: {server: true},
       uiOptional:true,
-      relevant: (c: any) => c.enabled,
-      hint: 'https://auth.example.com/application/o/pigallery2/'
-    } as TAGS,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
+      hint: 'https://auth.example.com/application/o/pigallery2/',
+      uiWarning: (v: unknown) => typeof v === 'string' && v.trim().toLowerCase().startsWith('http://') ?
+        $localize`With an http:// Issuer URL, the provider can't be verified and the login can be read on the network. Use it only for local tests.` :
+        undefined
+    },
     description: $localize`OIDC provider Issuer URL`
   })
   issuerUrl: string = '';
@@ -313,7 +316,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       name: $localize`Client ID`,
       priority: ConfigPriority.advanced,
       uiOptional:true,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       uiResetNeeded: {server: true}
     }
   })
@@ -325,9 +328,9 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       name: $localize`Client secret`,
       priority: ConfigPriority.advanced,
       uiOptional:true,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       uiResetNeeded: {server: true}
-    } as TAGS
+    }
   })
   clientSecret: string = '';
 
@@ -338,7 +341,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
       ConfigPriority.advanced,
       hint: 'https://example.com/pgapi/auth/oidc/callback',
       uiOptional:true,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       uiResetNeeded: {server: true}
     },
     description: $localize`Full callback URL registered at the provider (e.g.: https://example.com/pgapi/auth/oidc/callback)`
@@ -350,7 +353,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     arrayType: 'string',
     tags: {
       name: $localize`Scopes`,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       priority: ConfigPriority.advanced
     }
   })
@@ -360,7 +363,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     type: 'string',
     tags: {
       name: $localize`Username claim`,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       priority: ConfigPriority.advanced
     },
     description: $localize`JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty.`
@@ -371,7 +374,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     type: 'string',
     tags: {
       name: $localize`Email claim`,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       priority: ConfigPriority.advanced
     }
   })
@@ -383,7 +386,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     tags: {
       name: $localize`Allowed email domains`,
       uiOptional:true,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       priority: ConfigPriority.advanced,
     },
     description: $localize`If set, only identities with emails in these domains will be accepted.`
@@ -394,7 +397,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     type: 'boolean',
     tags: {
       name: $localize`Auto-create users`,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       priority: ConfigPriority.advanced
     },
     description: $localize`If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.`
@@ -405,11 +408,11 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     type: UserRoles,
     tags: {
       name: $localize`Auto-created user role`,
-      relevant: (c: any) => c.enabled && c.autoCreateUser,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled && c.autoCreateUser,
       priority: ConfigPriority.advanced,
       // LimitedGuest is reserved for sharing users
       uiOptions: [UserRoles.Guest, UserRoles.User, UserRoles.Admin, UserRoles.Developer]
-    } as TAGS,
+    },
     constraint: {
       assert: (v: UserRoles) => v >= UserRoles.Guest,
       assertReason: 'Users.oidc.autoCreateUserRole should be at least Guest.',
@@ -423,7 +426,7 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     type: 'boolean',
     tags: {
       name: $localize`Strict security`,
-      relevant: (c: any) => c.enabled,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled,
       priority: ConfigPriority.advanced
     },
     description: $localize`Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider.`
@@ -434,10 +437,10 @@ export class ServerUserOIDCConfig extends ClientUserOIDCConfig {
     type: UserRoles,
     tags: {
       name: $localize`Max role for linking`,
-      relevant: (c: any) => c.enabled && c.strictSecurity,
+      relevant: (c: ServerUserOIDCConfig) => c.enabled && c.strictSecurity,
       priority: ConfigPriority.advanced,
       uiOptions: [UserRoles.Guest, UserRoles.User, UserRoles.Admin, UserRoles.Developer]
-    } as TAGS,
+    },
     description: $localize`Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back.`
   })
   strictLinkMaxRole: UserRoles = UserRoles.User;
@@ -507,7 +510,7 @@ export class ServerUserConfig extends ClientUserConfig {
         uiResetNeeded: {server: true},
         uiOptional: true,
         githubIssue: 575
-      } as TAGS,
+      },
     description: $localize`Creates these users in the DB during startup if they do not exist. If a user with this name exist, it won't be overwritten, even if the role is different.`,
   })
   enforcedUsers: UserConfig[] = [];
@@ -681,7 +684,7 @@ export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
         priority: ConfigPriority.underTheHood,
         unit: 'm',
         uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      } as TAGS,
+      },
     description: $localize`Filters out entry that are closer than this to each other in meters.`
   })
   minDistance: number = 5;
@@ -693,7 +696,7 @@ export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
         priority: ConfigPriority.underTheHood,
         unit: 'm',
         uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      } as TAGS,
+      },
     description: $localize`Filters out entry that would fall on the line if we would just connect the previous and the next points. This setting sets the sensitivity for that (higher number, more points are filtered).`
   })
   maxMiddleDeviance: number = 5;
@@ -705,7 +708,7 @@ export class ServerGPXCompressingConfig extends ClientGPXCompressingConfig {
         priority: ConfigPriority.underTheHood,
         unit: 'ms',
         uiDisabled: (sc: ServerGPXCompressingConfig, c: ServerConfig) => !c.Map.enabled || !sc.enabled || !c.MetaFile.gpx
-      } as TAGS,
+      },
     description: $localize`Filters out entry that are closer than this in time in milliseconds.`
   })
   minTimeDistance: number = 5000;
@@ -721,12 +724,12 @@ export class ServerMetaFileConfig extends ClientMetaFileConfig {
         priority: ConfigPriority.advanced,
         uiJob: [{
           job: DefaultsJobs[DefaultsJobs['GPX Compression']],
-          relevant: (c) => c.MetaFile.GPXCompressing.enabled
+          relevant: (c: ClientConfig) => c.MetaFile.GPXCompressing.enabled
         }, {
           job: DefaultsJobs[DefaultsJobs['Delete Compressed GPX']],
-          relevant: (c) => c.MetaFile.GPXCompressing.enabled
+          relevant: (c: ClientConfig) => c.MetaFile.GPXCompressing.enabled
         }]
-      } as TAGS
+      }
   })
   override GPXCompressing: ServerGPXCompressingConfig = new ServerGPXCompressingConfig();
 }
@@ -741,7 +744,7 @@ export class ServerSharingConfig extends ClientSharingConfig {
         name: $localize`Update timeout`,
         priority: ConfigPriority.underTheHood,
         unit: 'ms'
-      } as TAGS,
+      },
     description: $localize`After creating a sharing link, it can be updated for this long.`
   })
   updateTimeout: number = 1000 * 60 * 5;
@@ -756,7 +759,7 @@ export class ServerIndexingConfig {
         name: $localize`Index cache timeout`,
         priority: ConfigPriority.underTheHood,
         unit: 'ms'
-      } as TAGS,
+      },
     description: $localize`If there was no indexing in this time, it reindexes. (skipped if indexes are in DB and sensitivity is low).`
   })
   cachedFolderTimeout: number = 1000 * 60 * 60; // Do not rescans the folder if seems ok
@@ -780,7 +783,7 @@ export class ServerIndexingConfig {
         uiResetNeeded: {server: true, db: true},
         uiOptional: true,
         uiAllowSpaces: true
-      } as TAGS,
+      },
     description: $localize`Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path.`,
   })
   excludeFolderList: string[] = ['.Trash-1000', '.dtrash', '$RECYCLE.BIN'];
@@ -794,7 +797,7 @@ export class ServerIndexingConfig {
         uiResetNeeded: {server: true, db: true},
         uiOptional: true,
         hint: $localize`.ignore;.pg2ignore`
-      } as TAGS,
+      },
     description: $localize`Skip folders that contain a file with any of these names.`,
   })
   excludeFileList: string[] = [];
@@ -808,7 +811,7 @@ export class ServerIndexingConfig {
         uiResetNeeded: {server: true, db: true},
         uiOptional: true,
         hint: $localize`.*;*.rm`
-      } as TAGS,
+      },
     description: $localize`Photos and videos to skip by file name. Supports * and ?, case-sensitive. E.g.: ._* or *.rm`,
   })
   excludeFilenameList: string[] = [];
@@ -892,7 +895,7 @@ export class ScheduledJobTriggerConfig extends JobTriggerConfigBase implements S
   override readonly type = JobTriggerType.scheduled;
 
   @ConfigProperty({type: 'unsignedInt'})
-  override time: number; // data time
+  override time!: number; // data time
 }
 
 @SubConfigClass({softReadonly: true})
@@ -925,7 +928,7 @@ export class JobScheduleConfig implements JobScheduleDTO {
   @ConfigProperty({type: 'string'})
   jobName: string;
   @ConfigProperty({type: 'object'})
-  config: Record<string, string | number | string[] | number[] | MediaPickDTO[]> = {};
+  config: Record<string, string | number | boolean | string[] | number[] | MediaPickDTO[]> = {};
   @ConfigProperty({type: 'boolean'})
   allowParallelRun: boolean = false;
   @ConfigProperty({
@@ -960,7 +963,7 @@ export class JobScheduleConfig implements JobScheduleDTO {
       | NeverJobTriggerConfig
       | PeriodicJobTriggerConfig
       | ScheduledJobTriggerConfig,
-    config: any = {},
+    config: JobScheduleConfig['config'] = {},
     allowParallelRun: boolean = false
   ) {
     this.name = name;
@@ -1094,7 +1097,7 @@ export class VideoTranscodingConfig {
         name: $localize`MP4 codec`,
         priority: ConfigPriority.underTheHood,
         uiOptions: ['libx264', 'libx265'],
-        relevant: (c: any) => c.format === 'mp4'
+        relevant: (c: VideoTranscodingConfig) => c.format === 'mp4'
       }
   })
   mp4Codec: videoCodecType = 'libx264';
@@ -1105,7 +1108,7 @@ export class VideoTranscodingConfig {
         name: $localize`Webm Codec`,
         priority: ConfigPriority.underTheHood,
         uiOptions: ['libvpx', 'libvpx-vp9'],
-        relevant: (c: any) => c.format === 'webm'
+        relevant: (c: VideoTranscodingConfig) => c.format === 'webm'
       }
   })
   webmCodec: videoCodecType = 'libvpx';
@@ -1153,7 +1156,7 @@ export class VideoTranscodingConfig {
       hint: '-option1; -option2 param2; -option3; -option4 param4',
       githubIssue: 592,
       uiAllowSpaces: true
-    } as TAGS,
+    },
     description: $localize`It will be sent to ffmpeg as it is, as custom input options.`,
   })
   customInputOptions: string[] = [];
@@ -1252,9 +1255,9 @@ export class ServerMediaConfig extends ClientMediaConfig {
       uiJob: [
         {
           job: DefaultsJobs[DefaultsJobs['Video Converting']],
-          relevant: (c) => c.Media.Video.enabled
+          relevant: (c: ClientConfig) => c.Media.Video.enabled
         }]
-    } as TAGS,
+    },
     description: $localize`Video support uses ffmpeg. ffmpeg and ffprobe binaries need to be available in the PATH or the @ffmpeg-installer/ffmpeg and @ffprobe-installer/ffprobe optional node packages need to be installed.`
   })
   override Video: ServerVideoConfig = new ServerVideoConfig();
@@ -1265,7 +1268,7 @@ export class ServerMediaConfig extends ClientMediaConfig {
       uiIcon: 'ionCameraOutline',
       priority: ConfigPriority.advanced,
       uiJob: [{job: DefaultsJobs[DefaultsJobs['Photo Converting']]}]
-    } as TAGS
+    }
   })
   override Photo: ServerPhotoConfig = new ServerPhotoConfig();
 }
@@ -1369,7 +1372,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Server`,
       uiIcon: 'ionCloudOutline'
-    } as TAGS,
+    },
   })
   override Server: ServerServiceConfig = new ServerServiceConfig();
 
@@ -1378,7 +1381,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Database`,
       uiIcon: 'ionServerOutline'
-    } as TAGS
+    }
   })
   Database: ServerDataBaseConfig = new ServerDataBaseConfig();
 
@@ -1387,7 +1390,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Users`,
       uiIcon: 'ionPersonOutline'
-    } as TAGS,
+    },
   })
   override Users: ServerUserConfig = new ServerUserConfig();
 
@@ -1404,7 +1407,7 @@ export class ServerConfig extends ClientConfig {
           job: DefaultsJobs[DefaultsJobs['Gallery Reset']],
           hideProgress: true
         }]
-    } as TAGS
+    }
   })
   Indexing: ServerIndexingConfig = new ServerIndexingConfig();
 
@@ -1413,7 +1416,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Media`,
       uiIcon: 'ionImagesOutline'
-    } as TAGS,
+    },
   })
   override Media: ServerMediaConfig = new ServerMediaConfig();
 
@@ -1422,7 +1425,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Meta file`,
       uiIcon: 'ionDocumentOutline'
-    } as TAGS,
+    },
   })
   override MetaFile: ServerMetaFileConfig = new ServerMetaFileConfig();
 
@@ -1439,7 +1442,7 @@ export class ServerConfig extends ClientConfig {
           job: DefaultsJobs[DefaultsJobs['Album Cover Reset']],
           hideProgress: true
         }]
-    } as TAGS,
+    },
     description: $localize`Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.`
   })
   AlbumCover: ServerAlbumCoverConfig = new ServerAlbumCoverConfig();
@@ -1449,7 +1452,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Sharing`,
       uiIcon: 'ionShareSocialOutline'
-    } as TAGS,
+    },
   })
   override Sharing: ServerSharingConfig = new ServerSharingConfig();
 
@@ -1458,7 +1461,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Duplicates`,
       uiIcon: 'ionCopyOutline'
-    } as TAGS
+    }
   })
   Duplicates: ServerDuplicatesConfig = new ServerDuplicatesConfig();
 
@@ -1468,7 +1471,7 @@ export class ServerConfig extends ClientConfig {
       name: $localize`Messaging`,
       uiIcon: 'ionChatboxOutline',
       githubIssue: 683
-    } as TAGS,
+    },
     description: $localize`The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.`
   })
   Messaging: MessagingConfig = new MessagingConfig();
@@ -1479,7 +1482,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Extensions`,
       uiIcon: 'ionExtensionPuzzleOutline'
-    } as TAGS
+    }
   })
   override Extensions: ServerExtensionsConfig = new ServerExtensionsConfig();
 
@@ -1488,7 +1491,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Upload`,
       uiIcon: 'ionCloudUploadOutline'
-    } as TAGS
+    }
   })
   override Upload: ServerUploadConfig = new ServerUploadConfig();
 
@@ -1497,7 +1500,7 @@ export class ServerConfig extends ClientConfig {
     tags: {
       name: $localize`Jobs`,
       uiIcon: 'ionPlayOutline'
-    } as TAGS
+    }
   })
   Jobs: ServerJobConfig = new ServerJobConfig();
 }

@@ -19,7 +19,7 @@ export class SavedSearchPopupComponent {
     name: string;
     searchQuery: SearchQueryDTO;
 }>();
-  private modalRef: BsModalRef | null;
+  private modalRef: BsModalRef | null = null;
 
   public async openModal(template: TemplateRef<unknown>): Promise<void> {
     this.modalRef = this.modalService.show(template, {class: 'modal-lg'});

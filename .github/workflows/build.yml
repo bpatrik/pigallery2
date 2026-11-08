@@ -47,6 +47,20 @@ jobs:
         npm ci
         npm run build
 
+    - name: Check the ffmpeg and ffprobe binaries
+      # ffmpeg-static downloads ffmpeg in its install script and npm ci does not fail when that download does.
+      # Without the binary, the video tests fail with 'spawn ffmpeg ENOENT'. Retry the download once, then fail with a clear error.
+      run: |
+        check='const fs = require("fs"); const {execFileSync} = require("child_process");
+          for (const p of [require("ffmpeg-static"), require("ffprobe-static").path]) {
+            fs.accessSync(p, fs.constants.X_OK); console.log(p + ": " + execFileSync(p, ["-version"]).toString().split("\n")[0]);
+          }'
+        node -e "$check" && exit 0
+        echo "::warning::ffmpeg-static or ffprobe-static binary is missing, re-running the ffmpeg-static install script"
+        npm rebuild ffmpeg-static && node -e "$check" && exit 0
+        echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
+        exit 1
+
     - name: lint
       run: |
         npm run lint
@@ -65,21 +79,61 @@ jobs:
       if: matrix.node-version == '26.x'
       uses: coverallsapp/github-action@v2
       with:
+        # a failed upload (e.g. a broken download of the Coveralls reporter) must not fail the build
+        fail-on-error: false
         files: coverage/lcov.info coverage/pigallery2/lcov.info
-    - name: E2E test - Cypress run
-      if: matrix.node-version == '26.x'
-      uses: cypress-io/github-action@v7
-      env:
-        DEBUG: '@cypress/github-action'
+
+  # own job, so a failing unit test does not skip the e2e tests (and the other way around)
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Use Node.js 26
+      uses: actions/setup-node@v7
       with:
-        start: npm run start-e2e-server
-      # after the test run completes store screenshots
+        node-version: 26.x
+    - name: npm install and build
+      run: |
+        npm ci
+        npm run build
+    - name: Check the ffmpeg and ffprobe binaries
+      # ffmpeg-static downloads ffmpeg in its install script and npm ci does not fail when that download does.
+      # Without the binary, the video tests fail with 'spawn ffmpeg ENOENT'. Retry the download once, then fail with a clear error.
+      run: |
+        check='const fs = require("fs"); const {execFileSync} = require("child_process");
+          for (const p of [require("ffmpeg-static"), require("ffprobe-static").path]) {
+            fs.accessSync(p, fs.constants.X_OK); console.log(p + ": " + execFileSync(p, ["-version"]).toString().split("\n")[0]);
+          }'
+        node -e "$check" && exit 0
+        echo "::warning::ffmpeg-static or ffprobe-static binary is missing, re-running the ffmpeg-static install script"
+        npm rebuild ffmpeg-static && node -e "$check" && exit 0
+        echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
+        exit 1
+    - name: Install Playwright browser
+      run: npx playwright install --with-deps chromium
+    - name: E2E test - Playwright
+      run: npm run test-e2e
+    - name: E2E test summary
+      if: ${{ !cancelled() && hashFiles('test-results/results.json') != '' }}
+      run: |
+        jq -r '
+          def count(s): map(select(.status == s)) | length;
+          "### E2E tests (Playwright)",
+          "",
+          "| Spec | Passed | Failed | Flaky | Skipped |",
+          "| --- | --: | --: | --: | --: |",
+          (.suites[] | [.. | objects | select(has("expectedStatus"))] as $t
+            | "| \(.file) | \($t | count("expected")) | \($t | count("unexpected")) | \($t | count("flaky")) | \($t | count("skipped")) |"),
+          "| **All (\(.stats.duration / 1000 | floor) s)** | **\(.stats.expected)** | **\(.stats.unexpected)** | **\(.stats.flaky)** | **\(.stats.skipped)** |",
+          "",
+          "Passed includes the expected failures of test.fail(). Details: the playwright-report artifact."
+        ' test-results/results.json >> "$GITHUB_STEP_SUMMARY"
     - uses: actions/upload-artifact@v7
-      if: failure() && matrix.node-version == '26.x' # Store screenshots only on failures
+      if: ${{ !cancelled() }}
       with:
-         name: cypress-screenshots
-         path: test/cypress/screenshots
-         if-no-files-found: ignore # 'warn' or 'error' are also available, defaults to `warn`
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
 
   create-release:
     runs-on: [ubuntu-latest]
@@ -106,7 +160,8 @@ jobs:
   # --- MULTI-PLATFORM DOCKER VERIFICATION ---
   build-verify-docker:
     runs-on: ubuntu-latest
-    needs: [test, create-release]
+    # Docker images are only built when all tests pass, the e2e tests included
+    needs: [test, e2e, create-release]
     strategy:
       fail-fast: false # Ensures one platform failure doesn't stop others from testing
       matrix:

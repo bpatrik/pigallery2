@@ -190,7 +190,7 @@ describe('GalleryPhotoComponent - search links', () => {
     fixture.componentRef.setInput('gridMedia', makeGridMedia({metadata: {size: {width: 4032, height: 3024}, ...metadata}} as any));
     fixture.componentInstance.infoBarVisible.set(true);
     fixture.detectChanges();
-    return Array.from(fixture.nativeElement.querySelectorAll('.info a'))
+    return Array.from<HTMLAnchorElement>(fixture.nativeElement.querySelectorAll('.info a'))
       .map((a: HTMLAnchorElement) => a.getAttribute('href')!);
   };
 

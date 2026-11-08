@@ -7,20 +7,20 @@ import {SessionUser} from '../../SessionContext';
 @Unique(['name'])
 export class UserEntity implements UserDTO,SessionUser {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  password: string;
+  password!: string;
 
   @Column('smallint')
-  role: UserRoles;
+  role!: UserRoles;
 
   // OIDC issuer and subject ('<iss>|<sub>'), only set in OIDC strict security mode
   @Column({type: 'text', nullable: true})
-  oidcSubject?: string;
+  oidcSubject?: string | null;
 
   // only if this set to true, will the per-user allow/blocklist be considered
   @Column({type: 'boolean', default: false})
@@ -31,54 +31,54 @@ export class UserEntity implements UserDTO,SessionUser {
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  allowQuery?: SearchQueryDTO;
+  allowQuery?: SearchQueryDTO | null;
 
   @Column({
     type: 'text',
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  blockQuery?: SearchQueryDTO;
+  blockQuery?: SearchQueryDTO | null;
 
   @Column({
     type: 'text',
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  allowDirectoryList?: DirectorySearch[];
+  allowDirectoryList?: DirectorySearch[] | null;
 
   @Column({
     type: 'text',
     nullable: true,
     transformer: {
       from: (val: string) => {
-        return val ? JSON.parse(val) : null;
+        return val ? JSON.parse(val) as unknown : null;
       },
       to: (val: object) => {
         return val ? JSON.stringify(val) : null;
       },
     },
   })
-  blockDirectoryList?: DirectorySearch[];
+  blockDirectoryList?: DirectorySearch[] | null;
 }

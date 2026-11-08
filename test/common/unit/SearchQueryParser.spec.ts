@@ -204,41 +204,41 @@ describe('SearchQueryParser', () => {
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 1, 1))} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '>=' + (new Date(query.min)).getFullYear() + '-' + '02'))
+      expect(parser.parse(defaultQueryKeywords.date + '>=' + (new Date(query.min!)).getFullYear() + '-' + '02'))
         .to.deep.equals(query, parser.stringify(query));
 
       // test if date gets simplified on 1st of Jan.
       query = {type: SearchQueryTypes.date, max: (Date.UTC(2020, 0, 1))} as DateSearch;
-      expect(parser.parse(defaultQueryKeywords.date + '<=' + (new Date(query.max)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '<=' + (new Date(query.max!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 0, 1))} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '>=' + (new Date(query.min)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '>=' + (new Date(query.min!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 0, 1)), max: (Date.UTC(2021, 0, 1))} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + ':' + (new Date(query.min)).getFullYear() + '..' + (new Date(query.max)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + ':' + (new Date(query.min!)).getFullYear() + '..' + (new Date(query.max!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 0, 1)), max: (Date.UTC(2021, 0, 1)), negate: true} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '!:' + (new Date(query.min)).getFullYear() + '..' + (new Date(query.max)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '!:' + (new Date(query.min!)).getFullYear() + '..' + (new Date(query.max!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 0, 1))} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '>=' + (new Date(query.min)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '>=' + (new Date(query.min!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 0, 1)), max: (Date.UTC(2020, 0, 1))} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '=' + (new Date(query.min)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '=' + (new Date(query.min!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, min: (Date.UTC(2020, 0, 1)), max: (Date.UTC(2020, 0, 1)), negate: true} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '!=' + (new Date(query.min)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '!=' + (new Date(query.min!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
       query = ({type: SearchQueryTypes.date, max: (Date.UTC(2020, 0, 1))} as DateSearch);
-      expect(parser.parse(defaultQueryKeywords.date + '<=' + (new Date(query.max)).getFullYear()))
+      expect(parser.parse(defaultQueryKeywords.date + '<=' + (new Date(query.max!)).getFullYear()))
         .to.deep.equals(query, parser.stringify(query));
 
 

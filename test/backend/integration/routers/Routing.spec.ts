@@ -1,11 +1,11 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import * as http from 'http';
-import {AddressInfo} from 'net';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
 import AdmZip from 'adm-zip';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {DBTestHelper} from '../../DBTestHelper';
@@ -21,7 +21,7 @@ import {Utils} from '../../../../src/common/Utils';
 import {LoginCredential} from '../../../../src/common/entities/LoginCredential';
 import {Logger} from '../../../../src/backend/Logger';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 chai.should();
 
 /**
@@ -94,7 +94,7 @@ describe('Routing', () => {
           if ((res.headers['content-type'] || '').includes('json')) {
             json = JSON.parse(text);
           }
-          resolve({path: urlPath, status: res.statusCode, headers: res.headers, body: buf, text, json});
+          resolve({path: urlPath, status: res.statusCode!, headers: res.headers, body: buf, text, json});
         });
       });
       req.on('error', reject);
@@ -415,7 +415,7 @@ describe('Routing', () => {
       await SQLConnection.close();
       const res = await postJson(api('/user/login'),
         {loginCredential: {username: adminUser.name, password: adminUser.password, rememberMe: false} as LoginCredential});
-      cookie = res.headers['set-cookie'];
+      cookie = res.headers['set-cookie']!;
     });
     after(tearDown);
 

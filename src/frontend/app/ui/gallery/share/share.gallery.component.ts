@@ -98,7 +98,7 @@ export class GalleryShareComponent {
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
 
-  modalRef: BsModalRef | null;
+  modalRef: BsModalRef | null = null;
   invalidSettings = $localize`Invalid settings`;
 
   private readonly activeShares = signal<ResponseSharingDTO[]>([]);

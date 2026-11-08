@@ -1,8 +1,8 @@
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
-import * as path from 'path';
-import * as fs from 'fs';
+import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
@@ -14,11 +14,13 @@ import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig'
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
+import chaiAsPromised from 'chai-as-promised';
 import {TestHelper} from '../../../TestHelper';
 
-process.env.NODE_ENV = 'test';
+process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
+chai.use(chaiAsPromised);
 
 describe('SharingRouter', () => {
   before(TestHelper.resetConfig);
@@ -52,13 +54,46 @@ describe('SharingRouter', () => {
   };
 
 
-  const shareLogin = async (srv: Server, sharingKey: string, password?: string): Promise<any> => {
+  const shareLogin = async (srv: Server, sharingKey: string, password?: string | null): Promise<any> => {
     return (request.execute(srv.Server) as SuperAgentStatic)
       .post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharingKey)
       .send({password});
 
   };
 
+
+  describe('/GET share/:sharingKey/publicInfo', () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const getPublicInfo = async (sharingKey: string): Promise<any> => {
+      return (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/share/' + sharingKey + '/publicInfo');
+    };
+
+    it('should return the public info of an existing sharing', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass');
+      const res = await getPublicInfo(sharing.sharingKey);
+
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+      res.body.result.should.deep.equal({sharingKey: sharing.sharingKey, passwordProtected: true});
+    });
+
+    // Expected to fail until #1254 is fixed (mocha has no test.fail()): remove the rejected wrapper then.
+    it('should return 404 for a not existing sharing (expected to fail #1254)', async () => {
+      const check = async (): Promise<void> => {
+        const res = await getPublicInfo('doesnotexist');
+
+        res.should.have.status(404);
+        res.body.error.should.be.a('object');
+        should.equal(res.body.result, null);
+      };
+      await check().should.be.rejectedWith(chai.AssertionError);
+    });
+  });
 
   describe('/POST share/login', () => {
 

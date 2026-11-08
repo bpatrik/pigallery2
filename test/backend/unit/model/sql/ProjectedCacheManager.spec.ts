@@ -145,15 +145,15 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
 
       subDir = dir.directories[0];
       subDir2 = dir.directories[1];
-      p = (subDir.media.filter(m => m.name === p.name)[0] as any);
+      p = (subDir.media!.filter(m => m.name === p.name)[0] as any);
       (p as any).directory = subDir;
-      p2 = (subDir.media.filter(m => m.name === p2.name)[0] as any);
+      p2 = (subDir.media!.filter(m => m.name === p2.name)[0] as any);
       (p2 as any).directory = subDir;
-      v = (subDir.media.filter(m => m.name === v.name)[0] as any);
+      v = (subDir.media!.filter(m => m.name === v.name)[0] as any);
       (v as any).directory = subDir;
-      pFaceLess = (subDir.media.filter(m => m.name === pFaceLessTmp.name)[0] as any);
+      pFaceLess = (subDir.media!.filter(m => m.name === pFaceLessTmp.name)[0] as any);
       (pFaceLess as any).directory = subDir;
-      p4 = (subDir2.media[0] as any);
+      p4 = (subDir2.media![0] as any);
       (p4 as any).directory = subDir2;
     };
 
@@ -184,15 +184,15 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
 
     const coverify = (mIn: MediaDTO) => {
       const tmpDir = mIn.directory as any;
-      delete mIn.directory;
+      delete (mIn as {directory?: unknown}).directory;
       const m = Utils.clone(mIn);
       mIn.directory = tmpDir;
       m.directory = {
         name: mIn.directory.name,
         path: mIn.directory.path,
       } as DirectoryBaseDTO;
-      delete m.metadata;
-      delete m.id;
+      delete (m as {metadata?: unknown}).metadata;
+      delete (m as {id?: unknown}).id;
       return m;
     };
 
@@ -303,7 +303,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       const root = GalleryManager.parseRelativeDirPath('.');
       const rootDir = await conn.getRepository(DirectoryEntity).findOneBy({name: root.name, path: root.parent});
       const cache = await ObjectManagers.getInstance().ProjectedCacheManager
-        .getCacheForDirectory(conn, DBTestHelper.defaultSession, rootDir);
+        .getCacheForDirectory(conn, DBTestHelper.defaultSession, rootDir!);
       // nested gallery: one photo in each of the 6 directories, 3 of them are deeper than the root's children
       expect(cache.mediaCount).to.equal(1);
       expect(cache.recursiveMediaCount).to.equal(6);
