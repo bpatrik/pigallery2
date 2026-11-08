@@ -78,7 +78,7 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
-  run against your DB. Single file: `npm run test-e2e -- share`; debugging: `--ui`, or `--trace on` + `npx playwright show-trace`.
+  run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
   - Tests start logged in as admin (`auth.setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
   - Tests run in parallel against one server: don't depend on data that other tests change (e.g. sharings of the same folder).
