@@ -9,6 +9,12 @@ export const asNormalUser = {storageState: USER_SESSION};
 export const isGalleryContent = (url: URL): boolean => url.pathname === '/pgapi/gallery/content/';
 
 /**
+ * A demo/images folder with accents, spaces and punctuation in its name: the journeys that use it check non-ASCII paths.
+ * It has IMG_8943.jpg, IMG_9697.jpg and subdirectory/IMG_8824.jpg.
+ */
+export const ACCENTED_DIR = 'its  a along directory name. with special caracters(_.-.,-.,) 1234 56789 űáéú őóüö';
+
+/**
  * Logs in on the login page, as admin by default.
  */
 export const loginWithUi = async (page: Page, username = 'admin', password = 'admin'): Promise<void> => {
