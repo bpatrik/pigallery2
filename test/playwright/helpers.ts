@@ -142,3 +142,23 @@ export const expectNavbar = async (page: Page, expected: NavbarExpectation): Pro
   await menuButton.click();
   await expect(page.locator('#dropdown-frame-menu')).toHaveCount(0);
 };
+
+/**
+ * Swipes with a real touch (Chromium only, the context needs hasTouch, e.g.: a phone device preset).
+ * dx < 0 swipes to the left (next photo in the lightbox).
+ */
+export const swipe = async (page: Page, dx: number, dy = 0): Promise<void> => {
+  const size = page.viewportSize() ?? {width: 400, height: 800};
+  const start = {x: Math.round(size.width / 2 - dx / 2), y: Math.round(size.height / 2 - dy / 2)};
+  const cdp = await page.context().newCDPSession(page);
+  const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number, y: number) => cdp.send('Input.dispatchTouchEvent', {
+    type, touchPoints: type === 'touchEnd' ? [] : [{x, y}],
+  });
+  await touch('touchStart', start.x, start.y);
+  const steps = 5;
+  for (let i = 1; i <= steps; i++) {
+    await touch('touchMove', start.x + dx * i / steps, start.y + dy * i / steps);
+  }
+  await touch('touchEnd', start.x + dx, start.y + dy);
+  await cdp.detach();
+};

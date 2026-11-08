@@ -42,6 +42,8 @@ test.describe('Lightbox', () => {
     await expect(page).toHaveURL(url => url.searchParams.get('p') === first);
     await expectLightboxPhoto(page, first!);
 
+    // the controls show up once the opening animation ended; a key pressed before that is lost
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
     // the first photo has no previous one
     await expect(page.locator('app-lightbox-controls #leftArrow')).toHaveCount(0);
 
@@ -63,7 +65,7 @@ test.describe('Lightbox', () => {
       await page.keyboard.press('Escape');
     }
     await expect(lightboxImages(page)).toHaveCount(0);
-    await expect(page).toHaveURL(url => url.pathname === '/gallery/' && !url.searchParams.has('p'));
+    await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery') && !url.searchParams.has('p'));
   });
 
   test('Closing the lightbox should scroll the grid to the last shown photo', async ({page, isMobile}) => {
@@ -73,6 +75,8 @@ test.describe('Lightbox', () => {
     const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
     await firstPhoto.click();
     await expect(page).toHaveURL(url => url.searchParams.has('p'));
+    // the controls show up once the opening animation ended; a key pressed before that is lost
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
 
     // page forward until a photo that was far below the screen
     const shown = [shownPhoto(page)];
