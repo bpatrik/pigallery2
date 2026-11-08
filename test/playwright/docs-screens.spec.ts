@@ -5,7 +5,6 @@
  * The screenshots are saved to test/playwright/screenshots.
  */
 import {expect, Page, test} from '@playwright/test';
-import {JobProgressStates} from '../../src/common/entities/job/JobProgressDTO';
 import {expectLightboxPhoto, expectVisiblePhotosLoaded, isGalleryContent} from './helpers';
 
 const WIDTH = 1600;
@@ -52,18 +51,7 @@ test.describe('Docs generation', () => {
   // one after the other: the first requests generate the thumbnails
   test.describe.configure({mode: 'default', timeout: 40000});
 
-  // albums, faces and the search hints need all folders in the DB, not only the opened one
-  test.beforeAll(async ({request}) => {
-    const start = await request.post('/pgapi/admin/jobs/scheduled/Indexing/start', {
-      // soloRun: without the follow-up jobs, their notifications would show on the screenshots
-      data: {soloRun: true, config: {indexChangesOnly: false}},
-    });
-    expect(start.ok()).toBe(true);
-    await expect.poll(async () => {
-      const progresses = (await (await request.get('/pgapi/admin/jobs/scheduled/progress')).json()).result;
-      return Object.values<{ jobName: string, state: JobProgressStates }>(progresses).find(p => p.jobName === 'Indexing')?.state;
-    }, {message: 'indexing job state', timeout: LOAD_TIMEOUT}).toBe(JobProgressStates.finished);
-  });
+  // albums, faces and the search hints need all folders in the DB: global-setup.ts indexes them
 
   test.beforeEach(async ({page}) => {
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));

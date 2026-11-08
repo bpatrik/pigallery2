@@ -1,49 +1,29 @@
-import {expect, Locator, test} from '@playwright/test';
-import {isGalleryContent} from './helpers';
-
-/**
- * The width of the loaded background image (the face thumbnail), 0 if it does not load.
- */
-const backgroundImageWidth = (photo: Locator): Promise<number> => photo.evaluate(el => {
-  const url = getComputedStyle(el).backgroundImage.match(/url\("(.*)"\)/)?.[1];
-  return new Promise<number>(resolve => {
-    if (!url) {
-      return resolve(0);
-    }
-    const img = new Image();
-    img.onload = () => resolve(img.naturalWidth);
-    img.onerror = () => resolve(0);
-    img.src = url;
-  });
-});
+import {expect, test} from '@playwright/test';
+import {expectCardCover, expectVisiblePhotosLoaded} from './helpers';
 
 test.describe('Faces', () => {
-  let personCount: number;
 
-  test.beforeEach(async ({page}) => {
-    // make sure that the dir is parsed before navigating to faces
-    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+  // Sanity check: what a user notices right away when opening the faces. Soft checks, so one failure does not hide the others.
+  test('Faces should look right', async ({page}) => {
     await page.goto('/gallery/');
-    await content;
     const persons = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/person');
     await page.locator('nav .nav-item .nav-link').filter({hasText: 'Faces'}).click();
-    personCount = (await (await persons).json()).result.length;
-  });
-
-  test('Show faces', async ({page}) => {
-    await expect(page.locator('app-face a > .info').filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
-  });
-
-  test('Faces should have photos', async ({page}) => {
+    const personCount = (await (await persons).json()).result.length;
     expect(personCount).toBeGreaterThan(0);
-    // every face has a thumbnail, not the placeholder icon
-    const photos = page.locator('app-face .photo-container .photo');
-    await expect(photos).toHaveCount(personCount);
-    await expect(page.locator('app-face .no-image')).toHaveCount(0);
-    // and the thumbnails are loaded
-    for (const photo of await photos.all()) {
-      await expect(photo).toBeVisible();
-      await expect.poll(() => backgroundImageWidth(photo)).toBeGreaterThan(0);
+
+    // every face has a name and a loaded thumbnail, not the placeholder icon
+    const faces = page.locator('app-face');
+    await expect(faces).toHaveCount(personCount);
+    for (const face of await faces.all()) {
+      await expect.soft(face.locator('.info')).toHaveText(/\S+ \(\d+\)/);
+      await expectCardCover(face);
     }
+
+    // clicking a face opens the search of that person, with results
+    await faces.filter({hasText: 'Alvin the Squirrel'}).click();
+    await expect(page).toHaveURL(/\/search\//);
+    await expect.soft(page.locator('app-gallery-search .search-text')).toHaveValue(/Alvin the Squirrel/);
+    await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expectVisiblePhotosLoaded(page);
   });
 });
