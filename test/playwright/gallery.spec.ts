@@ -18,10 +18,16 @@ test.describe('Gallery', () => {
   });
 
   test('Gallery should filter', async ({page}) => {
+    const gridPhotos = page.locator('app-gallery-grid .photo-container > img');
+    // without a filter, other photos are shown too
+    await expect.poll(() => gridPhotos.count()).toBeGreaterThan(1);
+
     const filterButton = page.locator('app-gallery-navbar ng-icon[name="ionFunnelOutline"]');
     await filterButton.click();
     await page.locator('app-gallery-navbar #gallery-filter-0').selectOption('City');
     const berkeley = page.locator('app-gallery-navbar #gallery-filter-0 ~ .filter-column li').filter({hasText: 'Berkeley'});
+    // only one photo was taken in Berkeley
+    await expect(berkeley.locator('.badge')).toHaveText('1');
     // the "select only this" icon shows up on hover
     await berkeley.hover();
     await berkeley.locator('ng-icon[name="ionFlagOutline"]').click();
@@ -30,10 +36,12 @@ test.describe('Gallery', () => {
     // should indicate that the filters have changed
     await expect(page.locator('app-gallery-navbar .btn-secondary ng-icon[name="ionFunnelOutline"]')).toBeVisible();
 
-    // should this photo be visible
-    await scrollUntilAttached(page, photo(page, 'IMG_5910.jpg'));
-    await expect(photo(page, 'IMG_6220.jpg')).toHaveCount(0);
+    // only the Berkeley photo is shown, all the others are filtered out
+    await expect(gridPhotos).toHaveCount(1);
+    await expect(gridPhotos).toHaveAttribute('alt', 'IMG_5910.jpg');
+    await expect(gridPhotos).toBeVisible();
   });
+
 
   test('Gallery should keep the sorting and the grid size of a folder', async ({page}) => {
     const sortingButton = page.locator('app-gallery-navbar #button-alignment');
