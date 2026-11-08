@@ -5,12 +5,12 @@
         <ol id="directory-path" class="mb-0 mt-1 breadcrumb">
           @for (path of routes(); track $index) {
             <li class="breadcrumb-item">
-              @if (path.route) {
+              @if (path.route !== null) {
                 <a [routerLink]="['/gallery',path.route]"
                   [title]="path.title || ''"
                 [queryParams]="queryService.params()">{{path.name}}</a>
               }
-              @if (!path.route) {<ng-container>{{path.name}}</ng-container>}
+              @if (path.route === null) {<ng-container>{{path.name}}</ng-container>}
             </li>
           }
         </ol>
