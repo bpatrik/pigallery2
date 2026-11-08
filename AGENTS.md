@@ -49,7 +49,7 @@ The photo folder is never modified.
   search query parsing, `DataStructureVersion.ts`.
 - `src/frontend` – Angular client (`app/ui`, `app/model`, `app/pipes`); translations in `src/frontend/translate/messages.*.xlf`.
 - `extension/` – `pigallery2-extension-kit` package sources and the extension `REPOSITORY.md`.
-- `test/` – `backend/unit`, `backend/integration`, `common/unit`, `frontend` (translation checks), `cypress` (e2e).
+- `test/` – `backend/unit`, `backend/integration`, `common/unit`, `frontend` (translation checks), `playwright` (e2e).
   Angular component specs live next to the code as `src/frontend/**/*.spec.ts`.
 - `docs/` – mkdocs site. `docs/user-guide/configuration.md` is generated: run `npm run generate-man` after config changes.
 
@@ -76,18 +76,27 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
     `import '<…>/common/config/public/Config';`, like `main.ts` does; otherwise the private config's asserts throw on load.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
-- E2E (Cypress): needs a frontend build in `dist`. Start `npm run start-e2e-server` in the background (port 8080, resets `test/e2e`),
-  then `npx cypress run`. It covers login, gallery (filters, lightbox, URL deep links), search, faces and sharing.
+- E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npx playwright test` starts `npm run start-e2e-server` itself
+  (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
+  run against your DB. Single file: `npx playwright test share`; debugging: `--ui`, or `--trace on` + `npx playwright show-trace`.
+  It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
+  - Tests start logged in as admin (`auth.setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
+  - Tests run in parallel against one server: don't depend on data that other tests change (e.g. sharings of the same folder).
+  - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
+    with `test.fail()` (in mocha: assert that the check is rejected, see `SharingRouter.spec.ts`).
   - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
     git-ignored test folders (e.g. `demo/images/sub_dir`, `demo/images2`) that CI doesn't have.
     `demo/images` is also the public demo page: don't add test-only files or folders to it.
-  - Cypress 16 removed `Cypress.env()`. A throwaway spec outside the repo must be plain `.js`:
-    `npx cypress run --spec <path> --config specPattern=<path>`.
-  - If the browser doesn't start (EPERM on a Cypress profile folder, "closed unexpectedly"), retry or use another `--browser`.
+  - Browser: `npx playwright install chromium` once. Cloud sessions have a Chromium in `/opt/pw-browsers` but can't download one;
+    if its revision differs from what `@playwright/test` expects, symlink the expected `chromium-<rev>` and
+    `chromium_headless_shell-<rev>` folders there to the installed ones.
+  - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npx playwright test docs-screens`.
 - Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
   read only the summary:
   - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
   - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/fe.log | grep -E "FAIL|Test Files|Tests "`
+  - e2e: `npx playwright test > <tmp>/e2e.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/e2e.log | grep -avE "WebServer" | grep -aE "passed|failed|flaky|^\s+[0-9]+\) "`
+    (expected failures of `test.fail()` print a ✘ but count as passed).
 
 ### Tooling
 
