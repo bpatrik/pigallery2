@@ -1,4 +1,5 @@
 import {defineConfig, devices} from '@playwright/test';
+import {ADMIN_SESSION} from './test/playwright/global-setup';
 
 /**
  * E2E tests. They need a frontend build in dist (e.g.: npm run build).
@@ -20,19 +21,13 @@ export default defineConfig({
     baseURL: 'http://localhost:8080',
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer
     trace: 'on-first-retry',
+    // logged in as admin, see global-setup.ts
+    storageState: ADMIN_SESSION,
   },
 
+  globalSetup: './test/playwright/global-setup.ts',
   projects: [
-    {name: 'setup', testMatch: /.*\.setup\.ts/},
-    {
-      name: 'chromium',
-      use: {
-        ...devices['Desktop Chrome'],
-        // logged in as admin, see auth.setup.ts
-        storageState: 'test/playwright/.auth/admin.json',
-      },
-      dependencies: ['setup'],
-    },
+    {name: 'chromium', use: {...devices['Desktop Chrome']}},
   ],
 
   // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.

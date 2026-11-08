@@ -98,8 +98,8 @@ test.describe('Gallery', () => {
     await expect(page.locator('app-gallery-lightbox-media img[alt="IMG_5910.jpg"]')).toBeVisible();
     await page.locator('.controls-background ng-icon[name="ionPlayOutline"]').click();
 
-    // autoplay default delay is 5s
-    await expect(page.locator('app-gallery-lightbox-media img[alt="IMG_6220.jpg"]')).toBeAttached({timeout: 7000});
+    // autoplay default delay is 5s, then the next photo loads (slow when all tests run, e.g. in UI mode)
+    await expect(page.locator('app-gallery-lightbox-media img[alt="IMG_6220.jpg"]')).toBeAttached({timeout: 15000});
   });
 
   test('Gallery should auto open lightbox for IMG_5910.jpg', async ({page}) => {

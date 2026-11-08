@@ -80,7 +80,7 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
-  - Tests start logged in as admin (`auth.setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
+  - Tests start logged in as admin (`global-setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
   - Tests run in parallel against one server: don't depend on data that other tests change (e.g. sharings of the same folder).
   - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
     with `test.fail()` (in mocha: assert that the check is rejected, see `SharingRouter.spec.ts`).

@@ -1,6 +1,6 @@
 import {expect, Locator, Page} from '@playwright/test';
 
-// a fresh browser without the logged in admin session of auth.setup.ts
+// a fresh browser without the logged in admin session of global-setup.ts
 export const notLoggedIn = {storageState: {cookies: [], origins: []}};
 
 export const isGalleryContent = (url: URL): boolean => url.pathname === '/pgapi/gallery/content/';
