@@ -1,5 +1,6 @@
 import {expect, Page, test} from '@playwright/test';
 import {
+  ACCENTED_DIR,
   expectCardCover,
   expectLightboxPhoto,
   expectNavbar,
@@ -204,6 +205,23 @@ test.describe('Share', () => {
       await expectContent(page, /\/pgapi\/gallery\/content\/timestamps(\?|$)/, () =>
         page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'}).click());
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expectVisiblePhotosLoaded(page);
+    });
+
+    test('Sharing of a folder with accents in its name should open it and its subfolder', async ({page}) => {
+      await openDirectory(page, encodeURIComponent(ACCENTED_DIR));
+      const link = await createSharing(page, {recursive: true});
+      await openSharingAsGuest(page, link, contentUrl);
+
+      await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR);
+      await expect(page.locator('#directory-path li').last()).toContainText('űáéú őóüö');
+      await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
+      await expectVisiblePhotosLoaded(page);
+
+      await expectContent(page, /\/pgapi\/gallery\/content\/[^?]*subdirectory(\?|$)/, () =>
+        page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click());
+      await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
+      await expect(page.locator('.photo-container > img[alt="IMG_8824.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
     });
 
