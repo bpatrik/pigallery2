@@ -76,9 +76,9 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
     `import '<…>/common/config/public/Config';`, like `main.ts` does; otherwise the private config's asserts throw on load.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
-- E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npx playwright test` starts `npm run start-e2e-server` itself
+- E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
-  run against your DB. Single file: `npx playwright test share`; debugging: `--ui`, or `--trace on` + `npx playwright show-trace`.
+  run against your DB. Single file: `npm run test-e2e -- share`; debugging: `--ui`, or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
   - Tests start logged in as admin (`auth.setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
   - Tests run in parallel against one server: don't depend on data that other tests change (e.g. sharings of the same folder).
@@ -90,12 +90,13 @@ Edit only `.ts` files; never hand-edit or commit generated `.js` / `.js.map` fil
   - Browser: `npx playwright install chromium` once. Cloud sessions have a Chromium in `/opt/pw-browsers` but can't download one;
     if its revision differs from what `@playwright/test` expects, symlink the expected `chromium-<rev>` and
     `chromium_headless_shell-<rev>` folders there to the installed ones.
-  - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npx playwright test docs-screens`.
+  - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens`.
+  - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `build.yml`).
 - Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
   read only the summary:
   - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
   - frontend: `npm run test-frontend > <tmp>/fe.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/fe.log | grep -E "FAIL|Test Files|Tests "`
-  - e2e: `npx playwright test > <tmp>/e2e.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/e2e.log | grep -avE "WebServer" | grep -aE "passed|failed|flaky|^\s+[0-9]+\) "`
+  - e2e: `npm run test-e2e > <tmp>/e2e.log 2>&1; sed 's/\x1b\[[0-9;]*m//g' <tmp>/e2e.log | grep -avE "WebServer" | grep -aE "passed|failed|flaky|^\s+[0-9]+\) "`
     (expected failures of `test.fail()` print a ✘ but count as passed).
 
 ### Tooling

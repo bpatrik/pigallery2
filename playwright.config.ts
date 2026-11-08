@@ -10,7 +10,12 @@ export default defineConfig({
   // Fail the build on CI if you accidentally left test.only in the source code.
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: [['list'], ['html', {open: 'never'}]],
+  reporter: [
+    ['list'],
+    ['html', {open: 'never'}],
+    // on CI: annotations of the failures, and results.json for the job summary (see build.yml)
+    ...(process.env.CI ? [['github'], ['json', {outputFile: 'test-results/results.json'}]] as const : []),
+  ],
   use: {
     baseURL: 'http://localhost:8080',
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer

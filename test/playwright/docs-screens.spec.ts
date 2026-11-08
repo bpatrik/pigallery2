@@ -1,6 +1,6 @@
 /**
  * These tests are only used for docs screenshot generation:
- * DOCS_SCREENSHOTS=true npx playwright test docs-screens
+ * DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens
  * The screenshots are saved to test/playwright/screenshots.
  */
 import {expect, Page, test} from '@playwright/test';

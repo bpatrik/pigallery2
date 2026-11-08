@@ -112,7 +112,22 @@ jobs:
     - name: Install Playwright browser
       run: npx playwright install --with-deps chromium
     - name: E2E test - Playwright
-      run: npx playwright test
+      run: npm run test-e2e
+    - name: E2E test summary
+      if: ${{ !cancelled() && hashFiles('test-results/results.json') != '' }}
+      run: |
+        jq -r '
+          def count(s): map(select(.status == s)) | length;
+          "### E2E tests (Playwright)",
+          "",
+          "| Spec | Passed | Failed | Flaky | Skipped |",
+          "| --- | --: | --: | --: | --: |",
+          (.suites[] | [.. | objects | select(has("expectedStatus"))] as $t
+            | "| \(.file) | \($t | count("expected")) | \($t | count("unexpected")) | \($t | count("flaky")) | \($t | count("skipped")) |"),
+          "| **All (\(.stats.duration / 1000 | floor) s)** | **\(.stats.expected)** | **\(.stats.unexpected)** | **\(.stats.flaky)** | **\(.stats.skipped)** |",
+          "",
+          "Passed includes the expected failures of test.fail(). Details: the playwright-report artifact."
+        ' test-results/results.json >> "$GITHUB_STEP_SUMMARY"
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
       with:

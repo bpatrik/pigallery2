@@ -16,6 +16,7 @@
     "test": "ng test --watch=false --coverage && c8 mocha test --exclude folder-reset.js",
     "test-frontend": "ng test --watch=false",
     "test-backend": "tsc && mocha test --exclude folder-reset.js",
+    "test-e2e": "playwright test",
     "coverage": "c8 report --reporter=lcov",
     "start": "node ./src/backend/index",
     "run-diagnostics": "node ./src/backend/index --run-diagnostics --Server-Log-level=silly",
