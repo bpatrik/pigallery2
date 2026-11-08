@@ -1,20 +1,90 @@
 import {expect, Page, test} from '@playwright/test';
-import {expectLightboxPhoto, isGalleryContent, loginWithUi, notLoggedIn, scrollUntilAttached} from './helpers';
+import {
+  asNormalUser,
+  expectCardCover,
+  expectLightboxPhoto,
+  expectNavbar,
+  expectVisiblePhotosLoaded,
+  isGalleryContent,
+  loginWithUi,
+  NavbarExpectation,
+  notLoggedIn,
+  scrollUntilAttached
+} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
 const lightboxTitle = (page: Page, text: string) =>
   page.locator('app-lightbox-controls > #controllers-container > .controls-title').filter({hasText: text});
 const lightboxFaceNames = (page: Page) => page.locator('app-lightbox-controls .faces-container > .face > .face-name');
 
+/**
+ * Sanity check of the gallery: what a logged in user notices right away when opening it.
+ * Soft checks, so one failure does not hide the others.
+ */
+const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): Promise<void> => {
+  const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+  await page.goto('/gallery/');
+  await content;
+
+  await expectNavbar(page, navbar);
+
+  // folders render with their covers (emptydirectory has nothing to show)
+  const folders = page.locator('app-gallery-directory').filter({hasNotText: 'emptydirectory'});
+  await expect(folders.first()).toBeVisible();
+  for (const folder of await folders.all()) {
+    await expectCardCover(folder);
+  }
+  await expectVisiblePhotosLoaded(page);
+
+  // the lightbox shows the photo with its title and faces
+  const squirrel = photo(page, 'IMG_5910.jpg');
+  await scrollUntilAttached(page, squirrel);
+  await squirrel.click();
+  await expect.soft(lightboxTitle(page, 'Squirrel at berkely')).toBeVisible();
+  await expect.soft(page.locator('app-lightbox-controls .faces-container a.face .face-name')
+    .filter({hasText: 'Alvin the Squirrel'}), 'faces link to their search').toBeAttached();
+  await expectLightboxPhoto(page, 'IMG_5910.jpg');
+  // the info panel links its keywords to a search
+  await page.keyboard.press('i');
+  await expect.soft(page.locator('app-info-panel .keywords a').filter({hasText: 'Berkley'})).toBeVisible();
+  await page.locator('app-info-panel .btn-close').click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('app-gallery-lightbox-media img')).toHaveCount(0);
+
+  // the info bar links the keywords and the place to a search, and the search finds the photo
+  await squirrel.scrollIntoViewIfNeeded();
+  await squirrel.hover();
+  const info = squirrel.locator('..').locator('.info');
+  await expect.soft(info.locator('.photo-keywords a').filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
+  const place = info.locator('.photo-position a').filter({hasText: 'Berkeley'});
+  await expect(place).toBeVisible();
+  await place.click();
+  await expect(page).toHaveURL(/\/search\//);
+  await expect.soft(photo(page, 'IMG_5910.jpg'), 'the search finds the photo').toBeVisible();
+  await expectVisiblePhotosLoaded(page);
+};
+
+test.describe('Gallery sanity', () => {
+  test.use({viewport: {width: 1400, height: 800}});
+
+  test('Gallery should look right for an admin', async ({page}) => {
+    await expectGalleryLooksRight(page, {tabs: ['Gallery', 'Albums', 'Faces'], search: true, share: true, admin: true});
+  });
+
+  test.describe('normal user', () => {
+    test.use(asNormalUser);
+
+    test('Gallery should look right for a normal user', async ({page}) => {
+      await expectGalleryLooksRight(page, {tabs: ['Gallery', 'Albums', 'Faces'], search: true, share: true, admin: false});
+    });
+  });
+});
+
 test.describe('Gallery', () => {
   test.beforeEach(async ({page}) => {
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');
     await content;
-  });
-
-  test('Gallery should open', async ({page}) => {
-    await expect(page.locator('.mb-0 > :nth-child(1) > .nav-link')).toContainText('Gallery');
   });
 
   test('Gallery should filter', async ({page}) => {

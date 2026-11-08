@@ -81,8 +81,13 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
-  - Tests start logged in as admin (`global-setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
-  - Tests run in parallel against one server: don't depend on data that other tests change (e.g. sharings of the same folder).
+  - `global-setup.ts` indexes all folders, creates a normal user and saves both sessions. Tests start logged in as admin;
+    `test.use(asNormalUser)` / `test.use(notLoggedIn)` from `helpers.ts` start as the normal user / a guest.
+  - Tests run in parallel against one server, so non-idempotent tests must be isolated: don't depend on data that other tests change
+    (e.g. sharings of the same folder), give data a test adds a unique name and delete it afterwards (see `albums.spec.ts`).
+    Server-wide changes (config, jobs) belong in `global-setup.ts`, or in a separate project that runs after the others.
+  - Every screen has a sanity test (`... should look right`): one `test()` per screen and role with `expect.soft()` checks
+    of what a person notices right away. Extend it rather than adding a new test that opens the same screen.
   - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
     with `test.fail()` (in mocha: assert that the check is rejected, see `SharingRouter.spec.ts`).
   - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,

@@ -1,5 +1,12 @@
 import {expect, Page, test} from '@playwright/test';
-import {expectVisiblePhotosLoaded} from './helpers';
+import {
+  expectCardCover,
+  expectLightboxPhoto,
+  expectNavbar,
+  expectVisiblePhotosLoaded,
+  logoutWithUi,
+  scrollUntilAttached
+} from './helpers';
 
 // The e2e server serves the demo/images folder.
 // timestamps has big_ben.jpg, dupl is an other directory next to it (without big_ben.jpg).
@@ -59,13 +66,6 @@ const createSharing = async (page: Page, options: { password?: string, recursive
   return link;
 };
 
-const logout = async (page: Page): Promise<void> => {
-  await page.locator('button#button-frame-menu').click();
-  const loggedOut = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/user/logout');
-  await page.locator('#dropdown-frame-menu ng-icon[name="ionLogOutOutline"]').click();
-  await loggedOut;
-};
-
 /**
  * A sharing always shows how long its link is available (e.g.: Link availability: 29 days, 23:59:58).
  * It updates every second, so it shows up a second after the page loads.
@@ -80,7 +80,7 @@ const getSharingKey = (link: string): string => new URL(link).pathname.split('/'
  * Opens a sharing without password as a guest (not logged in user).
  */
 const openSharingAsGuest = async (page: Page, link: string, url: RegExp): Promise<void> => {
-  await logout(page);
+  await logoutWithUi(page);
   await expect(page.locator('#username')).toBeVisible();
   await expectContent(page, url, async () => {
     await page.goto(link);
@@ -102,6 +102,44 @@ test.describe('Share', () => {
 
   test.describe('Directory sharing', () => {
 
+    // Sanity check: what a guest notices right away when opening a sharing. Soft checks, so one failure does not hide the others.
+    test('Sharing should look right for a guest', async ({page}) => {
+      await openDirectory(page, '');
+      const link = await createSharing(page, {recursive: true});
+      await openSharingAsGuest(page, link, contentUrl);
+
+      // nothing to navigate to outside the sharing: no tabs, no search, no sharing, no admin
+      await expectNavbar(page, {tabs: [], search: false, share: false, admin: false});
+
+      // folders render with their covers (emptydirectory has nothing to show)
+      const folders = page.locator('app-gallery-directory').filter({hasNotText: 'emptydirectory'});
+      await expect(folders.first()).toBeVisible();
+      for (const folder of await folders.all()) {
+        await expectCardCover(folder);
+      }
+      await expectVisiblePhotosLoaded(page);
+
+      // search links don't work in a sharing: the keywords and the place of the info bar are plain text
+      const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
+      await scrollUntilAttached(page, squirrel);
+      await squirrel.scrollIntoViewIfNeeded();
+      await squirrel.hover();
+      const info = squirrel.locator('..').locator('.info');
+      await expect.soft(info.locator('.photo-keywords span').filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
+      await expect.soft(info.locator('.photo-position span').filter({hasText: 'Berkeley'})).toBeVisible();
+      await expect.soft(info.locator('a'), 'no search links in the info bar').toHaveCount(0);
+
+      // the lightbox shows the photo, its faces and the info panel without search links
+      await squirrel.click();
+      await expectLightboxPhoto(page, 'IMG_5910.jpg');
+      await expect.soft(page.locator('app-lightbox-controls .faces-container .face-name')
+        .filter({hasText: 'Alvin the Squirrel'})).toBeAttached();
+      await expect.soft(page.locator('app-lightbox-controls a.face'), 'faces are no search links').toHaveCount(0);
+      await page.keyboard.press('i');
+      await expect(page.locator('app-info-panel .keywords').filter({hasText: 'Berkley'})).toBeVisible();
+      await expect.soft(page.locator('app-info-panel a[href*="/search/"]'), 'no search links in the info panel').toHaveCount(0);
+    });
+
     test('Open no password sharing', async ({page}) => {
       await openDirectory(page, 'timestamps');
       const link = await createSharing(page);
@@ -118,7 +156,7 @@ test.describe('Share', () => {
     test('Open password protected sharing', async ({page}) => {
       await openDirectory(page, 'timestamps');
       const link = await createSharing(page, {password: 'secret'});
-      await logout(page);
+      await logoutWithUi(page);
       await expectContent(page, contentUrl, () => loginToSharing(page, link, 'secret'));
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
@@ -219,7 +257,7 @@ test.describe('Share', () => {
       const link = await createSharing(page);
       await openSharingAsGuest(page, link, contentUrl);
 
-      await logout(page);
+      await logoutWithUi(page);
       await expect(page).toHaveURL(/\/login/);
       await expect(page).not.toHaveURL(/shareLogin/);
       await expect(page.locator('#username')).toBeVisible();
@@ -232,10 +270,10 @@ test.describe('Share', () => {
     test('Logout from password protected sharing should go to the sharing login', async ({page}) => {
       await openDirectory(page, 'timestamps');
       const link = await createSharing(page, {password: 'secret'});
-      await logout(page);
+      await logoutWithUi(page);
       await loginToSharing(page, link, 'secret');
 
-      await logout(page);
+      await logoutWithUi(page);
       await expect(page).toHaveURL(/\/shareLogin/);
       await expect(page.locator('input#password')).toBeVisible();
     });
