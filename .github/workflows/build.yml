@@ -79,6 +79,8 @@ jobs:
       if: matrix.node-version == '26.x'
       uses: coverallsapp/github-action@v2
       with:
+        # a failed upload (e.g. a broken download of the Coveralls reporter) must not fail the build
+        fail-on-error: false
         files: coverage/lcov.info coverage/pigallery2/lcov.info
 
   # own job, so a failing unit test does not skip the e2e tests (and the other way around)
