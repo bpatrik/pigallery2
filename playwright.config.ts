@@ -28,6 +28,8 @@ export default defineConfig({
   globalSetup: './test/playwright/global-setup.ts',
   projects: [
     {name: 'chromium', use: {...devices['Desktop Chrome']}},
+    // the journeys that work differently on a phone (touch, small screen), with real touch events (#1316)
+    {name: 'mobile', use: {...devices['Pixel 7']}, testMatch: /(lightbox|navigation)\.spec\.ts/},
   ],
 
   // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.
