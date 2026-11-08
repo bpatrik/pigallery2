@@ -50,7 +50,8 @@ describe('GalleryNavigatorComponent', () => {
     it('should link every parent of an accented folder', () => {
       content.set(folder('Nyaralás/Balaton', 'Őszi kirándulás'));
       expect(component.routes()).toEqual([
-        {name: 'Home', route: '/'},
+        // '' and not '/': the folder is one URL segment, so '/' would become /gallery/%2F
+        {name: 'Home', route: ''},
         {name: 'Nyaralás', route: 'Nyaralás'},
         {name: 'Balaton', route: 'Nyaralás/Balaton', title: 'key: alt + up'},
         {name: 'Őszi kirándulás', route: null},
@@ -101,6 +102,12 @@ describe('GalleryNavigatorComponent', () => {
       content.set(folder('Nyaralás', 'Balaton'));
       component.onKeyPress(altUp);
       expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Nyaralás'], {queryParams: {}});
+    });
+
+    it('should open the root from a top level folder', () => {
+      content.set(folder('.', 'Nyaralás'));
+      component.onKeyPress(altUp);
+      expect(router.navigate).toHaveBeenCalledWith(['/gallery', ''], {queryParams: {}});
     });
 
     it('should do nothing without a parent the user may open', () => {

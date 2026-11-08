@@ -80,7 +80,10 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
 - E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
-  It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
+  It covers login, gallery (filters, lightbox, URL deep links), folder navigation, search, faces, albums, sharing and error paths.
+  The `mobile` project (Pixel 7, real touch events; swipe with `swipe()` of `helpers.ts`) runs only `lightbox.spec.ts` and `navigation.spec.ts`.
+  - The lightbox controls, and so its keyboard shortcuts, only exist once the opening animation ended: wait for
+    `app-lightbox-controls #rightArrow` before pressing a key, or the key is lost.
   - `global-setup.ts` indexes all folders, creates a normal user and saves both sessions. Tests start logged in as admin;
     `test.use(asNormalUser)` / `test.use(notLoggedIn)` from `helpers.ts` start as the normal user / a guest.
   - Tests run in parallel against one server, so non-idempotent tests must be isolated: don't depend on data that other tests change
