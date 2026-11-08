@@ -1,5 +1,5 @@
 import {expect, Page, test} from '@playwright/test';
-import {isGalleryContent, loginWithUi, notLoggedIn, scrollUntilAttached} from './helpers';
+import {isGalleryContent, loadedImageWidth, loginWithUi, notLoggedIn, scrollUntilAttached} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
 const lightboxTitle = (page: Page, text: string) =>
@@ -81,7 +81,16 @@ test.describe('Gallery', () => {
     await scrollUntilAttached(page, photo(page, 'IMG_5910.jpg'));
     await photo(page, 'IMG_5910.jpg').hover();
 
-    const info = page.locator('.photo-container > .info');
+    // the info bar slides up over the photo (it is below the photo, hidden, until then)
+    const container = photo(page, 'IMG_5910.jpg').locator('..');
+    const info = container.locator('.info');
+    await expect(info).toBeVisible();
+    await expect.poll(async () => {
+      const c = await container.boundingBox();
+      const i = await info.boundingBox();
+      return !!c && !!i && i.y >= c.y - 1 && i.y + i.height <= c.y + c.height + 1;
+    }, {message: 'info bar is over the photo'}).toBe(true);
+
     await expect(info.locator('.photo-name')).toContainText('IMG_5910.jpg');
     await expect(info.locator('.photo-position')).toContainText('Berkeley');
     const keywords = info.locator('.photo-keywords a');
@@ -90,15 +99,27 @@ test.describe('Gallery', () => {
     await expect(keywords.filter({hasText: 'USA'})).toBeVisible();
   });
 
+
   test('Gallery should open lightbox', async ({page}) => {
     // contains a folder
     await expect(page.locator('app-gallery-directories.directories > app-gallery-directory > .button > .photo-container').first()).toBeVisible();
 
-    await scrollUntilAttached(page, photo(page, 'IMG_5910.jpg'));
-    await photo(page, 'IMG_5910.jpg').click();
+    const thumbnail = photo(page, 'IMG_5910.jpg');
+    await scrollUntilAttached(page, thumbnail);
+    await expect.poll(() => loadedImageWidth(thumbnail)).toBeGreaterThan(0);
+    const thumbnailWidth = await loadedImageWidth(thumbnail);
+    await thumbnail.click();
     await expect(lightboxTitle(page, 'Squirrel at berkely')).toBeVisible();
     await expect(lightboxFaceNames(page).filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
+
+    // the lightbox shows the thumbnail until the large photo is loaded, then only the large photo
+    const lightboxImages = page.locator('app-gallery-lightbox-media img');
+    await expect(lightboxImages).toHaveCount(1);
+    await expect(lightboxImages).toHaveAttribute('alt', 'IMG_5910.jpg');
+    await expect(lightboxImages).toBeVisible();
+    await expect.poll(() => loadedImageWidth(lightboxImages)).toBeGreaterThan(thumbnailWidth * 2);
   });
+
 
   test('Gallery should auto play in lightbox', async ({page}) => {
     await page.goto('/gallery/?p=IMG_5910.jpg');

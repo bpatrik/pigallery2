@@ -20,11 +20,19 @@ export const loginWithUi = async (page: Page): Promise<void> => {
 };
 
 /**
- * Scrolls down until the locator is rendered (the grid renders the photos while scrolling).
+ * Scrolls down a screen at a time until the locator is rendered (the grid renders the photos while scrolling).
  */
 export const scrollUntilAttached = async (page: Page, locator: Locator): Promise<void> => {
   await expect(async () => {
-    await page.mouse.wheel(0, 9000);
-    await expect(locator).toBeAttached({timeout: 500});
-  }).toPass({timeout: 10000});
+    if (await locator.count() === 0) {
+      await page.mouse.wheel(0, page.viewportSize()?.height ?? 720);
+    }
+    await expect(locator).toBeAttached({timeout: 300});
+  }).toPass({intervals: [100], timeout: 15000});
 };
+
+/**
+ * The natural width of a loaded image, 0 while it is loading.
+ */
+export const loadedImageWidth = (img: Locator): Promise<number> =>
+  img.evaluate((el: HTMLImageElement) => el.complete ? el.naturalWidth : 0);
