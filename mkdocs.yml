@@ -13,6 +13,16 @@ theme:
     accent: indigo
 
 
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bpatrik/pigallery2
+      name: PiGallery2 on GitHub
+    - icon: fontawesome/solid/heart
+      link: https://github.com/sponsors/bpatrik
+      name: Sponsor PiGallery2
+
+
 plugins:
   - search
   - glightbox
