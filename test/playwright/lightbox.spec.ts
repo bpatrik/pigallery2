@@ -95,6 +95,19 @@ test.describe('Lightbox', () => {
     await expect(firstPhoto).not.toBeInViewport();
   });
 
+  test('Lightbox should tell when a video fails to load', async ({page}) => {
+    // the video itself (the original or its transcoded version), not its thumbnail
+    const isVideo = (url: URL): boolean => /\/bunny\.mp4(\/bestFit)?$/.test(url.pathname);
+    await page.route(isVideo, route => route.fulfill({status: 404, body: 'Not Found'}));
+    const failed = page.waitForResponse(res => isVideo(new URL(res.url())));
+    await page.goto('/gallery/?p=bunny.mp4');
+    expect((await failed).status()).toBe(404);
+
+    await expect(page.locator('app-gallery-lightbox').getByText('Error during loading the video.')).toBeVisible();
+    // the lightbox stays open, it can be closed as usual
+    await expect(page.locator('app-lightbox-controls ng-icon[name="ionCloseOutline"]')).toBeVisible();
+  });
+
   test('Lightbox should download the photo with its original name', async ({page}) => {
     // a folder with accents in its name: the download URL has to encode them
     await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR) + '?p=IMG_8943.jpg');
