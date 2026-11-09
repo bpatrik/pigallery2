@@ -2,9 +2,11 @@ import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
 import {
   ACCENTED_DIR,
+  desktopViewport,
   expectCardCover,
   expectLightboxPhoto,
   expectNavbar,
+  expectNoHorizontalScroll,
   expectVisiblePhotosLoaded,
   logoutWithUi,
   notLoggedIn,
@@ -52,7 +54,13 @@ const openDirectory = async (page: Page, dir: string): Promise<void> => {
  * Creates a sharing from the share dialog of the current view and returns its link.
  */
 const createSharing = async (page: Page, options: { password?: string, recursive?: boolean } = {}): Promise<string> => {
-  await page.locator('button#shareButton').click();
+  if ((page.viewportSize()?.width ?? 1280) < 1200) {
+    // below the bootstrap xl breakpoint (e.g.: on a phone), Share is in the menu of the navbar
+    await page.locator('button#button-frame-menu').click();
+    await page.locator('#dropdown-frame-menu app-gallery-share button.dropdown-item').click();
+  } else {
+    await page.locator('button#shareButton').click();
+  }
   await expect(page.locator('button#getShareButton')).toBeVisible();
   // the dialog keeps its settings while the page is open
   const recursive = page.locator('input#share-recursive');
@@ -68,6 +76,11 @@ const createSharing = async (page: Page, options: { password?: string, recursive
   const link = await shareLink.inputValue();
   // the "copied to clipboard" toast has a close button too
   await page.locator('modal-container button.btn-close').click();
+  // the menu of the navbar stays open after its Share item (on a small screen)
+  if (await page.locator('#dropdown-frame-menu').isVisible()) {
+    await page.locator('button#button-frame-menu').click();
+    await expect(page.locator('#dropdown-frame-menu')).toHaveCount(0);
+  }
   return link;
 };
 
@@ -138,12 +151,12 @@ const loginToSharing = async (page: Page, link: string, password: string): Promi
 };
 
 test.describe('Share', () => {
-  test.use({viewport: {width: 1200, height: 600}});
+  test.use(desktopViewport({width: 1200, height: 600}));
 
   test.describe('Directory sharing', () => {
 
     // Sanity check: what a guest notices right away when opening a sharing. Soft checks, so one failure does not hide the others.
-    test('Sharing should look right for a guest', async ({page}) => {
+    test('Sharing should look right for a guest', {tag: '@sanity'}, async ({page}) => {
       await openDirectory(page, '');
       const link = await createSharing(page, {recursive: true});
       await openSharingAsGuest(page, link, contentUrl);
@@ -158,6 +171,7 @@ test.describe('Share', () => {
         await expectCardCover(folder);
       }
       await expectVisiblePhotosLoaded(page);
+      await expectNoHorizontalScroll(page, 'sharing');
 
       // search links don't work in a sharing: the keywords and the place of the info bar are plain text
       const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
@@ -172,6 +186,7 @@ test.describe('Share', () => {
       // the lightbox shows the photo, its faces and the info panel without search links
       await squirrel.click();
       await expectLightboxPhoto(page, 'IMG_5910.jpg');
+      await expectNoHorizontalScroll(page, 'lightbox');
       await expect.soft(page.locator('app-lightbox-controls .faces-container .face-name')
         .filter({hasText: 'Alvin the Squirrel'})).toBeAttached();
       await expect.soft(page.locator('app-lightbox-controls a.face'), 'faces are no search links').toHaveCount(0);

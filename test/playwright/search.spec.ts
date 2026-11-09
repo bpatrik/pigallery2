@@ -1,5 +1,5 @@
 import {expect, Page, test} from '@playwright/test';
-import {ACCENTED_DIR, expectLightboxPhoto, expectVisiblePhotosLoaded} from './helpers';
+import {ACCENTED_DIR, expectLightboxPhoto, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
 
 const SEARCH_KEYWORD = 104; // SearchQueryTypes.keyword
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
@@ -91,7 +91,7 @@ test.describe('Search', () => {
   });
 
   // Sanity check: what a user notices right away when opening search results. Soft checks, so one failure does not hide the others.
-  test('Search results should look right', async ({page}) => {
+  test('Search results should look right', {tag: '@sanity'}, async ({page}) => {
     const query = {type: SEARCH_KEYWORD, value: 'Berkley', matchType: EXACT_MATCH};
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/' + encodeURIComponent(JSON.stringify(query)));
@@ -102,9 +102,11 @@ test.describe('Search', () => {
     const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
     await expect(squirrel).toBeVisible();
     await expectVisiblePhotosLoaded(page);
+    await expectNoHorizontalScroll(page, 'search results');
 
     // opening a result shows it in the lightbox
     await squirrel.click();
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    await expectNoHorizontalScroll(page, 'lightbox');
   });
 });

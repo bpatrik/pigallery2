@@ -1,9 +1,11 @@
 import {expect, Page, test} from '@playwright/test';
 import {
   asNormalUser,
+  desktopViewport,
   expectCardCover,
   expectLightboxPhoto,
   expectNavbar,
+  expectNoHorizontalScroll,
   expectVisiblePhotosLoaded,
   isGalleryContent,
   loginWithUi,
@@ -35,6 +37,7 @@ const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): P
     await expectCardCover(folder);
   }
   await expectVisiblePhotosLoaded(page);
+  await expectNoHorizontalScroll(page, 'gallery');
 
   // the lightbox shows the photo with its title and faces
   const squirrel = photo(page, 'IMG_5910.jpg');
@@ -44,6 +47,7 @@ const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): P
   await expect.soft(page.locator('app-lightbox-controls .faces-container a.face .face-name')
     .filter({hasText: 'Alvin the Squirrel'}), 'faces link to their search').toBeAttached();
   await expectLightboxPhoto(page, 'IMG_5910.jpg');
+  await expectNoHorizontalScroll(page, 'lightbox');
   // the info panel links its keywords to a search
   await page.keyboard.press('i');
   await expect.soft(page.locator('app-info-panel .keywords a').filter({hasText: 'Berkley'})).toBeVisible();
@@ -65,16 +69,16 @@ const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): P
 };
 
 test.describe('Gallery sanity', () => {
-  test.use({viewport: {width: 1400, height: 800}});
+  test.use(desktopViewport({width: 1400, height: 800}));
 
-  test('Gallery should look right for an admin', async ({page}) => {
+  test('Gallery should look right for an admin', {tag: '@sanity'}, async ({page}) => {
     await expectGalleryLooksRight(page, {tabs: ['Gallery', 'Albums', 'Faces'], search: true, share: true, admin: true});
   });
 
   test.describe('normal user', () => {
     test.use(asNormalUser);
 
-    test('Gallery should look right for a normal user', async ({page}) => {
+    test('Gallery should look right for a normal user', {tag: '@sanity'}, async ({page}) => {
       await expectGalleryLooksRight(page, {tabs: ['Gallery', 'Albums', 'Faces'], search: true, share: true, admin: false});
     });
   });

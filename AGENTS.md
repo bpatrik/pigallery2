@@ -81,7 +81,9 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, URL deep links), folder navigation, search, faces, albums, sharing and error paths.
-  The `mobile` project (Pixel 7, real touch events; swipe with `swipe()` of `helpers.ts`) runs only `lightbox.spec.ts` and `navigation.spec.ts`.
+  The `mobile` project (Pixel 7, real touch events; `swipe()`, `pinch()`, `doubleTap()` of `helpers.ts`) runs `lightbox.spec.ts` and `navigation.spec.ts`;
+  `mobile-sanity` runs the sanity tests tagged `@sanity` on the same phone. Set a desktop viewport with `test.use(desktopViewport(...))`
+  (a phone keeps its own), and use helpers that handle the phone navbar (tabs and Share are in the menu: `expectNavbar`, `clickNavbarTab`).
   - The lightbox controls, and so its keyboard shortcuts, only exist once the opening animation ended: wait for
     `app-lightbox-controls #rightArrow` before pressing a key, or the key is lost.
   - `global-setup.ts` indexes all folders, creates a normal user and saves both sessions. Tests start logged in as admin;
@@ -89,8 +91,9 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   - Tests run in parallel against one server, so non-idempotent tests must be isolated: don't depend on data that other tests change
     (e.g. sharings of the same folder), give data a test adds a unique name and delete it afterwards (see `albums.spec.ts`).
     Server-wide changes (config, jobs) belong in `global-setup.ts`, or in a separate project that runs after the others.
-  - Every screen has a sanity test (`... should look right`): one `test()` per screen and role with `expect.soft()` checks
-    of what a person notices right away. Extend it rather than adding a new test that opens the same screen.
+  - Every screen has a sanity test (`... should look right`, tagged `@sanity`): one `test()` per screen and role with `expect.soft()` checks
+    of what a person notices right away, incl. `expectNoHorizontalScroll()` (on the screen and with the lightbox open).
+    Extend it rather than adding a new test that opens the same screen.
   - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
     with `test.fail()` (in mocha: assert that the check is rejected, see `SharingRouter.spec.ts`).
   - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
