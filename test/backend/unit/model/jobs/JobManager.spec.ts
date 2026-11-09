@@ -27,8 +27,10 @@ class CountingJob extends Job<{ items: number }> {
   public readonly ConfigTemplate: DynamicConfig[] = [];
   private left = 0;
 
+  private readonly supported = true;
+
   public get Supported(): boolean {
-    return true;
+    return this.supported;
   }
 
   protected async init(): Promise<void> {
@@ -57,8 +59,10 @@ class BrokenFileJob extends FileJob {
     super({noMetaFile: true, noVideo: true});
   }
 
+  private readonly supported = true;
+
   public get Supported(): boolean {
-    return true;
+    return this.supported;
   }
 
   protected async shouldProcess(): Promise<boolean> {

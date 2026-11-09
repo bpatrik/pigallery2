@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import * as path from 'node:path';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
-import {ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
+import {DirectoryBaseDTO, ParentDirectoryDTO} from '../../../../../src/common/entities/DirectoryDTO';
 import {DataSource} from 'typeorm';
 import {SessionUser, SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {
@@ -710,6 +710,46 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
       } finally {
         Config.MetaFile.gpx = origGpx;
       }
+    });
+  });
+
+  describe('getPossibleDuplicates (#1315)', async () => {
+    const photo = (dir: DirectoryBaseDTO, name: string, fileSize: number): void => {
+      const p = TestHelper.getRandomizedPhotoEntry(dir, name);
+      p.name = name;
+      p.metadata.fileSize = fileSize;
+    };
+
+    beforeEach(async () => {
+      await sqlHelper.initDB();
+    });
+
+    after(sqlHelper.clearDB);
+
+    it('lists media with the same name and size in different folders', async () => {
+      const root = TestHelper.getDirectoryEntry(null, '.');
+      const a = TestHelper.getDirectoryEntry(root, 'Balaton');
+      const b = TestHelper.getDirectoryEntry(root, 'Tihany és Hévíz');
+      photo(a, 'Árvíztűrő.jpg', 1234);
+      photo(b, 'Árvíztűrő.jpg', 1234);
+      photo(root, 'Árvíztűrő.jpg', 999); // same name, other size
+      photo(a, 'unique.jpg', 1234); // same size, other name
+      await DBTestHelper.persistTestDir(root);
+
+      const duplicates = await new GalleryManager().getPossibleDuplicates();
+      expect(duplicates.length).to.equal(1);
+      expect(duplicates[0].media.map(m => m.directory.name)).to.deep.equalInAnyOrder(['Balaton', 'Tihany és Hévíz']);
+      expect(duplicates[0].media.map(m => m.name)).to.deep.equal(['Árvíztűrő.jpg', 'Árvíztűrő.jpg']);
+    });
+
+    it('returns an empty list without duplicates', async () => {
+      const root = TestHelper.getDirectoryEntry(null, '.');
+      const a = TestHelper.getDirectoryEntry(root, 'Balaton');
+      photo(root, 'Tihany.jpg', 1000);
+      photo(a, 'Hévíz.jpg', 2000);
+      await DBTestHelper.persistTestDir(root);
+
+      expect(await new GalleryManager().getPossibleDuplicates()).to.deep.equal([]);
     });
   });
 });
