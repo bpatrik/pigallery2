@@ -1,4 +1,5 @@
-import {expect, Page, test} from '@playwright/test';
+import {APIRequestContext, expect, Page, test} from '@playwright/test';
+import {ADMIN_SESSION} from './global-setup';
 import {
   ACCENTED_DIR,
   expectCardCover,
@@ -6,13 +7,16 @@ import {
   expectNavbar,
   expectVisiblePhotosLoaded,
   logoutWithUi,
+  notLoggedIn,
   scrollUntilAttached
 } from './helpers';
 
 // The e2e server serves the demo/images folder.
 // timestamps has big_ben.jpg, dupl is an other directory next to it (without big_ben.jpg).
 const SEARCH_FILE_NAME = 103; // SearchQueryTypes.file_name
+const SEARCH_DIRECTORY = 102; // SearchQueryTypes.directory
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+const GLOB_MATCH = 3; // TextSearchQueryMatchTypes.globMatch
 
 // directory listing only, not the media (e.g.: content/dir/photo.jpg/320)
 const contentUrl = /\/pgapi\/gallery\/content\/(?![^?]*\.\w+\/\d+)/;
@@ -88,6 +92,41 @@ const openSharingAsGuest = async (page: Page, link: string, url: RegExp): Promis
     await expect(page.locator('app-gallery')).toBeAttached({timeout: 15000});
   });
   await expectCountDown(page);
+};
+
+// what an expired, deleted or not existing sharing link tells the user (#1307): one message, so a key can't be probed
+const INVALID_LINK_MESSAGE = 'This link is invalid or has expired';
+
+/**
+ * Creates a directory sharing through the API (as admin) and returns its key.
+ * valid: how long the sharing is available in ms.
+ */
+const createSharingWithApi = async (admin: APIRequestContext, dir: string,
+                                    options: { password?: string, recursive?: boolean, valid?: number } = {}): Promise<string> => {
+  const res = await admin.post('/pgapi/share/', {
+    data: {
+      createSharing: {
+        valid: options.valid ?? 24 * 60 * 60 * 1000,
+        ...(options.password && {password: options.password}),
+        directoryQuery: options.recursive
+          ? {type: SEARCH_DIRECTORY, value: dir + '/*', matchType: GLOB_MATCH}
+          : {type: SEARCH_DIRECTORY, value: dir, matchType: EXACT_MATCH},
+      },
+    },
+  });
+  expect(res.ok(), 'creating the sharing').toBe(true);
+  const sharingKey = (await res.json()).result?.sharingKey;
+  expect(sharingKey, 'sharing key').toBeTruthy();
+  return sharingKey;
+};
+
+/**
+ * The page of an invalid sharing link: only the message, no gallery around it.
+ */
+const expectInvalidLinkPage = async (page: Page): Promise<void> => {
+  await expect(page.getByText(INVALID_LINK_MESSAGE)).toBeVisible();
+  await expect(page.locator('app-gallery')).toHaveCount(0);
+  await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
 };
 
 const loginToSharing = async (page: Page, link: string, password: string): Promise<void> => {
@@ -294,6 +333,84 @@ test.describe('Share', () => {
       await logoutWithUi(page);
       await expect(page).toHaveURL(/\/shareLogin/);
       await expect(page.locator('input#password')).toBeVisible();
+    });
+  });
+
+  // the guest is not logged in; the sharings are created and deleted through the API as admin
+  test.describe('Invalid sharing', () => {
+    test.use(notLoggedIn);
+    let admin: APIRequestContext;
+
+    test.beforeEach(async ({playwright, baseURL}) => {
+      admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
+    });
+
+    test.afterEach(async () => {
+      await admin.dispose();
+    });
+
+    test('Wrong password should show an error and stay on the sharing login', async ({page}) => {
+      const sharingKey = await createSharingWithApi(admin, 'timestamps', {password: 'secret'});
+      await page.goto('/share/' + sharingKey);
+      await expect(page).toHaveURL(/\/shareLogin/);
+      await page.locator('input#password').fill('wrong');
+      const login = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/share/login');
+      await page.locator('button#button-share-login').click();
+      expect((await login).status()).toBe(401);
+
+      await expect(page.locator('.error-message')).toHaveText('Wrong password');
+      await expect(page).toHaveURL(/\/shareLogin/);
+      await expect(page.locator('input#password')).toBeVisible();
+      await expect(page.locator('app-gallery')).toHaveCount(0);
+    });
+
+    test('Expired sharing should tell the guest that the link is invalid or has expired', async ({page}) => {
+      test.fail(true, 'Not implemented yet #1307');
+      // expires 1 ms after its creation
+      const sharingKey = await createSharingWithApi(admin, 'timestamps', {valid: 1});
+      await page.goto('/share/' + sharingKey);
+
+      await expectInvalidLinkPage(page);
+    });
+
+    test('Sharing deleted while the guest has it open should show the invalid link page on the next navigation', async ({page}) => {
+      test.fail(true, 'Not implemented yet #1307');
+      const sharingKey = await createSharingWithApi(admin, ACCENTED_DIR, {recursive: true});
+      await page.goto('/share/' + sharingKey);
+      await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
+
+      expect((await admin.delete('/pgapi/share/' + sharingKey)).ok(), 'deleting the sharing').toBe(true);
+      await page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click();
+
+      await expectInvalidLinkPage(page);
+    });
+
+    test('Sharing deleted from the share list should not open anymore', async ({page, browser}) => {
+      const sharingKey = await createSharingWithApi(admin, 'timestamps');
+      const guestRequest = (): Promise<number> =>
+        page.request.get('/pgapi/gallery/content/timestamps?sk=' + sharingKey).then(r => r.status());
+      expect(await guestRequest(), 'the link works before the deletion').toBe(200);
+      await page.request.post('/pgapi/user/logout');
+
+      // the owner deletes it in the share dialog of the folder
+      const ownerContext = await browser.newContext({storageState: ADMIN_SESSION, viewport: {width: 1200, height: 600}});
+      try {
+        const owner = await ownerContext.newPage();
+        await openDirectory(owner, 'timestamps');
+        await owner.locator('button#shareButton').click();
+        await owner.locator('button.list-shares-button').click();
+        const row = owner.locator('modal-container .modal-footer table tbody tr').filter({hasText: sharingKey});
+        await expect(row).toHaveCount(1);
+        const deleted = owner.waitForResponse(res => res.request().method() === 'DELETE' &&
+          new URL(res.url()).pathname === '/pgapi/share/' + sharingKey);
+        await row.locator('button.btn-danger').click();
+        expect((await deleted).ok()).toBe(true);
+        await expect(row).toHaveCount(0);
+      } finally {
+        await ownerContext.close();
+      }
+
+      expect(await guestRequest(), 'the link stops working at once').toBe(401);
     });
   });
 });
