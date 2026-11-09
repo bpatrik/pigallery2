@@ -257,8 +257,9 @@ export const pinch = async (page: Page, scale: number): Promise<void> => {
 /**
  * Double taps with a real touch in the middle of the screen (the context needs hasTouch).
  */
-export const doubleTap = async (page: Page): Promise<void> => {
+export const doubleTap = async (page: Page, at?: { x: number, y: number }): Promise<void> => {
   const size = page.viewportSize() ?? {width: 400, height: 800};
-  await page.touchscreen.tap(size.width / 2, size.height / 2);
-  await page.touchscreen.tap(size.width / 2, size.height / 2);
+  const {x, y} = at ?? {x: size.width / 2, y: size.height / 2};
+  await page.touchscreen.tap(x, y);
+  await page.touchscreen.tap(x, y);
 };

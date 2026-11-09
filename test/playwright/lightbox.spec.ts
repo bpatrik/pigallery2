@@ -125,6 +125,40 @@ test.describe('Lightbox', () => {
     await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery') && !url.searchParams.has('p'));
   });
 
+  // A phone has no hover: a tap shows the faces, a double tap zooms (also on a face), a tap on a shown face opens its search.
+  test('Tapping a face on a phone should show the faces first, not open the search', async ({page, isMobile}) => {
+    test.skip(!isMobile, 'touch gestures: mobile project only');
+    test.fail(true, 'Not implemented yet #1310: a tap on a hidden face box opens the search');
+    await page.goto('/gallery/?p=IMG_5910.jpg');
+    await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    const face = page.locator('app-lightbox-controls .faces-container a.face').filter({hasText: 'Alvin the Squirrel'});
+    const faceBox = face.locator('.face-box');
+    const box = await face.boundingBox();
+    expect(box, 'the face box of Alvin the Squirrel').not.toBeNull();
+    const faceCenter = {x: box!.x + box!.width / 2, y: box!.y + box!.height / 2};
+    const opacity = (): Promise<number> => faceBox.evaluate(el => Number(getComputedStyle(el).opacity));
+
+    // the face is hidden until a tap shows it; the tap does not follow the link
+    expect(await opacity()).toBe(0);
+    await page.touchscreen.tap(faceCenter.x, faceCenter.y);
+    await expect.poll(opacity, {message: 'face box opacity after a tap'}).toBeGreaterThan(0);
+    await expect(page).toHaveURL(url => url.searchParams.get('p') === 'IMG_5910.jpg');
+
+    // a double tap on the face zooms in and out, it does not open the search
+    await doubleTap(page, faceCenter);
+    await expect(zoomSlider(page)).toBeVisible();
+    await expect(page).toHaveURL(url => url.searchParams.get('p') === 'IMG_5910.jpg');
+    await doubleTap(page, faceCenter);
+    await expect(zoomSlider(page)).toHaveCount(0);
+
+    // a tap on the shown face opens the search of that person
+    await page.touchscreen.tap(faceCenter.x, faceCenter.y);
+    await expect.poll(opacity, {message: 'face box opacity after a tap'}).toBeGreaterThan(0);
+    await page.touchscreen.tap(faceCenter.x, faceCenter.y);
+    await expect(page).toHaveURL(/\/search\//);
+  });
+
   test('Closing the lightbox should scroll the grid to the last shown photo', async ({page, isMobile}) => {
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');
