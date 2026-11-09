@@ -137,7 +137,8 @@ test.describe('Admin config', () => {
 
     // the page shows the progress of the run that just finished
     const progress = indexing.locator('app-settings-job-progress');
-    await expect(progress).toContainText('finished');
+    // the page polls the progress every 5 s while a job runs, but every 15 s when it saw none running
+    await expect(progress).toContainText('finished', {timeout: 20000});
     await expect(progress).toContainText(/\d+\/\d+/);
     // the gallery keeps working
     await page.goto('/gallery/');
