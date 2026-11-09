@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION, NORMAL_USER} from './global-setup';
 import {expectLightboxPhoto, isGalleryContent, loginWithUi, logoutWithUi, notLoggedIn} from './helpers';
@@ -152,7 +153,7 @@ test.describe('Login', () => {
   test.describe('Session ends while the app is open', () => {
     let admin: APIRequestContext;
     // a user of its own, so deleting it does not affect the other tests
-    const user = {name: 'e2e-session-end-' + Date.now() + '-' + Math.floor(Math.random() * 1000), password: 'pass', role: 3};
+    const user = {name: 'e2e-session-end-' + randomUUID(), password: 'pass', role: 3};
 
     test.beforeEach(async ({playwright, baseURL}) => {
       admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});

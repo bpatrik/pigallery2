@@ -1,4 +1,5 @@
 // Unhappy paths of the critical user journeys (#1254): the user should get a clear message, not an empty or wrong page.
+import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
 import {ACCENTED_DIR, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
@@ -75,7 +76,7 @@ test.describe('Errors', () => {
       let admin: APIRequestContext;
       // a user of its own whose directory block list hides the folder with accents in its name
       const user = {
-        name: 'e2e-restricted-' + Date.now() + '-' + Math.floor(Math.random() * 1000), password: 'pass', role: 3, // UserRoles.User
+        name: 'e2e-restricted-' + randomUUID(), password: 'pass', role: 3, // UserRoles.User
         overrideAllowBlockList: true,
         // SearchQueryTypes.directory, TextSearchQueryMatchTypes.exact_match
         blockDirectoryList: [{type: 102, value: ACCENTED_DIR, matchType: 1}],
