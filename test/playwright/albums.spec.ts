@@ -1,8 +1,21 @@
-import {expect, test} from '@playwright/test';
+import {expect, Page, test} from '@playwright/test';
 import {expectCardCover, expectLightboxPhoto, expectVisiblePhotosLoaded} from './helpers';
 
 const SEARCH_PERSON = 105; // SearchQueryTypes.person
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+
+/**
+ * Deletes the albums of the name through the API (clean up after a test).
+ */
+const deleteAlbumsNamed = async (page: Page, name: string): Promise<void> => {
+  const albums: { id: number, name: string }[] = (await (await page.request.get('/pgapi/albums')).json()).result;
+  for (const album of albums.filter(a => a.name === name)) {
+    expect((await page.request.delete('/pgapi/albums/' + album.id)).ok(), 'deleting the album').toBe(true);
+  }
+};
+
+const uniqueAlbumName = (workerIndex: number, retry: number): string =>
+  `e2e album ${workerIndex}-${retry}-${Date.now()}`;
 
 test.describe('Albums', () => {
   test.use({viewport: {width: 1200, height: 800}});
@@ -10,7 +23,7 @@ test.describe('Albums', () => {
 
   // The tests run in parallel on one server: every test adds its own album with a unique name and deletes it.
   test.beforeEach(async ({page}, testInfo) => {
-    albumName = `e2e album ${testInfo.workerIndex}-${testInfo.retry}-${Date.now()}`;
+    albumName = uniqueAlbumName(testInfo.workerIndex, testInfo.retry);
     const res = await page.request.put('/pgapi/albums/saved-searches', {
       data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Alvin the Squirrel', matchType: EXACT_MATCH}},
     });
@@ -18,10 +31,7 @@ test.describe('Albums', () => {
   });
 
   test.afterEach(async ({page}) => {
-    const albums: { id: number, name: string }[] = (await (await page.request.get('/pgapi/albums')).json()).result;
-    for (const album of albums.filter(a => a.name === albumName)) {
-      expect((await page.request.delete('/pgapi/albums/' + album.id)).ok(), 'deleting the album').toBe(true);
-    }
+    await deleteAlbumsNamed(page, albumName);
   });
 
   // Sanity check: what a user notices right away when opening the albums. Soft checks, so one failure does not hide the others.
@@ -46,5 +56,96 @@ test.describe('Albums', () => {
     await expect.soft(page.locator('app-gallery-grid .photo-container > img'), 'the photos of the album').toHaveCount(count);
     await squirrel.click();
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
+  });
+});
+
+// Adding and deleting an album through the UI (#1312, CUJ 25-28).
+test.describe('Album journey', () => {
+  test.use({viewport: {width: 1200, height: 800}});
+  let albumName: string;
+
+  test.beforeEach(() => {
+    // accents: the album name is shown as typed
+    albumName = 'Óbuda ' + uniqueAlbumName(test.info().workerIndex, test.info().retry);
+  });
+
+  test.afterEach(async ({page}) => {
+    await deleteAlbumsNamed(page, albumName);
+  });
+
+  /**
+   * Searches, saves the search as an album with the search modal and opens the albums page.
+   */
+  const saveSearchAsAlbum = async (page: Page): Promise<void> => {
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await page.goto('/search/big_ben');
+    expect((await search).ok()).toBe(true);
+    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+
+    await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
+    await page.locator('modal-container').getByRole('button', {name: 'Save'}).click();
+    await page.locator('modal-container input#saveSearchName').fill(albumName);
+    const saved = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums/saved-searches');
+    await page.locator('modal-container').getByRole('button', {name: 'Save as album'}).click();
+    expect((await saved).ok(), 'saving the album').toBe(true);
+
+    const albums = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums');
+    await page.goto('/albums');
+    await albums;
+  };
+
+  test('should save a search as an album, open it and delete it', async ({page}) => {
+    await saveSearchAsAlbum(page);
+
+    // listed with its photo count and cover
+    const card = page.locator('app-album').filter({hasText: albumName});
+    await expect(card).toBeVisible();
+    await expect(card.locator('.info')).toHaveText(/\(\d+\)/);
+    expect(Number((await card.locator('.info').innerText()).match(/\((\d+)\)/)?.[1]), 'photo count').toBeGreaterThan(0);
+    await expectCardCover(card);
+
+    // opening it shows the photos of the search
+    await card.click();
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+    await expectVisiblePhotosLoaded(page);
+
+    // deleting it removes it from the list
+    await page.goto('/albums');
+    page.on('dialog', dialog => dialog.accept());
+    const deleted = page.waitForResponse(res => res.request().method() === 'DELETE' && new URL(res.url()).pathname.startsWith('/pgapi/albums/'));
+    await card.locator('ng-icon.delete').click();
+    // a confirmation first (#1312), if there is one
+    const confirm = page.locator('modal-container').getByRole('button', {name: /delete|yes|ok/i});
+    if (await confirm.isVisible()) {
+      await confirm.click();
+    }
+    expect((await deleted).ok(), 'deleting the album').toBe(true);
+    await expect(card).toHaveCount(0);
+    const names = ((await (await page.request.get('/pgapi/albums')).json()).result as { name: string }[]).map(a => a.name);
+    expect(names).not.toContain(albumName);
+  });
+
+  test('should ask for confirmation before deleting an album', async ({page}) => {
+    test.fail(true, 'Not implemented yet #1312');
+    await saveSearchAsAlbum(page);
+    const card = page.locator('app-album').filter({hasText: albumName});
+    await expect(card).toBeVisible();
+
+    // either a browser confirm dialog or a modal; dismissed, so the album stays
+    let asked = false;
+    page.on('dialog', dialog => {
+      asked = true;
+      return dialog.dismiss();
+    });
+    await card.locator('ng-icon.delete').click();
+    const modal = page.locator('modal-container');
+    await expect.poll(async () => asked || await modal.isVisible(), {message: 'a confirmation is shown'}).toBe(true);
+    if (!asked) {
+      await modal.getByRole('button', {name: /cancel|no/i}).click();
+    }
+    await expect(card).toBeVisible();
+    const names = ((await (await page.request.get('/pgapi/albums')).json()).result as { name: string }[]).map(a => a.name);
+    expect(names, 'the album is not deleted').toContain(albumName);
   });
 });

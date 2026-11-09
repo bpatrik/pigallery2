@@ -187,6 +187,23 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
 
   });
 
+  // #1312: an album whose saved search matches nothing (anymore) stays in the list, without a cover
+  it('should list an album whose search matches nothing, with no cover and count 0', async () => {
+    const am = new AlbumManager();
+    const query: TextSearch = {value: 'nincs ilyen fénykép', type: SearchQueryTypes.any_text};
+    await am.addSavedSearch('Üres album', Utils.clone(query));
+
+    // twice: the first call fills the cache, the second reads it
+    for (let i = 0; i < 2; ++i) {
+      const albums = await am.getAll(DBTestHelper.defaultSession);
+      expect(albums.map(a => a.name)).to.deep.equal(['Üres album']);
+      expect((albums[0] as unknown as SavedSearchDTO).searchQuery).to.deep.equal(query);
+      expect(albums[0].cache, 'the album cache').to.not.be.undefined;
+      expect(albums[0].cache!.itemCount).to.equal(0);
+      expect(albums[0].cache!.cover ?? null).to.be.null;
+    }
+  });
+
   describe('Projection Tests',async () => {
 
     it('should get albums with projection session filtering by filename', async () => {
