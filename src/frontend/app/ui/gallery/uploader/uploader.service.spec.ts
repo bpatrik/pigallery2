@@ -164,4 +164,95 @@ describe('UploaderService', () => {
     await vi.advanceTimersByTimeAsync(ToastService.TIMEOUT);
     expect(toast('exists.jpg')).toBeUndefined();
   });
+
+  describe('per file errors (#1314)', () => {
+    const respond = (i: number, result: { filename: string, error: string }[]): void => {
+      network.requests[i].next({type: HttpEventType.Response, body: {result}});
+      network.requests[i].complete();
+    };
+
+    it('should show the error the server reports for a file and upload the others', async () => {
+      vi.useFakeTimers();
+      service.uploadFiles([file('Tihany.jpg'), file('Hévíz.jpg')]);
+      await vi.advanceTimersByTimeAsync(0);
+      respond(0, [{filename: 'Tihany.jpg', error: 'File already exists: Tihany.jpg'}]);
+      respond(1, []);
+      expect(toast('Tihany.jpg')).toEqual(expect.objectContaining({type: 'error', text: 'File already exists: Tihany.jpg'}));
+      expect(toast('Hévíz.jpg').type).toBe('success');
+      expect(notification.warning).toHaveBeenCalledWith('Uploaded: 1, failed: 1', 'Upload completed with errors');
+    });
+
+    it('should upload the supported files of a drop that also has unsupported ones', async () => {
+      vi.useFakeTimers();
+      service.uploadFiles([file('Tihany.jpg'), file('setup.exe')]);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(network.requests.length).toBe(1);
+      expect(toast('Tihany.jpg')).toBeDefined();
+      expect(toast('setup.exe')?.type).not.toBe('progress');
+    });
+
+    // TODO #1314: today one generic warning ("Some files were skipped due to unsupported format.") without the file names
+    it.fails('should name the unsupported file in its message', async () => {
+      vi.useFakeTimers();
+      service.uploadFiles([file('Tihany.jpg'), file('jegyzet.txt')]);
+      await vi.advanceTimersByTimeAsync(0);
+      const messages = [
+        ...toasts.toasts().map((t) => (t.title ?? '') + ' ' + (t.text ?? '')),
+        ...notification.warning.mock.calls.map((c) => c.join(' ')),
+        ...notification.error.mock.calls.map((c) => c.join(' '))
+      ];
+      expect(messages.some((m) => m.includes('jegyzet.txt'))).toBe(true);
+    });
+
+    // TODO #1314: there is no Upload.maxFileSizeMB setting yet; a file above it should fail right away with the limit in the message
+    it.fails('should reject a file above the size limit without sending it', async () => {
+      vi.useFakeTimers();
+      (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'] = 1;
+      try {
+        service.uploadFiles([new File([new Uint8Array(1024 * 1024 + 1)], 'nagy.jpg'), file('Tihany.jpg')]);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(toast('nagy.jpg')).toEqual(expect.objectContaining({type: 'error', text: expect.stringContaining('1 MB')}));
+        expect(network.requests.length).toBe(1); // only Tihany.jpg is sent
+      } finally {
+        delete (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'];
+      }
+    });
+
+    it('should not offer the upload to a user below the minimum upload role', () => {
+      const minimumRole = Config.Upload.minimumRole;
+      Config.Upload.minimumRole = UserRoles.Admin;
+      try {
+        (TestBed.inject(AuthenticationService) as unknown as MockAuthenticationService).user.set({name: 'Éva', role: UserRoles.User});
+        expect(service.canUpload()).toBe(false);
+      } finally {
+        Config.Upload.minimumRole = minimumRole;
+      }
+    });
+
+    // TODO #1314: the raw error of the request is shown instead
+    it.fails('should say "Can\'t save to this folder" when the server refuses the folder', async () => {
+      vi.useFakeTimers();
+      service.uploadFiles([file('Tihany.jpg')]);
+      await vi.advanceTimersByTimeAsync(0);
+      network.requests[0].error({status: 403, message: 'Http failure response: 403 Forbidden'});
+      const messages = [
+        ...toasts.toasts().map((t) => (t.title ?? '') + ' ' + (t.text ?? '')),
+        ...notification.error.mock.calls.map((c) => c.join(' '))
+      ];
+      expect(messages.some((m) => m.includes('Can\'t save to this folder'))).toBe(true);
+    });
+
+    // TODO #1314: a failed file can only be closed; it should offer a retry (e.g. an onRetry action of its toast)
+    it.fails('should offer a retry for a file whose connection dropped', async () => {
+      vi.useFakeTimers();
+      service.uploadFiles([file('Tihany.jpg')]);
+      await vi.advanceTimersByTimeAsync(0);
+      fail(0);
+      const retry = (toast('Tihany.jpg') as unknown as Record<string, unknown>)['onRetry'] as (() => void) | undefined;
+      expect(retry).toBeDefined();
+      retry!();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(network.requests.length).toBe(2);
+    });
+  });
 });
