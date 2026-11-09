@@ -10,7 +10,8 @@ import {GallerySortingService} from './sorting.service';
 import {GalleryNavigatorService} from './navigator.service';
 import {ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
-import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
 describe('GalleryNavigatorComponent', () => {
   let component: GalleryNavigatorComponent;
@@ -85,6 +86,41 @@ describe('GalleryNavigatorComponent', () => {
     it('should have no routes for a search', () => {
       content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Balaton'}}} as unknown as ContentWrapperWithError);
       expect(component.routes()).toEqual([]);
+    });
+  });
+
+  // #1308, CUJ 9: the flatten button opens a directory search of the folder
+  describe('flatten', () => {
+    const flattenQuery = (): TextSearch => SearchQueryUtils.parseURLifiedQuery(component.directoryFlattenSearchQuery()!) as TextSearch;
+
+    // the server sends the path of a folder like this (DiskManager.pathFromRelativeDirName)
+    it('should search the media of the folder with accents and of its subfolders', () => {
+      content.set(folder('Nyaralás/Balaton/', 'Őszi kirándulás'));
+      const query = flattenQuery();
+      expect(query.type).toBe(SearchQueryTypes.directory);
+      expect(query.matchType).toBe(TextSearchQueryMatchTypes.globMatch);
+      expect(query.value.startsWith('Nyaralás/Balaton/Őszi kirándulás')).toBe(true);
+    });
+
+    // TODO #1308: the glob is "<folder>*", so it also matches the sibling folders that start with the same name
+    // (e.g.: "Őszi kirándulás 2"). "<folder>/*" matches the folder and its subfolders only (SearchManager.expandDirectoryGlobs).
+    it.fails('should not search the sibling folders that start with the same name', () => {
+      content.set(folder('Nyaralás/Balaton/', 'Őszi kirándulás'));
+      expect(flattenQuery()).toEqual({
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.globMatch,
+        value: 'Nyaralás/Balaton/Őszi kirándulás/*'
+      });
+    });
+
+    it('should search everything from the root folder', () => {
+      content.set(folder('./', '.'));
+      expect(flattenQuery().value).toMatch(/^\.\/?\*$/);
+    });
+
+    it('should not offer it for a search result', () => {
+      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Balaton'}}} as unknown as ContentWrapperWithError);
+      expect(component.directoryFlattenSearchQuery()).toBeNull();
     });
   });
 

@@ -1,6 +1,7 @@
 // Unhappy paths of the critical user journeys (#1254): the user should get a clear message, not an empty or wrong page.
-import {expect, Page, test} from '@playwright/test';
-import {expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
+import {APIRequestContext, expect, Page, test} from '@playwright/test';
+import {ADMIN_SESSION} from './global-setup';
+import {ACCENTED_DIR, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
 
 const NOT_EXISTING_SHARING = '/share/doesnotexist';
 // what a missing or invalid sharing link should tell the user
@@ -68,6 +69,49 @@ test.describe('Errors', () => {
       await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
       // but the user is told why (a warning, not an error)
       await expect(page.locator('app-toast-card[role="status"]').filter({hasText: missingDir})).toBeVisible();
+    });
+
+    test.describe('that the user may not see', () => {
+      let admin: APIRequestContext;
+      // a user of its own whose directory block list hides the folder with accents in its name
+      const user = {
+        name: 'e2e-restricted-' + Date.now() + '-' + Math.floor(Math.random() * 1000), password: 'pass', role: 3, // UserRoles.User
+        overrideAllowBlockList: true,
+        // SearchQueryTypes.directory, TextSearchQueryMatchTypes.exact_match
+        blockDirectoryList: [{type: 102, value: ACCENTED_DIR, matchType: 1}],
+      };
+
+      test.beforeEach(async ({playwright, baseURL}) => {
+        admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
+        expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'creating the user').toBe(true);
+      });
+
+      test.afterEach(async () => {
+        const users: { id: number, name: string }[] = (await (await admin.get('/pgapi/user/list')).json()).result;
+        const id = users.find(u => u.name === user.name)?.id;
+        if (id !== undefined) {
+          await admin.delete('/pgapi/user/' + id);
+        }
+        await admin.dispose();
+      });
+
+      // the same as a missing folder, so its existence does not leak
+      test('should fall back to the root folder with the same warning toast as a missing folder', async ({page}) => {
+        test.fail(true, 'Not implemented yet #1308');
+        await page.context().clearCookies();
+        const login = await page.request.post('/pgapi/user/login', {
+          data: {loginCredential: {username: user.name, password: user.password, rememberMe: false}},
+        });
+        expect(login.ok(), 'restricted user login').toBe(true);
+
+        await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR));
+
+        await expect(page).toHaveURL(url => url.pathname === '/gallery/');
+        await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+        // none of the hidden photos
+        await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toHaveCount(0);
+        await expect(page.locator('app-toast-card[role="status"]').filter({hasText: ACCENTED_DIR})).toBeVisible();
+      });
     });
   });
 
