@@ -1,11 +1,11 @@
 // The admin page (#1315). Read-only: the tests that change the config or run jobs are in admin-config.spec.ts.
 import {expect, test} from '@playwright/test';
-import {asNormalUser} from './helpers';
+import {asNormalUser, desktopViewport, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
 
 test.describe('Admin', () => {
-  test.use({viewport: {width: 1200, height: 800}});
+  test.use(desktopViewport({width: 1200, height: 800}));
 
-  test('Admin page should look right for an admin', async ({page}) => {
+  test('Admin page should look right for an admin', {tag: '@sanity'}, async ({page}) => {
     const settingsLoaded = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings');
     await page.goto('/admin');
     expect((await settingsLoaded).ok()).toBe(true);
@@ -25,6 +25,28 @@ test.describe('Admin', () => {
     const ownRow = page.locator('app-settings-users tr').filter({has: page.locator('td', {hasText: /^admin$/})});
     await expect.soft(ownRow, 'own row in the user list').toHaveCount(1);
     await expect.soft(ownRow.locator('button:has(ng-icon[name="ionTrashOutline"])'), 'no delete on the own row').toBeDisabled();
+    await expectNoHorizontalScroll(page, 'admin');
+  });
+
+  // CUJ 41: the demo has big_ben_only_time.jpg in timestamps and in dupl, the same file
+  test('Duplicates should look right for an admin', {tag: '@sanity'}, async ({page}) => {
+    const duplicates = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/admin/duplicates');
+    await page.goto('/duplicates');
+    expect((await duplicates).ok()).toBe(true);
+
+    await expect.soft(page.locator('app-duplicate .alert'), 'summary').toContainText(/Listing \d+ duplicates/);
+    const pair = page.locator('app-duplicate .card').filter({hasText: 'big_ben_only_time.jpg'});
+    await expect(pair.first()).toBeVisible();
+    await expect.soft(pair.first(), 'copy in dupl').toContainText('/dupl/big_ben_only_time.jpg');
+    await expect.soft(pair.first(), 'copy in timestamps').toContainText('/timestamps/big_ben_only_time.jpg');
+    await expect.soft(pair.first().locator('app-duplicates-photo img').first(), 'thumbnail').toBeVisible();
+    await expectNoHorizontalScroll(page, 'duplicates');
+
+    // a row opens the folder of that copy
+    await pair.first().locator('a').filter({hasText: '/dupl/'}).click();
+    await expect(page).toHaveURL(url => url.pathname === '/gallery/dupl');
+    await expect(page.locator('.photo-container > img[alt="big_ben_only_time.jpg"]')).toBeVisible();
+    await expectVisiblePhotosLoaded(page);
   });
 
   test.describe('as a normal user', () => {

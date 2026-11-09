@@ -186,6 +186,39 @@ test.describe('Lightbox', () => {
     await expect(firstPhoto).not.toBeInViewport();
   });
 
+  // CUJ 15: the video plays, can be paused, and follows the loop setting (off by default)
+  test('Lightbox should play a video, pause it and loop it with the switch', async ({page}) => {
+    const video = page.locator('app-gallery-lightbox-media video').last();
+    const currentTime = (): Promise<number> => video.evaluate((v: HTMLVideoElement) => v.currentTime);
+    const paused = (): Promise<boolean> => video.evaluate((v: HTMLVideoElement) => v.paused);
+    await page.goto('/gallery/?p=bunny.mp4');
+    await expect(video).toBeAttached();
+    await expect(video.locator('source')).toHaveAttribute('src', /bunny\.mp4/);
+    await expect(page.locator('app-gallery-lightbox').getByText('Error during loading the video.')).toHaveCount(0);
+
+    // autoplay; the play/pause button of the controls otherwise.
+    // The controls fade out without hover (and on a phone until a tap), so the click is dispatched to the button.
+    const playPause = page.locator('app-lightbox-controls .controls-video ng-icon').first();
+    if (await paused()) {
+      await playPause.dispatchEvent('click');
+    }
+    await expect.poll(currentTime, {message: 'the video plays'}).toBeGreaterThan(0);
+    expect(await video.evaluate((v: HTMLVideoElement) => v.loop), 'no loop by default').toBe(false);
+
+    await playPause.dispatchEvent('click');
+    await expect.poll(paused, {message: 'the video is paused'}).toBe(true);
+    const pausedAt = await currentTime();
+    await expect(page.locator('app-lightbox-controls .controls-big-play')).toBeAttached();
+    // stays where it was paused
+    expect(await currentTime()).toBe(pausedAt);
+
+    // the "l" key toggles the loop of the video
+    await page.keyboard.press('l');
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.loop), {message: 'loop after the "l" key'}).toBe(true);
+    await page.keyboard.press('l');
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.loop), {message: 'loop after the second "l" key'}).toBe(false);
+  });
+
   test('Lightbox should tell when a video fails to load', async ({page}) => {
     // the video itself (the original or its transcoded version), not its thumbnail
     const isVideo = (url: URL): boolean => /\/bunny\.mp4(\/bestFit)?$/.test(url.pathname);

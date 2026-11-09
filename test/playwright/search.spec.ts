@@ -37,6 +37,32 @@ test.describe('Search', () => {
     await expectVisiblePhotosLoaded(page);
   });
 
+  // CUJ 21: the autocomplete of the search bar
+  test('Search should suggest a keyword while typing and search for the picked suggestion', async ({page}) => {
+    await page.goto('/gallery/');
+    const searchBar = page.locator('app-gallery-search .search-text');
+    const autocomplete = page.locator('app-gallery-search .autocomplete-list');
+    const suggestions = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/autocomplete/'));
+    // typed key by key: the suggestions follow the keyup
+    await searchBar.pressSequentially('Berk');
+    expect((await suggestions).ok()).toBe(true);
+    await expect(searchBar).toHaveAttribute('aria-expanded', 'true');
+    const berkley = autocomplete.getByRole('option').filter({hasText: 'Berkley'});
+    await expect(berkley.first()).toBeVisible();
+
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await berkley.first().click();
+    // a picked suggestion fills the search bar; Enter searches for it
+    await expect(searchBar).toHaveValue(/Berkley/);
+    if (!(new URL(page.url()).pathname.startsWith('/search/'))) {
+      await searchBar.press('Enter');
+    }
+    expect((await search).ok()).toBe(true);
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expect(autocomplete).toHaveCount(0);
+  });
+
   test('Search deep link with a photo should open the lightbox on that photo', async ({page}) => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     // in search results the photo is identified with its folder (QueryService.getMediaStringId)

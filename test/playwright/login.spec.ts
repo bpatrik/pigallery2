@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION, NORMAL_USER} from './global-setup';
-import {expectLightboxPhoto, isGalleryContent, loginWithUi, logoutWithUi, notLoggedIn} from './helpers';
+import {expectLightboxPhoto, expectNoHorizontalScroll, isGalleryContent, loginWithUi, logoutWithUi, notLoggedIn} from './helpers';
 
 const isApi = (url: string): boolean => new URL(url).pathname.startsWith('/pgapi/');
 
@@ -41,6 +41,24 @@ test.describe('Login', () => {
     await page.goto('/');
     await expect(page.locator('.card-body')).toBeVisible();
     await expect(page.locator('.col-sm-12').filter({hasText: 'Login'}).first()).toBeVisible();
+  });
+
+  // Sanity check: what a visitor notices right away on the login page. Soft checks, so one failure does not hide the others.
+  test('Login page should look right', {tag: '@sanity'}, async ({page}) => {
+    await page.goto('/gallery/');
+    await expect(page).toHaveURL(/\/login/);
+    await expect.soft(page.locator('app-login h1'), 'title').toBeVisible();
+    await expect.soft(page.locator('app-login .card-title'), 'heading').toHaveText('Please log in');
+    await expect.soft(page.locator('#username'), 'username').toBeVisible();
+    await expect.soft(page.locator('#password'), 'password').toBeVisible();
+    await expect.soft(page.locator('#password'), 'password is masked').toHaveAttribute('type', 'password');
+    await expect.soft(page.locator('#rememberMe'), 'remember me').toBeVisible();
+    await expect.soft(page.locator('app-login app-language'), 'language switch').toBeVisible();
+    // no error before the first try
+    await expect.soft(page.locator('.error-message'), 'no error').toBeHidden();
+    // no gallery around it
+    await expect.soft(page.locator('app-frame nav'), 'no navbar').toHaveCount(0);
+    await expectNoHorizontalScroll(page, 'login');
   });
 
   test('Login', async ({page}) => {

@@ -364,6 +364,29 @@ test.describe('Share', () => {
       await admin.dispose();
     });
 
+    // Sanity check: what a guest notices right away on the password page of a sharing. Soft checks.
+    test('Sharing login should look right for a guest', {tag: '@sanity'}, async ({page}) => {
+      const sharingKey = await createSharingWithApi(admin, 'timestamps', {password: 'secret'});
+      await page.goto('/share/' + sharingKey);
+      await expect(page).toHaveURL(/\/shareLogin/);
+      await expect.soft(page.locator('app-share-login h1'), 'title').toBeVisible();
+      await expect.soft(page.locator('input#password'), 'password').toBeVisible();
+      await expect.soft(page.locator('input#password'), 'password is masked').toHaveAttribute('type', 'password');
+      await expect.soft(page.locator('button#button-share-login'), 'enter is disabled while empty').toBeDisabled();
+      await expect.soft(page.locator('app-share-login app-language'), 'language switch').toBeVisible();
+      await expect.soft(page.locator('.error-message'), 'no error').toBeHidden();
+      await expect.soft(page.getByText('Unknown sharing key.'), 'the key is known').toHaveCount(0);
+      // nothing of the shared folder before the password
+      await expect.soft(page.locator('app-gallery'), 'no gallery').toHaveCount(0);
+      await expectNoHorizontalScroll(page, 'sharing login');
+
+      // the right password opens the folder
+      await page.locator('input#password').fill('secret');
+      await page.locator('button#button-share-login').click();
+      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await admin.delete('/pgapi/share/' + sharingKey);
+    });
+
     test('Wrong password should show an error and stay on the sharing login', async ({page}) => {
       const sharingKey = await createSharingWithApi(admin, 'timestamps', {password: 'secret'});
       await page.goto('/share/' + sharingKey);
