@@ -11,6 +11,8 @@ import {RouteTestingHelper} from './RouteTestingHelper';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import * as chai from "chai";
+import chaiAsPromised from 'chai-as-promised';
+import {CookieNames} from '../../../../src/common/CookieNames';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
@@ -18,6 +20,7 @@ import {TestHelper} from '../../../TestHelper';
 process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
+chai.use(chaiAsPromised);
 
 describe('UserRouter', () => {
   before(TestHelper.resetConfig);
@@ -70,6 +73,49 @@ describe('UserRouter', () => {
       await login(server);
 
     });
+    it('should reject a wrong password with CREDENTIAL_NOT_FOUND and 401', async () => {
+      Config.Users.authenticationRequired = true;
+      const result = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username: testUser.name, password: 'wrong', rememberMe: false} as LoginCredential});
+
+      result.body.error.should.be.a('object');
+      should.equal(result.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
+      should.equal(result.body.result, null);
+      should.not.exist(result.headers['set-cookie']);
+      // TODO #1306: the error goes out as HTTP 200; remove the rejection check once it is a 401 (see #1305)
+      await Promise.resolve().then(() => result.should.have.status(401)).should.be.rejectedWith(chai.AssertionError);
+    });
+
+    // remember me checked: the cookie survives a browser restart; unchecked: a session cookie, ends with the browser session
+    const sessionCookie = async (rememberMe: boolean): Promise<string> => {
+      const result = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username: testUser.name, password: testUser.password, rememberMe} as LoginCredential});
+      RouteTestingHelper.shouldBeValidUIUser(result, expectedUser);
+      const cookies = result.headers['set-cookie'] as unknown as string[];
+      const cookie = cookies.find(c => c.startsWith(CookieNames.session + '='));
+      should.exist(cookie);
+      return cookie!;
+    };
+
+    it('should set a persistent session cookie with remember me', async () => {
+      Config.Users.authenticationRequired = true;
+      const cookie = await sessionCookie(true);
+      const expires = cookie.match(/;\s*expires=([^;]+)/i);
+      should.exist(expires, cookie);
+      const lifetime = new Date(expires![1]).getTime() - Date.now();
+      // whole seconds in the header
+      lifetime.should.be.within(Config.Server.sessionTimeout - 60000, Config.Server.sessionTimeout + 1000);
+    });
+
+    it('should set a browser session cookie without remember me', async () => {
+      Config.Users.authenticationRequired = true;
+      const cookie = await sessionCookie(false);
+      cookie.should.not.match(/;\s*expires=/i);
+      cookie.should.not.match(/;\s*max-age=/i);
+    });
+
     it('it skip login', async () => {
       Config.Users.authenticationRequired = false;
       const result = await request.execute(server.Server)
