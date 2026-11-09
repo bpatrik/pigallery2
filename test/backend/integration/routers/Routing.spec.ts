@@ -3,6 +3,7 @@ import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import {expect} from 'chai';
 import * as http from 'node:http';
 import {AddressInfo} from 'node:net';
@@ -23,6 +24,7 @@ import {Logger} from '../../../../src/backend/Logger';
 
 process.env['NODE_ENV'] = 'test';
 chai.should();
+chai.use(chaiAsPromised);
 
 /**
  * Pins how the routes match and parse their path params (Express 4), so the Express 5 upgrade (#1291) can show that nothing changed.
@@ -584,6 +586,18 @@ describe('Routing', () => {
     it('should not find unknown api paths', async () => {
       const res = await get(api('/nincs/ilyen'));
       expect(res.status).to.equal(404);
+    });
+
+    it('should answer unknown api paths with a JSON error, not the HTML error page', async () => {
+      // TODO #1305: unknown api paths fall through to the Express HTML 404 page; remove the rejection check once fixed
+      const check = async (): Promise<void> => {
+        const res = await get(api('/doesnotexist'));
+        expect(res.status).to.equal(404);
+        expect(res.headers['content-type']).to.contain('application/json');
+        expect(res.json?.error?.code).to.be.a('number');
+        expect(res.json?.result).to.equal(null);
+      };
+      await check().should.be.rejectedWith(chai.AssertionError);
     });
 
     it('should render api errors as json', async () => {
