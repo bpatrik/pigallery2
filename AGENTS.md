@@ -79,7 +79,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
-  run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
+  run against your DB. `E2E_PORT=8091` runs it on another port (e.g.: in parallel git worktrees). Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, video, URL deep links), folder navigation, search, faces, albums, sharing, zip downloads,
   the photo frame, the admin page and error paths.
   The `mobile` project (Pixel 7, real touch events; `swipe()`, `pinch()`, `doubleTap()` of `helpers.ts`) runs `lightbox.spec.ts` and `navigation.spec.ts`;

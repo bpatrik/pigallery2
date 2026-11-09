@@ -1,6 +1,9 @@
 import {defineConfig, devices} from '@playwright/test';
 import {ADMIN_SESSION} from './test/playwright/global-setup';
 
+// E2E_PORT: run several e2e servers side by side (e.g.: one per git worktree)
+const port = Number(process.env['E2E_PORT'] ?? 8080);
+
 /**
  * E2E tests. They need a frontend build in dist (e.g.: npm run build).
  * See https://playwright.dev/docs/test-configuration.
@@ -18,7 +21,7 @@ export default defineConfig({
     ...(process.env.CI ? [['github'], ['json', {outputFile: 'test-results/results.json'}]] as const : []),
   ],
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:' + port,
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer
     trace: 'on-first-retry',
     // logged in as admin, see global-setup.ts
@@ -39,7 +42,9 @@ export default defineConfig({
   // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.
   webServer: {
     command: process.env.DOCS_SCREENSHOTS ? 'npm run start-docs-e2e-server' : 'npm run start-e2e-server',
-    url: 'http://localhost:8080',
+    // the port of the server (Server.port, envAlias PORT)
+    env: {PORT: String(port)},
+    url: 'http://localhost:' + port,
     reuseExistingServer: !process.env.CI,
   },
 });
