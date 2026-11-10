@@ -210,12 +210,14 @@ class RecordingJob extends Job<Record<string, unknown>> {
   public readonly ConfigTemplate: DynamicConfig[] = [];
   public runs: string[] = [];
 
+  private readonly supported = true;
+
   constructor(public readonly Name: string, private readonly log: string[]) {
     super();
   }
 
   public get Supported(): boolean {
-    return true;
+    return this.supported;
   }
 
   protected async init(): Promise<void> {
@@ -252,7 +254,9 @@ describe('JobManager schedules (CUJ 38)', () => {
     allowParallelRun: false,
     trigger
   });
-  type IJobName = { Name: string };
+  interface IJobName {
+    Name: string;
+  }
 
   const waitFor = async (condition: () => boolean, what: string, timeout = 5000): Promise<void> => {
     const start = Date.now();
