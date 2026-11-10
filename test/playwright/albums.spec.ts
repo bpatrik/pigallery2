@@ -159,3 +159,74 @@ test.describe('Album journey', () => {
     expect(names, 'the album is not deleted').toContain(albumName);
   });
 });
+
+// Albums whose search matches nothing, and the albums of a .saved_searches.pg2conf file (#1312, CUJ 25-26).
+test.describe('Album edge cases', () => {
+  test.use(desktopViewport({width: 1200, height: 800}));
+
+  test.describe('album whose search matches nothing', () => {
+    let albumName: string;
+
+    test.beforeEach(async ({page}, testInfo) => {
+      albumName = 'Ürés ' + uniqueAlbumName(testInfo.workerIndex, testInfo.retry);
+      const res = await page.request.put('/pgapi/albums/saved-searches', {
+        data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Nem Létező Személy', matchType: EXACT_MATCH}},
+      });
+      expect(res.ok(), 'adding the album').toBe(true);
+    });
+
+    test.afterEach(async ({page}) => {
+      await deleteAlbumsNamed(page, albumName);
+    });
+
+    test('should stay in the albums with a placeholder cover and no photos', async ({page}) => {
+      const albums = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums');
+      await page.goto('/albums');
+      await albums;
+
+      const card = page.locator('app-album').filter({hasText: albumName});
+      await expect(card).toBeVisible();
+      await expect(card.locator('.info')).toContainText(albumName + ' (0)');
+      await expect(card.locator('.no-image')).toBeVisible();
+      await expect(card.locator('.photo-container .photo')).toHaveCount(0);
+    });
+
+    test('should show the empty search message when opened', async ({page}) => {
+      test.fail(true, 'Not implemented yet #1312: opening an album that matches nothing shows an empty page (#1309)');
+      await page.goto('/albums');
+      const card = page.locator('app-album').filter({hasText: albumName});
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      await card.click();
+      expect((await search).ok(), 'the search of the album').toBe(true);
+      await expect(page).toHaveURL(/\/search\//);
+      await expect(page.locator('app-gallery-grid .photo-container')).toHaveCount(0);
+
+      // the empty state of a search that matched nothing (#1309, errors.spec.ts): a message with an icon
+      const text = page.locator('app-gallery').getByText(/matched nothing|no (results|photos|media)/i);
+      await expect(text).toBeVisible();
+      await expect(text.locator('..').locator('ng-icon').first()).toBeVisible();
+    });
+  });
+
+  // demo/images/.saved_searches.pg2conf defines "Group photos" and "Animals": indexing adds them as locked albums
+  test('should list the albums of the .saved_searches.pg2conf file', async ({page}) => {
+    const albums = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums');
+    await page.goto('/albums');
+    await albums;
+
+    for (const name of ['Group photos', 'Animals']) {
+      const card = page.locator('app-album').filter({has: page.locator('.info', {hasText: new RegExp('^\\s*' + name + ' \\(')})});
+      await expect(card, name).toHaveCount(1);
+      // locked: can't be deleted from the page
+      await expect(card.locator('ng-icon[name="ionLockClosedOutline"]'), name + ' is locked').toBeVisible();
+      await expect(card.locator('ng-icon.delete'), name + ' has no delete').toHaveCount(0);
+      expect(Number((await card.locator('.info').innerText()).match(/\((\d+)\)/)?.[1]), 'photo count of ' + name).toBeGreaterThan(0);
+      await expectCardCover(card);
+    }
+
+    // Animals: the photos of any of the animals, e.g. the squirrel
+    await page.locator('app-album').filter({hasText: 'Animals'}).click();
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
+  });
+});

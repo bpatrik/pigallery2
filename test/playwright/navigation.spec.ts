@@ -1,5 +1,6 @@
 // Browsing folders (#1308, CUJ 5) on the folder with accents in its name (#1316). Also runs on a phone (mobile project).
 import {expect, Page, test} from '@playwright/test';
+import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../src/common/entities/SearchQueryDTO';
 import {ACCENTED_DIR, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
@@ -55,5 +56,71 @@ test.describe('Navigation', () => {
     await subDir();
     await page.goForward();
     await accentedDir();
+  });
+
+  // #1308: the browser history keeps the scroll position too, not only the URL and the content
+  test('Browser back should restore the scroll position of the folder', async ({page}) => {
+    test.fail(true, 'Not implemented yet #1308: back from a subfolder opens the folder at the top');
+    const scrollY = (): Promise<number> => page.evaluate(() => window.scrollY);
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+
+    // scroll down the photos of the root, a screen at a time (the grid renders more of them while scrolling)
+    await expect(async () => {
+      await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+      expect(await scrollY()).toBeGreaterThan(1000);
+    }, 'scrolled down').toPass({intervals: [200], timeout: 15000});
+    const scrolledTo = await scrollY();
+    // a photo on the screen there
+    const belowName = await page.evaluate(() => [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-container > img')]
+      .find(img => img.getBoundingClientRect().top >= 0 && img.getBoundingClientRect().bottom <= window.innerHeight)?.alt);
+    expect(belowName, 'a photo on the screen').toBeTruthy();
+
+    // a folder link at the top of the page: clicked without scrolling up to it (like after scrolling, e.g. with alt + up)
+    const folderLink = folderCard(page, ACCENTED_DIR).locator('a').first();
+    await folderLink.evaluate((a: HTMLElement) => a.click());
+    await expect(breadcrumb(page)).toHaveText(['Home', ACCENTED_DIR]);
+
+    await page.goBack();
+    await expect(breadcrumb(page)).toHaveText(['Home']);
+    await expect.poll(scrollY, {message: 'the scroll position after back'}).toBeGreaterThan(scrolledTo - 50);
+    expect(await scrollY()).toBeLessThan(scrolledTo + 50);
+    // the same photos on the screen
+    await expect(photo(page, belowName!)).toBeInViewport();
+  });
+});
+
+test.describe('Empty folder', () => {
+
+  // #1311: there is nothing to zip in a folder without media
+  test('should not offer the zip download', async ({page}) => {
+    const content = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/gallery/content/emptydirectory');
+    await page.goto('/gallery/emptydirectory');
+    await content;
+    await expect(breadcrumb(page)).toHaveText(['Home', 'emptydirectory']);
+    await expect(page.locator('app-gallery-navbar ng-icon[name="ionDownloadOutline"]')).toHaveCount(0);
+
+    // a folder with media has it
+    await breadcrumb(page).getByRole('link', {name: 'Home'}).click();
+    await expect(page.locator('app-gallery-navbar a[href*="/pgapi/gallery/zip/"] ng-icon[name="ionDownloadOutline"]')).toBeVisible();
+  });
+
+  // #1308: flattening a folder with no media in any subfolder shows the same empty state as an empty folder
+  test('Flattening it should show an icon and a message, not an empty page', async ({page}) => {
+    test.fail(true, 'Not implemented yet #1308: the search of the flattened empty folder shows an empty page');
+    // the query of the flatten button (off by default: Gallery.NavBar.enableDirectoryFlattening, see navigator.gallery.component.ts)
+    const flatten = JSON.stringify({type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.globMatch, value: './emptydirectory*'});
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await page.goto('/search/' + encodeURIComponent(flatten));
+    expect((await search).ok(), 'the search of the flattened folder').toBe(true);
+    await expect(page.locator('app-gallery-navbar')).toContainText('emptydirectory');
+    await expect(page.locator('app-gallery-grid .photo-container')).toHaveCount(0);
+
+    // the same message as in an empty folder (errors.spec.ts): not /empty/i, the folder name itself contains that word
+    const text = page.locator('app-gallery').getByText(/(folder|directory) is empty|no (photos|media|items)|matched nothing/i);
+    await expect(text).toBeVisible();
+    await expect(text.locator('..').locator('ng-icon').first()).toBeVisible();
   });
 });

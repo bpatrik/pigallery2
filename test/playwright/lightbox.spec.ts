@@ -186,6 +186,88 @@ test.describe('Lightbox', () => {
     await expect(firstPhoto).not.toBeInViewport();
   });
 
+  /**
+   * Opens the first photo of the root and pages forward until a photo that was far below the screen; returns it.
+   */
+  const openAndPageForward = async (page: Page, isMobile: boolean): Promise<{ first: string, last: string }> => {
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
+    const first = (await firstPhoto.getAttribute('alt'))!;
+    await firstPhoto.click();
+    await expect(page).toHaveURL(url => url.searchParams.get('p') === first);
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+
+    // paging replaces the URL, it does not add to the history
+    const shown: (string | null)[] = [first];
+    for (let i = 0; i < 12; i++) {
+      await next(page, isMobile);
+      await expect(page).not.toHaveURL(url => shown.includes(url.searchParams.get('p')));
+      shown.push(shownPhoto(page));
+    }
+    const last = shownPhoto(page)!;
+    await expectLightboxPhoto(page, last);
+    return {first, last};
+  };
+
+  // CUJ 20 with the browser history (#1254): back closes the lightbox, forward opens it again on the same photo
+  test('Browser back should close the lightbox, forward should open it again', async ({page, isMobile}) => {
+    const {last} = await openAndPageForward(page, isMobile);
+
+    await page.goBack();
+    await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery') && !url.searchParams.has('p'));
+    await expect(lightboxImages(page)).toHaveCount(0);
+    await expect(page.locator('app-gallery-grid .photo-container > img').first()).toBeVisible();
+
+    await page.goForward();
+    await expect(page).toHaveURL(url => url.searchParams.get('p') === last);
+    await expectLightboxPhoto(page, last);
+  });
+
+  // #1310: closing scrolls the grid to the photo the lightbox was closed on; back closes it too
+  test('Browser back should scroll the grid to the last shown photo, like closing', async ({page, isMobile}) => {
+    test.fail(true, 'Not implemented yet #1310: back closes the lightbox, but the grid stays where the lightbox was opened');
+    const {first, last} = await openAndPageForward(page, isMobile);
+
+    await page.goBack();
+    await expect(lightboxImages(page)).toHaveCount(0);
+    await expect(photo(page, last)).toBeInViewport();
+    await expect(photo(page, first)).not.toBeInViewport();
+  });
+
+  // CUJ 12 without a mouse (#1254): Tab to a photo of the grid, Enter opens it, Escape closes it (paging: see above)
+  test('A photo of the grid should open with the keyboard', async ({page, isMobile}) => {
+    test.skip(isMobile, 'keyboard: desktop only');
+    test.fail(true, 'Not implemented yet #1254: the photos of the grid can not get the keyboard focus');
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    const firstPhoto = page.locator('app-gallery-grid app-gallery-grid-photo').first();
+    await expect(firstPhoto).toBeVisible();
+    const name = await firstPhoto.locator('.photo-container > img').getAttribute('alt');
+
+    // Tab through the page (navbar, folders, blog, ...) until the photo itself has the focus.
+    // The links of its info bar (keywords, place) don't count: Enter on them opens a search.
+    const photoFocused = (): Promise<boolean> => firstPhoto.evaluate(el => {
+      const active = document.activeElement;
+      return !!active && el.contains(active) && !active.closest('.info');
+    });
+    let focused = false;
+    for (let i = 0; i < 60 && !focused; i++) {
+      await page.keyboard.press('Tab');
+      focused = await photoFocused();
+    }
+    expect(focused, 'the first photo of the grid gets the focus with Tab').toBe(true);
+
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(url => url.searchParams.get('p') === name);
+    await expectLightboxPhoto(page, name!);
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(lightboxImages(page)).toHaveCount(0);
+  });
+
   // CUJ 15: the video plays, can be paused, and follows the loop setting (off by default)
   test('Lightbox should play a video, pause it and loop it with the switch', async ({page}) => {
     const video = page.locator('app-gallery-lightbox-media video').last();
