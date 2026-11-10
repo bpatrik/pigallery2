@@ -219,5 +219,30 @@ describe('Gallery without authentication', (sqlHelper: DBTestHelper) => {
       jobs.status.should.equal(200);
       expect(jobs.json.error).to.equal(null);
     });
+
+    // Admin is the intended default, but the admin can lower it to User in the settings ("Default user right")
+    it('should let the admin visitor lower the default right to User, which closes the admin API', async () => {
+      try {
+        const users = (await get('/settings')).json.result.Users;
+        expect(users.unAuthenticatedUserRole).to.equal(UserRoles.Admin);
+        // the settings page shows the saved config; this test switched the authentication off only in memory, a real install saves it
+        const saved = await send('put', '/settings', {
+          settingsPath: 'Users', settings: {...users, authenticationRequired: false, unAuthenticatedUserRole: UserRoles.User}
+        });
+        expect(saved.json.error, 'saving the default user right').to.equal(null);
+        expect(Config.Users.unAuthenticatedUserRole).to.equal(UserRoles.User);
+        expect(Config.Users.authenticationRequired).to.equal(false);
+
+        // the next visitor is a User: browses, but the admin API is refused
+        const me = await get('/user/me');
+        expect(me.json.result.role).to.equal(UserRoles.User);
+        expect((await get('/gallery/content/')).json.error).to.equal(null);
+        shouldBeRefused(await get('/settings'), 'GET settings');
+        shouldBeRefused(await get('/admin/jobs/available'), 'jobs');
+      } finally {
+        Config.Users.authenticationRequired = false;
+        Config.Users.unAuthenticatedUserRole = UserRoles.Admin;
+      }
+    });
   });
 });
