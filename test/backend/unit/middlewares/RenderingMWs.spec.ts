@@ -126,9 +126,14 @@ describe('RenderingMWs', () => {
         case ErrorCodes.PERMISSION_DENIED:
           return 403;
         case ErrorCodes.DIRECTORY_NOT_FOUND:
+        case ErrorCodes.PATH_ERROR: // e.g. a file that is not on the disk anymore
           return 404;
+        // the errors of what the user sent
+        case ErrorCodes.ALREADY_AUTHENTICATED:
+        case ErrorCodes.USER_CREATION_ERROR:
         case ErrorCodes.INPUT_ERROR:
-        case ErrorCodes.PATH_ERROR:
+        case ErrorCodes.SETTINGS_ERROR:
+        case ErrorCodes.ALBUM_ERROR:
         case ErrorCodes.UPLOAD_ERROR:
           return 400;
         default:
