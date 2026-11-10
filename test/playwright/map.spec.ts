@@ -9,7 +9,7 @@ const BLANK_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC
  * No external network in the tests: the map tiles (OpenStreetMap by default) are blank images.
  */
 const blockMapTiles = async (page: Page): Promise<void> => {
-  await page.route(url => url.hostname.endsWith('tile.openstreetmap.org') || url.hostname === 'api.mapbox.com',
+  await page.route(url => /(^|\.)tile\.openstreetmap\.org$/.test(url.hostname) || url.hostname === 'api.mapbox.com',
     route => route.fulfill({status: 200, contentType: 'image/png', body: BLANK_PNG}));
 };
 

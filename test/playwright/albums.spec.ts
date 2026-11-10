@@ -167,8 +167,8 @@ test.describe('Album edge cases', () => {
   test.describe('album whose search matches nothing', () => {
     let albumName: string;
 
-    test.beforeEach(async ({page}, testInfo) => {
-      albumName = 'Ürés ' + uniqueAlbumName(testInfo.workerIndex, testInfo.retry);
+    test.beforeEach(async ({page}) => {
+      albumName = 'Ürés ' + uniqueAlbumName();
       const res = await page.request.put('/pgapi/albums/saved-searches', {
         data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Nem Létező Személy', matchType: EXACT_MATCH}},
       });
