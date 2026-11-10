@@ -1,7 +1,7 @@
 // Who may share and what they can do with their sharings (CUJ 29–31, #1307): editing a sharing in the share dialog,
 // a normal user sees and changes only their own sharings, a guest (read-only user) cannot share.
 // The tests share 4MinsAroundTheWorld, which no other test shares.
-import {APIRequestContext, APIResponse, expect, Page, test} from '@playwright/test';
+import {APIRequestContext, APIResponse, expect, Page, Response, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
 import {
   createDirectorySharingWithApi,
@@ -84,7 +84,7 @@ test.describe('Sharing rights', () => {
     sharingKeys.push(sharingKey);
 
     // the dialog updates the sharing on every change of its settings
-    const updated = (): Promise<APIResponse> => page.waitForResponse(res => res.request().method() === 'PUT' &&
+    const updated = (): Promise<Response> => page.waitForResponse(res => res.request().method() === 'PUT' &&
       isShareApi(new URL(res.url())));
     let update = updated();
     await page.locator('input#share-password').fill('new-secret');
