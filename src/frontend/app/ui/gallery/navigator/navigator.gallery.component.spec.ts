@@ -18,6 +18,7 @@ describe('GalleryNavigatorComponent', () => {
   let content: ReturnType<typeof signal<ContentWrapperWithError>>;
   let user: ReturnType<typeof signal<UserDTO>>;
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let params: ReturnType<typeof signal<Record<string, string>>>;
 
   const folder = (path: string, name: string, availableParents?: boolean[]): ContentWrapperWithError =>
     ({directory: {path, name, availableParents}} as unknown as ContentWrapperWithError);
@@ -26,11 +27,12 @@ describe('GalleryNavigatorComponent', () => {
     content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
     user = signal<UserDTO>({name: 'admin', role: UserRoles.Admin} as UserDTO);
     router = {navigate: vi.fn().mockResolvedValue(true)};
+    params = signal<Record<string, string>>({});
     TestBed.configureTestingModule({
       providers: [
         {provide: ContentLoaderService, useValue: {content}},
         {provide: AuthenticationService, useValue: {user}},
-        {provide: QueryService, useValue: {getParams: (): Record<string, string> => ({})}},
+        {provide: QueryService, useValue: {getParams: (): Record<string, string> => ({}), params}},
         {provide: FilterService, useValue: {}},
         {provide: GallerySortingService, useValue: {}},
         {provide: GalleryNavigatorService, useValue: {}},
@@ -150,6 +152,46 @@ describe('GalleryNavigatorComponent', () => {
       content.set(folder('Nyaralás', 'Balaton', [false, false]));
       component.onKeyPress(altUp);
       expect(router.navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  // #1311, CUJ 32: the zip download of the folder or the search
+  describe('zip download', () => {
+    const zipUrl = (): URL => new URL(component.downloadZipLink()!, 'http://localhost');
+
+    it('should zip the folder with accents', () => {
+      content.set(folder('Nyaralás/', 'Őszi kirándulás'));
+      const url = zipUrl();
+      expect(url.pathname.startsWith('/pgapi/gallery/zip/')).toBe(true);
+      const query = JSON.parse(decodeURIComponent(url.pathname.substring('/pgapi/gallery/zip/'.length))) as TextSearch;
+      expect(query).toEqual({
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.exact_match,
+        value: 'Nyaralás/Őszi kirándulás'
+      });
+    });
+
+    it('should keep the sharing key', () => {
+      params.set({sk: 'abc'});
+      content.set(folder('Nyaralás/', 'Balaton'));
+      expect(zipUrl().searchParams.get('sk')).toBe('abc');
+    });
+
+    // TODO #1311: the query params are joined without '&' (e.g.: "?sk=abcfoo=bar")
+    it.fails('should keep every query param', () => {
+      params.set({sk: 'abc', foo: 'bar'});
+      content.set(folder('Nyaralás/', 'Balaton'));
+      const url = zipUrl();
+      expect(url.searchParams.get('sk')).toBe('abc');
+      expect(url.searchParams.get('foo')).toBe('bar');
+    });
+
+    // the template shows the button only with items to download
+    it('should count no items in a folder without media', () => {
+      content.set({directory: {path: './', name: 'emptydirectory', cache: {mediaCount: 0}}} as unknown as ContentWrapperWithError);
+      expect(component.itemCount()).toBe(0);
+      content.set({directory: {path: './', name: 'Balaton', cache: {mediaCount: 3}}} as unknown as ContentWrapperWithError);
+      expect(component.itemCount()).toBe(3);
     });
   });
 });
