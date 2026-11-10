@@ -51,12 +51,9 @@ test.describe('Search', () => {
     await expect(berkley.first()).toBeVisible();
 
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    // clicking a suggestion fills the search bar and searches for it (the arrow of the suggestion only fills it)
     await berkley.first().click();
-    // a picked suggestion fills the search bar; Enter searches for it
     await expect(searchBar).toHaveValue(/Berkley/);
-    if (!(new URL(page.url()).pathname.startsWith('/search/'))) {
-      await searchBar.press('Enter');
-    }
     expect((await search).ok()).toBe(true);
     await expect(page).toHaveURL(/\/search\//);
     await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();

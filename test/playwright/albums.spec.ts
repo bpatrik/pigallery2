@@ -1,3 +1,4 @@
+import {randomUUID} from 'node:crypto';
 import {expect, Page, test} from '@playwright/test';
 import {
   desktopViewport,
@@ -20,16 +21,15 @@ const deleteAlbumsNamed = async (page: Page, name: string): Promise<void> => {
   }
 };
 
-const uniqueAlbumName = (workerIndex: number, retry: number): string =>
-  `e2e album ${workerIndex}-${retry}-${Date.now()}`;
+const uniqueAlbumName = (): string => 'e2e album ' + randomUUID();
 
 test.describe('Albums', () => {
   test.use(desktopViewport({width: 1200, height: 800}));
   let albumName: string;
 
   // The tests run in parallel on one server: every test adds its own album with a unique name and deletes it.
-  test.beforeEach(async ({page}, testInfo) => {
-    albumName = uniqueAlbumName(testInfo.workerIndex, testInfo.retry);
+  test.beforeEach(async ({page}) => {
+    albumName = uniqueAlbumName();
     const res = await page.request.put('/pgapi/albums/saved-searches', {
       data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Alvin the Squirrel', matchType: EXACT_MATCH}},
     });
@@ -75,7 +75,7 @@ test.describe('Album journey', () => {
 
   test.beforeEach(() => {
     // accents: the album name is shown as typed
-    albumName = 'Óbuda ' + uniqueAlbumName(test.info().workerIndex, test.info().retry);
+    albumName = 'Óbuda ' + uniqueAlbumName();
   });
 
   test.afterEach(async ({page}) => {
@@ -124,9 +124,10 @@ test.describe('Album journey', () => {
     page.on('dialog', dialog => dialog.accept());
     const deleted = page.waitForResponse(res => res.request().method() === 'DELETE' && new URL(res.url()).pathname.startsWith('/pgapi/albums/'));
     await card.locator('ng-icon.delete').click();
-    // a confirmation first (#1312), if there is one
+    // Today it deletes at once. With the confirmation of #1312 (a modal), confirm it; a browser dialog is accepted above.
     const confirm = page.locator('modal-container').getByRole('button', {name: /delete|yes|ok/i});
-    if (await confirm.isVisible()) {
+    const first = await Promise.race([deleted.then(() => 'deleted'), confirm.waitFor().then(() => 'confirm')]);
+    if (first === 'confirm') {
       await confirm.click();
     }
     expect((await deleted).ok(), 'deleting the album').toBe(true);

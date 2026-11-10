@@ -54,7 +54,8 @@ const openDirectory = async (page: Page, dir: string): Promise<void> => {
  * Creates a sharing from the share dialog of the current view and returns its link.
  */
 const createSharing = async (page: Page, options: { password?: string, recursive?: boolean } = {}): Promise<string> => {
-  if ((page.viewportSize()?.width ?? 1280) < 1200) {
+  const fromMenu = (page.viewportSize()?.width ?? 1280) < 1200;
+  if (fromMenu) {
     // below the bootstrap xl breakpoint (e.g.: on a phone), Share is in the menu of the navbar
     await page.locator('button#button-frame-menu').click();
     await page.locator('#dropdown-frame-menu app-gallery-share button.dropdown-item').click();
@@ -76,8 +77,9 @@ const createSharing = async (page: Page, options: { password?: string, recursive
   const link = await shareLink.inputValue();
   // the "copied to clipboard" toast has a close button too
   await page.locator('modal-container button.btn-close').click();
-  // the menu of the navbar stays open after its Share item (on a small screen)
-  if (await page.locator('#dropdown-frame-menu').isVisible()) {
+  // the menu of the navbar stays open after its Share item
+  if (fromMenu) {
+    await expect(page.locator('#dropdown-frame-menu')).toBeVisible();
     await page.locator('button#button-frame-menu').click();
     await expect(page.locator('#dropdown-frame-menu')).toHaveCount(0);
   }
@@ -355,18 +357,34 @@ test.describe('Share', () => {
   test.describe('Invalid sharing', () => {
     test.use(notLoggedIn);
     let admin: APIRequestContext;
+    // the sharings a test created, deleted after it (also if it failed halfway)
+    let created: string[];
+
+    /**
+     * Creates a directory sharing through the API (as admin) and returns its key. It is deleted after the test.
+     */
+    const createSharingForTest = async (dir: string, options: { password?: string, recursive?: boolean, valid?: number } = {}): Promise<string> => {
+      const sharingKey = await createSharingWithApi(admin, dir, options);
+      created.push(sharingKey);
+      return sharingKey;
+    };
 
     test.beforeEach(async ({playwright, baseURL}) => {
       admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
+      created = [];
     });
 
     test.afterEach(async () => {
+      // a test may have deleted its sharing already
+      for (const sharingKey of created) {
+        await admin.delete('/pgapi/share/' + sharingKey);
+      }
       await admin.dispose();
     });
 
     // Sanity check: what a guest notices right away on the password page of a sharing. Soft checks.
     test('Sharing login should look right for a guest', {tag: '@sanity'}, async ({page}) => {
-      const sharingKey = await createSharingWithApi(admin, 'timestamps', {password: 'secret'});
+      const sharingKey = await createSharingForTest('timestamps', {password: 'secret'});
       await page.goto('/share/' + sharingKey);
       await expect(page).toHaveURL(/\/shareLogin/);
       await expect.soft(page.locator('app-share-login h1'), 'title').toBeVisible();
@@ -384,11 +402,10 @@ test.describe('Share', () => {
       await page.locator('input#password').fill('secret');
       await page.locator('button#button-share-login').click();
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-      await admin.delete('/pgapi/share/' + sharingKey);
     });
 
     test('Wrong password should show an error and stay on the sharing login', async ({page}) => {
-      const sharingKey = await createSharingWithApi(admin, 'timestamps', {password: 'secret'});
+      const sharingKey = await createSharingForTest('timestamps', {password: 'secret'});
       await page.goto('/share/' + sharingKey);
       await expect(page).toHaveURL(/\/shareLogin/);
       await page.locator('input#password').fill('wrong');
@@ -405,7 +422,7 @@ test.describe('Share', () => {
     test('Expired sharing should tell the guest that the link is invalid or has expired', async ({page}) => {
       test.fail(true, 'Not implemented yet #1307');
       // expires 1 ms after its creation
-      const sharingKey = await createSharingWithApi(admin, 'timestamps', {valid: 1});
+      const sharingKey = await createSharingForTest('timestamps', {valid: 1});
       await page.goto('/share/' + sharingKey);
 
       await expectInvalidLinkPage(page);
@@ -413,7 +430,7 @@ test.describe('Share', () => {
 
     test('Sharing deleted while the guest has it open should show the invalid link page on the next navigation', async ({page}) => {
       test.fail(true, 'Not implemented yet #1307');
-      const sharingKey = await createSharingWithApi(admin, ACCENTED_DIR, {recursive: true});
+      const sharingKey = await createSharingForTest(ACCENTED_DIR, {recursive: true});
       await page.goto('/share/' + sharingKey);
       await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
 
@@ -423,12 +440,19 @@ test.describe('Share', () => {
       await expectInvalidLinkPage(page);
     });
 
-    test('Sharing deleted from the share list should not open anymore', async ({page, browser}) => {
-      const sharingKey = await createSharingWithApi(admin, 'timestamps');
-      const guestRequest = (): Promise<number> =>
+    test('Sharing deleted from the share list should not open anymore', async ({page, browser, playwright, baseURL}) => {
+      const sharingKey = await createSharingForTest('timestamps');
+      // the guest has the sharing open: logged in to it, with its session cookie
+      await page.goto('/share/' + sharingKey);
+      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      // a request of the open page (with the session cookie), and the link itself in a fresh browser (no session)
+      const guestSessionRequest = (): Promise<number> =>
         page.request.get('/pgapi/gallery/content/timestamps?sk=' + sharingKey).then(r => r.status());
-      expect(await guestRequest(), 'the link works before the deletion').toBe(200);
-      await page.request.post('/pgapi/user/logout');
+      const fresh = await playwright.request.newContext({baseURL});
+      const linkRequest = (): Promise<number> =>
+        fresh.get('/pgapi/gallery/content/timestamps?sk=' + sharingKey).then(r => r.status());
+      expect(await guestSessionRequest(), 'the open sharing works before the deletion').toBe(200);
+      expect(await linkRequest(), 'the link works before the deletion').toBe(200);
 
       // the owner deletes it in the share dialog of the folder
       const ownerContext = await browser.newContext({storageState: ADMIN_SESSION, viewport: {width: 1200, height: 600}});
@@ -448,7 +472,10 @@ test.describe('Share', () => {
         await ownerContext.close();
       }
 
-      expect(await guestRequest(), 'the link stops working at once').toBe(401);
+      // the open sharing and its link stop working at once (what the open page shows is checked in the test above, #1307)
+      expect(await guestSessionRequest(), 'the session of the guest ends').toBe(401);
+      expect(await linkRequest(), 'the link stops working').toBe(401);
+      await fresh.dispose();
     });
   });
 });
