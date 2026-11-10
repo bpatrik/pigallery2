@@ -65,6 +65,17 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
     return cookies.filter(c => c.startsWith(CookieNames.session)).map(c => c.split(';')[0]).join('; ');
   };
 
+  /**
+   * The first listing of a folder answers with the disk scan and saves it to the DB in the background.
+   * Waits for that save, so the DB (search, counts) has the folder.
+   */
+  const waitForIndexSave = async (): Promise<void> => {
+    const im = ObjectManagers.getInstance().IndexingManager;
+    while (im.IsSavingInProgress) {
+      await im.SavingReady;
+    }
+  };
+
   it('should log in with the default admin, list the folder and search it', async () => {
     await startServer();
     // nothing indexed yet
@@ -81,6 +92,7 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
     expect(content.body.error).to.equal(null);
     expect(JSON.stringify(content.body.result.directory)).to.include('test image öüóőúéáű-.,.jpg');
     expect(content.body.result.directory.directories.length).to.be.greaterThan(0);
+    await waitForIndexSave();
 
     // the indexed photos can be searched
     const query = {type: SearchQueryTypes.file_name, value: 'öüóőúéáű', matchType: TextSearchQueryMatchTypes.like} as TextSearch;
@@ -99,6 +111,7 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
     await (request.execute(server.Server) as SuperAgentStatic)
       .get(Config.Server.apiPath + '/gallery/content/')
       .set('Cookie', cookie);
+    await waitForIndexSave();
     let connection = await SQLConnection.getConnection();
     expect(await connection.getRepository(DirectoryEntity).count(), 'indexed before the upgrade').to.be.greaterThan(0);
 
