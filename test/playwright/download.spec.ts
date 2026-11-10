@@ -45,9 +45,12 @@ test.describe('Zip download', () => {
       imgs => imgs.map(img => img.getAttribute('alt')!).sort());
 
     const {names} = await downloadZip(page);
-    // every result, the same file names of different folders made unique (big_ben_only_time_2.jpg)
+    // every result; the same file name of different folders is made unique with a number (big_ben_only_time_2.jpg).
+    // Only a name that is not a result itself is such a renamed copy (e.g.: IMG_5910.jpg is no copy of IMG.jpg).
+    const original = (n: string): string => shown.includes(n) ? n : n.replace(/_\d+(\.\w+)$/, '$1');
     expect(names).toHaveLength(shown.length);
-    expect(names.map(n => n.replace(/_\d+(\.\w+)$/, '$1')).sort()).toEqual(shown);
+    expect(new Set(names).size, 'unique names in the zip').toBe(names.length);
+    expect(names.map(original).sort()).toEqual(shown);
   });
 
   test.describe('in a sharing', () => {

@@ -65,7 +65,8 @@ test.describe('Admin', () => {
     test('should be redirected to the gallery with a warning toast', async ({page}) => {
       test.fail(true, 'Not implemented yet #1315');
       await page.goto('/admin');
-      await expect(page).toHaveURL(url => url.pathname === '/gallery/');
+      // the root folder: /gallery or /gallery/
+      await expect(page).toHaveURL(url => url.pathname === '/gallery' || url.pathname === '/gallery/');
       await expect(page.locator('app-toast-card[role="status"]')).toBeVisible();
     });
 
