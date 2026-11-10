@@ -13,6 +13,7 @@ import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {TestHelper} from '../../../../TestHelper';
+import {JobScheduleDTO, JobTriggerType} from '../../../../../src/common/entities/job/JobScheduleDTO';
 
 declare const describe: any;
 declare const before: any;
@@ -201,5 +202,208 @@ describe('JobManager (#1315)', () => {
     const progress = progressOf(indexingName);
     expect(progress.state).to.equal(JobProgressStates.finished);
     expect(progress.logs.map(l => l.comment).join('\n')).to.contain('Indexing failed for: /unreadable');
+  });
+});
+
+// a job with a name given in the constructor, that records when it runs
+class RecordingJob extends Job<Record<string, unknown>> {
+  public readonly ConfigTemplate: DynamicConfig[] = [];
+  public runs: string[] = [];
+
+  constructor(public readonly Name: string, private readonly log: string[]) {
+    super();
+  }
+
+  public get Supported(): boolean {
+    return true;
+  }
+
+  protected async init(): Promise<void> {
+    this.log.push(this.Name);
+    this.Progress.All = 2;
+  }
+
+  protected async step(): Promise<boolean> {
+    if (this.Progress.Processed >= 2) {
+      return false;
+    }
+    await new Promise(resolve => setTimeout(resolve, 2));
+    this.Progress.Processed++;
+    return true;
+  }
+}
+
+/**
+ * Jobs run by their schedule (CUJ 38, #1254): at a date, periodically, or after another scheduled job.
+ */
+describe('JobManager schedules (CUJ 38)', () => {
+  before(TestHelper.resetConfig);
+
+  const log: string[] = [];
+  const jobA = new RecordingJob('Scheduled test job A #1254', log);
+  const jobB = new RecordingJob('Scheduled test job B #1254', log);
+  const jobC = new RecordingJob('Scheduled test job C #1254', log);
+  let jobManager: JobManager;
+
+  const schedule = (name: string, job: IJobName, trigger: JobScheduleDTO['trigger']): JobScheduleDTO => ({
+    name,
+    jobName: job.Name,
+    config: {},
+    allowParallelRun: false,
+    trigger
+  });
+  type IJobName = { Name: string };
+
+  const waitFor = async (condition: () => boolean, what: string, timeout = 5000): Promise<void> => {
+    const start = Date.now();
+    while (!condition() && Date.now() - start < timeout) {
+      await new Promise(resolve => setTimeout(resolve, 5));
+    }
+    expect(condition(), what).to.be.true;
+  };
+  const idle = (): boolean => [jobA, jobB, jobC].every(j => !j.InProgress);
+
+  const start = async (scheduled: JobScheduleDTO[]): Promise<void> => {
+    Config.Jobs.scheduled = scheduled;
+    jobManager = new JobManager();
+    await jobManager.init();
+  };
+
+  before(() => {
+    for (const j of [jobA, jobB, jobC]) {
+      JobRepository.Instance.register(j);
+    }
+  });
+
+  after(() => {
+    for (const j of [jobA, jobB, jobC]) {
+      delete JobRepository.Instance.availableJobs[j.Name];
+    }
+  });
+
+  beforeEach(() => {
+    TestHelper.resetConfig();
+    fs.rmSync(TestHelper.TMP_DIR, {recursive: true, force: true});
+    Config.Database.dbFolder = TestHelper.TMP_DIR;
+    ProjectPath.reset();
+    log.length = 0;
+  });
+
+  afterEach(async () => {
+    await waitFor(idle, 'jobs should finish');
+    await jobManager?.cleanUp();
+    Config.Jobs.scheduled = [];
+    fs.rmSync(TestHelper.TMP_DIR, {recursive: true, force: true});
+  });
+
+  it('should run a job at its scheduled date and not one whose date has passed', async () => {
+    await start([
+      schedule('A at a date', jobA, {type: JobTriggerType.scheduled, time: Date.now() + 50}),
+      schedule('B in the past', jobB, {type: JobTriggerType.scheduled, time: Date.now() - 1000}),
+      schedule('C never', jobC, {type: JobTriggerType.never}),
+    ]);
+    expect(log, 'not before its date').to.deep.equal([]);
+    expect(Object.keys(jobManager.getProgresses())).to.deep.equal([]);
+
+    await waitFor(() => log.length > 0, 'A should run');
+    await waitFor(idle, 'A should finish');
+    await new Promise(resolve => setTimeout(resolve, 100));
+    expect(log).to.deep.equal([jobA.Name]);
+    expect(Object.values(jobManager.getProgresses()).map(p => p.state)).to.deep.equal([JobProgressStates.finished]);
+  });
+
+  it('should run the jobs scheduled after a job, in a chain', async () => {
+    await start([
+      schedule('C after B', jobC, {type: JobTriggerType.after, afterScheduleName: 'B after A'}),
+      schedule('B after A', jobB, {type: JobTriggerType.after, afterScheduleName: 'A at a date'}),
+      schedule('A at a date', jobA, {type: JobTriggerType.scheduled, time: Date.now() + 20}),
+    ]);
+
+    await waitFor(() => log.length === 3 && idle(), 'the chain should run');
+    expect(log).to.deep.equal([jobA.Name, jobB.Name, jobC.Name]);
+  });
+
+  it('should run the jobs scheduled after a job that was started by hand, unless it was a solo run', async () => {
+    await start([
+      schedule('A', jobA, {type: JobTriggerType.never}),
+      schedule('B after A', jobB, {type: JobTriggerType.after, afterScheduleName: 'A'}),
+    ]);
+
+    await jobManager.run(jobA.Name, {}, true, false);
+    await waitFor(idle, 'A should finish');
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(log, 'solo run').to.deep.equal([jobA.Name]);
+
+    await jobManager.run(jobA.Name, {}, false, false);
+    await waitFor(() => log.length === 3 && idle(), 'B should run after A');
+    expect(log).to.deep.equal([jobA.Name, jobA.Name, jobB.Name]);
+  });
+
+  it('should not run the jobs scheduled after a job that was stopped', async () => {
+    await start([
+      schedule('A', jobA, {type: JobTriggerType.never}),
+      schedule('B after A', jobB, {type: JobTriggerType.after, afterScheduleName: 'A'}),
+    ]);
+
+    await jobManager.run(jobA.Name, {}, false, false);
+    jobManager.stop(jobA.Name);
+    await waitFor(idle, 'A should stop');
+    await new Promise(resolve => setTimeout(resolve, 50));
+    expect(log).to.deep.equal([jobA.Name]);
+  });
+
+  describe('periodic', () => {
+    // the timers of the schedules (longer than a minute) are caught, the others (job steps, progress saving) run
+    const realSetTimeout = global.setTimeout;
+    let caught: { callback: () => void, delay: number }[];
+
+    beforeEach(() => {
+      caught = [];
+      (global as any).setTimeout = (callback: () => void, delay?: number, ...args: unknown[]): NodeJS.Timeout => {
+        if ((delay ?? 0) > 60 * 1000) {
+          caught.push({callback, delay: delay!});
+          // a real timer that never fires before the end of the test, so clearTimeout() works on it
+          return realSetTimeout(() => undefined, 2 ** 31 - 1).unref();
+        }
+        return realSetTimeout(callback, delay, ...args) as unknown as NodeJS.Timeout;
+      };
+    });
+
+    afterEach(() => {
+      global.setTimeout = realSetTimeout;
+    });
+
+    it('should run a daily job at its time of the day, then schedule the next day', async () => {
+      const now = new Date();
+      // two minutes from now, in UTC minutes of the day
+      const atTime = (now.getUTCHours() * 60 + now.getUTCMinutes() + 2) % (24 * 60);
+      const expected = new Date(now);
+      expected.setUTCSeconds(0, 0);
+      expected.setUTCHours(Math.floor(atTime / 60), atTime % 60);
+      if (expected.getTime() <= now.getTime()) {
+        expected.setUTCDate(expected.getUTCDate() + 1);
+      }
+
+      await start([schedule('A daily', jobA, {type: JobTriggerType.periodic, periodicity: 7, atTime})]);
+      expect(caught.length, 'one timer').to.equal(1);
+      expect(Date.now() + caught[0].delay).to.be.closeTo(expected.getTime(), 1000);
+      expect(Object.values(jobManager.getProgresses()), 'not run yet').to.deep.equal([]);
+
+      // the time has come
+      caught[0].callback();
+      await waitFor(() => log.length === 1 && idle(), 'A should run');
+      // the next run is computed from the clock; the test fired the timer early, so it is the same time again
+      await waitFor(() => caught.length === 2, 'the next run should be scheduled');
+      expect(Date.now() + caught[1].delay).to.be.closeTo(expected.getTime(), 1000);
+      expect((jobManager as unknown as { timers: unknown[] }).timers.length, 'one timer').to.equal(1);
+    });
+
+    it('should stop the timers on cleanUp', async () => {
+      await start([schedule('A daily', jobA, {type: JobTriggerType.periodic, periodicity: 7, atTime: 0})]);
+      expect(caught.length).to.equal(1);
+      expect((jobManager as unknown as { timers: unknown[] }).timers.length).to.equal(1);
+      jobManager.stopSchedules();
+      expect((jobManager as unknown as { timers: unknown[] }).timers.length).to.equal(0);
+    });
   });
 });
