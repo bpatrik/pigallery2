@@ -5,8 +5,8 @@ import {ADMIN_SESSION} from './global-setup';
 import {ACCENTED_DIR, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
 
 const NOT_EXISTING_SHARING = '/share/doesnotexist';
-// what a missing or invalid sharing link should tell the user
-const invalidLinkMessage = /not found|invalid|expired|does not exist/i;
+// what a missing, expired or deleted sharing link tells the user (agreed in #1307, the same text as in share.spec.ts)
+const invalidLinkMessage = 'This link is invalid or has expired';
 
 /**
  * The message of an empty result: a visible text in the gallery with an icon next to it.
@@ -19,6 +19,8 @@ const expectMessageWithIcon = async (page: Page, message: RegExp): Promise<void>
 };
 
 const isSearch = (url: URL): boolean => url.pathname.startsWith('/pgapi/search/');
+// the root folder: /gallery or /gallery/
+const isGalleryRoot = (url: URL): boolean => url.pathname === '/gallery' || url.pathname === '/gallery/';
 
 /**
  * A failed load shows an inline error in the gallery: never an endless spinner or an empty grid.
@@ -38,7 +40,7 @@ test.describe('Errors', () => {
       test.use(notLoggedIn);
 
       test('should tell a guest that the link is invalid', async ({page}) => {
-        test.fail(true, 'Not implemented yet #1254');
+        test.fail(true, 'Not implemented yet #1307');
         await page.goto(NOT_EXISTING_SHARING);
 
         await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
@@ -48,7 +50,7 @@ test.describe('Errors', () => {
     });
 
     test('should tell a logged in user that the link is invalid', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1254');
+      test.fail(true, 'Not implemented yet #1307');
       await page.goto(NOT_EXISTING_SHARING);
 
       await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
@@ -59,16 +61,22 @@ test.describe('Errors', () => {
   });
 
   test.describe('Not existing folder', () => {
+    const missingDir = 'nem_létező_mappa';
 
-    test('should fall back to the root folder with a warning toast', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1254');
-      const missingDir = 'nem_létező_mappa';
+    // falling back to the root is intended
+    test('should fall back to the root folder', async ({page}) => {
       await page.goto('/gallery/' + encodeURIComponent(missingDir));
 
-      // falling back to the root is intended
-      await expect(page).toHaveURL(url => url.pathname === '/gallery/');
+      await expect(page).toHaveURL(url => isGalleryRoot(url));
       await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
-      // but the user is told why (a warning, not an error)
+    });
+
+    // but the user is told why (a warning, not an error)
+    test('should tell with a warning toast that the folder was not found', async ({page}) => {
+      test.fail(true, 'Not implemented yet #1308');
+      await page.goto('/gallery/' + encodeURIComponent(missingDir));
+
+      await expect(page).toHaveURL(url => isGalleryRoot(url));
       await expect(page.locator('app-toast-card[role="status"]').filter({hasText: missingDir})).toBeVisible();
     });
 
@@ -96,21 +104,34 @@ test.describe('Errors', () => {
         await admin.dispose();
       });
 
-      // the same as a missing folder, so its existence does not leak
-      test('should fall back to the root folder with the same warning toast as a missing folder', async ({page}) => {
-        test.fail(true, 'Not implemented yet #1308');
+      /**
+       * Logs in as the restricted user and opens the hidden folder.
+       */
+      const openHiddenFolder = async (page: Page): Promise<void> => {
         await page.context().clearCookies();
         const login = await page.request.post('/pgapi/user/login', {
           data: {loginCredential: {username: user.name, password: user.password, rememberMe: false}},
         });
         expect(login.ok(), 'restricted user login').toBe(true);
-
         await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR));
+      };
 
-        await expect(page).toHaveURL(url => url.pathname === '/gallery/');
+      // the same as a missing folder, so its existence does not leak
+      test('should fall back to the root folder without the hidden photos', async ({page}) => {
+        await openHiddenFolder(page);
+
+        await expect(page).toHaveURL(url => isGalleryRoot(url));
         await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
         // none of the hidden photos
         await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toHaveCount(0);
+        await expect(page.locator('.photo-container > img[alt="IMG_9697.jpg"]')).toHaveCount(0);
+      });
+
+      test('should show the same warning toast as for a missing folder', async ({page}) => {
+        test.fail(true, 'Not implemented yet #1308');
+        await openHiddenFolder(page);
+
+        await expect(page).toHaveURL(url => isGalleryRoot(url));
         await expect(page.locator('app-toast-card[role="status"]').filter({hasText: ACCENTED_DIR})).toBeVisible();
       });
     });
@@ -119,7 +140,7 @@ test.describe('Errors', () => {
   test.describe('Empty results', () => {
 
     test('should show an icon and a message in an empty folder', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1254');
+      test.fail(true, 'Not implemented yet #1308');
       const content = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/gallery/content/emptydirectory');
       await page.goto('/gallery/emptydirectory');
       await content;
@@ -129,7 +150,7 @@ test.describe('Errors', () => {
     });
 
     test('should show an icon and a message when the search matched nothing', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1254');
+      test.fail(true, 'Not implemented yet #1309');
       const query = 'zzzznomatch';
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
       await page.goto('/search/' + query);
