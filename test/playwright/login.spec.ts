@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION, NORMAL_USER} from './global-setup';
-import {expectLightboxPhoto, expectNoHorizontalScroll, isGalleryContent, loginWithUi, logoutWithUi, notLoggedIn} from './helpers';
+import {ACCENTED_DIR, expectLightboxPhoto, expectNoHorizontalScroll, isGalleryContent, loginWithUi, logoutWithUi, notLoggedIn} from './helpers';
 
 const isApi = (url: string): boolean => new URL(url).pathname.startsWith('/pgapi/');
 
@@ -154,14 +154,15 @@ test.describe('Login', () => {
 
   test('Deep link should open after the login', async ({page}) => {
     test.fail(true, 'Not implemented yet #1306');
-    await page.goto('/gallery/timestamps?p=big_ben.jpg');
+    // a full size photo (big_ben.jpg is smaller than the lightbox) in the folder with accents in its name
+    await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR) + '?p=IMG_8943.jpg');
     await expect(page).toHaveURL(/\/login/);
     await fillLoginForm(page, NORMAL_USER.name, NORMAL_USER.password);
     await page.locator('.col-sm-12 > .btn').click();
 
     // back on the deep link, not on the gallery root
-    await expect(page).toHaveURL(url => url.pathname === '/gallery/timestamps' && url.searchParams.get('p') === 'big_ben.jpg');
-    await expectLightboxPhoto(page, 'big_ben.jpg');
+    await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR && url.searchParams.get('p') === 'IMG_8943.jpg');
+    await expectLightboxPhoto(page, 'IMG_8943.jpg');
   });
 
   test('Search deep link should open after the login', async ({page}) => {
