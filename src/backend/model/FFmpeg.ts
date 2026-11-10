@@ -18,6 +18,7 @@ export interface FfprobeStream {
 }
 
 export interface FfprobeFormat {
+  format_name?: string;
   duration?: string;
   bit_rate?: string;
   tags?: Record<string, string>;
@@ -42,9 +43,9 @@ export class FFmpeg {
   /** stderr lines kept for the error message of a failed run */
   private static readonly ERROR_LINES = 20;
 
-  public static async probe(file: string): Promise<FfprobeData> {
+  public static async probe(file: string, extraArgs: string[] = []): Promise<FfprobeData> {
     const stdout = await this.spawn(FFmpegFactory.getPaths().ffprobe,
-      ['-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', file], {}, true);
+      ['-v', 'error', ...extraArgs, '-print_format', 'json', '-show_format', '-show_streams', file], {}, true);
     const data = JSON.parse(stdout) as Partial<FfprobeData>;
     return {streams: data.streams || [], format: data.format || {}};
   }

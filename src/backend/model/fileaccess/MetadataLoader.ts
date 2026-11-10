@@ -160,6 +160,23 @@ export class MetadataLoader {
       metadata.creationDate = metadata.creationDate || 0;
 
       try {
+        // GPS of videos is stored in the embedded XMP (issue #1260). ffprobe only exposes the XMP with
+        // the export_xmp flag, and only the mov/mp4 demuxer accepts that flag (e.g. matroska rejects it).
+        if ((data.format.format_name || '').split(',').includes('mp4')) {
+          const xmp = (await FFmpeg.probe(fullPath, ['-export_xmp', '1'])).format.tags?.['xmp'];
+          if (xmp) {
+            const xmpData: ExifData = await exifr.sidecar(Buffer.from(xmp), undefined, 'xmp');
+            if (xmpData) {
+              MetadataLoader.mapGPS(metadata, xmpData);
+            }
+          }
+        }
+      } catch (err) {
+        Logger.silly(LOG_TAG, 'Error loading embedded XMP metadata for : ' + fullPath);
+        Logger.silly(err);
+      }
+
+      try {
         // search for sidecar and merge metadata
         const fullPathWithoutExt = path.join(path.parse(fullPath).dir, path.parse(fullPath).name);
         const sidecarPaths = [

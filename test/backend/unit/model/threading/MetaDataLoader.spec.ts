@@ -1,12 +1,14 @@
 import {expect} from 'chai';
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {Utils} from '../../../../../src/common/Utils';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
+import {PhotoMetadata} from '../../../../../src/common/entities/PhotoDTO';
 import {TestHelper} from '../../../../TestHelper';
 
 declare const before: any;
@@ -361,6 +363,37 @@ describe('MetadataLoader', () => {
     const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/video_mkv.mkv'));
     const expected = require(path.join(__dirname, '/../../../assets/video_mkv.json'));
     expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+
+  it('should load GPS from the embedded XMP of an mp4', async () => {
+    // see https://github.com/bpatrik/pigallery2/issues/1260
+    // no test asset has GPS in its embedded XMP, so append the standard top-level XMP uuid box
+    // (the one exiftool writes) to a copy of video.mp4
+    const xmp = Buffer.from('<x:xmpmeta xmlns:x="adobe:ns:meta/">' +
+      '<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">' +
+      '<rdf:Description rdf:about="" xmlns:exif="http://ns.adobe.com/exif/1.0/"' +
+      ' exif:GPSLatitude="47,29.3N" exif:GPSLongitude="19,2.2E"/>' +
+      '</rdf:RDF></x:xmpmeta>', 'utf8');
+    const uuidBox = Buffer.concat([
+      Buffer.alloc(4), // box size, filled below
+      Buffer.from('uuid'),
+      Buffer.from('be7acfcb97a942e89c71999491e3afac', 'hex'), // XMP box uuid
+      xmp,
+    ]);
+    uuidBox.writeUInt32BE(uuidBox.length, 0);
+    const tmpDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'pg2-xmp-'));
+    try {
+      const videoPath = path.join(tmpDir, 'video_xmp_gps.mp4');
+      await fs.promises.writeFile(videoPath, Buffer.concat(
+        [await fs.promises.readFile(path.join(__dirname, '/../../../assets/video.mp4')), uuidBox]));
+
+      const data = await MetadataLoader.loadVideoMetadata(videoPath);
+      expect((data as PhotoMetadata).positionData).to.be.deep.equal({
+        GPSData: {latitude: 47.488333, longitude: 19.036667},
+      });
+    } finally {
+      await fs.promises.rm(tmpDir, {recursive: true, force: true});
+    }
   });
 
 
