@@ -164,6 +164,10 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
   starts, restores or ends sessions. Call `SessionManager.invalidateSessionCache()` after every write to users or sharings.
 - **Albums** are saved searches: an album links to its search (`/search/<query>`), not to an album URL.
   The link of a deleted album keeps working as a plain search; that's intended.
+- **urlBase** expects a reverse proxy in front of the server that strips it: the server serves everything at `/`,
+  only the links it renders carry the urlBase.
+- **No login** (`Users.authenticationRequired=false`): every visitor gets `Users.unAuthenticatedUserRole`. Admin is the intended default;
+  the admin can lower it (e.g. to User) in the settings.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.

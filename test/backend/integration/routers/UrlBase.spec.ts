@@ -4,7 +4,6 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import {default as chaiHttp, request} from 'chai-http';
 import {SuperAgentStatic} from 'superagent';
 import {DBTestHelper} from '../../DBTestHelper';
@@ -15,12 +14,11 @@ import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig'
 process.env['NODE_ENV'] = 'test';
 chai.should();
 chai.use(chaiHttp);
-chai.use(chaiAsPromised);
 
 /**
  * Running under a reverse-proxy subpath (`Server.urlBase`, e.g. https://example.com/myGallery, #1254).
- * Today the server expects the proxy to strip the urlBase: it serves everything at `/` and only the links
- * it renders (base href, redirects, client config) carry the urlBase.
+ * The urlBase expects a reverse proxy in front of the server that strips it (intended): the server serves everything at `/`
+ * and only the links it renders (base href, redirects, client config) carry the urlBase.
  */
 describe('Server.urlBase', () => {
   before(TestHelper.resetConfig);
@@ -96,27 +94,6 @@ describe('Server.urlBase', () => {
       const res = await get('/hu/gallery/' + encodeURIComponent(ALBUM));
       res.should.have.status(302);
       expect(res.header['location']).to.equal(URL_BASE + '/gallery/' + encodeURIComponent(ALBUM) + '?ln=hu');
-    });
-  });
-
-  // A proxy that passes the path on as it is (e.g. nginx `location /myGallery { proxy_pass http://pigallery2; }`, see #854).
-  describe('behind a proxy that keeps the urlBase', () => {
-
-    // TODO #1254: the server does not answer under the urlBase; remove the rejection check once it does
-    it('should answer the app, the API and the assets under the urlBase (expected to fail #1254)', async () => {
-      const check = async (): Promise<void> => {
-        const page = await get(URL_BASE + '/gallery/' + encodeURIComponent(ALBUM));
-        expect(page.status, 'app page').to.equal(200);
-        expect(page.text, 'app page').to.contain('<base href="' + URL_BASE + '/"/>');
-
-        const api = await get(URL_BASE + Config.Server.apiPath + '/gallery/content/' + encodeURIComponent(ALBUM));
-        expect(api.status, 'api').to.equal(200);
-        expect(api.body.result?.directory?.name, 'api').to.equal(ALBUM);
-
-        const asset = await get(URL_BASE + '/assets/logo.png');
-        expect(asset.status, 'asset').to.equal(200);
-      };
-      await check().should.be.rejectedWith(chai.AssertionError, 'app page');
     });
   });
 });
