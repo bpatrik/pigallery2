@@ -1,4 +1,5 @@
-import {expect, Locator, Page, TestInfo, ViewportSize} from '@playwright/test';
+import {randomUUID} from 'node:crypto';
+import {APIRequest, APIRequestContext, expect, Locator, Page, TestInfo, ViewportSize} from '@playwright/test';
 import {USER_SESSION} from './global-setup';
 
 // a fresh browser without the logged in admin session of global-setup.ts
@@ -262,4 +263,94 @@ export const doubleTap = async (page: Page, at?: { x: number, y: number }): Prom
   const {x, y} = at ?? {x: size.width / 2, y: size.height / 2};
   await page.touchscreen.tap(x, y);
   await page.touchscreen.tap(x, y);
+};
+
+// what an expired, deleted or not existing sharing link tells the user (#1307): one message, so a key can't be probed
+export const INVALID_LINK_MESSAGE = 'This link is invalid or has expired';
+
+const SEARCH_DIRECTORY = 102; // SearchQueryTypes.directory
+const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+const GLOB_MATCH = 3; // TextSearchQueryMatchTypes.globMatch
+
+export interface CreatedSharing {
+  sharingKey: string;
+  // when the sharing expires (ms since epoch, server clock; the e2e server runs on the same machine)
+  expires: number;
+}
+
+/**
+ * Creates a directory sharing through the API and returns it (the same as createSharingWithApi of share.spec.ts).
+ * @param creator a logged-in request context (e.g.: admin), it becomes the creator of the sharing
+ * @param options.valid how long the sharing is available in ms
+ */
+export const createDirectorySharingWithApi = async (creator: APIRequestContext, dir: string,
+                                                    options: { password?: string, recursive?: boolean, valid?: number } = {}):
+  Promise<CreatedSharing> => {
+  const res = await creator.post('/pgapi/share/', {
+    data: {
+      createSharing: {
+        valid: options.valid ?? 24 * 60 * 60 * 1000,
+        ...(options.password && {password: options.password}),
+        directoryQuery: options.recursive
+          ? {type: SEARCH_DIRECTORY, value: dir + '/*', matchType: GLOB_MATCH}
+          : {type: SEARCH_DIRECTORY, value: dir, matchType: EXACT_MATCH},
+      },
+    },
+  });
+  expect(res.ok(), 'creating the sharing').toBe(true);
+  const result = (await res.json()).result;
+  expect(result?.sharingKey, 'sharing key').toBeTruthy();
+  return {sharingKey: result.sharingKey, expires: result.expires};
+};
+
+/**
+ * The page of an invalid sharing link: only the message, no gallery around it (#1307).
+ */
+export const expectInvalidLinkPage = async (page: Page, timeout?: number): Promise<void> => {
+  await expect(page.getByText(INVALID_LINK_MESSAGE)).toBeVisible({timeout});
+  await expect(page.locator('app-gallery')).toHaveCount(0);
+  await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
+};
+
+export interface TestUser {
+  name: string;
+  password: string;
+  role: number; // UserRoles
+}
+
+/**
+ * A user of its own for a test (unique name), so changing or deleting it does not affect the other tests.
+ * Delete it with deleteUserWithApi.
+ * @param role UserRoles, a normal user (3) by default
+ */
+export const createUserWithApi = async (admin: APIRequestContext, prefix: string, role = 3): Promise<TestUser> => {
+  const user = {name: prefix + '-' + randomUUID(), password: 'pass', role};
+  expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'creating the user ' + user.name).toBe(true);
+  return user;
+};
+
+/**
+ * Deletes the user if it exists (a test might have deleted it already). Returns whether it existed.
+ */
+export const deleteUserWithApi = async (admin: APIRequestContext, name: string): Promise<boolean> => {
+  const users: { id: number, name: string }[] = (await (await admin.get('/pgapi/user/list')).json()).result;
+  const user = users.find(u => u.name === name);
+  if (!user) {
+    return false;
+  }
+  expect((await admin.delete('/pgapi/user/' + user.id)).ok(), 'deleting the user ' + name).toBe(true);
+  return true;
+};
+
+/**
+ * A request context logged in as the user, e.g.: to create sharings as that user.
+ */
+export const loginWithApi = async (playwright: { request: APIRequest }, baseURL: string | undefined,
+                                   user: { name: string, password: string }): Promise<APIRequestContext> => {
+  const context = await playwright.request.newContext({baseURL});
+  const res = await context.post('/pgapi/user/login', {
+    data: {loginCredential: {username: user.name, password: user.password, rememberMe: false}},
+  });
+  expect(res.ok(), user.name + ' login').toBe(true);
+  return context;
 };
