@@ -109,6 +109,9 @@ jobs:
         npm rebuild ffmpeg-static && node -e "$check" && exit 0
         echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
         exit 1
+    - name: Type check the e2e tests
+      # Playwright runs the tests without a type check
+      run: npx tsc --noEmit -p test/playwright/tsconfig.json
     - name: Install Playwright browser
       run: npx playwright install --with-deps chromium
     - name: E2E test - Playwright

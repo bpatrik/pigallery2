@@ -124,8 +124,11 @@ export interface NavbarExpectation {
   admin: boolean;
 }
 
-// below this width (bootstrap md) the navbar tabs are in the menu
-const SMALL_SCREEN_WIDTH = 768;
+// the navbar moves into its menu in two steps (bootstrap breakpoints of frame.component.html):
+// below md the tabs, below xl the share button
+export const NAVBAR_TABS_IN_MENU_BELOW = 768;
+export const NAVBAR_SHARE_IN_MENU_BELOW = 1200;
+const viewportWidth = (page: Page): number => page.viewportSize()?.width ?? 1280;
 
 /**
  * Overrides the viewport of a desktop browser (test.use(desktopViewport(...))). A phone keeps the viewport of its device preset.
@@ -137,13 +140,16 @@ export const desktopViewport = (viewport: ViewportSize) => ({
 
 /**
  * Checks (softly) what the navbar offers to the current user.
- * On a small screen (phone) the tabs and the share button are in the menu.
+ * On a smaller screen the tabs and the share button are in the menu (see NAVBAR_TABS_IN_MENU_BELOW, NAVBAR_SHARE_IN_MENU_BELOW).
  */
 export const expectNavbar = async (page: Page, expected: NavbarExpectation): Promise<void> => {
-  const smallScreen = (page.viewportSize()?.width ?? 1280) < SMALL_SCREEN_WIDTH;
+  const tabsInMenu = viewportWidth(page) < NAVBAR_TABS_IN_MENU_BELOW;
+  const shareInMenu = viewportWidth(page) < NAVBAR_SHARE_IN_MENU_BELOW;
   await expect.soft(page.locator('app-frame nav app-gallery-search'), 'search bar').toHaveCount(expected.search ? 1 : 0);
-  if (!smallScreen) {
+  if (!tabsInMenu) {
     await expect.soft(page.locator('app-frame nav ul.navbar-nav.mb-0 .nav-link'), 'navbar tabs').toHaveText(expected.tabs);
+  }
+  if (!shareInMenu) {
     await expect.soft(page.locator('app-frame nav button#shareButton'), 'share button').toHaveCount(expected.share ? 1 : 0);
   }
 
@@ -151,9 +157,11 @@ export const expectNavbar = async (page: Page, expected: NavbarExpectation): Pro
   await menuButton.click();
   const menu = page.locator('#dropdown-frame-menu');
   await expect(menu).toBeVisible();
-  if (smallScreen) {
+  if (tabsInMenu) {
     await expect.soft(menu.locator('li.d-md-none a.dropdown-item').filter({visible: true}), 'tabs in the menu')
       .toHaveText(expected.tabs);
+  }
+  if (shareInMenu) {
     await expect.soft(menu.locator('app-gallery-share button.dropdown-item').filter({visible: true}), 'share in the menu')
       .toHaveCount(expected.share ? 1 : 0);
   }
@@ -171,7 +179,7 @@ export const expectNavbar = async (page: Page, expected: NavbarExpectation): Pro
  * Opens a tab of the navbar (e.g.: Faces). On a small screen (phone) the tabs are in the menu.
  */
 export const clickNavbarTab = async (page: Page, tab: string): Promise<void> => {
-  if ((page.viewportSize()?.width ?? 1280) < SMALL_SCREEN_WIDTH) {
+  if (viewportWidth(page) < NAVBAR_TABS_IN_MENU_BELOW) {
     await page.locator('button#button-frame-menu').click();
     await page.locator('#dropdown-frame-menu li.d-md-none a.dropdown-item').filter({hasText: tab}).click();
     return;

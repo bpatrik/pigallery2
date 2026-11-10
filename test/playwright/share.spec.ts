@@ -9,6 +9,7 @@ import {
   expectNoHorizontalScroll,
   expectVisiblePhotosLoaded,
   logoutWithUi,
+  NAVBAR_SHARE_IN_MENU_BELOW,
   notLoggedIn,
   scrollUntilAttached
 } from './helpers';
@@ -54,9 +55,9 @@ const openDirectory = async (page: Page, dir: string): Promise<void> => {
  * Creates a sharing from the share dialog of the current view and returns its link.
  */
 const createSharing = async (page: Page, options: { password?: string, recursive?: boolean } = {}): Promise<string> => {
-  const fromMenu = (page.viewportSize()?.width ?? 1280) < 1200;
+  const fromMenu = (page.viewportSize()?.width ?? 1280) < NAVBAR_SHARE_IN_MENU_BELOW;
   if (fromMenu) {
-    // below the bootstrap xl breakpoint (e.g.: on a phone), Share is in the menu of the navbar
+    // e.g.: on a phone, Share is in the menu of the navbar
     await page.locator('button#button-frame-menu').click();
     await page.locator('#dropdown-frame-menu app-gallery-share button.dropdown-item').click();
   } else {
