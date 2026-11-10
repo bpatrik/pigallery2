@@ -96,17 +96,23 @@ test.describe('Login', () => {
 
   // The session lives in the cookie, and every authenticated response sends it again (with the extended expiry).
   // So a request that was sent before the logout and answered after it brings the logged-out session back.
-  test('Logout should not be undone by a request that was sent before it', async ({page}) => {
+  test('Logout should not be undone by a request that was sent before it', async ({page, playwright, baseURL}) => {
     test.fail(true, 'Not implemented yet #1306');
+    const pendingApiRequests = trackPendingApiRequests(page);
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await loginWithUi(page, NORMAL_USER.name, NORMAL_USER.password);
     await content;
+    // only the request below may answer after the logout: the thumbnails of the gallery would undo it too
+    await expect.poll(pendingApiRequests, {message: 'pending API requests', timeout: 15000}).toBe(0);
 
-    // e.g.: a thumbnail that the server is still generating: the server answers at once, the browser gets it after the logout
+    // e.g.: a thumbnail that the server is still generating: the browser sends the request (with the session cookie) before the logout,
+    // and gets the answer after the logout. The request goes out with the cookie of before the logout (from a request context of its own:
+    // route.fetch() would store the cookie of the answer in the browser at once), and its answer reaches the browser after the logout.
+    const beforeLogout = await playwright.request.newContext({baseURL, storageState: await page.context().storageState()});
     let release!: () => void;
     const released = new Promise<void>(resolve => release = resolve);
     await page.route(url => url.searchParams.has('in-flight'), async route => {
-      const response = await route.fetch();
+      const response = await beforeLogout.get(route.request().url());
       await released;
       await route.fulfill({response});
     });
@@ -115,6 +121,7 @@ test.describe('Login', () => {
     await expect(page).toHaveURL(/\/login/);
     release();
     expect(await inFlight).toBe(200);
+    await beforeLogout.dispose();
 
     await page.goto('/gallery/');
     await expect(page).toHaveURL(/\/login/);
@@ -188,8 +195,10 @@ test.describe('Login', () => {
       await admin.dispose();
     });
 
-    test('Deleted user should get to the login page with a message', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1306');
+    /**
+     * Logs in as the user, then the admin deletes the user while the gallery is open, and the user opens a folder.
+     */
+    const deleteUserWhileOpen = async (page: Page): Promise<void> => {
       const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
       await loginWithUi(page, user.name, user.password);
       await content;
@@ -200,9 +209,18 @@ test.describe('Login', () => {
       expect((await admin.delete('/pgapi/user/' + id)).ok(), 'deleting the user').toBe(true);
 
       await page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'}).click();
+    };
+
+    test('Deleted user should get to the login page', async ({page}) => {
+      await deleteUserWhileOpen(page);
       await expect(page).toHaveURL(/\/login/);
       await expect(page.locator('#username')).toBeVisible();
-      // the redirect works already, the message is missing
+    });
+
+    test('Deleted user should be told that the session has ended', async ({page}) => {
+      test.fail(true, 'Not implemented yet #1306');
+      await deleteUserWhileOpen(page);
+      await expect(page).toHaveURL(/\/login/);
       await expect(page.locator('app-toast-card').filter({hasText: 'Your session has ended. Please log in again.'})).toBeVisible();
     });
   });
