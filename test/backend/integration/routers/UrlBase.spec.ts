@@ -25,7 +25,7 @@ describe('Server.urlBase', () => {
 
   const sqlHelper = new DBTestHelper(DatabaseType.sqlite);
   const URL_BASE = '/myGallery';
-  const ALBUM = 'Árvíztűrő mappa';
+  const ALBUM = 'Árvíztűrő tükörfúrógép'; // accents must survive the urlBase links
   let server: Server;
   let frontendFolder: string;
 
@@ -33,7 +33,7 @@ describe('Server.urlBase', () => {
     await sqlHelper.initDB();
     const mediaDir = path.join(TestHelper.TMP_DIR, 'urlbase-media');
     fs.mkdirSync(path.join(mediaDir, ALBUM), {recursive: true});
-    fs.copyFileSync(path.join(__dirname, '../../assets/wild-1-small.jpg'), path.join(mediaDir, ALBUM, 'kép.jpg'));
+    fs.copyFileSync(path.join(__dirname, '../../assets/wild-1-small.jpg'), path.join(mediaDir, ALBUM, 'photo.jpg'));
     Config.Users.authenticationRequired = false;
     Config.Server.urlBase = URL_BASE;
     Config.Media.folder = mediaDir;

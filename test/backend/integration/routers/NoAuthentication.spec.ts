@@ -37,8 +37,8 @@ describe('Gallery without authentication', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
   const assets = path.join(__dirname, '../../assets');
-  const DIR = 'Nyílt galéria';
-  const FILE = 'árvíztűrő tükör.jpg';
+  const DIR = 'Open gallery';
+  const FILE = 'árvíztűrő tükörfúrógép.jpg'; // accents in the path and in the search
   const SOURCE = path.join(assets, 'exiftool.jpg');
 
   let server: Server;
@@ -49,7 +49,7 @@ describe('Gallery without authentication', (sqlHelper: DBTestHelper) => {
     const folder = path.join(TestHelper.TMP_DIR, 'noauth-gallery');
     fs.mkdirSync(path.join(folder, DIR), {recursive: true});
     fs.copyFileSync(SOURCE, path.join(folder, DIR, FILE));
-    fs.copyFileSync(path.join(assets, 'wild-1-small.jpg'), path.join(folder, 'gyökér.jpg'));
+    fs.copyFileSync(path.join(assets, 'wild-1-small.jpg'), path.join(folder, 'root.jpg'));
     Config.Users.authenticationRequired = false;
     Config.Media.folder = folder;
     Config.Media.tempFolder = path.join(TestHelper.TMP_DIR, 'noauth-temp');
@@ -153,7 +153,7 @@ describe('Gallery without authentication', (sqlHelper: DBTestHelper) => {
     it('should not allow user management, not even for an admin visitor', async () => {
       for (const [method, url, data] of [
         ['get', '/user/list', undefined],
-        ['put', '/user', {newUser: {name: 'új', password: 'új', role: UserRoles.Admin}}],
+        ['put', '/user', {newUser: {name: 'new user', password: 'new user', role: UserRoles.Admin}}],
         ['delete', '/user/1', undefined],
         ['post', '/user/1/role', {newRole: UserRoles.Admin}],
       ] as ['get' | 'put' | 'delete' | 'post', string, unknown][]) {
@@ -165,7 +165,7 @@ describe('Gallery without authentication', (sqlHelper: DBTestHelper) => {
           expect(code, method + ' ' + url).to.equal(ErrorCodes.USER_MANAGEMENT_DISABLED);
         }
       }
-      expect(await ObjectManagers.getInstance().UserManager.find({name: 'új'})).to.deep.equal([]);
+      expect(await ObjectManagers.getInstance().UserManager.find({name: 'new user'})).to.deep.equal([]);
     });
   };
 
@@ -185,11 +185,11 @@ describe('Gallery without authentication', (sqlHelper: DBTestHelper) => {
 
     it('should refuse the admin API (settings, jobs, statistics)', async () => {
       shouldBeRefused(await get('/settings'), 'GET settings');
-      shouldBeRefused(await send('put', '/settings', {settingsPath: 'Server.applicationTitle', settings: 'feltört'}), 'PUT settings');
+      shouldBeRefused(await send('put', '/settings', {settingsPath: 'Server.applicationTitle', settings: 'hacked'}), 'PUT settings');
       shouldBeRefused(await get('/admin/jobs/available'), 'jobs');
       shouldBeRefused(await send('post', '/admin/jobs/scheduled/' + DefaultsJobs[DefaultsJobs.Indexing] + '/start', {}), 'start job');
       shouldBeRefused(await get('/admin/statistic'), 'statistic');
-      expect(Config.Server.applicationTitle).to.not.equal('feltört');
+      expect(Config.Server.applicationTitle).to.not.equal('hacked');
     });
 
     it('should refuse the admin API to a User role too', async () => {
