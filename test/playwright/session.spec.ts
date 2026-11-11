@@ -6,6 +6,7 @@ import {
   ACCENTED_DIR,
   createUserWithApi,
   deleteUserWithApi,
+  expectApiOk,
   expectLightboxPhoto,
   isGalleryContent,
   loginWithUi,
@@ -26,7 +27,7 @@ const loginOnCurrentLoginPage = async (page: Page, user: TestUser): Promise<void
   await page.locator('#password').fill(user.password);
   const login = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/user/login');
   await page.locator('.col-sm-12 > .btn').click();
-  expect((await login).ok()).toBe(true);
+  await expectApiOk(await login, 'login');
 };
 
 test.use(notLoggedIn);
@@ -55,7 +56,7 @@ test.describe('Session ends on a deep link', () => {
     await expect(page).toHaveURL(/\/gallery/);
     const content = page.waitForResponse(res => isContent(new URL(res.url())));
     await page.goto(url);
-    expect((await content).ok()).toBe(true);
+    await expectApiOk(await content, 'loading ' + url);
   };
 
   const endSession = async (): Promise<void> => {
@@ -86,7 +87,7 @@ test.describe('Session ends on a deep link', () => {
     await expect(page).toHaveURL(/\/login/);
 
     // the admin recreates the user, the user logs in again
-    expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'recreating the user').toBe(true);
+    await expectApiOk(await admin.put('/pgapi/user', {data: {newUser: user}}), 'recreating the user');
     await loginOnCurrentLoginPage(page, user);
 
     await expect(page).toHaveURL(url => url.pathname === '/gallery/' && url.searchParams.get('p') === 'IMG_5910.jpg');
@@ -104,7 +105,7 @@ test.describe('Session ends on a deep link', () => {
     await subdirectory.click();
     await expect(page).toHaveURL(/\/login/);
 
-    expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'recreating the user').toBe(true);
+    await expectApiOk(await admin.put('/pgapi/user', {data: {newUser: user}}), 'recreating the user');
     await loginOnCurrentLoginPage(page, user);
 
     // the folder the user was opening when the session ended

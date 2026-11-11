@@ -1,7 +1,17 @@
-import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION, NORMAL_USER} from './global-setup';
-import {ACCENTED_DIR, expectLightboxPhoto, expectNoHorizontalScroll, isGalleryContent, loginWithUi, logoutWithUi, notLoggedIn} from './helpers';
+import {
+  ACCENTED_DIR,
+  createUserWithApi,
+  deleteUserWithApi,
+  expectLightboxPhoto,
+  expectNoHorizontalScroll,
+  isGalleryContent,
+  loginWithUi,
+  logoutWithUi,
+  notLoggedIn,
+  TestUser
+} from './helpers';
 
 const isApi = (url: string): boolean => new URL(url).pathname.startsWith('/pgapi/');
 
@@ -179,20 +189,16 @@ test.describe('Login', () => {
   test.describe('Session ends while the app is open', () => {
     let admin: APIRequestContext;
     // a user of its own, so deleting it does not affect the other tests
-    const user = {name: 'e2e-session-end-' + randomUUID(), password: 'pass', role: 3};
+    let user: TestUser;
 
     test.beforeEach(async ({playwright, baseURL}) => {
       admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
-      expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'creating the user').toBe(true);
+      user = await createUserWithApi(admin, 'e2e-session-end');
     });
 
     test.afterEach(async () => {
       // the test deletes the user, unless it failed before
-      const users: { id: number, name: string }[] = (await (await admin.get('/pgapi/user/list')).json()).result;
-      const left = users.find(u => u.name === user.name);
-      if (left) {
-        await admin.delete('/pgapi/user/' + left.id);
-      }
+      await deleteUserWithApi(admin, user.name);
       await admin.dispose();
     });
 
@@ -205,9 +211,7 @@ test.describe('Login', () => {
       await content;
       await expect(page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'})).toBeVisible();
 
-      const users: { id: number, name: string }[] = (await (await admin.get('/pgapi/user/list')).json()).result;
-      const id = users.find(u => u.name === user.name)?.id;
-      expect((await admin.delete('/pgapi/user/' + id)).ok(), 'deleting the user').toBe(true);
+      expect(await deleteUserWithApi(admin, user.name), 'the user existed').toBe(true);
 
       await page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'}).click();
     };
