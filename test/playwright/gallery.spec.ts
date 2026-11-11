@@ -37,6 +37,8 @@ const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): P
     await expectCardCover(folder);
   }
   await expectVisiblePhotosLoaded(page);
+  // the blog of the folder (index.md) shows its first lines
+  await expect.soft(page.locator('app-gallery-blog .blog .text-preview').first(), 'blog preview').toContainText('You can use this feature');
   await expectNoHorizontalScroll(page, 'gallery');
 
   // the lightbox shows the photo with its title and faces
@@ -144,6 +146,26 @@ test.describe('Gallery', () => {
     await expect(firstPhoto).toHaveAttribute('alt', 'wild-3.jpg');
     await expect(sortingButton).toHaveClass(/\bbtn-secondary\b/);
     await expect(gridSizeButton).toHaveClass(/\bbtn-secondary\b/);
+  });
+
+  // CUJ 11: the index.md of a folder is its blog, collapsed to a preview until opened
+  test('Gallery should open and close the blog of the folder', async ({page}) => {
+    const blog = page.locator('app-gallery-blog .blog').first();
+    const toggle = blog.locator('button.btn-blog-details');
+    await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+
+    // opened: the whole markdown, rendered
+    await toggle.click();
+    await expect(blog.locator('.text-preview')).toHaveCount(0);
+    await expect(blog.getByRole('heading', {name: 'Blog', level: 1})).toBeVisible();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading', level: 2})).toBeVisible();
+    await expect(blog.locator('markdown strong').filter({hasText: 'This is bold text'}).first()).toBeVisible();
+    await expect(blog.locator('markdown blockquote').first()).toBeAttached();
+
+    await toggle.click();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+    await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
   });
 
   test('Gallery should show infobar over photo', async ({page}) => {
