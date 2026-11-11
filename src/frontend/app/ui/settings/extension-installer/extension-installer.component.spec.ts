@@ -23,13 +23,13 @@ describe('ExtensionInstallerComponent', () => {
     const component = TestBed.createComponent(ExtensionInstallerComponent).componentInstance;
     return {component, notification, settings};
   };
-  const extension = (): ExtensionListItem => ({id: 'broken-ext', name: 'Törött', installed: false} as ExtensionListItem);
+  const extension = (): ExtensionListItem => ({id: 'broken-ext', name: 'Broken extension', installed: false} as ExtensionListItem);
 
   it('should show an error and not mark the extension installed when the install fails', async () => {
     const {component, notification, settings} = setUp({installExtension: vi.fn().mockRejectedValue(new Error('npm install failed'))});
     const ext = extension();
     await component.installExtension(ext);
-    expect(notification.error).toHaveBeenCalledWith('Failed to install extension "Törött"', 'npm install failed');
+    expect(notification.error).toHaveBeenCalledWith('Failed to install extension "Broken extension"', 'npm install failed');
     expect(notification.success).not.toHaveBeenCalled();
     expect(ext.installed).toBe(false);
     expect(settings.getSettings).not.toHaveBeenCalled();

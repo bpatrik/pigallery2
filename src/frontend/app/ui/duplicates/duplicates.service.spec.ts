@@ -18,7 +18,7 @@ describe('DuplicateService', () => {
   });
 
   it('should load the duplicates', async () => {
-    const duplicates = [{media: [{name: 'Hévíz.jpg'}, {name: 'Hévíz.jpg'}]}] as unknown as DuplicatesDTO[];
+    const duplicates = [{media: [{name: 'lake.jpg'}, {name: 'lake.jpg'}]}] as unknown as DuplicatesDTO[];
     getJson.mockResolvedValue(duplicates);
     await service.getDuplicates();
     expect(getJson).toHaveBeenCalledWith('/admin/duplicates');

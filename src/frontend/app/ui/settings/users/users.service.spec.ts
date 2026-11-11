@@ -6,7 +6,7 @@ import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 describe('UsersSettingsService', () => {
   let service: UsersSettingsService;
   let network: { getJson: ReturnType<typeof vi.fn>, putJson: ReturnType<typeof vi.fn>, postJson: ReturnType<typeof vi.fn>, deleteJson: ReturnType<typeof vi.fn> };
-  const user = {id: 7, name: 'Árvíztűrő', password: 'pass', role: UserRoles.User} as UserDTO;
+  const user = {id: 7, name: 'alice', password: 'pass', role: UserRoles.User} as UserDTO;
 
   beforeEach(() => {
     network = {

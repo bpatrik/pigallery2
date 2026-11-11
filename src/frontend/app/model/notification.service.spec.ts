@@ -48,7 +48,7 @@ describe('NotificationService', () => {
     const {getJson} = setUp(null, [defaultAdminWarning]);
     TestBed.tick();
     TestBed.resetTestingModule();
-    const guest = setUp({id: 2, name: 'Éva', role: UserRoles.Guest} as UserDTO, [defaultAdminWarning]);
+    const guest = setUp({id: 2, name: 'visitor', role: UserRoles.Guest} as UserDTO, [defaultAdminWarning]);
     TestBed.tick();
     await Promise.resolve();
     expect(getJson).not.toHaveBeenCalled();

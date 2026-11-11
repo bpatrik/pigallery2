@@ -47,10 +47,10 @@ describe('DuplicateComponent', () => {
   };
 
   it('should list the duplicates with a summary', async () => {
-    const el = await render([{media: [media('Balaton', 'Tihany.jpg'), media('Nyár', 'Tihany.jpg')]}]);
+    const el = await render([{media: [media('Lake', 'beach.jpg'), media('Summer', 'beach.jpg')]}]);
     expect(el.querySelector('.alert')!.textContent!.replace(/\s+/g, ' ')).toContain('Listing 1 duplicates (2 photos).');
     expect(el.querySelectorAll('.card').length).toBe(1);
-    expect(el.querySelector('.card')!.textContent).toContain('/Nyár/');
+    expect(el.querySelector('.card')!.textContent).toContain('/Summer/');
     expect(el.textContent).not.toContain('No duplicates found');
   });
 
