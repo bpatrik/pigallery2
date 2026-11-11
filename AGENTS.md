@@ -83,7 +83,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. `E2E_PORT=8091 npm run test-e2e` runs it on another port (e.g. in parallel git worktrees). Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login (wrong password, deep links, logout, a session that ends while the app is open), gallery (filters, blog, map, lightbox, URL deep links),
-  folder navigation, search, faces, albums, sharing and error paths.
+  folder navigation, search, faces, albums, sharing, zip downloads, the photo frame, the random link and error paths.
   The `mobile` project (Pixel 7, real touch events; `swipe()`, `pinch()`, `doubleTap()` of `helpers.ts`) runs `lightbox.spec.ts` and `navigation.spec.ts`;
   `mobile-sanity` runs the sanity tests tagged `@sanity` on the same phone. Set a desktop viewport with `test.use(desktopViewport(...))`
   (a phone keeps its own), and use helpers that handle the phone navbar (tabs and Share are in the menu: `expectNavbar`, `clickNavbarTab`).
@@ -166,6 +166,8 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Sessions**: the session lives in the signed `cookie-session` cookie. `req.session.stamp` (see `SessionManager.getSessionStamp`)
   ties it to its user or sharing DB row, and `AuthenticationMWs` ends the session once that row changes. Only `AuthenticationMWs`
   starts, restores or ends sessions. Call `SessionManager.invalidateSessionCache()` after every write to users or sharings.
+- **Albums** are saved searches: an album links to its search (`/search/<query>`), not to an album URL.
+  The link of a deleted album keeps working as a plain search; that's intended.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
