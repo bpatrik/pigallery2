@@ -69,7 +69,7 @@ const createSharing = async (page: Page, options: { password?: string, recursive
   // the dialog keeps its settings while the page is open
   const recursive = page.locator('input#share-recursive');
   if (await recursive.count() > 0) {
-    await recursive.setChecked(!!options.recursive, {force: true});
+    await recursive.setChecked(!!options.recursive);
   }
   if (options.password) {
     await page.locator('input#share-password').fill(options.password);
@@ -270,7 +270,7 @@ test.describe('Share', () => {
       await expect(rows.first().locator('ng-icon[name="ionCopyOutline"]')).toBeVisible();
 
       // the list does not depend on the subfolder switch
-      await page.locator('input#share-recursive').uncheck({force: true});
+      await page.locator('input#share-recursive').uncheck();
       await expect(rows).toHaveCount(before + 2);
     });
   });
