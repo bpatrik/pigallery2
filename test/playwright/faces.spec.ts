@@ -47,7 +47,7 @@ test.describe('Faces', () => {
     await page.goto('/faces');
     await page.locator('app-face').filter({hasText: 'Alvin the Squirrel'}).click();
     await expect(page).toHaveURL(/\/search\//);
-    const missing = 'Nem Létező Személy';
+    const missing = 'Not Existing Person';
     const url = new URL(page.url());
     expect(decodeURIComponent(url.pathname)).toContain('Alvin the Squirrel');
     url.pathname = '/search/' + encodeURIComponent(decodeURIComponent(url.pathname.substring('/search/'.length))

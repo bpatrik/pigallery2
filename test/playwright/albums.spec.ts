@@ -74,8 +74,8 @@ test.describe('Album journey', () => {
   let albumName: string;
 
   test.beforeEach(() => {
-    // accents: the album name is shown as typed
-    albumName = 'Óbuda ' + uniqueAlbumName();
+    // accents on purpose: the album name with non-ASCII characters is shown as typed
+    albumName = 'Árvíztűrő tükörfúrógép ' + uniqueAlbumName();
   });
 
   test.afterEach(async ({page}) => {
@@ -168,9 +168,9 @@ test.describe('Album edge cases', () => {
     let albumName: string;
 
     test.beforeEach(async ({page}) => {
-      albumName = 'Ürés ' + uniqueAlbumName();
+      albumName = 'Empty ' + uniqueAlbumName();
       const res = await page.request.put('/pgapi/albums/saved-searches', {
-        data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Nem Létező Személy', matchType: EXACT_MATCH}},
+        data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Not Existing Person', matchType: EXACT_MATCH}},
       });
       expect(res.ok(), 'adding the album').toBe(true);
     });
