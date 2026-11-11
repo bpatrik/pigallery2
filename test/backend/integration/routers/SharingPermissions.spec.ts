@@ -40,15 +40,16 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
-  const SHARED = 'Megosztott mappa ő';
-  const OTHER = 'Másik mappa';
-  const PHOTO = 'kép ű.jpg';
+  // accented on purpose: sharing a folder with a non-ASCII name
+  const SHARED = 'Shared Árvíztűrő tükörfúrógép';
+  const OTHER = 'Other folder';
+  const PHOTO = 'photo.jpg';
 
   type TestUser = Omit<UserDTO, 'id'>;
-  const owner: TestUser = {name: 'Tulajdonos Ádám', password: 'owner', role: UserRoles.User};
-  const other: TestUser = {name: 'Másik Éva', password: 'other', role: UserRoles.User};
+  const owner: TestUser = {name: 'Owner', password: 'owner', role: UserRoles.User};
+  const other: TestUser = {name: 'Other user', password: 'other', role: UserRoles.User};
   const admin: TestUser = {name: 'admin-test', password: 'admin-test', role: UserRoles.Admin};
-  const guest: TestUser = {name: 'Vendég', password: 'guest', role: UserRoles.Guest};
+  const guest: TestUser = {name: 'Guest', password: 'guest', role: UserRoles.Guest};
 
   let galleryFolder: string;
   let server: Server;
@@ -165,7 +166,7 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
       const res = await create(owner, SHARED);
       expect(res.body.error.code).to.equal(ErrorCodes.INPUT_ERROR);
       expect(await sharingKeys()).to.deep.equal([]);
-      const s = await createOk(owner, SHARED, 'titkos jelszó');
+      const s = await createOk(owner, SHARED, 'secret password');
       expect(s.passwordProtected).to.be.true;
     });
   });
@@ -177,7 +178,7 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
 
     beforeEach(async () => {
       await setUp();
-      mine = await createOk(owner, SHARED, 'régi jelszó');
+      mine = await createOk(owner, SHARED, 'old password');
       others = await createOk(other, SHARED);
       admins = await createOk(admin, SHARED);
     });
@@ -220,33 +221,33 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
       const res = await update(other, SHARED, mine.id, null, -1);
       expect(res.body.error, 'error').to.not.equal(null);
       // the old password still works, nothing changed
-      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'régi jelszó')).should.have.status(200);
+      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'old password')).should.have.status(200);
       (await shareLogin(request.agent(server.Server), mine.sharingKey, null)).should.have.status(401);
     });
 
     it('should update the password and the expiry; the old password stops working', async () => {
       const valid = 2 * 24 * 60 * 60 * 1000;
       const before = Date.now();
-      const res = await update(owner, SHARED, mine.id, 'új jelszó', valid);
+      const res = await update(owner, SHARED, mine.id, 'new password', valid);
       res.should.have.status(200);
       expect(res.body.error).to.equal(null);
       expect(res.body.result.sharingKey, 'the link stays the same').to.equal(mine.sharingKey);
       expect(res.body.result.passwordProtected).to.be.true;
       expect(res.body.result.expires).to.be.within(before + valid, Date.now() + valid);
 
-      const oldPassword = await shareLogin(request.agent(server.Server), mine.sharingKey, 'régi jelszó');
+      const oldPassword = await shareLogin(request.agent(server.Server), mine.sharingKey, 'old password');
       oldPassword.should.have.status(401);
       expect(oldPassword.body.error.code).to.equal(ErrorCodes.CREDENTIAL_NOT_FOUND);
-      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'új jelszó')).should.have.status(200);
+      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'new password')).should.have.status(200);
     });
 
     it('should end the session of a guest that logged in with the old password', async () => {
       const guestAgent = request.agent(server.Server);
       try {
-        (await shareLogin(guestAgent, mine.sharingKey, 'régi jelszó')).should.have.status(200);
+        (await shareLogin(guestAgent, mine.sharingKey, 'old password')).should.have.status(200);
         (await guestAgent.get(api('/user/me'))).should.have.status(200);
 
-        (await update(owner, SHARED, mine.id, 'új jelszó', -1)).should.have.status(200);
+        (await update(owner, SHARED, mine.id, 'new password', -1)).should.have.status(200);
         (await guestAgent.get(api('/user/me'))).should.have.status(401);
       } finally {
         guestAgent.close();
@@ -263,18 +264,18 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
     it('should lock a sharing for its User after Sharing.updateTimeout, not for an Admin', async () => {
       Config.Sharing.updateTimeout = 0;
       await new Promise(resolve => setTimeout(resolve, 5));
-      const locked = await update(owner, SHARED, mine.id, 'új jelszó', -1);
+      const locked = await update(owner, SHARED, mine.id, 'new password', -1);
       expect(locked.body.error, 'locked').to.not.equal(null);
-      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'régi jelszó')).should.have.status(200);
+      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'old password')).should.have.status(200);
 
-      const byAdmin = await update(admin, SHARED, admins.id, 'új jelszó', -1);
+      const byAdmin = await update(admin, SHARED, admins.id, 'new password', -1);
       expect(byAdmin.body.error, 'admin').to.equal(null);
     });
 
     // updateSharing passes forceUpdate for admins, but SharingManager.updateSharing looks the sharing up by its id
     // and the requesting user as creator, so an admin only finds the own sharings ('Sharing not found').
     it('should let an Admin update the sharing of another user', async () => {
-      const res = await update(admin, SHARED, mine.id, 'admin jelszó', -1);
+      const res = await update(admin, SHARED, mine.id, 'admin password', -1);
       await expectToFail('#1307', () => expect(res.body.error?.message ?? null, 'admin update').to.equal(null),
         /^admin update: expected 'Error during updating sharing link/);
     });
@@ -286,9 +287,9 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
 
     beforeEach(async () => {
       await setUp();
-      sharing = await createOk(owner, SHARED, 'jelszó');
+      sharing = await createOk(owner, SHARED, 'password');
       guestAgent = request.agent(server.Server);
-      (await shareLogin(guestAgent, sharing.sharingKey, 'jelszó')).should.have.status(200);
+      (await shareLogin(guestAgent, sharing.sharingKey, 'password')).should.have.status(200);
       const res = await guestAgent.get(api('/gallery/content/' + encodeURIComponent(SHARED)));
       res.should.have.status(200);
       const cw = ContentWrapperUtils.unpack(res.body.result as PackedContentWrapper);
@@ -307,7 +308,7 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
       // the open session and a new login keep working
       for (const agent of [guestAgent, request.agent(server.Server)]) {
         if (agent !== guestAgent) {
-          (await shareLogin(agent, sharing.sharingKey, 'jelszó')).should.have.status(200);
+          (await shareLogin(agent, sharing.sharingKey, 'password')).should.have.status(200);
         }
         (await agent.get(api('/user/me'))).should.have.status(200);
         const res = await agent.get(api('/gallery/content/' + encodeURIComponent(SHARED)));
@@ -317,7 +318,7 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
     };
 
     it('should keep the sharing valid and answer "directory not found" for a renamed folder', async () => {
-      fs.renameSync(path.join(galleryFolder, SHARED), path.join(galleryFolder, SHARED + ' (átnevezve)'));
+      fs.renameSync(path.join(galleryFolder, SHARED), path.join(galleryFolder, SHARED + ' (renamed)'));
       await shouldStayValidWithDirectoryNotFound();
     });
 
@@ -327,7 +328,7 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
     });
 
     it('should not show the renamed folder under its new name to the guest', async () => {
-      const renamed = SHARED + ' (átnevezve)';
+      const renamed = SHARED + ' (renamed)';
       fs.renameSync(path.join(galleryFolder, SHARED), path.join(galleryFolder, renamed));
       const res = await guestAgent.get(api('/gallery/content/' + encodeURIComponent(renamed)));
       res.should.have.status(404);
