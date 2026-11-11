@@ -49,7 +49,7 @@ test.describe('Errors', () => {
 
     test('should fall back to the root folder with a warning toast', async ({page}) => {
       test.fail(true, 'Not implemented yet #1254');
-      const missingDir = 'nem_létező_mappa';
+      const missingDir = 'not_existing_folder';
       await page.goto('/gallery/' + encodeURIComponent(missingDir));
 
       // falling back to the root is intended
