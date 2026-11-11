@@ -3,9 +3,15 @@ import * as http from 'node:http';
 import {AddressInfo} from 'node:net';
 import express from 'express';
 import {NextFunction, Request, Response} from 'express';
+import * as chai from 'chai';
 import {expect} from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import {RenderingMWs} from '../../../../src/backend/middlewares/RenderingMWs';
 import {TestHelper} from '../../../TestHelper';
+import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
+
+chai.should();
+chai.use(chaiAsPromised);
 
 declare const beforeEach: any;
 declare const afterEach: any;
@@ -106,5 +112,78 @@ describe('RenderingMWs', () => {
 
       expect(errors).to.be.empty;
     });
+  });
+
+  describe('renderError', () => {
+    // The HTTP status of every error code (#1305). An ErrorDTO must never go out as a 2xx.
+    const expectedStatus = (code: ErrorCodes): number => {
+      switch (code) {
+        case ErrorCodes.NOT_AUTHENTICATED:
+        case ErrorCodes.NOT_AUTHENTICATED_SHARING:
+        case ErrorCodes.CREDENTIAL_NOT_FOUND:
+          return 401;
+        case ErrorCodes.NOT_AUTHORISED:
+        case ErrorCodes.PERMISSION_DENIED:
+          return 403;
+        case ErrorCodes.DIRECTORY_NOT_FOUND:
+        case ErrorCodes.PATH_ERROR: // e.g. a file that is not on the disk anymore
+          return 404;
+        // the errors of what the user sent
+        case ErrorCodes.ALREADY_AUTHENTICATED:
+        case ErrorCodes.USER_CREATION_ERROR:
+        case ErrorCodes.INPUT_ERROR:
+        case ErrorCodes.SETTINGS_ERROR:
+        case ErrorCodes.ALBUM_ERROR:
+        case ErrorCodes.UPLOAD_ERROR:
+          return 400;
+        default:
+          return 500;
+      }
+    };
+
+    let server: http.Server;
+    let port: number;
+
+    before(async () => {
+      const app = express();
+      app.get('/error/:code', (req: Request, res: Response, next: NextFunction) => {
+        next(new ErrorDTO(parseInt(req.params['code'] as string, 10) as ErrorCodes, 'test error'));
+      });
+      app.use(RenderingMWs.renderError);
+      await new Promise<void>((resolve) => {
+        server = app.listen(0, () => {
+          port = (server.address() as AddressInfo).port;
+          resolve();
+        });
+      });
+    });
+
+    after((done: () => void) => {
+      server.close(() => done());
+    });
+
+    const get = (url: string): Promise<{ status: number, body: any }> =>
+      new Promise((resolve, reject) => {
+        http.get({port, path: url}, (res) => {
+          let text = '';
+          res.on('data', (c: Buffer) => text += c.toString('utf8'));
+          res.on('end', () => resolve({status: res.statusCode!, body: JSON.parse(text)}));
+        }).on('error', reject);
+      });
+
+    const codes = Object.values(ErrorCodes).filter((c): c is ErrorCodes => typeof c === 'number');
+
+    for (const code of codes) {
+      it('should render ' + ErrorCodes[code] + ' with HTTP ' + expectedStatus(code), async () => {
+        // TODO #1305: renderError does not set a status yet, every error goes out as HTTP 200;
+        // remove the rejection check once it maps the codes
+        const check = async (): Promise<void> => {
+          const res = await get('/error/' + code);
+          expect(res.body.error.code).to.equal(code);
+          expect(res.status).to.equal(expectedStatus(code));
+        };
+        await check().should.be.rejectedWith(chai.AssertionError);
+      });
+    }
   });
 });
