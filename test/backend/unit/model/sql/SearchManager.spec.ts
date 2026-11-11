@@ -30,7 +30,6 @@ import {VideoDTO} from '../../../../../src/common/entities/VideoDTO';
 import {AutoCompleteItem} from '../../../../../src/common/entities/AutoCompleteItem';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
-import chaiAsPromised from 'chai-as-promised';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
@@ -38,12 +37,12 @@ import {SessionUser, SessionContext} from '../../../../../src/backend/model/Sess
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
+import {expectToFail} from '../../../KnownFailures';
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const chai = require('chai');
 
 chai.use(deepEqualInAnyOrder);
-chai.use(chaiAsPromised);
 const {expect} = chai;
 
 // to help WebStorm to handle the test cases
@@ -1668,18 +1667,19 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         });
 
         it('should find accented text typed without the accents', async () => {
-          const check = async (): Promise<void> => {
-            expect(await names({value: 'padme', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
-            expect(await names({value: 'Padme Amidala', type: SearchQueryTypes.keyword} as TextSearch)).to.deep.equal([p2.name]);
-            expect(await names({value: 'padme', type: SearchQueryTypes.person} as TextSearch)).to.deep.equal([p2.name]);
-          };
+          const found = [
+            await names({value: 'padme', type: SearchQueryTypes.any_text} as TextSearch),
+            await names({value: 'Padme Amidala', type: SearchQueryTypes.keyword} as TextSearch),
+            await names({value: 'padme', type: SearchQueryTypes.person} as TextSearch)
+          ];
+          const check = (): void => expect(found).to.deep.equal([[p2.name], [p2.name], [p2.name]]);
           if (sqlHelper.dbType === DatabaseType.mysql) {
             // utf8mb4_general_ci ignores the accents
-            await check();
+            check();
             return;
           }
-          // TODO #1309: SQLite's LIKE compares the accented letters exactly; remove the rejection check once it ignores the accents
-          await expect(check()).to.be.rejectedWith(chai.AssertionError);
+          // SQLite's LIKE compares the accented letters exactly
+          await expectToFail('#1309', check, /expected \[ \[\], \[\], \[\] \] to deeply equal/);
         });
       });
 

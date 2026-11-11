@@ -11,11 +11,11 @@ import {SuperAgentStatic} from 'superagent';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
-import chaiAsPromised from 'chai-as-promised';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
+import {expectToFail} from '../../KnownFailures';
 
 declare const describe: any;
 declare const it: any;
@@ -27,7 +27,6 @@ declare const afterEach: any;
 process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
-chai.use(chaiAsPromised);
 
 describe('UploadRouter', () => {
   before(TestHelper.resetConfig);
@@ -194,20 +193,20 @@ describe('UploadRouter', () => {
 
       res.body.error.code.should.equal(ErrorCodes.NOT_AUTHORISED);
       fs.existsSync(path.join(testDir, 'not_allowed.jpg')).should.be.false;
-      // TODO #1315: NOT_AUTHORISED goes out as 401 (AuthenticationMWs.authorise); remove the rejection check once it is a 403 (see #1305)
-      await Promise.resolve().then(() => res.should.have.status(403)).should.be.rejectedWith(chai.AssertionError);
+      // NOT_AUTHORISED goes out as 401 (AuthenticationMWs.authorise, see #1305)
+      await expectToFail('#1315', () => res.should.have.status(403), /status code 403 but got 401/);
     });
 
     it('should have a 50 MB upload size limit by default', async () => {
-      // TODO #1314: the Upload.maxFileSizeMB setting does not exist yet; remove the rejection check once it does
-      await Promise.resolve().then(() => should.equal((Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'], 50))
-        .should.be.rejectedWith(chai.AssertionError);
+      // the Upload.maxFileSizeMB setting does not exist yet
+      await expectToFail('#1314', () => should.equal((Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'], 50),
+        /expected undefined to equal 50/);
     });
 
     it('should reject a file above the size limit with the limit in the message and save the others', async () => {
       (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'] = 1;
       const loginRes = await login(server);
-      // TODO #1314: there is no upload size limit yet; remove the rejection check once Upload.maxFileSizeMB is checked
+      // there is no upload size limit yet (Upload.maxFileSizeMB)
       const check = async (): Promise<void> => {
         const res = await request.execute(server.Server)
           .post(Config.Server.apiPath + '/upload/size_limit')
@@ -223,7 +222,7 @@ describe('UploadRouter', () => {
         fs.existsSync(path.join(testDir, 'size_limit', 'small.jpg')).should.be.true;
       };
       try {
-        await check().should.be.rejectedWith(chai.AssertionError);
+        await expectToFail('#1314', check, /expected \[\] to have a length of 1 but got \+?0/);
       } finally {
         delete (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'];
       }
