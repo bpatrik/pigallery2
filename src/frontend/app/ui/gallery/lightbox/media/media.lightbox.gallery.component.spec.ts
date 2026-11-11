@@ -180,3 +180,59 @@ describe('GalleryLightboxMediaComponent - Live Photo', () => {
     expect(component.imageTransform()).toBe('scale(2) translate(calc(-25% + 5px), calc(-25% + -10px))');
   });
 });
+
+// CUJ 15: the lightbox asks for the best fit of a video: the server sends the converted (transcoded) video if there is one,
+// the original otherwise. Formats that browsers can't play (e.g. .mov) need the conversion (Media.Video.supportedFormatsWithTranscoding).
+describe('GalleryLightboxMediaComponent - video source', () => {
+  let fixture: ComponentFixture<GalleryLightboxMediaComponent>;
+
+  // accented and Japanese names: the path of the video must be URL-encoded
+  const video = (name: string): GridMedia => {
+    const gridMedia = new GridMedia({
+      name,
+      directory: {name: 'Café trip', path: 'Zürich/'},
+      metadata: {size: {width: 1920, height: 1080}, creationDate: 0, duration: 10, fileSize: 1000},
+    } as any, 100, 100, 0);
+    gridMedia.getThumbnailPath = () => 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+    return gridMedia;
+  };
+
+  const source = (gridMedia: GridMedia): string | null => {
+    fixture.componentRef.setInput('gridMedia', gridMedia);
+    fixture.componentRef.setInput('loadMedia', true);
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).querySelector('video > source')?.getAttribute('src') ?? null;
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [GalleryLightboxMediaComponent],
+      providers: [
+        provideIcons(appIcons),
+        {provide: LightboxService, useClass: MockLightboxService},
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(GalleryLightboxMediaComponent);
+  });
+
+  it('should play the best fit of a video that browsers can play', () => {
+    const mp4 = video('Árvíztűrő 東京.mp4');
+    expect(mp4.isVideoTranscodingNeeded()).toBe(false);
+    expect(source(mp4)).toBe('/pgapi/gallery/content/' + encodeURI('Zürich/Café trip/Árvíztűrő 東京.mp4') + '/bestFit');
+  });
+
+  it('should play the best fit (the converted video) of a format that needs conversion', () => {
+    const mov = video('Árvíztűrő.MOV');
+    expect(mov.isVideo()).toBe(true);
+    expect(mov.isVideoTranscodingNeeded()).toBe(true);
+    expect(source(mov)).toBe('/pgapi/gallery/content/' + encodeURI('Zürich/Café trip/Árvíztűrő.MOV') + '/bestFit');
+  });
+
+  it('should escape the characters of the name that would end the path', () => {
+    expect(source(video('#1 ?$.mp4'))).toBe('/pgapi/gallery/content/' + encodeURI('Zürich/Café trip/') + '%231%20%3F%24.mp4/bestFit');
+  });
+
+  it('should not render a video for a photo', () => {
+    expect(source(video('Árvíztűrő.jpg'))).toBeNull();
+  });
+});
