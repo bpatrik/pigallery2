@@ -19,9 +19,9 @@ test.describe('Users', () => {
   test.use(desktopViewport({width: 1200, height: 800}));
 
   test.describe('managed through the admin page', () => {
-    // accented, unique per run: the tests run in parallel against one server
-    const name = 'Ünnepi Ödön ' + randomUUID();
-    const password = 'jelszó-' + randomUUID();
+    // unique per run: the tests run in parallel against one server
+    const name = 'Managed user ' + randomUUID();
+    const password = 'password-' + randomUUID();
 
     test.afterEach(async ({request}) => {
       // clean up, also when the test failed halfway
