@@ -30,11 +30,13 @@ export default defineConfig({
 
   globalSetup: './test/playwright/global-setup.ts',
   projects: [
-    {name: 'chromium', use: {...devices['Desktop Chrome']}},
+    {name: 'chromium', use: {...devices['Desktop Chrome']}, testIgnore: /admin-config\.spec\.ts/},
     // the journeys that work differently on a phone (touch, small screen), with real touch events (#1316)
     {name: 'mobile', use: {...devices['Pixel 7']}, testMatch: /(lightbox|navigation)\.spec\.ts/},
     // the "... should look right" sanity test of every screen (tagged @sanity) on a phone too (#1316)
-    {name: 'mobile-sanity', use: {...devices['Pixel 7']}, grep: /@sanity/},
+    {name: 'mobile-sanity', use: {...devices['Pixel 7']}, testIgnore: /admin-config\.spec\.ts/, grep: /@sanity/},
+    // tests that change the server config or run jobs: after all the others, so they don't change the server under them (#1315)
+    {name: 'admin-config', use: {...devices['Desktop Chrome']}, testMatch: /admin-config\.spec\.ts/, dependencies: ['chromium', 'mobile', 'mobile-sanity']},
   ],
 
   // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.

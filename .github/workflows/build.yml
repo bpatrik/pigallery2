@@ -142,18 +142,19 @@ jobs:
     - name: Install Playwright browser
       run: npx playwright install --with-deps chromium
     - name: E2E test - Playwright
+      id: e2e
       run: npm run test-e2e
     - name: E2E test summary
       if: ${{ !cancelled() && hashFiles('test-results/results.json') != '' }}
-      run: |
-        jq -r '
+      run: &e2e-summary |
+        jq -r --arg title "${E2E_TITLE:-E2E tests (Playwright)}" '
           def tests: [.. | objects | select(has("expectedStatus"))];
           def count(s): map(select(.status == s)) | length;
           # test.fail(): expected to fail, and it did
           def known: map(select(.status == "expected" and .expectedStatus == "failed")) | length;
           def passed: map(select(.status == "expected" and .expectedStatus != "failed")) | length;
           def row(name): "| \(name) | \(passed) | \(known) | \(count("unexpected")) | \(count("flaky")) | \(count("skipped")) |";
-          "### E2E tests (Playwright)",
+          "### \($title)",
           "",
           "| Spec | Passed | Known failures | Failed | Flaky | Skipped |",
           "| --- | --: | --: | --: | --: | --: |",
@@ -167,6 +168,24 @@ jobs:
       with:
         name: playwright-report
         path: playwright-report/
+        retention-days: 30
+    # admin-config depends on the other projects, so Playwright skips it when one of them failed: run it on its own then, for its result
+    - name: E2E test - admin-config project on its own
+      id: e2e-admin-config
+      if: ${{ !cancelled() && steps.e2e.outcome == 'failure' }}
+      run: npx playwright test --project=admin-config --no-deps
+      env:
+        PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-admin-config
+    - name: E2E test summary - admin-config project on its own
+      if: ${{ !cancelled() && steps.e2e-admin-config.outcome != 'skipped' && hashFiles('test-results/results.json') != '' }}
+      env:
+        E2E_TITLE: E2E tests - admin-config project on its own (the other projects failed)
+      run: *e2e-summary
+    - uses: actions/upload-artifact@v7
+      if: ${{ !cancelled() && steps.e2e-admin-config.outcome != 'skipped' }}
+      with:
+        name: playwright-report-admin-config
+        path: playwright-report-admin-config/
         retention-days: 30
 
   create-release:
