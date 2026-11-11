@@ -83,7 +83,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. `E2E_PORT=8091 npm run test-e2e` runs it on another port (e.g. in parallel git worktrees). Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login (wrong password, deep links, logout, a session that ends while the app is open), gallery (filters, blog, map, lightbox, video, URL deep links),
-  folder navigation, search, faces, albums, sharing (incl. its expiry and who may share), zip downloads, the photo frame, the random link and error paths.
+  folder navigation, search, faces, albums, sharing (incl. its expiry and who may share), zip downloads, the photo frame, the random link, the admin page (settings, jobs, users) and error paths.
   The `mobile` project (Pixel 7, real touch events; `swipe()`, `pinch()`, `doubleTap()` of `helpers.ts`) runs `lightbox.spec.ts` and `navigation.spec.ts`;
   `mobile-sanity` runs the sanity tests tagged `@sanity` on the same phone. Set a desktop viewport with `test.use(desktopViewport(...))`
   (a phone keeps its own), and use helpers that handle the phone navbar (tabs and Share are in the menu: `expectNavbar`, `clickNavbarTab`).
@@ -93,7 +93,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     `test.use(asNormalUser)` / `test.use(notLoggedIn)` from `helpers.ts` start as the normal user / a guest.
   - Tests run in parallel against one server, so non-idempotent tests must be isolated: don't depend on data that other tests change
     (e.g. sharings of the same folder), give data a test adds a unique name and delete it afterwards (see `albums.spec.ts`).
-    Server-wide changes (config, jobs) belong in `global-setup.ts`, or in a separate project that runs after the others.
+    Server-wide changes (config, jobs) belong in `global-setup.ts`, or in `admin-config.spec.ts`: its `admin-config` project runs after the others.
   - Every screen has a sanity test (`... should look right`, tagged `@sanity`): one `test()` per screen and role with `expect.soft()` checks
     of what a person notices right away, incl. `expectNoHorizontalScroll()` (on the screen and with the lightbox open).
     Extend it rather than adding a new test that opens the same screen.
