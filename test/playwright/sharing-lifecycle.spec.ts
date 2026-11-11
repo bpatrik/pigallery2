@@ -2,7 +2,7 @@
 // the guest gets the "This link is invalid or has expired" page, full screen.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, expectInvalidLinkPage, expectLightboxPhoto, notLoggedIn} from './helpers';
+import {ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, deleteSharingsWithApi, expectInvalidLinkPage, expectLightboxPhoto, notLoggedIn} from './helpers';
 
 // a frame link: playing, looping, caption on, controls hidden, the next photo after 300 s, reloading the content every second
 // (the same as frameParams of frame.spec.ts)
@@ -28,10 +28,7 @@ test.describe('Sharing ends while the guest has it open', () => {
   });
 
   test.afterEach(async () => {
-    // expired sharings are removed by the server; the others are deleted here
-    for (const s of sharings.splice(0)) {
-      await admin.delete('/pgapi/share/' + s.sharingKey);
-    }
+    await deleteSharingsWithApi(admin, sharings.splice(0).map(s => s.sharingKey));
     await admin.dispose();
   });
 

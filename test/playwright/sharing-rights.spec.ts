@@ -6,6 +6,7 @@ import {ADMIN_SESSION} from './global-setup';
 import {
   createDirectorySharingWithApi,
   createUserWithApi,
+  deleteSharingsWithApi,
   deleteUserWithApi,
   loginWithApi,
   loginWithUi,
@@ -72,9 +73,7 @@ test.describe('Sharing rights', () => {
   });
 
   test.afterEach(async () => {
-    for (const key of sharingKeys.splice(0)) {
-      await admin.delete('/pgapi/share/' + key);
-    }
+    await deleteSharingsWithApi(admin, sharingKeys.splice(0));
     await admin.dispose();
   });
 
@@ -127,9 +126,7 @@ test.describe('Sharing rights', () => {
 
     test.afterEach(async () => {
       // the sharings first (the outer afterEach), the user can be deleted after them
-      for (const key of sharingKeys.splice(0)) {
-        await admin.delete('/pgapi/share/' + key);
-      }
+      await deleteSharingsWithApi(admin, sharingKeys.splice(0));
       await deleteUserWithApi(admin, user.name);
     });
 

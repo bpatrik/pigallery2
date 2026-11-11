@@ -3,6 +3,7 @@ import {ADMIN_SESSION} from './global-setup';
 import {
   ACCENTED_DIR,
   createDirectorySharingWithApi,
+  deleteSharingsWithApi,
   desktopViewport,
   expectCardCover,
   expectInvalidLinkPage,
@@ -341,10 +342,7 @@ test.describe('Share', () => {
     });
 
     test.afterEach(async () => {
-      // a test may have deleted its sharing already
-      for (const sharingKey of created) {
-        await admin.delete('/pgapi/share/' + sharingKey);
-      }
+      await deleteSharingsWithApi(admin, created);
       await admin.dispose();
     });
 
