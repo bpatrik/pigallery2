@@ -1,5 +1,6 @@
 import {expect} from 'chai';
-import {ErrorDTO} from '../../../../../src/common/entities/Error';
+import * as path from 'node:path';
+import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
 import {SettingsMWs} from '../../../../../src/backend/middlewares/admin/SettingsMWs';
 import {ServerUserConfig} from '../../../../../src/common/config/private/PrivateConfig';
 import {Config} from '../../../../../src/common/config/private/Config';
@@ -93,5 +94,53 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
 
   });
 
+
+
+  describe('invalid settings', () => {
+    // resolves with the error SettingsMWs.updateSettings passed to next (undefined on success)
+    const save = (settingsPath: string, settings: unknown): Promise<ErrorDTO | undefined> =>
+      new Promise((resolve) => {
+        const req: any = {session: {}, sessionOptions: {}, query: {}, params: {}, body: {settingsPath, settings}};
+        SettingsMWs.updateSettings(req, null!, resolve as any).catch(resolve);
+      });
+    const sharingJSON = (): Record<string, unknown> =>
+      ConfigClassBuilder.attachPrivateInterface(Config.Sharing).toJSON({skipTags: {secret: true}}) as Record<string, unknown>;
+
+    it('should reject a number above its maximum and keep the config', async () => {
+      const before = Config.Sharing.sharingKeyLength;
+      const err = await save('Sharing', {...sharingJSON(), sharingKeyLength: 200});
+      expect(err).to.be.instanceOf(ErrorDTO);
+      expect(err!.code).to.equal(ErrorCodes.SETTINGS_ERROR);
+      expect(Config.Sharing.sharingKeyLength).to.equal(before);
+      expect((await ExtensionConfigWrapper.original()).Sharing.sharingKeyLength).to.equal(before);
+    });
+
+    it('should reject a negative number and keep the config', async () => {
+      const before = Config.Sharing.sharingKeyLength;
+      const err = await save('Sharing', {...sharingJSON(), sharingKeyLength: -5});
+      expect(err).to.be.instanceOf(ErrorDTO);
+      expect(Config.Sharing.sharingKeyLength).to.equal(before);
+      expect((await ExtensionConfigWrapper.original()).Sharing.sharingKeyLength).to.equal(before);
+    });
+
+    it('should reject an images folder that does not exist and keep the config', async () => {
+      const before = Config.Media.folder;
+      const media = ConfigClassBuilder.attachPrivateInterface(Config.Media).toJSON({skipTags: {secret: true}}) as Record<string, unknown>;
+      const err = await save('Media', {...media, folder: path.join(TestHelper.TMP_DIR, 'not-existing-images-folder')});
+      expect(err).to.be.instanceOf(ErrorDTO);
+      expect(err!.code).to.equal(ErrorCodes.SETTINGS_ERROR);
+      expect(Config.Media.folder).to.equal(before);
+      expect((await ExtensionConfigWrapper.original()).Media.folder).to.not.contain('not-existing-images-folder');
+    });
+
+    // decision of #1315: the whole save is rejected, also the valid changes of it
+    it('should not keep the valid changes of a rejected save', async () => {
+      const before = Config.Sharing.passwordRequired;
+      const err = await save('Sharing', {...sharingJSON(), passwordRequired: !before, sharingKeyLength: 200});
+      expect(err).to.be.instanceOf(ErrorDTO);
+      expect(Config.Sharing.passwordRequired).to.equal(before);
+      expect((await ExtensionConfigWrapper.original()).Sharing.passwordRequired).to.equal(before);
+    });
+  });
 
 });
