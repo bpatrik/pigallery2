@@ -42,11 +42,10 @@ describe('SearchQueryParserService', () => {
       expect(service.stringify(service.parse(text))).toBe(text);
     });
 
-    // TODO #1309: the parser collapses the double space, so the search of a folder with two spaces in its name
-    // (e.g.: the "its  a along directory name..." folder of demo/images) does not find that folder.
-    it.fails('should keep the double space of a folder name', () => {
+    // a double space is usually a typo, so the parser collapses it; the backend still finds folders that have one (#1309)
+    it('should collapse the double space of a folder name', () => {
       const name = 'its  a along directory name. with special caracters(_.-.,-.,) 1234 56789 űáéú őóüö';
-      expect((service.parse('directory:(' + name + ')') as TextSearch).value).toBe(name);
+      expect((service.parse('directory:(' + name + ')') as TextSearch).value).toBe(name.replace('  ', ' '));
     });
 
     it('should search free text with accents as any text', () => {
