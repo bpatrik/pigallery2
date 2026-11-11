@@ -1,6 +1,8 @@
 import {ProjectPath} from '../../src/backend/ProjectPath';
 import {promises as fsp} from 'node:fs';
 import * as path from 'node:path';
+import {TestHelper} from '../TestHelper';
+import {expectToFail} from '../backend/KnownFailures';
 
 const chai = require('chai');
 const {expect} = chai;
@@ -38,4 +40,25 @@ describe('UI', () => {
   });
 
 
+});
+
+describe('Translations (#1344)', () => {
+  before(TestHelper.resetConfig);
+
+  // the source texts of the translation units that come from that template
+  const sourcesOf = async (template: string): Promise<string[]> => {
+    const xlf = await fsp.readFile(path.join(ProjectPath.Root, 'src', 'frontend', 'translate', 'messages.en.xlf'), 'utf8');
+    return [...xlf.matchAll(/<trans-unit[^>]*>\s*<source>([\s\S]*?)<\/source>([\s\S]*?)<\/trans-unit>/g)]
+      .filter(m => m[2].includes(template))
+      .map(m => m[1]);
+  };
+
+  // the duplicates page summary ("Listing N duplicates (M photos).") is not wrapped in i18n
+  it('should translate the duplicates summary', async () => {
+    const sources = await sourcesOf('src/frontend/app/ui/duplicates/duplicates.component.html');
+    expect(sources.join('\n')).to.contain('No duplicates found');
+    // the summary is in messages.en.xlf once it is translatable and `npm run merge-new-translation` ran
+    await expectToFail('#1344', () => expect(sources.some(s => s.includes('Listing') && s.includes('duplicates')),
+      'the summary is in messages.en.xlf').to.equal(true), /the summary is in messages.en.xlf/);
+  });
 });
