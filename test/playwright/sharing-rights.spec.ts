@@ -8,6 +8,7 @@ import {
   createUserWithApi,
   deleteSharingsWithApi,
   deleteUserWithApi,
+  expectApiOk,
   loginWithApi,
   loginWithUi,
   notLoggedIn,
@@ -24,7 +25,7 @@ const isShareApi = (url: URL): boolean => url.pathname.startsWith('/pgapi/share/
 const openDir = async (page: Page): Promise<void> => {
   const content = page.waitForResponse(res => isDirContent(new URL(res.url())));
   await page.goto('/gallery/' + DIR);
-  expect((await content).ok()).toBe(true);
+  await expectApiOk(await content, 'opening ' + DIR);
 };
 
 /**
@@ -88,10 +89,10 @@ test.describe('Sharing rights', () => {
     let update = updated();
     await page.locator('input#share-password').fill('new-secret');
     await page.locator('input#share-password').press('Tab');
-    expect((await update).ok(), 'password updated').toBe(true);
+    await expectApiOk(await update, 'password updated');
     update = updated();
     await page.locator('select[name="valid-to"]').selectOption({label: 'Hours'});
-    expect((await update).ok(), 'expiry updated').toBe(true);
+    await expectApiOk(await update, 'expiry updated');
     // the link stays the same
     await expect(page.locator('input#shareLink')).toHaveValue(new RegExp(sharingKey + '$'));
     await page.locator('modal-container button.btn-close').click();
@@ -152,7 +153,7 @@ test.describe('Sharing rights', () => {
       const deleted = page.waitForResponse(res => res.request().method() === 'DELETE' &&
         new URL(res.url()).pathname === '/pgapi/share/' + sharingKey);
       await rows.filter({hasText: sharingKey}).locator('button.btn-danger').click();
-      expect((await deleted).ok(), 'deleting the own sharing').toBe(true);
+      await expectApiOk(await deleted, 'deleting the own sharing');
       await expect(rows).toHaveCount(0);
     });
 

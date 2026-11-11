@@ -2,7 +2,7 @@
 // the guest gets the "This link is invalid or has expired" page, full screen.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, deleteSharingsWithApi, expectInvalidLinkPage, expectLightboxPhoto, notLoggedIn} from './helpers';
+import {ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, deleteSharingsWithApi, expectApiOk, expectInvalidLinkPage, expectLightboxPhoto, notLoggedIn} from './helpers';
 
 // a frame link: playing, looping, caption on, controls hidden, the next photo after 300 s, reloading the content every second
 // (the same as frameParams of frame.spec.ts)
@@ -106,7 +106,7 @@ test.describe('Sharing ends while the guest has it open', () => {
       test.fail(true, 'Not implemented yet #1313: the frame shows the generic error page (Something went spectacularly wrong)');
       const sharing = await share();
       await openFrame(page, sharing);
-      expect((await admin.delete('/pgapi/share/' + sharing.sharingKey)).ok(), 'deleting the sharing').toBe(true);
+      await expectApiOk(await admin.delete('/pgapi/share/' + sharing.sharingKey), 'deleting the sharing');
       // the frame reloads its content every second
 
       await expectInvalidLinkPage(page, 10000);

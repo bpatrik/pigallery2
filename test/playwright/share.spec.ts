@@ -5,6 +5,7 @@ import {
   createDirectorySharingWithApi,
   deleteSharingsWithApi,
   desktopViewport,
+  expectApiOk,
   expectCardCover,
   expectInvalidLinkPage,
   expectLightboxPhoto,
@@ -398,7 +399,7 @@ test.describe('Share', () => {
       await page.goto('/share/' + sharingKey);
       await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
 
-      expect((await admin.delete('/pgapi/share/' + sharingKey)).ok(), 'deleting the sharing').toBe(true);
+      await expectApiOk(await admin.delete('/pgapi/share/' + sharingKey), 'deleting the sharing');
       await page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click();
 
       await expectInvalidLinkPage(page);
@@ -430,7 +431,7 @@ test.describe('Share', () => {
         const deleted = owner.waitForResponse(res => res.request().method() === 'DELETE' &&
           new URL(res.url()).pathname === '/pgapi/share/' + sharingKey);
         await row.locator('button.btn-danger').click();
-        expect((await deleted).ok()).toBe(true);
+        await expectApiOk(await deleted, 'deleting the sharing');
         await expect(row).toHaveCount(0);
       } finally {
         await ownerContext.close();
