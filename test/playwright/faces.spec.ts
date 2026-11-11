@@ -39,4 +39,26 @@ test.describe('Faces', () => {
     await expect(page.locator('app-face').first()).toBeVisible();
     await expectNoHorizontalScroll(page, 'faces');
   });
+
+  // #1312: a person that doesn't exist anymore (e.g. renamed, or a stale link) falls back to the faces with a warning toast
+  test('Stale person link should fall back to the faces with a warning toast', async ({page}) => {
+    test.fail(true, 'Not implemented yet #1312');
+    // the link of an existing face, with the name of a person that doesn't exist
+    await page.goto('/faces');
+    await page.locator('app-face').filter({hasText: 'Alvin the Squirrel'}).click();
+    await expect(page).toHaveURL(/\/search\//);
+    const missing = 'Nem Létező Személy';
+    const url = new URL(page.url());
+    expect(decodeURIComponent(url.pathname)).toContain('Alvin the Squirrel');
+    url.pathname = '/search/' + encodeURIComponent(decodeURIComponent(url.pathname.substring('/search/'.length))
+      .replace('Alvin the Squirrel', missing));
+
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await page.goto(url.pathname + url.search);
+    await search;
+
+    await expect(page).toHaveURL(u => u.pathname === '/faces');
+    await expect(page.locator('app-face').first()).toBeVisible();
+    await expect(page.locator('app-toast-card[role="status"]').filter({hasText: missing})).toBeVisible();
+  });
 });
