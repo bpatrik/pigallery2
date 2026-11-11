@@ -113,14 +113,15 @@ test.describe('Errors', () => {
       };
 
       // the same as a missing folder, so its existence does not leak
-      test('should fall back to the root folder without the hidden photos', async ({page}) => {
+      test('should fall back to the root folder without the hidden folder', async ({page}) => {
         await openHiddenFolder(page);
 
         await expect(page).toHaveURL(url => isGalleryRoot(url));
         await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
-        // none of the hidden photos
-        await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toHaveCount(0);
-        await expect(page.locator('.photo-container > img[alt="IMG_9697.jpg"]')).toHaveCount(0);
+        // the folder tiles are rendered: the user would see the hidden folder's tile next to them if it were allowed
+        const folderName = page.locator('app-gallery-directory .directory-name');
+        await expect(folderName.filter({hasText: 'timestamps'})).toBeVisible();
+        await expect(folderName.filter({hasText: ACCENTED_DIR})).toHaveCount(0);
       });
 
       test('should show the same warning toast as for a missing folder', async ({page}) => {
