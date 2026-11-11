@@ -21,6 +21,7 @@ import {
 } from '../../../../src/common/entities/SearchQueryDTO';
 import {AlbumBaseDTO} from '../../../../src/common/entities/album/AlbumBaseDTO';
 import {Utils} from '../../../../src/common/Utils';
+import {QueryParams} from '../../../../src/common/QueryParams';
 
 process.env['NODE_ENV'] = 'test';
 chai.should();
@@ -38,6 +39,8 @@ declare const it: any;
  *  - 'private folder/': hidden by the user's directory block list, with a photo of 'Joe', a video and a gpx track
  * Every check first asks as an admin (no lists) and expects to see the hidden content, so a check can't pass by not
  * finding anything at all. Then it asks as the restricted user and expects to see none of it.
+ * The same checks run for the guest of a sharing of 'shared folder/' (created by the admin): for the guest,
+ * everything outside the shared folder is hidden, also visible.jpg.
  * The admin asks first, so the checks also cover the projected caches (one cache entry per projection).
  */
 const tmpDescribe = describe;
@@ -65,6 +68,9 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
     blockQuery: {type: SearchQueryTypes.keyword, value: HIDDEN_KEYWORD, matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
     blockDirectoryList: [{type: SearchQueryTypes.directory, value: HIDDEN_DIR, matchType: TextSearchQueryMatchTypes.exact_match} as DirectorySearch]
   };
+  const SHARED_DIR = 'shared folder';
+  // the guest of a sharing of SHARED_DIR, without its subfolders; logs in with the password of the sharing (name: only the key of its agent)
+  const sharingGuest: TestUser = {name: 'sharing guest', password: 'sharing-password', role: UserRoles.LimitedGuest};
 
   // a query that matches every hidden media
   const hiddenQuery: ORSearchQuery = {
@@ -80,7 +86,9 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
 
   const createGallery = (folder: string): void => {
     fs.mkdirSync(path.join(folder, HIDDEN_DIR), {recursive: true});
+    fs.mkdirSync(path.join(folder, SHARED_DIR), {recursive: true});
     fs.copyFileSync(path.join(assets, 'exiftool.jpg'), path.join(folder, 'visible.jpg'));
+    fs.copyFileSync(path.join(assets, 'exiftool.jpg'), path.join(folder, SHARED_DIR, 'shared.jpg'));
     fs.copyFileSync(path.join(assets, 'edge_case_exif_data/before_epoch.jpg'), path.join(folder, 'secret.jpg'));
     fs.copyFileSync(path.join(assets, 'orientation/Portrait_1.jpg'), path.join(folder, HIDDEN_DIR, 'Portrait.jpg'));
     fs.copyFileSync(path.join(assets, 'video.mp4'), path.join(folder, HIDDEN_DIR, 'video.mp4'));
@@ -98,6 +106,7 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
     const folder = path.join(TestHelper.TMP_DIR, 'projection-gallery');
     createGallery(folder);
     Config.Users.authenticationRequired = true;
+    Config.Sharing.enabled = true;
     Config.Media.Video.enabled = true;
     Config.Media.folder = folder;
     Config.Media.tempFolder = path.join(TestHelper.TMP_DIR, 'projection-temp');
@@ -108,6 +117,7 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
     const om = ObjectManagers.getInstance();
     await om.IndexingManager.indexDirectory('.', true);
     await om.IndexingManager.indexDirectory(HIDDEN_DIR, true);
+    await om.IndexingManager.indexDirectory(SHARED_DIR, true);
     await om.AlbumManager.addSavedSearch(HIDDEN_ALBUM, {type: SearchQueryTypes.person, value: 'Bambi'} as TextSearch);
     for (const user of [admin, restricted]) {
       await om.UserManager.createUser(Utils.clone(user) as UserDTO);
@@ -117,6 +127,21 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
       res.should.have.status(200);
       agents[user.name] = agent;
     }
+
+    // the admin shares SHARED_DIR, the guest logs in to the sharing
+    const sharing = await agents[admin.name].post(Config.Server.apiPath + '/share/').send({
+      createSharing: {
+        valid: 60 * 60 * 1000,
+        password: sharingGuest.password,
+        directoryQuery: {type: SearchQueryTypes.directory, value: SHARED_DIR, matchType: TextSearchQueryMatchTypes.exact_match}
+      }
+    });
+    expect(sharing.body.error, 'creating the sharing').to.equal(null);
+    const guestAgent = request.agent(server.Server);
+    const guestLogin = await guestAgent.post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' +
+      sharing.body.result.sharingKey).send({password: sharingGuest.password});
+    expect(guestLogin.body.error, 'guest login').to.equal(null);
+    agents[sharingGuest.name] = guestAgent;
   });
 
   after(async () => {
@@ -190,7 +215,12 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
     {
       name: 'albums (count and cover)',
       leaks: async (u) => {
-        const album = (json(await get(u, '/albums')).result as AlbumBaseDTO[]).find(a => a.name === HIDDEN_ALBUM);
+        const albums = json(await get(u, '/albums')).result as AlbumBaseDTO[] | null;
+        // refused (e.g.: a sharing guest has no albums)
+        if (!albums) {
+          return [];
+        }
+        const album = albums.find(a => a.name === HIDDEN_ALBUM);
         expect(album, 'the album itself is listed').to.not.be.undefined;
         return [
           ...(album!.cache?.itemCount ? ['item count: ' + album!.cache.itemCount] : []),
@@ -228,5 +258,36 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
       expect(await check.leaks(admin), 'the admin sees the hidden media (the check works)').to.not.be.empty;
       expect(await check.leaks(restricted), 'what the restricted user sees').to.be.empty;
     });
+
+    it(check.name + ': should hide the media outside the sharing from its guest', async () => {
+      expect(await check.leaks(admin), 'the admin sees the hidden media (the check works)').to.not.be.empty;
+      expect(await check.leaks(sharingGuest), 'what the sharing guest sees').to.be.empty;
+    });
   }
+
+  describe('sharing guest', () => {
+    // so the checks above can't pass because the guest's session does not work
+    it('should get the shared folder and its photo', async () => {
+      const listing = await get(sharingGuest, '/gallery/content/' + encodeURIComponent(SHARED_DIR));
+      expect(json(listing).error).to.equal(null);
+      expect(hiddenInResult(listing, ['shared.jpg']), 'the photo of the shared folder').to.deep.equal(['shared.jpg']);
+      const photo = await get(sharingGuest, '/gallery/content/' + encodeURIComponent(SHARED_DIR) + '/shared.jpg');
+      expect(photo.status).to.equal(200);
+      expect(photo.headers['content-type']).to.equal('image/jpeg');
+    });
+
+    // visible.jpg is visible to everybody else: the checks above don't cover it
+    it('should not get the photo of the root folder, which is outside the sharing', async () => {
+      for (const file of ['visible.jpg', 'visible.jpg/320', 'visible.jpg/icon']) {
+        expect(servedFile(await get(sharingGuest, '/gallery/content/' + file)), file).to.be.empty;
+      }
+      const visibleQuery = {type: SearchQueryTypes.file_name, value: 'visible.jpg', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch;
+      expect(hiddenInResult(await get(admin, '/search/' + q(visibleQuery)), ['visible.jpg']), 'the admin finds it').to.not.be.empty;
+      expect(hiddenInResult(await get(sharingGuest, '/search/' + q(visibleQuery)), ['visible.jpg']), 'search').to.be.empty;
+      expect(servedFile(await get(sharingGuest, '/gallery/random/' + q(visibleQuery))), 'random photo').to.be.empty;
+      const zip = await get(sharingGuest, '/gallery/zip/' + q(visibleQuery));
+      expect((zip.headers['content-type'] || '').includes('application/zip') ? new AdmZip(zip.body).getEntries().map(e => e.entryName) : [],
+        'zip').to.be.empty;
+    });
+  });
 });
