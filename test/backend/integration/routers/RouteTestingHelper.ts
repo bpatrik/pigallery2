@@ -11,11 +11,11 @@ const should = chai.should();
 export class RouteTestingHelper {
 
 
-  static async createSharing(testUser: UserDTO, password: string | null = null): Promise<SharingEntity> {
+  static async createSharing(testUser: UserDTO, password: string | null = null, expires = Date.now() + 1000): Promise<SharingEntity> {
     const sharing = {
       sharingKey: 'sharing_test_key_' + Date.now(),
       searchQuery: {type: SearchQueryTypes.directory, value: 'test', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch,
-      expires: Date.now() + 1000,
+      expires,
       timeStamp: Date.now(),
       creator: testUser
     } as any;
