@@ -8,6 +8,7 @@ import chaiAsPromised from 'chai-as-promised';
 import {default as chaiHttp, request} from 'chai-http';
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
+import {expectToFail} from '../../KnownFailures';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
@@ -272,12 +273,10 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
 
     // updateSharing passes forceUpdate for admins, but SharingManager.updateSharing looks the sharing up by its id
     // and the requesting user as creator, so an admin only finds the own sharings ('Sharing not found').
-    it('should let an Admin update the sharing of another user (expected to fail #1307)', async () => {
+    it('should let an Admin update the sharing of another user', async () => {
       const res = await update(admin, SHARED, mine.id, 'admin jelszó', -1);
-      expect(res.body.error?.message).to.contain('Error during updating sharing link');
-      // TODO #1307: remove the rejection check once an admin can update any sharing
-      await Promise.resolve().then(() => expect(res.body.error, 'admin update').to.equal(null))
-        .should.be.rejectedWith(chai.AssertionError, 'admin update');
+      await expectToFail('#1307', () => expect(res.body.error?.message ?? null, 'admin update').to.equal(null),
+        /^admin update: expected 'Error during updating sharing link/);
     });
   });
 
