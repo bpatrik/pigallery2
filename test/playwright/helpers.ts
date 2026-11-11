@@ -388,3 +388,25 @@ export const loginWithApi = async (playwright: { request: APIRequest }, baseURL:
   await expectApiOk(res, user.name + ' login');
   return context;
 };
+
+const isApi = (url: string): boolean => new URL(url).pathname.startsWith('/pgapi/');
+
+/**
+ * Counts the API requests of the page that did not finish yet. Call it before the requests start.
+ */
+export const trackPendingApiRequests = (page: Page): () => number => {
+  let pending = 0;
+  page.on('request', req => {
+    if (isApi(req.url())) {
+      pending++;
+    }
+  });
+  const done = (req: { url: () => string }): void => {
+    if (isApi(req.url())) {
+      pending--;
+    }
+  };
+  page.on('requestfinished', done);
+  page.on('requestfailed', done);
+  return () => pending;
+};
