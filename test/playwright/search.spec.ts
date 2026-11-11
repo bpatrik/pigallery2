@@ -1,5 +1,5 @@
 import {expect, Page, test} from '@playwright/test';
-import {ACCENTED_DIR, expectLightboxPhoto, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
+import {ACCENTED_DIR, expectApiOk, expectLightboxPhoto, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
 
 const SEARCH_KEYWORD = 104; // SearchQueryTypes.keyword
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
@@ -26,7 +26,7 @@ test.describe('Search', () => {
     await searchBar.fill('űáéú őóüö');
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await searchBar.press('Enter');
-    expect((await search).ok()).toBe(true);
+    await expectApiOk(await search, 'the search');
 
     await expect(page).toHaveURL(/\/search\//);
     await expect(searchBar).toHaveValue('űáéú őóüö');
@@ -45,7 +45,7 @@ test.describe('Search', () => {
     const suggestions = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/autocomplete/'));
     // typed key by key: the suggestions follow the keyup
     await searchBar.pressSequentially('Berk');
-    expect((await suggestions).ok()).toBe(true);
+    await expectApiOk(await suggestions, 'the autocomplete');
     await expect(searchBar).toHaveAttribute('aria-expanded', 'true');
     const berkley = autocomplete.getByRole('option').filter({hasText: 'Berkley'});
     await expect(berkley.first()).toBeVisible();
@@ -54,7 +54,7 @@ test.describe('Search', () => {
     // clicking a suggestion fills the search bar and searches for it (the arrow of the suggestion only fills it)
     await berkley.first().click();
     await expect(searchBar).toHaveValue(/Berkley/);
-    expect((await search).ok()).toBe(true);
+    await expectApiOk(await search, 'the search');
     await expect(page).toHaveURL(/\/search\//);
     await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
     await expect(autocomplete).toHaveCount(0);
@@ -64,7 +64,7 @@ test.describe('Search', () => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     // in search results the photo is identified with its folder (QueryService.getMediaStringId)
     await page.goto('/search/' + encodeURIComponent('űáéú őóüö') + '?p=' + encodeURIComponent(ACCENTED_DIR + '/IMG_8943.jpg'));
-    expect((await search).ok()).toBe(true);
+    await expectApiOk(await search, 'the search');
 
     await expectLightboxPhoto(page, 'IMG_8943.jpg');
     // not the fallback to the first photo of a stale link
@@ -86,7 +86,7 @@ test.describe('Search', () => {
       await searchBar.fill('big_ben');
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
       await searchBar.press('Enter');
-      expect((await search).ok()).toBe(true);
+      await expectApiOk(await search, 'the search');
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
       await expect(page.locator('app-gallery .alert-danger')).toHaveCount(0);
     };
@@ -95,7 +95,7 @@ test.describe('Search', () => {
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
       // broken JSON: "{"
       await page.goto('/search/%7B');
-      expect((await search).ok()).toBe(true);
+      await expectApiOk(await search, 'the search');
 
       await expect(page.locator('app-gallery-search .search-text')).toHaveValue('{');
       await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
