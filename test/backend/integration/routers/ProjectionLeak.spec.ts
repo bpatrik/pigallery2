@@ -35,7 +35,7 @@ declare const it: any;
  *
  * The gallery has one visible photo and three kinds of hidden content:
  *  - secret.jpg: hidden by the user's media block list (its keyword); the only photo of the person 'Bambi'
- *  - 'privát mappa/': hidden by the user's directory block list, with a photo of 'Joe', a video and a gpx track
+ *  - 'private folder/': hidden by the user's directory block list, with a photo of 'Joe', a video and a gpx track
  * Every check first asks as an admin (no lists) and expects to see the hidden content, so a check can't pass by not
  * finding anything at all. Then it asks as the restricted user and expects to see none of it.
  * The admin asks first, so the checks also cover the projected caches (one cache entry per projection).
@@ -48,7 +48,7 @@ describe('Projection leak', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
   const assets = path.join(__dirname, '../../assets');
-  const HIDDEN_DIR = 'privát mappa';
+  const HIDDEN_DIR = 'private folder';
   const HIDDEN_KEYWORD = 'USA Road trip';
   const HIDDEN_ALBUM = 'album of Bambi';
   // what should never reach the restricted user

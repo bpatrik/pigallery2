@@ -504,13 +504,13 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       // a crafted query from the URL: only AND, OR and SOME_OF queries have a list, and it is an array
       const query = {
         type: SearchQueryTypes.caption,
-        value: 'kép',
+        value: 'photo',
         list: {length: 1000000000}
       } as unknown as TextSearch;
 
       const prepared = await sm.prepareQuery(query);
       expect(prepared.type).to.equal(SearchQueryTypes.caption);
-      expect((prepared as TextSearch).value).to.equal('*kép*'); // the default 'like' match as a glob
+      expect((prepared as TextSearch).value).to.equal('*photo*'); // the default 'like' match as a glob
     });
 
     it('should AND', async () => {
