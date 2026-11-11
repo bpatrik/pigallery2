@@ -29,6 +29,7 @@ import {GPSMetadata, PhotoDTO, PhotoMetadata} from '../../../../../src/common/en
 import {VideoDTO} from '../../../../../src/common/entities/VideoDTO';
 import {AutoCompleteItem} from '../../../../../src/common/entities/AutoCompleteItem';
 import {Config} from '../../../../../src/common/config/private/Config';
+import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
@@ -36,6 +37,7 @@ import {SessionUser, SessionContext} from '../../../../../src/backend/model/Sess
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
+import {expectToFail} from '../../../KnownFailures';
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const chai = require('chai');
@@ -1646,6 +1648,39 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
           resultOverflow: false
         } as SearchResultDTO));
 
+      });
+
+      // #1309: p2 has the keyword and the person 'Padmé Amidala'
+      describe('with accents', () => {
+        const names = async (query: TextSearch): Promise<string[]> =>
+          (await new SearchManager().search(DBTestHelper.defaultSession, query)).media.map(m => m.name);
+
+        it('should find accented text typed with the accents', async () => {
+          expect(await names({value: 'Padmé', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({value: 'padmé amidala', type: SearchQueryTypes.keyword} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({value: 'Padmé', type: SearchQueryTypes.person} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({
+            value: 'Padmé Amidala',
+            type: SearchQueryTypes.person,
+            matchType: TextSearchQueryMatchTypes.exact_match
+          } as TextSearch)).to.deep.equal([p2.name]);
+        });
+
+        it('should find accented text typed without the accents', async () => {
+          const found = [
+            await names({value: 'padme', type: SearchQueryTypes.any_text} as TextSearch),
+            await names({value: 'Padme Amidala', type: SearchQueryTypes.keyword} as TextSearch),
+            await names({value: 'padme', type: SearchQueryTypes.person} as TextSearch)
+          ];
+          const check = (): void => expect(found).to.deep.equal([[p2.name], [p2.name], [p2.name]]);
+          if (sqlHelper.dbType === DatabaseType.mysql) {
+            // utf8mb4_general_ci ignores the accents
+            check();
+            return;
+          }
+          // SQLite's LIKE compares the accented letters exactly
+          await expectToFail('#1309', check, /expected \[ \[\], \[\], \[\] \] to deeply equal/);
+        });
       });
 
       it('with globMatch', async () => {
