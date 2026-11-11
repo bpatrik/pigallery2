@@ -2,8 +2,10 @@ import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
 import {
   ACCENTED_DIR,
+  createDirectorySharingWithApi,
   desktopViewport,
   expectCardCover,
+  expectInvalidLinkPage,
   expectLightboxPhoto,
   expectNavbar,
   expectNoHorizontalScroll,
@@ -17,9 +19,7 @@ import {
 // The e2e server serves the demo/images folder.
 // timestamps has big_ben.jpg, dupl is an other directory next to it (without big_ben.jpg).
 const SEARCH_FILE_NAME = 103; // SearchQueryTypes.file_name
-const SEARCH_DIRECTORY = 102; // SearchQueryTypes.directory
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
-const GLOB_MATCH = 3; // TextSearchQueryMatchTypes.globMatch
 
 // directory listing only, not the media (e.g.: content/dir/photo.jpg/320)
 const contentUrl = /\/pgapi\/gallery\/content\/(?![^?]*\.\w+\/\d+)/;
@@ -108,41 +108,6 @@ const openSharingAsGuest = async (page: Page, link: string, url: RegExp): Promis
     await expect(page.locator('app-gallery')).toBeAttached({timeout: 15000});
   });
   await expectCountDown(page);
-};
-
-// what an expired, deleted or not existing sharing link tells the user (#1307): one message, so a key can't be probed
-const INVALID_LINK_MESSAGE = 'This link is invalid or has expired';
-
-/**
- * Creates a directory sharing through the API (as admin) and returns its key.
- * valid: how long the sharing is available in ms.
- */
-const createSharingWithApi = async (admin: APIRequestContext, dir: string,
-                                    options: { password?: string, recursive?: boolean, valid?: number } = {}): Promise<string> => {
-  const res = await admin.post('/pgapi/share/', {
-    data: {
-      createSharing: {
-        valid: options.valid ?? 24 * 60 * 60 * 1000,
-        ...(options.password && {password: options.password}),
-        directoryQuery: options.recursive
-          ? {type: SEARCH_DIRECTORY, value: dir + '/*', matchType: GLOB_MATCH}
-          : {type: SEARCH_DIRECTORY, value: dir, matchType: EXACT_MATCH},
-      },
-    },
-  });
-  expect(res.ok(), 'creating the sharing').toBe(true);
-  const sharingKey = (await res.json()).result?.sharingKey;
-  expect(sharingKey, 'sharing key').toBeTruthy();
-  return sharingKey;
-};
-
-/**
- * The page of an invalid sharing link: only the message, no gallery around it.
- */
-const expectInvalidLinkPage = async (page: Page): Promise<void> => {
-  await expect(page.getByText(INVALID_LINK_MESSAGE)).toBeVisible();
-  await expect(page.locator('app-gallery')).toHaveCount(0);
-  await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
 };
 
 const loginToSharing = async (page: Page, link: string, password: string): Promise<void> => {
@@ -365,7 +330,7 @@ test.describe('Share', () => {
      * Creates a directory sharing through the API (as admin) and returns its key. It is deleted after the test.
      */
     const createSharingForTest = async (dir: string, options: { password?: string, recursive?: boolean, valid?: number } = {}): Promise<string> => {
-      const sharingKey = await createSharingWithApi(admin, dir, options);
+      const {sharingKey} = await createDirectorySharingWithApi(admin, dir, options);
       created.push(sharingKey);
       return sharingKey;
     };
