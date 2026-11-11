@@ -45,15 +45,16 @@ describe('PhotoFrameBuilderGalleryComponent', () => {
     return new URL(component.url);
   };
 
+  // an accented photo name: non-ASCII names must survive the url encoding
   it('should build a public link of the current folder and photo that plays on its own', () => {
-    const url = build('/gallery/' + encodeURIComponent('Nyaralás 2024') + '?p=' + encodeURIComponent('Ábel.jpg'));
+    const url = build('/gallery/' + encodeURIComponent('Holiday 2024') + '?p=' + encodeURIComponent('árvíztűrő.jpg'));
 
     expect(url.origin).toBe('https://photos.example.com');
-    expect(decodeURIComponent(url.pathname)).toBe('/gallery/Nyaralás 2024');
-    expect(url.searchParams.get('p')).toBe('Ábel.jpg');
+    expect(decodeURIComponent(url.pathname)).toBe('/gallery/Holiday 2024');
+    expect(url.searchParams.get('p')).toBe('árvíztűrő.jpg');
     // the defaults: playing, polling and moving on every 5 minutes, looping, caption on, controls hidden
     expect(Object.fromEntries(url.searchParams)).toEqual({
-      p: 'Ábel.jpg',
+      p: 'árvíztűrő.jpg',
       play: 'true',
       auInt: '300',
       ls: 'true',

@@ -100,7 +100,7 @@ describe('AlbumsComponent - empty state', () => {
       .find(d => /no albums/i.test(d.textContent ?? '') && !d.querySelector('button'));
 
   it('should not show the empty state when there are albums', async () => {
-    const el = await render([{id: 1, name: 'Balaton', locked: false} as AlbumBaseDTO]);
+    const el = await render([{id: 1, name: 'Summer', locked: false} as AlbumBaseDTO]);
     expect(emptyState(el)).toBeUndefined();
   });
 

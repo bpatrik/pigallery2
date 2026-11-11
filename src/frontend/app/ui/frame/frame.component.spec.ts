@@ -32,7 +32,7 @@ describe('FrameComponent', () => {
   const searchQuery = {
     type: SearchQueryTypes.keyword,
     matchType: TextSearchQueryMatchTypes.exact_match,
-    value: 'Balaton nyár'
+    value: 'Summer at the lake'
   } as TextSearch;
 
   // the active state of every navbar link, by its name
@@ -45,8 +45,8 @@ describe('FrameComponent', () => {
       new NavigationLinkConfig(NavigationLinkTypes.gallery, 'gallery'),
       new NavigationLinkConfig(NavigationLinkTypes.albums, 'albums'),
       new NavigationLinkConfig(NavigationLinkTypes.faces, 'faces'),
-      new NavigationLinkConfig(NavigationLinkTypes.search, 'Balaton', searchQuery),
-      new NavigationLinkConfig(NavigationLinkTypes.url, 'Térkép', undefined, '/gallery/Térkép'),
+      new NavigationLinkConfig(NavigationLinkTypes.search, 'Lake', searchQuery),
+      new NavigationLinkConfig(NavigationLinkTypes.url, 'Árvíztűrő', undefined, '/gallery/Árvíztűrő'),
     ];
     // the constructor asks for it; it needs window.matchMedia, which jsdom lacks
     vi.spyOn(DeviceHelper, 'isTouchDevice').mockReturnValue(false);
@@ -80,27 +80,28 @@ describe('FrameComponent', () => {
 
   it('should mark the link of the current page active and follow the url', () => {
     url.set('/albums');
-    expect(activeLinks()).toEqual({gallery: false, albums: true, faces: false, Balaton: false, Térkép: false});
+    expect(activeLinks()).toEqual({gallery: false, albums: true, faces: false, Lake: false, Árvíztűrő: false});
 
-    url.set('/gallery/Nyaralás/Őszi kirándulás');
-    expect(activeLinks()).toEqual({gallery: true, albums: false, faces: false, Balaton: false, Térkép: false});
+    url.set('/gallery/Holiday/Autumn trip');
+    expect(activeLinks()).toEqual({gallery: true, albums: false, faces: false, Lake: false, Árvíztűrő: false});
   });
 
+  // the custom link has an accented name and url: non-ASCII urls must be matched too
   it('should mark a custom url link active by its prefix', () => {
-    url.set('/gallery/Térkép/Szeged');
-    expect(activeLinks()).toEqual({gallery: true, albums: false, faces: false, Balaton: false, Térkép: true});
+    url.set('/gallery/Árvíztűrő/Tükörfúrógép');
+    expect(activeLinks()).toEqual({gallery: true, albums: false, faces: false, Lake: false, Árvíztűrő: true});
   });
 
   it('should link and mark the search link active only for its own search', () => {
     const searchUrl = SearchQueryUtils.urlify(searchQuery);
-    expect(component.navbarLinkItems().find((i) => i.link.name === 'Balaton')!.searchUrl).toBe(searchUrl);
+    expect(component.navbarLinkItems().find((i) => i.link.name === 'Lake')!.searchUrl).toBe(searchUrl);
 
     // it compares the full (not the urlified) query of the url
     url.set('/search/' + encodeURIComponent(JSON.stringify(searchQuery)));
-    expect(activeLinks()['Balaton']).toBe(true);
+    expect(activeLinks()['Lake']).toBe(true);
 
-    url.set('/search/' + encodeURIComponent(JSON.stringify({...searchQuery, value: 'Tihany'})));
-    expect(activeLinks()['Balaton']).toBe(false);
+    url.set('/search/' + encodeURIComponent(JSON.stringify({...searchQuery, value: 'Mountains'})));
+    expect(activeLinks()['Lake']).toBe(false);
   });
 });
 
@@ -113,7 +114,7 @@ describe('FrameComponent template', () => {
         provideRouter([]),
         {
           provide: AuthenticationService, useValue: {
-            user: signal<UserDTO>({name: 'Árvíztűrő Tükörfúrógép', role: UserRoles.Admin} as UserDTO),
+            user: signal<UserDTO>({name: 'admin', role: UserRoles.Admin} as UserDTO),
             isAdmin: signal(true),
             isAuthorized: (): boolean => true // an admin
           }
@@ -156,7 +157,7 @@ describe('FrameComponent notification badge', () => {
   // renders the navbar with the real NotificationService, the server answers with the notifications
   const render = async (role: UserRoles): Promise<HTMLElement> => {
     vi.spyOn(DeviceHelper, 'isTouchDevice').mockReturnValue(false);
-    const user = {id: 1, name: 'Árvíztűrő Tükörfúrógép', role} as UserDTO;
+    const user = {id: 1, name: 'Alice', role} as UserDTO;
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),

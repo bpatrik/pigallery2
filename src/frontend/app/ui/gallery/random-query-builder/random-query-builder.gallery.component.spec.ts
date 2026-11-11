@@ -24,11 +24,12 @@ describe('RandomQueryBuilderGalleryComponent', () => {
   let originalPublicUrl: string;
   let originalUrlBase: string;
 
+  // accents in the person name: non-ASCII text must survive the link of the query
   const query: ANDSearchQuery = {
     type: SearchQueryTypes.AND,
     list: [
-      {type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.exact_match, value: './Nyaralás 2024'} as TextSearch,
-      {type: SearchQueryTypes.person, value: 'Árvíztűrő Ödön'} as TextSearch,
+      {type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.exact_match, value: './Holiday 2024'} as TextSearch,
+      {type: SearchQueryTypes.person, value: 'Árvíztűrő Tükörfúrógép'} as TextSearch,
     ]
   };
 
@@ -73,7 +74,7 @@ describe('RandomQueryBuilderGalleryComponent', () => {
 
   it('should rebuild the link when the query changes in the builder', () => {
     params.next({qs: SearchQueryUtils.urlify(query)});
-    const changed: TextSearch = {type: SearchQueryTypes.keyword, value: 'tűzijáték'};
+    const changed: TextSearch = {type: SearchQueryTypes.keyword, value: 'fireworks'};
     component.searchQueryDTO.set(changed);
     component.onQueryChange();
 

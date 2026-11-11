@@ -43,10 +43,11 @@ describe('FacesComponent - empty state', () => {
    */
   const emptyState = (el: HTMLElement): HTMLElement | null => el.querySelector('.no-face-msg');
 
+  // the second name has accents: non-ASCII person names must be listed too
   it('should list the faces, accented names too, without the empty state', async () => {
     const el = await render([
-      {id: 1, name: 'Ödön', isFavourite: false} as PersonDTO,
-      {id: 2, name: 'Álmos', isFavourite: true} as PersonDTO,
+      {id: 1, name: 'Alice', isFavourite: false} as PersonDTO,
+      {id: 2, name: 'Árvíztűrő Tükörfúrógép', isFavourite: true} as PersonDTO,
     ]);
     expect(emptyState(el)).toBeNull();
     expect(el.querySelectorAll('app-face').length).toBe(2);
