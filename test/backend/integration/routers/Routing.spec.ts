@@ -3,6 +3,7 @@ import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as chai from 'chai';
+import {expectToFail} from '../../KnownFailures';
 import {expect} from 'chai';
 import * as http from 'node:http';
 import {AddressInfo} from 'node:net';
@@ -584,6 +585,17 @@ describe('Routing', () => {
     it('should not find unknown api paths', async () => {
       const res = await get(api('/nincs/ilyen'));
       expect(res.status).to.equal(404);
+    });
+
+    it('should answer unknown api paths with a JSON error, not the HTML error page', async () => {
+      // unknown api paths fall through to the Express HTML 404 page today
+      await expectToFail('#1305', async () => {
+        const res = await get(api('/doesnotexist'));
+        expect(res.status).to.equal(404);
+        expect(res.headers['content-type']).to.contain('application/json');
+        expect(res.json?.error?.code).to.be.a('number');
+        expect(res.json?.result).to.equal(null);
+      }, /text\/html.* to include 'application\/json'/);
     });
 
     it('should render api errors as json', async () => {

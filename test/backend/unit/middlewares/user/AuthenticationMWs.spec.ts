@@ -480,6 +480,44 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     });
   });
 
+  describe('remember me', async () => {
+    const login = async (name: string, rememberMe: boolean) => {
+      await ObjectManagers.getInstance().UserManager.createUser({name, password: 'pass', role: UserRoles.User} as UserDTO);
+      const req: any = {
+        session: {}, sessionOptions: {}, query: {}, params: {},
+        body: {loginCredential: {username: name, password: 'pass', rememberMe}}
+      };
+      let err: any = 'not-called';
+      await AuthenticationMWs.login(req, null!, (e?: any) => {
+        err = e;
+      });
+      expect(err).to.be.undefined;
+      return req;
+    };
+
+    beforeEach(() => {
+      Config.Users.authenticationRequired = true;
+    });
+
+    it('makes the cookie outlive the browser session for the session timeout', async () => {
+      const req = await login('remembered', true);
+      expect(req.session.rememberMe).to.be.true;
+      expect(req.sessionOptions.expires).to.be.instanceOf(Date);
+      expect(req.sessionOptions.expires.getTime()).to.equal(req.session.expires);
+      expect(req.session.expires).to.be.within(Date.now() + Config.Server.sessionTimeout - 10000, Date.now() + Config.Server.sessionTimeout);
+    });
+
+    it('keeps a browser session cookie without it', async () => {
+      const req = await login('forgotten', false);
+      expect(req.session.rememberMe).to.be.false;
+      // neither expires nor maxAge: the browser drops the cookie when it closes
+      expect(req.sessionOptions.expires).to.be.undefined;
+      expect(req.sessionOptions.maxAge).to.be.undefined;
+      // the server side timeout applies still
+      expect(req.session.expires).to.be.greaterThan(Date.now());
+    });
+  });
+
   describe('inverseAuthenticate', async () => {
 
     it('should call next with error on authenticated', (done: (err?: any) => void) => {
