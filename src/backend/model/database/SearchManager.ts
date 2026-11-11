@@ -972,23 +972,27 @@ export class SearchManager {
       const whereFN = (query as TextSearch).negate ? 'andWhere' : 'orWhere';
       const whereFNRev = (query as TextSearch).negate ? 'orWhere' : 'andWhere';
 
+      // A double space in a name is usually a typo, and the search query parser collapses it (#1309),
+      // so runs of spaces are collapsed on both sides. The three REPLACEs collapse up to 8 spaces.
+      const collapseSpaces = (fieldName: string): string =>
+        `REPLACE(REPLACE(REPLACE(${fieldName}, '  ', ' '), '  ', ' '), '  ', ' ')`;
+      const textValue = (query as TextSearch).value.replace(/ {2,}/g, ' ');
+
       const getLikeExpr = (fieldName: string, paramName: string): string => {
         const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
         // convertGlobToLike escapes with '\', that is the default in MySQL but SQLite has no default escape character
         const esc = Config.Database.type === DatabaseType.sqlite ? ' ESCAPE \'\\\'' : '';
-        return `${fieldName} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
+        return `${collapseSpaces(fieldName)} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
       };
 
       const textParam: Record<string, unknown> = {};
-      textParam['text' + queryId] = createMatchString(
-        (query as TextSearch).value
-      );
+      textParam['text' + queryId] = createMatchString(textValue);
 
       if (
         query.type === SearchQueryTypes.any_text ||
         query.type === SearchQueryTypes.directory
       ) {
-        const dirPathStr = (query as TextSearch).value.replace(
+        const dirPathStr = textValue.replace(
           new RegExp('\\\\', 'g'),
           '/'
         );

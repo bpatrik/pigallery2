@@ -2321,4 +2321,54 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       expect(await searchMediaNames(DBTestHelper.defaultSession, dq('pub%'))).to.deep.equal([]);
     });
   });
+
+  // #1309: the search query parser collapses double spaces (they are usually a typo),
+  // so a search with single spaces has to find the names that have more spaces on the disk
+  describe('names with double spaces', () => {
+    const names = async (query: TextSearch): Promise<string[]> =>
+      (await new SearchManager().search(DBTestHelper.defaultSession, query)).media.map(m => m.name.split('_')[0]).sort();
+    const dirNames = async (query: TextSearch): Promise<string[]> =>
+      (await new SearchManager().search(DBTestHelper.defaultSession, query)).directories.map(d => d.name).sort();
+
+    before(async () => {
+      await sqlHelper.initDB();
+      const root = TestHelper.getDirectoryEntry(null, '.');
+      const trip = TestHelper.getDirectoryEntry(root, 'summer  trip   2024');
+      const other = TestHelper.getDirectoryEntry(root, 'winter trip');
+      const sunset = TestHelper.getRandomizedPhotoEntry(trip, 'beach  sunset');
+      sunset.metadata.caption = 'sunset  over    the sea';
+      TestHelper.getRandomizedPhotoEntry(other, 'snow');
+      await DBTestHelper.persistTestDir(root);
+    });
+
+    after(async () => {
+      // restore the default gallery of this spec
+      await setUpSqlDB();
+    });
+
+    it('should find a directory', async () => {
+      expect(await dirNames({type: SearchQueryTypes.directory, value: 'summer trip 2024'} as TextSearch))
+        .to.deep.equal(['summer  trip   2024']);
+      expect(await names({type: SearchQueryTypes.directory, value: 'summer trip 2024'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({
+        type: SearchQueryTypes.directory,
+        value: 'summer trip 2024',
+        matchType: TextSearchQueryMatchTypes.exact_match
+      } as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.directory, value: 'summer trip 2024', negate: true} as TextSearch))
+        .to.deep.equal(['snow']);
+    });
+
+    it('should find a file name, a caption and any text', async () => {
+      expect(await names({type: SearchQueryTypes.file_name, value: 'beach sunset'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.caption, value: 'sunset over the sea'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.any_text, value: 'sunset over'} as TextSearch)).to.deep.equal(['beach  sunset']);
+    });
+
+    it('should find the names with a query that has double spaces', async () => {
+      // e.g. a query of the API or of a block list, that did not go through the parser
+      expect(await names({type: SearchQueryTypes.file_name, value: 'beach  sunset'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.directory, value: 'summer  trip   2024'} as TextSearch)).to.deep.equal(['beach  sunset']);
+    });
+  });
 });

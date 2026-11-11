@@ -199,6 +199,12 @@ export const SearchQueryUtils = {
     return parts.join('/');
   },
   /**
+   * The directory path as the directory searches compare it: normalized, lower case and with runs of spaces collapsed
+   * (the SQL search collapses them too, see SearchManager; a double space in a name is usually a typo #1309).
+   */
+  comparableDirectoryPath: (dirPath: string): string =>
+    SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase().replace(/ {2,}/g, ' '),
+  /**
    * Matches a relative directory path against a directory search, without any DB access.
    * It follows the semantic of the SQL directory search (see SearchManager):
    *  - exact_match: the path equals to the value
@@ -209,8 +215,8 @@ export const SearchQueryUtils = {
    * Matching is case-insensitive.
    */
   matchDirectorySearch: (dirPath: string, search: DirectorySearch): boolean => {
-    const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase();
-    const value = SearchQueryUtils.normalizeDirectoryPath(search.value).toLowerCase();
+    const p = SearchQueryUtils.comparableDirectoryPath(dirPath);
+    const value = SearchQueryUtils.comparableDirectoryPath(search.value);
     let match: boolean;
     switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
       case TextSearchQueryMatchTypes.exact_match:
@@ -244,7 +250,7 @@ export const SearchQueryUtils = {
     if (search.negate) {
       return null;
     }
-    const segments = SearchQueryUtils.normalizeDirectoryPath(search.value).toLowerCase().split('/')
+    const segments = SearchQueryUtils.comparableDirectoryPath(search.value).split('/')
       .filter(s => s !== '');
     switch (search.matchType ?? TextSearchQueryMatchTypes.like) {
       case TextSearchQueryMatchTypes.exact_match:
@@ -284,7 +290,7 @@ export const SearchQueryUtils = {
    * so check if the directory is allowed first.
    */
   isDirectoryAnchoredParent: (dirPath: string, list: DirectorySearch[]): boolean => {
-    const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase().split('/')
+    const p = SearchQueryUtils.comparableDirectoryPath(dirPath).split('/')
       .filter(s => s !== '');
     return (list || []).some(d => {
       const anchor = SearchQueryUtils.getDirectorySearchAnchor(d);
