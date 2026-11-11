@@ -3,10 +3,7 @@
 import {APIRequestContext, Download, expect, Page, test} from '@playwright/test';
 import AdmZip from 'adm-zip';
 import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, notLoggedIn} from './helpers';
-
-const SEARCH_DIRECTORY = 102; // SearchQueryTypes.directory
-const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+import {ACCENTED_DIR, createDirectorySharingWithApi, expectApiOk, notLoggedIn} from './helpers';
 
 const zipButton = (page: Page) => page.locator('app-gallery-navbar a.btn-navigator:has(ng-icon[name="ionDownloadOutline"])');
 
@@ -39,7 +36,7 @@ test.describe('Zip download', () => {
   test('should download the results of a search as a zip', async ({page}) => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/big_ben');
-    expect((await search).ok()).toBe(true);
+    await expectApiOk(await search, 'the search');
     await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
     const shown = await page.locator('app-gallery-grid .photo-container > img').evaluateAll(
       imgs => imgs.map(img => img.getAttribute('alt')!).sort());
@@ -60,16 +57,7 @@ test.describe('Zip download', () => {
 
     test.beforeEach(async ({playwright, baseURL}) => {
       admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
-      const res = await admin.post('/pgapi/share/', {
-        data: {
-          createSharing: {
-            valid: 24 * 60 * 60 * 1000,
-            directoryQuery: {type: SEARCH_DIRECTORY, value: 'timestamps', matchType: EXACT_MATCH},
-          },
-        },
-      });
-      expect(res.ok(), 'creating the sharing').toBe(true);
-      sharingKey = (await res.json()).result.sharingKey;
+      sharingKey = (await createDirectorySharingWithApi(admin, 'timestamps')).sharingKey;
     });
 
     test.afterEach(async () => {

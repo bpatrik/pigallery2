@@ -2,6 +2,7 @@ import {randomUUID} from 'node:crypto';
 import {expect, Page, test} from '@playwright/test';
 import {
   desktopViewport,
+  expectApiOk,
   expectCardCover,
   expectLightboxPhoto,
   expectNoHorizontalScroll,
@@ -17,7 +18,7 @@ const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
 const deleteAlbumsNamed = async (page: Page, name: string): Promise<void> => {
   const albums: { id: number, name: string }[] = (await (await page.request.get('/pgapi/albums')).json()).result;
   for (const album of albums.filter(a => a.name === name)) {
-    expect((await page.request.delete('/pgapi/albums/' + album.id)).ok(), 'deleting the album').toBe(true);
+    await expectApiOk(await page.request.delete('/pgapi/albums/' + album.id), 'deleting the album');
   }
 };
 
@@ -33,7 +34,7 @@ test.describe('Albums', () => {
     const res = await page.request.put('/pgapi/albums/saved-searches', {
       data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Alvin the Squirrel', matchType: EXACT_MATCH}},
     });
-    expect(res.ok(), 'adding the album').toBe(true);
+    await expectApiOk(res, 'adding the album');
   });
 
   test.afterEach(async ({page}) => {
@@ -88,7 +89,7 @@ test.describe('Album journey', () => {
   const saveSearchAsAlbum = async (page: Page): Promise<void> => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/big_ben');
-    expect((await search).ok()).toBe(true);
+    await expectApiOk(await search, 'the search');
     await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
 
     await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
@@ -96,7 +97,7 @@ test.describe('Album journey', () => {
     await page.locator('modal-container input#saveSearchName').fill(albumName);
     const saved = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums/saved-searches');
     await page.locator('modal-container').getByRole('button', {name: 'Save as album'}).click();
-    expect((await saved).ok(), 'saving the album').toBe(true);
+    await expectApiOk(await saved, 'saving the album');
 
     const albums = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums');
     await page.goto('/albums');
@@ -130,7 +131,7 @@ test.describe('Album journey', () => {
     if (first === 'confirm') {
       await confirm.click();
     }
-    expect((await deleted).ok(), 'deleting the album').toBe(true);
+    await expectApiOk(await deleted, 'deleting the album');
     await expect(card).toHaveCount(0);
     const names = ((await (await page.request.get('/pgapi/albums')).json()).result as { name: string }[]).map(a => a.name);
     expect(names).not.toContain(albumName);
@@ -172,7 +173,7 @@ test.describe('Album edge cases', () => {
       const res = await page.request.put('/pgapi/albums/saved-searches', {
         data: {name: albumName, searchQuery: {type: SEARCH_PERSON, value: 'Not Existing Person', matchType: EXACT_MATCH}},
       });
-      expect(res.ok(), 'adding the album').toBe(true);
+      await expectApiOk(res, 'adding the album');
     });
 
     test.afterEach(async ({page}) => {
@@ -197,7 +198,7 @@ test.describe('Album edge cases', () => {
       const card = page.locator('app-album').filter({hasText: albumName});
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
       await card.click();
-      expect((await search).ok(), 'the search of the album').toBe(true);
+      await expectApiOk(await search, 'the search of the album');
       await expect(page).toHaveURL(/\/search\//);
       await expect(page.locator('app-gallery-grid .photo-container')).toHaveCount(0);
 
