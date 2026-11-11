@@ -11,16 +11,15 @@ import {RouteTestingHelper} from './RouteTestingHelper';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import * as chai from "chai";
-import chaiAsPromised from 'chai-as-promised';
 import {CookieNames} from '../../../../src/common/CookieNames';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
+import {expectToFail} from '../../KnownFailures';
 
 process.env['NODE_ENV'] = 'test';
 const should = chai.should();
 chai.use(chaiHttp);
-chai.use(chaiAsPromised);
 
 describe('UserRouter', () => {
   before(TestHelper.resetConfig);
@@ -83,8 +82,8 @@ describe('UserRouter', () => {
       should.equal(result.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
       should.equal(result.body.result, null);
       should.not.exist(result.headers['set-cookie']);
-      // TODO #1306: the error goes out as HTTP 200; remove the rejection check once it is a 401 (see #1305)
-      await Promise.resolve().then(() => result.should.have.status(401)).should.be.rejectedWith(chai.AssertionError);
+      // the error goes out as HTTP 200 (see #1305)
+      await expectToFail('#1306', () => result.should.have.status(401), /status code 401 but got 200/);
     });
 
     // remember me checked: the cookie survives a browser restart; unchecked: a session cookie, ends with the browser session
@@ -289,14 +288,17 @@ describe('UserRouter', () => {
 
     it('should refuse the admin API to a normal user', async () => {
       const userAgent = await loginAs(testUser);
+      const statuses: number[] = [];
       for (const url of ['/settings', '/user/list', '/admin/jobs/available']) {
         const res = await userAgent.get(Config.Server.apiPath + url);
         should.equal(res.body.error.code, ErrorCodes.NOT_AUTHORISED, url);
         should.equal(res.body.result, null, url);
-        // TODO #1315: NOT_AUTHORISED goes out as 401 (AuthenticationMWs.authorise); remove the rejection check once it is a 403 (see #1305)
-        await Promise.resolve().then(() => res.should.have.status(403)).should.be.rejectedWith(chai.AssertionError);
+        statuses.push(res.status);
       }
       userAgent.close();
+      // NOT_AUTHORISED goes out as 401 (AuthenticationMWs.authorise, see #1305)
+      await expectToFail('#1315', () => chai.expect(statuses).to.deep.equal([403, 403, 403]),
+        /expected \[ 401, 401, 401 \] to deeply equal/);
     });
 
     it('should end the session of a user whose role an admin changed', async () => {
@@ -349,14 +351,13 @@ describe('UserRouter', () => {
     it('should not let an admin lower their own role, even if there is an other admin', async () => {
       await ObjectManagers.getInstance().UserManager.createUser({name: 'other_admin', password: 'pass', role: UserRoles.Admin} as UserDTO);
       const adminAgent = await loginAs(admin);
-      // TODO #1315: UserRequestConstrainsMWs.notSelfRequestOr2Admins allows it when there is an other admin;
-      // remove the rejection check once the server refuses it
+      // UserRequestConstrainsMWs.notSelfRequestOr2Admins allows it when there is an other admin
       const check = async (): Promise<void> => {
         const res = await adminAgent.post(Config.Server.apiPath + '/user/' + adminId + '/role').send({newRole: UserRoles.User});
         should.exist(res.body.error);
         (await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}))!.role.should.equal(UserRoles.Admin);
       };
-      await check().should.be.rejectedWith(chai.AssertionError);
+      await expectToFail('#1315', check, /expected null to exist/);
       adminAgent.close();
     });
   });
