@@ -10,7 +10,7 @@ const login = async (context: APIRequestContext, username: string, password: str
   const res = await context.post('/pgapi/user/login', {
     data: {loginCredential: {username, password, rememberMe: false}},
   });
-  expect(res.ok(), username + ' login (is your own server running on port 8080?)').toBe(true);
+  expect(res.ok(), username + ' login (is your own server running on the e2e port?)').toBe(true);
 };
 
 /**
