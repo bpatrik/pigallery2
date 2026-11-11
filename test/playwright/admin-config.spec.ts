@@ -3,6 +3,7 @@
 // one after the other (all in one serial describe), and restore what they change.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
+import {expectApiOk} from './helpers';
 import {JobProgressStates} from '../../src/common/entities/job/JobProgressDTO';
 
 type Settings = Record<string, Record<string, unknown>>;
@@ -13,7 +14,7 @@ const getSettings = async (api: APIRequestContext): Promise<Settings> =>
 const openAdmin = async (page: Page): Promise<void> => {
   const settingsLoaded = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings');
   await page.goto('/admin');
-  expect((await settingsLoaded).ok()).toBe(true);
+  await expectApiOk(await settingsLoaded, 'loading the settings');
 };
 
 // shows the settings of that mode (Basic, Advanced or Under the hood)
@@ -42,7 +43,7 @@ test.describe('Admin config', () => {
     // restore the settings the tests touch, also if a test failed halfway
     for (const settingsPath of ['Upload', 'Sharing', 'Jobs']) {
       const res = await admin.put('/pgapi/settings', {data: {settingsPath, settings: original[settingsPath]}});
-      expect(res.ok(), 'restoring ' + settingsPath).toBe(true);
+      await expectApiOk(res, 'restoring ' + settingsPath);
     }
     await admin.dispose();
   });
@@ -56,9 +57,7 @@ test.describe('Admin config', () => {
     await toggle.click();
     const saved = page.waitForResponse(isSettingsSave);
     await page.locator('form#Upload button.btn-success', {hasText: 'Save'}).click();
-    const res = await saved;
-    expect(res.ok()).toBe(true);
-    expect((await res.json()).error).toBeNull();
+    await expectApiOk(await saved, 'saving the settings');
 
     await openAdmin(page);
     await expect(page.locator('form#Upload').locator('[id="Upload.enabled"]')).toBeChecked({checked: !wasEnabled});
@@ -68,7 +67,7 @@ test.describe('Admin config', () => {
     await page.locator('form#Upload').locator('[id="Upload.enabled"]').click();
     const restored = page.waitForResponse(isSettingsSave);
     await page.locator('form#Upload button.btn-success', {hasText: 'Save'}).click();
-    expect((await restored).ok()).toBe(true);
+    await expectApiOk(await restored, 'restoring the setting');
     expect((await getSettings(admin))['Upload']['enabled']).toBe(wasEnabled);
   });
 
@@ -128,7 +127,7 @@ test.describe('Admin config', () => {
     await indexing.locator('app-settings-job-button button', {hasText: /Run now:\s*Indexing/}).click();
     const started = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/admin/jobs/scheduled/Indexing/start');
     await page.locator('.modal-footer button', {hasText: 'Run now'}).click();
-    expect((await started).ok()).toBe(true);
+    await expectApiOk(await started, 'starting the indexing');
 
     await expect.poll(async () => {
       const p = await indexingProgress();
@@ -172,9 +171,7 @@ test.describe('Admin config', () => {
 
       const saved = page.waitForResponse(isSettingsSave);
       await page.locator('form#Jobs button.btn-success', {hasText: 'Save'}).click();
-      const res = await saved;
-      expect(res.ok()).toBe(true);
-      expect((await res.json()).error).toBeNull();
+      await expectApiOk(await saved, 'saving the job schedule');
 
       // the server has it
       const schedules = (await getSettings(admin))['Jobs']['scheduled'] as { name: string, trigger: { type: number, periodicity?: number } }[];

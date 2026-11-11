@@ -1,12 +1,12 @@
 // CUJ 39 (#1315): the admin manages the users on the admin page.
 import {randomUUID} from 'node:crypto';
 import {expect, Locator, Page, test} from '@playwright/test';
-import {desktopViewport, loginWithUi} from './helpers';
+import {deleteUserWithApi, desktopViewport, expectApiOk, loginWithUi} from './helpers';
 
 const openAdmin = async (page: Page): Promise<void> => {
   const users = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/user/list');
   await page.goto('/admin');
-  expect((await users).ok()).toBe(true);
+  await expectApiOk(await users, 'loading the users');
 };
 
 const userRow = (page: Page, name: string): Locator =>
@@ -25,11 +25,7 @@ test.describe('Users', () => {
 
     test.afterEach(async ({request}) => {
       // clean up, also when the test failed halfway
-      const users: { id: number, name: string }[] = (await (await request.get('/pgapi/user/list')).json()).result;
-      const left = users.find(u => u.name === name);
-      if (left) {
-        expect((await request.delete('/pgapi/user/' + left.id)).ok()).toBe(true);
-      }
+      await deleteUserWithApi(request, name);
     });
 
     test('should add a user, change its role, let it log in with the new role and delete it', async ({page, browser, baseURL}) => {
@@ -45,9 +41,7 @@ test.describe('Users', () => {
       await addModal.locator('select[name="role"]').selectOption({label: 'Guest'});
       const created = page.waitForResponse(isUserApi('PUT', /^\/pgapi\/user$/));
       await addModal.locator('.modal-footer button', {hasText: 'Add User'}).click();
-      const createdRes = await created;
-      expect(createdRes.ok()).toBe(true);
-      expect((await createdRes.json()).error).toBeNull();
+      await expectApiOk(await created, 'adding the user');
       await expect(addModal).toBeHidden();
 
       // it shows in the list with its role
@@ -66,8 +60,8 @@ test.describe('Users', () => {
       const roleChanged = page.waitForResponse(isUserApi('POST', /^\/pgapi\/user\/\d+\/role$/));
       const settingsSaved = page.waitForResponse(isUserApi('POST', /^\/pgapi\/user\/\d+\/settings$/));
       await editModal.locator('.modal-footer button', {hasText: 'Save changes'}).click();
-      expect((await (await roleChanged).json()).error).toBeNull();
-      expect((await (await settingsSaved).json()).error).toBeNull();
+      await expectApiOk(await roleChanged, 'changing the role');
+      await expectApiOk(await settingsSaved, 'saving the user settings');
       await expect(editModal).toBeHidden();
       await expect(row.locator('td').nth(1)).toHaveText('Admin');
 
@@ -79,14 +73,14 @@ test.describe('Users', () => {
         await expect(userPage).toHaveURL(url => url.pathname.startsWith('/gallery'));
         const settingsLoaded = userPage.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings');
         await userPage.goto('/admin');
-        expect((await settingsLoaded).ok()).toBe(true);
+        await expectApiOk(await settingsLoaded, 'loading the settings as the new admin');
         await expect(userPage).toHaveURL(url => url.pathname === '/admin');
         await expect(userPage.locator('form#Server')).toBeVisible();
 
         // the admin deletes it
         const deleted = page.waitForResponse(isUserApi('DELETE', /^\/pgapi\/user\/\d+$/));
         await row.locator('button:has(ng-icon[name="ionTrashOutline"])').click();
-        expect((await (await deleted).json()).error).toBeNull();
+        await expectApiOk(await deleted, 'deleting the user');
         await expect(row).toHaveCount(0);
         // also after a reload
         await openAdmin(page);

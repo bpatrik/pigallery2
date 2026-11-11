@@ -1,6 +1,6 @@
 // The admin page (#1315). Read-only: the tests that change the config or run jobs are in admin-config.spec.ts.
 import {expect, test} from '@playwright/test';
-import {asNormalUser, desktopViewport, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
+import {asNormalUser, desktopViewport, expectApiOk, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
 
 test.describe('Admin', () => {
   test.use(desktopViewport({width: 1200, height: 800}));
@@ -8,7 +8,7 @@ test.describe('Admin', () => {
   test('Admin page should look right for an admin', {tag: '@sanity'}, async ({page}) => {
     const settingsLoaded = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings');
     await page.goto('/admin');
-    expect((await settingsLoaded).ok()).toBe(true);
+    await expectApiOk(await settingsLoaded, 'loading the settings');
 
     await expect(page).toHaveURL(url => url.pathname === '/admin');
     await expect.soft(page.locator('.version'), 'app version').toContainText(/v\d/);
@@ -32,7 +32,7 @@ test.describe('Admin', () => {
   test('Duplicates should look right for an admin', {tag: '@sanity'}, async ({page}) => {
     const duplicates = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/admin/duplicates');
     await page.goto('/duplicates');
-    expect((await duplicates).ok()).toBe(true);
+    await expectApiOk(await duplicates, 'loading the duplicates');
 
     await expect.soft(page.locator('app-duplicate .alert'), 'summary').toContainText(/Listing \d+ duplicates/);
     const pair = page.locator('app-duplicate .card').filter({hasText: 'big_ben_only_time.jpg'});
