@@ -419,6 +419,18 @@ describe('SearchQueryDTOUtils.matchDirectorySearch', () => {
     expect(match('Photos/Public', 'photos/public', TextSearchQueryMatchTypes.exact_match)).to.be.true;
   });
 
+  // like the SQL search: the parser collapses double spaces, they are usually a typo (#1309)
+  it('should collapse runs of spaces', () => {
+    expect(match('photos/summer  trip   2024', 'photos/summer trip 2024', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+    expect(match('photos/summer trip 2024', 'photos/summer  trip 2024', TextSearchQueryMatchTypes.exact_match)).to.be.true;
+    expect(match('photos/summer  trip/sub', 'summer trip')).to.be.true;
+    expect(match('photos/summer  trip/sub', 'photos/summer trip/*', TextSearchQueryMatchTypes.globMatch)).to.be.true;
+    expect(match('photos/summertrip', 'photos/summer trip', TextSearchQueryMatchTypes.exact_match)).to.be.false;
+    expect(SearchQueryUtils.isDirectoryAnchoredParent('photos/summer  trip',
+      [{type: SearchQueryTypes.directory, value: 'photos/summer trip/sub', matchType: TextSearchQueryMatchTypes.exact_match}]))
+      .to.be.true;
+  });
+
   it('should negate', () => {
     expect(match('photos/public', 'photos/public', TextSearchQueryMatchTypes.exact_match, true)).to.be.false;
     expect(match('photos/other', 'photos/public', TextSearchQueryMatchTypes.exact_match, true)).to.be.true;
