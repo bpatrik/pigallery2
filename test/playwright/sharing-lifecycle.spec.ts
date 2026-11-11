@@ -8,8 +8,9 @@ import {ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, deleteShari
 // (the same as frameParams of frame.spec.ts)
 const FRAME_PARAMS = 'play=true&auInt=1&ls=true&cAO=true&cd=true&ssp=300';
 
-// long enough to open the sharing on a busy server, short enough to wait for
-const SHORT_VALIDITY = 10000;
+// The tests don't wait for a sharing to expire. The countdown runs on the clock of the browser, which the tests fake
+// (page.clock) and move next to the expiry of the sharing; the server learns about the expiry through the API.
+const HOUR = 60 * 60 * 1000;
 
 const countDown = (page: Page) => page.locator('nav').getByText(/Link availability/);
 // the countdown reached zero (or went past it)
@@ -43,44 +44,60 @@ test.describe('Sharing ends while the guest has it open', () => {
     await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible({timeout: 15000});
   };
 
+  /**
+   * The sharing expires now on the server, as if its time ran out (the owner sets its validity to 0 ms).
+   */
+  const expireOnServer = async (sharing: CreatedSharing): Promise<void> => {
+    const stored = (await (await admin.get('/pgapi/share/' + sharing.sharingKey)).json()).result;
+    await expectApiOk(await admin.put('/pgapi/share/', {
+      data: {updateSharing: {id: stored.id, directoryQuery: stored.directoryQuery, valid: 0}},
+    }), 'expiring the sharing');
+  };
+
+  const seconds = async (page: Page): Promise<number> =>
+    Number((await countDown(page).innerText()).match(/:(\d\d)\s*$/)?.[1]);
+
   test('Countdown should show the time left of a sharing that expires soon', async ({page}) => {
-    const sharing = await share({valid: 60 * 1000});
+    const sharing = await share({valid: HOUR});
+    await page.clock.install();
     await openAsGuest(page, sharing);
 
-    // less than a minute, counting down
-    await expect(countDown(page)).toHaveText(/Link availability\s*:\s*0\s*days\s*,\s*00:00\s*:[0-5]\d/);
-    const seconds = async (): Promise<number> => Number((await countDown(page).innerText()).match(/:(\d\d)\s*$/)?.[1]);
-    const first = await seconds();
-    await expect.poll(seconds, {message: 'seconds left'}).toBeLessThan(first);
+    // half a minute before the expiry; the clock stands still, so the countdown moves only with runFor()
+    await page.clock.pauseAt(sharing.expires - 30 * 1000);
+    await page.clock.runFor(1000);
+    await expect(countDown(page)).toHaveText(/Link availability\s*:\s*0\s*days\s*,\s*00:00\s*:(29|30)/);
+    const first = await seconds(page);
+    await page.clock.runFor(5000);
+    await expect.poll(() => seconds(page), {message: 'seconds left'}).toBeLessThanOrEqual(first - 4);
   });
 
   test('Countdown should not go below zero when the sharing expires', async ({page}) => {
     test.fail(true, 'Not implemented yet #1307: the countdown goes on below zero ("-1 days , 23:59:59")');
-    const sharing = await share({valid: SHORT_VALIDITY});
+    const sharing = await share({valid: HOUR});
+    await page.clock.install();
     await openAsGuest(page, sharing);
 
-    // everything the countdown shows until a while after the expiry
+    // everything the countdown shows from 2 s before until 3 s after the expiry, every quarter of a second
+    await page.clock.pauseAt(sharing.expires - 2000);
     const shown = new Set<string>();
-    await expect.poll(async () => {
-      const text = await countDown(page).innerText({timeout: 500}).catch(() => '');
-      if (text) {
-        shown.add(text.replace(/\s+/g, ' '));
-      }
-      return Date.now() > sharing.expires + 2500;
-    }, {message: 'waiting until the sharing expired', intervals: [200], timeout: SHORT_VALIDITY + 10000}).toBe(true);
+    for (let i = 0; i < 20; i++) {
+      await page.clock.runFor(250);
+      shown.add((await countDown(page).innerText()).replace(/\s+/g, ' '));
+    }
 
     expect([...shown].filter(t => /-\d|NaN/.test(t)), 'negative or NaN countdown values').toEqual([]);
   });
 
   test('Sharing that expired while open should show the invalid link page on the next navigation', async ({page}) => {
     test.fail(true, 'Not implemented yet #1307: the guest gets an empty gallery with a negative countdown instead');
-    const sharing = await share({valid: SHORT_VALIDITY});
+    const sharing = await share({valid: HOUR});
+    await page.clock.install();
     await openAsGuest(page, sharing);
 
-    await expect(countDown(page)).toHaveText(COUNTDOWN_AT_ZERO, {timeout: SHORT_VALIDITY + 5000});
-    // the countdown shows 00:00:00 for the last second before the expiry
-    await expect.poll(() => Date.now() > sharing.expires + 1000, {message: 'waiting until the sharing expired', timeout: 5000})
-      .toBe(true);
+    await expireOnServer(sharing);
+    // the browser's clock a second past the expiry it knows; the time goes on, so the page keeps working
+    await page.clock.fastForward(sharing.expires + 1000 - await page.evaluate(() => Date.now()));
+    await expect(countDown(page)).toHaveText(COUNTDOWN_AT_ZERO);
     await page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click();
 
     await expectInvalidLinkPage(page);
