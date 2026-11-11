@@ -1,5 +1,6 @@
 import {expect} from 'chai';
-import {ErrorDTO} from '../../../../../src/common/entities/Error';
+import * as path from 'node:path';
+import {ErrorCodes, ErrorDTO} from '../../../../../src/common/entities/Error';
 import {SettingsMWs} from '../../../../../src/backend/middlewares/admin/SettingsMWs';
 import {ServerUserConfig} from '../../../../../src/common/config/private/PrivateConfig';
 import {Config} from '../../../../../src/common/config/private/Config';
@@ -93,5 +94,22 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
 
   });
 
+  // typeconfig validates the values and ConfigDiagnostics.testConfig checks them (both have their own tests);
+  // this only checks that the middleware applies and saves nothing when they reject the settings
+  it('should not change or save the config when the settings are rejected', async () => {
+    const before = Config.Media.folder;
+    const media = ConfigClassBuilder.attachPrivateInterface(Config.Media).toJSON({skipTags: {secret: true}}) as Record<string, unknown>;
+    const req: any = {
+      session: {}, sessionOptions: {}, query: {}, params: {},
+      body: {settingsPath: 'Media', settings: {...media, folder: path.join(TestHelper.TMP_DIR, 'not-existing-images-folder')}}
+    };
+    const err = await new Promise<ErrorDTO | undefined>((resolve) => {
+      SettingsMWs.updateSettings(req, null!, resolve as any).catch(resolve);
+    });
+    expect(err).to.be.instanceOf(ErrorDTO);
+    expect(err!.code).to.equal(ErrorCodes.SETTINGS_ERROR);
+    expect(Config.Media.folder).to.equal(before);
+    expect((await ExtensionConfigWrapper.original()).Media.folder).to.equal(before);
+  });
 
 });
