@@ -10,30 +10,9 @@ import {
   loginWithUi,
   logoutWithUi,
   notLoggedIn,
-  TestUser
+  TestUser,
+  trackPendingApiRequests
 } from './helpers';
-
-const isApi = (url: string): boolean => new URL(url).pathname.startsWith('/pgapi/');
-
-/**
- * Counts the API requests of the page that did not finish yet. Call it before the requests start.
- */
-const trackPendingApiRequests = (page: Page): () => number => {
-  let pending = 0;
-  page.on('request', req => {
-    if (isApi(req.url())) {
-      pending++;
-    }
-  });
-  const done = (req: { url: () => string }): void => {
-    if (isApi(req.url())) {
-      pending--;
-    }
-  };
-  page.on('requestfinished', done);
-  page.on('requestfailed', done);
-  return () => pending;
-};
 
 /**
  * Fills the login form without submitting it, so the test can watch what happens after the click.
@@ -206,10 +185,13 @@ test.describe('Login', () => {
      * Logs in as the user, then the admin deletes the user while the gallery is open, and the user opens a folder.
      */
     const deleteUserWhileOpen = async (page: Page): Promise<void> => {
+      const pendingApiRequests = trackPendingApiRequests(page);
       const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
       await loginWithUi(page, user.name, user.password);
       await content;
       await expect(page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'})).toBeVisible();
+      // a thumbnail that is still loading would notice the ended session (401 -> /login) before the click below
+      await expect.poll(pendingApiRequests, {message: 'pending API requests', timeout: 15000}).toBe(0);
 
       expect(await deleteUserWithApi(admin, user.name), 'the user existed').toBe(true);
 

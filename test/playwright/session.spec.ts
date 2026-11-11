@@ -11,7 +11,8 @@ import {
   isGalleryContent,
   loginWithUi,
   notLoggedIn,
-  TestUser
+  TestUser,
+  trackPendingApiRequests
 } from './helpers';
 
 // a directory listing, not its media (e.g.: content/dir/photo.jpg/320)
@@ -52,8 +53,11 @@ test.describe('Session ends on a deep link', () => {
    * Logs in, opens the url and waits for the response that shows it.
    */
   const loginAndOpen = async (page: Page, url: string, isContent: (u: URL) => boolean): Promise<void> => {
+    // the gallery root that the login opens; otherwise its answer could be taken for the answer of the url below
+    const root = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await loginWithUi(page, user.name, user.password);
     await expect(page).toHaveURL(/\/gallery/);
+    await root;
     const content = page.waitForResponse(res => isContent(new URL(res.url())));
     await page.goto(url);
     await expectApiOk(await content, 'loading ' + url);
@@ -97,9 +101,12 @@ test.describe('Session ends on a deep link', () => {
   test('Folder should open after logging in again when the session ended while navigating to it', async ({page}) => {
     test.fail(true, 'Not implemented yet #1306: the login does not keep the return URL, the user lands on the gallery root');
     // a folder with accents: the return URL has to survive the encoding
+    const pendingApiRequests = trackPendingApiRequests(page);
     await loginAndOpen(page, '/gallery/' + encodeURIComponent(ACCENTED_DIR), isDirectoryContent);
     const subdirectory = page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'});
     await expect(subdirectory).toBeVisible();
+    // a thumbnail that is still loading would notice the ended session (401 -> /login) before the click below
+    await expect.poll(pendingApiRequests, {message: 'pending API requests', timeout: 15000}).toBe(0);
 
     await endSession();
     await subdirectory.click();
