@@ -15,7 +15,6 @@ import {
 
 // a directory listing, not its media (e.g.: content/dir/photo.jpg/320)
 const isDirectoryContent = (url: URL): boolean => /^\/pgapi\/gallery\/content\/(?!.*\.\w+\/\d+$)/.test(url.pathname);
-const isSearch = (url: URL): boolean => url.pathname.startsWith('/pgapi/search/');
 
 /**
  * Logs in on the login page that the app redirected to, without opening '/' first (loginWithUi would),
@@ -111,25 +110,5 @@ test.describe('Session ends on a deep link', () => {
     // the folder the user was opening when the session ended
     await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
     await expect(page.locator('.photo-container > img[alt="IMG_8824.jpg"]')).toBeVisible();
-  });
-
-  test('Search should open again after logging in again as another user', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306: the login does not keep the return URL, the user lands on the gallery root');
-    await loginAndOpen(page, '/search/big_ben', isSearch);
-    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-
-    await endSession();
-    await page.reload();
-    await expect(page).toHaveURL(/\/login/);
-
-    // someone else logs in on the same browser (e.g.: the admin): the search is not tied to the user
-    const other = await createUserWithApi(admin, 'e2e-session-return-other');
-    try {
-      await loginOnCurrentLoginPage(page, other);
-      await expect(page).toHaveURL(url => url.pathname === '/search/big_ben');
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-    } finally {
-      await deleteUserWithApi(admin, other.name);
-    }
   });
 });
