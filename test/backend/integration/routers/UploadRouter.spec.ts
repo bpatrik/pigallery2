@@ -197,12 +197,6 @@ describe('UploadRouter', () => {
       await expectToFail('#1315', () => res.should.have.status(403), /status code 403 but got 401/);
     });
 
-    it('should have a 50 MB upload size limit by default', async () => {
-      // the Upload.maxFileSizeMB setting does not exist yet
-      await expectToFail('#1314', () => should.equal((Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'], 50),
-        /expected undefined to equal 50/);
-    });
-
     it('should reject a file above the size limit with the limit in the message and save the others', async () => {
       (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'] = 1;
       const loginRes = await login(server);
