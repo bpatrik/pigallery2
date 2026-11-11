@@ -217,6 +217,8 @@ Pitfalls seen so far:
 - Keep strict typing; prefer explicit return types.
 - Angular components: separate `.ts`, `.html` and `.css` files (`templateUrl` / `styleUrls`), no inline `template` or `styles`.
 - Match the style of the surrounding code.
+- English only: identifiers, comments, test data and names (files, folders, people, albums, ...) use English words, never Hungarian.
+  The only exception is test data whose purpose is to test accents / non-ASCII text (e.g. `Árvíztűrő tükörfúrógép`).
 
 ## Git
 
