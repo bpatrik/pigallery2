@@ -61,7 +61,7 @@ test.describe('Errors', () => {
   });
 
   test.describe('Not existing folder', () => {
-    const missingDir = 'nem_létező_mappa';
+    const missingDir = 'not_existing_folder';
 
     // falling back to the root is intended
     test('should fall back to the root folder', async ({page}) => {
