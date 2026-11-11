@@ -26,7 +26,7 @@ describe('File processing jobs (#1315)', function (this: { timeout(ms: number): 
 
   const assets = path.join(__dirname, '../../../../backend/assets');
   const imageDir = path.join(TestHelper.TMP_DIR, 'job_images');
-  const albumDir = path.join(imageDir, 'Nyári képek');
+  const albumDir = path.join(imageDir, 'summer');
   let jobManager: JobManager;
 
   const photoConverting = DefaultsJobs[DefaultsJobs['Photo Converting']];
@@ -47,9 +47,10 @@ describe('File processing jobs (#1315)', function (this: { timeout(ms: number): 
     TestHelper.resetConfig();
     fs.rmSync(TestHelper.TMP_DIR, {recursive: true, force: true});
     fs.mkdirSync(albumDir, {recursive: true});
-    fs.copyFileSync(path.join(assets, 'test image öüóőúéáű-.,.jpg'), path.join(imageDir, 'Balaton öüóőúéáű.jpg'));
-    fs.copyFileSync(path.join(assets, 'two_ratings.jpg'), path.join(albumDir, 'Tihany.jpg'));
-    fs.copyFileSync(path.join(assets, 'video.mp4'), path.join(albumDir, 'Hévíz.mp4'));
+    // accented file name: thumbnails of non-ASCII paths
+    fs.copyFileSync(path.join(assets, 'test image öüóőúéáű-.,.jpg'), path.join(imageDir, 'árvíztűrő.jpg'));
+    fs.copyFileSync(path.join(assets, 'two_ratings.jpg'), path.join(albumDir, 'beach.jpg'));
+    fs.copyFileSync(path.join(assets, 'video.mp4'), path.join(albumDir, 'video.mp4'));
     Config.Database.dbFolder = TestHelper.TMP_DIR;
     Config.Media.folder = imageDir;
     Config.Media.tempFolder = path.join(TestHelper.TMP_DIR, 'tmp');
@@ -69,7 +70,7 @@ describe('File processing jobs (#1315)', function (this: { timeout(ms: number): 
 
   it('should generate the thumbnails of every photo and video in the temp folder', async () => {
     const size = Config.Media.Photo.thumbnailSizes[0];
-    const media = [path.join(imageDir, 'Balaton öüóőúéáű.jpg'), path.join(albumDir, 'Tihany.jpg'), path.join(albumDir, 'Hévíz.mp4')];
+    const media = [path.join(imageDir, 'árvíztűrő.jpg'), path.join(albumDir, 'beach.jpg'), path.join(albumDir, 'video.mp4')];
     for (const m of media) {
       expect(fs.existsSync(PhotoProcessing.generateConvertedPath(m, size)), 'no thumbnail before: ' + m).to.be.false;
     }
@@ -84,7 +85,7 @@ describe('File processing jobs (#1315)', function (this: { timeout(ms: number): 
     }
     expect(progress.steps.processed).to.equal(3);
     expect(progress.steps.skipped).to.equal(0);
-    expect(progress.logs.map(l => l.comment).join('\n')).to.contain('Tihany.jpg');
+    expect(progress.logs.map(l => l.comment).join('\n')).to.contain('beach.jpg');
 
     // a second run finds them and skips them
     const rerun = await runAndWait(photoConverting, {sizes: [size], indexedOnly: false});
@@ -94,7 +95,7 @@ describe('File processing jobs (#1315)', function (this: { timeout(ms: number): 
   });
 
   it('should convert the videos in the temp folder', async () => {
-    const video = path.join(albumDir, 'Hévíz.mp4');
+    const video = path.join(albumDir, 'video.mp4');
     const converted = VideoProcessing.generateConvertedFilePath(video);
     expect(fs.existsSync(converted)).to.be.false;
 
@@ -106,6 +107,6 @@ describe('File processing jobs (#1315)', function (this: { timeout(ms: number): 
     expect(await VideoProcessing.isValidConvertedPath(converted)).to.be.true;
     // only the video, not the photos
     expect(progress.steps.processed).to.equal(1);
-    expect(progress.logs.map(l => l.comment).join('\n')).to.not.contain('Tihany.jpg');
+    expect(progress.logs.map(l => l.comment).join('\n')).to.not.contain('beach.jpg');
   });
 });

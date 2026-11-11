@@ -161,13 +161,13 @@ describe('JobManager (#1315)', () => {
   });
 
   it('should process the other files when one file fails and log the failed one', async () => {
-    for (const name of ['Tihany.jpg', 'broken.jpg', 'Hévíz.jpg']) {
+    for (const name of ['beach.jpg', 'broken.jpg', 'mountain.jpg']) {
       fs.writeFileSync(path.join(imageDir, name), '');
     }
     await jobManager.run(brokenFileJob.Name, {indexedOnly: false}, true, false);
     await waitForJob(brokenFileJob.Name);
 
-    expect(brokenFileJob.processed.sort()).to.deep.equal(['Hévíz.jpg', 'Tihany.jpg']);
+    expect(brokenFileJob.processed.sort()).to.deep.equal(['beach.jpg', 'mountain.jpg']);
     const progress = progressOf(brokenFileJob.Name);
     expect(progress.state).to.equal(JobProgressStates.finished);
     expect(progress.logs.map(l => l.comment).join('\n')).to.match(/Error during processing file:.*broken\.jpg.*Unsupported image/);
@@ -185,11 +185,11 @@ describe('JobManager (#1315)', () => {
         }
         indexed.push(name);
         return {
-          directories: name === '.' ? ['Balaton', 'unreadable', 'Hévíz'].map(n => ({path: '/', name: n})) : []
+          directories: name === '.' ? ['beach', 'unreadable', 'mountains'].map(n => ({path: '/', name: n})) : []
         };
       }
     };
-    for (const name of ['Balaton', 'unreadable', 'Hévíz']) {
+    for (const name of ['beach', 'unreadable', 'mountains']) {
       fs.mkdirSync(path.join(imageDir, name));
     }
     const indexingName = DefaultsJobs[DefaultsJobs.Indexing];
@@ -198,7 +198,7 @@ describe('JobManager (#1315)', () => {
     await jobManager.run(indexingName, {indexChangesOnly: false}, true, false);
     await waitForJob(indexingName);
 
-    expect(indexed.sort()).to.deep.equal(['.', 'Balaton', 'Hévíz'].sort());
+    expect(indexed.sort()).to.deep.equal(['.', 'beach', 'mountains'].sort());
     const progress = progressOf(indexingName);
     expect(progress.state).to.equal(JobProgressStates.finished);
     expect(progress.logs.map(l => l.comment).join('\n')).to.contain('Indexing failed for: /unreadable');

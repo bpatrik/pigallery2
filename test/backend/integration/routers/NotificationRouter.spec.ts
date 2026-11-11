@@ -20,7 +20,7 @@ chai.use(chaiHttp);
 describe('NotificationRouter (#1315)', () => {
   before(TestHelper.resetConfig);
   const sqlHelper = new DBTestHelper(DatabaseType.sqlite);
-  const normalUser = {name: 'Ödön', password: 'jelszó', role: UserRoles.User};
+  const normalUser = {name: 'normal_user', password: 'password', role: UserRoles.User};
   const DEFAULT_ADMIN_WARNING = 'Using default admin user!';
   let server: Server;
 
