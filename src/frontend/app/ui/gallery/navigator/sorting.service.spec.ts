@@ -8,6 +8,7 @@ import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../..
 import {Config} from '../../../../../common/config/public/Config';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {DirectoryContent} from '../contentLoader.service';
+import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
 // stores the sorting and grouping per folder, like the localStorage based cache
 class FakeGalleryCacheService {
@@ -49,13 +50,19 @@ const folder = (name: string, metaFile: { name: string }[] = []): ContentWrapper
 const media = (name: string, creationDate: number, rating = 0): MediaDTO =>
   ({name, metadata: {creationDate, rating, size: {width: 10, height: 10}}} as unknown as MediaDTO);
 
+const detailedMedia = (name: string, creationDate: number, rating: number, faceCount: number, fileSize: number): MediaDTO =>
+  ({
+    name,
+    metadata: {creationDate, rating, fileSize, faces: new Array(faceCount).fill({name: 'Jane Smith'}), size: {width: 10, height: 10}}
+  } as unknown as MediaDTO);
+
 describe('GallerySortingService', () => {
   let service: GallerySortingService;
   let cache: FakeGalleryCacheService;
   let content: ReturnType<typeof signal<ContentWrapperWithError>>;
 
   beforeEach(() => {
-    content = signal(folder('Őszi kirándulás'));
+    content = signal(folder('Autumn trip'));
     TestBed.configureTestingModule({
       providers: [
         {provide: GalleryCacheService, useClass: FakeGalleryCacheService},
@@ -73,7 +80,7 @@ describe('GallerySortingService', () => {
     });
 
     it('should use the sorting of the folder\'s .pg2conf file', () => {
-      content.set(folder('Balaton', [{name: '.order_descending_name.pg2conf'}]));
+      content.set(folder('Lake', [{name: '.order_descending_name.pg2conf'}]));
       expect(service.sorting()).toEqual({method: SortByTypes.Name, ascending: false});
     });
 
@@ -81,14 +88,14 @@ describe('GallerySortingService', () => {
       const byName = {method: SortByTypes.Name, ascending: true};
       service.setSorting(byName);
       expect(service.sorting()).toEqual(byName);
-      expect(cache.getSorting(folder('Őszi kirándulás'))).toEqual(byName);
+      expect(cache.getSorting(folder('Autumn trip'))).toEqual(byName);
 
       // another folder gets its own (default) sorting
-      content.set(folder('Balaton'));
+      content.set(folder('Lake'));
       expect(service.sorting()).toEqual(Config.Gallery.NavBar.SortingGrouping.defaultPhotoSortingMethod);
 
       // back to the first folder
-      content.set(folder('Őszi kirándulás'));
+      content.set(folder('Autumn trip'));
       expect(service.sorting()).toEqual(byName);
     });
 
@@ -101,9 +108,9 @@ describe('GallerySortingService', () => {
     it('should save the chosen grouping for the folder', () => {
       const noGrouping = {method: GroupByTypes.NoGrouping, ascending: true};
       service.setGrouping(noGrouping);
-      content.set(folder('Balaton'));
+      content.set(folder('Lake'));
       expect(service.grouping()).toEqual(Config.Gallery.NavBar.SortingGrouping.defaultPhotoGroupingMethod);
-      content.set(folder('Őszi kirándulás'));
+      content.set(folder('Autumn trip'));
       expect(service.grouping()).toEqual(noGrouping);
     });
 
@@ -120,13 +127,14 @@ describe('GallerySortingService', () => {
       service.applySorting({...dc, media: [...dc.media]}, s, g)!.mediaGroups.map((mg) => mg.media.map((m) => m.name));
 
     const day = 24 * 60 * 60 * 1000;
+    // accents and numbers in the names on purpose: the name sorting must handle both
     const dc: DirectoryContent = {
       directories: [],
       metaFile: [],
       media: [
-        media('Őszi 10.jpg', Date.UTC(2025, 9, 2), 5),
-        media('Őszi 2.jpg', Date.UTC(2025, 9, 1), 1),
-        media('Ágnes.jpg', Date.UTC(2025, 9, 1) + day / 2, 3),
+        media('Éclair 10.jpg', Date.UTC(2025, 9, 2), 5),
+        media('Éclair 2.jpg', Date.UTC(2025, 9, 1), 1),
+        media('Árvíztűrő.jpg', Date.UTC(2025, 9, 1) + day / 2, 3),
       ]
     };
 
@@ -135,17 +143,108 @@ describe('GallerySortingService', () => {
     });
 
     it('should sort by name with numbers in order', () => {
-      expect(names(dc, {method: SortByTypes.Name, ascending: true})).toEqual([['Ágnes.jpg', 'Őszi 2.jpg', 'Őszi 10.jpg']]);
-      expect(names(dc, {method: SortByTypes.Name, ascending: false})).toEqual([['Őszi 10.jpg', 'Őszi 2.jpg', 'Ágnes.jpg']]);
+      expect(names(dc, {method: SortByTypes.Name, ascending: true})).toEqual([['Árvíztűrő.jpg', 'Éclair 2.jpg', 'Éclair 10.jpg']]);
+      expect(names(dc, {method: SortByTypes.Name, ascending: false})).toEqual([['Éclair 10.jpg', 'Éclair 2.jpg', 'Árvíztűrő.jpg']]);
     });
 
     it('should sort by rating', () => {
-      expect(names(dc, {method: SortByTypes.Rating, ascending: true})).toEqual([['Őszi 2.jpg', 'Ágnes.jpg', 'Őszi 10.jpg']]);
+      expect(names(dc, {method: SortByTypes.Rating, ascending: true})).toEqual([['Éclair 2.jpg', 'Árvíztűrő.jpg', 'Éclair 10.jpg']]);
     });
 
     it('should group by day and sort inside the groups', () => {
       const groups = names(dc, {method: SortByTypes.Name, ascending: true}, {method: GroupByTypes.Date, ascending: true});
-      expect(groups).toEqual([['Ágnes.jpg', 'Őszi 2.jpg'], ['Őszi 10.jpg']]);
+      expect(groups).toEqual([['Árvíztűrő.jpg', 'Éclair 2.jpg'], ['Éclair 10.jpg']]);
+    });
+
+    describe('every sorting and grouping option (#1308)', () => {
+      const MB = 1024 * 1024;
+      // name, date, rating, number of faces, file size; the order differs for every option
+      // (the names have accents on purpose: the sorting must be accent aware)
+      const all: DirectoryContent = {
+        directories: [],
+        metaFile: [],
+        media: [
+          detailedMedia('Zebra.jpg', Date.UTC(2025, 0, 3), 1, 3, 0.2 * MB),
+          detailedMedia('Árvíztűrő.jpg', Date.UTC(2025, 0, 1), 3, 1, 12 * MB),
+          detailedMedia('Avocado.jpg', Date.UTC(2025, 0, 2), 2, 2, 3 * MB),
+          detailedMedia('éclair.jpg', Date.UTC(2025, 0, 4), 4, 0, 1.5 * MB),
+        ]
+      };
+      const flat = (s: SortingMethod, g: GroupingMethod = noGrouping): string[] => names(all, s, g).flat();
+
+      it('should sort by name accent aware: Árvíztűrő sorts with A, not after Z', () => {
+        expect(flat({method: SortByTypes.Name, ascending: true})).toEqual(['Árvíztűrő.jpg', 'Avocado.jpg', 'éclair.jpg', 'Zebra.jpg']);
+      });
+
+      it('should sort by date', () => {
+        expect(flat({method: SortByTypes.Date, ascending: true})).toEqual(['Árvíztűrő.jpg', 'Avocado.jpg', 'Zebra.jpg', 'éclair.jpg']);
+        expect(flat({method: SortByTypes.Date, ascending: false})).toEqual(['éclair.jpg', 'Zebra.jpg', 'Avocado.jpg', 'Árvíztűrő.jpg']);
+      });
+
+      it('should sort by rating', () => {
+        expect(flat({method: SortByTypes.Rating, ascending: false})).toEqual(['éclair.jpg', 'Árvíztűrő.jpg', 'Avocado.jpg', 'Zebra.jpg']);
+      });
+
+      it('should sort by the number of persons', () => {
+        expect(flat({method: SortByTypes.PersonCount, ascending: true})).toEqual(['éclair.jpg', 'Árvíztűrő.jpg', 'Avocado.jpg', 'Zebra.jpg']);
+      });
+
+      it('should sort by file size', () => {
+        expect(flat({method: SortByTypes.FileSize, ascending: true})).toEqual(['Zebra.jpg', 'éclair.jpg', 'Avocado.jpg', 'Árvíztűrő.jpg']);
+      });
+
+      it('should group by date', () => {
+        const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.Date, ascending: false})!.mediaGroups;
+        expect(groups.map(g => g.media.map(m => m.name))).toEqual([['éclair.jpg'], ['Zebra.jpg'], ['Avocado.jpg'], ['Árvíztűrő.jpg']]);
+        expect(groups.map(g => g.date)).toEqual([4, 3, 2, 1].map(d => new Date(Date.UTC(2025, 0, d))));
+      });
+
+      it('should group by rating', () => {
+        const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.Rating, ascending: true})!.mediaGroups;
+        expect(groups.map(g => g.name)).toEqual(['1', '2', '3', '4']);
+      });
+
+      it('should group by the number of persons', () => {
+        const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.PersonCount, ascending: true})!.mediaGroups;
+        expect(groups.map(g => g.name)).toEqual(['0', '1', '2', '3']);
+      });
+
+      it('should group by file size', () => {
+        const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.FileSize, ascending: true})!.mediaGroups;
+        expect(groups.map(g => [g.name, g.media.map(m => m.name)])).toEqual([
+          ['<0.5 MB', ['Zebra.jpg']],
+          ['1 - 2 MB', ['éclair.jpg']],
+          ['2 - 5 MB', ['Avocado.jpg']],
+          ['10 - 15 MB', ['Árvíztűrő.jpg']],
+        ]);
+      });
+
+      it('should not group at all with no grouping', () => {
+        expect(names(all, {method: SortByTypes.Name, ascending: true})).toHaveLength(1);
+      });
+
+      // TODO #1308: the groups are made by the exact first letter (Á, A), so a letter with an accent splits
+      // the A group into several groups. Árvíztűrő should be in the same group as Avocado, like it sorts with A.
+      it.fails('should group by name accent aware: Árvíztűrő is in the A group', () => {
+        const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.Name, ascending: true})!.mediaGroups;
+        expect(groups.map(g => g.media.map(m => m.name))).toEqual([['Árvíztűrő.jpg', 'Avocado.jpg'], ['éclair.jpg'], ['Zebra.jpg']]);
+      });
+
+      it('should sort the folders by name accent aware, also for the options that only apply to media', () => {
+        const dirs = (s: SortingMethod): string[] => service.applySorting({
+          ...all,
+          directories: ['Zurich', 'Árvíztűrő', 'Aspen', 'Évian'].map(name => ({name} as SubDirectoryDTO))
+        }, s, noGrouping)!.directories.map(d => d.name);
+        for (const method of [SortByTypes.Name, SortByTypes.Rating, SortByTypes.PersonCount, SortByTypes.FileSize]) {
+          expect(dirs({method, ascending: true}), SortByTypes[method]).toEqual(['Árvíztűrő', 'Aspen', 'Évian', 'Zurich']);
+        }
+        expect(dirs({method: SortByTypes.Name, ascending: false})).toEqual(['Zurich', 'Évian', 'Aspen', 'Árvíztűrő']);
+      });
     });
 
     it('should shuffle the same way for the same content', () => {
