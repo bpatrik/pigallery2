@@ -39,7 +39,7 @@ describe('Routing', () => {
   const assets = path.join(__dirname, '../../assets');
 
   const ACCENTED = 'Árvíztűrő tükörfúrógép';
-  const SPECIAL = '100% kész+más #1';
+  const SPECIAL = '100% done+more #1';
   const DOTS = 'folder.with.dots';
   const PHOTO_DIR = 'dir.jpg'; // a folder that is named like a photo
   const HIDDEN = '.hidden';
@@ -47,9 +47,9 @@ describe('Routing', () => {
   // real files, needed by the routes that read the content (thumbnails, bestFit)
   const realFiles: Record<string, string> = {
     'photo.jpg': path.join(assets, 'sidecar/no_metadata.jpg'),
-    [ACCENTED + '/kép 1.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
-    [ACCENTED + '/al mappa/kép 2.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
-    [HIDDEN + '/titkos mappa/kép.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
+    [ACCENTED + '/photo 1.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
+    [ACCENTED + '/sub folder/photo 2.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
+    [HIDDEN + '/secret folder/photo.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
     'video.mp4': path.join(assets, 'sidecar/20240128_105420.mp4'),
     'track.gpx': path.join(__dirname, '../../../../demo/images/SF- LA flight.gpx'),
   };
@@ -61,11 +61,11 @@ describe('Routing', () => {
     ...SupportedFormats.Photos.map(f => 'upper/F.' + f.toUpperCase()),
     ...SupportedFormats.Videos.map(f => 'upper/F.' + f.toUpperCase()),
     'formats/f.txt',
-    ACCENTED + '/árvíz.png',
+    ACCENTED + '/árvíztűrő.png',
     SPECIAL + '/a+b #c 100%.jpg',
     DOTS + '/a.b c.jpg',
-    PHOTO_DIR + '/benne.jpg',
-    HIDDEN + '/titkos mappa/rejtett.png',
+    PHOTO_DIR + '/inside.jpg',
+    HIDDEN + '/secret folder/hidden.png',
   ];
 
   let server: Server;
@@ -203,15 +203,15 @@ describe('Routing', () => {
       it('should list nested folders', async () => {
         expect(await listDir(api('/gallery/content/formats'))).to.deep.equal({name: 'formats', path: '.' + path.sep});
         expect(await listDir(api('/gallery/content/formats/'))).to.deep.equal({name: 'formats', path: '.' + path.sep});
-        expect(await listDir(api('/gallery/content/' + enc(ACCENTED + '/al mappa'))))
-          .to.deep.equal({name: 'al mappa', path: ACCENTED + path.sep});
+        expect(await listDir(api('/gallery/content/' + enc(ACCENTED + '/sub folder'))))
+          .to.deep.equal({name: 'sub folder', path: ACCENTED + path.sep});
       });
 
       it('should decode non-ASCII, percent-encoded and special names', async () => {
         expect(await listDir(api('/gallery/content/' + enc(ACCENTED)))).to.deep.equal({name: ACCENTED, path: '.' + path.sep});
         // an encoded '/' is a separator too
-        expect(await listDir(api('/gallery/content/' + encodeURIComponent(ACCENTED + '/al mappa'))))
-          .to.deep.equal({name: 'al mappa', path: ACCENTED + path.sep});
+        expect(await listDir(api('/gallery/content/' + encodeURIComponent(ACCENTED + '/sub folder'))))
+          .to.deep.equal({name: 'sub folder', path: ACCENTED + path.sep});
         expect(await listDir(api('/gallery/content/' + encodeURIComponent(SPECIAL)))).to.deep.equal({name: SPECIAL, path: '.' + path.sep});
         expect(await listDir(api('/gallery/content/' + DOTS))).to.deep.equal({name: DOTS, path: '.' + path.sep});
       });
@@ -221,13 +221,13 @@ describe('Routing', () => {
       });
 
       it('should list a folder under a hidden folder', async () => {
-        expect(await listDir(api('/gallery/content/' + enc(HIDDEN + '/titkos mappa'))))
-          .to.deep.equal({name: 'titkos mappa', path: HIDDEN + path.sep});
+        expect(await listDir(api('/gallery/content/' + enc(HIDDEN + '/secret folder'))))
+          .to.deep.equal({name: 'secret folder', path: HIDDEN + path.sep});
       });
 
       it('should not find a file or a missing folder', async () => {
         shouldHaveError(await get(api('/gallery/content/formats/f.txt')), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
-        shouldHaveError(await get(api('/gallery/content/' + enc('nincs ilyen'))), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
+        shouldHaveError(await get(api('/gallery/content/' + enc('no such folder'))), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
       });
 
       it('should reject path traversal', async () => {
@@ -258,8 +258,8 @@ describe('Routing', () => {
       });
 
       it('should serve files with non-ASCII, special and dotted names', async () => {
-        for (const rel of [ACCENTED + '/árvíz.png', SPECIAL + '/a+b #c 100%.jpg', DOTS + '/a.b c.jpg',
-          PHOTO_DIR + '/benne.jpg']) {
+        for (const rel of [ACCENTED + '/árvíztűrő.png', SPECIAL + '/a+b #c 100%.jpg', DOTS + '/a.b c.jpg',
+          PHOTO_DIR + '/inside.jpg']) {
           await shouldServe(api('/gallery/content/' + enc(rel)), rel);
           // encoded '/'
           await shouldServe(api('/gallery/content/' + encodeURIComponent(rel)), rel);
@@ -267,7 +267,7 @@ describe('Routing', () => {
       });
 
       it('should serve files under a hidden folder', async () => {
-        const rel = HIDDEN + '/titkos mappa/rejtett.png';
+        const rel = HIDDEN + '/secret folder/hidden.png';
         await shouldServe(api('/gallery/content/' + enc(rel)), rel);
       });
 
@@ -279,7 +279,7 @@ describe('Routing', () => {
 
       it('should report missing media of every format', async () => {
         for (const f of [...SupportedFormats.Photos, ...SupportedFormats.Videos, ...SupportedFormats.MetaFiles]) {
-          shouldHaveError(await get(api('/gallery/content/nincs.' + f)), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f)), ErrorCodes.PATH_ERROR);
         }
       });
 
@@ -308,7 +308,7 @@ describe('Routing', () => {
       };
 
       it('should get photo icons and thumbnails', async () => {
-        for (const rel of ['photo.jpg', ACCENTED + '/kép 1.jpg', ACCENTED + '/al mappa/kép 2.jpg', HIDDEN + '/titkos mappa/kép.jpg']) {
+        for (const rel of ['photo.jpg', ACCENTED + '/photo 1.jpg', ACCENTED + '/sub folder/photo 2.jpg', HIDDEN + '/secret folder/photo.jpg']) {
           await shouldBeImage(api('/gallery/content/' + enc(rel) + '/icon'));
           await shouldBeImage(api('/gallery/content/' + enc(rel) + '/240'));
           await shouldBeImage(api('/gallery/content/' + encodeURIComponent(rel) + '/240'));
@@ -332,25 +332,25 @@ describe('Routing', () => {
       it('should route the actions of every format', async () => {
         // a missing file reaches loadFile of the matching route
         for (const f of [...SupportedFormats.Photos, ...SupportedFormats.Videos]) {
-          shouldHaveError(await get(api('/gallery/content/nincs.' + f + '/icon')), ErrorCodes.PATH_ERROR);
-          shouldHaveError(await get(api('/gallery/content/nincs.' + f + '/240')), ErrorCodes.PATH_ERROR);
-          shouldHaveError(await get(api('/gallery/content/nincs.' + f.toUpperCase() + '/240')), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/icon')), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/240')), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f.toUpperCase() + '/240')), ErrorCodes.PATH_ERROR);
         }
         for (const f of [...SupportedFormats.Videos, ...SupportedFormats.MetaFiles]) {
-          shouldHaveError(await get(api('/gallery/content/nincs.' + f + '/bestFit')), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/bestFit')), ErrorCodes.PATH_ERROR);
         }
       });
 
       it('should not route actions of other files', async () => {
-        shouldHaveError(await get(api('/gallery/content/nincs.txt/icon')), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
-        shouldHaveError(await get(api('/gallery/content/nincs.gpx/240')), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
+        shouldHaveError(await get(api('/gallery/content/missing.txt/icon')), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
+        shouldHaveError(await get(api('/gallery/content/missing.gpx/240')), ErrorCodes.DIRECTORY_NOT_FOUND, 404);
       });
     });
 
     describe('search, autocomplete and zip', () => {
       before(async () => {
         // index the folders
-        for (const dir of ['', ACCENTED, ACCENTED + '/al mappa', SPECIAL, DOTS, PHOTO_DIR, 'formats']) {
+        for (const dir of ['', ACCENTED, ACCENTED + '/sub folder', SPECIAL, DOTS, PHOTO_DIR, 'formats']) {
           await listDir(api('/gallery/content/' + enc(dir)));
         }
       });
@@ -371,14 +371,14 @@ describe('Routing', () => {
       it('should search with an encoded query', async () => {
         expect(await search(api('/search/' + encodeURIComponent(JSON.stringify(dirQuery(SPECIAL))))))
           .to.deep.equal(['a+b #c 100%.jpg']);
-        expect(await search(api('/search/' + encodeURIComponent(JSON.stringify(dirQuery(ACCENTED + '/al mappa'))))))
-          .to.deep.equal(['kép 2.jpg']);
+        expect(await search(api('/search/' + encodeURIComponent(JSON.stringify(dirQuery(ACCENTED + '/sub folder'))))))
+          .to.deep.equal(['photo 2.jpg']);
       });
 
       it('should search with a query that has a not encoded "/"', async () => {
-        const q = encodeURIComponent(JSON.stringify(dirQuery(ACCENTED + '/al mappa'))).replace(/%2F/g, '/');
+        const q = encodeURIComponent(JSON.stringify(dirQuery(ACCENTED + '/sub folder'))).replace(/%2F/g, '/');
         expect(q).to.contain('/');
-        expect(await search(api('/search/' + q))).to.deep.equal(['kép 2.jpg']);
+        expect(await search(api('/search/' + q))).to.deep.equal(['photo 2.jpg']);
       });
 
       it('should autocomplete', async () => {
@@ -389,9 +389,9 @@ describe('Routing', () => {
           return res.json.result.map((i: { value: string }) => i.value);
         };
         expect(await autocomplete(api('/autocomplete/' + encodeURIComponent('Árvíz')))).to.contain(ACCENTED);
-        expect(await autocomplete(api('/autocomplete/' + encodeURIComponent('100% k')))).to.contain(SPECIAL);
+        expect(await autocomplete(api('/autocomplete/' + encodeURIComponent('100% d')))).to.contain(SPECIAL);
         // a not encoded '/' is part of the value
-        expect((await get(api('/autocomplete/al/mappa'))).json.error).to.equal(null);
+        expect((await get(api('/autocomplete/sub/folder'))).json.error).to.equal(null);
       });
 
       it('should zip a search result', async () => {
@@ -401,7 +401,7 @@ describe('Routing', () => {
           return new AdmZip(res.body).getEntries().map(e => e.entryName).sort();
         };
         expect(await zip(dirQuery(SPECIAL))).to.deep.equal(['a+b #c 100%.jpg']);
-        expect(await zip(dirQuery(ACCENTED + '/al mappa'))).to.deep.equal(['kép 2.jpg']);
+        expect(await zip(dirQuery(ACCENTED + '/sub folder'))).to.deep.equal(['photo 2.jpg']);
       });
     });
   });
@@ -434,12 +434,12 @@ describe('Routing', () => {
       expect(await sharedDirectory('')).to.equal(path.sep);
       expect(await sharedDirectory('/')).to.equal(path.sep);
       expect(await sharedDirectory('formats')).to.equal('formats');
-      expect(await sharedDirectory(enc(ACCENTED + '/al mappa'))).to.equal(path.join(ACCENTED, 'al mappa'));
-      expect(await sharedDirectory(encodeURIComponent(ACCENTED + '/al mappa'))).to.equal(path.join(ACCENTED, 'al mappa'));
+      expect(await sharedDirectory(enc(ACCENTED + '/sub folder'))).to.equal(path.join(ACCENTED, 'sub folder'));
+      expect(await sharedDirectory(encodeURIComponent(ACCENTED + '/sub folder'))).to.equal(path.join(ACCENTED, 'sub folder'));
       expect(await sharedDirectory(encodeURIComponent(SPECIAL))).to.equal(SPECIAL);
       expect(await sharedDirectory(DOTS)).to.equal(DOTS);
       expect(await sharedDirectory(PHOTO_DIR)).to.equal(PHOTO_DIR);
-      expect(await sharedDirectory(enc(HIDDEN + '/titkos mappa'))).to.equal(path.join(HIDDEN, 'titkos mappa'));
+      expect(await sharedDirectory(enc(HIDDEN + '/secret folder'))).to.equal(path.join(HIDDEN, 'secret folder'));
     });
 
     it('should authenticate the search, autocomplete and zip routes without a query', async () => {
@@ -462,9 +462,9 @@ describe('Routing', () => {
       const boundary = 'routing-test-boundary';
       const body = Buffer.concat([
         Buffer.from('--' + boundary + '\r\n' +
-          'Content-Disposition: form-data; name="files"; filename="feltöltés.jpg"\r\n' +
+          'Content-Disposition: form-data; name="files"; filename="árvíztűrő upload.jpg"\r\n' +
           'Content-Type: image/jpeg\r\n\r\n', 'utf8'),
-        Buffer.from('feltöltött', 'utf8'),
+        Buffer.from('uploaded', 'utf8'),
         Buffer.from('\r\n--' + boundary + '--\r\n', 'utf8'),
       ]);
       return call('POST', api('/upload/' + dir), {
@@ -476,10 +476,10 @@ describe('Routing', () => {
 
     it('should upload to folders', async () => {
       for (const [dir, rel] of [
-        ['', ''], ['/', ''], ['formats', 'formats'], [enc(ACCENTED + '/al mappa'), ACCENTED + '/al mappa'],
-        [encodeURIComponent(ACCENTED + '/al mappa'), ACCENTED + '/al mappa'], [encodeURIComponent(SPECIAL), SPECIAL],
-        [DOTS, DOTS], [PHOTO_DIR, PHOTO_DIR], [enc(HIDDEN + '/titkos mappa'), HIDDEN + '/titkos mappa']]) {
-        const target = path.join(mediaDir, rel, 'feltöltés.jpg');
+        ['', ''], ['/', ''], ['formats', 'formats'], [enc(ACCENTED + '/sub folder'), ACCENTED + '/sub folder'],
+        [encodeURIComponent(ACCENTED + '/sub folder'), ACCENTED + '/sub folder'], [encodeURIComponent(SPECIAL), SPECIAL],
+        [DOTS, DOTS], [PHOTO_DIR, PHOTO_DIR], [enc(HIDDEN + '/secret folder'), HIDDEN + '/secret folder']]) {
+        const target = path.join(mediaDir, rel, 'árvíztűrő upload.jpg');
         fs.rmSync(target, {force: true});
         const res = await upload(dir);
         expect(res.status, dir).to.equal(200);
@@ -494,7 +494,7 @@ describe('Routing', () => {
         expect(res.json.error?.code, t).to.equal(ErrorCodes.INPUT_ERROR);
       }
       for (const dir of [tmpDir, path.dirname(tmpDir), path.dirname(path.dirname(tmpDir))]) {
-        expect(fs.existsSync(path.join(dir, 'feltöltés.jpg')), dir).to.be.false;
+        expect(fs.existsSync(path.join(dir, 'árvíztűrő upload.jpg')), dir).to.be.false;
       }
     });
   });
@@ -505,9 +505,9 @@ describe('Routing', () => {
       await startServer(false);
       frontendFolder = ProjectPath.FrontendFolder;
       ProjectPath.FrontendFolder = path.join(tmpDir, 'frontend');
-      fs.mkdirSync(path.join(ProjectPath.FrontendFolder, 'en', 'assets', 'al mappa'), {recursive: true});
+      fs.mkdirSync(path.join(ProjectPath.FrontendFolder, 'en', 'assets', 'sub folder'), {recursive: true});
       fs.writeFileSync(path.join(ProjectPath.FrontendFolder, 'en', 'index.html'), '<!-- index -->');
-      fs.writeFileSync(path.join(ProjectPath.FrontendFolder, 'en', 'assets', 'al mappa', 'kép.png'), 'assets/al mappa/kép.png');
+      fs.writeFileSync(path.join(ProjectPath.FrontendFolder, 'en', 'assets', 'sub folder', 'árvíztűrő.png'), 'assets/sub folder/árvíztűrő.png');
       fs.writeFileSync(path.join(ProjectPath.FrontendFolder, 'en', 'assets', 'top.png'), 'assets/top.png');
     });
     after(async () => {
@@ -516,7 +516,7 @@ describe('Routing', () => {
     });
 
     it('should render the app for the gallery and search pages', async () => {
-      for (const url of ['/gallery', '/gallery/', '/gallery/' + enc(ACCENTED + '/al mappa'), '/gallery/a.jpg',
+      for (const url of ['/gallery', '/gallery/', '/gallery/' + enc(ACCENTED + '/sub folder'), '/gallery/a.jpg',
         '/galleryx', '/search', '/search/' + encodeURIComponent('{"a":"b/c"}'), '/search/a/b?p=c.jpg', '/searchx']) {
         const res = await get(url);
         expect(res.status, url).to.equal(200);
@@ -526,17 +526,17 @@ describe('Routing', () => {
 
     it('should serve nested and non-ASCII assets', async () => {
       await shouldServe('/assets/top.png', 'assets/top.png');
-      await shouldServe('/assets/' + enc('al mappa/kép.png'), 'assets/al mappa/kép.png');
-      await shouldServe('/assets/' + encodeURIComponent('al mappa/kép.png'), 'assets/al mappa/kép.png');
-      expect((await get('/assets/nincs.png')).status).to.equal(404);
+      await shouldServe('/assets/' + enc('sub folder/árvíztűrő.png'), 'assets/sub folder/árvíztűrő.png');
+      await shouldServe('/assets/' + encodeURIComponent('sub folder/árvíztűrő.png'), 'assets/sub folder/árvíztűrő.png');
+      expect((await get('/assets/missing.png')).status).to.equal(404);
       expect((await get('/assets/')).status).to.equal(404);
     });
 
     it('should redirect language links with a nested path', async () => {
       Config.Server.languages = ['en', 'hu'];
-      const res = await get('/hu/gallery/' + enc(ACCENTED + '/al mappa'));
+      const res = await get('/hu/gallery/' + enc(ACCENTED + '/sub folder'));
       expect(res.status).to.equal(302);
-      expect(res.headers['location']).to.equal('/gallery/' + enc(ACCENTED + '/al mappa') + '?ln=hu');
+      expect(res.headers['location']).to.equal('/gallery/' + enc(ACCENTED + '/sub folder') + '?ln=hu');
     });
   });
 
@@ -569,7 +569,7 @@ describe('Routing', () => {
 
     it('should log api requests as verbose', async () => {
       expect(await loggedAs(api('/gallery/content/'))).to.deep.equal(['verbose']);
-      expect(await loggedAs(api('/nincs/ilyen'))).to.deep.equal(['verbose']);
+      expect(await loggedAs(api('/no/such/path'))).to.deep.equal(['verbose']);
       expect(await loggedAs(api('x'))).to.deep.equal(['verbose']);
     });
 
@@ -583,7 +583,7 @@ describe('Routing', () => {
     });
 
     it('should not find unknown api paths', async () => {
-      const res = await get(api('/nincs/ilyen'));
+      const res = await get(api('/no/such/path'));
       expect(res.status).to.equal(404);
     });
 
@@ -599,7 +599,7 @@ describe('Routing', () => {
     });
 
     it('should render api errors as json', async () => {
-      shouldHaveError(await get(api('/gallery/content/nincs.jpg')), ErrorCodes.PATH_ERROR);
+      shouldHaveError(await get(api('/gallery/content/missing.jpg')), ErrorCodes.PATH_ERROR);
     });
   });
 });
