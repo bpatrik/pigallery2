@@ -18,6 +18,8 @@ const photo = (page: Page, name: string) => page.locator(`.photo-container > img
 const lightboxTitle = (page: Page, text: string) =>
   page.locator('app-lightbox-controls > #controllers-container > .controls-title').filter({hasText: text});
 const lightboxFaceNames = (page: Page) => page.locator('app-lightbox-controls .faces-container > .face > .face-name');
+// the real title of demo/images/IMG_1252.jpg in its metadata: it tests a long title with accents
+const LONG_TITLE = 'This is a super long title with special characters -.,űáéúőpóüö';
 
 /**
  * Sanity check of the gallery: what a logged in user notices right away when opening it.
@@ -37,6 +39,8 @@ const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): P
     await expectCardCover(folder);
   }
   await expectVisiblePhotosLoaded(page);
+  // the blog of the folder (index.md) shows its first lines
+  await expect.soft(page.locator('app-gallery-blog .blog .text-preview').first(), 'blog preview').toContainText('You can use this feature');
   await expectNoHorizontalScroll(page, 'gallery');
 
   // the lightbox shows the photo with its title and faces
@@ -146,6 +150,26 @@ test.describe('Gallery', () => {
     await expect(gridSizeButton).toHaveClass(/\bbtn-secondary\b/);
   });
 
+  // CUJ 11: the index.md of a folder is its blog, collapsed to a preview until opened
+  test('Gallery should open and close the blog of the folder', async ({page}) => {
+    const blog = page.locator('app-gallery-blog .blog').first();
+    const toggle = blog.locator('button.btn-blog-details');
+    await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+
+    // opened: the whole markdown, rendered
+    await toggle.click();
+    await expect(blog.locator('.text-preview')).toHaveCount(0);
+    await expect(blog.getByRole('heading', {name: 'Blog', level: 1})).toBeVisible();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading', level: 2})).toBeVisible();
+    await expect(blog.locator('markdown strong').filter({hasText: 'This is bold text'}).first()).toBeVisible();
+    await expect(blog.locator('markdown blockquote').first()).toBeAttached();
+
+    await toggle.click();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+    await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
+  });
+
   test('Gallery should show infobar over photo', async ({page}) => {
     // contains a folder
     await expect(page.locator('app-gallery-directories.directories > app-gallery-directory > .button > .photo-container').first()).toBeVisible();
@@ -219,7 +243,7 @@ test.describe('Gallery', () => {
     await expect(page.locator('app-gallery-grid-photo').first()).toBeAttached();
     await expect(photo(page, 'IMG_1252.jpg')).toBeAttached(); // the main photo should be visible
 
-    await expect(lightboxTitle(page, 'This is a super long title with special characters -.,űáéúőpóüö')).toBeVisible();
+    await expect(lightboxTitle(page, LONG_TITLE)).toBeVisible();
     await expect(lightboxFaceNames(page)).toHaveCount(0);
   });
 });
@@ -245,7 +269,7 @@ test.describe('Gallery - dont wait for content load', () => {
     await expect(page.locator('app-gallery-grid-photo').first()).toBeAttached();
     await expect(photo(page, 'IMG_1252.jpg')).toBeAttached(); // the main photo should be visible
 
-    await expect(lightboxTitle(page, 'This is a super long title with special characters -.,űáéúőpóüö')).toBeVisible();
+    await expect(lightboxTitle(page, LONG_TITLE)).toBeVisible();
     await expect(page.locator('app-lightbox-controls .faces-container > .face')).toHaveCount(0);
   });
 });
