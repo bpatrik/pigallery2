@@ -129,16 +129,16 @@ describe('ControlsLightboxComponent', () => {
   let previous: ReturnType<typeof vi.fn<() => void>>;
   const facesEnabled = Config.Faces.enabled;
 
-  // a landscape photo (3:2) with a face of a person with accents in the name
-  const photo = (name = 'Őszi kirándulás.jpg'): GridMedia => new GridMedia({
+  // a landscape photo (3:2) with a face; the caption has accents, to check that it shows as it is
+  const photo = (name = 'autumn hike.jpg'): GridMedia => new GridMedia({
     name,
-    directory: {name: 'Nyaralás', path: './'},
+    directory: {name: 'Vacation', path: './'},
     metadata: {
       size: {width: 3000, height: 2000},
       caption: 'Árvíztűrő tükörfúrógép',
       creationDate: Date.UTC(2020, 0, 1),
       fileSize: 1024,
-      faces: [{name: 'Kovács Éva', box: {left: 300, top: 200, width: 600, height: 400}}]
+      faces: [{name: 'Jane Doe', box: {left: 300, top: 200, width: 600, height: 400}}]
     }
   } as unknown as PhotoDTO, 300, 200, 0);
 
@@ -319,7 +319,7 @@ describe('ControlsLightboxComponent', () => {
     it('should show the face boxes with the names when faces are enabled', () => {
       Config.Faces.enabled = true;
       create();
-      expect(faceNames()).toEqual(['Kovács Éva']);
+      expect(faceNames()).toEqual(['Jane Doe']);
       const face = query('.faces-container .face')!;
       // in % of the photo
       expect(face.style.left).toBe('10%');

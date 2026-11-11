@@ -154,19 +154,19 @@ describe('InfoPanelLightboxComponent - non-ASCII metadata', () => {
       size: {width: 4032, height: 3024},
       creationDate: Date.UTC(2015, 5, 12),
       fileSize: 2048000,
-      title: 'Őszi túra a Bükkben',
-      caption: 'Ünnepi kirándulás – 東京タワー, Kraków',
+      title: 'Café in Zürich',
+      caption: 'Crème brûlée – 東京タワー, Kraków',
       keywords: ['Árvíztűrő', '桜', 'Zürich'],
       faces: [
-        {name: 'Ödön Ősz', box: {left: 0, top: 0, width: 1, height: 1}},
+        {name: 'Zoë Brontë', box: {left: 0, top: 0, width: 1, height: 1}},
         {name: '山田太郎', box: {left: 0, top: 0, width: 1, height: 1}},
         // the same person twice: listed once
-        {name: 'Ödön Ősz', box: {left: 0, top: 0, width: 1, height: 1}},
+        {name: 'Zoë Brontë', box: {left: 0, top: 0, width: 1, height: 1}},
       ],
       positionData: {
         city: 'Kraków',
         state: '東京都',
-        country: 'Magyarország',
+        country: 'Curaçao',
         GPSData: {latitude: 35.6586, longitude: 139.7454},
       },
     },
@@ -203,15 +203,15 @@ describe('InfoPanelLightboxComponent - non-ASCII metadata', () => {
 
   it('should show the name, the title and the caption', () => {
     expect(text(el.querySelector('[title="Filename"]'))).toBe('Árvíztűrő tükörfúrógép 東京.jpg');
-    expect(text(el.querySelector('h4'))).toBe('Őszi túra a Bükkben');
-    expect(text(el.querySelector('.caption-body'))).toBe('Ünnepi kirándulás – 東京タワー, Kraków');
+    expect(text(el.querySelector('h4'))).toBe('Café in Zürich');
+    expect(text(el.querySelector('.caption-body'))).toBe('Crème brûlée – 東京タワー, Kraków');
   });
 
   it('should list the persons once and the keywords, each linked to its search', () => {
     const links = [...el.querySelectorAll('.keywords a')];
-    expect(links.map(text)).toEqual(['Ödön Ősz', '山田太郎', '#Árvíztűrő', '#桜', '#Zürich']);
+    expect(links.map(text)).toEqual(['Zoë Brontë', '山田太郎', '#Árvíztűrő', '#桜', '#Zürich']);
     expect(links.map(a => queryOf(a))).toEqual([
-      {type: SearchQueryTypes.person, matchType: TextSearchQueryMatchTypes.exact_match, value: 'Ödön Ősz'},
+      {type: SearchQueryTypes.person, matchType: TextSearchQueryMatchTypes.exact_match, value: 'Zoë Brontë'},
       {type: SearchQueryTypes.person, matchType: TextSearchQueryMatchTypes.exact_match, value: '山田太郎'},
       {type: SearchQueryTypes.keyword, matchType: TextSearchQueryMatchTypes.exact_match, value: 'Árvíztűrő'},
       {type: SearchQueryTypes.keyword, matchType: TextSearchQueryMatchTypes.exact_match, value: '桜'},
@@ -221,8 +221,8 @@ describe('InfoPanelLightboxComponent - non-ASCII metadata', () => {
 
   it('should link every part of the place to its search', () => {
     const links = [...el.querySelectorAll('[title="Click location parts to search for media from the same area"] a')];
-    expect(links.map(text)).toEqual(['Kraków', '東京都', 'Magyarország']);
-    expect(links.map(a => (queryOf(a) as TextSearch).value)).toEqual(['Kraków', '東京都', 'Magyarország']);
+    expect(links.map(text)).toEqual(['Kraków', '東京都', 'Curaçao']);
+    expect(links.map(a => (queryOf(a) as TextSearch).value)).toEqual(['Kraków', '東京都', 'Curaçao']);
     expect(links.map(a => queryOf(a).type)).toEqual([SearchQueryTypes.position, SearchQueryTypes.position, SearchQueryTypes.position]);
   });
 
