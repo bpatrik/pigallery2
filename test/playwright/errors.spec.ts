@@ -2,7 +2,7 @@
 import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
+import {ACCENTED_DIR, deleteUserWithApi, expectApiOk, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
 
 const NOT_EXISTING_SHARING = '/share/doesnotexist';
 // what a missing, expired or deleted sharing link tells the user (agreed in #1307, the same text as in share.spec.ts)
@@ -92,15 +92,11 @@ test.describe('Errors', () => {
 
       test.beforeEach(async ({playwright, baseURL}) => {
         admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
-        expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'creating the user').toBe(true);
+        await expectApiOk(await admin.put('/pgapi/user', {data: {newUser: user}}), 'creating the user');
       });
 
       test.afterEach(async () => {
-        const users: { id: number, name: string }[] = (await (await admin.get('/pgapi/user/list')).json()).result;
-        const id = users.find(u => u.name === user.name)?.id;
-        if (id !== undefined) {
-          await admin.delete('/pgapi/user/' + id);
-        }
+        await deleteUserWithApi(admin, user.name);
         await admin.dispose();
       });
 
@@ -112,7 +108,7 @@ test.describe('Errors', () => {
         const login = await page.request.post('/pgapi/user/login', {
           data: {loginCredential: {username: user.name, password: user.password, rememberMe: false}},
         });
-        expect(login.ok(), 'restricted user login').toBe(true);
+        await expectApiOk(login, 'restricted user login');
         await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR));
       };
 

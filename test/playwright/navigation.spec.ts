@@ -1,7 +1,7 @@
 // Browsing folders (#1308, CUJ 5) on the folder with accents in its name (#1316). Also runs on a phone (mobile project).
 import {expect, Page, test} from '@playwright/test';
 import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../src/common/entities/SearchQueryDTO';
-import {ACCENTED_DIR, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
+import {ACCENTED_DIR, expectApiOk, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
 const breadcrumb = (page: Page) => page.locator('app-gallery-navbar #directory-path .breadcrumb-item');
@@ -114,7 +114,7 @@ test.describe('Empty folder', () => {
     const flatten = JSON.stringify({type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.globMatch, value: './emptydirectory*'});
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/' + encodeURIComponent(flatten));
-    expect((await search).ok(), 'the search of the flattened folder').toBe(true);
+    await expectApiOk(await search, 'the search of the flattened folder');
     await expect(page.locator('app-gallery-navbar')).toContainText('emptydirectory');
     await expect(page.locator('app-gallery-grid .photo-container')).toHaveCount(0);
 

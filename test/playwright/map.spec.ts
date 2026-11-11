@@ -39,6 +39,7 @@ test.describe('Map', () => {
     await expect(bigMap.locator('.leaflet-container')).toBeVisible();
     await expect.poll(() => bigMap.locator('.leaflet-marker-pane .leaflet-marker-icon').count(), {message: 'markers on the big map'})
       .toBeGreaterThan(0);
+    // a GPX file, not a JSON answer: the HTTP status is the check
     expect((await gpx).ok(), 'a GPX file of the folder loads').toBe(true);
     await expect.poll(() => bigMap.locator('path.gpx-line').count(), {message: 'GPX tracks on the big map'}).toBeGreaterThan(0);
 
