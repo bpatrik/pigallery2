@@ -1,6 +1,6 @@
 // The admin journeys that change the server config or run jobs (#1315).
 // They change the server for every test, so they run in the `admin-config` project, after the others (see playwright.config.ts),
-// one after the other, and restore what they change.
+// one after the other (all in one serial describe), and restore what they change.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
 import {ADMIN_SESSION} from './global-setup';
 import {JobProgressStates} from '../../src/common/entities/job/JobProgressDTO';
@@ -40,7 +40,7 @@ test.describe('Admin config', () => {
 
   test.afterAll(async () => {
     // restore the settings the tests touch, also if a test failed halfway
-    for (const settingsPath of ['Upload', 'Sharing']) {
+    for (const settingsPath of ['Upload', 'Sharing', 'Jobs']) {
       const res = await admin.put('/pgapi/settings', {data: {settingsPath, settings: original[settingsPath]}});
       expect(res.ok(), 'restoring ' + settingsPath).toBe(true);
     }
@@ -144,65 +144,49 @@ test.describe('Admin config', () => {
     await page.goto('/gallery/');
     await expect(page.locator('app-gallery-grid .photo-container').first()).toBeVisible();
   });
-});
 
-// CUJ 38 (#1315): the admin sets when a job runs
-test.describe('Job schedule', () => {
-  test.use({viewport: {width: 1200, height: 800}});
+  // CUJ 38 (#1315): the admin sets when a job runs
+  test.describe('Job schedule', () => {
+    const SCHEDULE = 'Temp Folder Cleaning';
 
-  const SCHEDULE = 'Temp Folder Cleaning';
-  let admin: APIRequestContext;
-  let original: Settings;
+    test('A job schedule set on the admin page should stay after save and reload', async ({page}) => {
+      // two days from now (UTC): not today in any time zone, so the job does not start during the tests
+      const weekday = (new Date().getUTCDay() + 2) % 7; // 0: Sunday
+      const periodicity = (weekday + 6) % 7; // the UI's list starts with Monday
+      const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][periodicity];
 
-  test.beforeAll(async ({playwright, baseURL}) => {
-    admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
-    original = await getSettings(admin);
-  });
+      const scheduleCard = (p: Page) => p.locator('form#Jobs app-settings-workflow .card')
+        .filter({has: p.locator('.card-header [role="button"]', {hasText: new RegExp('^\\s*' + SCHEDULE)})});
 
-  test.afterAll(async () => {
-    const res = await admin.put('/pgapi/settings', {data: {settingsPath: 'Jobs', settings: original['Jobs']}});
-    expect(res.ok(), 'restoring Jobs').toBe(true);
-    expect((await res.json()).error).toBeNull();
-    await admin.dispose();
-  });
+      await openAdmin(page);
+      await switchMode(page, 'Under the hood');
+      const card = scheduleCard(page);
+      await expect(card).toHaveCount(1);
+      await expect(card.locator('.card-header')).toContainText('after');
 
-  test('A job schedule set on the admin page should stay after save and reload', async ({page}) => {
-    // two days from now (UTC): not today in any time zone, so the job does not start during the tests
-    const weekday = (new Date().getUTCDay() + 2) % 7; // 0: Sunday
-    const periodicity = (weekday + 6) % 7; // the UI's list starts with Monday
-    const dayName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][periodicity];
+      await card.locator('.card-header [role="button"]').click();
+      await card.locator('select[id^="repeatType"]').selectOption({label: 'periodic'});
+      await card.locator('select[id^="periodicity"]').selectOption({label: 'every ' + dayName});
+      await expect(card.locator('.card-header')).toContainText('every');
+      await expect(card.locator('.card-header')).toContainText(dayName);
 
-    const scheduleCard = (p: Page) => p.locator('form#Jobs app-settings-workflow .card')
-      .filter({has: p.locator('.card-header [role="button"]', {hasText: new RegExp('^\\s*' + SCHEDULE)})});
+      const saved = page.waitForResponse(isSettingsSave);
+      await page.locator('form#Jobs button.btn-success', {hasText: 'Save'}).click();
+      const res = await saved;
+      expect(res.ok()).toBe(true);
+      expect((await res.json()).error).toBeNull();
 
-    await openAdmin(page);
-    await switchMode(page, 'Under the hood');
-    const card = scheduleCard(page);
-    await expect(card).toHaveCount(1);
-    await expect(card.locator('.card-header')).toContainText('after');
+      // the server has it
+      const schedules = (await getSettings(admin))['Jobs']['scheduled'] as { name: string, trigger: { type: number, periodicity?: number } }[];
+      expect(schedules.find(s => s.name === SCHEDULE)?.trigger).toMatchObject({type: 3, periodicity}); // JobTriggerType.periodic
 
-    await card.locator('.card-header [role="button"]').click();
-    await card.locator('select[id^="repeatType"]').selectOption({label: 'periodic'});
-    await card.locator('select[id^="periodicity"]').selectOption({label: 'every ' + dayName});
-    await expect(card.locator('.card-header')).toContainText('every');
-    await expect(card.locator('.card-header')).toContainText(dayName);
-
-    const saved = page.waitForResponse(isSettingsSave);
-    await page.locator('form#Jobs button.btn-success', {hasText: 'Save'}).click();
-    const res = await saved;
-    expect(res.ok()).toBe(true);
-    expect((await res.json()).error).toBeNull();
-
-    // the server has it
-    const schedules = (await getSettings(admin))['Jobs']['scheduled'] as { name: string, trigger: { type: number, periodicity?: number } }[];
-    expect(schedules.find(s => s.name === SCHEDULE)?.trigger).toMatchObject({type: 3, periodicity}); // JobTriggerType.periodic
-
-    // and the page shows it after a reload
-    await openAdmin(page);
-    await switchMode(page, 'Under the hood');
-    const reloaded = scheduleCard(page).locator('.card-header');
-    await expect(reloaded).toContainText('every');
-    await expect(reloaded).toContainText(dayName);
-    await expect(reloaded).not.toContainText('after');
+      // and the page shows it after a reload
+      await openAdmin(page);
+      await switchMode(page, 'Under the hood');
+      const reloaded = scheduleCard(page).locator('.card-header');
+      await expect(reloaded).toContainText('every');
+      await expect(reloaded).toContainText(dayName);
+      await expect(reloaded).not.toContainText('after');
+    });
   });
 });
