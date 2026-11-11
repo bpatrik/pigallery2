@@ -127,8 +127,13 @@ test.describe('Album journey', () => {
     await card.locator('ng-icon.delete').click();
     // Today it deletes at once. With the confirmation of #1312 (a modal), confirm it; a browser dialog is accepted above.
     const confirm = page.locator('modal-container').getByRole('button', {name: /delete|yes|ok/i});
-    const first = await Promise.race([deleted.then(() => 'deleted'), confirm.waitFor().then(() => 'confirm')]);
-    if (first === 'confirm') {
+    // polls both, so no waitFor() stays pending once one of them happened
+    let isDeleted = false;
+    void deleted.then(() => {
+      isDeleted = true;
+    }, () => undefined); // a failure is reported by the await below
+    await expect.poll(async () => isDeleted || await confirm.isVisible(), {message: 'deleted or asked to confirm'}).toBe(true);
+    if (!isDeleted) {
       await confirm.click();
     }
     await expectApiOk(await deleted, 'deleting the album');
