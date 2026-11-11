@@ -26,7 +26,7 @@ export const loginWithUi = async (page: Page, username = 'admin', password = 'ad
   await page.locator('#password').fill(password);
   const login = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/user/login');
   await page.locator('.col-sm-12 > .btn').click();
-  expect((await login).ok()).toBe(true);
+  await expectApiOk(await login, 'login');
 };
 
 /**
@@ -273,6 +273,15 @@ export const doubleTap = async (page: Page, at?: { x: number, y: number }): Prom
   await page.touchscreen.tap(x, y);
 };
 
+/**
+ * Checks that an API call (an APIResponse or the Response of a page) succeeded: HTTP OK and no error in the answer.
+ * The server sends its errors with HTTP 200 today (#1305), so res.ok() alone can't fail.
+ */
+export const expectApiOk = async (res: { ok(): boolean, json(): Promise<{ error?: unknown } | null> }, what: string): Promise<void> => {
+  expect(res.ok(), what).toBe(true);
+  expect((await res.json())?.error ?? null, what + ': no error in the answer').toBeNull();
+};
+
 // what an expired, deleted or not existing sharing link tells the user (#1307): one message, so a key can't be probed
 export const INVALID_LINK_MESSAGE = 'This link is invalid or has expired';
 
@@ -305,7 +314,7 @@ export const createDirectorySharingWithApi = async (creator: APIRequestContext, 
       },
     },
   });
-  expect(res.ok(), 'creating the sharing').toBe(true);
+  await expectApiOk(res, 'creating the sharing');
   const result = (await res.json()).result;
   expect(result?.sharingKey, 'sharing key').toBeTruthy();
   return {sharingKey: result.sharingKey, expires: result.expires};
@@ -333,7 +342,7 @@ export interface TestUser {
  */
 export const createUserWithApi = async (admin: APIRequestContext, prefix: string, role = 3): Promise<TestUser> => {
   const user = {name: prefix + '-' + randomUUID(), password: 'pass', role};
-  expect((await admin.put('/pgapi/user', {data: {newUser: user}})).ok(), 'creating the user ' + user.name).toBe(true);
+  await expectApiOk(await admin.put('/pgapi/user', {data: {newUser: user}}), 'creating the user ' + user.name);
   return user;
 };
 
@@ -346,7 +355,7 @@ export const deleteUserWithApi = async (admin: APIRequestContext, name: string):
   if (!user) {
     return false;
   }
-  expect((await admin.delete('/pgapi/user/' + user.id)).ok(), 'deleting the user ' + name).toBe(true);
+  await expectApiOk(await admin.delete('/pgapi/user/' + user.id), 'deleting the user ' + name);
   return true;
 };
 
@@ -359,6 +368,6 @@ export const loginWithApi = async (playwright: { request: APIRequest }, baseURL:
   const res = await context.post('/pgapi/user/login', {
     data: {loginCredential: {username: user.name, password: user.password, rememberMe: false}},
   });
-  expect(res.ok(), user.name + ' login').toBe(true);
+  await expectApiOk(res, user.name + ' login');
   return context;
 };
