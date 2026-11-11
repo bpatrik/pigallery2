@@ -40,7 +40,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
   before(TestHelper.resetConfig);
   describe = tmpDescribe;
 
-  const PHOTO = 'Tihany apátság.jpg';
+  const PHOTO = 'abbey.jpg';
   let server: Server;
   let geocode: (text: string) => Promise<unknown[]>;
 
@@ -77,7 +77,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
   } as DistanceSearch);
 
   const shouldStillSearch = async (): Promise<void> => {
-    const res = await get('/search/' + q({type: SearchQueryTypes.file_name, value: 'apátság'} as TextSearch));
+    const res = await get('/search/' + q({type: SearchQueryTypes.file_name, value: 'abbey'} as TextSearch));
     res.should.have.status(200);
     expect(res.body.error).to.equal(null);
     const cw = ContentWrapperUtils.unpack(res.body.result as PackedContentWrapper);
@@ -88,7 +88,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
 
     it('should answer LocationLookUp_ERROR naming the place when it is not found', async () => {
       geocode = async () => [];
-      const place = 'Sehol sincs falu ő' + Date.now(); // the location lookups are cached by text
+      const place = 'Árvíztűrő tükörfúrógép ' + Date.now(); // accents must reach the message; the location lookups are cached by text
       const res = await get('/search/' + q(distance(place)));
 
       expect(res.headers['content-type']).to.contain('application/json');
@@ -102,7 +102,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
       geocode = async () => [];
       const res = await get('/search/' + q({
         type: SearchQueryTypes.AND,
-        list: [{type: SearchQueryTypes.file_name, value: 'apátság'} as TextSearch, distance('Nincs ilyen hely ' + Date.now())]
+        list: [{type: SearchQueryTypes.file_name, value: 'abbey'} as TextSearch, distance('No such place ' + Date.now())]
       } as ANDSearchQuery));
 
       expect(res.body.error.code).to.equal(ErrorCodes.LocationLookUp_ERROR);
@@ -132,7 +132,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
   });
 
   describe('random photo link that matches nothing (#1313)', () => {
-    const noMatch = (): string => '/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'nincs ilyen kép'} as TextSearch);
+    const noMatch = (): string => '/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'no such photo'} as TextSearch);
 
     it('should answer a JSON error, not an image and not a crash', async () => {
       const res = await get(noMatch());
@@ -142,7 +142,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
       expect(res.body.error.code).to.equal(ErrorCodes.INPUT_ERROR);
       expect(res.body.result).to.equal(null);
       // the server keeps working, also for a random link that matches
-      const ok = await get('/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'apátság'} as TextSearch));
+      const ok = await get('/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'abbey'} as TextSearch));
       ok.should.have.status(200);
       expect(ok.headers['content-type']).to.equal('image/jpeg');
     });
