@@ -2,6 +2,7 @@ import {ProjectPath} from '../../src/backend/ProjectPath';
 import {promises as fsp} from 'node:fs';
 import * as path from 'node:path';
 import {TestHelper} from '../TestHelper';
+import {expectToFail} from '../backend/KnownFailures';
 
 const chai = require('chai');
 const {expect} = chai;
@@ -56,8 +57,8 @@ describe('Translations (#1344)', () => {
   it('should translate the duplicates summary', async () => {
     const sources = await sourcesOf('src/frontend/app/ui/duplicates/duplicates.component.html');
     expect(sources.join('\n')).to.contain('No duplicates found');
-    // TODO #1344: remove the rejection check once the summary is translatable (and `npm run merge-new-translation` ran)
-    expect(() => expect(sources.some(s => s.includes('Listing') && s.includes('duplicates')),
-      'the summary is in messages.en.xlf').to.equal(true)).to.throw(chai.AssertionError);
+    // the summary is in messages.en.xlf once it is translatable and `npm run merge-new-translation` ran
+    await expectToFail('#1344', () => expect(sources.some(s => s.includes('Listing') && s.includes('duplicates')),
+      'the summary is in messages.en.xlf').to.equal(true), /the summary is in messages.en.xlf/);
   });
 });
