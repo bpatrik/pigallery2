@@ -62,7 +62,8 @@ test.describe('Search', () => {
 
   test('Search deep link with a photo should open the lightbox on that photo', async ({page}) => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
-    // in search results the photo is identified with its folder (QueryService.getMediaStringId)
+    // accents in the search text and in the folder of the photo: the link has to encode both.
+    // In search results the photo is identified with its folder (QueryService.getMediaStringId).
     await page.goto('/search/' + encodeURIComponent('űáéú őóüö') + '?p=' + encodeURIComponent(ACCENTED_DIR + '/IMG_8943.jpg'));
     await expectApiOk(await search, 'the search');
 
