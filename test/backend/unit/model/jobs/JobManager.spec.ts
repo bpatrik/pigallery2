@@ -237,6 +237,7 @@ class RecordingJob extends Job<Record<string, unknown>> {
 
 /**
  * Jobs run by their schedule (CUJ 38, #1254): at a date, periodically, or after another scheduled job.
+ * The tests don't wait for real time: the schedule timers are caught and fired by the test.
  */
 describe('JobManager schedules (CUJ 38)', () => {
   before(TestHelper.resetConfig);
@@ -246,6 +247,7 @@ describe('JobManager schedules (CUJ 38)', () => {
   const jobB = new RecordingJob('Scheduled test job B #1254', log);
   const jobC = new RecordingJob('Scheduled test job C #1254', log);
   let jobManager: JobManager;
+  const HOUR = 60 * 60 * 1000;
 
   const schedule = (name: string, job: IJobName, trigger: JobScheduleDTO['trigger']): JobScheduleDTO => ({
     name,
@@ -265,13 +267,23 @@ describe('JobManager schedules (CUJ 38)', () => {
     }
     expect(condition(), what).to.be.true;
   };
+  // A job that finishes starts the jobs scheduled after it synchronously (Job.onFinish -> JobManager.onJobFinished
+  // -> Job.start), so once every job is idle, no other job is about to start.
   const idle = (): boolean => [jobA, jobB, jobC].every(j => !j.InProgress);
+  const timerCount = (): number => (jobManager as unknown as { timers: unknown[] }).timers.length;
+  // ten minutes from now, in UTC minutes of the day: far enough that a minute rollover during the test
+  // doesn't matter, and the timer stays longer than a minute (so it is caught)
+  const inTenMinutes = (now: Date): number => (now.getUTCHours() * 60 + now.getUTCMinutes() + 10) % (24 * 60);
 
   const start = async (scheduled: JobScheduleDTO[]): Promise<void> => {
     Config.Jobs.scheduled = scheduled;
     jobManager = new JobManager();
     await jobManager.init();
   };
+
+  // the timers of the schedules (longer than a minute) are caught, the others (job steps, progress saving) run
+  const realSetTimeout = global.setTimeout;
+  let caught: { callback: () => void, delay: number }[];
 
   before(() => {
     for (const j of [jobA, jobB, jobC]) {
@@ -291,9 +303,19 @@ describe('JobManager schedules (CUJ 38)', () => {
     Config.Database.dbFolder = TestHelper.TMP_DIR;
     ProjectPath.reset();
     log.length = 0;
+    caught = [];
+    (global as any).setTimeout = (callback: () => void, delay?: number, ...args: unknown[]): NodeJS.Timeout => {
+      if ((delay ?? 0) > 60 * 1000) {
+        caught.push({callback, delay: delay!});
+        // a real timer that never fires during the test, so clearTimeout() works on it
+        return realSetTimeout(() => undefined, 2 ** 31 - 1).unref();
+      }
+      return realSetTimeout(callback, delay, ...args) as unknown as NodeJS.Timeout;
+    };
   });
 
   afterEach(async () => {
+    global.setTimeout = realSetTimeout;
     await waitFor(idle, 'jobs should finish');
     await jobManager?.cleanUp();
     Config.Jobs.scheduled = [];
@@ -301,17 +323,20 @@ describe('JobManager schedules (CUJ 38)', () => {
   });
 
   it('should run a job at its scheduled date and not one whose date has passed', async () => {
+    const date = Date.now() + HOUR;
     await start([
-      schedule('A at a date', jobA, {type: JobTriggerType.scheduled, time: Date.now() + 50}),
+      schedule('A at a date', jobA, {type: JobTriggerType.scheduled, time: date}),
       schedule('B in the past', jobB, {type: JobTriggerType.scheduled, time: Date.now() - 1000}),
       schedule('C never', jobC, {type: JobTriggerType.never}),
     ]);
     expect(log, 'not before its date').to.deep.equal([]);
     expect(Object.keys(jobManager.getProgresses())).to.deep.equal([]);
+    expect(caught.length, 'only A has a timer').to.equal(1);
+    expect(Date.now() + caught[0].delay).to.be.closeTo(date, 1000);
 
-    await waitFor(() => log.length > 0, 'A should run');
+    // the date has come
+    caught[0].callback();
     await waitFor(idle, 'A should finish');
-    await new Promise(resolve => setTimeout(resolve, 100));
     expect(log).to.deep.equal([jobA.Name]);
     expect(Object.values(jobManager.getProgresses()).map(p => p.state)).to.deep.equal([JobProgressStates.finished]);
   });
@@ -320,9 +345,11 @@ describe('JobManager schedules (CUJ 38)', () => {
     await start([
       schedule('C after B', jobC, {type: JobTriggerType.after, afterScheduleName: 'B after A'}),
       schedule('B after A', jobB, {type: JobTriggerType.after, afterScheduleName: 'A at a date'}),
-      schedule('A at a date', jobA, {type: JobTriggerType.scheduled, time: Date.now() + 20}),
+      schedule('A at a date', jobA, {type: JobTriggerType.scheduled, time: Date.now() + HOUR}),
     ]);
+    expect(caught.length, 'only A has a timer').to.equal(1);
 
+    caught[0].callback();
     await waitFor(() => log.length === 3 && idle(), 'the chain should run');
     expect(log).to.deep.equal([jobA.Name, jobB.Name, jobC.Name]);
   });
@@ -335,7 +362,6 @@ describe('JobManager schedules (CUJ 38)', () => {
 
     await jobManager.run(jobA.Name, {}, true, false);
     await waitFor(idle, 'A should finish');
-    await new Promise(resolve => setTimeout(resolve, 50));
     expect(log, 'solo run').to.deep.equal([jobA.Name]);
 
     await jobManager.run(jobA.Name, {}, false, false);
@@ -352,35 +378,13 @@ describe('JobManager schedules (CUJ 38)', () => {
     await jobManager.run(jobA.Name, {}, false, false);
     jobManager.stop(jobA.Name);
     await waitFor(idle, 'A should stop');
-    await new Promise(resolve => setTimeout(resolve, 50));
     expect(log).to.deep.equal([jobA.Name]);
   });
 
   describe('periodic', () => {
-    // the timers of the schedules (longer than a minute) are caught, the others (job steps, progress saving) run
-    const realSetTimeout = global.setTimeout;
-    let caught: { callback: () => void, delay: number }[];
-
-    beforeEach(() => {
-      caught = [];
-      (global as any).setTimeout = (callback: () => void, delay?: number, ...args: unknown[]): NodeJS.Timeout => {
-        if ((delay ?? 0) > 60 * 1000) {
-          caught.push({callback, delay: delay!});
-          // a real timer that never fires before the end of the test, so clearTimeout() works on it
-          return realSetTimeout(() => undefined, 2 ** 31 - 1).unref();
-        }
-        return realSetTimeout(callback, delay, ...args) as unknown as NodeJS.Timeout;
-      };
-    });
-
-    afterEach(() => {
-      global.setTimeout = realSetTimeout;
-    });
-
     it('should run a daily job at its time of the day, then schedule the next day', async () => {
       const now = new Date();
-      // two minutes from now, in UTC minutes of the day
-      const atTime = (now.getUTCHours() * 60 + now.getUTCMinutes() + 2) % (24 * 60);
+      const atTime = inTenMinutes(now);
       const expected = new Date(now);
       expected.setUTCSeconds(0, 0);
       expected.setUTCHours(Math.floor(atTime / 60), atTime % 60);
@@ -399,15 +403,15 @@ describe('JobManager schedules (CUJ 38)', () => {
       // the next run is computed from the clock; the test fired the timer early, so it is the same time again
       await waitFor(() => caught.length === 2, 'the next run should be scheduled');
       expect(Date.now() + caught[1].delay).to.be.closeTo(expected.getTime(), 1000);
-      expect((jobManager as unknown as { timers: unknown[] }).timers.length, 'one timer').to.equal(1);
+      expect(timerCount(), 'one timer').to.equal(1);
     });
 
     it('should stop the timers on cleanUp', async () => {
-      await start([schedule('A daily', jobA, {type: JobTriggerType.periodic, periodicity: 7, atTime: 0})]);
+      await start([schedule('A daily', jobA, {type: JobTriggerType.periodic, periodicity: 7, atTime: inTenMinutes(new Date())})]);
       expect(caught.length).to.equal(1);
-      expect((jobManager as unknown as { timers: unknown[] }).timers.length).to.equal(1);
+      expect(timerCount()).to.equal(1);
       jobManager.stopSchedules();
-      expect((jobManager as unknown as { timers: unknown[] }).timers.length).to.equal(0);
+      expect(timerCount()).to.equal(0);
     });
   });
 });
