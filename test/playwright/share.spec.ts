@@ -22,6 +22,9 @@ import {
 // timestamps has big_ben.jpg, dupl is an other directory next to it (without big_ben.jpg).
 const SEARCH_FILE_NAME = 103; // SearchQueryTypes.file_name
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+// the server generates the thumbnails on request (a few at a time); while the other tests load photos too,
+// a thumbnail can take longer than the default 5 s
+const THUMBNAIL_TIMEOUT = 15000;
 
 // directory listing only, not the media (e.g.: content/dir/photo.jpg/320)
 const contentUrl = /\/pgapi\/gallery\/content\/(?![^?]*\.\w+\/\d+)/;
@@ -140,7 +143,7 @@ test.describe('Share', () => {
       for (const folder of await folders.all()) {
         await expectCardCover(folder);
       }
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
       await expectNoHorizontalScroll(page, 'sharing');
 
       // search links don't work in a sharing: the keywords and the place of the info bar are plain text
@@ -172,7 +175,7 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
       // the parents are shown, but they can't be opened
       await expect(page.locator('#directory-path li').first().locator('a')).toHaveCount(0);
       await expect(page.locator('#directory-path li').last()).toContainText('timestamps');
@@ -186,7 +189,7 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
     });
 
     test('Open password protected sharing with logged in user', async ({page}) => {
@@ -199,7 +202,7 @@ test.describe('Share', () => {
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
       // a logged in user sees the sharing as a sharing too
       await expectCountDown(page);
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
     });
 
     test('Sharing without subfolders should not open subfolders', async ({page}) => {
@@ -217,7 +220,7 @@ test.describe('Share', () => {
       await expect(page).not.toHaveURL(/timestamps/);
       await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
       await expectCountDown(page);
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
     });
 
     test('Sharing with subfolders should open subfolders', async ({page}) => {
@@ -229,7 +232,7 @@ test.describe('Share', () => {
       await expectContent(page, /\/pgapi\/gallery\/content\/timestamps(\?|$)/, () =>
         page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'}).click());
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
     });
 
     test('Sharing of a folder with accents in its name should open it and its subfolder', async ({page}) => {
@@ -240,13 +243,13 @@ test.describe('Share', () => {
       await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR);
       await expect(page.locator('#directory-path li').last()).toContainText('űáéú őóüö');
       await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
 
       await expectContent(page, /\/pgapi\/gallery\/content\/[^?]*subdirectory(\?|$)/, () =>
         page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click());
       await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
       await expect(page.locator('.photo-container > img[alt="IMG_8824.jpg"]')).toBeVisible();
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
     });
 
     test('Share dialog should list the sharings with and without subfolders', async ({page}) => {
@@ -285,7 +288,7 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(/\/search\//);
       await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-      await expectVisiblePhotosLoaded(page);
+      await expectVisiblePhotosLoaded(page, THUMBNAIL_TIMEOUT);
       // only the directories with shared photos (and their parents) can be opened
       expect((await page.request.get('/pgapi/gallery/content/timestamps')).status()).toBe(200);
       expect((await page.request.get('/pgapi/gallery/content/')).status()).toBe(200);
