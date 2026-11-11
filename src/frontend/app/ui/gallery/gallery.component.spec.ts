@@ -34,6 +34,8 @@ import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../icons';
+import {By} from '@angular/platform-browser';
+import {GalleryGridComponent} from './grid/grid.gallery.component';
 
 
 // Mock services
@@ -366,6 +368,25 @@ describe('GalleryComponent', () => {
       const overflowAlert = compiled.querySelector('.alert-info');
       expect(overflowAlert).toBeTruthy();
       expect(overflowAlert.textContent).toContain('Too many results');
+    });
+
+    // #1309: the alert tells to refine the search, the results that came back are still shown
+    it('should still show the results of a search with too many results', () => {
+      const photos = ['Árvíztűrő.jpg', '東京.jpg'].map(name => ({
+        name,
+        directory: {path: './', name: 'Nyaralás'},
+        metadata: {size: {width: 400, height: 300}, creationDate: 0}
+      })) as unknown as PhotoDTO[];
+      mockContentLoader.content.set({
+        searchResult: {media: photos, directories: [], metaFile: [], resultOverflow: true}
+      } as unknown as ContentWrapperWithError);
+      setSortedContent({directories: [], mediaGroups: [{name: '', media: photos}], metaFile: []} as unknown as GroupedDirectoryContent);
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.alert-info')?.textContent?.trim()).toBe('Too many results to show. Refine your search.');
+      const grid = fixture.debugElement.query(By.directive(GalleryGridComponent)).componentInstance as GalleryGridComponent;
+      expect(grid.mediaGroups().flatMap(g => g.media).map(m => m.name)).toEqual(['Árvíztűrő.jpg', '東京.jpg']);
     });
   });
 

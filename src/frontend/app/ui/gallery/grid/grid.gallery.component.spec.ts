@@ -23,6 +23,7 @@ import {ThumbnailManagerService} from '../thumbnailManager.service';
 import {ExtensionService} from '../../../model/extension.service';
 import {MediaButtonModalService} from './photo/media-button-modal/media-button-modal.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
+import {PageHelper} from '../../../model/page.helper';
 
 class MockQueryService {
   getMediaStringId(media: MediaDTO): string {
@@ -234,6 +235,80 @@ describe('GalleryGridComponent', () => {
     const heights = component.mediaToRender().map(g => g.media.map(m => m.renderHeight));
     expect(heights).toEqual([[heights[0][0]], [heights[0][0], heights[0][0]]]);
   });
+
+  // #1308, CUJ 6: a large folder renders while scrolling, not all media at once
+  describe('on scroll', () => {
+    let pageHeight: number;
+    let scrollY: number;
+    let frames: FrameRequestCallback[];
+
+    // the height of the rendered rows: what the page would be after the browser laid them out
+    const renderedHeight = (): number => {
+      const rows = new Map<string, number>();
+      component.mediaToRender().forEach((g, i) => g.media.forEach(gm => rows.set(i + '-' + gm.rowId, gm.renderHeight)));
+      return [...rows.values()].reduce((sum, h) => sum + h + 2 * component.IMAGE_MARGIN, 0);
+    };
+    // a scroll event, then the browser lays out the new rows
+    const scroll = (): number => {
+      component.onScroll();
+      frames.splice(0).forEach(cb => cb(0));
+      pageHeight = renderedHeight();
+      return component.getNumberOfRenderedMedia();
+    };
+    const maxScrollY = (): number => Math.max(0, pageHeight - window.innerHeight);
+
+    beforeEach(() => {
+      pageHeight = 0;
+      scrollY = 0;
+      frames = [];
+      // jsdom has no layout: the page is as high as the rendered rows
+      vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockImplementation(maxScrollY);
+      vi.spyOn(PageHelper, 'ScrollY', 'get').mockImplementation(() => scrollY);
+      const photos: PhotoDTO[] = [];
+      for (let i = 0; i < 500; ++i) {
+        photos.push({name: i + '.jpg', directory: {name: 'd', path: 'p'}, metadata: {size: {width: 3000, height: 2000}}} as PhotoDTO);
+      }
+      component.containerWidth = 1000;
+      component.screenHeight = 1000;
+      fixture.componentRef.setInput('mediaGroups', [{name: 'all', media: photos}]);
+      // after setInput: the change detection scheduler uses it too
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback): number => {
+        frames.push(cb);
+        return frames.length;
+      });
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('should render only the first screens, then more rows when scrolled to the bottom', () => {
+      scroll();
+      scroll();
+      const firstScreens = scroll();
+      expect(firstScreens).toBeGreaterThan(0);
+      expect(firstScreens).toBeLessThan(500);
+      // staying at the top renders nothing more
+      expect(scroll()).toBe(firstScreens);
+      expect(pageHeight).toBeGreaterThan(window.innerHeight);
+
+      scrollY = maxScrollY();
+      const afterScroll = scroll();
+      expect(afterScroll).toBeGreaterThan(firstScreens);
+      expect(afterScroll).toBeLessThan(500);
+
+      // scrolling down to the end renders all of them, a few rows at a time
+      let steps = 0;
+      while (component.getNumberOfRenderedMedia() < 500 && steps < 1000) {
+        scrollY = maxScrollY();
+        scroll();
+        steps++;
+      }
+      expect(component.getNumberOfRenderedMedia()).toBe(500);
+      expect(steps).toBeGreaterThan(2);
+    });
+  });
+
   describe('as the lightbox grid', () => {
     const photo = (name: string): PhotoDTO => ({
       name,

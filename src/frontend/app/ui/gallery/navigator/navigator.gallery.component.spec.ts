@@ -10,13 +10,15 @@ import {GallerySortingService} from './sorting.service';
 import {GalleryNavigatorService} from './navigator.service';
 import {ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
-import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
 describe('GalleryNavigatorComponent', () => {
   let component: GalleryNavigatorComponent;
   let content: ReturnType<typeof signal<ContentWrapperWithError>>;
   let user: ReturnType<typeof signal<UserDTO>>;
   let router: { navigate: ReturnType<typeof vi.fn> };
+  let params: ReturnType<typeof signal<Record<string, string>>>;
 
   const folder = (path: string, name: string, availableParents?: boolean[]): ContentWrapperWithError =>
     ({directory: {path, name, availableParents}} as unknown as ContentWrapperWithError);
@@ -25,11 +27,12 @@ describe('GalleryNavigatorComponent', () => {
     content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
     user = signal<UserDTO>({name: 'admin', role: UserRoles.Admin} as UserDTO);
     router = {navigate: vi.fn().mockResolvedValue(true)};
+    params = signal<Record<string, string>>({});
     TestBed.configureTestingModule({
       providers: [
         {provide: ContentLoaderService, useValue: {content}},
         {provide: AuthenticationService, useValue: {user}},
-        {provide: QueryService, useValue: {getParams: (): Record<string, string> => ({})}},
+        {provide: QueryService, useValue: {getParams: (): Record<string, string> => ({}), params}},
         {provide: FilterService, useValue: {}},
         {provide: GallerySortingService, useValue: {}},
         {provide: GalleryNavigatorService, useValue: {}},
@@ -88,6 +91,41 @@ describe('GalleryNavigatorComponent', () => {
     });
   });
 
+  // #1308, CUJ 9: the flatten button opens a directory search of the folder
+  describe('flatten', () => {
+    const flattenQuery = (): TextSearch => SearchQueryUtils.parseURLifiedQuery(component.directoryFlattenSearchQuery()!) as TextSearch;
+
+    // the server sends the path of a folder like this (DiskManager.pathFromRelativeDirName)
+    it('should search the media of the folder with accents and of its subfolders', () => {
+      content.set(folder('Nyaralás/Balaton/', 'Őszi kirándulás'));
+      const query = flattenQuery();
+      expect(query.type).toBe(SearchQueryTypes.directory);
+      expect(query.matchType).toBe(TextSearchQueryMatchTypes.globMatch);
+      expect(query.value.startsWith('Nyaralás/Balaton/Őszi kirándulás')).toBe(true);
+    });
+
+    // TODO #1308: the glob is "<folder>*", so it also matches the sibling folders that start with the same name
+    // (e.g.: "Őszi kirándulás 2"). "<folder>/*" matches the folder and its subfolders only (SearchManager.expandDirectoryGlobs).
+    it.fails('should not search the sibling folders that start with the same name', () => {
+      content.set(folder('Nyaralás/Balaton/', 'Őszi kirándulás'));
+      expect(flattenQuery()).toEqual({
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.globMatch,
+        value: 'Nyaralás/Balaton/Őszi kirándulás/*'
+      });
+    });
+
+    it('should search everything from the root folder', () => {
+      content.set(folder('./', '.'));
+      expect(flattenQuery().value).toMatch(/^\.\/?\*$/);
+    });
+
+    it('should not offer it for a search result', () => {
+      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Balaton'}}} as unknown as ContentWrapperWithError);
+      expect(component.directoryFlattenSearchQuery()).toBeNull();
+    });
+  });
+
   describe('alt + up', () => {
     const altUp = new KeyboardEvent('keydown', {key: 'ArrowUp', altKey: true});
 
@@ -114,6 +152,46 @@ describe('GalleryNavigatorComponent', () => {
       content.set(folder('Nyaralás', 'Balaton', [false, false]));
       component.onKeyPress(altUp);
       expect(router.navigate).not.toHaveBeenCalled();
+    });
+  });
+
+  // #1311, CUJ 32: the zip download of the folder or the search
+  describe('zip download', () => {
+    const zipUrl = (): URL => new URL(component.downloadZipLink()!, 'http://localhost');
+
+    it('should zip the folder with accents', () => {
+      content.set(folder('Nyaralás/', 'Őszi kirándulás'));
+      const url = zipUrl();
+      expect(url.pathname.startsWith('/pgapi/gallery/zip/')).toBe(true);
+      const query = JSON.parse(decodeURIComponent(url.pathname.substring('/pgapi/gallery/zip/'.length))) as TextSearch;
+      expect(query).toEqual({
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.exact_match,
+        value: 'Nyaralás/Őszi kirándulás'
+      });
+    });
+
+    it('should keep the sharing key', () => {
+      params.set({sk: 'abc'});
+      content.set(folder('Nyaralás/', 'Balaton'));
+      expect(zipUrl().searchParams.get('sk')).toBe('abc');
+    });
+
+    // TODO #1311: the query params are joined without '&' (e.g.: "?sk=abcfoo=bar")
+    it.fails('should keep every query param', () => {
+      params.set({sk: 'abc', foo: 'bar'});
+      content.set(folder('Nyaralás/', 'Balaton'));
+      const url = zipUrl();
+      expect(url.searchParams.get('sk')).toBe('abc');
+      expect(url.searchParams.get('foo')).toBe('bar');
+    });
+
+    // the template shows the button only with items to download
+    it('should count no items in a folder without media', () => {
+      content.set({directory: {path: './', name: 'emptydirectory', cache: {mediaCount: 0}}} as unknown as ContentWrapperWithError);
+      expect(component.itemCount()).toBe(0);
+      content.set({directory: {path: './', name: 'Balaton', cache: {mediaCount: 3}}} as unknown as ContentWrapperWithError);
+      expect(component.itemCount()).toBe(3);
     });
   });
 });
