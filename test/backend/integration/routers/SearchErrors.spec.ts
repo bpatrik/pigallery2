@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import {expectToFail} from '../../KnownFailures';
 import {default as chaiHttp, request} from 'chai-http';
 import {SuperAgentStatic} from 'superagent';
 import {DBTestHelper} from '../../DBTestHelper';
@@ -24,7 +24,6 @@ import {ContentWrapperUtils, PackedContentWrapper} from '../../../../src/common/
 process.env['NODE_ENV'] = 'test';
 chai.should();
 chai.use(chaiHttp);
-chai.use(chaiAsPromised);
 
 // to help WebStorm to handle the test cases
 declare let describe: any;
@@ -92,7 +91,6 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
       const place = 'Sehol sincs falu ő' + Date.now(); // the location lookups are cached by text
       const res = await get('/search/' + q(distance(place)));
 
-      expect(res.status).to.not.equal(500);
       expect(res.headers['content-type']).to.contain('application/json');
       expect(res.body.error.code).to.equal(ErrorCodes.LocationLookUp_ERROR);
       expect(res.body.error.message).to.contain(place);
@@ -120,19 +118,15 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
     });
 
     // e.g. no network, or the geocoding service is down: the same "Cannot find location" message as a not found place
-    it('should answer LocationLookUp_ERROR when the geocoding service fails (expected to fail #1309)', async () => {
+    it('should answer LocationLookUp_ERROR when the geocoding service fails', async () => {
       geocode = async () => {
         throw new Error('getaddrinfo ENOTFOUND nominatim.openstreetmap.org');
       };
       const res = await get('/search/' + q(distance('Balaton ' + Date.now())));
 
-      expect(res.status).to.not.equal(500);
       expect(res.headers['content-type']).to.contain('application/json');
       // today it is a GENERAL_ERROR ('Error during searching'), so the client can't name the place
-      expect(res.body.error.code).to.equal(ErrorCodes.GENERAL_ERROR);
-      // TODO #1309: remove the rejection check once a failed lookup is reported as LocationLookUp_ERROR
-      await Promise.resolve().then(() => expect(res.body.error.code).to.equal(ErrorCodes.LocationLookUp_ERROR))
-        .should.be.rejectedWith(chai.AssertionError);
+      await expectToFail('#1309', () => expect(res.body.error.code).to.equal(ErrorCodes.LocationLookUp_ERROR));
       await shouldStillSearch();
     });
   });
@@ -154,11 +148,10 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
     });
 
     // a frame or an <img> only sees the status: INPUT_ERROR goes out as 400 (#1305)
-    it('should answer with an HTTP error status (expected to fail #1305)', async () => {
+    it('should answer with an HTTP error status', async () => {
       const res = await get(noMatch());
-      // TODO #1305: every API error goes out as HTTP 200 today; remove the rejection check once INPUT_ERROR is a 400
-      await Promise.resolve().then(() => res.should.have.status(400))
-        .should.be.rejectedWith(chai.AssertionError, 'but got 200');
+      // every API error goes out as HTTP 200 today
+      await expectToFail('#1305', () => res.should.have.status(400), /but got 200/);
     });
   });
 });

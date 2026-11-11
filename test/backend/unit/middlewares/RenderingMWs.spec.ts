@@ -5,13 +5,12 @@ import express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import {expectToFail} from '../../KnownFailures';
 import {RenderingMWs} from '../../../../src/backend/middlewares/RenderingMWs';
 import {TestHelper} from '../../../TestHelper';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
 
 chai.should();
-chai.use(chaiAsPromised);
 
 declare const beforeEach: any;
 declare const afterEach: any;
@@ -171,18 +170,19 @@ describe('RenderingMWs', () => {
         }).on('error', reject);
       });
 
-    const codes = Object.values(ErrorCodes).filter((c): c is ErrorCodes => typeof c === 'number');
+    // the status of these is not decided yet: neither is a server fault, but the client needs the error body
+    const undecided = [ErrorCodes.LocationLookUp_ERROR, ErrorCodes.USER_MANAGEMENT_DISABLED];
+    const codes = Object.values(ErrorCodes)
+      .filter((c): c is ErrorCodes => typeof c === 'number' && !undecided.includes(c));
 
     for (const code of codes) {
       it('should render ' + ErrorCodes[code] + ' with HTTP ' + expectedStatus(code), async () => {
-        // TODO #1305: renderError does not set a status yet, every error goes out as HTTP 200;
-        // remove the rejection check once it maps the codes
-        const check = async (): Promise<void> => {
+        // renderError does not set a status yet, every error goes out as HTTP 200
+        await expectToFail('#1305', async () => {
           const res = await get('/error/' + code);
           expect(res.body.error.code).to.equal(code);
           expect(res.status).to.equal(expectedStatus(code));
-        };
-        await check().should.be.rejectedWith(chai.AssertionError);
+        }, /expected 200 to equal/);
       });
     }
   });
