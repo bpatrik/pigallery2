@@ -329,6 +329,23 @@ export const expectInvalidLinkPage = async (page: Page, timeout?: number): Promi
   await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
 };
 
+/**
+ * Deletes those of the sharings that still exist: a test may have deleted them already, or they expired.
+ * Deleting a missing sharing would log a server error.
+ */
+export const deleteSharingsWithApi = async (admin: APIRequestContext, sharingKeys: string[]): Promise<void> => {
+  if (sharingKeys.length === 0) {
+    return;
+  }
+  // listing also removes the expired sharings
+  const res = await admin.get('/pgapi/share/listAll');
+  await expectApiOk(res, 'listing the sharings');
+  const existing = new Set(((await res.json()).result as { sharingKey: string }[]).map(s => s.sharingKey));
+  for (const sharingKey of sharingKeys.filter(k => existing.has(k))) {
+    await expectApiOk(await admin.delete('/pgapi/share/' + sharingKey), 'deleting the sharing ' + sharingKey);
+  }
+};
+
 export interface TestUser {
   name: string;
   password: string;
