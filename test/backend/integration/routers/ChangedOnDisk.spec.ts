@@ -55,6 +55,8 @@ describe('Photos changed on disk', (sqlHelper: DBTestHelper) => {
 
   let galleryFolder: string;
   let server: Server;
+  // indexings the listings started in the background; the test waits for them before it closes the DB
+  let indexings: Promise<unknown>[] = [];
 
   const dirPath = (...p: string[]): string => path.join(galleryFolder, DIR, ...p);
 
@@ -100,8 +102,16 @@ describe('Photos changed on disk', (sqlHelper: DBTestHelper) => {
     server = new Server(false);
     await server.onStarted.wait();
 
-    // in the DB before the change (a first listing would save in the background)
     const im = ObjectManagers.getInstance().IndexingManager;
+    indexings = [];
+    const indexDirectory = im.indexDirectory.bind(im);
+    im.indexDirectory = (...args: Parameters<typeof im.indexDirectory>) => {
+      const indexing = indexDirectory(...args);
+      indexings.push(indexing.catch(() => null));
+      return indexing;
+    };
+
+    // in the DB before the change (a first listing would save in the background)
     await im.indexDirectory('.', true);
     await im.indexDirectory(DIR, true);
     for (const sub of [SUB_RENAMED_FROM, SUB_DELETED]) {
@@ -110,6 +120,11 @@ describe('Photos changed on disk', (sqlHelper: DBTestHelper) => {
   };
 
   const tearDown = async (): Promise<void> => {
+    // a background indexing that outlives the test would scan the next test's folder and reopen the closed DB
+    // (with MySQL, a reopened connection pool keeps mocha from exiting)
+    const im = ObjectManagers.getInstance().IndexingManager;
+    await Promise.all(indexings);
+    await im.SavingReady;
     await sqlHelper.clearDB();
     // the next initDB() would create the temp folder of this one
     TestHelper.resetConfig();
