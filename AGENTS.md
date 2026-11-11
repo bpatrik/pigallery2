@@ -64,6 +64,8 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     fail in their `before all` hooks and the run hangs. In a fresh worktree, build the frontend or copy `dist/en` from the main checkout first.
   - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
     never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
+  - Tests must not leave servers, sockets, timers or child processes open: mocha then never exits (CI fails on the step timeout).
+    `test/backend/OpenHandles.ts` lists what keeps the process alive 10 s after the last test.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
 - Frontend unit tests: `npm run test-frontend` (Vitest in jsdom, no browser needed). Single file: `npx ng test --watch=false --include=<path>.spec.ts`.
   - The test setup is Angular's default (no Vitest config or setup file); keep it that way. Each spec is self-contained.
@@ -79,7 +81,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
-  run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
+  run against your DB. `E2E_PORT=8091 npm run test-e2e` runs it on another port (e.g. in parallel git worktrees). Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login, gallery (filters, lightbox, URL deep links), folder navigation, search, faces, albums, sharing and error paths.
   The `mobile` project (Pixel 7, real touch events; swipe with `swipe()` of `helpers.ts`) runs only `lightbox.spec.ts` and `navigation.spec.ts`.
   - The lightbox controls, and so its keyboard shortcuts, only exist once the opening animation ended: wait for
@@ -92,7 +94,8 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   - Every screen has a sanity test (`... should look right`): one `test()` per screen and role with `expect.soft()` checks
     of what a person notices right away. Extend it rather than adding a new test that opens the same screen.
   - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
-    with `test.fail()` (in mocha: assert that the check is rejected, see `SharingRouter.spec.ts`).
+    with `test.fail()` (Vitest: `it.fails()`; mocha: `expectToFail('#<issue>', check)` of `test/backend/KnownFailures.ts`, see `SharingRouter.spec.ts`).
+    CI counts them as "Known failures" in the job summaries.
   - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
     git-ignored test folders (e.g. `demo/images/sub_dir`, `demo/images2`) that CI doesn't have.
     `demo/images` is also the public demo page: don't add test-only files or folders to it.
@@ -101,7 +104,8 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     `chromium_headless_shell-<rev>` folders there to the installed ones.
   - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens` saves them to `test/playwright/screenshots`.
     It starts its own server (`start-docs-e2e-server`) on the maintainer's `demo/images2/docs/puerto rico` photos, which are not in git.
-  - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `build.yml`).
+  - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `build.yml`),
+    and a table of the unit tests (parsed from their output).
 - Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
   read only the summary:
   - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`

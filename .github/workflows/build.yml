@@ -17,6 +17,8 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    # a hanging run would otherwise take 6 hours
+    timeout-minutes: 45
 
     strategy:
       matrix:
@@ -65,8 +67,12 @@ jobs:
       run: |
         npm run lint
     - name: test
+      # a step timeout fails the step (a job timeout cancels it), so the summary still runs
+      # and the log keeps what test/backend/OpenHandles.ts lists as keeping the process alive
+      timeout-minutes: 20
+      shell: bash
       run: |
-        npm test
+        npm test 2>&1 | tee test-output.log
         if [ "${{ matrix.node-version }}" = "26.x" ]; then npm run coverage; fi
       env:
         MYSQL_HOST: localhost
@@ -75,6 +81,26 @@ jobs:
         MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
         PORT: 35000
         CI: true
+    - name: Test summary
+      if: ${{ !cancelled() && hashFiles('test-output.log') != '' }}
+      shell: bash
+      run: |
+        log=$(sed 's/\x1b\[[0-9;]*m//g' test-output.log)
+        # number before $1 in the line $2 (0 if missing)
+        num() { grep -aE "$2" <<<"$log" | tail -n 1 | grep -oE "[0-9]+ $1" | grep -oE '^[0-9]+' || echo 0; }
+        fe_line='^ +Tests +[0-9]'
+        be_passing=$(num passing '^ +[0-9]+ passing')
+        be_known=$(grep -aoE '^ +Known failures: [0-9]+' <<<"$log" | tail -n 1 | grep -oE '[0-9]+$' || echo 0)
+        {
+          echo "### Unit tests (Node ${{ matrix.node-version }})"
+          echo ""
+          echo "| Suite | Passed | Known failures | Failed |"
+          echo "| --- | --: | --: | --: |"
+          echo "| Frontend (Vitest) | $(num passed "$fe_line") | $(num 'expected fail' "$fe_line") | $(num failed "$fe_line") |"
+          echo "| Backend (mocha) | $((be_passing - be_known)) | $be_known | $(num failing '^ +[0-9]+ failing') |"
+          echo ""
+          echo "Known failures: tests of behaviour that doesn't work yet (\`it.fails()\`, \`expectToFail()\`); they pass while it is broken."
+        } >> "$GITHUB_STEP_SUMMARY"
     - name: Coveralls
       if: matrix.node-version == '26.x'
       uses: coverallsapp/github-action@v2
@@ -86,6 +112,7 @@ jobs:
   # own job, so a failing unit test does not skip the e2e tests (and the other way around)
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
     - uses: actions/checkout@v7
     - name: Use Node.js 26
@@ -109,6 +136,9 @@ jobs:
         npm rebuild ffmpeg-static && node -e "$check" && exit 0
         echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
         exit 1
+    - name: Type check the e2e tests
+      # Playwright runs the tests without a type check
+      run: npx tsc --noEmit -p test/playwright/tsconfig.json
     - name: Install Playwright browser
       run: npx playwright install --with-deps chromium
     - name: E2E test - Playwright
@@ -117,16 +147,20 @@ jobs:
       if: ${{ !cancelled() && hashFiles('test-results/results.json') != '' }}
       run: |
         jq -r '
+          def tests: [.. | objects | select(has("expectedStatus"))];
           def count(s): map(select(.status == s)) | length;
+          # test.fail(): expected to fail, and it did
+          def known: map(select(.status == "expected" and .expectedStatus == "failed")) | length;
+          def passed: map(select(.status == "expected" and .expectedStatus != "failed")) | length;
+          def row(name): "| \(name) | \(passed) | \(known) | \(count("unexpected")) | \(count("flaky")) | \(count("skipped")) |";
           "### E2E tests (Playwright)",
           "",
-          "| Spec | Passed | Failed | Flaky | Skipped |",
-          "| --- | --: | --: | --: | --: |",
-          (.suites[] | [.. | objects | select(has("expectedStatus"))] as $t
-            | "| \(.file) | \($t | count("expected")) | \($t | count("unexpected")) | \($t | count("flaky")) | \($t | count("skipped")) |"),
-          "| **All (\(.stats.duration / 1000 | floor) s)** | **\(.stats.expected)** | **\(.stats.unexpected)** | **\(.stats.flaky)** | **\(.stats.skipped)** |",
+          "| Spec | Passed | Known failures | Failed | Flaky | Skipped |",
+          "| --- | --: | --: | --: | --: | --: |",
+          (.suites[] | .file as $f | tests | row($f)),
+          (.stats.duration / 1000 | floor) as $s | (tests | row("**All (\($s) s)**")),
           "",
-          "Passed includes the expected failures of test.fail(). Details: the playwright-report artifact."
+          "Known failures: test.fail() tests of behaviour that doesn'"'"'t work yet; they pass while it is broken. Details: the playwright-report artifact."
         ' test-results/results.json >> "$GITHUB_STEP_SUMMARY"
     - uses: actions/upload-artifact@v7
       if: ${{ !cancelled() }}
