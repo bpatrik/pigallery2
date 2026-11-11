@@ -728,8 +728,9 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
 
     it('lists media with the same name and size in different folders', async () => {
       const root = TestHelper.getDirectoryEntry(null, '.');
-      const a = TestHelper.getDirectoryEntry(root, 'Balaton');
-      const b = TestHelper.getDirectoryEntry(root, 'Tihany és Hévíz');
+      // accents in the folder and file names on purpose
+      const a = TestHelper.getDirectoryEntry(root, 'Holiday');
+      const b = TestHelper.getDirectoryEntry(root, 'Árvíztűrő tükörfúrógép');
       photo(a, 'Árvíztűrő.jpg', 1234);
       photo(b, 'Árvíztűrő.jpg', 1234);
       photo(root, 'Árvíztűrő.jpg', 999); // same name, other size
@@ -738,15 +739,15 @@ describe('GalleryManager', (sqlHelper: DBTestHelper) => {
 
       const duplicates = await new GalleryManager().getPossibleDuplicates();
       expect(duplicates.length).to.equal(1);
-      expect(duplicates[0].media.map(m => m.directory.name)).to.deep.equalInAnyOrder(['Balaton', 'Tihany és Hévíz']);
+      expect(duplicates[0].media.map(m => m.directory.name)).to.deep.equalInAnyOrder(['Holiday', 'Árvíztűrő tükörfúrógép']);
       expect(duplicates[0].media.map(m => m.name)).to.deep.equal(['Árvíztűrő.jpg', 'Árvíztűrő.jpg']);
     });
 
     it('returns an empty list without duplicates', async () => {
       const root = TestHelper.getDirectoryEntry(null, '.');
-      const a = TestHelper.getDirectoryEntry(root, 'Balaton');
-      photo(root, 'Tihany.jpg', 1000);
-      photo(a, 'Hévíz.jpg', 2000);
+      const a = TestHelper.getDirectoryEntry(root, 'Holiday');
+      photo(root, 'beach.jpg', 1000);
+      photo(a, 'lake.jpg', 2000);
       await DBTestHelper.persistTestDir(root);
 
       expect(await new GalleryManager().getPossibleDuplicates()).to.deep.equal([]);

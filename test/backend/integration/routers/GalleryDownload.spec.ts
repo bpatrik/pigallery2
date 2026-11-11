@@ -34,15 +34,15 @@ describe('Gallery downloads', (sqlHelper: DBTestHelper) => {
 
   const assets = path.join(__dirname, '../../assets');
   // accents, spaces and punctuation in the folder and file names
-  const DIR = 'Árvíztűrő mappa, 2024';
+  const DIR = 'Árvíztűrő tükörfúrógép, 2024';
   const FILES: Record<string, string> = {
-    'tükör fúrógép.jpg': 'exiftool.jpg',
-    'Ábel (1).jpg': 'wild-1-small.jpg',
-    'videó.mp4': 'video.mp4',
+    'árvíztűrő tükörfúrógép.jpg': 'exiftool.jpg',
+    'Árvíztűrő (1).jpg': 'wild-1-small.jpg',
+    'my video.mp4': 'video.mp4',
   };
-  const SUB_DIR = 'alkönyvtár';
-  const SUB_FILE = 'őz.jpg';
-  const DELETED = 'törölt kép.jpg';
+  const SUB_DIR = 'subfolder';
+  const SUB_FILE = 'árvíztűrő.jpg';
+  const DELETED = 'deleted photo.jpg';
 
   let galleryFolder: string;
   let server: Server;

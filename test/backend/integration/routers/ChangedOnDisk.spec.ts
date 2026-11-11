@@ -39,19 +39,20 @@ describe('Photos changed on disk', (sqlHelper: DBTestHelper) => {
   describe = tmpDescribe;
 
   const assets = path.join(__dirname, '../../assets');
-  const DIR = 'Nyaralás 2024';
-  const KEPT = 'tükör fúrógép.jpg';
-  const DELETED = 'törölt kép.jpg';
-  const RENAMED_FROM = 'régi név.jpg';
-  const RENAMED_TO = 'új név.jpg';
-  const ADDED = 'hozzáadott ő.jpg';
-  const SUB_RENAMED_FROM = 'Őszi kirándulás';
-  const SUB_RENAMED_TO = 'Téli kirándulás';
-  const SUB_FILE = 'falevél.jpg';
-  const SUB_DELETED = 'Törlendő mappa';
-  const SUB_DELETED_FILE = 'hóember.jpg';
-  const SUB_ADDED = 'Új mappa';
-  const SUB_ADDED_FILE = 'első ű.jpg';
+  // accents in the folder and in the added names: non-ASCII names must survive the reindexing too
+  const DIR = 'Árvíztűrő 2024';
+  const KEPT = 'kept photo.jpg';
+  const DELETED = 'deleted photo.jpg';
+  const RENAMED_FROM = 'old name.jpg';
+  const RENAMED_TO = 'new name.jpg';
+  const ADDED = 'árvíztűrő.jpg';
+  const SUB_RENAMED_FROM = 'Autumn trip';
+  const SUB_RENAMED_TO = 'Winter trip';
+  const SUB_FILE = 'leaf.jpg';
+  const SUB_DELETED = 'Folder to delete';
+  const SUB_DELETED_FILE = 'snowman.jpg';
+  const SUB_ADDED = 'Árvíztűrő tükörfúrógép';
+  const SUB_ADDED_FILE = 'tükörfúrógép.jpg';
 
   let galleryFolder: string;
   let server: Server;
@@ -70,7 +71,7 @@ describe('Photos changed on disk', (sqlHelper: DBTestHelper) => {
     fs.copyFileSync(path.join(assets, 'wild-2-small.jpg'), dirPath(SUB_RENAMED_FROM, SUB_FILE));
     fs.copyFileSync(path.join(assets, 'two_ratings.jpg'), dirPath(SUB_DELETED, SUB_DELETED_FILE));
     // the root is never empty (an empty root stops the indexing)
-    fs.copyFileSync(path.join(assets, 'date_issue.jpg'), path.join(galleryFolder, 'gyökér.jpg'));
+    fs.copyFileSync(path.join(assets, 'date_issue.jpg'), path.join(galleryFolder, 'root.jpg'));
   };
 
   /**
