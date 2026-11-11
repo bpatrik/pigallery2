@@ -372,9 +372,9 @@ describe('GalleryComponent', () => {
 
     // #1309: the alert tells to refine the search, the results that came back are still shown
     it('should still show the results of a search with too many results', () => {
-      const photos = ['Árvíztűrő.jpg', '東京.jpg'].map(name => ({
+      const photos = ['sunset.jpg', '東京.jpg'].map(name => ({
         name,
-        directory: {path: './', name: 'Nyaralás'},
+        directory: {path: './', name: 'Vacation'},
         metadata: {size: {width: 400, height: 300}, creationDate: 0}
       })) as unknown as PhotoDTO[];
       mockContentLoader.content.set({
@@ -386,7 +386,7 @@ describe('GalleryComponent', () => {
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.alert-info')?.textContent?.trim()).toBe('Too many results to show. Refine your search.');
       const grid = fixture.debugElement.query(By.directive(GalleryGridComponent)).componentInstance as GalleryGridComponent;
-      expect(grid.mediaGroups().flatMap(g => g.media).map(m => m.name)).toEqual(['Árvíztűrő.jpg', '東京.jpg']);
+      expect(grid.mediaGroups().flatMap(g => g.media).map(m => m.name)).toEqual(['sunset.jpg', '東京.jpg']);
     });
   });
 

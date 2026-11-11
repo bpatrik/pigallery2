@@ -11,6 +11,7 @@ import {
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
 
 // #1309, CUJ 21: the search bar text and the query of the query builder (and of the URL) turn into each other
+// (the texts have accents and other non-ASCII letters on purpose: the parser must keep them)
 describe('SearchQueryParserService', () => {
   let service: SearchQueryParserService;
 
@@ -22,20 +23,20 @@ describe('SearchQueryParserService', () => {
     it.each([
       'Árvíztűrő',
       'any-text:(Árvíztűrő tükörfúrógép)',
-      'keyword:Őszi',
-      'keyword:(Őszi kirándulás)',
-      'person:"Kovács Éva"',
-      'person!:"Kovács Éva"',
-      'caption:(ünnepi vacsora)',
+      'keyword:café',
+      'keyword:(crème brûlée)',
+      'person:"Zoë Smith"',
+      'person!:"Zoë Smith"',
+      'caption:(fête dinner)',
       'file-name:"IMG_ÅÄÖ.jpg"',
-      'position:Pécs',
-      'directory~:Nyaralás/Balaton/*',
-      'directory~:"Nyaralás/Őszi kirándulás/*"',
+      'position:Orléans',
+      'directory~:Vacation/Orléans/*',
+      'directory~:"Vacation/Árvíztűrő tükörfúrógép/*"',
       'directory:(with special caracters(_.-.,-.,) 1234 56789 űáéú őóüö)',
-      'Ábel and keyword:Őszi',
-      'person:"Kovács Éva" or person:"Nagy Ödön"',
-      'Ábel and (Zoé or Ünőke)',
-      '2-of:(Ábel Zoé Ünőke)',
+      'Zoë and keyword:café',
+      'person:"Zoë Smith" or person:"José García"',
+      'Zoë and (Chloé or José)',
+      '2-of:(Zoë Chloé José)',
       '日本 and Москва',
     ])('should keep "%s"', (text) => {
       expect(service.stringify(service.parse(text))).toBe(text);
@@ -66,21 +67,21 @@ describe('SearchQueryParserService', () => {
   describe('query -> text -> query', () => {
     it.each<[string, SearchQueryDTO]>([
       ['any text', {type: SearchQueryTypes.any_text, value: 'Árvíztűrő tükörfúrógép'} as TextSearch],
-      ['exact person', {type: SearchQueryTypes.person, value: 'Kovács Éva', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch],
-      ['negated keyword', {type: SearchQueryTypes.keyword, value: 'Őszi kirándulás', negate: true} as TextSearch],
+      ['exact person', {type: SearchQueryTypes.person, value: 'Zoë Smith', matchType: TextSearchQueryMatchTypes.exact_match} as TextSearch],
+      ['negated keyword', {type: SearchQueryTypes.keyword, value: 'crème brûlée', negate: true} as TextSearch],
       ['directory glob', {
         type: SearchQueryTypes.directory,
-        value: 'Nyaralás/Balaton/*',
+        value: 'Vacation/Orléans/*',
         matchType: TextSearchQueryMatchTypes.globMatch
       } as TextSearch],
       ['or of and', {
         type: SearchQueryTypes.OR,
         list: [
-          {type: SearchQueryTypes.caption, value: 'ünnep'} as TextSearch,
+          {type: SearchQueryTypes.caption, value: 'fête'} as TextSearch,
           {
             type: SearchQueryTypes.AND,
             list: [
-              {type: SearchQueryTypes.position, value: 'Pécs'} as TextSearch,
+              {type: SearchQueryTypes.position, value: 'Orléans'} as TextSearch,
               {type: SearchQueryTypes.file_name, value: 'ÅÄÖ'} as TextSearch,
             ]
           } as ANDSearchQuery
@@ -91,8 +92,8 @@ describe('SearchQueryParserService', () => {
     });
 
     it('should leave out the default match type', () => {
-      const query = {type: SearchQueryTypes.keyword, value: 'Őszi', matchType: TextSearchQueryMatchTypes.like} as TextSearch;
-      expect(service.stringify(query)).toBe('keyword:Őszi');
+      const query = {type: SearchQueryTypes.keyword, value: 'café', matchType: TextSearchQueryMatchTypes.like} as TextSearch;
+      expect(service.stringify(query)).toBe('keyword:café');
     });
 
     it('should stringify nothing to an empty text', () => {
@@ -104,11 +105,11 @@ describe('SearchQueryParserService', () => {
   // the URL of a search (/search/<query>) carries the query in a shortened JSON
   describe('URL', () => {
     it('should keep a query with accents through the URL', () => {
-      const query = service.parse('person:"Kovács Éva" and directory~:"Nyaralás/Őszi kirándulás/*"');
+      const query = service.parse('person:"Zoë Smith" and directory~:"Vacation/Árvíztűrő tükörfúrógép/*"');
       const url = '/search/' + encodeURIComponent(SearchQueryUtils.urlify(query));
       const back = SearchQueryUtils.parseURLifiedQuery(decodeURIComponent(url.substring('/search/'.length)));
       expect(back).toEqual(query);
-      expect(service.stringify(back)).toBe('person:"Kovács Éva" and directory~:"Nyaralás/Őszi kirándulás/*"');
+      expect(service.stringify(back)).toBe('person:"Zoë Smith" and directory~:"Vacation/Árvíztűrő tükörfúrógép/*"');
     });
 
     it('should search a hand typed URL with accents as text', () => {

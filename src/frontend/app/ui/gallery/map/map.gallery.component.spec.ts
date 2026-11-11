@@ -12,7 +12,7 @@ import {Config} from '../../../../../common/config/public/Config';
 
 const photo = (name: string, gps?: { latitude: number, longitude: number }): PhotoDTO => ({
   name,
-  directory: {path: './', name: 'Nyaralás'},
+  directory: {path: './', name: 'Vacation'},
   metadata: {
     size: {width: 400, height: 300},
     creationDate: 0,
@@ -52,7 +52,7 @@ describe('GalleryMapComponent - markers', () => {
 
   it('should have a marker for each photo with GPS, none for the others', () => {
     fixture.componentRef.setInput('photos', [
-      photo('Árvíztűrő.jpg', {latitude: 47.4979, longitude: 19.0402}),
+      photo('Budapest.jpg', {latitude: 47.4979, longitude: 19.0402}),
       photo('no gps.jpg'),
       photo('東京.jpg', {latitude: 35.6762, longitude: 139.6503}),
     ]);
@@ -82,7 +82,8 @@ describe('MapService - GPX', () => {
   let service: MapService;
   let getXML: ReturnType<typeof vi.fn>;
 
-  const gpxFile = {name: 'Túra 東京.gpx', directory: {path: './', name: 'Nyaralás'}} as unknown as FileDTO;
+  // accents in the file name and in the GPX texts on purpose: they must survive the URL and the parsing
+  const gpxFile = {name: 'árvíztűrő 東京.gpx', directory: {path: './', name: 'Vacation'}} as unknown as FileDTO;
   const gpx = (body: string): Document => new DOMParser().parseFromString(
     '<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">' + body + '</gpx>',
     'application/xml');
@@ -96,8 +97,8 @@ describe('MapService - GPX', () => {
 
   it('should read the track, the waypoints and the names of a GPX file with accents', async () => {
     getXML.mockResolvedValue(gpx(
-      '<metadata><name>Kéktúra</name><desc>Ősz a Bükkben</desc><author><name>Ödön</name></author></metadata>' +
-      '<wpt lat="48.1" lon="20.5"><name>Kilátó</name></wpt>' +
+      '<metadata><name>Blue Trail</name><desc>Árvíztűrő tükörfúrógép</desc><author><name>Chloé</name></author></metadata>' +
+      '<wpt lat="48.1" lon="20.5"><name>Lookout</name></wpt>' +
       '<trk><name>trk</name><trkseg>' +
       trkpt(48.0, 20.0, '2015-06-12T14:00:00Z') + trkpt(48.01, 20.0, '2015-06-12T14:30:00Z') +
       '</trkseg><trkseg>' +
@@ -107,10 +108,10 @@ describe('MapService - GPX', () => {
     const parsed = await service.getMapCoordinates(gpxFile);
 
     // the file is loaded from its own folder
-    expect(getXML).toHaveBeenCalledWith('/gallery/content/Nyaralás/Túra 東京.gpx/bestFit');
-    expect(parsed.name).toBe('Kéktúra');
-    expect(parsed.description).toBe('Ősz a Bükkben');
-    expect(parsed.author).toBe('Ödön');
+    expect(getXML).toHaveBeenCalledWith('/gallery/content/Vacation/árvíztűrő 東京.gpx/bestFit');
+    expect(parsed.name).toBe('Blue Trail');
+    expect(parsed.description).toBe('Árvíztűrő tükörfúrógép');
+    expect(parsed.author).toBe('Chloé');
     // one path per track segment
     expect(parsed.path.map(p => p.map(ll => [ll.lat, ll.lng]))).toEqual([[[48.0, 20.0], [48.01, 20.0]], [[48.02, 20.0], [48.03, 20.0]]]);
     expect(parsed.markers.map(ll => [ll.lat, ll.lng])).toEqual([[48.1, 20.5]]);

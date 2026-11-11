@@ -19,6 +19,7 @@ class FakeGalleryCacheService {
 }
 
 // #1309, CUJ 21: the suggestions of the search bar
+// (the typed texts and the suggestions have accents on purpose: they must survive the request, the sorting and the cache)
 describe('AutoCompleteService', () => {
   let service: AutoCompleteService;
   let cache: FakeGalleryCacheService;
@@ -42,7 +43,7 @@ describe('AutoCompleteService', () => {
   });
 
   it('should suggest "and" for an empty search, but not twice', () => {
-    expect(service.autoComplete({current: '', prev: 'Balaton'})).toEqual({
+    expect(service.autoComplete({current: '', prev: 'lake'})).toEqual({
       items: [{value: 'and', queryHint: 'and', notSearchable: true}],
       more: null
     });
@@ -66,42 +67,42 @@ describe('AutoCompleteService', () => {
 
   it('should ask the server for a text with accents and sort the persons first', async () => {
     serverItems = [
-      {value: 'Árvíztűrő tükörfúrógép', type: SearchQueryTypes.keyword},
-      {value: 'Árpád', type: SearchQueryTypes.person},
-      {value: 'Szent Árpád utca', type: SearchQueryTypes.position},
+      {value: 'Éclair', type: SearchQueryTypes.keyword},
+      {value: 'Étienne', type: SearchQueryTypes.person},
+      {value: 'Rue Étienne Marcel', type: SearchQueryTypes.position},
     ];
-    const result = service.autoComplete({current: 'Ár', prev: ''});
+    const result = service.autoComplete({current: 'É', prev: ''});
     expect(result.more).not.toBeNull();
-    expect(getJson).toHaveBeenCalledWith('/autocomplete/' + encodeURIComponent('Ár'), {});
+    expect(getJson).toHaveBeenCalledWith('/autocomplete/' + encodeURIComponent('É'), {});
 
     const items = await result.more!;
     // those that start with the text first, persons first among them; a later word that starts with it after them
-    expect(values(items)).toEqual(['Árpád', 'Árvíztűrő tükörfúrógép', 'Szent Árpád utca']);
-    expect(hints(items)).toEqual(['person:"Árpád"', 'keyword:"Árvíztűrő tükörfúrógép"', 'position:"Szent Árpád utca"']);
+    expect(values(items)).toEqual(['Étienne', 'Éclair', 'Rue Étienne Marcel']);
+    expect(hints(items)).toEqual(['person:"Étienne"', 'keyword:"Éclair"', 'position:"Rue Étienne Marcel"']);
   });
 
   it('should ask the server for the type of the typed keyword', async () => {
-    serverItems = [{value: 'Őszi kirándulás', type: SearchQueryTypes.keyword}];
-    const result = service.autoComplete({current: 'keyword:"Ősz', prev: ''});
-    expect(getJson).toHaveBeenCalledWith('/autocomplete/' + encodeURIComponent('Ősz'), {type: SearchQueryTypes.keyword});
-    expect(hints(await result.more!)).toEqual(['keyword:"Őszi kirándulás"']);
+    serverItems = [{value: 'Éclair', type: SearchQueryTypes.keyword}];
+    const result = service.autoComplete({current: 'keyword:"Écl', prev: ''});
+    expect(getJson).toHaveBeenCalledWith('/autocomplete/' + encodeURIComponent('Écl'), {type: SearchQueryTypes.keyword});
+    expect(hints(await result.more!)).toEqual(['keyword:"Éclair"']);
   });
 
   it('should keep the distance in the hint of a place', async () => {
-    serverItems = [{value: 'Pécs', type: SearchQueryTypes.position}];
-    const result = service.autoComplete({current: '5-km-from:Pé', prev: ''});
-    expect(getJson).toHaveBeenCalledWith('/autocomplete/' + encodeURIComponent('Pé'), {type: SearchQueryTypes.distance});
-    expect(hints(await result.more!)).toContain('5-km-from:"Pécs"');
+    serverItems = [{value: 'Orléans', type: SearchQueryTypes.position}];
+    const result = service.autoComplete({current: '5-km-from:Orlé', prev: ''});
+    expect(getJson).toHaveBeenCalledWith('/autocomplete/' + encodeURIComponent('Orlé'), {type: SearchQueryTypes.distance});
+    expect(hints(await result.more!)).toContain('5-km-from:"Orléans"');
   });
 
   it('should answer from the cache without asking the server again', async () => {
-    serverItems = [{value: 'Ábel', type: SearchQueryTypes.person}];
-    await service.autoComplete({current: 'Áb', prev: ''}).more;
-    expect(cache.getAutoComplete('Áb', null)).toEqual(serverItems);
+    serverItems = [{value: 'Étienne', type: SearchQueryTypes.person}];
+    await service.autoComplete({current: 'Ét', prev: ''}).more;
+    expect(cache.getAutoComplete('Ét', null)).toEqual(serverItems);
 
-    const result = service.autoComplete({current: 'Áb', prev: ''});
+    const result = service.autoComplete({current: 'Ét', prev: ''});
     expect(result.more).toBeNull();
-    expect(hints(result.items)).toEqual(['person:"Ábel"']);
+    expect(hints(result.items)).toEqual(['person:"Étienne"']);
     expect(getJson).toHaveBeenCalledTimes(1);
   });
 });

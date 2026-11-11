@@ -20,6 +20,7 @@ describe('GalleryNavigatorComponent', () => {
   let router: { navigate: ReturnType<typeof vi.fn> };
   let params: ReturnType<typeof signal<Record<string, string>>>;
 
+  // the folder name has accents on purpose: the routes and the queries must keep them
   const folder = (path: string, name: string, availableParents?: boolean[]): ContentWrapperWithError =>
     ({directory: {path, name, availableParents}} as unknown as ContentWrapperWithError);
 
@@ -51,24 +52,24 @@ describe('GalleryNavigatorComponent', () => {
     });
 
     it('should link every parent of an accented folder', () => {
-      content.set(folder('Nyaralás/Balaton', 'Őszi kirándulás'));
+      content.set(folder('Vacation/Lake', 'Árvíztűrő tükörfúrógép'));
       expect(component.routes()).toEqual([
         // '' and not '/': the folder is one URL segment, so '/' would become /gallery/%2F
         {name: 'Home', route: ''},
-        {name: 'Nyaralás', route: 'Nyaralás'},
-        {name: 'Balaton', route: 'Nyaralás/Balaton', title: 'key: alt + up'},
-        {name: 'Őszi kirándulás', route: null},
+        {name: 'Vacation', route: 'Vacation'},
+        {name: 'Lake', route: 'Vacation/Lake', title: 'key: alt + up'},
+        {name: 'Árvíztűrő tükörfúrógép', route: null},
       ]);
     });
 
     it('should link only the parents the server allows', () => {
-      content.set(folder('Nyaralás/Balaton', 'Őszi kirándulás', [false, false, true]));
-      expect(component.routes().map((r) => r.route)).toEqual([null, null, 'Nyaralás/Balaton', null]);
+      content.set(folder('Vacation/Lake', 'Árvíztűrő tükörfúrógép', [false, false, true]));
+      expect(component.routes().map((r) => r.route)).toEqual([null, null, 'Vacation/Lake', null]);
     });
 
     it('should not link parents for a sharing guest', () => {
       user.set({name: 'Guest', role: UserRoles.LimitedGuest} as UserDTO);
-      content.set(folder('Nyaralás', 'Balaton'));
+      content.set(folder('Vacation', 'Lake'));
       expect(component.routes().map((r) => r.route)).toEqual([null, null, null]);
     });
 
@@ -78,15 +79,15 @@ describe('GalleryNavigatorComponent', () => {
           searchQuery: {
             type: SearchQueryTypes.directory,
             matchType: TextSearchQueryMatchTypes.exact_match,
-            value: './Nyaralás/Balaton'
+            value: './Vacation/Lake'
           }
         }
       } as unknown as ContentWrapperWithError);
-      expect(component.routes().map((r) => r.name)).toEqual(['Home', 'Nyaralás', 'Balaton']);
+      expect(component.routes().map((r) => r.name)).toEqual(['Home', 'Vacation', 'Lake']);
     });
 
     it('should have no routes for a search', () => {
-      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Balaton'}}} as unknown as ContentWrapperWithError);
+      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Lake'}}} as unknown as ContentWrapperWithError);
       expect(component.routes()).toEqual([]);
     });
   });
@@ -97,21 +98,21 @@ describe('GalleryNavigatorComponent', () => {
 
     // the server sends the path of a folder like this (DiskManager.pathFromRelativeDirName)
     it('should search the media of the folder with accents and of its subfolders', () => {
-      content.set(folder('Nyaralás/Balaton/', 'Őszi kirándulás'));
+      content.set(folder('Vacation/Lake/', 'Árvíztűrő tükörfúrógép'));
       const query = flattenQuery();
       expect(query.type).toBe(SearchQueryTypes.directory);
       expect(query.matchType).toBe(TextSearchQueryMatchTypes.globMatch);
-      expect(query.value.startsWith('Nyaralás/Balaton/Őszi kirándulás')).toBe(true);
+      expect(query.value.startsWith('Vacation/Lake/Árvíztűrő tükörfúrógép')).toBe(true);
     });
 
     // TODO #1308: the glob is "<folder>*", so it also matches the sibling folders that start with the same name
-    // (e.g.: "Őszi kirándulás 2"). "<folder>/*" matches the folder and its subfolders only (SearchManager.expandDirectoryGlobs).
+    // (e.g.: "Árvíztűrő tükörfúrógép 2"). "<folder>/*" matches the folder and its subfolders only (SearchManager.expandDirectoryGlobs).
     it.fails('should not search the sibling folders that start with the same name', () => {
-      content.set(folder('Nyaralás/Balaton/', 'Őszi kirándulás'));
+      content.set(folder('Vacation/Lake/', 'Árvíztűrő tükörfúrógép'));
       expect(flattenQuery()).toEqual({
         type: SearchQueryTypes.directory,
         matchType: TextSearchQueryMatchTypes.globMatch,
-        value: 'Nyaralás/Balaton/Őszi kirándulás/*'
+        value: 'Vacation/Lake/Árvíztűrő tükörfúrógép/*'
       });
     });
 
@@ -121,7 +122,7 @@ describe('GalleryNavigatorComponent', () => {
     });
 
     it('should not offer it for a search result', () => {
-      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Balaton'}}} as unknown as ContentWrapperWithError);
+      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Lake'}}} as unknown as ContentWrapperWithError);
       expect(component.directoryFlattenSearchQuery()).toBeNull();
     });
   });
@@ -130,26 +131,26 @@ describe('GalleryNavigatorComponent', () => {
     const altUp = new KeyboardEvent('keydown', {key: 'ArrowUp', altKey: true});
 
     it('should open the parent folder', () => {
-      content.set(folder('Nyaralás/Balaton', 'Őszi kirándulás'));
+      content.set(folder('Vacation/Lake', 'Árvíztűrő tükörfúrógép'));
       component.onKeyPress(altUp);
-      expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Nyaralás/Balaton'], {queryParams: {}});
+      expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Vacation/Lake'], {queryParams: {}});
     });
 
     it('should follow the content to the next folder', () => {
-      content.set(folder('Nyaralás/Balaton', 'Őszi kirándulás'));
-      content.set(folder('Nyaralás', 'Balaton'));
+      content.set(folder('Vacation/Lake', 'Árvíztűrő tükörfúrógép'));
+      content.set(folder('Vacation', 'Lake'));
       component.onKeyPress(altUp);
-      expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Nyaralás'], {queryParams: {}});
+      expect(router.navigate).toHaveBeenCalledWith(['/gallery', 'Vacation'], {queryParams: {}});
     });
 
     it('should open the root from a top level folder', () => {
-      content.set(folder('.', 'Nyaralás'));
+      content.set(folder('.', 'Vacation'));
       component.onKeyPress(altUp);
       expect(router.navigate).toHaveBeenCalledWith(['/gallery', ''], {queryParams: {}});
     });
 
     it('should do nothing without a parent the user may open', () => {
-      content.set(folder('Nyaralás', 'Balaton', [false, false]));
+      content.set(folder('Vacation', 'Lake', [false, false]));
       component.onKeyPress(altUp);
       expect(router.navigate).not.toHaveBeenCalled();
     });
@@ -160,27 +161,27 @@ describe('GalleryNavigatorComponent', () => {
     const zipUrl = (): URL => new URL(component.downloadZipLink()!, 'http://localhost');
 
     it('should zip the folder with accents', () => {
-      content.set(folder('Nyaralás/', 'Őszi kirándulás'));
+      content.set(folder('Vacation/', 'Árvíztűrő tükörfúrógép'));
       const url = zipUrl();
       expect(url.pathname.startsWith('/pgapi/gallery/zip/')).toBe(true);
       const query = JSON.parse(decodeURIComponent(url.pathname.substring('/pgapi/gallery/zip/'.length))) as TextSearch;
       expect(query).toEqual({
         type: SearchQueryTypes.directory,
         matchType: TextSearchQueryMatchTypes.exact_match,
-        value: 'Nyaralás/Őszi kirándulás'
+        value: 'Vacation/Árvíztűrő tükörfúrógép'
       });
     });
 
     it('should keep the sharing key', () => {
       params.set({sk: 'abc'});
-      content.set(folder('Nyaralás/', 'Balaton'));
+      content.set(folder('Vacation/', 'Lake'));
       expect(zipUrl().searchParams.get('sk')).toBe('abc');
     });
 
     // TODO #1311: the query params are joined without '&' (e.g.: "?sk=abcfoo=bar")
     it.fails('should keep every query param', () => {
       params.set({sk: 'abc', foo: 'bar'});
-      content.set(folder('Nyaralás/', 'Balaton'));
+      content.set(folder('Vacation/', 'Lake'));
       const url = zipUrl();
       expect(url.searchParams.get('sk')).toBe('abc');
       expect(url.searchParams.get('foo')).toBe('bar');
@@ -190,7 +191,7 @@ describe('GalleryNavigatorComponent', () => {
     it('should count no items in a folder without media', () => {
       content.set({directory: {path: './', name: 'emptydirectory', cache: {mediaCount: 0}}} as unknown as ContentWrapperWithError);
       expect(component.itemCount()).toBe(0);
-      content.set({directory: {path: './', name: 'Balaton', cache: {mediaCount: 3}}} as unknown as ContentWrapperWithError);
+      content.set({directory: {path: './', name: 'Lake', cache: {mediaCount: 3}}} as unknown as ContentWrapperWithError);
       expect(component.itemCount()).toBe(3);
     });
   });
