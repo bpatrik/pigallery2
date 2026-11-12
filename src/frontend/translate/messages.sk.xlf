@@ -1382,7 +1382,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -4718,11 +4718,31 @@
         </context-group>
         <target>Toto uložené hľadanie sa načíta zo súboru počas indexovania galérie a je odolné voči resetovaniu databáze.</target>
       </trans-unit>
+      <trans-unit id="3894950702316166331" datatype="html">
+        <source>Loading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+        <target>Loading...</target>
+      </trans-unit>
+      <trans-unit id="706701817138815411" datatype="html">
+        <source> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+        <target> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </target>
+      </trans-unit>
       <trans-unit id="2904029998096758375" datatype="html">
         <source> No duplicates found </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
-          <context context-type="linenumber">12,13</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <target> Nenašli sa žiadne duplicity. </target>
       </trans-unit>
@@ -5418,7 +5438,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>Domov</target>
       </trans-unit>
@@ -5758,7 +5778,7 @@
         <source>The photo is not available anymore. Showing the first one.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">338</context>
+          <context context-type="linenumber">339</context>
         </context-group>
         <target>The photo is not available anymore. Showing the first one.</target>
       </trans-unit>
@@ -5930,7 +5950,7 @@
         <source>key: alt + up</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">156</context>
         </context-group>
         <target>kláves: alt + šípka hore</target>
       </trans-unit>
@@ -6849,14 +6869,6 @@
           <context context-type="linenumber">12,13</context>
         </context-group>
         <target>Install extensions</target>
-      </trans-unit>
-      <trans-unit id="3894950702316166331" datatype="html">
-        <source>Loading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
-          <context context-type="linenumber">20,21</context>
-        </context-group>
-        <target>Loading...</target>
       </trans-unit>
       <trans-unit id="7934833136974560675" datatype="html">
         <source>Retry</source>
