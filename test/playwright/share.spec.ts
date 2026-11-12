@@ -1,6 +1,6 @@
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
 import {
+  ADMIN_SESSION,
   ACCENTED_DIR,
   createDirectorySharingWithApi,
   deleteSharingsWithApi,

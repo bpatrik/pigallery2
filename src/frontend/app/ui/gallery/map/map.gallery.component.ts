@@ -45,7 +45,8 @@ export class GalleryMapComponent implements OnChanges, IRenderable {
   readonly markerLayer = computed((): Marker[] => this.photos()
     .flatMap((p): LatLngLiteral[] => {
       const gps = p.metadata?.positionData?.GPSData;
-      return gps?.latitude && gps.longitude ? [{lat: gps.latitude, lng: gps.longitude}] : [];
+      // 0 is a valid coordinate (the equator, the prime meridian)
+      return typeof gps?.latitude === 'number' && typeof gps.longitude === 'number' ? [{lat: gps.latitude, lng: gps.longitude}] : [];
     })
     .slice(0, Config.Map.maxPreviewMarkers)
     .map((latLng): Marker => marker(latLng).setIcon(MarkerFactory.defIconSmall)));

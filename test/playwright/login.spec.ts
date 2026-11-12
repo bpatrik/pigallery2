@@ -1,6 +1,7 @@
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION, NORMAL_USER} from './global-setup';
 import {
+  ADMIN_SESSION,
+  NORMAL_USER,
   ACCENTED_DIR,
   createUserWithApi,
   deleteUserWithApi,

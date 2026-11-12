@@ -227,9 +227,9 @@ describe('GallerySortingService', () => {
         expect(names(all, {method: SortByTypes.Name, ascending: true})).toHaveLength(1);
       });
 
-      // TODO #1308: the groups are made by the exact first letter (Á, A), so a letter with an accent splits
-      // the A group into several groups. Árvíztűrő should be in the same group as Avocado, like it sorts with A.
-      it.fails('should group by name accent aware: Árvíztűrő is in the A group', () => {
+      // #1308: a letter with an accent does not split the A group: Árvíztűrő is in the same group as Avocado,
+      // like it sorts with A
+      it('should group by name accent aware: Árvíztűrő is in the A group', () => {
         const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
           {method: GroupByTypes.Name, ascending: true})!.mediaGroups;
         expect(groups.map(g => g.media.map(m => m.name))).toEqual([['Árvíztűrő.jpg', 'Avocado.jpg'], ['éclair.jpg'], ['Zebra.jpg']]);

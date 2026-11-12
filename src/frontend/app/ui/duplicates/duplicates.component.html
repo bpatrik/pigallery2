@@ -1,9 +1,15 @@
 <app-frame>
 
   <div body class="container">
-    @if (renderedDirGroups()) {
+    @if (loading()) {
+      <div class="text-center">
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden" i18n>Loading...</span>
+        </div>
+      </div>
+    } @else {
       @if ( duplicateCount().photos >0) {
-        <div class="alert alert-secondary" role="alert">
+        <div class="alert alert-secondary" role="alert" i18n>
           Listing <strong>{{duplicateCount().pairs}}</strong> duplicates ({{duplicateCount().photos}} photos).
         </div>
       }
@@ -42,9 +48,6 @@
           }
         </div>
       }
-    }
-    @if (!renderedDirGroups()) {
-      loading
     }
   </div>
 </app-frame>

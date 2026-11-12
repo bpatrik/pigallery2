@@ -36,7 +36,7 @@ describe('NotificationService', () => {
     await vi.waitFor(() => expect(open).toHaveBeenCalled());
 
     expect(getJson).toHaveBeenCalledWith('/notifications');
-    expect(service.numberOfNotifications).toBe(2);
+    expect(service.numberOfNotifications()).toBe(2);
     // the same notification twice is shown once, with its count
     expect(service.countedNotifications().map(n => [n.message, n.count])).toEqual([['Using default admin user!', 2]]);
     expect(open).toHaveBeenCalledTimes(1);

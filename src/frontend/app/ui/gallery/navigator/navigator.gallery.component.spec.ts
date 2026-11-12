@@ -105,9 +105,9 @@ describe('GalleryNavigatorComponent', () => {
       expect(query.value.startsWith('Vacation/Lake/Árvíztűrő tükörfúrógép')).toBe(true);
     });
 
-    // TODO #1308: the glob is "<folder>*", so it also matches the sibling folders that start with the same name
+    // "<folder>*" would also match the sibling folders that start with the same name
     // (e.g.: "Árvíztűrő tükörfúrógép 2"). "<folder>/*" matches the folder and its subfolders only (SearchManager.expandDirectoryGlobs).
-    it.fails('should not search the sibling folders that start with the same name', () => {
+    it('should not search the sibling folders that start with the same name', () => {
       content.set(folder('Vacation/Lake/', 'Árvíztűrő tükörfúrógép'));
       expect(flattenQuery()).toEqual({
         type: SearchQueryTypes.directory,
@@ -178,8 +178,8 @@ describe('GalleryNavigatorComponent', () => {
       expect(zipUrl().searchParams.get('sk')).toBe('abc');
     });
 
-    // TODO #1311: the query params are joined without '&' (e.g.: "?sk=abcfoo=bar")
-    it.fails('should keep every query param', () => {
+    // #1311: the query params are joined with '&', not like "?sk=abcfoo=bar"
+    it('should keep every query param', () => {
       params.set({sk: 'abc', foo: 'bar'});
       content.set(folder('Vacation/', 'Lake'));
       const url = zipUrl();

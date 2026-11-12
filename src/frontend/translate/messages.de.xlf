@@ -1382,7 +1382,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -4718,11 +4718,31 @@
         </context-group>
         <target>This saved search will be loaded from file during gallery indexing and it will survive a database reset.</target>
       </trans-unit>
+      <trans-unit id="3894950702316166331" datatype="html">
+        <source>Loading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+        <target>Loading...</target>
+      </trans-unit>
+      <trans-unit id="706701817138815411" datatype="html">
+        <source> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+        <target> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </target>
+      </trans-unit>
       <trans-unit id="2904029998096758375" datatype="html">
         <source> No duplicates found </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
-          <context context-type="linenumber">12,13</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <target> No duplicates found </target>
       </trans-unit>
@@ -5366,14 +5386,6 @@
         </context-group>
         <target>Taste: Pfeil nach links</target>
       </trans-unit>
-      <trans-unit id="5015670487371268284" datatype="html">
-        <source>key: right arrow</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">225</context>
-        </context-group>
-        <target>Taste: Pfeil nach rechts</target>
-      </trans-unit>
       <trans-unit id="2952982394711430494" datatype="html">
         <source>Zoom out, key: '-'</source>
         <context-group purpose="location">
@@ -5406,11 +5418,27 @@
         </context-group>
         <target>Auto play</target>
       </trans-unit>
+      <trans-unit id="740732965879422811" datatype="html">
+        <source>Start over from the first photo (key: right arrow)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>Start over from the first photo (key: right arrow)</target>
+      </trans-unit>
+      <trans-unit id="5015670487371268284" datatype="html">
+        <source>key: right arrow</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <target>Taste: Pfeil nach rechts</target>
+      </trans-unit>
       <trans-unit id="2821179408673282599" datatype="html">
         <source>Home</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">359</context>
+          <context context-type="linenumber">363</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
@@ -5418,7 +5446,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>Start</target>
       </trans-unit>
@@ -5758,7 +5786,7 @@
         <source>The photo is not available anymore. Showing the first one.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">338</context>
+          <context context-type="linenumber">344</context>
         </context-group>
         <target>The photo is not available anymore. Showing the first one.</target>
       </trans-unit>
@@ -5930,7 +5958,7 @@
         <source>key: alt + up</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">156</context>
         </context-group>
         <target>key: alt + up</target>
       </trans-unit>
@@ -6849,14 +6877,6 @@
           <context context-type="linenumber">12,13</context>
         </context-group>
         <target>Install extensions</target>
-      </trans-unit>
-      <trans-unit id="3894950702316166331" datatype="html">
-        <source>Loading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
-          <context context-type="linenumber">20,21</context>
-        </context-group>
-        <target>Loading...</target>
       </trans-unit>
       <trans-unit id="7934833136974560675" datatype="html">
         <source>Retry</source>

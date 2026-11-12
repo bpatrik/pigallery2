@@ -119,7 +119,7 @@ describe('FrameComponent template', () => {
             isAuthorized: (): boolean => true // an admin
           }
         },
-        {provide: NotificationService, useValue: {numberOfNotifications: 0}},
+        {provide: NotificationService, useValue: {numberOfNotifications: signal(0)}},
         {provide: QueryService, useValue: {params: signal({})}},
         {provide: NavigationService, useValue: {url: signal('/gallery')}},
         {provide: ThemeService, useValue: {mode: signal(ThemeModes.light)}},
@@ -185,7 +185,7 @@ describe('FrameComponent notification badge', () => {
     const fixture = TestBed.createComponent(FrameComponent);
     await fixture.whenStable();
     // the notifications have arrived
-    await vi.waitFor(() => expect(TestBed.inject(NotificationService).numberOfNotifications).toBe(1));
+    await vi.waitFor(() => expect(TestBed.inject(NotificationService).numberOfNotifications()).toBe(1));
     await fixture.whenStable();
     return fixture.nativeElement as HTMLElement;
   };
@@ -199,9 +199,8 @@ describe('FrameComponent notification badge', () => {
     expect(el.querySelector('#button-frame-menu .navbar-badge')).toBeNull();
   });
 
-  // TODO #1315: numberOfNotifications is a plain field set when the request answers, so the zoneless
-  // navbar doesn't render it until something else changes (it should be a signal)
-  it.fails('should show the number of notifications to an admin once they arrive', async () => {
+  // #1315: the zoneless navbar renders the count once the request answers, without anything else changing
+  it('should show the number of notifications to an admin once they arrive', async () => {
     const el = await render(UserRoles.Admin);
     expect(el.querySelector('#button-frame-menu .navbar-badge')?.textContent?.trim()).toBe('1');
   });

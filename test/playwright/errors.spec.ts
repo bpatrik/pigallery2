@@ -1,8 +1,7 @@
 // Unhappy paths of the critical user journeys (#1254): the user should get a clear message, not an empty or wrong page.
 import {randomUUID} from 'node:crypto';
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, deleteUserWithApi, expectApiOk, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
+import {ADMIN_SESSION, ACCENTED_DIR, deleteUserWithApi, expectApiOk, expectLightboxPhoto, isGalleryContent, notLoggedIn} from './helpers';
 
 const NOT_EXISTING_SHARING = '/share/doesnotexist';
 // what a missing, expired or deleted sharing link tells the user (agreed in #1307, the same text as in share.spec.ts)

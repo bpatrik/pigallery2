@@ -1,5 +1,5 @@
 import {defineConfig, devices} from '@playwright/test';
-import {ADMIN_SESSION} from './test/playwright/global-setup';
+import {ADMIN_SESSION} from './test/playwright/helpers';
 
 // E2E_PORT: run several e2e servers side by side (e.g.: one per git worktree)
 const port = Number(process.env['E2E_PORT'] ?? 8080);
