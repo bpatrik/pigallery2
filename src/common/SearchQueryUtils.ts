@@ -1,5 +1,6 @@
 import {
   DirectorySearch,
+  ListSearchQueryTypes,
   NegatableSearchQuery,
   OrientationSearch,
   RangeSearchQueryTypes,
@@ -132,6 +133,20 @@ export const SearchQueryUtils = {
       return out as T;
     }
     return val;
+  },
+  /**
+   * False if a part of the query has a type that this version does not know, e.g. a hand-edited or outdated search link.
+   */
+  isKnownQuery: (query: SearchQueryDTO): boolean => {
+    if (!query || typeof query !== 'object' || query.type === SearchQueryTypes.UNKNOWN_RELATION ||
+      !Object.values(SearchQueryTypes).includes(query.type)) {
+      return false;
+    }
+    if (ListSearchQueryTypes.includes(query.type)) {
+      const list = (query as SearchListQuery).list;
+      return Array.isArray(list) && list.every(SearchQueryUtils.isKnownQuery);
+    }
+    return true;
   },
   validateSearchQuery: (query: SearchQueryDTO, what = 'SearchQuery'): void => {
     if (!query) {

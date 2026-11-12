@@ -7,6 +7,7 @@ import { FrameComponent } from '../frame/frame.component';
 import { FaceComponent } from './face/face.component';
 import {SortByDirectionalTypes} from '../../../../common/entities/SortingMethods';
 import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
+import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 
 @Component({
     selector: 'app-faces',
@@ -15,7 +16,8 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
     imports: [
     FrameComponent,
     FaceComponent,
-    FacesNavigatorComponent
+    FacesNavigatorComponent,
+    EmptyStateComponent
 ]
 })
 export class FacesComponent implements OnInit {

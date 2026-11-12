@@ -6,6 +6,14 @@
       [size]="size()" />
     }
 
+    <!-- before the button: the absolutely positioned button starts below it -->
+    @if (albumsService.albums()?.length === 0) {
+      <app-empty-state class="no-item-msg" icon="ionAlbumsOutline">
+        <ng-container i18n>No albums yet.</ng-container>
+        <span hint i18n>Search for something, then save the search as an album with the save button next to the search bar.</span>
+      </app-empty-state>
+    }
+
     @if (CanCreateAlbum) {
       <button type="button" class="add-saved-search btn btn-secondary"
         [style.width.px]="size()"
@@ -16,17 +24,6 @@
           <span i18n>Add saved search</span>
         </span>
       </button>
-    }
-
-    @if (albumsService.albums()?.length === 0) {
-      <div class="d-flex no-item-msg"
-        >
-        <div class="flex-fill">
-          <h2>:(
-            <ng-container i18n>No albums to show.</ng-container>
-          </h2>
-        </div>
-      </div>
     }
   </div>
 </app-frame>

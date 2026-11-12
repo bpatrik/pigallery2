@@ -105,7 +105,7 @@ describe('AlbumsComponent - empty state', () => {
   });
 
   // #1312: an icon and a short explanation of how to save a search as an album, not only ":( No albums to show."
-  it.fails('should show an icon and explain how to add an album when there are no albums yet', async () => {
+  it('should show an icon and explain how to add an album when there are no albums yet', async () => {
     const el = await render([]);
 
     const state = emptyState(el);

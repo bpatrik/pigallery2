@@ -9,12 +9,7 @@ app-album {
 }
 
 .no-item-msg {
-  height: 100vh;
-  text-align: center;
-}
-
-.no-face-msg h2 {
-  color: #6c757d;
+  display: block;
 }
 
 .add-saved-search {

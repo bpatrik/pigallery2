@@ -14,6 +14,7 @@ import {GallerySearchQueryBuilderComponent} from '../gallery/search/query-builde
 import {SavedSearchPopupComponent} from './saved-search-popup/saved-search-popup.component';
 import {ShareService} from '../gallery/share.service';
 import {NavigationService} from '../../model/navigation.service';
+import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 import {SearchQueryParserService} from '../gallery/search/search-query-parser.service';
 
 @Component({
@@ -26,7 +27,8 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
     NgIconComponent,
     FormsModule,
     GallerySearchQueryBuilderComponent,
-    SavedSearchPopupComponent
+    SavedSearchPopupComponent,
+    EmptyStateComponent
 ]
 })
 export class AlbumsComponent implements OnInit {

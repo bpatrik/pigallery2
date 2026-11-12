@@ -72,7 +72,6 @@ test.describe('Errors', () => {
 
     // but the user is told why (a warning, not an error)
     test('should tell with a warning toast that the folder was not found', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1308');
       await page.goto('/gallery/' + encodeURIComponent(missingDir));
 
       await expect(page).toHaveURL(url => isGalleryRoot(url));
@@ -124,7 +123,6 @@ test.describe('Errors', () => {
       });
 
       test('should show the same warning toast as for a missing folder', async ({page}) => {
-        test.fail(true, 'Not implemented yet #1308');
         await openHiddenFolder(page);
 
         await expect(page).toHaveURL(url => isGalleryRoot(url));
@@ -136,7 +134,6 @@ test.describe('Errors', () => {
   test.describe('Empty results', () => {
 
     test('should show an icon and a message in an empty folder', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1308');
       const content = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/gallery/content/emptydirectory');
       await page.goto('/gallery/emptydirectory');
       await content;
@@ -146,7 +143,6 @@ test.describe('Errors', () => {
     });
 
     test('should show an icon and a message when the search matched nothing', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1309');
       const query = 'zzzznomatch';
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
       await page.goto('/search/' + query);
@@ -175,7 +171,6 @@ test.describe('Errors', () => {
   test.describe('API errors', () => {
 
     test('should show an error, not a spinner, when the folder load gets a server error', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1305');
       await page.route(isGalleryContent, route => route.fulfill({status: 500, body: 'Internal Server Error'}));
       const failed = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
       await page.goto('/gallery/');
@@ -185,7 +180,6 @@ test.describe('Errors', () => {
     });
 
     test('should show an error, not a spinner, when the folder load loses the connection', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1305');
       await page.route(isGalleryContent, route => route.abort('internetdisconnected'));
       const failed = page.waitForEvent('requestfailed', req => isGalleryContent(new URL(req.url())));
       await page.goto('/gallery/');
@@ -204,7 +198,6 @@ test.describe('Errors', () => {
     });
 
     test('should load the folder again with the Retry button after a server error', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1305');
       let fail = true;
       await page.route(isGalleryContent, route => fail ? route.fulfill({status: 500, body: 'Internal Server Error'}) : route.continue());
       const failed = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
@@ -221,7 +214,6 @@ test.describe('Errors', () => {
     });
 
     test('should load the search again with the Retry button after a server error', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1305');
       let fail = true;
       await page.route(isSearch, route => fail ? route.fulfill({status: 500, body: 'Internal Server Error'}) : route.continue());
       const failed = page.waitForResponse(res => isSearch(new URL(res.url())));

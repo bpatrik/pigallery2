@@ -16,14 +16,10 @@
     }
 
     @if (nonFavourites().length === 0 && favourites().length === 0) {
-      <div class="d-flex no-face-msg"
-        >
-        <div class="flex-fill">
-          <h2>:(
-            <ng-container i18n>No faces to show.</ng-container>
-          </h2>
-        </div>
-      </div>
+      <app-empty-state class="no-face-msg" icon="ionPeopleOutline">
+        <ng-container i18n>No faces to show.</ng-container>
+        <span hint i18n>Faces come from the face regions in the metadata of the photos. Tag the faces in your photo manager (e.g. digiKam, Lightroom), then index the photos again.</span>
+      </app-empty-state>
     }
   </div>
 </app-frame>

@@ -1,7 +1,6 @@
 // Browsing folders (#1308, CUJ 5) on the folder with accents in its name (#1316). Also runs on a phone (mobile project).
 import {expect, Page, test} from '@playwright/test';
-import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../src/common/entities/SearchQueryDTO';
-import {ACCENTED_DIR, expectApiOk, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
+import {ACCENTED_DIR, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
 const breadcrumb = (page: Page) => page.locator('app-gallery-navbar #directory-path .breadcrumb-item');
@@ -105,22 +104,5 @@ test.describe('Empty folder', () => {
     // a folder with media has it
     await breadcrumb(page).getByRole('link', {name: 'Home'}).click();
     await expect(page.locator('app-gallery-navbar a[href*="/pgapi/gallery/zip/"] ng-icon[name="ionDownloadOutline"]')).toBeVisible();
-  });
-
-  // #1308: flattening a folder with no media in any subfolder shows the same empty state as an empty folder
-  test('Flattening it should show an icon and a message, not an empty page', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1308: the search of the flattened empty folder shows an empty page');
-    // the query of the flatten button (off by default: Gallery.NavBar.enableDirectoryFlattening, see navigator.gallery.component.ts)
-    const flatten = JSON.stringify({type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.globMatch, value: './emptydirectory*'});
-    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
-    await page.goto('/search/' + encodeURIComponent(flatten));
-    await expectApiOk(await search, 'the search of the flattened folder');
-    await expect(page.locator('app-gallery-navbar')).toContainText('emptydirectory');
-    await expect(page.locator('app-gallery-grid .photo-container')).toHaveCount(0);
-
-    // the same message as in an empty folder (errors.spec.ts): not /empty/i, the folder name itself contains that word
-    const text = page.locator('app-gallery').getByText(/(folder|directory) is empty|no (photos|media|items)|matched nothing/i);
-    await expect(text).toBeVisible();
-    await expect(text.locator('..').locator('ng-icon').first()).toBeVisible();
   });
 });

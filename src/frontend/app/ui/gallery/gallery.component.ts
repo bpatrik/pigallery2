@@ -35,6 +35,9 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 import {UploaderService} from './uploader/uploader.service';
 import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
+import {NgIconComponent} from '@ng-icons/core';
+import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
+import {SearchQueryParserService} from './search/search-query-parser.service';
 
 @Component({
   selector: 'app-gallery',
@@ -59,7 +62,9 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
     GPXFilesFilterPipe,
     PhotoFilterPipe,
     MediaButtonModalComponent,
-    UploaderComponent
+    UploaderComponent,
+    EmptyStateComponent,
+    NgIconComponent
 ]
 })
 export class GalleryComponent implements OnInit, OnDestroy {
@@ -75,6 +80,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   private sortingService = inject(GallerySortingService);
   private piTitleService = inject(PiTitleService);
   uploaderService = inject(UploaderService);
+  private searchQueryParser = inject(SearchQueryParserService);
 
   readonly grid = viewChild(GalleryGridComponent);
 
@@ -102,6 +108,27 @@ export class GalleryComponent implements OnInit, OnDestroy {
       mediaGroup.media.some((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude)
     )
   );
+  // a loaded folder or search result without anything in it (the filters are not taken into account)
+  public readonly emptyState = computed((): { icon: string, message: string, hint?: string } | null => {
+    const content = this.contentLoader.content();
+    if (content.error) {
+      return null;
+    }
+    const isEmpty = (c: { directories?: unknown[], media?: unknown[] }): boolean =>
+      !c.directories?.length && !c.media?.length;
+    if (content.searchResult && isEmpty(content.searchResult)) {
+      const query = this.searchQueryParser.stringify(content.searchResult.searchQuery);
+      return {
+        icon: 'ionSearchOutline',
+        message: $localize`Search for "${query}:QUERY:" matched nothing.`,
+        hint: $localize`Check the spelling or try fewer words.`
+      };
+    }
+    if (content.directory && content.directory.isPartial !== true && isEmpty(content.directory) && !content.directory.metaFile?.length) {
+      return {icon: 'ionFolderOpenOutline', message: $localize`This folder is empty.`};
+    }
+    return null;
+  });
   public isUploadOver = false;
   private $counter!: Observable<number>; // set by ngOnInit()
   private subscription: { route: Subscription | null, timer: Subscription | null } = {
@@ -189,6 +216,10 @@ export class GalleryComponent implements OnInit, OnDestroy {
     return undefined;
   }
 
+  retry(): void {
+    this.contentLoader.reloadCurrentContent().catch(console.error);
+  }
+
   onDragOver(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();
@@ -219,6 +250,10 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   private onRoute = async (params: Params): Promise<void> => {
     const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
+    if (searchQuery && !SearchQueryUtils.isKnownQuery(searchQuery)) {
+      this.contentLoader.showBrokenSearchLink();
+      return;
+    }
     if (searchQuery) {
       this.contentLoader.search(searchQuery).catch(console.error);
       this.piTitleService.setSearchTitle(searchQuery);

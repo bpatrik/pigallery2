@@ -59,8 +59,8 @@ describe('FacesComponent - empty state', () => {
     expect(el.querySelectorAll('app-face').length).toBe(0);
   });
 
-  // TODO #1312: an icon and a short explanation (faces come from the face regions in the photos' metadata), not only ":( No faces to show."
-  it.fails('should show an icon and a short explanation when there are no faces yet', async () => {
+  // #1312: an icon and a short explanation (faces come from the face regions in the photos' metadata), not only ":( No faces to show."
+  it('should show an icon and a short explanation when there are no faces yet', async () => {
     const el = await render([]);
     const state = emptyState(el);
     expect(state, 'the empty state').not.toBeNull();
