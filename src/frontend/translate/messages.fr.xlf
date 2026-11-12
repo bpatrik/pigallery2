@@ -5386,14 +5386,6 @@
         </context-group>
         <target>touche : flèche gauche</target>
       </trans-unit>
-      <trans-unit id="5015670487371268284" datatype="html">
-        <source>key: right arrow</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">225</context>
-        </context-group>
-        <target>touche : flèche droite</target>
-      </trans-unit>
       <trans-unit id="2952982394711430494" datatype="html">
         <source>Zoom out, key: '-'</source>
         <context-group purpose="location">
@@ -5426,11 +5418,27 @@
         </context-group>
         <target>Auto play</target>
       </trans-unit>
+      <trans-unit id="740732965879422811" datatype="html">
+        <source>Start over from the first photo (key: right arrow)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>Start over from the first photo (key: right arrow)</target>
+      </trans-unit>
+      <trans-unit id="5015670487371268284" datatype="html">
+        <source>key: right arrow</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <target>touche : flèche droite</target>
+      </trans-unit>
       <trans-unit id="2821179408673282599" datatype="html">
         <source>Home</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">359</context>
+          <context context-type="linenumber">363</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
@@ -5778,7 +5786,7 @@
         <source>The photo is not available anymore. Showing the first one.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">339</context>
+          <context context-type="linenumber">344</context>
         </context-group>
         <target>The photo is not available anymore. Showing the first one.</target>
       </trans-unit>

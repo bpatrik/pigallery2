@@ -53,7 +53,11 @@ export class ControlsLightboxComponent implements OnDestroy {
   readonly toggleFullScreen = output();
   readonly nextPhoto = output();
   readonly previousPhoto = output();
-  readonly navigation = input({hasPrev: true, hasNext: true});
+  // nextLoops: the next photo is the first one again (last photo with loop on)
+  readonly navigation = input<{ hasPrev: boolean, hasNext: boolean, nextLoops?: boolean }>({hasPrev: true, hasNext: true});
+  readonly nextButton = computed((): { icon: string, title: string } => this.navigation().nextLoops ?
+    {icon: 'ionReloadOutline', title: $localize`Start over from the first photo (key: right arrow)`} :
+    {icon: 'ionChevronForwardOutline', title: $localize`key: right arrow`});
   readonly activePhoto = input<GridMedia | null>(null);
   readonly mediaElement = input.required<GalleryLightboxMediaComponent>();
   readonly photoFrameDim = input({width: 1, height: 1, aspect: 1});
