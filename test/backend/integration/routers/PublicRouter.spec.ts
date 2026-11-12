@@ -326,6 +326,32 @@ describe('PublicRouter', () => {
         expect(JSON.parse(config).Server.applicationTitle, l).to.equal(Config.Server.applicationTitle);
       }
     });
+
+    // #1305: the app shows "Page not found"
+    it('should answer an unknown page with the app and 404', async () => {
+      for (const url of ['/foo', '/foo/bar', '/' + encodeURIComponent('Árvíztűrő tükörfúrógép'), '/foo?p=x.jpg']) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+        expect(res.status, url).to.equal(404);
+        expect(res.text, url).to.contain('<!-- locale:en -->');
+        expect(res.text, url).to.not.contain('<%');
+      }
+    });
+
+    it('should answer an unknown file with a plain 404', async () => {
+      for (const url of ['/foo.js', '/foo/bar.png', '/assets/missing.png', '/' + encodeURIComponent('tükörfúrógép.jpg')]) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+        expect(res.status, url).to.equal(404);
+        expect(res.text, url).to.not.contain('<!-- locale:');
+      }
+    });
+
+    it('should answer an unknown API path with the JSON error, not the app', async () => {
+      for (const url of [Config.Server.apiPath, Config.Server.apiPath + '/foo', Config.Server.apiPath + '/foo/bar']) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic).get(url);
+        expect(res.status, url).to.equal(404);
+        expect(res.body.error, url).to.not.be.undefined;
+      }
+    });
   });
 
   describe('Language links', () => {

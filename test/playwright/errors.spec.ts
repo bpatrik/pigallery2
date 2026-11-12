@@ -241,7 +241,6 @@ test.describe('Errors', () => {
   test.describe('Unknown page', () => {
 
     test('should show a not found page with a link to the gallery', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1305');
       await page.goto('/foo');
 
       await expect(page.getByText(/page not found/i).first()).toBeVisible();

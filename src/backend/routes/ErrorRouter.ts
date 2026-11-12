@@ -13,11 +13,11 @@ export class ErrorRouter {
 
   // every API route is added before this, so the path is unknown
   private static addApiNotFound(app: Express): void {
-    app.use(Config.Server.apiPath + '/{*rest}', RenderingMWs.notFound);
+    app.use(Config.Server.apiPath + '{/*rest}', RenderingMWs.notFound);
   }
 
   private static addApiErrorHandler(app: Express): void {
-    app.use(Config.Server.apiPath + '/{*rest}', RenderingMWs.renderError);
+    app.use(Config.Server.apiPath + '{/*rest}', RenderingMWs.renderError);
   }
 
   private static addGenericHandler(app: Express): void {
