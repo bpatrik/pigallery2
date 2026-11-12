@@ -105,9 +105,9 @@ describe('GalleryNavigatorComponent', () => {
       expect(query.value.startsWith('Vacation/Lake/Árvíztűrő tükörfúrógép')).toBe(true);
     });
 
-    // TODO #1308: the glob is "<folder>*", so it also matches the sibling folders that start with the same name
+    // "<folder>*" would also match the sibling folders that start with the same name
     // (e.g.: "Árvíztűrő tükörfúrógép 2"). "<folder>/*" matches the folder and its subfolders only (SearchManager.expandDirectoryGlobs).
-    it.fails('should not search the sibling folders that start with the same name', () => {
+    it('should not search the sibling folders that start with the same name', () => {
       content.set(folder('Vacation/Lake/', 'Árvíztűrő tükörfúrógép'));
       expect(flattenQuery()).toEqual({
         type: SearchQueryTypes.directory,
