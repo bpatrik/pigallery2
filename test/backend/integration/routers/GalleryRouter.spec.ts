@@ -13,7 +13,6 @@ import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {ORSearchQuery, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../src/common/entities/SearchQueryDTO';
 import AdmZip from 'adm-zip';
-import {expectToFail} from '../../KnownFailures';
 import * as fs from 'node:fs';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 
@@ -192,16 +191,14 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
       expect(result.header['content-range']).to.match(/^bytes 100-\d+\/\d+$/);
     });
 
-    // answers 500 today: sendFile's 416 error ends in the generic error handler
     it('should answer 416 to a range past the end of the video', async () => {
-      await expectToFail('#1305', async () => {
-        const size = fs.statSync(path.join(__dirname, '../../assets/video.mp4')).size;
-        const result = await (request.execute(server.Server) as SuperAgentStatic)
-          .get(Config.Server.apiPath + '/gallery/content/video.mp4')
-          .set('Range', 'bytes=' + (size + 10) + '-');
+      const size = fs.statSync(path.join(__dirname, '../../assets/video.mp4')).size;
+      const result = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/content/video.mp4')
+        .set('Range', 'bytes=' + (size + 10) + '-');
 
-        (result.should as any).have.status(416);
-      }, /status code 416/);
+      (result.should as any).have.status(416);
+      expect(result.header['content-range']).to.equal('bytes */' + size);
     });
 
     it('should get video icon', async () => {

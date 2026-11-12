@@ -164,6 +164,14 @@ export class RenderingMWs {
     res.json(message);
   }
 
+  public static notFound(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): void {
+    return next(new ErrorDTO(ErrorCodes.PATH_ERROR, 'Unknown API path: ' + req.method + ' ' + req.path));
+  }
+
   public static renderError(
     err: Error,
     req: Request,
@@ -193,12 +201,58 @@ export class RenderingMWs {
           delete err.detailsStr;
         }
       }
+      res.status(RenderingMWs.httpStatus(err.code));
       const message = new Message<null>(err, null);
       res.json(message);
       return;
     }
+    if (RenderingMWs.isClientHttpError(err)) {
+      // e.g. a range past the end of a video (send: 416) or a body that is not JSON (body-parser: 400)
+      Logger.debug('[RenderingMWs]', 'Client error', req.method, req.url, err.status, err.message);
+      res.status(err.status);
+      if (err.headers) {
+        res.set(err.headers);
+      }
+      res.json(new Message<null>(new ErrorDTO(ErrorCodes.INPUT_ERROR, err.message), null));
+      return;
+    }
     NotificationManager.error('Unknown server error', err, req);
     return next(err);
+  }
+
+  /**
+   * An http-errors error of the client (status 4xx), raised by express or its middlewares.
+   */
+  public static isClientHttpError(err: unknown): err is Error & { status: number, headers?: Record<string, string> } {
+    const status = (err as { status?: unknown })?.status;
+    return err instanceof Error && typeof status === 'number' && status >= 400 && status < 500;
+  }
+
+  private static httpStatus(code: ErrorCodes): number {
+    switch (code) {
+      case ErrorCodes.NOT_AUTHENTICATED:
+      case ErrorCodes.NOT_AUTHENTICATED_SHARING:
+      case ErrorCodes.CREDENTIAL_NOT_FOUND:
+        return 401;
+      case ErrorCodes.NOT_AUTHORISED:
+      case ErrorCodes.PERMISSION_DENIED:
+      case ErrorCodes.USER_MANAGEMENT_DISABLED:
+        return 403;
+      case ErrorCodes.DIRECTORY_NOT_FOUND:
+      case ErrorCodes.PATH_ERROR:
+      case ErrorCodes.SHARING_NOT_FOUND:
+      case ErrorCodes.LocationLookUp_ERROR:
+        return 404;
+      case ErrorCodes.ALREADY_AUTHENTICATED:
+      case ErrorCodes.USER_CREATION_ERROR:
+      case ErrorCodes.INPUT_ERROR:
+      case ErrorCodes.SETTINGS_ERROR:
+      case ErrorCodes.ALBUM_ERROR:
+      case ErrorCodes.UPLOAD_ERROR:
+        return 400;
+      default:
+        return 500;
+    }
   }
 
   protected static renderMessage<T>(res: Response, content: T): void {

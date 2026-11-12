@@ -84,13 +84,11 @@ describe('SharingRouter', () => {
     });
 
     it('should return 404 for a not existing sharing', async () => {
-      await expectToFail('#1254', async () => {
-        const res = await getPublicInfo('doesnotexist');
+      const res = await getPublicInfo('doesnotexist');
 
-        res.should.have.status(404);
-        res.body.error.should.be.a('object');
-        should.equal(res.body.result, null);
-      }, /status code 404/);
+      res.should.have.status(404);
+      res.body.error.code.should.equal(ErrorCodes.SHARING_NOT_FOUND);
+      should.equal(res.body.result, null);
     });
   });
 

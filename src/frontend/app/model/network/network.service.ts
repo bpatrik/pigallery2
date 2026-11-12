@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import {HttpClient, HttpEvent, HttpEventType, HttpResponse} from '@angular/common/http';
 import {Message} from '../../../../common/entities/Message';
 import {LoadingBarService} from '@ngx-loading-bar/core';
-import {ErrorCodes, ErrorDTO} from '../../../../common/entities/Error';
+import {ErrorDTO} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
 import {CustomHeaders} from '../../../../common/CustomHeaders';
 import {VersionService} from '../version.service';
@@ -145,9 +145,6 @@ export class NetworkService {
         throw new Error('Empty response from the server');
       }
       if (msg.error) {
-        if (msg.error.code) {
-          (msg.error as ErrorDTO & { title?: string }).title = ErrorCodes[msg.error.code];
-        }
         throw msg.error;
       }
       // the caller's T says whether the result can be null

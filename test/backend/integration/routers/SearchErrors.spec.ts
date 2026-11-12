@@ -150,8 +150,7 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
     // a frame or an <img> only sees the status: INPUT_ERROR goes out as 400 (#1305)
     it('should answer with an HTTP error status', async () => {
       const res = await get(noMatch());
-      // every API error goes out as HTTP 200 today
-      await expectToFail('#1305', () => res.should.have.status(400), /but got 200/);
+      res.should.have.status(400);
     });
   });
 });

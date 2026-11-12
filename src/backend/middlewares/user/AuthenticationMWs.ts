@@ -61,7 +61,6 @@ export class AuthenticationMWs {
         return next();
       }
     } catch (err) {
-      res.status(500);
       return next(new ErrorDTO(ErrorCodes.INTERNAL, null, err));
     }
 
@@ -74,7 +73,6 @@ export class AuthenticationMWs {
 
     // no sharing user yet (eg.: its password protected)
     if (!user) {
-      res.status(401);
       return next(
         new ErrorDTO(ErrorCodes.NOT_AUTHENTICATED_SHARING, 'Not authenticated sharing')
       );
@@ -84,7 +82,6 @@ export class AuthenticationMWs {
     try {
       await AuthenticationMWs.startSession(req, user);
     } catch (err) {
-      res.status(500);
       return next(new ErrorDTO(ErrorCodes.INTERNAL, null, err));
     }
     return next();
@@ -154,14 +151,14 @@ export class AuthenticationMWs {
           ? await req.session.context.directoryAccess.getAccess(dirRelPath)
           : DirectoryAccessTypes.none;
         if (access === DirectoryAccessTypes.none) {
-          return AuthenticationMWs.directoryNotFound(res, next);
+          return AuthenticationMWs.directoryNotFound(next);
         }
         req.directoryAccess = access;
         return next();
       } catch (e) {
         // On error, fail closed to be safe
         Logger.warn(LOG_TAG, 'authoriseDirectory error:', e);
-        return AuthenticationMWs.directoryNotFound(res, next);
+        return AuthenticationMWs.directoryNotFound(next);
       }
     };
   }
@@ -170,8 +167,7 @@ export class AuthenticationMWs {
    * The response for not existing and not available directories. They need to be the same:
    * GalleryMWs.listDirectory answers not existing directories with the same status and error.
    */
-  private static directoryNotFound(res: Response, next: NextFunction): void {
-    res.status(404);
+  private static directoryNotFound(next: NextFunction): void {
     return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
   }
 
@@ -213,7 +209,6 @@ export class AuthenticationMWs {
       // fail closed: a request without session is not authorised
       const userRole = req.session.context?.user.role;
       if (userRole === undefined || userRole < role) {
-        res.status(401);
         return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
       }
       return next();
@@ -249,7 +244,6 @@ export class AuthenticationMWs {
           !PasswordHelper.comparePassword(password, sharing.password))
       ) {
         Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` with sharing:' + sharingKey + ', bad password');
-        res.status(401);
         return next(new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND));
       }
 

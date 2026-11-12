@@ -82,8 +82,7 @@ describe('UserRouter', () => {
       should.equal(result.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
       should.equal(result.body.result, null);
       should.not.exist(result.headers['set-cookie']);
-      // the error goes out as HTTP 200 (see #1305)
-      await expectToFail('#1306', () => result.should.have.status(401), /status code 401 but got 200/);
+      result.should.have.status(401);
     });
 
     // remember me checked: the cookie survives a browser restart; unchecked: a session cookie, ends with the browser session

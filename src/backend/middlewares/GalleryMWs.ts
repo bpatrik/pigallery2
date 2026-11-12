@@ -77,7 +77,6 @@ export class GalleryMWs {
     }
     if (!isDirectory) {
       // the same answer as AuthenticationMWs.authoriseDirectory gives for not available directories
-      res.status(404);
       return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
     }
 
