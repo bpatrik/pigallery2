@@ -142,7 +142,6 @@ test.describe('Login', () => {
   });
 
   test('Deep link should open after the login', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306');
     // a full size photo (big_ben.jpg is smaller than the lightbox) in the folder with accents in its name
     await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR) + '?p=IMG_8943.jpg');
     await expect(page).toHaveURL(/\/login/);
@@ -155,7 +154,6 @@ test.describe('Login', () => {
   });
 
   test('Search deep link should open after the login', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306');
     await page.goto('/search/big_ben');
     await expect(page).toHaveURL(/\/login/);
     await fillLoginForm(page, NORMAL_USER.name, NORMAL_USER.password);

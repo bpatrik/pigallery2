@@ -18,6 +18,8 @@ export class AuthenticationService {
   public readonly isAuthenticated = computed((): boolean =>
     Config.Users.authenticationRequired === false || !!this.user()
   );
+  // the user logged out (not: the session ended), so the login page does not take them back to where they were
+  public loggedOutByUser = false;
   public readonly isAdmin = computed((): boolean => this.isAuthorized(UserRoles.Admin));
 
   constructor() {
@@ -65,6 +67,7 @@ export class AuthenticationService {
 
   public async login(credential: LoginCredential): Promise<UserDTO> {
     const user = await this.userService.login(credential);
+    this.loggedOutByUser = false;
     this.currentUser.set(user);
     return user;
   }
@@ -82,7 +85,11 @@ export class AuthenticationService {
 
   public readonly canSearch = computed((): boolean => Config.Search.enabled && this.isAuthorized(UserRoles.Guest));
 
+  /**
+   * @param reason why the session ended; none when the user logs out
+   */
   public async logout(reason?: ErrorCodes): Promise<void> {
+    this.loggedOutByUser = reason === undefined;
     await this.userService.logout();
     await this.shareService.wait();
     if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {

@@ -8,6 +8,7 @@ import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 @Injectable({providedIn: 'root'})
 export class NavigationService {
+  private static readonly RETURN_URL = 'returnUrl';
   private router = inject(Router);
   private shareService = inject(ShareService);
   // the url of the last successful navigation (the same as router.url once the navigation finished)
@@ -15,12 +16,14 @@ export class NavigationService {
     const navigation = this.router.lastSuccessfulNavigation();
     return navigation?.finalUrl ? this.router.serializeUrl(navigation.finalUrl) : this.router.url;
   });
-
+  // whether the app has shown a page yet (the first navigation can still be on its way, e.g. waiting for a guard)
+  public readonly hasNavigated = computed((): boolean => this.router.lastSuccessfulNavigation() !== null);
 
   public isLoginPage(): boolean {
     return (
+      // with or without the url to return to
       this.router.isActive('login',
-        {paths: 'exact', queryParams: 'exact', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
+        {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions) ||
       this.router.isActive('shareLogin',
         {paths: 'exact', queryParams: 'ignored', fragment: 'ignored', matrixParams: 'ignored'} as IsActiveMatchOptions)
     );
@@ -34,7 +37,10 @@ export class NavigationService {
     );
   }
 
-  public async toLogin(): Promise<boolean> {
+  /**
+   * @param returnUrl the url of this app to open after the login (e.g. where the session ended)
+   */
+  public async toLogin(returnUrl?: string): Promise<boolean> {
     await this.shareService.wait();
     if (this.shareService.isSharing()) {
       const publicSharing = await this.shareService.getPublicSharing();
@@ -51,8 +57,30 @@ export class NavigationService {
         return this.toError();
       }
     } else {
+      if (returnUrl && NavigationService.isReturnUrl(returnUrl)) {
+        return this.router.navigate(['login'], {queryParams: {[NavigationService.RETURN_URL]: returnUrl}});
+      }
       return this.router.navigate(['login']);
     }
+  }
+
+  /**
+   * Opens the url that the login page was opened for (#1306), or the default page.
+   */
+  public async toAfterLogin(): Promise<boolean> {
+    const returnUrl: unknown = this.router.parseUrl(this.router.url).queryParams[NavigationService.RETURN_URL];
+    if (typeof returnUrl === 'string' && NavigationService.isReturnUrl(returnUrl)) {
+      return this.router.navigateByUrl(returnUrl);
+    }
+    return this.toDefault();
+  }
+
+  /**
+   * Only a page of this app (a path, never another site), and not a login page.
+   */
+  private static isReturnUrl(url: string): boolean {
+    return /^\/(?![/\\])/.test(url) && // a path, not another site
+      !/^\/(login|shareLogin)?([?#/]|$)/.test(url); // not a login page ('/' redirects to the login page too)
   }
 
   public async toDefault(): Promise<boolean> {
