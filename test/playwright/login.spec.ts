@@ -87,7 +87,7 @@ test.describe('Login', () => {
   // The session lives in the cookie, and every authenticated response sends it again (with the extended expiry).
   // So a request that was sent before the logout and answered after it brings the logged-out session back.
   test('Logout should not be undone by a request that was sent before it', async ({page, playwright, baseURL}) => {
-    test.fail(true, 'Not implemented yet #1306');
+    test.fail(true, 'Not implemented yet #1368: the cookie-only session can not be revoked on the server');
     const pendingApiRequests = trackPendingApiRequests(page);
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await loginWithUi(page, NORMAL_USER.name, NORMAL_USER.password);
