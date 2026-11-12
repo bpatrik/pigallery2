@@ -295,9 +295,7 @@ describe('UserRouter', () => {
         statuses.push(res.status);
       }
       userAgent.close();
-      // NOT_AUTHORISED goes out as 401 (AuthenticationMWs.authorise, see #1305)
-      await expectToFail('#1315', () => chai.expect(statuses).to.deep.equal([403, 403, 403]),
-        /expected \[ 401, 401, 401 \] to deeply equal/);
+      chai.expect(statuses).to.deep.equal([403, 403, 403]);
     });
 
     it('should end the session of a user whose role an admin changed', async () => {

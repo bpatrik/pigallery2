@@ -16,7 +16,6 @@ import * as chai from "chai";
 import {default as chaiHttp, request} from "chai-http";
 import chaiAsPromised from 'chai-as-promised';
 import {TestHelper} from '../../../TestHelper';
-import {expectToFail} from '../../KnownFailures';
 
 process.env['NODE_ENV'] = 'test';
 const should = chai.should();
@@ -103,15 +102,12 @@ describe('SharingRouter', () => {
     it('should not give the public info of an expired sharing', async () => {
       Config.Sharing.passwordRequired = false;
       const sharing = await RouteTestingHelper.createSharing(testUser, null, expired());
-      // publicInfo does not check the expiry yet
-      await expectToFail('#1307', async () => {
-        const res = await (request.execute(server.Server) as SuperAgentStatic)
-          .get(Config.Server.apiPath + '/share/' + sharing.sharingKey + '/publicInfo');
+      const res = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/share/' + sharing.sharingKey + '/publicInfo');
 
-        res.should.have.status(404);
-        res.body.error.should.be.a('object');
-        should.equal(res.body.result, null);
-      }, /status code 404/);
+      res.should.have.status(404);
+      res.body.error.code.should.equal(ErrorCodes.SHARING_NOT_FOUND);
+      should.equal(res.body.result, null);
     });
 
     it('should not login to an expired sharing', async () => {

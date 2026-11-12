@@ -169,7 +169,7 @@ export class RenderingMWs {
     res: Response,
     next: NextFunction
   ): void {
-    return next(new ErrorDTO(ErrorCodes.PATH_ERROR, 'Unknown API path: ' + req.method + ' ' + req.path));
+    return next(new ErrorDTO(ErrorCodes.PATH_ERROR, 'Unknown API path: ' + req.method + ' ' + req.baseUrl + req.path));
   }
 
   public static renderError(
@@ -208,7 +208,7 @@ export class RenderingMWs {
     }
     if (RenderingMWs.isClientHttpError(err)) {
       // e.g. a range past the end of a video (send: 416) or a body that is not JSON (body-parser: 400)
-      Logger.debug('[RenderingMWs]', 'Client error', req.method, req.url, err.status, err.message);
+      Logger.debug('[RenderingMWs]', 'Client error', req.method, req.originalUrl, err.status, err.message);
       res.status(err.status);
       if (err.headers) {
         res.set(err.headers);
