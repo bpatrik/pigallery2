@@ -20,6 +20,10 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
         serverError?.code !== ErrorCodes.CREDENTIAL_NOT_FOUND) {
         authenticationService.logout(serverError?.code).catch(console.error);
       }
+      // an illegal move (e.g. a normal user calls the admin API): log out
+      if (err.status === 403 && serverError?.code === ErrorCodes.NOT_AUTHORISED) {
+        authenticationService.logout(serverError.code).catch(console.error);
+      }
       if (err.status === 500 && serverError?.code === ErrorCodes.INTERNAL) {
         // Unknown server error
         navigationService.toError();

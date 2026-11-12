@@ -78,7 +78,17 @@ describe('errorInterceptor', () => {
     expect(authService.logout).not.toHaveBeenCalled();
   });
 
-  it('should not log out on a 403', async () => {
+  // an illegal move (e.g. a normal user calls the admin API or uploads without the right): log out, also on uploads
+  it('should log out on NOT_AUTHORISED', async () => {
+    const result = request();
+    httpMock.expectOne('/api/test').flush({error: {code: ErrorCodes.NOT_AUTHORISED}},
+      {status: 403, statusText: 'Forbidden'});
+
+    expect(await result).toEqual({code: ErrorCodes.NOT_AUTHORISED});
+    expect(authService.logout).toHaveBeenCalledWith(ErrorCodes.NOT_AUTHORISED);
+  });
+
+  it('should not log out on other 403 errors', async () => {
     const result = request();
     httpMock.expectOne('/api/test').flush({error: {code: ErrorCodes.PERMISSION_DENIED}},
       {status: 403, statusText: 'Forbidden'});
