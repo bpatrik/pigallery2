@@ -1,4 +1,4 @@
-import {Component, input} from '@angular/core';
+import {booleanAttribute, Component, input} from '@angular/core';
 import {NgIconComponent} from '@ng-icons/core';
 
 /**
@@ -9,8 +9,11 @@ import {NgIconComponent} from '@ng-icons/core';
   selector: 'app-empty-state',
   templateUrl: './empty-state.component.html',
   styleUrl: './empty-state.component.css',
-  imports: [NgIconComponent]
+  imports: [NgIconComponent],
+  host: {'[class.center]': 'center()'}
 })
 export class EmptyStateComponent {
   readonly icon = input.required<string>();
+  // in the middle of the page, like the loading spinner, instead of in the flow of the page
+  readonly center = input(false, {transform: booleanAttribute});
 }

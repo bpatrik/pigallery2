@@ -18,3 +18,11 @@
   font-size: 1.25rem;
   margin-bottom: 0.5rem;
 }
+
+:host(.center) {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
+}

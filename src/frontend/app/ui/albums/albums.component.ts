@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal, computed } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
@@ -43,6 +43,8 @@ export class AlbumsComponent implements OnInit {
 
   readonly container = viewChild<ElementRef>('container');
   public readonly size = signal(0); // set from the container width in ngOnInit
+  // the albums and the size of a tile are known
+  public readonly isLoaded = computed((): boolean => this.size() > 0 && this.albumsService.albums() !== null);
   public savedSearch = {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
