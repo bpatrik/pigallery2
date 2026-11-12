@@ -1,16 +1,12 @@
 import {APIRequestContext, expect, FullConfig, request} from '@playwright/test';
 import {JobProgressStates} from '../../src/common/entities/job/JobProgressDTO';
-
-export const ADMIN_SESSION = 'test/playwright/.auth/admin.json';
-export const USER_SESSION = 'test/playwright/.auth/user.json';
-// a normal (not admin) user, created by the global setup
-export const NORMAL_USER = {name: 'e2e-user', password: 'e2e-user', role: 3}; // UserRoles.User
+import {ADMIN_SESSION, expectApiOk, NORMAL_USER, USER_SESSION} from './helpers';
 
 const login = async (context: APIRequestContext, username: string, password: string): Promise<void> => {
   const res = await context.post('/pgapi/user/login', {
     data: {loginCredential: {username, password, rememberMe: false}},
   });
-  expect(res.ok(), username + ' login (is your own server running on the e2e port?)').toBe(true);
+  await expectApiOk(res, username + ' login (is your own server running on the e2e port?)');
 };
 
 /**
@@ -22,7 +18,7 @@ const indexAllFolders = async (admin: APIRequestContext): Promise<void> => {
     // soloRun: without the follow-up jobs (e.g.: thumbnail generation)
     data: {soloRun: true, config: {indexChangesOnly: false}},
   });
-  expect(start.ok(), 'starting the indexing').toBe(true);
+  await expectApiOk(start, 'starting the indexing');
   await expect.poll(async () => {
     const progresses = (await (await admin.get('/pgapi/admin/jobs/scheduled/progress')).json()).result;
     return Object.values<{ jobName: string, state: JobProgressStates }>(progresses).find(p => p.jobName === 'Indexing')?.state;
@@ -42,10 +38,12 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
   await indexAllFolders(admin);
 
   // a reused local server might have the user already
-  const users: { name: string }[] = (await (await admin.get('/pgapi/user/list')).json()).result;
+  const list = await admin.get('/pgapi/user/list');
+  await expectApiOk(list, 'listing the users');
+  const users: { name: string }[] = (await list.json()).result;
   if (!users.some(u => u.name === NORMAL_USER.name)) {
     const res = await admin.put('/pgapi/user', {data: {newUser: NORMAL_USER}});
-    expect(res.ok(), 'creating the normal user').toBe(true);
+    await expectApiOk(res, 'creating the normal user');
   }
   await admin.dispose();
 

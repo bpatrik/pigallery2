@@ -2,8 +2,7 @@
 // The single photo download of the lightbox is in lightbox.spec.ts, the zip contents in detail in GalleryDownload.spec.ts (backend).
 import {APIRequestContext, Download, expect, Page, test} from '@playwright/test';
 import AdmZip from 'adm-zip';
-import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, createDirectorySharingWithApi, expectApiOk, notLoggedIn} from './helpers';
+import {ADMIN_SESSION, ACCENTED_DIR, createDirectorySharingWithApi, expectApiOk, notLoggedIn} from './helpers';
 
 const zipButton = (page: Page) => page.locator('app-gallery-navbar a.btn-navigator:has(ng-icon[name="ionDownloadOutline"])');
 

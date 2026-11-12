@@ -1,8 +1,8 @@
 // The session of a logged-in user ends while the app is open on a deep link (#1306):
 // the next API call gets a 401 → /login, and after logging in again the user lands back on that URL.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
 import {
+  ADMIN_SESSION,
   ACCENTED_DIR,
   createUserWithApi,
   deleteUserWithApi,
