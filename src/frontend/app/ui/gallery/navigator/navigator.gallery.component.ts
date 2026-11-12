@@ -266,15 +266,11 @@ export class GalleryNavigatorComponent {
       return null;
     }
 
-    let queryParams = '';
-    Object.entries(this.queryService.params()).forEach((e) => {
-      queryParams += e[0] + '=' + e[1];
-    });
-
+    const queryParams = new URLSearchParams(this.queryService.params()).toString();
     return Config.Server.getApiUrl(
       '/gallery/zip/',
       encodeURIComponent(JSON.stringify(searchQuery)) +
-      '?' + queryParams
+      (queryParams ? '?' + queryParams : '')
     );
   });
 

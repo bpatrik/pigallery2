@@ -178,8 +178,8 @@ describe('GalleryNavigatorComponent', () => {
       expect(zipUrl().searchParams.get('sk')).toBe('abc');
     });
 
-    // TODO #1311: the query params are joined without '&' (e.g.: "?sk=abcfoo=bar")
-    it.fails('should keep every query param', () => {
+    // #1311: the query params are joined with '&', not like "?sk=abcfoo=bar"
+    it('should keep every query param', () => {
       params.set({sk: 'abc', foo: 'bar'});
       content.set(folder('Vacation/', 'Lake'));
       const url = zipUrl();
