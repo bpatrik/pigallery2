@@ -91,7 +91,7 @@ export const routes: Routes = [
   {
     matcher: galleryMatcherFunction,
     component: GalleryComponent,
-    canActivate: [authGuard, sharingGuard],
+    canActivate: [sharingGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   // #1305: the server answers these with HTTP 404

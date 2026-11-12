@@ -42,6 +42,9 @@ test.describe('Errors', () => {
         await page.goto(NOT_EXISTING_SHARING);
 
         await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
+      await expect(page).toHaveURL(url => url.pathname === NOT_EXISTING_SHARING);
+        // the address bar keeps the link
+        await expect(page).toHaveURL(url => url.pathname === NOT_EXISTING_SHARING);
         // not the generic error page
         await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
       });

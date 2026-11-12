@@ -390,6 +390,7 @@ test.describe('Share', () => {
       await page.goto('/share/' + sharingKey);
 
       await expectInvalidLinkPage(page);
+      await expect(page).toHaveURL(url => url.pathname === '/share/' + sharingKey);
     });
 
     test('Sharing deleted while the guest has it open should show the invalid link page on the next navigation', async ({page}) => {
