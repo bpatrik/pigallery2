@@ -1,5 +1,14 @@
 <app-gallery-lightbox [grid]="grid()" />
-<app-frame [showSearch]="showSearchBar()" [showShare]="showShare()">
+@if (isEmptyFrame()) {
+  <!-- #1313: full screen, nothing of the gallery around it; the frame keeps reloading its content -->
+  <div class="empty-frame">
+    <app-empty-state icon="ionImagesOutline" center>
+      <ng-container i18n>No photos match this frame.</ng-container>
+      <span hint i18n>It shows the photos as soon as some match.</span>
+    </app-empty-state>
+  </div>
+}
+<app-frame [showSearch]="showSearchBar()" [showShare]="showShare()" [class.d-none]="isEmptyFrame()">
 
   <ng-container navbar>
     @if (countDown(); as countDown) {

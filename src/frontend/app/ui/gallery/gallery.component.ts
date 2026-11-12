@@ -37,6 +37,7 @@ import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
 import {SpinnerComponent} from '../utils/spinner/spinner.component';
+import {LightboxService} from './lightbox/lightbox.service';
 import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 
@@ -83,6 +84,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   private piTitleService = inject(PiTitleService);
   uploaderService = inject(UploaderService);
   private searchQueryParser = inject(SearchQueryParserService);
+  private lightboxService = inject(LightboxService);
 
   readonly grid = viewChild(GalleryGridComponent);
 
@@ -131,6 +133,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
     }
     return null;
   });
+  // a photo frame (a playing slideshow) with nothing to show (#1313)
+  public readonly isEmptyFrame = computed((): boolean => this.lightboxService.playback() && this.emptyState() !== null);
   public isUploadOver = false;
   // the server was asked once whether the sharing ended, when its countdown reached zero
   private expiryChecked = false;
