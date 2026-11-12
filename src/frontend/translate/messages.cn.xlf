@@ -3874,6 +3874,14 @@
         </context-group>
         <target>获取所选搜索查询的热门照片并通过电子邮件发送.您需要设置 SMTP 服务器连接才能发送电子邮件.</target>
       </trans-unit>
+      <trans-unit id="5567329162136900412" datatype="html">
+        <source>Your session has ended. Please log in again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/model/network/helper/error.interceptor.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <target>Your session has ended. Please log in again.</target>
+      </trans-unit>
       <trans-unit id="3257486285145946953" datatype="html">
         <source>Show fewer notifications</source>
         <context-group purpose="location">

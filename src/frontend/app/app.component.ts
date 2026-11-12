@@ -44,11 +44,13 @@ export class AppComponent implements OnInit {
     }
     if (authenticated) {
       if (this.navigation.isLoginPage()) {
-        return this.navigation.toDefault();
+        return this.navigation.toAfterLogin();
       }
     } else {
-      if (!this.navigation.isLoginPage()) {
-        return this.navigation.toLogin();
+      // before the first page, the auth guard sends the user to the login page (with the url they opened)
+      if (!this.navigation.isLoginPage() && this.navigation.hasNavigated()) {
+        // the session ended (e.g. the user was deleted): the login takes the user back to this page; not after logging out
+        return this.navigation.toLogin(this.authenticationService.loggedOutByUser ? undefined : this.navigation.url());
       }
     }
     return undefined;

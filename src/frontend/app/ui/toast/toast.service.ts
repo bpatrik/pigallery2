@@ -25,6 +25,8 @@ export interface ToastOptions {
   // Overrides the icon and the Bootstrap color of the type
   icon?: string;
   color?: string;
+  // Also shown while nobody is logged in, e.g. on the login page. Other toasts are not shown and closed there.
+  showLoggedOut?: boolean;
 }
 
 export interface Toast extends ToastOptions {
@@ -84,7 +86,7 @@ export class ToastService {
     // e.g. no toasts left on the login page after a logout
     effect(() => {
       if (!this.authService.isAuthenticated()) {
-        untracked(() => this.clear());
+        untracked(() => this.clear(true));
       }
     });
   }
@@ -98,7 +100,7 @@ export class ToastService {
   }
 
   open(options: ToastOptions): ToastRef {
-    if (!this.authService.isAuthenticated()) {
+    if (!options.showLoggedOut && !this.authService.isAuthenticated()) {
       return {
         update: (): void => {
           // nothing is shown, so there is nothing to update
@@ -147,10 +149,18 @@ export class ToastService {
     this.toasts().filter((t) => t.group === group).forEach((t) => this.dismiss(t.id));
   }
 
-  clear(): void {
-    this.timers.forEach((t) => clearTimeout(t.handle ?? undefined));
-    this.timers.clear();
-    this.toasts.set([]);
+  /**
+   * @param keepLoggedOut keeps the toasts that are shown while nobody is logged in (showLoggedOut)
+   */
+  clear(keepLoggedOut = false): void {
+    const kept = keepLoggedOut ? this.toasts().filter((t) => t.showLoggedOut) : [];
+    this.timers.forEach((t, id) => {
+      if (!kept.some((k) => k.id === id)) {
+        clearTimeout(t.handle ?? undefined);
+        this.timers.delete(id);
+      }
+    });
+    this.toasts.set(kept);
     this.expandedGroups.set([]);
   }
 

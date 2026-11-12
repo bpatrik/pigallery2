@@ -83,4 +83,15 @@ describe('ToastService', () => {
     service.open({type: 'info', text: 'Hello'});
     expect(service.toasts().length).toBe(0);
   });
+
+  // #1306: e.g.: "Your session has ended", opened just before the logout, shown on the login page
+  it('should show a toast for the login page while logged out', () => {
+    service.open({type: 'error', text: 'Upload failed'});
+    service.open({type: 'warning', text: 'Session ended', showLoggedOut: true});
+    auth.user.set(null);
+    TestBed.tick();
+    expect(service.toasts().map((t) => t.text)).toEqual(['Session ended']);
+    service.open({type: 'warning', text: 'Logged out', showLoggedOut: true});
+    expect(service.toasts().map((t) => t.text)).toEqual(['Session ended', 'Logged out']);
+  });
 });

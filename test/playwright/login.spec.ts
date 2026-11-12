@@ -87,7 +87,7 @@ test.describe('Login', () => {
   // The session lives in the cookie, and every authenticated response sends it again (with the extended expiry).
   // So a request that was sent before the logout and answered after it brings the logged-out session back.
   test('Logout should not be undone by a request that was sent before it', async ({page, playwright, baseURL}) => {
-    test.fail(true, 'Not implemented yet #1306');
+    test.fail(true, 'Not implemented yet #1368: the cookie-only session can not be revoked on the server');
     const pendingApiRequests = trackPendingApiRequests(page);
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await loginWithUi(page, NORMAL_USER.name, NORMAL_USER.password);
@@ -135,7 +135,6 @@ test.describe('Login', () => {
   });
 
   test('Wrong password should be cleared for the next try', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306');
     await loginWithWrongPassword(page);
 
     await expect(page.locator('.error-message')).toBeVisible();
@@ -143,7 +142,6 @@ test.describe('Login', () => {
   });
 
   test('Deep link should open after the login', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306');
     // a full size photo (big_ben.jpg is smaller than the lightbox) in the folder with accents in its name
     await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR) + '?p=IMG_8943.jpg');
     await expect(page).toHaveURL(/\/login/);
@@ -156,7 +154,6 @@ test.describe('Login', () => {
   });
 
   test('Search deep link should open after the login', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306');
     await page.goto('/search/big_ben');
     await expect(page).toHaveURL(/\/login/);
     await fillLoginForm(page, NORMAL_USER.name, NORMAL_USER.password);
@@ -206,7 +203,6 @@ test.describe('Login', () => {
     });
 
     test('Deleted user should be told that the session has ended', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1306');
       await deleteUserWhileOpen(page);
       await expect(page).toHaveURL(/\/login/);
       await expect(page.locator('app-toast-card').filter({hasText: 'Your session has ended. Please log in again.'})).toBeVisible();
