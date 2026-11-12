@@ -135,7 +135,6 @@ test.describe('Login', () => {
   });
 
   test('Wrong password should be cleared for the next try', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306');
     await loginWithWrongPassword(page);
 
     await expect(page.locator('.error-message')).toBeVisible();
