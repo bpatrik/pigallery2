@@ -19,7 +19,6 @@ export class UserRequestConstrainsMWs {
       return next();
     }
     if (RequestSession.getContext(req).user.id !== parseInt(RequestParams.getRequired(req, 'id'), 10)) {
-      res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
 
@@ -39,7 +38,6 @@ export class UserRequestConstrainsMWs {
     }
 
     if (RequestSession.getContext(req).user.id === parseInt(RequestParams.getRequired(req, 'id'), 10)) {
-      res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
 

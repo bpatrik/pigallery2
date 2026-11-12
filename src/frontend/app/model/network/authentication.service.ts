@@ -45,7 +45,7 @@ export class AuthenticationService {
         return true;
       }
       if (error.code === ErrorCodes.NOT_AUTHORISED) {
-        this.logout().catch(console.error);
+        // the error interceptor logs out
         return true;
       }
       return false;

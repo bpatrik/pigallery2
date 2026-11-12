@@ -60,7 +60,7 @@ export class SharingMWs {
 
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       if (!sharing) {
-        throw new Error('Sharing not found: ' + sharingKey);
+        return next(new ErrorDTO(ErrorCodes.SHARING_NOT_FOUND, 'Sharing not found'));
       }
       req.resultPipe =
         {
@@ -279,7 +279,6 @@ export class SharingMWs {
       if (RequestSession.getContext(req).user.role < UserRoles.Admin) {
         const s = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
         if (!s || s.creator.id !== RequestSession.getContext(req).user.id) {
-          res.status(401);
           return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED, 'Can\'t delete sharing.'));
         }
       }

@@ -14,9 +14,15 @@ export const errorInterceptor: HttpInterceptorFn = (request, next) => {
     catchError((err) => {
       // err.error is not an object when the response body is not JSON (e.g. a proxy error page)
       const serverError = err.error?.error;
-      if (err.status === 401) {
-        // auto logout if 401 response returned from server
+      // the session ended (e.g. expired or the user was deleted): log out.
+      // Not on a wrong password: the guest of a password protected sharing has to stay on its login page.
+      if (err.status === 401 && authenticationService.user() &&
+        serverError?.code !== ErrorCodes.CREDENTIAL_NOT_FOUND) {
         authenticationService.logout(serverError?.code).catch(console.error);
+      }
+      // an illegal move (e.g. a normal user calls the admin API): log out
+      if (err.status === 403 && serverError?.code === ErrorCodes.NOT_AUTHORISED) {
+        authenticationService.logout(serverError.code).catch(console.error);
       }
       if (err.status === 500 && serverError?.code === ErrorCodes.INTERNAL) {
         // Unknown server error

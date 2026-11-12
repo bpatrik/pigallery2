@@ -10,7 +10,6 @@ import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
-import {expectToFail} from '../../KnownFailures';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 
 process.env['NODE_ENV'] = 'test';
@@ -121,8 +120,7 @@ describe('Gallery downloads', (sqlHelper: DBTestHelper) => {
 
       expect(res.headers['content-type']).to.contain('application/json');
       expect(JSON.parse(res.body.toString('utf8')).error, 'error in the body').to.not.be.null;
-      // it is a 200 with an ErrorDTO (PATH_ERROR) today
-      await expectToFail('#1311', () => expect(res.status).to.equal(404), /expected 200 to equal 404/);
+      expect(res.status).to.equal(404);
     });
   });
 

@@ -275,7 +275,6 @@ export const doubleTap = async (page: Page, at?: { x: number, y: number }): Prom
 
 /**
  * Checks that an API call (an APIResponse or the Response of a page) succeeded: HTTP OK and no error in the answer.
- * The server sends its errors with HTTP 200 today (#1305), so res.ok() alone can't fail.
  */
 export const expectApiOk = async (res: { ok(): boolean, json(): Promise<{ error?: unknown } | null> }, what: string): Promise<void> => {
   expect(res.ok(), what).toBe(true);
