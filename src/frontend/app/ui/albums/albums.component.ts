@@ -14,6 +14,7 @@ import {GallerySearchQueryBuilderComponent} from '../gallery/search/query-builde
 import {SavedSearchPopupComponent} from './saved-search-popup/saved-search-popup.component';
 import {ShareService} from '../gallery/share.service';
 import {NavigationService} from '../../model/navigation.service';
+import {SpinnerComponent} from '../utils/spinner/spinner.component';
 import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 import {SearchQueryParserService} from '../gallery/search/search-query-parser.service';
 
@@ -28,7 +29,8 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
     FormsModule,
     GallerySearchQueryBuilderComponent,
     SavedSearchPopupComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    SpinnerComponent
 ]
 })
 export class AlbumsComponent implements OnInit {

@@ -36,6 +36,7 @@ import {UploaderService} from './uploader/uploader.service';
 import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
+import {SpinnerComponent} from '../utils/spinner/spinner.component';
 import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 import {SearchQueryParserService} from './search/search-query-parser.service';
 
@@ -64,7 +65,8 @@ import {SearchQueryParserService} from './search/search-query-parser.service';
     MediaButtonModalComponent,
     UploaderComponent,
     EmptyStateComponent,
-    NgIconComponent
+    NgIconComponent,
+    SpinnerComponent
 ]
 })
 export class GalleryComponent implements OnInit, OnDestroy {

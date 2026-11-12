@@ -6,6 +6,9 @@
       [size]="size()" />
     }
 
+    @if (albumsService.albums() === null) {
+      <app-spinner />
+    }
     @if (albumsService.albums()?.length === 0) {
       <app-empty-state class="no-item-msg" icon="ionAlbumsOutline" center>
         <ng-container i18n>No albums yet.</ng-container>

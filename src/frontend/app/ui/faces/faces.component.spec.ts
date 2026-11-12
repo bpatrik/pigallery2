@@ -67,4 +67,14 @@ describe('FacesComponent - empty state', () => {
     expect(state!.querySelector('ng-icon'), 'icon of the empty state').not.toBeNull();
     expect(state!.textContent).toMatch(/metadata|tag|face region|keyword/i);
   });
+  it('should show the spinner, not the empty state, while the faces load', async () => {
+    const el = await render(null as unknown as PersonDTO[]);
+    expect(el.querySelector('app-spinner'), 'spinner').not.toBeNull();
+    expect(emptyState(el)).toBeNull();
+  });
+
+  it('should not show the spinner once the faces are loaded', async () => {
+    const el = await render([]);
+    expect(el.querySelector('app-spinner')).toBeNull();
+  });
 });

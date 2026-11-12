@@ -113,4 +113,15 @@ describe('AlbumsComponent - empty state', () => {
     expect(state!.querySelector('ng-icon'), 'icon of the empty state').not.toBeNull();
     expect(state!.textContent).toMatch(/save.*search|search.*album/i);
   });
+  it('should show the spinner, not the empty state, while the albums load', async () => {
+    const el = await render(null as unknown as AlbumBaseDTO[]);
+    expect(el.querySelector('app-spinner'), 'spinner').not.toBeNull();
+    expect(emptyState(el)).toBeUndefined();
+    expect(el.querySelector('.add-saved-search'), 'no add button before the albums').toBeNull();
+  });
+
+  it('should not show the spinner once the albums are loaded', async () => {
+    const el = await render([]);
+    expect(el.querySelector('app-spinner')).toBeNull();
+  });
 });

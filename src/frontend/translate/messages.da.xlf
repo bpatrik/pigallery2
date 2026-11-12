@@ -3522,7 +3522,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.ts</context>
-          <context context-type="linenumber">51</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/navigator/navigator.faces.component.html</context>
@@ -4193,7 +4193,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.ts</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -4666,7 +4666,7 @@
         <source>No albums yet.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">12</context>
+          <context context-type="linenumber">14</context>
         </context-group>
         <target>No albums yet.</target>
       </trans-unit>
@@ -4674,7 +4674,7 @@
         <source>Search for something, then save the search as an album with the save button next to the search bar.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">13,14</context>
+          <context context-type="linenumber">15,16</context>
         </context-group>
         <target>Search for something, then save the search as an album with the save button next to the search bar.</target>
       </trans-unit>
@@ -4682,11 +4682,11 @@
         <source>Add saved search</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">24,25</context>
+          <context context-type="linenumber">26,27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">35,36</context>
+          <context context-type="linenumber">36,37</context>
         </context-group>
         <target>Tilføj gemt søgning</target>
       </trans-unit>
@@ -4694,7 +4694,7 @@
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">67,68</context>
+          <context context-type="linenumber">68,69</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
@@ -4886,7 +4886,7 @@
         <source>No faces to show.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.html</context>
-          <context context-type="linenumber">20</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>Ingen ansigter at vise.</target>
       </trans-unit>
@@ -4894,7 +4894,7 @@
         <source>Faces come from the face regions in the metadata of the photos. Tag the faces in your photo manager (e.g. digiKam, Lightroom), then index the photos again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.html</context>
-          <context context-type="linenumber">21,22</context>
+          <context context-type="linenumber">23,24</context>
         </context-group>
         <target>Faces come from the face regions in the metadata of the photos. Tag the faces in your photo manager (e.g. digiKam, Lightroom), then index the photos again.</target>
       </trans-unit>
@@ -5050,11 +5050,11 @@
         <source>Unknown server error</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">129</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">207</context>
+          <context context-type="linenumber">209</context>
         </context-group>
         <target>Ukendt serverfejl</target>
       </trans-unit>
@@ -5062,7 +5062,7 @@
         <source>Directory not found</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">169</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>Directory not found</target>
       </trans-unit>
@@ -5070,7 +5070,7 @@
         <source>Folder "<x id="FOLDER" equiv-text="directoryName"/>" not found. Showing Home.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">174</context>
+          <context context-type="linenumber">176</context>
         </context-group>
         <target>Folder "<x id="FOLDER" equiv-text="directoryName"/>" not found. Showing Home.</target>
       </trans-unit>
@@ -5078,7 +5078,7 @@
         <source>Cannot find location</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">205</context>
+          <context context-type="linenumber">207</context>
         </context-group>
         <target>Kan ikke finde lokation</target>
       </trans-unit>
@@ -5086,7 +5086,7 @@
         <source>This search link is broken</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">227</context>
+          <context context-type="linenumber">229</context>
         </context-group>
         <target>This search link is broken</target>
       </trans-unit>
@@ -5230,7 +5230,7 @@
         <source>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">125</context>
         </context-group>
         <target>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</target>
       </trans-unit>
@@ -5238,7 +5238,7 @@
         <source>Check the spelling or try fewer words.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">124</context>
+          <context context-type="linenumber">126</context>
         </context-group>
         <target>Check the spelling or try fewer words.</target>
       </trans-unit>
@@ -5246,7 +5246,7 @@
         <source>This folder is empty.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">130</context>
         </context-group>
         <target>This folder is empty.</target>
       </trans-unit>
@@ -8174,6 +8174,14 @@
           <context context-type="linenumber">51,52</context>
         </context-group>
         <target>Cancel all</target>
+      </trans-unit>
+      <trans-unit id="7619560701830330401" datatype="html">
+        <source>Loading</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/utils/spinner/spinner.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <target>Loading</target>
       </trans-unit>
     </body>
   </file>
