@@ -1,4 +1,5 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, Injector, OnChanges, OnDestroy, afterNextRender, computed, effect, inject, input, signal, untracked, viewChild, viewChildren} from '@angular/core';
+import {formatDate} from '@angular/common';
+import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, Injector, OnChanges, OnDestroy, LOCALE_ID, afterNextRender, computed, effect, inject, input, signal, untracked, viewChild, viewChildren} from '@angular/core';
 import {GridRowBuilder} from './GridRowBuilder';
 import type {LightboxGrid, LightboxGridTile} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
@@ -10,7 +11,8 @@ import {Router} from '@angular/router';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
-import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
+import {Utils} from '../../../../../common/Utils';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
@@ -37,6 +39,7 @@ export class GalleryGridComponent
   private overlayService = inject(OverlayService);
   private changeDetector = inject(ChangeDetectorRef);
   private injector = inject(Injector);
+  private locale = inject(LOCALE_ID);
   queryService = inject(QueryService);
   private router = inject(Router);
   sortingService = inject(GallerySortingService);
@@ -63,6 +66,10 @@ export class GalleryGridComponent
   private MAX_ROW_COUNT = 5;
   private onScrollFired = false;
   private helperTime: number | null = null;
+  private scrollDateFrameRequested = false;
+  private scrollDateHideTimer: number | null = null;
+  // the month and year of the first visible photo and where to show it next to the scrollbar, while scrolling a date-sorted grid
+  readonly scrollDate = signal<ScrollDateLabel | null>(null);
 
   constructor() {
     effect(() => {
@@ -136,6 +143,10 @@ export class GalleryGridComponent
     if (this.renderDelayTimer) {
       clearTimeout(this.renderDelayTimer);
       this.renderDelayTimer = null;
+    }
+    if (this.scrollDateHideTimer != null) {
+      clearTimeout(this.scrollDateHideTimer);
+      this.scrollDateHideTimer = null;
     }
   }
 
@@ -368,6 +379,7 @@ export class GalleryGridComponent
   }
 
   onScroll(): void {
+    this.requestScrollDateUpdate();
     const prioritiseThumbnails = Config.Gallery.enableOnScrollThumbnailPrioritising === true;
     if (
       !this.onScrollFired &&
@@ -390,6 +402,63 @@ export class GalleryGridComponent
       });
       this.onScrollFired = true;
     }
+  }
+
+  private requestScrollDateUpdate(): void {
+    if (this.scrollDateFrameRequested) {
+      return;
+    }
+    if (this.sortingService.sorting().method !== SortByTypes.Date) {
+      this.scrollDate.set(null);
+      return;
+    }
+    this.scrollDateFrameRequested = true;
+    window.requestAnimationFrame((): void => {
+      this.scrollDateFrameRequested = false;
+      this.updateScrollDate();
+    });
+  }
+
+  private updateScrollDate(): void {
+    const maxScrollY = PageHelper.MaxScrollY;
+    const media = this.getFirstVisibleMedia();
+    if (maxScrollY <= 0 || !media || !media.metadata?.creationDate) {
+      this.scrollDate.set(null);
+      return;
+    }
+    const time = Utils.getTimeMS(media.metadata.creationDate, media.metadata.creationDateOffset, Config.Gallery.ignoreTimestampOffset);
+    this.scrollDate.set({
+      text: formatDate(time, 'MMMM y', this.locale, 'UTC'),
+      // where the scrollbar thumb is: 0 at the top, 1 at the bottom
+      position: Math.min(1, Math.max(0, PageHelper.ScrollY / maxScrollY))
+    });
+    if (this.scrollDateHideTimer != null) {
+      clearTimeout(this.scrollDateHideTimer);
+    }
+    this.scrollDateHideTimer = window.setTimeout((): void => {
+      this.scrollDateHideTimer = null;
+      this.scrollDate.set(null);
+    }, SCROLL_DATE_VISIBLE_MS);
+  }
+
+  /** The first media that is not scrolled out at the top. The tiles are in the order of their position, so it is a binary search. */
+  private getFirstVisibleMedia(): MediaDTO | null {
+    const tiles = this.photoComponents();
+    const scrollY = PageHelper.ScrollY;
+    let low = 0;
+    let high = tiles.length - 1;
+    let found = -1;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const d = tiles[mid].getDimension();
+      if (d.top + d.height > scrollY) {
+        found = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return found === -1 ? null : tiles[found].gridMedia().media;
   }
 
   getNumberOfRenderedMedia(): number {
@@ -536,6 +605,13 @@ export class GalleryGridComponent
     PageHelper.OverflowY = scrollY;
     return false;
   }
+}
+
+const SCROLL_DATE_VISIBLE_MS = 1000;
+
+interface ScrollDateLabel {
+  text: string;
+  position: number; // 0-1
 }
 
 interface GridMediaGroup {

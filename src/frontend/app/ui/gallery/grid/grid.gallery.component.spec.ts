@@ -14,7 +14,7 @@ import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {GridMedia} from './GridMedia';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {provideHttpClient, withXhr} from '@angular/common/http';
 import {BlogService, GroupedMarkdown} from '../blog/blog.service';
 import {provideIcons} from '@ng-icons/core';
@@ -23,6 +23,7 @@ import {ThumbnailManagerService} from '../thumbnailManager.service';
 import {ExtensionService} from '../../../model/extension.service';
 import {MediaButtonModalService} from './photo/media-button-modal/media-button-modal.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
+import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
 
 class MockQueryService {
@@ -45,6 +46,7 @@ class MockContentService {
 }
 
 class MockGallerySortingService {
+  readonly sorting = signal({method: SortByTypes.Date, ascending: false});
   readonly grouping = signal({method: GroupByTypes.NoGrouping, ascending: true});
 }
 
@@ -62,6 +64,7 @@ class MockBlogService {
 }
 
 describe('GalleryGridComponent', () => {
+  let sortingService: MockGallerySortingService;
   let component: GalleryGridComponent;
   let fixture: ComponentFixture<GalleryGridComponent>;
 
@@ -96,6 +99,7 @@ describe('GalleryGridComponent', () => {
     })
       .compileComponents();
 
+    sortingService = TestBed.inject(GallerySortingService) as unknown as MockGallerySortingService;
     fixture = TestBed.createComponent(GalleryGridComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -306,6 +310,117 @@ describe('GalleryGridComponent', () => {
       }
       expect(component.getNumberOfRenderedMedia()).toBe(500);
       expect(steps).toBeGreaterThan(2);
+    });
+  });
+
+  // #1209: the month and year of the first visible photo next to the scrollbar
+  describe('scroll date', () => {
+    const TILE_HEIGHT = 100;
+    let scrollY: number;
+    let frames: FrameRequestCallback[];
+
+    const photo = (i: number, date: number): PhotoDTO => ({
+      name: i + '.jpg',
+      directory: {name: 'd', path: 'p'},
+      metadata: {size: {width: 300, height: 200}, creationDate: date}
+    } as PhotoDTO);
+    // jsdom has no layout: the tiles are one below the other
+    const layOut = (): void => {
+      fixture.nativeElement.querySelectorAll('app-gallery-grid-photo').forEach((el: HTMLElement, i: number) => {
+        Object.defineProperty(el, 'offsetParent', {value: document.body});
+        Object.defineProperty(el, 'offsetTop', {value: i * TILE_HEIGHT});
+        Object.defineProperty(el, 'offsetLeft', {value: 0});
+        const img = el.querySelector('img');
+        Object.defineProperty(img, 'width', {value: 150});
+        Object.defineProperty(img, 'height', {value: TILE_HEIGHT});
+      });
+    };
+    const scroll = (): void => {
+      component.onScroll();
+      frames.splice(0).forEach(cb => cb(0));
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      scrollY = 0;
+      frames = [];
+      vi.spyOn(PageHelper, 'ScrollY', 'get').mockImplementation(() => scrollY);
+      vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(1000);
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback): number => {
+        frames.push(cb);
+        return frames.length;
+      });
+      // newest first, 10 tiles of every month, one below the other
+      const photos: PhotoDTO[] = [];
+      for (let i = 0; i < 20; ++i) {
+        photos.push(photo(i, Date.UTC(2021, i < 10 ? 5 : 2, 15, 12)));
+      }
+      fixture.componentRef.setInput('mediaGroups', [{name: 'all', media: photos}]);
+      component.mediaToRender.set([{
+        name: 'all',
+        media: photos.map((p, i) => new GridMedia(p, 150, TILE_HEIGHT, i))
+      }]);
+      fixture.detectChanges();
+      layOut();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    const label = (): HTMLElement | null => fixture.nativeElement.querySelector('.scroll-date');
+
+    it('should show the month and year of the first visible photo at the thumb position', () => {
+      scrollY = 250; // the 3rd tile is the first one that is not scrolled out
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('June 2021');
+      expect(label()?.style.getPropertyValue('--scroll-position')).toBe('0.25');
+
+      scrollY = 1050; // below the 10th tile
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('March 2021');
+      expect(label()?.style.getPropertyValue('--scroll-position')).toBe('1');
+    });
+
+    it('should hide after the scrolling stopped', async () => {
+      scrollY = 250;
+      scroll();
+      expect(label()).not.toBeNull();
+      await vi.advanceTimersByTimeAsync(1500);
+      fixture.detectChanges();
+      expect(label()).toBeNull();
+    });
+
+    it('should not show when the grid is not sorted by date', () => {
+      sortingService.sorting.set({method: SortByTypes.Name, ascending: true});
+      scrollY = 250;
+      scroll();
+      expect(label()).toBeNull();
+    });
+
+    it('should not show when there is nothing to scroll', () => {
+      vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(0);
+      scroll();
+      expect(label()).toBeNull();
+    });
+
+    it('should show the date in the time zone of the photo', () => {
+      const first = photo(0, Date.UTC(2021, 5, 30, 23, 30));
+      first.metadata.creationDateOffset = '+02:00';
+      fixture.componentRef.setInput('mediaGroups', [{name: 'all', media: [first]}]);
+      component.mediaToRender.set([{name: 'all', media: [new GridMedia(first, 150, TILE_HEIGHT, 0)]}]);
+      fixture.detectChanges();
+      layOut();
+      const ignoreOffset = Config.Gallery.ignoreTimestampOffset;
+      Config.Gallery.ignoreTimestampOffset = true;
+      try {
+        scroll();
+        expect(label()?.textContent?.trim()).toBe('July 2021');
+      } finally {
+        Config.Gallery.ignoreTimestampOffset = ignoreOffset;
+      }
     });
   });
 

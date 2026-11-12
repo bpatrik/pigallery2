@@ -45,3 +45,8 @@
   }
 
 </div>
+
+@if (scrollDate(); as label) {
+  <div class="scroll-date shadow"
+    [style.--scroll-position]="label.position">{{ label.text }}</div>
+}
