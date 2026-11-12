@@ -385,7 +385,6 @@ test.describe('Share', () => {
     });
 
     test('Expired sharing should tell the guest that the link is invalid or has expired', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       // expires 1 ms after its creation
       const sharingKey = await createSharingForTest('timestamps', {valid: 1});
       await page.goto('/share/' + sharingKey);

@@ -338,6 +338,7 @@ export class ShareService {
       }
     } catch (e) {
       this.sharingIsValid.set(false);
+      this.publicSharing.set(null);
       console.error(e);
     }
   }

@@ -39,7 +39,6 @@ test.describe('Errors', () => {
       test.use(notLoggedIn);
 
       test('should tell a guest that the link is invalid', async ({page}) => {
-        test.fail(true, 'Not implemented yet #1307');
         await page.goto(NOT_EXISTING_SHARING);
 
         await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
@@ -49,7 +48,6 @@ test.describe('Errors', () => {
     });
 
     test('should tell a logged in user that the link is invalid', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       await page.goto(NOT_EXISTING_SHARING);
 
       await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});

@@ -6,6 +6,7 @@ import {
 import { GalleryComponent } from './ui/gallery/gallery.component';
 import { QueryParams } from '../../common/QueryParams';
 import { authGuard } from './model/network/helper/auth.guard';
+import { sharingGuard } from './model/network/helper/sharing.guard';
 import { ErrorComponent } from './ui/error/error.component';
 
 export function galleryMatcherFunction(
@@ -82,10 +83,15 @@ export const routes: Routes = [
     path: 'error',
     component: ErrorComponent,
   },
+  // #1307: shown without changing the address bar (NavigationService.INVALID_SHARING_URL)
+  {
+    path: 'invalidSharing',
+    loadComponent: () => import('./ui/invalid-sharing/invalid-sharing.component').then(m => m.InvalidSharingComponent),
+  },
   {
     matcher: galleryMatcherFunction,
     component: GalleryComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, sharingGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   // #1305: the server answers these with HTTP 404

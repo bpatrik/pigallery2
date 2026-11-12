@@ -46,13 +46,12 @@ describe('NavigationService', () => {
       expect(router.navigate).toHaveBeenCalledWith(['shareLogin'], {queryParams: {sk: 'key'}});
     });
 
-    it('should navigate to error, if the sharing info is not available', async () => {
-      // e.g.: logging out of a sharing that is not valid anymore
+    // #1307: e.g. a guest opens a missing or expired sharing link; the address bar keeps the link
+    it('should show the invalid link page, if the sharing info is not available', async () => {
       const {router, service} = setUp(null);
-      vi.spyOn(console, 'error').mockImplementation(() => undefined);
       await service.toLogin();
-      expect(router.navigate).toHaveBeenCalledWith(['error']);
-      expect(console.error).toHaveBeenCalledWith('Navigating to share login with an invalid sharing');
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/invalidSharing', {skipLocationChange: true});
+      expect(router.navigate).not.toHaveBeenCalled();
     });
 
     it('should navigate to login without sharing', async () => {
