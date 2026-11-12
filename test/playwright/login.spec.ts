@@ -203,7 +203,6 @@ test.describe('Login', () => {
     });
 
     test('Deleted user should be told that the session has ended', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1306');
       await deleteUserWhileOpen(page);
       await expect(page).toHaveURL(/\/login/);
       await expect(page.locator('app-toast-card').filter({hasText: 'Your session has ended. Please log in again.'})).toBeVisible();
