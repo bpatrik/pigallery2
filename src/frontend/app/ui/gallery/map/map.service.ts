@@ -129,8 +129,8 @@ export class MapService {
     }
 
     let duration = startTime && endTime ? (endTime.getTime() - startTime.getTime()) / 1000 : 0;
-    // should be at least 1 second
-    if (duration < 1000) {
+    // should be at least 1 second (also drops an invalid time: NaN)
+    if (!(duration >= 1)) {
       duration = 0;
     }
     const averageSpeed = duration > 0 ? (totalDistance / duration) * 3.6 : 0; // Convert m/s to km/h
