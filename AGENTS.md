@@ -166,6 +166,7 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Sessions**: the session lives in the signed `cookie-session` cookie. `req.session.stamp` (see `SessionManager.getSessionStamp`)
   ties it to its user or sharing DB row, and `AuthenticationMWs` ends the session once that row changes. Only `AuthenticationMWs`
   starts, restores or ends sessions. Call `SessionManager.invalidateSessionCache()` after every write to users or sharings.
+  An illegal move (`NOT_AUTHORISED`, HTTP 403) logs the user out in the frontend (`error.interceptor.ts`); a wrong password does not.
 - **Albums** are saved searches: an album links to its search (`/search/<query>`), not to an album URL.
   The link of a deleted album keeps working as a plain search; that's intended.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
