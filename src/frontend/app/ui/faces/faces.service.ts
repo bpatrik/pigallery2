@@ -8,7 +8,8 @@ import {Config} from '../../../../common/config/public/Config';
 export class FacesService {
   private networkService = inject(NetworkService);
 
-  public readonly persons = signal<PersonDTO[]>([]);
+  // null until loaded
+  public readonly persons = signal<PersonDTO[] | null>(null);
   public readonly sorting = signal<SortingMethod>({
     method: Config.Faces.sorting.method,
     ascending: Config.Faces.sorting.ascending
@@ -26,12 +27,12 @@ export class FacesService {
       '/person/' + person.name,
       {isFavourite}
     );
-    if (!this.persons().some((p) => p.id === updated.id)) {
+    if (!this.persons()?.some((p) => p.id === updated.id)) {
       return;
     }
     // a new array, so the signal notifies its consumers
     this.persons.update((persons) =>
-      persons.map((p) => (p.id === updated.id ? updated : p))
+      persons?.map((p) => (p.id === updated.id ? updated : p)) ?? null
     );
   }
 

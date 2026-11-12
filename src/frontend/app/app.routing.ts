@@ -88,5 +88,9 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: '**', redirectTo: '/error', pathMatch: 'full' },
+  // #1305: the server answers these with HTTP 404
+  {
+    path: '**',
+    loadComponent: () => import('./ui/not-found/not-found.component').then(m => m.NotFoundComponent),
+  },
 ];

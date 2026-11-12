@@ -43,6 +43,9 @@ class MockContentLoaderService {
   readonly content = signal<ContentWrapperWithError | null>({} as ContentWrapperWithError);
   loadDirectory = vi.fn();
   search = vi.fn().mockReturnValue(Promise.resolve());
+  readonly canRetry = signal(false);
+  reloadCurrentContent = vi.fn().mockReturnValue(Promise.resolve());
+  showBrokenSearchLink = vi.fn();
 
   constructor(private initialContent: ContentWrapperWithError | null = null) {
     if (initialContent) {

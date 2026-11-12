@@ -35,9 +35,22 @@
     <div body class="container-fluid app-gallery-body">
       <app-gallery-uploader [isUploadOver]="isUploadOver" />
       @if (ContentWrapper.error) {
-        <div class="alert alert-danger" role="alert">
-          {{ ContentWrapper.error }}
+        <div class="alert alert-danger d-flex align-items-center gap-2" role="alert">
+          <span class="flex-grow-1">{{ ContentWrapper.error }}</span>
+          @if (contentLoader.canRetry()) {
+            <button type="button" class="btn btn-sm btn-outline-danger" (click)="retry()">
+              <ng-icon name="ionReloadOutline" class="me-1" /><span i18n>Retry</span>
+            </button>
+          }
         </div>
+      }
+      @if (emptyState(); as empty) {
+        <app-empty-state [icon]="empty.icon" center>
+          {{ empty.message }}
+          @if (empty.hint) {
+            <span hint>{{ empty.hint }}</span>
+          }
+        </app-empty-state>
       }
       @if (!ContentWrapper.error && (ContentWrapper.searchResult || ContentWrapper.directory)) {
         <!-- Show search result overflow -->
@@ -79,11 +92,7 @@
     ContentWrapper.directory.isPartial === true)
     && !ContentWrapper.searchResult
     && !ContentWrapper.error)) {
-    <div body class="container spinner-container"
-      >
-      <div class="spinner rounded">
-      </div>
-    </div>
+    <app-spinner body />
   }
 </app-frame>
 

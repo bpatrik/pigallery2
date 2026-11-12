@@ -309,8 +309,9 @@ export class PublicRouter {
     );
     app.get(['/:locale', '/:locale/*page'], redirectToLocalePage);
 
-    const renderFile = (subDir = '') => {
-      return (req: Request, res: Response) => {
+    // a missing file: a plain 404, unless notFoundNext is set (the page catch-all below decides)
+    const renderFile = (subDir = '', notFoundNext = false) => {
+      return (req: Request, res: Response, next: NextFunction) => {
         // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
         // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
         const file = RequestParams.getRequired(req, 'file');
@@ -329,10 +330,27 @@ export class PublicRouter {
         }, (err) => {
           if (err && !res.headersSent) {
             res.removeHeader('Cache-Control');
+            if (notFoundNext) {
+              return next();
+            }
             res.sendStatus(404);
           }
         });
       };
+    };
+
+    // Nothing above matched: the API answers its own JSON 404 (ErrorRouter), a file gets a plain 404,
+    // any other path is a page of the app that does not exist: the app shows "Page not found" with HTTP 404.
+    const notFound = (req: Request, res: Response, next: NextFunction) => {
+      const apiPath = Config.Server.apiPath;
+      if (req.path === apiPath || req.path.startsWith(apiPath + '/')) {
+        return next('route');
+      }
+      if (path.extname(req.path) !== '') {
+        return res.sendStatus(404);
+      }
+      res.status(404);
+      next();
     };
 
     app.get(
@@ -345,7 +363,15 @@ export class PublicRouter {
       '/:file',
       setLocale,
       AuthenticationMWs.normalizePathParam('file'),
-      renderFile()
+      renderFile('', true)
+    );
+    app.get(
+      '/{*rest}',
+      notFound,
+      AuthenticationMWs.tryAuthenticate,
+      addTPl,
+      setLocale,
+      renderIndex
     );
   }
 }

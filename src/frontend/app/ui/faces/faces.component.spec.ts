@@ -59,12 +59,22 @@ describe('FacesComponent - empty state', () => {
     expect(el.querySelectorAll('app-face').length).toBe(0);
   });
 
-  // TODO #1312: an icon and a short explanation (faces come from the face regions in the photos' metadata), not only ":( No faces to show."
-  it.fails('should show an icon and a short explanation when there are no faces yet', async () => {
+  // #1312: an icon and a short explanation (faces come from the face regions in the photos' metadata), not only ":( No faces to show."
+  it('should show an icon and a short explanation when there are no faces yet', async () => {
     const el = await render([]);
     const state = emptyState(el);
     expect(state, 'the empty state').not.toBeNull();
     expect(state!.querySelector('ng-icon'), 'icon of the empty state').not.toBeNull();
     expect(state!.textContent).toMatch(/metadata|tag|face region|keyword/i);
+  });
+  it('should show the spinner, not the empty state, while the faces load', async () => {
+    const el = await render(null as unknown as PersonDTO[]);
+    expect(el.querySelector('app-spinner'), 'spinner').not.toBeNull();
+    expect(emptyState(el)).toBeNull();
+  });
+
+  it('should not show the spinner once the faces are loaded', async () => {
+    const el = await render([]);
+    expect(el.querySelector('app-spinner')).toBeNull();
   });
 });

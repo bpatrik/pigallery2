@@ -105,12 +105,23 @@ describe('AlbumsComponent - empty state', () => {
   });
 
   // #1312: an icon and a short explanation of how to save a search as an album, not only ":( No albums to show."
-  it.fails('should show an icon and explain how to add an album when there are no albums yet', async () => {
+  it('should show an icon and explain how to add an album when there are no albums yet', async () => {
     const el = await render([]);
 
     const state = emptyState(el);
     expect(state, 'the empty state').toBeDefined();
     expect(state!.querySelector('ng-icon'), 'icon of the empty state').not.toBeNull();
     expect(state!.textContent).toMatch(/save.*search|search.*album/i);
+  });
+  it('should show the spinner, not the empty state, while the albums load', async () => {
+    const el = await render(null as unknown as AlbumBaseDTO[]);
+    expect(el.querySelector('app-spinner'), 'spinner').not.toBeNull();
+    expect(emptyState(el)).toBeUndefined();
+    expect(el.querySelector('.add-saved-search'), 'no add button before the albums').toBeNull();
+  });
+
+  it('should not show the spinner once the albums are loaded', async () => {
+    const el = await render([]);
+    expect(el.querySelector('app-spinner')).toBeNull();
   });
 });
