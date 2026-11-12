@@ -132,6 +132,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
     return null;
   });
   public isUploadOver = false;
+  // the server was asked once whether the sharing ended, when its countdown reached zero
+  private expiryChecked = false;
   private $counter!: Observable<number>; // set by ngOnInit()
   private subscription: { route: Subscription | null, timer: Subscription | null } = {
     route: null,
@@ -172,9 +174,16 @@ export class GalleryComponent implements OnInit, OnDestroy {
       return;
     }
 
-    t = Math.floor(
+    // never below zero (#1307)
+    t = Math.max(0, Math.floor(
       (sharing.expires - Date.now()) / 1000
-    );
+    ));
+    if (t === 0 && !this.expiryChecked) {
+      // the server decides whether the sharing ended (the clock of the browser can be off):
+      // for an ended one it answers 401, and the guest gets the invalid link page
+      this.expiryChecked = true;
+      this.contentLoader.reloadCurrentContent().catch(console.error);
+    }
     const day = Math.floor(t / 86400);
     t -= day * 86400;
     const hour = Math.floor(t / 3600) % 24;

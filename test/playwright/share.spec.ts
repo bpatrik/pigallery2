@@ -393,7 +393,6 @@ test.describe('Share', () => {
     });
 
     test('Sharing deleted while the guest has it open should show the invalid link page on the next navigation', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       const sharingKey = await createSharingForTest(ACCENTED_DIR, {recursive: true});
       await page.goto('/share/' + sharingKey);
       await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
