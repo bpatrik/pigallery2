@@ -26,10 +26,15 @@ import {MDFileEntity} from './enitites/MDFileEntity';
 import {ProjectedDirectoryCacheEntity} from './enitites/ProjectedDirectoryCacheEntity';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {ProjectedAlbumCacheEntity} from './enitites/album/ProjectedAlbumCacheEntity';
+import {foldText} from './enitites/EntityUtils';
 
 const LOG_TAG = '[SQLConnection]';
 
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
+// the part of better-sqlite3's Database that is used here
+interface BetterSqlite3Db {
+  function(name: string, options: { deterministic: boolean }, fn: (text: string | null) => string | null): void;
+}
 
 export class SQLConnection {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -311,6 +316,10 @@ export class SQLConnection {
           ProjectPath.getAbsolutePath(config.dbFolder),
           SQLConnection.getSQLiteConfig(config).DBFileName
         ),
+        // for the accent- and case-insensitive search (#1309)
+        prepareDatabase: (db: BetterSqlite3Db): void => {
+          db.function('fold', {deterministic: true}, foldText);
+        },
       };
     } else {
       throw new Error('Unsupported database type: ' + String(config.type));

@@ -167,6 +167,17 @@ export class SQLiteConfig {
     description: $localize`Sqlite will save the db with this filename.`,
   })
   DBFileName: string = 'sqlite.db';
+
+  @ConfigProperty({
+    type: 'boolean',
+    tags:
+      {
+        name: $localize`Accent-insensitive search`,
+        priority: ConfigPriority.advanced
+      },
+    description: $localize`Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Makes text search several times slower on a large gallery.`,
+  })
+  accentInsensitiveSearch: boolean = false;
 }
 
 @SubConfigClass({softReadonly: true})

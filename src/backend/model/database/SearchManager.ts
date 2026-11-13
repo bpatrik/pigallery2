@@ -29,7 +29,7 @@ import {ObjectManagers} from '../ObjectManagers';
 import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {Utils} from '../../../common/Utils';
 import {FileEntity} from './enitites/FileEntity';
-import {SQL_COLLATE} from './enitites/EntityUtils';
+import {foldText, SQL_COLLATE} from './enitites/EntityUtils';
 import {GroupSortByTypes, SortByTypes, SortingMethod} from '../../../common/entities/SortingMethods';
 import {SessionContext} from '../SessionContext';
 import * as path from 'node:path';
@@ -42,6 +42,37 @@ export class SearchManager {
   ];
   // makes all search query params unique, so typeorm won't mix them
   private queryIdBase = 0;
+
+  /**
+   * SQLite's LIKE ignores SQL_COLLATE and the case of non-English letters. With Database.sqlite.accentInsensitiveSearch
+   * both sides are folded instead: lowercase and without accents (#1309). It makes text search several times slower.
+   */
+  private static foldsText(): boolean {
+    return Config.Database.type === DatabaseType.sqlite && !!Config.Database.sqlite?.accentInsensitiveSearch;
+  }
+
+  // The value of a param of like()
+  private static likeValue(value: string): string {
+    return SearchManager.foldsText() ? foldText(value)! : value;
+  }
+
+  /**
+   * A text condition that ignores the accents and the case as far as the DB can, see foldsText().
+   * @param escape '\' escapes the wildcards of the value (MySQL does it by default, SQLite only with ESCAPE)
+   */
+  private static like(field: string, param: string, options: { negate?: boolean, escape?: boolean } = {}): string {
+    const op = options.negate ? 'NOT LIKE' : 'LIKE';
+    if (Config.Database.type === DatabaseType.sqlite) {
+      const folded = SearchManager.foldsText() ? `fold(${field})` : field;
+      return `${folded} ${op} :${param}${options.escape ? ' ESCAPE \'\\\'' : ''}`;
+    }
+    return `${field} ${op} :${param} COLLATE ${SQL_COLLATE}`;
+  }
+
+  // Whether an autocomplete text contains what was typed, ignoring the accents and the case (like MySQL's SQL_COLLATE)
+  private static containsText(text: string, value: string): boolean {
+    return foldText(text)!.toLowerCase().includes(foldText(value)!.toLowerCase());
+  }
 
   public static setSorting<T extends ObjectLiteral>(
     query: SelectQueryBuilder<T>,
@@ -124,8 +155,8 @@ export class SearchManager {
       const q = photoRepository
         .createQueryBuilder('media')
         .select('DISTINCT(media.metadata.keywords)')
-        .where('media.metadata.keywords LIKE :valueKW COLLATE ' + SQL_COLLATE, {
-          valueKW: '%' + value + '%',
+        .where(SearchManager.like('media.metadata.keywords', 'valueKW'), {
+          valueKW: SearchManager.likeValue('%' + value + '%'),
         });
 
       if (session.projectionQuery) {
@@ -144,10 +175,7 @@ export class SearchManager {
         .forEach((keywords): void => {
           acList.push(
             ...this.encapsulateAutoComplete(
-              keywords.filter(
-                (k): boolean =>
-                  k.toLowerCase().indexOf(value.toLowerCase()) !== -1
-              ),
+              keywords.filter((k): boolean => SearchManager.containsText(k, value)),
               SearchQueryTypes.keyword
             )
           );
@@ -168,8 +196,8 @@ export class SearchManager {
               .createQueryBuilder('person')
               .select('DISTINCT(person.name), cache.count')
               .leftJoin('person.cache', 'cache', 'cache.projectionKey = :pk', {pk: session.user.projectionKey})
-              .where('person.name LIKE :value COLLATE ' + SQL_COLLATE, {
-                value: '%' + value + '%',
+              .where(SearchManager.like('person.name', 'value'), {
+                value: SearchManager.likeValue('%' + value + '%'),
               })
               .andWhere('cache.count > 0 AND cache.valid = 1')
               .limit(
@@ -197,17 +225,14 @@ export class SearchManager {
         );
       const b = new Brackets((q) => {
         q.where(
-          'media.metadata.positionData.country LIKE :value COLLATE ' +
-          SQL_COLLATE,
-          {value: '%' + value + '%'}
+          SearchManager.like('media.metadata.positionData.country', 'value'),
+          {value: SearchManager.likeValue('%' + value + '%')}
         ).orWhere(
-          'media.metadata.positionData.state LIKE :value COLLATE ' +
-          SQL_COLLATE,
-          {value: '%' + value + '%'}
+          SearchManager.like('media.metadata.positionData.state', 'value'),
+          {value: SearchManager.likeValue('%' + value + '%')}
         ).orWhere(
-          'media.metadata.positionData.city LIKE :value COLLATE ' +
-          SQL_COLLATE,
-          {value: '%' + value + '%'}
+          SearchManager.like('media.metadata.positionData.city', 'value'),
+          {value: SearchManager.likeValue('%' + value + '%')}
         );
       });
       q.where(b);
@@ -235,10 +260,7 @@ export class SearchManager {
         .forEach((positions): void => {
           acList.push(
             ...this.encapsulateAutoComplete(
-              positions.filter(
-                (p): boolean =>
-                  p.toLowerCase().indexOf(value.toLowerCase()) !== -1
-              ),
+              positions.filter((p): boolean => SearchManager.containsText(p, value)),
               type === SearchQueryTypes.distance
                 ? type
                 : SearchQueryTypes.position
@@ -255,8 +277,8 @@ export class SearchManager {
       const q = mediaRepository
         .createQueryBuilder('media')
         .select('DISTINCT(media.name)')
-        .where('media.name LIKE :value COLLATE ' + SQL_COLLATE, {
-          value: '%' + value + '%',
+        .where(SearchManager.like('media.name', 'value'), {
+          value: SearchManager.likeValue('%' + value + '%'),
         });
 
 
@@ -287,8 +309,8 @@ export class SearchManager {
         .createQueryBuilder('media')
         .select('DISTINCT(media.metadata.caption) as caption')
         .where(
-          'media.metadata.caption LIKE :value COLLATE ' + SQL_COLLATE,
-          {value: '%' + value + '%'}
+          SearchManager.like('media.metadata.caption', 'value'),
+          {value: SearchManager.likeValue('%' + value + '%')}
         );
 
       if (session.projectionQuery) {
@@ -317,8 +339,8 @@ export class SearchManager {
       const dirQ = directoryRepository
         .createQueryBuilder('directory')
         .leftJoinAndSelect('directory.cache', 'cache', 'cache.projectionKey = :pk AND cache.valid = 1', {pk: session.user.projectionKey})
-        .where('directory.name LIKE :value COLLATE ' + SQL_COLLATE, {
-          value: '%' + value + '%',
+        .where(SearchManager.like('directory.name', 'value'), {
+          value: SearchManager.likeValue('%' + value + '%'),
         })
         .andWhere('(cache.recursiveMediaCount > 0 OR cache.id is NULL)');
       session.directoryAccess.filterDirectoryQuery(dirQ, 'directory');
@@ -978,15 +1000,14 @@ export class SearchManager {
         `REPLACE(REPLACE(REPLACE(${fieldName}, '  ', ' '), '  ', ' '), '  ', ' ')`;
       const textValue = (query as TextSearch).value.replace(/ {2,}/g, ' ');
 
-      const getLikeExpr = (fieldName: string, paramName: string): string => {
-        const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
-        // convertGlobToLike escapes with '\', that is the default in MySQL but SQLite has no default escape character
-        const esc = Config.Database.type === DatabaseType.sqlite ? ' ESCAPE \'\\\'' : '';
-        return `${collapseSpaces(fieldName)} ${op} :${paramName}${queryId}${esc} COLLATE ${SQL_COLLATE}`;
-      };
+      const likeValue = (value: string): string => SearchManager.likeValue(value);
+      // convertGlobToLike escapes with '\', that is the default in MySQL but SQLite has no default escape character
+      const likeExpr = (field: string, paramName: string): string =>
+        SearchManager.like(field, paramName + queryId, {negate: (query as TextSearch).negate, escape: true});
+      const getLikeExpr = (fieldName: string, paramName: string): string => likeExpr(collapseSpaces(fieldName), paramName);
 
       const textParam: Record<string, unknown> = {};
-      textParam['text' + queryId] = createMatchString(textValue);
+      textParam['text' + queryId] = likeValue(createMatchString(textValue));
 
       if (
         query.type === SearchQueryTypes.any_text ||
@@ -1007,7 +1028,7 @@ export class SearchManager {
           return likeStr.replace(/\//g, '\\\\');
         };
         const fullDirPath = path.posix.normalize(path.posix.join('./', dirPathStr));
-        textParam['fullPath' + queryId] = toDBSeparator(createMatchString(fullDirPath));
+        textParam['fullPath' + queryId] = likeValue(toDBSeparator(createMatchString(fullDirPath)));
         q[whereFN](
           getLikeExpr(`${alias}.path`, 'fullPath'),
           textParam
@@ -1019,17 +1040,17 @@ export class SearchManager {
         };
         q[whereFN](
           new Brackets((dq): unknown => {
-            textParam['dirName' + queryId] = createMatchString(
+            textParam['dirName' + queryId] = likeValue(createMatchString(
               directoryPath.name
-            );
+            ));
             dq[whereFNRev](
               getLikeExpr(`${alias}.name`, 'dirName'),
               textParam
             );
             if (dirPathStr.includes('/')) {
-              textParam['parentName' + queryId] = toDBSeparator(createMatchString(
+              textParam['parentName' + queryId] = likeValue(toDBSeparator(createMatchString(
                 directoryPath.parent
-              ));
+              )));
               dq[whereFNRev](
                 getLikeExpr(`${alias}.path`, 'parentName'),
                 textParam
@@ -1084,28 +1105,26 @@ export class SearchManager {
             qbr[whereFN](
               new Brackets((qb): void => {
                 const globPattern = convertGlobToLike((query as TextSearch).value);
-                const esc = Config.Database.type === DatabaseType.sqlite ? " ESCAPE '\\'" : '';
-                const op = (query as TextSearch).negate ? 'NOT LIKE' : 'LIKE';
 
-                textParam['CtextC' + queryId] = `%,${globPattern},%`;
-                textParam['Ctext' + queryId] = `%,${globPattern}`;
-                textParam['textC' + queryId] = `${globPattern},%`;
-                textParam['text_exact' + queryId] = `${globPattern}`;
+                textParam['CtextC' + queryId] = likeValue(`%,${globPattern},%`);
+                textParam['Ctext' + queryId] = likeValue(`%,${globPattern}`);
+                textParam['textC' + queryId] = likeValue(`${globPattern},%`);
+                textParam['text_exact' + queryId] = likeValue(globPattern);
 
                 qb[whereFN](
-                  `${fieldName} ${op} :CtextC${queryId}${esc} COLLATE ${SQL_COLLATE}`,
+                  likeExpr(fieldName, 'CtextC'),
                   textParam
                 );
                 qb[whereFN](
-                  `${fieldName} ${op} :Ctext${queryId}${esc} COLLATE ${SQL_COLLATE}`,
+                  likeExpr(fieldName, 'Ctext'),
                   textParam
                 );
                 qb[whereFN](
-                  `${fieldName} ${op} :textC${queryId}${esc} COLLATE ${SQL_COLLATE}`,
+                  likeExpr(fieldName, 'textC'),
                   textParam
                 );
                 qb[whereFN](
-                  `${fieldName} ${op} :text_exact${queryId}${esc} COLLATE ${SQL_COLLATE}`,
+                  likeExpr(fieldName, 'text_exact'),
                   textParam
                 );
               })
