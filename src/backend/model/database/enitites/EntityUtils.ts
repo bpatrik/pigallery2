@@ -1,6 +1,7 @@
 import {Config} from '../../../../common/config/private/Config';
 import {ColumnOptions} from 'typeorm/decorator/options/ColumnOptions';
 import {DatabaseType} from '../../../../common/config/private/PrivateConfig';
+import {foldChar} from '../../../../common/TextFold';
 
 export class ColumnCharsetCS implements ColumnOptions {
   public get charset(): string {
@@ -30,15 +31,9 @@ export const SQL_COLLATE = 'utf8mb4_general_ci';
 // fold() runs for every row of a search: folding char by char from a table is faster than normalizing every text
 const NON_ASCII = /\P{ASCII}/u;
 const NON_ASCII_ALL = /\P{ASCII}/gu;
-const foldedChars = new Map<string, string>();
-const foldChar = (char: string): string => {
-  let folded = foldedChars.get(char);
-  if (folded === undefined) {
-    folded = char.normalize('NFD').replace(/\p{M}/gu, '');
-    foldedChars.set(char, folded);
-  }
-  return folded;
-};
+// the same keywords, persons and places come for many photos (idea from #1218)
+const FOLDED_TEXTS_MAX = 20000;
+const foldedTexts = new Map<string, string>();
 
 /**
  * The text in lowercase and without accents: SQLite searches compare fold(column) LIKE fold(value),
@@ -49,6 +44,14 @@ export const foldText = (text: string | null): string | null => {
   if (text === null || !NON_ASCII.test(text)) {
     return text;
   }
-  return text.toLowerCase().replace(NON_ASCII_ALL, foldChar);
+  let folded = foldedTexts.get(text);
+  if (folded === undefined) {
+    folded = text.toLowerCase().replace(NON_ASCII_ALL, foldChar);
+    if (foldedTexts.size >= FOLDED_TEXTS_MAX) {
+      foldedTexts.clear();
+    }
+    foldedTexts.set(text, folded);
+  }
+  return folded;
 };
 

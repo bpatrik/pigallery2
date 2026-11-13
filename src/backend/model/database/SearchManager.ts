@@ -63,8 +63,13 @@ export class SearchManager {
   private static like(field: string, param: string, options: { negate?: boolean, escape?: boolean } = {}): string {
     const op = options.negate ? 'NOT LIKE' : 'LIKE';
     if (Config.Database.type === DatabaseType.sqlite) {
-      const folded = SearchManager.foldsText() ? `fold(${field})` : field;
-      return `${folded} ${op} :${param}${options.escape ? ' ESCAPE \'\\\'' : ''}`;
+      const esc = options.escape ? ' ESCAPE \'\\\'' : '';
+      if (!SearchManager.foldsText()) {
+        return `${field} ${op} :${param}${esc}`;
+      }
+      // most captions, keywords and persons are empty: those rows need no call of the JS function (idea from #1218).
+      // FALSE instead of NULL makes no difference, as the conditions are never negated with NOT (...)
+      return `(${field} IS NOT NULL AND fold(${field}) ${op} :${param}${esc})`;
     }
     return `${field} ${op} :${param} COLLATE ${SQL_COLLATE}`;
   }
