@@ -19,6 +19,7 @@ import {
   SearchQueryTypes,
   TextSearch
 } from '../../../../src/common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../../src/common/SearchQueryUtils';
 import {ContentWrapperUtils, PackedContentWrapper} from '../../../../src/common/entities/ContentWrapper';
 
 process.env['NODE_ENV'] = 'test';
@@ -145,6 +146,16 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
       const ok = await get('/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'abbey'} as TextSearch));
       ok.should.have.status(200);
       expect(ok.headers['content-type']).to.equal('image/jpeg');
+    });
+  });
+
+  describe('random photo link of the gallery', () => {
+    // the "Random link" dialog builds the link from the shortened query of the search page urls
+    it('should answer a photo of the shortened query', async () => {
+      const res = await get('/gallery/random/' + encodeURIComponent(SearchQueryUtils.urlify({type: SearchQueryTypes.file_name, value: 'abbey'} as TextSearch)));
+
+      res.should.have.status(200);
+      expect(res.headers['content-type']).to.equal('image/jpeg');
     });
   });
 });
