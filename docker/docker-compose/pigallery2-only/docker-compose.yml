@@ -1,3 +1,6 @@
+# WARNING: PiGallery2 does not limit the request rate itself (e.g. password guessing on the login page).
+# Put a reverse proxy with rate limiting in front of it before making it reachable from the internet,
+# see ../default/nginx.conf
 version: '3.9'
 services:
   pigallery2:

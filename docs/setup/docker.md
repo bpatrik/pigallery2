@@ -46,9 +46,12 @@ Edit `nginx.conf` at the `# CHANGE ME` lines by replacing `yourdomain.com` with 
 
 **Note**: Do not change the `image` and `tmp` paths in the `config.json` or UI; only use Docker `volume` settings. See [here](https://github.com/bpatrik/pigallery2/issues/114#issuecomment-570006336) and [here](https://github.com/bpatrik/pigallery2/issues/119).
 
-**Note:** We are using nginx as reverse proxy to handle https and do proper HTTP queuing, gzipping, etc. Full nginx-based docker-compose tutorial [here](https://www.domysee.com/blogposts/reverse-proxy-nginx-docker-compose).
+**Note:** We are using nginx as reverse proxy to handle https and do proper HTTP queuing, gzipping, rate limiting, etc. Full nginx-based docker-compose tutorial [here](https://www.domysee.com/blogposts/reverse-proxy-nginx-docker-compose).
 
 **Note 2:** You can skip nginx, by using [docker-compose/pigallery2-only/docker-compose.yml](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/pigallery2-only/docker-compose.yml).
+
+**Warning:** PiGallery2 does not limit the request rate itself: nothing slows down password guessing on the login page or on a password protected sharing link, and nothing stops a client from flooding the server with requests.
+The `nginx.conf` above does both (see its `limit_req` lines). If you skip nginx or use another reverse proxy, set up rate limiting there before making the gallery reachable from the internet.
 
 ### I.1.a Get SSL Certificate with Certbot
 Install Certbot: https://certbot.eff.org/. (Certbot uses letsencrypt to get free certificate).
