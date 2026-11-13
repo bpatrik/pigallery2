@@ -4,6 +4,7 @@ import {
   LightBoxTitleTexts,
   MapProviders,
   NavigationLinkTypes,
+  ScrollLabelModes,
   ScrollUpModes
 } from '../../../common/config/public/ClientConfig';
 import {ReIndexingSensitivity} from '../../../common/config/private/PrivateConfig';
@@ -39,6 +40,7 @@ EnumTranslations[ConfigPriority[ConfigPriority.underTheHood]] = $localize`Under 
 EnumTranslations[ScrollUpModes[ScrollUpModes.always]] = $localize`Always`;
 EnumTranslations[ScrollUpModes[ScrollUpModes.mobileOnly]] = $localize`Mobile only`;
 EnumTranslations[ScrollUpModes[ScrollUpModes.never]] = $localize`Never`;
+EnumTranslations[ScrollLabelModes[ScrollLabelModes.date]] = $localize`Only by date`;
 
 EnumTranslations[ConfigStyle[ConfigStyle.full]] = $localize`Full`;
 EnumTranslations[ConfigStyle[ConfigStyle.compact]] = $localize`Compact`;

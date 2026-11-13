@@ -258,7 +258,7 @@ describe('GallerySortingService', () => {
 
   describe('getScrollLabelFn', () => {
     const photo = detailedMedia('Bravo.jpg', Date.UTC(2021, 5, 30, 23, 30), 4, 2, 3 * 1024 * 1024);
-    const label = (s: SortingMethod, g: GroupingMethod) => service.getScrollLabelFn(s, g)?.(photo);
+    const label = (s: SortingMethod, g: GroupingMethod) => service.getScrollLabelFn(s, g)?.label(photo);
     const sortBy = (method: SortingMethod['method']): SortingMethod => ({method, ascending: true});
     const groupBy = (method: GroupingMethod['method']): GroupingMethod => ({method, ascending: true});
     let mode: ScrollLabelModes;
@@ -281,15 +281,15 @@ describe('GallerySortingService', () => {
 
     it('should be empty for a media without date', () => {
       const undated = {name: 'a.jpg', metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO;
-      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.(undated)).toBe('');
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.label(undated)).toBe('');
     });
 
     it('should use the time zone handling of the date grouping', () => {
       const withOffset = {...photo, metadata: {...photo.metadata, creationDateOffset: '+02:00'}} as MediaDTO;
       Config.Gallery.ignoreTimestampOffset = true;
-      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.(withOffset)).toBe('July 2021');
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.label(withOffset)).toBe('July 2021');
       Config.Gallery.ignoreTimestampOffset = false;
-      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.(withOffset)).toBe('June 2021');
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.label(withOffset)).toBe('June 2021');
     });
 
     it('should reuse the group names of the other orders', () => {
@@ -308,6 +308,8 @@ describe('GallerySortingService', () => {
       expect(label(sortBy(SortByTypes.Date), groupBy(GroupByTypes.Name))).toBe('B');
       // grouped by date, sorted by name: the dates are in order
       expect(label(sortBy(SortByTypes.Name), groupBy(GroupByTypes.Date))).toBe('June 2021');
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Name), groupBy(GroupByTypes.Date))?.order).toBe(SortByTypes.Date);
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Rating), groupBy(GroupByTypes.NoGrouping))?.order).toBe(SortByTypes.Rating);
       expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))).not.toBeNull();
     });
 

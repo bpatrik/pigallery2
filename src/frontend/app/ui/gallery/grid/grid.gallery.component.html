@@ -48,5 +48,22 @@
 
 @if (scrollLabel(); as label) {
   <div class="scroll-label shadow" aria-hidden="true"
-    [style.--scroll-position]="label.position">{{ label.text }}</div>
+    [style.--scroll-position]="label.position"
+    [style.--navbar-bottom.px]="label.navbarBottom">
+    <!-- like the group headers -->
+    @switch (label.order) {
+      @case (GroupByTypes.Rating) {
+        @for (filled of label.stars; track $index) {
+          <ng-icon [name]="filled ? 'ionStar' : 'ionStarOutline'" />
+        }
+      }
+      @case (GroupByTypes.PersonCount) {
+        {{ label.text }}
+        <ng-icon class="ms-1" name="ionPeopleOutline" />
+      }
+      @default {
+        {{ label.text }}
+      }
+    }
+  </div>
 }

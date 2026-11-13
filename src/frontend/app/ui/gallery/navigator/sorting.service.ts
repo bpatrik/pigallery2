@@ -3,7 +3,7 @@ import {formatDate} from '@angular/common';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {ScrollLabelModes} from '../../../../../common/config/public/ClientConfig';
-import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {SeededRandomService} from '../../../model/seededRandom.service';
@@ -203,11 +203,11 @@ export class GallerySortingService {
   }
 
   /**
-   * Returns the label of a media on the scroll indicator, or null if there should be no label.
+   * Returns the order the scroll indicator shows and the label of a media in it, or null if there should be no label.
    * The media are ordered by the grouping and only sorted within the groups,
    * so the label follows the grouping, or the sorting if there is no grouping.
    */
-  public getScrollLabelFn(sorting: SortingMethod, grouping: GroupingMethod): ((m: MediaDTO) => string) | null {
+  public getScrollLabelFn(sorting: SortingMethod, grouping: GroupingMethod): ScrollLabelFn | null {
     const mode = Config.Gallery.NavBar.showScrollLabel;
     const method = grouping.method === GroupByTypes.NoGrouping ? sorting.method : grouping.method;
     if (mode === ScrollLabelModes.never || (mode === ScrollLabelModes.date && method !== SortByTypes.Date)) {
@@ -216,12 +216,12 @@ export class GallerySortingService {
     switch (method) {
       case SortByTypes.Date:
         // coarser than the day of the group headers, but with the same time zone handling
-        return (m: MediaDTO) => m.metadata?.creationDate ? this.formatMediaDate(m, 'MMMM y') : '';
+        return {order: method, label: (m: MediaDTO) => m.metadata?.creationDate ? this.formatMediaDate(m, 'MMMM y') : ''};
       case SortByTypes.Name:
       case SortByTypes.Rating:
       case SortByTypes.FileSize:
       case SortByTypes.PersonCount:
-        return this.getGroupByNameFn({method, ascending: true});
+        return {order: method, label: this.getGroupByNameFn({method, ascending: true})};
     }
     return null;
   }
@@ -307,6 +307,12 @@ export class GallerySortingService {
 
     return c;
   }
+}
+
+// the order the scroll indicator shows (to show the label like the group headers do) and the label of a media in it
+export interface ScrollLabelFn {
+  order: SortByDirectionalTypes;
+  label: (m: MediaDTO) => string;
 }
 
 export interface MediaGroup {

@@ -5,7 +5,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {GalleryGridComponent} from './grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {ContentService} from '../content.service';
-import {GallerySortingService} from '../navigator/sorting.service';
+import {GallerySortingService, ScrollLabelFn} from '../navigator/sorting.service';
 import {QueryService} from '../../../model/query.service';
 import {of} from 'rxjs';
 import {formatDate} from '@angular/common';
@@ -50,9 +50,12 @@ class MockGallerySortingService {
   readonly sorting = signal({method: SortByTypes.Date, ascending: false});
   readonly grouping = signal({method: GroupByTypes.NoGrouping, ascending: true});
   // the label of the scroll indicator, the real logic is tested with the sorting service
-  scrollLabelFn: ((m: MediaDTO) => string) | null = (m: MediaDTO) => formatDate(m.metadata.creationDate, 'MMMM y', 'en-US', 'UTC');
+  scrollLabelFn: ScrollLabelFn | null = {
+    order: SortByTypes.Date,
+    label: (m: MediaDTO) => formatDate(m.metadata.creationDate, 'MMMM y', 'en-US', 'UTC')
+  };
 
-  getScrollLabelFn(): ((m: MediaDTO) => string) | null {
+  getScrollLabelFn(): ScrollLabelFn | null {
     return this.scrollLabelFn;
   }
 }
@@ -423,7 +426,7 @@ describe('GalleryGridComponent', () => {
     });
 
     it('should show the label of the sorting service', () => {
-      sortingService.scrollLabelFn = (m: MediaDTO) => m.name.at(0) ?? '';
+      sortingService.scrollLabelFn = {order: SortByTypes.Name, label: (m: MediaDTO) => m.name.at(0) ?? ''};
       scrollY = 250;
       scroll();
       expect(label()?.textContent?.trim()).toBe('2');
@@ -454,9 +457,52 @@ describe('GalleryGridComponent', () => {
         scrollY = 950; // the 10th tile is behind the navbar, the 11th is the first visible one
         scroll();
         expect(label()?.textContent?.trim()).toBe('March 2021');
+        expect(label()?.style.getPropertyValue('--navbar-bottom'), 'the label stays below the navbar').toBe('100px');
       } finally {
         navbar.remove();
       }
+    });
+
+    it('should show the rating with stars like the group headers', () => {
+      sortingService.scrollLabelFn = {order: SortByTypes.Rating, label: () => '3'};
+      scrollY = 250;
+      scroll();
+      const stars = [...(label()?.querySelectorAll('ng-icon') ?? [])].map(i => i.innerHTML);
+      expect(stars.length).toBe(5);
+      expect(stars[0]).not.toBe('');
+      // 3 filled, 2 outlined
+      expect(stars.filter(s => s === stars[0]).length).toBe(3);
+      expect(stars[3]).toBe(stars[4]);
+      expect(stars[3]).not.toBe(stars[0]);
+      expect(label()?.textContent?.trim()).toBe('');
+    });
+
+    it('should show the person count with the people icon like the group headers', () => {
+      sortingService.scrollLabelFn = {order: SortByTypes.PersonCount, label: () => '2'};
+      scrollY = 250;
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('2');
+      expect(label()?.querySelectorAll('ng-icon').length).toBe(1);
+    });
+
+    // #1308: browser back or forward scrolls the page itself
+    it('should not show while the scroll position of a browser back is restored', () => {
+      const restoreTarget = vi.spyOn(TestBed.inject(ScrollRestorationService), 'restoreTarget').mockReturnValue(250);
+      scrollY = 250;
+      scroll();
+      expect(label()).toBeNull();
+      restoreTarget.mockReturnValue(null); // the user scrolls
+      scroll();
+      expect(label()).not.toBeNull();
+    });
+
+    it('should not update after the grid is removed', () => {
+      const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+      scrollY = 250;
+      const labelFrame = frames.length + 1; // the label asks for the first frame of the scroll
+      component.onScroll();
+      fixture.destroy();
+      expect(cancel).toHaveBeenCalledWith(labelFrame);
     });
 
     it('should not show when there is nothing to scroll', () => {
