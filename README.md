@@ -33,7 +33,8 @@ For more detailed information, please see our [Documentation Website](http://bpa
 - [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing)
 
 ## 🤝 Contributing
-Contributions are welcome! Please read our [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing) to get started.
+Bug fixes are welcome! I mostly merge bug fixes: to keep the app simple, new features should be a setting, a theme or an [extension](https://bpatrik.github.io/pigallery2/development/extensions) when possible.
+Please read the [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing) before you start.
 Using an AI coding agent? See [AGENTS.md](AGENTS.md).
 
 ## ❤️ Support

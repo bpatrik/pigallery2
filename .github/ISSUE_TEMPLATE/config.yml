@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Ideas and questions
+    url: https://github.com/bpatrik/pigallery2/discussions
+    about: Share ideas, ask questions and get help from the community.
+  - name: Extensions
+    url: https://bpatrik.github.io/pigallery2/development/extensions
+    about: Most new features are best built as an extension. Read how to write one.

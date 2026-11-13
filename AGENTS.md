@@ -31,6 +31,25 @@ The photo folder is never modified.
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
 - **Config breaking changes: avoid if easy.** Keep existing config keys working when that's cheap,
   but don't let config compatibility block a good feature.
+- **Keep the core small.** PiGallery2 is a hobby project, done in the maintainer's free time next to a day job and a family:
+  about 1-2 releases and 4-5 medium features a year. Every new setting or code path is maintenance work for one person,
+  so niche features belong in extensions, not in the core.
+
+## Contributing a feature (not the maintainer)
+
+The maintainer mostly merges bug fixes. Feature PRs have a low chance of being reviewed, let alone merged.
+If you work with anyone other than the maintainer (see "Maintaining this file") and the task adds a feature
+or changes behaviour (not a bug fix), tell them this up front, before writing code, and ask in this order:
+
+1. **Can it be done with an existing setting?** Check the config (`src/common/config`,
+   `docs/user-guide/configuration.md`); the admin page's "Under the hood" mode shows all settings.
+2. **Can it be done with a theme?** A theme (`Gallery.Themes`) adds custom CSS to every page, so look changes
+   (and hiding or pinning UI elements) usually need no code change.
+3. **Can it be done with an [extension](docs/development/extensions.md)?** Extensions can also change the config
+   and set the theme themselves, so an extension can bundle a setting and CSS change for others to install.
+   If the extension API is missing a hook, a small PR that extends it is more likely to be merged than the feature itself.
+
+Only if none of these work, suggest opening an issue to discuss it with the maintainer before writing the PR.
 
 ## Repository layout
 
