@@ -13,6 +13,7 @@ import {provideRouter, Router} from '@angular/router';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 import {QueryService} from '../../../../model/query.service';
+import {ScrollRestorationService} from '../../../../model/scroll-restoration.service';
 import {MediaDTO} from '../../../../../../common/entities/MediaDTO';
 
 class MockQueryService {
@@ -22,18 +23,6 @@ class MockQueryService {
 }
 
 class MockThumbnailManagerService {
-  private readonly shown = new Set<string>();
-
-  wasShown(src: string | null): boolean {
-    return src !== null && this.shown.has(src);
-  }
-
-  markShown(src: string | null): void {
-    if (src !== null) {
-      this.shown.add(src);
-    }
-  }
-
   getThumbnail() {
     return {
       Available: true,
@@ -118,9 +107,13 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
   });
 });
 
-// going back to a folder shows the same photos again: only a photo that was not shown yet fades in, so they don't flicker
+// the photos fade in, also the ones seen before on another screen; only browser back and forward show the same photos
+// again at once, so they don't flicker
 describe('GalleryPhotoComponent - fade in', () => {
+  let restoreTarget: number | null;
+
   beforeEach(async () => {
+    restoreTarget = null;
     await TestBed.configureTestingModule({
       imports: [GalleryPhotoComponent],
       providers: [
@@ -131,6 +124,7 @@ describe('GalleryPhotoComponent - fade in', () => {
         {provide: ExtensionService, useClass: MockExtensionService},
         {provide: MediaButtonModalService, useClass: MockMediaButtonModalService},
         {provide: QueryService, useClass: MockQueryService},
+        {provide: ScrollRestorationService, useValue: {restoreTarget: (): number | null => restoreTarget}},
       ],
     }).compileComponents();
   });
@@ -142,18 +136,22 @@ describe('GalleryPhotoComponent - fade in', () => {
     return fixture.nativeElement.querySelector('img');
   };
 
-  it('should fade in a photo the first time it is shown', () => {
+  it('should fade in a photo, also one that was shown before', () => {
+    render().dispatchEvent(new Event('load'));
+
     expect(render().classList).toContain('fade-in');
   });
 
-  it('should not fade in a photo again once it was shown', () => {
-    render().dispatchEvent(new Event('load'));
+  it('should not fade in the photos while browser back restores the page', () => {
+    restoreTarget = 1500;
 
     expect(render().classList).not.toContain('fade-in');
   });
 
-  it('should fade in again a photo that did not load', () => {
+  it('should fade in the photos rendered once the user scrolls on after back', () => {
+    restoreTarget = 1500;
     render();
+    restoreTarget = null;
 
     expect(render().classList).toContain('fade-in');
   });

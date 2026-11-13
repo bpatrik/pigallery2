@@ -89,6 +89,13 @@ test.describe('Navigation', () => {
     await expect(photo(page, belowName!)).toBeInViewport();
     // they were shown before: they show up at once, without fading in again (it flickers)
     expect(await photo(page, belowName!).evaluate((img: HTMLImageElement) => img.getAnimations().length), 'fade in animations').toBe(0);
+
+    // a new screen fades in its photos, also the ones seen before
+    await folderLink.evaluate((a: HTMLElement) => a.click());
+    await expect(breadcrumb(page)).toHaveText(['Home', ACCENTED_DIR]);
+    await breadcrumb(page).getByRole('link', {name: 'Home'}).click();
+    await expect(breadcrumb(page)).toHaveText(['Home']);
+    await expect(page.locator('app-gallery-grid .photo-link > img').first()).toHaveClass(/fade-in/);
   });
 });
 

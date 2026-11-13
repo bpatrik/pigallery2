@@ -8,18 +8,7 @@ import {Person} from '../faces/Person';
 @Injectable({providedIn: 'root'})
 export class ThumbnailManagerService {
   private thumbnailLoader = inject(ThumbnailLoaderService);
-  // thumbnails that were already shown: the browser has them, so they show up at once (e.g. after back) without fading in
-  private readonly shownSrcs = new Set<string>();
 
-  public wasShown(src: string | null): boolean {
-    return src !== null && this.shownSrcs.has(src);
-  }
-
-  public markShown(src: string | null): void {
-    if (src !== null) {
-      this.shownSrcs.add(src);
-    }
-  }
 
   public getThumbnail(photo: Media): Thumbnail {
     return new Thumbnail(photo, this.thumbnailLoader);

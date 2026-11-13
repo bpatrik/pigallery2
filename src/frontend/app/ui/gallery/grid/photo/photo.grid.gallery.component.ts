@@ -19,6 +19,7 @@ import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 import {QueryService} from '../../../../model/query.service';
+import {ScrollRestorationService} from '../../../../model/scroll-restoration.service';
 
 export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaButtonConfig {
   extensionBasePath: string;
@@ -43,6 +44,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private modalService = inject(MediaButtonModalService);
   private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private queryService = inject(QueryService);
+  private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridMedia = input.required<GridMedia>();
   readonly imageRef = viewChild<ElementRef>('img');
@@ -57,7 +59,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean | null = null;
   loaded = false;
-  // only a photo that was not shown yet fades in; one seen before (e.g. after back) shows up at once
+  // browser back and forward show the same photos again: they show up at once, a new screen or row fades in
   fadeIn = true;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
@@ -228,13 +230,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
-    this.fadeIn = !this.thumbnailService.wasShown(this.thumbnail.Src);
+    this.fadeIn = this.scrollRestoration.restoreTarget() === null;
     this.updateMediaButtons();
-  }
-
-  onLoad(): void {
-    this.loaded = true;
-    this.thumbnailService.markShown(this.thumbnail.Src);
   }
 
   ngOnDestroy(): void {
