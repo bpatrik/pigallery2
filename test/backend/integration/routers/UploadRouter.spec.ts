@@ -15,7 +15,6 @@ import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
-import {expectToFail} from '../../KnownFailures';
 
 declare const describe: any;
 declare const it: any;
@@ -68,6 +67,8 @@ describe('UploadRouter', () => {
   };
 
   const tearDown = async () => {
+    Config.Upload.maxFileSizeMB = 500;
+    Config.Upload.enforcedDirectoryConfig = false;
     await sqlHelper.clearDB();
   };
 
@@ -198,28 +199,36 @@ describe('UploadRouter', () => {
     });
 
     it('should reject a file above the size limit with the limit in the message and save the others', async () => {
-      (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'] = 1;
+      Config.Upload.maxFileSizeMB = 1;
       const loginRes = await login(server);
-      // there is no upload size limit yet (Upload.maxFileSizeMB)
-      const check = async (): Promise<void> => {
-        const res = await request.execute(server.Server)
-          .post(Config.Server.apiPath + '/upload/size_limit')
-          .set('Cookie', loginRes.res.headers['set-cookie'])
-          .attach('files', Buffer.alloc(1024 * 1024 + 1), 'too_large.jpg')
-          .attach('files', Buffer.from('small'), 'small.jpg');
+      const res = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/size_limit')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.alloc(1024 * 1024 + 1), 'too_large.jpg')
+        .attach('files', Buffer.from('small'), 'small.jpg');
 
-        res.should.have.status(200);
-        res.body.result.should.be.an('array').with.lengthOf(1);
-        res.body.result[0].filename.should.equal('too_large.jpg');
-        res.body.result[0].error.should.contain('1 MB');
-        fs.existsSync(path.join(testDir, 'size_limit', 'too_large.jpg')).should.be.false;
-        fs.existsSync(path.join(testDir, 'size_limit', 'small.jpg')).should.be.true;
-      };
-      try {
-        await expectToFail('#1314', check, /expected \[\] to have a length of 1 but got \+?0/);
-      } finally {
-        delete (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'];
-      }
+      res.should.have.status(200);
+      res.body.result.should.be.an('array').with.lengthOf(1);
+      res.body.result[0].filename.should.equal('too_large.jpg');
+      res.body.result[0].error.should.contain('1 MB');
+      fs.existsSync(path.join(testDir, 'size_limit', 'too_large.jpg')).should.be.false;
+      fs.readFileSync(path.join(testDir, 'size_limit', 'small.jpg')).toString().should.equal('small');
+      // the files are written to the temp folder first (not held in RAM): nothing is left there
+      fs.readdirSync(path.join(ProjectPath.TempFolder, 'upload')).should.deep.equal([]);
+    });
+
+    it('should refuse a folder where uploading is not enabled', async () => {
+      Config.Upload.enforcedDirectoryConfig = true;
+      const loginRes = await login(server);
+      const res = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/no_upload_conf')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.from('test image'), 'refused.jpg');
+
+      res.should.have.status(403);
+      res.body.error.code.should.equal(ErrorCodes.PERMISSION_DENIED);
+      fs.existsSync(path.join(testDir, 'no_upload_conf', 'refused.jpg')).should.be.false;
+      fs.readdirSync(path.join(ProjectPath.TempFolder, 'upload')).should.deep.equal([]);
     });
 
     it('should return 401 if not authenticated', async () => {
