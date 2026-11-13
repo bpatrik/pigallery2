@@ -159,6 +159,7 @@
             (swipeLeft)="zoom() === 1 && nextPhoto.emit()"
             (swipeRight)="zoom() === 1 && previousPhoto.emit()"
             (swipeUp)="zoom() === 1 && closed.emit()"
+            (tap)="onTap($event)"
             (doubleTap)="doubleTap()"
             (pan)="pan($event)"
             (pinch)="pinch($event)"
@@ -167,6 +168,7 @@
 
             @if (facesEnabled && faces().length > 0) {
               <div class="faces-container"
+                [class.faces-shown]="facesShown()"
                 [style.top.px]="photoFrameDim().height/2 + drag().y"
                 [style.left.px]="photoFrameDim().width/2 + drag().x"
                 [style.width.px]="faceContainerDim().width * zoom()"
@@ -176,7 +178,9 @@
                   @for (face of faces(); track $index) {
                     <a
                       class="face"
-                      [routerLink]="['/search', face.query]"
+                      [href]="face.href"
+                      [attr.data-face]="$index"
+                      (click)="onFaceClick($event, face.url)"
                       [style.top.%]="face.top"
                       [style.left.%]="face.left"
                       [style.height.%]="face.height"

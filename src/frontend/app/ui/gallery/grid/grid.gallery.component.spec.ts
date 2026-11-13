@@ -24,6 +24,7 @@ import {ExtensionService} from '../../../model/extension.service';
 import {MediaButtonModalService} from './photo/media-button-modal/media-button-modal.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {PageHelper} from '../../../model/page.helper';
+import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 
 class MockQueryService {
   getMediaStringId(media: MediaDTO): string {
@@ -307,6 +308,28 @@ describe('GalleryGridComponent', () => {
       expect(component.getNumberOfRenderedMedia()).toBe(500);
       expect(steps).toBeGreaterThan(2);
     });
+
+    // #1308: back to a folder that was scrolled down, the page must be high enough to scroll there
+    it('should render down to the scroll position of a browser back, then scroll there', async () => {
+      vi.spyOn(TestBed.inject(ScrollRestorationService), 'restoreTarget').mockReturnValue(5000);
+      // the rows of the previous content (e.g. a search) are still on the page until the next render
+      let previousContent = 3000;
+      vi.spyOn(document.documentElement, 'scrollHeight', 'get').mockImplementation(() => renderedHeight() + previousContent);
+      const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+      scroll();
+
+      (component as unknown as { restoreScroll(): void }).restoreScroll();
+      previousContent = 0; // the render removes them
+      for (let i = 0; i < 10 && scrollTo.mock.calls.length === 0; i++) {
+        fixture.detectChanges();
+        await fixture.whenStable();
+      }
+
+      expect(renderedHeight()).toBeGreaterThanOrEqual(5000 + window.innerHeight);
+      expect(component.getNumberOfRenderedMedia(), 'not all at once').toBeLessThan(500);
+      expect(scrollTo).toHaveBeenCalledTimes(1);
+      expect(scrollTo).toHaveBeenCalledWith({left: window.scrollX, top: 5000, behavior: 'instant'});
+    });
   });
 
   describe('as the lightbox grid', () => {
@@ -359,6 +382,16 @@ describe('GalleryGridComponent', () => {
       expect(tile.gridMedia.media).toBe(target);
       expect(tile.gridMedia).toBe(secondGroup[index]);
       expect(tile.rect).toEqual({top: 0, left: 0, width: 0, height: 0}); // jsdom has no layout
+    });
+
+    // e.g. a face of the lightbox opens a search that is not cached yet: its empty content removes the grid,
+    // while the closing lightbox waits for the tile of its photo
+    it('should resolve null when the grid is removed before the next render', async () => {
+      const revealed = component.revealMedia(photos[20]);
+      fixture.destroy();
+
+      const result = await Promise.race([revealed, new Promise(resolve => setTimeout(() => resolve('pending'), 100))]);
+      expect(result).toBeNull();
     });
 
     it('should resolve null for a media that is not in the grid, without navigating', async () => {

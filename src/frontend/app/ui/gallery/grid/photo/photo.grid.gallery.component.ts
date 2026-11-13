@@ -18,6 +18,8 @@ import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
 import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {QueryService} from '../../../../model/query.service';
+import {ScrollRestorationService} from '../../../../model/scroll-restoration.service';
 
 export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaButtonConfig {
   extensionBasePath: string;
@@ -41,6 +43,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private extensionService = inject(ExtensionService);
   private modalService = inject(MediaButtonModalService);
   private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private queryService = inject(QueryService);
+  private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridMedia = input.required<GridMedia>();
   readonly imageRef = viewChild<ElementRef>('img');
@@ -55,8 +59,12 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean | null = null;
   loaded = false;
+  // browser back and forward show the same photos again: they show up at once, a new screen or row fades in
+  fadeIn = true;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
+  // the query params of the link to this media in the lightbox
+  readonly lightboxParams = computed((): Record<string, string> => this.queryService.getParams({media: this.gridMedia().media}));
   readonly isVideo = computed((): boolean => this.gridMedia().isVideo());
   readonly isLivePhoto = computed((): boolean => this.gridMedia().isLivePhoto());
   readonly hasPositionData = computed((): boolean => this.gridMedia().hasPositionData());
@@ -222,6 +230,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
+    this.fadeIn = this.scrollRestoration.restoreTarget() === null;
     this.updateMediaButtons();
   }
 

@@ -38,7 +38,7 @@ test.describe('Sharing ends while the guest has it open', () => {
 
   const openAsGuest = async (page: Page, sharing: CreatedSharing): Promise<void> => {
     await page.goto('/share/' + sharing.sharingKey);
-    await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible({timeout: 15000});
+    await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeVisible({timeout: 15000});
   };
 
   /**

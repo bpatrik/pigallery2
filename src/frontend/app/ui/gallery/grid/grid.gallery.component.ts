@@ -6,7 +6,6 @@ import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
-import {Router} from '@angular/router';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
@@ -16,6 +15,7 @@ import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
+import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -38,9 +38,9 @@ export class GalleryGridComponent
   private changeDetector = inject(ChangeDetectorRef);
   private injector = inject(Injector);
   queryService = inject(QueryService);
-  private router = inject(Router);
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
+  private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
   // only read imperatively (revealMedia, onScroll), never in a template, computed or effect
@@ -63,6 +63,9 @@ export class GalleryGridComponent
   private MAX_ROW_COUNT = 5;
   private onScrollFired = false;
   private helperTime: number | null = null;
+  private destroyed = false;
+  // the waits for the next render: a removed grid never renders again, so they end on destroy
+  private readonly pendingRenders = new Set<() => void>();
 
   constructor() {
     effect(() => {
@@ -130,6 +133,9 @@ export class GalleryGridComponent
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.pendingRenders.forEach(resolve => resolve());
+    this.pendingRenders.clear();
     if (this.helperTime != null) {
       clearTimeout(this.helperTime);
     }
@@ -161,12 +167,6 @@ export class GalleryGridComponent
     }, 100);
   }
 
-  photoClicked(media: MediaDTO): void {
-    this.router.navigate([], {
-      queryParams: this.queryService.getParams({media}),
-    });
-  }
-
   ngAfterViewInit(): void {
     this.updateContainerDimensions();
     this.clearRenderedPhotos();
@@ -183,11 +183,17 @@ export class GalleryGridComponent
     if (!this.isAfterViewInit) {
       await this.afterRender();
     }
+    if (this.destroyed) {
+      return null;
+    }
     const id = this.queryService.getMediaStringId(media);
     if (!this.renderUpToMedia(id)) {
       return null;
     }
     await this.afterRender();
+    if (this.destroyed) {
+      return null;
+    }
     const tile = this.photoComponents().find(p => this.queryService.getMediaStringId(p.gridMedia().media) === id);
     if (!tile) {
       return null;
@@ -201,8 +207,21 @@ export class GalleryGridComponent
     return {rect, gridMedia: tile.gridMedia()};
   }
 
+  /**
+   * Resolves after the next render, or right away when the grid is (or gets) removed: it then never renders again.
+   */
   private afterRender(): Promise<void> {
-    return new Promise<void>(resolve => afterNextRender(() => resolve(), {injector: this.injector}));
+    if (this.destroyed) {
+      return Promise.resolve();
+    }
+    return new Promise<void>(resolve => {
+      const done = (): void => {
+        this.pendingRenders.delete(done);
+        resolve();
+      };
+      this.pendingRenders.add(done);
+      afterNextRender(done, {injector: this.injector});
+    });
   }
 
   private static hasSameLayout(m1: MediaDTO, m2: MediaDTO): boolean {
@@ -402,7 +421,38 @@ export class GalleryGridComponent
   private renderMinimalPhotos(): void {
     this.helperTime = window.setTimeout((): void => {
       this.renderPhotos();
+      this.restoreScroll();
     }, 0);
+  }
+
+  /**
+   * Browser back or forward to this page: renders the rows down to its last scroll position, then scrolls there.
+   * The grid only renders as many rows as the screen needs, so without them the page is too short to scroll there.
+   * Runs after every render until the user scrolls: the first one may still show the previous content (e.g. the search).
+   * The page is measured only after a render: before it, the rows of the previous content are still on the page.
+   */
+  private restoreScroll(): void {
+    if (!this.mediaGroups()?.length || this.scrollRestoration.restoreTarget() === null) {
+      return;
+    }
+    afterNextRender(() => this.restoreScrollStep(), {injector: this.injector});
+  }
+
+  private restoreScrollStep(): void {
+    const y = this.scrollRestoration.restoreTarget();
+    if (y === null || this.destroyed) {
+      return;
+    }
+    let missing = y + window.innerHeight - document.documentElement.scrollHeight;
+    if (missing > 0 && this.isMoreToRender()) {
+      while (missing > 0 && this.isMoreToRender()) {
+        missing -= this.renderARow() ?? Infinity;
+      }
+      // measure again once the new rows are on the page
+      afterNextRender(() => this.restoreScrollStep(), {injector: this.injector});
+      return;
+    }
+    window.scrollTo({left: window.scrollX, top: y, behavior: 'instant'});
   }
 
   private getMaxRowHeight(): number {

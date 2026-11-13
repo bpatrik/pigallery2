@@ -32,7 +32,7 @@ test.describe('Search', () => {
     await expect(searchBar).toHaveValue('űáéú őóüö');
     // the photos of the folder with accents in its name, also of its subfolder
     for (const name of ['IMG_8943.jpg', 'IMG_9697.jpg', 'IMG_8824.jpg']) {
-      await expect(page.locator(`.photo-container > img[alt="${name}"]`)).toBeVisible();
+      await expect(page.locator(`.photo-link > img[alt="${name}"]`)).toBeVisible();
     }
     await expectVisiblePhotosLoaded(page);
   });
@@ -56,7 +56,7 @@ test.describe('Search', () => {
     await expect(searchBar).toHaveValue(/Berkley/);
     await expectApiOk(await search, 'the search');
     await expect(page).toHaveURL(/\/search\//);
-    await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeVisible();
     await expect(autocomplete).toHaveCount(0);
   });
 
@@ -75,7 +75,7 @@ test.describe('Search', () => {
     await expect(page.locator('app-gallery-lightbox-media img')).toHaveCount(0);
     // back on the results of the same search
     await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/search/űáéú őóüö' && !url.searchParams.has('p'));
-    await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeInViewport();
+    await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeInViewport();
   });
 
   test.describe('Malformed search link', () => {
@@ -88,7 +88,7 @@ test.describe('Search', () => {
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
       await searchBar.press('Enter');
       await expectApiOk(await search, 'the search');
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
       await expect(page.locator('app-gallery .alert-danger')).toHaveCount(0);
     };
 
@@ -122,7 +122,7 @@ test.describe('Search', () => {
 
     // the query is shown and the results render with loaded thumbnails
     await expect.soft(page.locator('app-gallery-search .search-text')).toHaveValue(/Berkley/);
-    const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
+    const squirrel = page.locator('.photo-link > img[alt="IMG_5910.jpg"]');
     await expect(squirrel).toBeVisible();
     await expectVisiblePhotosLoaded(page);
     await expectNoHorizontalScroll(page, 'search results');

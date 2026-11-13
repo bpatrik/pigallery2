@@ -25,7 +25,7 @@ test.describe('Zip download', () => {
 
   test('should download the photos of the folder with accents as a zip', async ({page}) => {
     await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR));
-    await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeVisible();
 
     const {download, names} = await downloadZip(page);
     expect(download.suggestedFilename()).toMatch(/\.zip$/);
@@ -36,8 +36,8 @@ test.describe('Zip download', () => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/big_ben');
     await expectApiOk(await search, 'the search');
-    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
-    const shown = await page.locator('app-gallery-grid .photo-container > img').evaluateAll(
+    await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+    const shown = await page.locator('app-gallery-grid .photo-link > img').evaluateAll(
       imgs => imgs.map(img => img.getAttribute('alt')!).sort());
 
     const {names} = await downloadZip(page);
@@ -66,7 +66,7 @@ test.describe('Zip download', () => {
 
     test('Guest should download the shared folder as a zip', async ({page}) => {
       await page.goto('/share/' + sharingKey);
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
 
       const {names} = await downloadZip(page);
       expect(names).toEqual([

@@ -3,7 +3,7 @@
 import {expect, Page, test} from '@playwright/test';
 import {ACCENTED_DIR, doubleTap, expectLightboxPhoto, isGalleryContent, pinch, swipe} from './helpers';
 
-const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
+const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt="${name}"]`);
 const lightboxImages = (page: Page) => page.locator('app-gallery-lightbox-media img');
 const shownPhoto = (page: Page): string | null => new URL(page.url()).searchParams.get('p');
 const zoomSlider = (page: Page) => page.locator('app-lightbox-controls .controls-zoom input.zoom-progress');
@@ -42,9 +42,9 @@ test.describe('Lightbox', () => {
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');
     await content;
-    const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
+    const firstPhoto = page.locator('app-gallery-grid .photo-link > img').first();
     const first = await firstPhoto.getAttribute('alt');
-    const second = await page.locator('app-gallery-grid .photo-container > img').nth(1).getAttribute('alt');
+    const second = await page.locator('app-gallery-grid .photo-link > img').nth(1).getAttribute('alt');
     await firstPhoto.click();
     await expect(page).toHaveURL(url => url.searchParams.get('p') === first);
     await expectLightboxPhoto(page, first!);
@@ -82,7 +82,7 @@ test.describe('Lightbox', () => {
     await page.goto('/gallery/');
     await content;
     // a photo without faces: a tap on a face opens the search of that person, it would end the double tap
-    const gridPhoto = page.locator('app-gallery-grid .photo-container > img').nth(1);
+    const gridPhoto = page.locator('app-gallery-grid .photo-link > img').nth(1);
     const first = await gridPhoto.getAttribute('alt');
     await gridPhoto.click();
     await expect(page).toHaveURL(url => url.searchParams.get('p') === first);
@@ -125,10 +125,24 @@ test.describe('Lightbox', () => {
     await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery') && !url.searchParams.has('p'));
   });
 
+  // The search of the face is not cached yet (a fresh browser): its empty content removes the grid while the lightbox closes
+  test('Clicking a face should close the lightbox and open the search of the person', async ({page, isMobile}) => {
+    test.skip(isMobile, 'mouse: desktop only');
+    await page.goto('/gallery/?p=IMG_5910.jpg');
+    await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    const face = page.locator('app-lightbox-controls .faces-container a.face').filter({hasText: 'Alvin the Squirrel'});
+    await face.hover();
+    await face.click();
+
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(lightboxImages(page)).toHaveCount(0);
+    await expect(page.locator('app-gallery-grid .photo-link > img').first()).toBeVisible();
+  });
+
   // A phone has no hover: a tap shows the faces, a double tap zooms (also on a face), a tap on a shown face opens its search.
   test('Tapping a face on a phone should show the faces first, not open the search', async ({page, isMobile}) => {
     test.skip(!isMobile, 'touch gestures: mobile project only');
-    test.fail(true, 'Not implemented yet #1310: a tap on a hidden face box opens the search');
     await page.goto('/gallery/?p=IMG_5910.jpg');
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
     await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
@@ -138,11 +152,14 @@ test.describe('Lightbox', () => {
     expect(box, 'the face box of Alvin the Squirrel').not.toBeNull();
     const faceCenter = {x: box!.x + box!.width / 2, y: box!.y + box!.height / 2};
     const opacity = (): Promise<number> => faceBox.evaluate(el => Number(getComputedStyle(el).opacity));
+    // a tap counts once no second tap followed (not a double tap); the sticky :hover of a phone can show the face before that
+    const facesShown = page.locator('app-lightbox-controls .faces-container.faces-shown');
 
     // the face is hidden until a tap shows it; the tap does not follow the link
     expect(await opacity()).toBe(0);
     await page.touchscreen.tap(faceCenter.x, faceCenter.y);
     await expect.poll(opacity, {message: 'face box opacity after a tap'}).toBeGreaterThan(0);
+    await expect(facesShown).toBeAttached();
     await expect(page).toHaveURL(url => url.searchParams.get('p') === 'IMG_5910.jpg');
 
     // a double tap on the face zooms in and out, it does not open the search
@@ -155,6 +172,7 @@ test.describe('Lightbox', () => {
     // a tap on the shown face opens the search of that person
     await page.touchscreen.tap(faceCenter.x, faceCenter.y);
     await expect.poll(opacity, {message: 'face box opacity after a tap'}).toBeGreaterThan(0);
+    await expect(facesShown).toBeAttached();
     await page.touchscreen.tap(faceCenter.x, faceCenter.y);
     await expect(page).toHaveURL(/\/search\//);
   });
@@ -163,7 +181,7 @@ test.describe('Lightbox', () => {
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');
     await content;
-    const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
+    const firstPhoto = page.locator('app-gallery-grid .photo-link > img').first();
     await firstPhoto.click();
     await expect(page).toHaveURL(url => url.searchParams.has('p'));
     // the controls show up once the opening animation ended; a key pressed before that is lost
@@ -193,7 +211,7 @@ test.describe('Lightbox', () => {
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');
     await content;
-    const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
+    const firstPhoto = page.locator('app-gallery-grid .photo-link > img').first();
     const first = (await firstPhoto.getAttribute('alt'))!;
     await firstPhoto.click();
     await expect(page).toHaveURL(url => url.searchParams.get('p') === first);
@@ -218,7 +236,7 @@ test.describe('Lightbox', () => {
     await page.goBack();
     await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery') && !url.searchParams.has('p'));
     await expect(lightboxImages(page)).toHaveCount(0);
-    await expect(page.locator('app-gallery-grid .photo-container > img').first()).toBeVisible();
+    await expect(page.locator('app-gallery-grid .photo-link > img').first()).toBeVisible();
 
     await page.goForward();
     await expect(page).toHaveURL(url => url.searchParams.get('p') === last);
@@ -227,7 +245,6 @@ test.describe('Lightbox', () => {
 
   // #1310: closing scrolls the grid to the photo the lightbox was closed on; back closes it too
   test('Browser back should scroll the grid to the last shown photo, like closing', async ({page, isMobile}) => {
-    test.fail(true, 'Not implemented yet #1310: back closes the lightbox, but the grid stays where the lightbox was opened');
     const {first, last} = await openAndPageForward(page, isMobile);
 
     await page.goBack();
@@ -239,13 +256,12 @@ test.describe('Lightbox', () => {
   // CUJ 12 without a mouse (#1254): Tab to a photo of the grid, Enter opens it, Escape closes it (paging: see above)
   test('A photo of the grid should open with the keyboard', async ({page, isMobile}) => {
     test.skip(isMobile, 'keyboard: desktop only');
-    test.fail(true, 'Not implemented yet #1254: the photos of the grid can not get the keyboard focus');
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');
     await content;
     const firstPhoto = page.locator('app-gallery-grid app-gallery-grid-photo').first();
     await expect(firstPhoto).toBeVisible();
-    const name = await firstPhoto.locator('.photo-container > img').getAttribute('alt');
+    const name = await firstPhoto.locator('.photo-link > img').getAttribute('alt');
 
     // Tab through the page (navbar, folders, blog, ...) until the photo itself has the focus.
     // The links of its info bar (keywords, place) don't count: Enter on them opens a search.

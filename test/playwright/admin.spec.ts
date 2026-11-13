@@ -45,7 +45,7 @@ test.describe('Admin', () => {
     // a row opens the folder of that copy
     await pair.first().locator('a').filter({hasText: '/dupl/'}).click();
     await expect(page).toHaveURL(url => url.pathname === '/gallery/dupl');
-    await expect(page.locator('.photo-container > img[alt="big_ben_only_time.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="big_ben_only_time.jpg"]')).toBeVisible();
     await expectVisiblePhotosLoaded(page);
   });
 
