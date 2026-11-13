@@ -1,5 +1,5 @@
 import '../../../../common/config/public/Config';
-import {TestBed} from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
 import {provideRouter} from '@angular/router';
 import {FrameComponent} from './frame.component';
@@ -11,6 +11,7 @@ import {ThemeService} from '../../model/theme.service';
 import {GalleryService} from '../gallery/gallery.service';
 import {UploaderService} from '../gallery/uploader/uploader.service';
 import {DeviceHelper} from '../../model/device.helper';
+import {PageHelper} from '../../model/page.helper';
 import {Config} from '../../../../common/config/public/Config';
 import {NavigationLinkConfig, NavigationLinkTypes, ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../common/entities/SearchQueryDTO';
@@ -147,6 +148,69 @@ describe('FrameComponent template', () => {
     expect(menu.getAttribute('aria-hidden')).toBeNull();
     expect(menu.style.display).not.toBe('none');
     expect(menu.querySelector('app-gallery-search')).not.toBeNull();
+  });
+
+  // #1116: the navbar hides while scrolling down, unless auto-hide is disabled
+  describe('while scrolling', () => {
+    let autoHide: boolean;
+
+    // scrolls the page to the given position and returns the classes of the navbar after it
+    const scrollTo = async (fixture: ComponentFixture<FrameComponent>, y: number): Promise<DOMTokenList> => {
+      vi.spyOn(PageHelper, 'ScrollY', 'get').mockReturnValue(y);
+      window.dispatchEvent(new Event('scroll'));
+      await fixture.whenStable();
+      return ((fixture.nativeElement as HTMLElement).querySelector('.navbar-container') as HTMLElement).classList;
+    };
+
+    beforeEach(() => {
+      autoHide = Config.Gallery.NavBar.autoHide;
+      // scrolling down closes the language dropdown, so the navbar needs the (empty) language selector
+      TestBed.overrideComponent(LanguageComponent, {set: {template: '', imports: []}});
+      TestBed.overrideComponent(FrameComponent, {add: {imports: [LanguageComponent]}});
+    });
+
+    afterEach(() => {
+      Config.Gallery.NavBar.autoHide = autoHide;
+    });
+
+    it('should hide the navbar while scrolling down by default', async () => {
+      const fixture = TestBed.createComponent(FrameComponent);
+      await fixture.whenStable();
+
+      const classes = await scrollTo(fixture, 1000);
+      expect(classes.contains('hide-navbar')).toBe(true);
+      expect(classes.contains('navbar-keep-top')).toBe(false);
+    });
+
+    it('should keep the navbar on the screen if auto-hide is disabled', async () => {
+      Config.Gallery.NavBar.autoHide = false;
+      const fixture = TestBed.createComponent(FrameComponent);
+      await fixture.whenStable();
+
+      let classes = await scrollTo(fixture, 1000);
+      expect(classes.contains('hide-navbar')).toBe(false);
+      // sticky on the top of the screen, not in the flow of the page
+      expect(classes.contains('navbar-keep-top')).toBe(false);
+
+      classes = await scrollTo(fixture, 3000);
+      expect(classes.contains('hide-navbar')).toBe(false);
+
+      // back on the top of the page
+      classes = await scrollTo(fixture, 0);
+      expect(classes.contains('hide-navbar')).toBe(false);
+      expect(classes.contains('navbar-keep-top')).toBe(true);
+    });
+
+    it('should still let the user fix the navbar on the top of the page if auto-hide is disabled', async () => {
+      Config.Gallery.NavBar.autoHide = false;
+      const fixture = TestBed.createComponent(FrameComponent);
+      fixture.componentInstance.fixNavbarOnTop = true;
+      await fixture.whenStable();
+
+      const classes = await scrollTo(fixture, 1000);
+      expect(classes.contains('navbar-keep-top')).toBe(true);
+      expect(classes.contains('hide-navbar')).toBe(false);
+    });
   });
 });
 

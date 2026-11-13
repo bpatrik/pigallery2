@@ -904,6 +904,18 @@ export class NavBarConfig {
     new NavigationLinkConfig(NavigationLinkTypes.albums),
     new NavigationLinkConfig(NavigationLinkTypes.faces),
   ];
+
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Auto-hide navbar`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 1116
+    },
+    description: $localize`Hides the navigation bar while scrolling down and shows it again while scrolling up. If disabled, the navigation bar is always visible.`,
+  })
+  autoHide: boolean = true;
+
   @ConfigProperty({
     tags: {
       name: $localize`Navbar show delay`,

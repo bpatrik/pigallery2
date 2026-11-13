@@ -74,6 +74,7 @@
   "Gallery.NavBar.SortingGrouping.defaultSearchSortingMethod": "config",
   "Gallery.NavBar.SortingGrouping.defaultSearchSortingMethod.ascending": "boolean",
   "Gallery.NavBar.SortingGrouping.defaultSearchSortingMethod.method": "enum:Name,Date,Rating,PersonCount,FileSize,Random",
+  "Gallery.NavBar.autoHide": "boolean",
   "Gallery.NavBar.defaultGidSize": "enum:extraSmall,small,medium,large,extraLarge",
   "Gallery.NavBar.enableDirectoryFlattening": "boolean",
   "Gallery.NavBar.enableDownloadZip": "boolean",

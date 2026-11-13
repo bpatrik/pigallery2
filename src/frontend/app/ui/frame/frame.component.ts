@@ -159,6 +159,11 @@ export class FrameComponent {
 
   onScroll(): void {
     const scrollPosition = PageHelper.ScrollY;
+    if (!Config.Gallery.NavBar.autoHide) {
+      // the navbar stays on the screen (sticky); on the top of the page it is in the page flow, without a shadow
+      this.navbarKeepTop = scrollPosition <= 0;
+      return;
+    }
     const up = this.lastScroll.any > scrollPosition;
     const down = this.lastScroll.any < scrollPosition;
     const upDelay = up && this.lastScroll.down > scrollPosition + window.innerHeight * Config.Gallery.NavBar.NavbarShowDelay;

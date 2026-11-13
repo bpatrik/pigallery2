@@ -74,6 +74,7 @@ App CLI options:
   --Gallery-NavBar-defaultGidSize                                           Default grid size that is used to render photos and videos. (default: 'medium')
   --Gallery-NavBar-showItemCount                                            Shows the number photos and videos on the navigation bar. (default: true)
   --Gallery-NavBar-links                                                    Visible links in the top menu. (default: [{"type":1},{"type":3},{"type":2}])
+  --Gallery-NavBar-autoHide                                                 Hides the navigation bar while scrolling down and shows it again while scrolling up. If disabled, the navigation bar is always visible. (default: true)
   --Gallery-NavBar-NavbarShowDelay                                          Ratio of the page height, you need to scroll to show the navigation bar. (default: 0.3)
   --Gallery-NavBar-NavbarHideDelay                                          Ratio of the page height, you need to scroll to hide the navigation bar. (default: 0.15)
   --Gallery-NavBar-showScrollUpButton                                       Set when the floating scroll-up button should be visible. (default: 'mobileOnly')
@@ -263,6 +264,7 @@ Environmental variables:
   Gallery-NavBar-defaultGidSize                                         Default grid size that is used to render photos and videos. (default: 'medium')
   Gallery-NavBar-showItemCount                                          Shows the number photos and videos on the navigation bar. (default: true)
   Gallery-NavBar-links                                                  Visible links in the top menu. (default: [{"type":1},{"type":3},{"type":2}])
+  Gallery-NavBar-autoHide                                               Hides the navigation bar while scrolling down and shows it again while scrolling up. If disabled, the navigation bar is always visible. (default: true)
   Gallery-NavBar-NavbarShowDelay                                        Ratio of the page height, you need to scroll to show the navigation bar. (default: 0.3)
   Gallery-NavBar-NavbarHideDelay                                        Ratio of the page height, you need to scroll to hide the navigation bar. (default: 0.15)
   Gallery-NavBar-showScrollUpButton                                     Set when the floating scroll-up button should be visible. (default: 'mobileOnly')
@@ -535,6 +537,8 @@ Environmental variables:
                     "type": "faces"
                 }
             ],
+            "//[autoHide]": "Hides the navigation bar while scrolling down and shows it again while scrolling up. If disabled, the navigation bar is always visible.",
+            "autoHide": true,
             "//[NavbarShowDelay]": "Ratio of the page height, you need to scroll to show the navigation bar.",
             "NavbarShowDelay": 0.3,
             "//[NavbarHideDelay]": "Ratio of the page height, you need to scroll to hide the navigation bar.",
