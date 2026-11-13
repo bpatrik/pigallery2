@@ -57,6 +57,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean | null = null;
   loaded = false;
+  // only a photo that was not shown yet fades in; one seen before (e.g. after back) shows up at once
+  fadeIn = true;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
   // the query params of the link to this media in the lightbox
@@ -226,7 +228,13 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
+    this.fadeIn = !this.thumbnailService.wasShown(this.thumbnail.Src);
     this.updateMediaButtons();
+  }
+
+  onLoad(): void {
+    this.loaded = true;
+    this.thumbnailService.markShown(this.thumbnail.Src);
   }
 
   ngOnDestroy(): void {

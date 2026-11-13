@@ -7,8 +7,9 @@
   <a class="photo-link" [routerLink]="[]" [queryParams]="lightboxParams()">
     @if (thumbnail.Available) {
       <img alt="{{gridMedia().media.name}}" #img [src]="thumbnail.Src"
-        (load)="loaded=true"
+        (load)="onLoad()"
         [class.loading]="!loaded"
+        [class.fade-in]="fadeIn"
         >
     }
 

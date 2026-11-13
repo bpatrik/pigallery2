@@ -22,6 +22,18 @@ class MockQueryService {
 }
 
 class MockThumbnailManagerService {
+  private readonly shown = new Set<string>();
+
+  wasShown(src: string | null): boolean {
+    return src !== null && this.shown.has(src);
+  }
+
+  markShown(src: string | null): void {
+    if (src !== null) {
+      this.shown.add(src);
+    }
+  }
+
   getThumbnail() {
     return {
       Available: true,
@@ -103,6 +115,47 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
     expect(
       fixture.nativeElement.querySelector('.live-photo-indicator')
     ).toBeNull();
+  });
+});
+
+// going back to a folder shows the same photos again: only a photo that was not shown yet fades in, so they don't flicker
+describe('GalleryPhotoComponent - fade in', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [GalleryPhotoComponent],
+      providers: [
+        provideIcons(appIcons),
+        provideRouter([]),
+        {provide: ThumbnailManagerService, useClass: MockThumbnailManagerService},
+        {provide: AuthenticationService, useClass: MockAuthenticationService},
+        {provide: ExtensionService, useClass: MockExtensionService},
+        {provide: MediaButtonModalService, useClass: MockMediaButtonModalService},
+        {provide: QueryService, useClass: MockQueryService},
+      ],
+    }).compileComponents();
+  });
+
+  const render = (): HTMLImageElement => {
+    const fixture = TestBed.createComponent(GalleryPhotoComponent);
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
+    fixture.detectChanges();
+    return fixture.nativeElement.querySelector('img');
+  };
+
+  it('should fade in a photo the first time it is shown', () => {
+    expect(render().classList).toContain('fade-in');
+  });
+
+  it('should not fade in a photo again once it was shown', () => {
+    render().dispatchEvent(new Event('load'));
+
+    expect(render().classList).not.toContain('fade-in');
+  });
+
+  it('should fade in again a photo that did not load', () => {
+    render();
+
+    expect(render().classList).toContain('fade-in');
   });
 });
 

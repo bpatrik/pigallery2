@@ -80,7 +80,11 @@ describe('GalleryGridComponent', () => {
         {provide: GalleryNavigatorService, useClass: MockGalleryNavigatorService},
         {provide: OverlayService, useClass: MockOverlayService},
         // for the tiles
-        {provide: ThumbnailManagerService, useValue: {getThumbnail: () => ({Available: true, Error: false, loading: false, Src: '', destroy: (): void => undefined})}},
+        {provide: ThumbnailManagerService, useValue: {
+          getThumbnail: () => ({Available: true, Error: false, loading: false, Src: '', destroy: (): void => undefined}),
+          wasShown: (): boolean => false,
+          markShown: (): void => undefined
+        }},
         {provide: ExtensionService, useValue: {UIExtensionConfig: []}},
         {provide: MediaButtonModalService, useValue: {}},
         {provide: AuthenticationService, useValue: {canSearch: () => false}},

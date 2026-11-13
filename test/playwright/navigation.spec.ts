@@ -86,7 +86,10 @@ test.describe('Navigation', () => {
     await expect.poll(scrollY, {message: 'the scroll position after back'}).toBeGreaterThan(scrolledTo - 50);
     expect(await scrollY()).toBeLessThan(scrolledTo + 50);
     // the same photos on the screen
-    await expect(photo(page, belowName!)).toBeInViewport();  });
+    await expect(photo(page, belowName!)).toBeInViewport();
+    // they were shown before: they show up at once, without fading in again (it flickers)
+    expect(await photo(page, belowName!).evaluate((img: HTMLImageElement) => img.getAnimations().length), 'fade in animations').toBe(0);
+  });
 });
 
 test.describe('Navigation on a large screen', () => {
