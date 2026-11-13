@@ -62,9 +62,8 @@ describe('DuplicateComponent', () => {
     expect(el.textContent).not.toMatch(/Listing/);
   });
 
-  // TODO #1315: while the duplicates load (it can take a while on a big gallery), the page shows a loading state;
-  // today it says "No duplicates found" until they arrive
-  it.fails('should show a loading state, not "No duplicates found", while loading', async () => {
+  // #1315: while the duplicates load (it can take a while on a big gallery), the page shows a loading state
+  it('should show a loading state, not "No duplicates found", while loading', async () => {
     const el = await render(null);
     expect(el.textContent).not.toContain('No duplicates found');
     expect(el.querySelector('.spinner-border, [role="status"]') !== null || /loading/i.test(el.textContent ?? ''),

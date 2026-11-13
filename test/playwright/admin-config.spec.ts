@@ -2,8 +2,7 @@
 // They change the server for every test, so they run in the `admin-config` project, after the others (see playwright.config.ts),
 // one after the other (all in one serial describe), and restore what they change.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
-import {expectApiOk} from './helpers';
+import {ADMIN_SESSION, expectApiOk} from './helpers';
 import {JobProgressStates} from '../../src/common/entities/job/JobProgressDTO';
 
 type Settings = Record<string, Record<string, unknown>>;

@@ -1,8 +1,8 @@
 // The session of a logged-in user ends while the app is open on a deep link (#1306):
 // the next API call gets a 401 → /login, and after logging in again the user lands back on that URL.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
 import {
+  ADMIN_SESSION,
   ACCENTED_DIR,
   createUserWithApi,
   deleteUserWithApi,
@@ -82,7 +82,6 @@ test.describe('Session ends on a deep link', () => {
   });
 
   test('Photo deep link should open again after logging in after the session ended', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306: the login does not keep the return URL, the user lands on the gallery root');
     await loginAndOpen(page, '/gallery/?p=IMG_5910.jpg', isGalleryContent);
     await expectLightboxPhoto(page, 'IMG_5910.jpg', 20000);
 
@@ -94,12 +93,12 @@ test.describe('Session ends on a deep link', () => {
     await expectApiOk(await admin.put('/pgapi/user', {data: {newUser: user}}), 'recreating the user');
     await loginOnCurrentLoginPage(page, user);
 
-    await expect(page).toHaveURL(url => url.pathname === '/gallery/' && url.searchParams.get('p') === 'IMG_5910.jpg');
+    // the router drops the trailing slash of the gallery root ('/gallery/' and '/gallery' are the same page)
+    await expect(page).toHaveURL(url => /^\/gallery\/?$/.test(url.pathname) && url.searchParams.get('p') === 'IMG_5910.jpg');
     await expectLightboxPhoto(page, 'IMG_5910.jpg', 20000);
   });
 
   test('Folder should open after logging in again when the session ended while navigating to it', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1306: the login does not keep the return URL, the user lands on the gallery root');
     // a folder with accents: the return URL has to survive the encoding
     const pendingApiRequests = trackPendingApiRequests(page);
     await loginAndOpen(page, '/gallery/' + encodeURIComponent(ACCENTED_DIR), isDirectoryContent);

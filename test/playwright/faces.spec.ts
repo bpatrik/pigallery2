@@ -29,10 +29,9 @@ test.describe('Faces', () => {
     await expectNoHorizontalScroll(page, 'search of a face');
   });
 
-  // UI fits the screen, a phone too (#1316). A separate test, so the known phone bug does not hide the other checks above.
-  test('Faces should fit the screen', {tag: '@sanity'}, async ({page, isMobile}) => {
-    // the demo has a person called "abcdefghijklmnopqrstuvwxyz": one long word, the name does not wrap in its card
-    test.fail(isMobile, 'Not implemented yet #1316: a long face name sticks out of its card and of the phone screen');
+  // UI fits the screen, a phone too (#1316)
+  test('Faces should fit the screen', {tag: '@sanity'}, async ({page}) => {
+    // the demo has a person called "abcdefghijklmnopqrstuvwxyz": one long word, that must wrap in its card
     const persons = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/person');
     await page.goto('/faces');
     await persons;

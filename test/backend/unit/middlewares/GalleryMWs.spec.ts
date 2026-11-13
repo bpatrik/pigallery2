@@ -261,18 +261,11 @@ describe('GalleryMWs', () => {
 
     const callListDirectory = async (directory: string, context: SessionContext, directoryAccess?: DirectoryAccessTypes) => {
       const req: any = {session: {context}, params: {directory}, query: {}, directoryAccess};
-      let status: number = null!;
-      const res: any = {
-        status: (s: number) => {
-          status = s;
-          return res;
-        }
-      };
       let nextArgs: any[] = null!;
-      await GalleryMWs.listDirectory(req, res, (...args: any[]) => {
+      await GalleryMWs.listDirectory(req, {} as any, (...args: any[]) => {
         nextArgs = args;
       });
-      return {req, status, nextArgs};
+      return {req, nextArgs};
     };
 
     beforeEach(() => {
@@ -298,7 +291,6 @@ describe('GalleryMWs', () => {
         throw new Error('ENOENT');
       };
       const notExisting = await callListDirectory('not_existing', sessionContext({}));
-      expect(notExisting.status).to.equal(404);
       expect((notExisting.nextArgs[0] as ErrorDTO).code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
       expect(listArgs).to.be.null;
 
@@ -310,7 +302,6 @@ describe('GalleryMWs', () => {
       // fsp.stat is stubbed to "exists": only the path check can stop it
       for (const dir of ['..', '../other', 'a/../../other']) {
         const outside = await callListDirectory(dir, sessionContext({}));
-        expect(outside.status, dir).to.equal(404);
         expect((outside.nextArgs[0] as ErrorDTO).code, dir).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
         expect(listArgs, dir).to.be.null;
       }

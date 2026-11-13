@@ -5,7 +5,6 @@ import express from 'express';
 import {NextFunction, Request, Response} from 'express';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import {expectToFail} from '../../KnownFailures';
 import {RenderingMWs} from '../../../../src/backend/middlewares/RenderingMWs';
 import {TestHelper} from '../../../TestHelper';
 import {ErrorCodes, ErrorDTO} from '../../../../src/common/entities/Error';
@@ -123,9 +122,12 @@ describe('RenderingMWs', () => {
           return 401;
         case ErrorCodes.NOT_AUTHORISED:
         case ErrorCodes.PERMISSION_DENIED:
+        case ErrorCodes.USER_MANAGEMENT_DISABLED:
           return 403;
         case ErrorCodes.DIRECTORY_NOT_FOUND:
         case ErrorCodes.PATH_ERROR: // e.g. a file that is not on the disk anymore
+        case ErrorCodes.SHARING_NOT_FOUND:
+        case ErrorCodes.LocationLookUp_ERROR: // also when the geocoding service fails
           return 404;
         // the errors of what the user sent
         case ErrorCodes.ALREADY_AUTHENTICATED:
@@ -170,19 +172,14 @@ describe('RenderingMWs', () => {
         }).on('error', reject);
       });
 
-    // the status of these is not decided yet: neither is a server fault, but the client needs the error body
-    const undecided = [ErrorCodes.LocationLookUp_ERROR, ErrorCodes.USER_MANAGEMENT_DISABLED];
     const codes = Object.values(ErrorCodes)
-      .filter((c): c is ErrorCodes => typeof c === 'number' && !undecided.includes(c));
+      .filter((c): c is ErrorCodes => typeof c === 'number');
 
     for (const code of codes) {
       it('should render ' + ErrorCodes[code] + ' with HTTP ' + expectedStatus(code), async () => {
-        // renderError does not set a status yet, every error goes out as HTTP 200
-        await expectToFail('#1305', async () => {
-          const res = await get('/error/' + code);
-          expect(res.body.error.code).to.equal(code);
-          expect(res.status).to.equal(expectedStatus(code));
-        }, /expected 200 to equal/);
+        const res = await get('/error/' + code);
+        expect(res.body.error.code).to.equal(code);
+        expect(res.status).to.equal(expectedStatus(code));
       });
     }
   });

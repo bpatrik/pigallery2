@@ -533,3 +533,27 @@ describe('SearchQueryDTOUtils.urlifyExactMatch', () => {
     expect(SearchQueryUtils.parseURLifiedQuery(SearchQueryUtils.urlifyExactMatch(query.type, query.value))).to.deep.equal(query);
   });
 });
+
+// #1309: a hand-edited or outdated search link
+describe('SearchQueryDTOUtils.isKnownQuery', () => {
+  it('should accept the queries of the search bar, also nested ones', () => {
+    expect(SearchQueryUtils.isKnownQuery({type: SearchQueryTypes.keyword, value: 'Balaton'} as TextSearch)).to.equal(true);
+    expect(SearchQueryUtils.isKnownQuery({type: SearchQueryTypes.date, min: 0} as SearchQueryDTO)).to.equal(true);
+    expect(SearchQueryUtils.isKnownQuery({
+      type: SearchQueryTypes.AND, list: [
+        {type: SearchQueryTypes.person, value: 'Árvíztűrő Tükörfúrógép'} as TextSearch,
+        {type: SearchQueryTypes.OR, list: [{type: SearchQueryTypes.rating, min: 3} as SearchQueryDTO]} as SearchQueryDTO
+      ]
+    } as SearchQueryDTO)).to.equal(true);
+  });
+
+  it('should reject a query with an unknown type, also nested', () => {
+    expect(SearchQueryUtils.isKnownQuery({type: 999} as unknown as SearchQueryDTO)).to.equal(false);
+    expect(SearchQueryUtils.isKnownQuery({type: SearchQueryTypes.UNKNOWN_RELATION} as SearchQueryDTO)).to.equal(false);
+    expect(SearchQueryUtils.isKnownQuery({} as SearchQueryDTO)).to.equal(false);
+    expect(SearchQueryUtils.isKnownQuery({
+      type: SearchQueryTypes.AND, list: [{type: SearchQueryTypes.keyword, value: 'x'} as TextSearch, {type: 999} as unknown as SearchQueryDTO]
+    } as SearchQueryDTO)).to.equal(false);
+    expect(SearchQueryUtils.isKnownQuery({type: SearchQueryTypes.OR} as SearchQueryDTO)).to.equal(false);
+  });
+});

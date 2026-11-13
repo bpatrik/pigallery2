@@ -318,13 +318,16 @@ describe('GalleryLightboxComponent', () => {
 
   it('should tell whether there is a previous and a next photo', async () => {
     await openPhoto('photo1.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: false, hasNext: true});
+    expect(component.navigation()).toEqual({hasPrev: false, hasNext: true, nextLoops: false});
 
     await openPhoto('photo2.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: false});
 
     await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: true, hasNext: false});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: false, nextLoops: false});
+
+    await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: true});
   });
 
   it('should navigate by the content order, also beyond the rendered photos', async () => {
@@ -442,11 +445,11 @@ describe('GalleryLightboxComponent', () => {
       expect(nextButton()).toEqual({icon: 'ionChevronForwardOutline', title: 'key: right arrow'});
     });
 
-    // TODO #1310: on the last photo the next button starts over from the first photo, but looks like the normal next button
-    it.fails('should show the restart icon on the last photo with loop on', async () => {
+    // on the last photo the next button starts over from the first photo, so it does not look like the normal next button
+    it('should show the restart icon on the last photo with loop on', async () => {
       await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
       const button = nextButton();
-      expect(button.icon).toBe('ionRepeatOutline');
+      expect(button.icon).toBe('ionReloadOutline');
       // a tooltip of its own, e.g.: "start over from the first photo"
       expect(button.title).toBeTruthy();
       expect(button.title).not.toBe('key: right arrow');

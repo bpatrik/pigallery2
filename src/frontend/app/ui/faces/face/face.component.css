@@ -80,6 +80,8 @@ a {
   padding: 5px;
   width: 100%;
   line-height: normal;
+  /* a long name of one word wraps, instead of sticking out of the card (and of a phone screen) */
+  overflow-wrap: anywhere;
 }
 
 a:hover .info {

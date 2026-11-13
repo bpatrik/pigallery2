@@ -198,7 +198,6 @@ test.describe('Album edge cases', () => {
     });
 
     test('should show the empty search message when opened', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1312: opening an album that matches nothing shows an empty page (#1309)');
       await page.goto('/albums');
       const card = page.locator('app-album').filter({hasText: albumName});
       const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));

@@ -2,8 +2,8 @@
 // a normal user sees and changes only their own sharings, a guest (read-only user) cannot share.
 // The tests share 4MinsAroundTheWorld, which no other test shares.
 import {APIRequestContext, APIResponse, expect, Page, Response, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
 import {
+  ADMIN_SESSION,
   createDirectorySharingWithApi,
   createUserWithApi,
   deleteSharingsWithApi,

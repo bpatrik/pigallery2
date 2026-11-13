@@ -105,7 +105,6 @@ test.describe('Search', () => {
     });
 
     test('should tell that the link is broken for an unknown search type, and keep the search bar working', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1309');
       await page.goto('/search/' + encodeURIComponent(JSON.stringify({t: 999, v: 'x'})));
 
       await expect(page.locator('app-gallery').getByText('This search link is broken')).toBeVisible();

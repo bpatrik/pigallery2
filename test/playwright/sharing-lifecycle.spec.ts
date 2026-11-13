@@ -1,8 +1,7 @@
 // A sharing ends while a guest has it open (#1307), also as a photo frame (#1313):
 // the guest gets the "This link is invalid or has expired" page, full screen.
 import {APIRequestContext, expect, Page, test} from '@playwright/test';
-import {ADMIN_SESSION} from './global-setup';
-import {ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, deleteSharingsWithApi, expectApiOk, expectInvalidLinkPage, expectLightboxPhoto, notLoggedIn} from './helpers';
+import {ADMIN_SESSION, ACCENTED_DIR, createDirectorySharingWithApi, CreatedSharing, deleteSharingsWithApi, expectApiOk, expectInvalidLinkPage, expectLightboxPhoto, notLoggedIn} from './helpers';
 
 // a frame link: playing, looping, caption on, controls hidden, the next photo after 300 s, reloading the content every second
 // (the same as frameParams of frame.spec.ts)

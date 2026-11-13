@@ -71,7 +71,6 @@ test.describe('Admin', () => {
     });
 
     test('should get 403 from the admin API', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1315: answers 401');
       const res = await page.request.get('/pgapi/settings');
       expect(res.status()).toBe(403);
     });

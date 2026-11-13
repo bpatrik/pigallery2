@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {Component, ElementRef, OnInit, inject, signal, viewChild} from '@angular/core';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes, isErrorDTO} from '../../../../common/entities/Error';
 import {Config} from '../../../../common/config/public/Config';
@@ -27,6 +27,7 @@ export class ShareLoginComponent implements OnInit {
 
   password = '';
   readonly loginError = signal(false);
+  private readonly passwordInput = viewChild<ElementRef<HTMLInputElement>>('passwordInput');
   readonly inProgress = signal(false);
   title: string;
 
@@ -52,6 +53,9 @@ export class ShareLoginComponent implements OnInit {
           error === 'Unauthorized'
       ) {
         this.loginError.set(true);
+        // a fresh start for the next try
+        this.password = '';
+        this.passwordInput()?.nativeElement.focus();
       }
     }
 

@@ -198,24 +198,18 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
         session, sessionOptions: {}, params: {},
         query: sharingKey ? {[QueryParams.gallery.sharingKey_query]: sharingKey} : {}
       };
-      let status: number = null!;
-      const res: any = {
-        status: (s: number) => {
-          status = s;
-          return res;
-        }
-      };
       let err: any = 'not-called';
-      await AuthenticationMWs.authenticate(req, res, (e?: any) => {
+      await AuthenticationMWs.authenticate(req, {} as any, (e?: any) => {
         err = e;
       });
-      return {req, status, err};
+      return {req, err};
     };
 
     const expectEnded = async (session: any, sharingKey?: string) => {
       const r = await authenticate(session, sharingKey);
-      expect(r.status).to.equal(401);
       expect(r.err).to.be.instanceOf(ErrorDTO);
+      // both go out as 401 (see RenderingMWs.renderError)
+      expect([ErrorCodes.NOT_AUTHENTICATED, ErrorCodes.NOT_AUTHENTICATED_SHARING]).to.include(r.err.code);
       expect(r.req.session.context).to.be.undefined;
     };
 
@@ -401,21 +395,15 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       await expectEnded({context: {user: {id: ivy.id, name: 'ivy', role: UserRoles.Admin}}, expires: Date.now() + 10000});
     });
 
-    it('rejects an unknown sharing key with 401', async () => {
+    it('rejects an unknown sharing key with CREDENTIAL_NOT_FOUND', async () => {
       const req: any = {
         session: {}, sessionOptions: {}, params: {}, body: {},
         query: {[QueryParams.gallery.sharingKey_query]: 'no_such_key'}
       };
-      let status: number | undefined;
       let err: ErrorDTO | undefined;
-      await AuthenticationMWs.shareLogin(req, {
-        status: (s: number): void => {
-          status = s;
-        }
-      } as any, (e?: any) => {
+      await AuthenticationMWs.shareLogin(req, {} as any, (e?: any) => {
         err = e;
       });
-      expect(status).to.equal(401);
       expect(err?.code).to.equal(ErrorCodes.CREDENTIAL_NOT_FOUND);
       expect(req.session.context).to.be.undefined;
     });
@@ -1168,25 +1156,19 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
 
     const authorise = async (context: SessionContext, directory: string) => {
       const req: any = {session: {context}, params: {directory: path.normalize(directory)}, query: {}};
-      let status: number = null!;
-      const res: any = {
-        status: (s: number) => {
-          status = s;
-          return res;
-        }
-      };
       let nextArgs: any[] = null!;
-      await AuthenticationMWs.authoriseDirectory('directory')(req, res, (...args: any[]) => {
+      await AuthenticationMWs.authoriseDirectory('directory')(req, {} as any, (...args: any[]) => {
         nextArgs = args;
       });
-      return {req, status, nextArgs};
+      const code: ErrorCodes | null = (nextArgs[0] as ErrorDTO | undefined)?.code ?? null;
+      return {req, code, nextArgs};
     };
 
     it('lets available directories through', async () => {
       const ctx = await userContext({allowDirectoryList: [dq('public/*', TextSearchQueryMatchTypes.globMatch)]});
       const r = await authorise(ctx, 'public/sub');
       expect(r.nextArgs).to.deep.equal([]);
-      expect(r.status).to.be.null;
+      expect(r.code).to.be.null;
       expect(r.req.directoryAccess).to.equal(DirectoryAccessTypes.available);
     });
 
@@ -1204,7 +1186,6 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       });
       for (const d of ['other', 'public/private', 'publicity']) {
         const r = await authorise(ctx, d);
-        expect(r.status, d).to.equal(404);
         expect(r.nextArgs[0], d).to.be.instanceOf(ErrorDTO);
         expect((r.nextArgs[0] as ErrorDTO).code, d).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
         // GalleryMWs.listDirectory answers not existing directories with the same error (see its spec)
@@ -1217,7 +1198,7 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       const ctx = await userContext({blockDirectoryList: [dq('private/*', TextSearchQueryMatchTypes.globMatch)]});
       const existing = await authorise(ctx, 'private');
       const notExisting = await authorise(ctx, 'private/not_existing_' + Date.now());
-      expect(notExisting.status).to.equal(existing.status);
+      expect(notExisting.code).to.equal(existing.code);
       expect(notExisting.nextArgs).to.deep.equal(existing.nextArgs);
     });
 
@@ -1231,17 +1212,17 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       } as any));
       expect((await authorise(ctx, 'public')).req.directoryAccess).to.equal(DirectoryAccessTypes.available);
       expect((await authorise(ctx, 'public/sub')).req.directoryAccess).to.equal(DirectoryAccessTypes.available);
-      expect((await authorise(ctx, '/')).status).to.equal(404);
-      expect((await authorise(ctx, 'other')).status).to.equal(404);
+      expect((await authorise(ctx, '/')).code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+      expect((await authorise(ctx, 'other')).code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
     });
 
     it('fails closed', async () => {
       const r = await authorise(undefined!, 'public');
-      expect(r.status).to.equal(404);
+      expect(r.code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
       const ctx = await userContext({});
       (ctx.directoryAccess as any).blockList = {}; // broken context
       const r2 = await authorise(ctx, 'public');
-      expect(r2.status).to.equal(404);
+      expect(r2.code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
     });
   });
 });

@@ -70,8 +70,8 @@ describe('GalleryMapComponent - markers', () => {
     expect(markers().length).toBe(2);
   });
 
-  // TODO #1254: a latitude or longitude of 0 (the equator, the prime meridian) is falsy, so the photo gets no marker
-  it.fails('should have a marker for a photo on the prime meridian', () => {
+  // #1254: a latitude or longitude of 0 (the equator, the prime meridian) is falsy, but a valid coordinate
+  it('should have a marker for a photo on the prime meridian', () => {
     fixture.componentRef.setInput('photos', [photo('Greenwich.jpg', {latitude: 51.4779, longitude: 0})]);
     expect(markers()).toEqual([{lat: 51.4779, lng: 0}]);
   });
@@ -126,9 +126,8 @@ describe('MapService - GPX', () => {
     expect((await service.getMapCoordinates(gpxFile)).name).toBe('Hiking 6/12/15');
   });
 
-  // TODO #1254: calculateGpxStats compares the duration in seconds with 1000 ("should be at least 1 second"),
-  // so a track shorter than ~17 minutes has no duration and no average speed
-  it.fails('should have the duration and the speed of a short track', async () => {
+  // #1254: a track shorter than ~17 minutes once had no duration and no speed (seconds were compared with 1000)
+  it('should have the duration and the speed of a short track', async () => {
     getXML.mockResolvedValue(gpx('<trk><trkseg>' +
       trkpt(48.0, 20.0, '2015-06-12T14:00:00Z') + trkpt(48.01, 20.0, '2015-06-12T14:10:00Z') +
       '</trkseg></trk>'));

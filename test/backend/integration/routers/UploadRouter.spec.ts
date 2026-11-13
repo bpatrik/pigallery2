@@ -194,8 +194,7 @@ describe('UploadRouter', () => {
 
       res.body.error.code.should.equal(ErrorCodes.NOT_AUTHORISED);
       fs.existsSync(path.join(testDir, 'not_allowed.jpg')).should.be.false;
-      // NOT_AUTHORISED goes out as 401 (AuthenticationMWs.authorise, see #1305)
-      await expectToFail('#1315', () => res.should.have.status(403), /status code 403 but got 401/);
+      res.should.have.status(403);
     });
 
     it('should reject a file above the size limit with the limit in the message and save the others', async () => {

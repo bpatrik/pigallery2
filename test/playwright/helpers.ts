@@ -1,9 +1,13 @@
 import {randomUUID} from 'node:crypto';
 import {APIRequest, APIRequestContext, expect, Locator, Page, TestInfo, ViewportSize} from '@playwright/test';
-import {USER_SESSION} from './global-setup';
 
 // a fresh browser without the logged in admin session of global-setup.ts
 export const notLoggedIn = {storageState: {cookies: [], origins: []}};
+// the sessions that global-setup.ts saves
+export const ADMIN_SESSION = 'test/playwright/.auth/admin.json';
+export const USER_SESSION = 'test/playwright/.auth/user.json';
+// a normal (not admin) user, created by the global setup
+export const NORMAL_USER = {name: 'e2e-user', password: 'e2e-user', role: 3}; // UserRoles.User
 // logged in as a normal (not admin) user, see global-setup.ts
 export const asNormalUser = {storageState: USER_SESSION};
 
@@ -275,7 +279,6 @@ export const doubleTap = async (page: Page, at?: { x: number, y: number }): Prom
 
 /**
  * Checks that an API call (an APIResponse or the Response of a page) succeeded: HTTP OK and no error in the answer.
- * The server sends its errors with HTTP 200 today (#1305), so res.ok() alone can't fail.
  */
 export const expectApiOk = async (res: { ok(): boolean, json(): Promise<{ error?: unknown } | null> }, what: string): Promise<void> => {
   expect(res.ok(), what).toBe(true);

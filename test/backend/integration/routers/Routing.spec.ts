@@ -3,7 +3,6 @@ import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as chai from 'chai';
-import {expectToFail} from '../../KnownFailures';
 import {expect} from 'chai';
 import * as http from 'node:http';
 import {AddressInfo} from 'node:net';
@@ -160,7 +159,7 @@ describe('Routing', () => {
     expect(res.text, url).to.equal(rel);
   };
 
-  const shouldHaveError = (res: Res, code: ErrorCodes, status = 200): void => {
+  const shouldHaveError = (res: Res, code: ErrorCodes, status: number): void => {
     expect(res.status, res.path).to.equal(status);
     expect(res.json?.error?.code, res.path).to.equal(code);
   };
@@ -234,12 +233,12 @@ describe('Routing', () => {
         for (const t of TRAVERSALS) {
           const res = await get(api('/gallery/content/' + t));
           shouldNotLeak(res);
-          shouldHaveError(res, ErrorCodes.INPUT_ERROR);
+          shouldHaveError(res, ErrorCodes.INPUT_ERROR, 400);
         }
         shouldNotLeak(await get(api('/gallery/content/' + BACKSLASH_TRAVERSAL)));
-        shouldHaveError(await get(api('/gallery/content/..')), ErrorCodes.INPUT_ERROR);
-        shouldHaveError(await get(api('/gallery/content/%2E%2E%2F')), ErrorCodes.INPUT_ERROR);
-        shouldHaveError(await get(api('/gallery/content/formats/..%2F..%2F')), ErrorCodes.INPUT_ERROR);
+        shouldHaveError(await get(api('/gallery/content/..')), ErrorCodes.INPUT_ERROR, 400);
+        shouldHaveError(await get(api('/gallery/content/%2E%2E%2F')), ErrorCodes.INPUT_ERROR, 400);
+        shouldHaveError(await get(api('/gallery/content/formats/..%2F..%2F')), ErrorCodes.INPUT_ERROR, 400);
       });
     });
 
@@ -279,7 +278,7 @@ describe('Routing', () => {
 
       it('should report missing media of every format', async () => {
         for (const f of [...SupportedFormats.Photos, ...SupportedFormats.Videos, ...SupportedFormats.MetaFiles]) {
-          shouldHaveError(await get(api('/gallery/content/missing.' + f)), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f)), ErrorCodes.PATH_ERROR, 404);
         }
       });
 
@@ -288,14 +287,14 @@ describe('Routing', () => {
           for (const action of ['', '/icon', '/240', '/bestFit']) {
             const res = await get(api('/gallery/content/' + t + action));
             shouldNotLeak(res);
-            shouldHaveError(res, ErrorCodes.INPUT_ERROR);
+            shouldHaveError(res, ErrorCodes.INPUT_ERROR, 400);
           }
         }
         shouldNotLeak(await get(api('/gallery/content/' + BACKSLASH_TRAVERSAL)));
         shouldNotLeak(await get(api('/gallery/content/' + BACKSLASH_TRAVERSAL + '/240')));
-        shouldHaveError(await get(api('/gallery/content/..%2Fsecret.jpg')), ErrorCodes.INPUT_ERROR);
-        shouldHaveError(await get(api('/gallery/content/%2E%2E/secret.gpx')), ErrorCodes.INPUT_ERROR);
-        shouldHaveError(await get(api('/gallery/content/..%2Fsecret.gpx/bestFit')), ErrorCodes.INPUT_ERROR);
+        shouldHaveError(await get(api('/gallery/content/..%2Fsecret.jpg')), ErrorCodes.INPUT_ERROR, 400);
+        shouldHaveError(await get(api('/gallery/content/%2E%2E/secret.gpx')), ErrorCodes.INPUT_ERROR, 400);
+        shouldHaveError(await get(api('/gallery/content/..%2Fsecret.gpx/bestFit')), ErrorCodes.INPUT_ERROR, 400);
       });
     });
 
@@ -332,12 +331,12 @@ describe('Routing', () => {
       it('should route the actions of every format', async () => {
         // a missing file reaches loadFile of the matching route
         for (const f of [...SupportedFormats.Photos, ...SupportedFormats.Videos]) {
-          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/icon')), ErrorCodes.PATH_ERROR);
-          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/240')), ErrorCodes.PATH_ERROR);
-          shouldHaveError(await get(api('/gallery/content/missing.' + f.toUpperCase() + '/240')), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/icon')), ErrorCodes.PATH_ERROR, 404);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/240')), ErrorCodes.PATH_ERROR, 404);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f.toUpperCase() + '/240')), ErrorCodes.PATH_ERROR, 404);
         }
         for (const f of [...SupportedFormats.Videos, ...SupportedFormats.MetaFiles]) {
-          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/bestFit')), ErrorCodes.PATH_ERROR);
+          shouldHaveError(await get(api('/gallery/content/missing.' + f + '/bestFit')), ErrorCodes.PATH_ERROR, 404);
         }
       });
 
@@ -451,9 +450,9 @@ describe('Routing', () => {
     it('should reject path traversal on sharing', async () => {
       const before = (await ObjectManagers.getInstance().SharingManager.listAll()).length;
       for (const t of TRAVERSALS) {
-        shouldHaveError(await createSharing(t), ErrorCodes.INPUT_ERROR);
+        shouldHaveError(await createSharing(t), ErrorCodes.INPUT_ERROR, 400);
         shouldHaveError(await call('PUT', api('/share/' + t), {Cookie: cookie, 'Content-Type': 'application/json'},
-          JSON.stringify({updateSharing: {id: 1, valid: 60 * 1000}})), ErrorCodes.INPUT_ERROR);
+          JSON.stringify({updateSharing: {id: 1, valid: 60 * 1000}})), ErrorCodes.INPUT_ERROR, 400);
       }
       expect((await ObjectManagers.getInstance().SharingManager.listAll()).length).to.equal(before);
     });
@@ -588,18 +587,15 @@ describe('Routing', () => {
     });
 
     it('should answer unknown api paths with a JSON error, not the HTML error page', async () => {
-      // unknown api paths fall through to the Express HTML 404 page today
-      await expectToFail('#1305', async () => {
-        const res = await get(api('/doesnotexist'));
-        expect(res.status).to.equal(404);
-        expect(res.headers['content-type']).to.contain('application/json');
-        expect(res.json?.error?.code).to.be.a('number');
-        expect(res.json?.result).to.equal(null);
-      }, /text\/html.* to include 'application\/json'/);
+      const res = await get(api('/doesnotexist'));
+      expect(res.status).to.equal(404);
+      expect(res.headers['content-type']).to.contain('application/json');
+      expect(res.json?.error?.code).to.be.a('number');
+      expect(res.json?.result).to.equal(null);
     });
 
     it('should render api errors as json', async () => {
-      shouldHaveError(await get(api('/gallery/content/missing.jpg')), ErrorCodes.PATH_ERROR);
+      shouldHaveError(await get(api('/gallery/content/missing.jpg')), ErrorCodes.PATH_ERROR, 404);
     });
   });
 });

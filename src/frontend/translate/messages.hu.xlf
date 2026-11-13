@@ -1382,7 +1382,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">144</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -3522,7 +3522,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.ts</context>
-          <context context-type="linenumber">49</context>
+          <context context-type="linenumber">54</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/navigator/navigator.faces.component.html</context>
@@ -3874,6 +3874,14 @@
         </context-group>
         <target>Lekéri a kiválasztott keresési lekérdezések legjobb fotóit, és elküldi azokat e-mailben. E-mailek küldéséhez be kell állítania az SMTP-szerverkapcsolatot.</target>
       </trans-unit>
+      <trans-unit id="5567329162136900412" datatype="html">
+        <source>Your session has ended. Please log in again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/model/network/helper/error.interceptor.ts</context>
+          <context context-type="linenumber">24</context>
+        </context-group>
+        <target>Your session has ended. Please log in again.</target>
+      </trans-unit>
       <trans-unit id="3257486285145946953" datatype="html">
         <source>Show fewer notifications</source>
         <context-group purpose="location">
@@ -4185,7 +4193,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.ts</context>
-          <context context-type="linenumber">69</context>
+          <context context-type="linenumber">75</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -4654,31 +4662,39 @@
         </context-group>
         <target>Az album le van zárva, nem lehet a weboldalon keresztül törölni.</target>
       </trans-unit>
+      <trans-unit id="2773482984080104729" datatype="html">
+        <source>No albums yet.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
+          <context context-type="linenumber">14</context>
+        </context-group>
+        <target>No albums yet.</target>
+      </trans-unit>
+      <trans-unit id="8860025461729905837" datatype="html">
+        <source>Search for something, then save the search as an album with the save button next to the search bar.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
+          <context context-type="linenumber">15,16</context>
+        </context-group>
+        <target>Search for something, then save the search as an album with the save button next to the search bar.</target>
+      </trans-unit>
       <trans-unit id="7786160088790041328" datatype="html">
         <source>Add saved search</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">16,17</context>
+          <context context-type="linenumber">26,27</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">38,39</context>
+          <context context-type="linenumber">36,37</context>
         </context-group>
         <target>Mentett keresés hozzáadása</target>
-      </trans-unit>
-      <trans-unit id="3231059240281443547" datatype="html">
-        <source>No albums to show.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">26</context>
-        </context-group>
-        <target>Nincs Album.</target>
       </trans-unit>
       <trans-unit id="3768927257183755959" datatype="html">
         <source>Save</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
-          <context context-type="linenumber">70,71</context>
+          <context context-type="linenumber">68,69</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/search.gallery.component.html</context>
@@ -4718,11 +4734,31 @@
         </context-group>
         <target>Ez a mentett keresés automatikusan be lesz töltve indexelés közben és túl fogja élni az adatbázis nullázást.</target>
       </trans-unit>
+      <trans-unit id="3894950702316166331" datatype="html">
+        <source>Loading...</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
+          <context context-type="linenumber">20,21</context>
+        </context-group>
+        <target>Töltés...</target>
+      </trans-unit>
+      <trans-unit id="706701817138815411" datatype="html">
+        <source> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
+          <context context-type="linenumber">13,15</context>
+        </context-group>
+        <target> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </target>
+      </trans-unit>
       <trans-unit id="2904029998096758375" datatype="html">
         <source> No duplicates found </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
-          <context context-type="linenumber">12,13</context>
+          <context context-type="linenumber">18,19</context>
         </context-group>
         <target> Nincsenek másolatok </target>
       </trans-unit>
@@ -4850,9 +4886,17 @@
         <source>No faces to show.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.html</context>
-          <context context-type="linenumber">23</context>
+          <context context-type="linenumber">22</context>
         </context-group>
         <target>Nincsenek arcok, amiket meg lehetne mutatni.</target>
+      </trans-unit>
+      <trans-unit id="1799946675780681926" datatype="html">
+        <source>Faces come from the face regions in the metadata of the photos. Tag the faces in your photo manager (e.g. digiKam, Lightroom), then index the photos again.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.html</context>
+          <context context-type="linenumber">23,24</context>
+        </context-group>
+        <target>Faces come from the face regions in the metadata of the photos. Tag the faces in your photo manager (e.g. digiKam, Lightroom), then index the photos again.</target>
       </trans-unit>
       <trans-unit id="5146398958364876914" datatype="html">
         <source>Sort</source>
@@ -5002,29 +5046,49 @@
         </context-group>
         <target>Kijelentkezés</target>
       </trans-unit>
+      <trans-unit id="7436975022198908854" datatype="html">
+        <source>Unknown server error</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
+          <context context-type="linenumber">131</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
+          <context context-type="linenumber">209</context>
+        </context-group>
+        <target>Ismeretlen szerverhiba</target>
+      </trans-unit>
       <trans-unit id="1459984371118890781" datatype="html">
         <source>Directory not found</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">159</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>Directory not found</target>
+      </trans-unit>
+      <trans-unit id="8561662210686953155" datatype="html">
+        <source>Folder "<x id="FOLDER" equiv-text="directoryName"/>" not found. Showing Home.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
+          <context context-type="linenumber">176</context>
+        </context-group>
+        <target>Folder "<x id="FOLDER" equiv-text="directoryName"/>" not found. Showing Home.</target>
       </trans-unit>
       <trans-unit id="665354434676729572" datatype="html">
         <source>Cannot find location</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">190</context>
+          <context context-type="linenumber">207</context>
         </context-group>
         <target>Poyíció nem található</target>
       </trans-unit>
-      <trans-unit id="7436975022198908854" datatype="html">
-        <source>Unknown server error</source>
+      <trans-unit id="5840392863722695952" datatype="html">
+        <source>This search link is broken</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
-          <context context-type="linenumber">192</context>
+          <context context-type="linenumber">229</context>
         </context-group>
-        <target>Ismeretlen szerverhiba</target>
+        <target>This search link is broken</target>
       </trans-unit>
       <trans-unit id="1146494050504614738" datatype="html">
         <source>Select only this</source>
@@ -5142,13 +5206,49 @@
         </context-group>
         <target>nap</target>
       </trans-unit>
+      <trans-unit id="7934833136974560675" datatype="html">
+        <source>Retry</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
+          <context context-type="linenumber">42,43</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
+          <context context-type="linenumber">28,29</context>
+        </context-group>
+        <target>Újra próbálás</target>
+      </trans-unit>
       <trans-unit id="1018831956200649278" datatype="html">
         <source> Too many results to show. Refine your search. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
-          <context context-type="linenumber">47,48</context>
+          <context context-type="linenumber">60,61</context>
         </context-group>
         <target> Túl sok eredmény jelenik meg. Pontosítsa a keresést. </target>
+      </trans-unit>
+      <trans-unit id="4433224658278363054" datatype="html">
+        <source>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
+          <context context-type="linenumber">125</context>
+        </context-group>
+        <target>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</target>
+      </trans-unit>
+      <trans-unit id="1624903707791719841" datatype="html">
+        <source>Check the spelling or try fewer words.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
+          <context context-type="linenumber">126</context>
+        </context-group>
+        <target>Check the spelling or try fewer words.</target>
+      </trans-unit>
+      <trans-unit id="6641316732085362970" datatype="html">
+        <source>This folder is empty.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
+          <context context-type="linenumber">130</context>
+        </context-group>
+        <target>This folder is empty.</target>
       </trans-unit>
       <trans-unit id="7819314041543176992" datatype="html">
         <source>Close</source>
@@ -5366,14 +5466,6 @@
         </context-group>
         <target>gyorsgomb: balra nyíl</target>
       </trans-unit>
-      <trans-unit id="5015670487371268284" datatype="html">
-        <source>key: right arrow</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">225</context>
-        </context-group>
-        <target>gyorsgomb: jobbra nyíl</target>
-      </trans-unit>
       <trans-unit id="2952982394711430494" datatype="html">
         <source>Zoom out, key: '-'</source>
         <context-group purpose="location">
@@ -5406,11 +5498,27 @@
         </context-group>
         <target>Auto lejátszás</target>
       </trans-unit>
+      <trans-unit id="740732965879422811" datatype="html">
+        <source>Start over from the first photo (key: right arrow)</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">59</context>
+        </context-group>
+        <target>Start over from the first photo (key: right arrow)</target>
+      </trans-unit>
+      <trans-unit id="5015670487371268284" datatype="html">
+        <source>key: right arrow</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
+          <context context-type="linenumber">60</context>
+        </context-group>
+        <target>gyorsgomb: jobbra nyíl</target>
+      </trans-unit>
       <trans-unit id="2821179408673282599" datatype="html">
         <source>Home</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">359</context>
+          <context context-type="linenumber">363</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
@@ -5418,7 +5526,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>Galéria</target>
       </trans-unit>
@@ -5758,7 +5866,7 @@
         <source>The photo is not available anymore. Showing the first one.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">338</context>
+          <context context-type="linenumber">344</context>
         </context-group>
         <target>The photo is not available anymore. Showing the first one.</target>
       </trans-unit>
@@ -5930,7 +6038,7 @@
         <source>key: alt + up</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
-          <context context-type="linenumber">155</context>
+          <context context-type="linenumber">156</context>
         </context-group>
         <target>key: alt + fel</target>
       </trans-unit>
@@ -6830,6 +6938,30 @@
         </context-group>
         <target>Belépés </target>
       </trans-unit>
+      <trans-unit id="2275328567992347600" datatype="html">
+        <source>Page not found</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/not-found/not-found.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>Page not found</target>
+      </trans-unit>
+      <trans-unit id="4372352591753131487" datatype="html">
+        <source>The page you are looking for does not exist.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/not-found/not-found.component.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+        <target>The page you are looking for does not exist.</target>
+      </trans-unit>
+      <trans-unit id="5500175451795807478" datatype="html">
+        <source>Go to the gallery</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/not-found/not-found.component.html</context>
+          <context context-type="linenumber">9,10</context>
+        </context-group>
+        <target>Go to the gallery</target>
+      </trans-unit>
       <trans-unit id="1791389700783409961" datatype="html">
         <source>/path/to/folder</source>
         <context-group purpose="location">
@@ -6849,22 +6981,6 @@
           <context context-type="linenumber">12,13</context>
         </context-group>
         <target>Kigészítő telepítése</target>
-      </trans-unit>
-      <trans-unit id="3894950702316166331" datatype="html">
-        <source>Loading...</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
-          <context context-type="linenumber">20,21</context>
-        </context-group>
-        <target>Töltés...</target>
-      </trans-unit>
-      <trans-unit id="7934833136974560675" datatype="html">
-        <source>Retry</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
-          <context context-type="linenumber">28,29</context>
-        </context-group>
-        <target>Újra próbálás</target>
       </trans-unit>
       <trans-unit id="1451533126518313032" datatype="html">
         <source> No extensions available. </source>
@@ -8058,6 +8174,14 @@
           <context context-type="linenumber">51,52</context>
         </context-group>
         <target>Cancel all</target>
+      </trans-unit>
+      <trans-unit id="7619560701830330401" datatype="html">
+        <source>Loading</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/utils/spinner/spinner.component.html</context>
+          <context context-type="linenumber">1</context>
+        </context-group>
+        <target>Loading</target>
       </trans-unit>
     </body>
   </file>

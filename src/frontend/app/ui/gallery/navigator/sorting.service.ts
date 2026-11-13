@@ -171,7 +171,8 @@ export class GallerySortingService {
         }
 
       case SortByTypes.Name:
-        return (m: MediaDTO) => (m.name.at(0) ?? '').toUpperCase();
+        // by the first letter without its accent (Á is in the A group), like the names sort
+        return (m: MediaDTO) => (m.name.normalize('NFD').at(0) ?? '').toUpperCase();
 
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();

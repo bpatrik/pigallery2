@@ -118,7 +118,12 @@ export class GalleryLightboxComponent implements OnDestroy {
     return this.lightboxService.loopSlideshow() ? media[0] : null;
   });
   readonly hasNext = computed((): boolean => !!this.nextMedia());
-  readonly navigation = computed(() => ({hasPrev: this.hasPrev(), hasNext: this.hasNext()}));
+  readonly navigation = computed(() => ({
+    hasPrev: this.hasPrev(),
+    hasNext: this.hasNext(),
+    // the last photo with loop on: next starts over from the first one
+    nextLoops: this.hasNext() && this.activeIndex() === (this.media()?.length ?? 0) - 1
+  }));
   // only used to preload the next photo, that is sized to the window: it does not need the grid's tile
   readonly nextGridMedia = computed((): GridMedia | null => {
     const media = this.nextMedia();

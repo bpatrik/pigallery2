@@ -266,15 +266,11 @@ export class GalleryNavigatorComponent {
       return null;
     }
 
-    let queryParams = '';
-    Object.entries(this.queryService.params()).forEach((e) => {
-      queryParams += e[0] + '=' + e[1];
-    });
-
+    const queryParams = new URLSearchParams(this.queryService.params()).toString();
     return Config.Server.getApiUrl(
       '/gallery/zip/',
       encodeURIComponent(JSON.stringify(searchQuery)) +
-      '?' + queryParams
+      (queryParams ? '?' + queryParams : '')
     );
   });
 
@@ -286,7 +282,7 @@ export class GalleryNavigatorComponent {
     return SearchQueryUtils.urlify({
       type: SearchQueryTypes.directory,
       matchType: TextSearchQueryMatchTypes.globMatch,
-      value: Utils.concatUrls('./', c?.directory.path, c?.directory.name) + '*',
+      value: Utils.concatUrls('./', c?.directory.path, c?.directory.name) + '/*', // the folder and its subfolders, not its siblings
     } as TextSearch);
   });
 
