@@ -14,7 +14,7 @@ import {
   scrollUntilAttached
 } from './helpers';
 
-const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
+const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt="${name}"]`);
 const lightboxTitle = (page: Page, text: string) =>
   page.locator('app-lightbox-controls > #controllers-container > .controls-title').filter({hasText: text});
 const lightboxFaceNames = (page: Page) => page.locator('app-lightbox-controls .faces-container > .face > .face-name');
@@ -62,7 +62,7 @@ const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): P
   // the info bar links the keywords and the place to a search, and the search finds the photo
   await squirrel.scrollIntoViewIfNeeded();
   await squirrel.hover();
-  const info = squirrel.locator('..').locator('.info');
+  const info = squirrel.locator('xpath=../..').locator('.info');
   await expect.soft(info.locator('.photo-keywords a').filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
   const place = info.locator('.photo-position a').filter({hasText: 'Berkeley'});
   await expect(place).toBeVisible();
@@ -96,7 +96,7 @@ test.describe('Gallery', () => {
   });
 
   test('Gallery should filter', async ({page}) => {
-    const gridPhotos = page.locator('app-gallery-grid .photo-container > img');
+    const gridPhotos = page.locator('app-gallery-grid .photo-link > img');
     // without a filter, other photos are shown too
     await expect.poll(() => gridPhotos.count()).toBeGreaterThan(1);
 
@@ -124,7 +124,7 @@ test.describe('Gallery', () => {
   test('Gallery should keep the sorting and the grid size of a folder', async ({page}) => {
     const sortingButton = page.locator('app-gallery-navbar #button-alignment');
     const gridSizeButton = page.locator('app-gallery-navbar #button-grid-size');
-    const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
+    const firstPhoto = page.locator('app-gallery-grid .photo-link > img').first();
 
     // sort by name, descending
     await sortingButton.click();
@@ -184,7 +184,7 @@ test.describe('Gallery', () => {
     await squirrel.hover();
 
     // the info bar slides up over the photo (it is below the photo, hidden, until then)
-    const container = squirrel.locator('..');
+    const container = squirrel.locator('xpath=../..');
     const info = container.locator('.info');
     await expect(info).toBeVisible();
     await expect(info).toBeInViewport({ratio: 0.99});

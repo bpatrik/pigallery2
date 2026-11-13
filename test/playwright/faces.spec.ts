@@ -24,7 +24,7 @@ test.describe('Faces', () => {
     await faces.filter({hasText: 'Alvin the Squirrel'}).click();
     await expect(page).toHaveURL(/\/search\//);
     await expect.soft(page.locator('app-gallery-search .search-text')).toHaveValue(/Alvin the Squirrel/);
-    await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeVisible();
     await expectVisiblePhotosLoaded(page);
     await expectNoHorizontalScroll(page, 'search of a face');
   });

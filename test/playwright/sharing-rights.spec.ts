@@ -108,7 +108,7 @@ test.describe('Sharing rights', () => {
       expect(await guestOpensWithPassword(guest, sharingKey, 'old-secret'), 'the old password opens it').toBe(false);
       await expect(guest.locator('.error-message')).toHaveText('Wrong password');
       expect(await guestOpensWithPassword(guest, sharingKey, 'new-secret'), 'the new password opens it').toBe(true);
-      await expect(guest.locator('.photo-container > img[alt="' + PHOTO + '"]')).toBeVisible({timeout: 15000});
+      await expect(guest.locator('.photo-link > img[alt="' + PHOTO + '"]')).toBeVisible({timeout: 15000});
     } finally {
       await guestContext.close();
     }
@@ -194,7 +194,7 @@ test.describe('Sharing rights', () => {
     test('Guest user should not be able to share', async ({page, playwright, baseURL}) => {
       await loginWithUi(page, user.name, user.password);
       await openDir(page);
-      await expect(page.locator('.photo-container > img[alt="' + PHOTO + '"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="' + PHOTO + '"]')).toBeVisible();
       await expect(page.locator('app-frame nav button#shareButton')).toHaveCount(0);
 
       const userApi = await loginWithApi(playwright, baseURL, user);

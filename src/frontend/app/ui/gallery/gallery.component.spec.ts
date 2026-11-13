@@ -36,6 +36,8 @@ import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../icons';
 import {By} from '@angular/platform-browser';
 import {GalleryGridComponent} from './grid/grid.gallery.component';
+import {LightboxService} from './lightbox/lightbox.service';
+import {SearchResultDTO} from '../../../../common/entities/SearchResultDTO';
 
 
 // Mock services
@@ -129,6 +131,7 @@ describe('GalleryComponent', () => {
   let mockAuthService: MockAuthenticationService;
   let mockShareService: MockShareService;
   let mockCacheService: MockCacheService;
+  const playback = signal(false);
 
   const setSortedContent = (content: GroupedDirectoryContent): void =>
     (TestBed.inject(ContentService) as unknown as MockContentService).sortedFilteredContent.set(content);
@@ -144,6 +147,7 @@ describe('GalleryComponent', () => {
     mockAuthService = new MockAuthenticationService();
     mockShareService = new MockShareService();
     mockCacheService = new MockCacheService();
+    playback.set(false);
 
     await TestBed.configureTestingModule({
       imports: [GalleryComponent],
@@ -162,6 +166,7 @@ describe('GalleryComponent', () => {
         {provide: BlogService, useClass: MockBlogService},
         {provide: UploaderService, useClass: MockUploaderService},
         {provide: ThemeService, useClass: MockThemeService},
+        {provide: LightboxService, useValue: {playback}},
         {provide: FullScreenService, useValue: {mock: vi.fn()}},
         {provide: OverlayService, useValue: {mock: vi.fn()}},
         {provide: QueryService, useValue: {params: signal({}), getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
@@ -226,6 +231,63 @@ describe('GalleryComponent', () => {
     it('should return null when contentLoader has no content', () => {
       mockContentLoader.content.set(null);
       expect(component.ContentWrapper).toBeNull();
+    });
+  });
+
+  describe('photo frame whose search matches nothing (#1313)', () => {
+    const noMatch = {searchResult: {searchQuery: {}, directories: [], media: []} as unknown as SearchResultDTO} as ContentWrapperWithError;
+
+    it('should show a full screen message without the gallery around it', () => {
+      playback.set(true);
+      mockContentLoader.content.set(noMatch);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.empty-frame')?.textContent).toContain('No photos match this frame.');
+      expect(el.querySelector('app-frame')?.classList).toContain('d-none');
+    });
+
+    it('should show the gallery with the empty search message when it is not a frame', () => {
+      mockContentLoader.content.set(noMatch);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.empty-frame')).toBeNull();
+      expect(el.querySelector('app-frame')?.classList).not.toContain('d-none');
+    });
+  });
+
+  describe('countdown of a sharing (#1307)', () => {
+    const NOW = new Date(2026, 10, 12, 12, 0, 0).getTime();
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const expiresIn = (ms: number): void =>
+      (mockShareService.sharing as unknown as ReturnType<typeof signal<{ expires: number } | null>>).set({expires: NOW + ms});
+
+    it('should show the time left', () => {
+      expiresIn(((24 + 1) * 60 + 1) * 60 * 1000 + 1000);
+      component.updateTimer(0);
+      expect(component.countDown()).toEqual({day: 1, hour: '01', minute: '01', second: '01'});
+      expect(mockContentLoader.reloadCurrentContent).not.toHaveBeenCalled();
+    });
+
+    // the server decides whether the sharing ended: the browser's clock can be off
+    it('should stop at zero and ask the server once', () => {
+      expiresIn(-5000);
+      component.updateTimer(0);
+      vi.setSystemTime(NOW + 1000);
+      component.updateTimer(1);
+
+      expect(component.countDown()).toEqual({day: 0, hour: '00', minute: '00', second: '00'});
+      expect(mockContentLoader.reloadCurrentContent).toHaveBeenCalledTimes(1);
     });
   });
 

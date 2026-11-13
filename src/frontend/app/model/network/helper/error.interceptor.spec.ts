@@ -9,6 +9,8 @@ import {NavigationService} from '../../navigation.service';
 import {ErrorCodes} from '../../../../../common/entities/Error';
 import {UserDTO} from '../../../../../common/entities/UserDTO';
 import {ToastOptions, ToastService} from '../../../ui/toast/toast.service';
+import {ShareService} from '../../../ui/gallery/share.service';
+import {PublicSharingDTO} from '../../../../../common/entities/SharingDTO';
 
 describe('errorInterceptor', () => {
   let http: HttpClient;
@@ -16,15 +18,17 @@ describe('errorInterceptor', () => {
   let authService: Mocked<AuthenticationService>;
   let navigationService: Mocked<NavigationService>;
   let toastService: Mocked<ToastService>;
+  let shareService: { isSharing: ReturnType<typeof vi.fn>, reloadPublicSharing: ReturnType<typeof vi.fn> };
   const user = signal<UserDTO | null>(null);
 
   beforeEach(() => {
     user.set({name: 'user'} as UserDTO);
     authService = {logout: vi.fn(), user} as unknown as Mocked<AuthenticationService>;
     authService.logout.mockResolvedValue(undefined);
-    navigationService = {toError: vi.fn()} as unknown as Mocked<NavigationService>;
+    navigationService = {toError: vi.fn(), toInvalidSharing: vi.fn().mockResolvedValue(true)} as unknown as Mocked<NavigationService>;
     const toasts = signal<ToastOptions[]>([]);
     toastService = {open: vi.fn((t: ToastOptions) => toasts.update(list => [...list, t])), toasts} as unknown as Mocked<ToastService>;
+    shareService = {isSharing: vi.fn().mockReturnValue(false), reloadPublicSharing: vi.fn()};
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withXhr(), withInterceptors([errorInterceptor])),
@@ -32,6 +36,7 @@ describe('errorInterceptor', () => {
         {provide: AuthenticationService, useValue: authService},
         {provide: NavigationService, useValue: navigationService},
         {provide: ToastService, useValue: toastService},
+        {provide: ShareService, useValue: shareService},
       ]
     });
     http = TestBed.inject(HttpClient);
@@ -106,6 +111,40 @@ describe('errorInterceptor', () => {
     expect(await result).toEqual({code: ErrorCodes.NOT_AUTHENTICATED});
     expect(authService.logout).not.toHaveBeenCalled();
     expect(toastService.open).not.toHaveBeenCalled();
+  });
+
+  describe('the session of a sharing guest ended (#1307)', () => {
+    const sharingSessionEnded = async (): Promise<void> => {
+      shareService.isSharing.mockReturnValue(true);
+      const result = request();
+      httpMock.expectOne('/api/test').flush({error: {code: ErrorCodes.NOT_AUTHENTICATED_SHARING}},
+        {status: 401, statusText: 'Unauthorized'});
+      await result;
+      await vi.waitFor(() => expect(shareService.reloadPublicSharing).toHaveBeenCalled());
+      await Promise.resolve();
+    };
+
+    // deleted or expired while the guest has it open, also as a photo frame
+    it('should show the invalid link page when the sharing ended', async () => {
+      shareService.reloadPublicSharing.mockResolvedValue(null);
+
+      await sharingSessionEnded();
+
+      await vi.waitFor(() => expect(navigationService.toInvalidSharing).toHaveBeenCalled());
+      expect(authService.logout).not.toHaveBeenCalled();
+      expect(toastService.open).not.toHaveBeenCalled();
+    });
+
+    // e.g. the session of a password protected sharing timed out: its login page
+    it('should log out when only the session ended', async () => {
+      shareService.reloadPublicSharing.mockResolvedValue({sharingKey: 'key', passwordProtected: true} as PublicSharingDTO);
+
+      await sharingSessionEnded();
+
+      await vi.waitFor(() => expect(authService.logout).toHaveBeenCalledWith(ErrorCodes.NOT_AUTHENTICATED_SHARING));
+      expect(toastService.open).toHaveBeenCalledTimes(1);
+      expect(navigationService.toInvalidSharing).not.toHaveBeenCalled();
+    });
   });
 
   // an illegal move (e.g. a normal user calls the admin API or uploads without the right): log out, also on uploads

@@ -39,17 +39,18 @@ test.describe('Errors', () => {
       test.use(notLoggedIn);
 
       test('should tell a guest that the link is invalid', async ({page}) => {
-        test.fail(true, 'Not implemented yet #1307');
         await page.goto(NOT_EXISTING_SHARING);
 
         await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
+      await expect(page).toHaveURL(url => url.pathname === NOT_EXISTING_SHARING);
+        // the address bar keeps the link
+        await expect(page).toHaveURL(url => url.pathname === NOT_EXISTING_SHARING);
         // not the generic error page
         await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
       });
     });
 
     test('should tell a logged in user that the link is invalid', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       await page.goto(NOT_EXISTING_SHARING);
 
       await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
@@ -67,7 +68,7 @@ test.describe('Errors', () => {
       await page.goto('/gallery/' + encodeURIComponent(missingDir));
 
       await expect(page).toHaveURL(url => isGalleryRoot(url));
-      await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+      await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
     });
 
     // but the user is told why (a warning, not an error)
@@ -115,7 +116,7 @@ test.describe('Errors', () => {
         await openHiddenFolder(page);
 
         await expect(page).toHaveURL(url => isGalleryRoot(url));
-        await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+        await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
         // the folder tiles are rendered: the user would see the hidden folder's tile next to them if it were allowed
         const folderName = page.locator('app-gallery-directory .directory-name');
         await expect(folderName.filter({hasText: 'timestamps'})).toBeVisible();
@@ -209,7 +210,7 @@ test.describe('Errors', () => {
       const retry = page.locator('app-gallery .alert-danger').getByRole('button', {name: 'Retry'});
       await expect(retry).toBeVisible();
       await retry.click();
-      await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+      await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
       await expect(page.locator('app-gallery .alert-danger')).toHaveCount(0);
     });
 
@@ -225,7 +226,7 @@ test.describe('Errors', () => {
       const retry = page.locator('app-gallery .alert-danger').getByRole('button', {name: 'Retry'});
       await expect(retry).toBeVisible();
       await retry.click();
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeAttached();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeAttached();
       await expect(page.locator('app-gallery .alert-danger')).toHaveCount(0);
     });
   });
@@ -240,7 +241,7 @@ test.describe('Errors', () => {
       await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
       await page.getByRole('link', {name: /gallery/i}).first().click();
       await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery'));
-      await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+      await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
     });
   });
 });

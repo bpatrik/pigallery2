@@ -1,6 +1,6 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
-import {provideRouter} from '@angular/router';
+import {provideRouter, Router} from '@angular/router';
 import {NgIconsModule} from '@ng-icons/core';
 import {
   ionChevronBackOutline,
@@ -25,6 +25,8 @@ import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
 import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 import {Config} from '../../../../../../common/config/public/Config';
 import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
+import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../../common/entities/SearchQueryDTO';
 
 class MockLightboxService {
   readonly controllersDimmed = signal(false);
@@ -343,6 +345,87 @@ describe('ControlsLightboxComponent', () => {
       expect(query('.face-box.controls-nodim')).not.toBeNull();
       key('a');
       expect(query('.face-box.controls-nodim')).toBeNull();
+    });
+
+    // #1310: a phone has no hover, the face boxes are hidden but still links
+    describe('the search of a face', () => {
+      let navigateByUrl: ReturnType<typeof vi.spyOn>;
+      let faceUrl: string;
+
+      beforeEach(() => {
+        Config.Faces.enabled = true;
+        vi.spyOn(TestBed.inject(AuthenticationService), 'canSearch').mockReturnValue(true);
+        const router = TestBed.inject(Router);
+        navigateByUrl = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+        faceUrl = router.serializeUrl(router.createUrlTree(['/search', SearchQueryUtils.urlify({
+          type: SearchQueryTypes.person,
+          matchType: TextSearchQueryMatchTypes.exact_match,
+          value: 'Jane Doe'
+        } as TextSearch)]));
+        create();
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+      });
+
+      const face = (): HTMLAnchorElement => query('a.face') as HTMLAnchorElement;
+      const tapFace = (): void => {
+        component.onTap({pointerType: 'touch', target: face().querySelector('.face-box')});
+        fixture.detectChanges();
+      };
+      const click = (init: PointerEventInit): PointerEvent => {
+        const e = new PointerEvent('click', {bubbles: true, cancelable: true, button: 0, ...init});
+        face().dispatchEvent(e);
+        return e;
+      };
+
+      it('should link the face to its search', () => {
+        expect(face().getAttribute('href')).toBe(faceUrl);
+      });
+
+      it('should show the faces on the first tap, and open the search on a tap on a shown face', () => {
+        // the click of the tap does not follow the link
+        expect(click({pointerType: 'touch'}).defaultPrevented).toBe(true);
+        expect(query('.faces-shown')).toBeNull();
+        tapFace();
+        expect(query('.faces-shown')).not.toBeNull();
+        expect(navigateByUrl).not.toHaveBeenCalled();
+
+        tapFace();
+        expect(navigateByUrl).toHaveBeenCalledWith(faceUrl);
+      });
+
+      it('should open the search on the first tap with "Always show faces"', () => {
+        lightboxService.setFacesAlwaysOn(true);
+        tapFace();
+        expect(navigateByUrl).toHaveBeenCalledWith(faceUrl);
+      });
+
+      it('should hide the faces when the controls dim and on a zoom', async () => {
+        vi.useFakeTimers();
+        tapFace();
+        component.doubleTap();
+        fixture.detectChanges();
+        expect(query('.faces-shown')).toBeNull();
+
+        tapFace();
+        await vi.advanceTimersByTimeAsync(2000);
+        fixture.detectChanges();
+        expect(query('.faces-shown')).toBeNull();
+        expect(navigateByUrl).not.toHaveBeenCalled();
+      });
+
+      it('should open the search with a mouse click, and leave a ctrl click to the browser', () => {
+        component.onTap({pointerType: 'mouse', target: face()});
+        expect(query('.faces-shown')).toBeNull();
+        expect(click({pointerType: 'mouse', ctrlKey: true}).defaultPrevented).toBe(false);
+        expect(navigateByUrl).not.toHaveBeenCalled();
+
+        expect(click({pointerType: 'mouse'}).defaultPrevented).toBe(true);
+        expect(navigateByUrl).toHaveBeenCalledWith(faceUrl);
+      });
     });
 
     it('should show the caption of the photo', () => {

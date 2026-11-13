@@ -8,7 +8,6 @@ import chaiAsPromised from 'chai-as-promised';
 import {default as chaiHttp, request} from 'chai-http';
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
-import {expectToFail} from '../../KnownFailures';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
@@ -272,12 +271,12 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
       expect(byAdmin.body.error, 'admin').to.equal(null);
     });
 
-    // updateSharing passes forceUpdate for admins, but SharingManager.updateSharing looks the sharing up by its id
-    // and the requesting user as creator, so an admin only finds the own sharings ('Sharing not found').
     it('should let an Admin update the sharing of another user', async () => {
       const res = await update(admin, SHARED, mine.id, 'admin password', -1);
-      await expectToFail('#1307', () => expect(res.body.error?.message ?? null, 'admin update').to.equal(null),
-        /^admin update: expected 'Error during updating sharing link/);
+      expect(res.body.error?.message ?? null, 'admin update').to.equal(null);
+      // still the sharing of its owner
+      expect(await listForDir(owner, mine)).to.deep.equal([mine.sharingKey]);
+      (await shareLogin(request.agent(server.Server), mine.sharingKey, 'admin password')).should.have.status(200);
     });
   });
 

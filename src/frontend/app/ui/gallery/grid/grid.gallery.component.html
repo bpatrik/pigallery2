@@ -33,7 +33,7 @@
         }
         <div class="media-grid">
           @for (gridPhoto of group.media; track gridPhoto) {
-            <app-gallery-grid-photo (click)="photoClicked(gridPhoto.media)"
+            <app-gallery-grid-photo
               [gridMedia]="gridPhoto"
               [style.width.px]="gridPhoto.renderWidth"
               [style.height.px]="gridPhoto.renderHeight"

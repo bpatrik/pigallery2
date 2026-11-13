@@ -12,8 +12,6 @@ const FRAME_PARAMS = 'play=true&auInt=1&ls=true&cAO=true&cd=true&ssp=300';
 const HOUR = 60 * 60 * 1000;
 
 const countDown = (page: Page) => page.locator('nav').getByText(/Link availability/);
-// the countdown reached zero (or went past it)
-const COUNTDOWN_AT_ZERO = /0\s*days\s*,\s*00:00\s*:00|-\d|NaN/;
 
 test.use(notLoggedIn);
 // the photos of ACCENTED_DIR are 743 px high: no upscaling in the lightbox
@@ -40,7 +38,7 @@ test.describe('Sharing ends while the guest has it open', () => {
 
   const openAsGuest = async (page: Page, sharing: CreatedSharing): Promise<void> => {
     await page.goto('/share/' + sharing.sharingKey);
-    await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible({timeout: 15000});
+    await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeVisible({timeout: 15000});
   };
 
   /**
@@ -71,7 +69,6 @@ test.describe('Sharing ends while the guest has it open', () => {
   });
 
   test('Countdown should not go below zero when the sharing expires', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1307: the countdown goes on below zero ("-1 days , 23:59:59")');
     const sharing = await share({valid: HOUR});
     await page.clock.install();
     await openAsGuest(page, sharing);
@@ -87,8 +84,8 @@ test.describe('Sharing ends while the guest has it open', () => {
     expect([...shown].filter(t => /-\d|NaN/.test(t)), 'negative or NaN countdown values').toEqual([]);
   });
 
-  test('Sharing that expired while open should show the invalid link page on the next navigation', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1307: the guest gets an empty gallery with a negative countdown instead');
+  // the browser's clock reaches the expiry: the app asks the server, which knows that the sharing ended
+  test('Sharing that expired while open should show the invalid link page once its countdown ends', async ({page}) => {
     const sharing = await share({valid: HOUR});
     await page.clock.install();
     await openAsGuest(page, sharing);
@@ -96,8 +93,6 @@ test.describe('Sharing ends while the guest has it open', () => {
     await expireOnServer(sharing);
     // the browser's clock a second past the expiry it knows; the time goes on, so the page keeps working
     await page.clock.fastForward(sharing.expires + 1000 - await page.evaluate(() => Date.now()));
-    await expect(countDown(page)).toHaveText(COUNTDOWN_AT_ZERO);
-    await page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click();
 
     await expectInvalidLinkPage(page);
   });
@@ -119,7 +114,6 @@ test.describe('Sharing ends while the guest has it open', () => {
     });
 
     test('Photo frame should show the invalid link message full screen once its sharing is deleted', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1313: the frame shows the generic error page (Something went spectacularly wrong)');
       const sharing = await share();
       await openFrame(page, sharing);
       await expectApiOk(await admin.delete('/pgapi/share/' + sharing.sharingKey), 'deleting the sharing');
