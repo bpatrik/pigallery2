@@ -243,6 +243,7 @@
   "Upload.blockedExtensions": "array<string>",
   "Upload.enabled": "boolean",
   "Upload.enforcedDirectoryConfig": "boolean",
+  "Upload.maxFileSizeMB": "unsignedInt",
   "Upload.minimumRole": "enum:LimitedGuest,Guest,User,Admin,Developer",
   "Users": "config",
   "Users.allowDirectoryList": "array<config>",
