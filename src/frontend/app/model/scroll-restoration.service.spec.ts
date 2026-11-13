@@ -1,18 +1,18 @@
 import {TestBed} from '@angular/core/testing';
 import {Subject} from 'rxjs';
-import {Event, NavigationEnd, NavigationStart, Router} from '@angular/router';
+import {Event as RouterEvent, NavigationEnd, NavigationStart, Router} from '@angular/router';
 import {ScrollRestorationService} from './scroll-restoration.service';
 
 // #1308, #1310: browser back and forward restore the scroll position of a page, also once its content renders later
 describe('ScrollRestorationService', () => {
   let service: ScrollRestorationService;
-  let events: Subject<Event>;
+  let events: Subject<RouterEvent>;
   let originalRestoration: ScrollRestoration;
   let nextId = 1;
 
   beforeEach(() => {
     originalRestoration = history.scrollRestoration;
-    events = new Subject<Event>();
+    events = new Subject<RouterEvent>();
     nextId = 1;
     TestBed.configureTestingModule({
       providers: [{provide: Router, useValue: {events}}]
@@ -49,9 +49,22 @@ describe('ScrollRestorationService', () => {
     scrolledTo(0);
     navigate('/gallery/', root);
 
-    expect(service.takePending()).toBe(1500);
-    // only once: a later render of the same page doesn't scroll again
-    expect(service.takePending()).toBeNull();
+    expect(service.restoreTarget()).toBe(1500);
+    // also for a later render of the page (e.g. once the folder replaced the previous search)
+    expect(service.restoreTarget()).toBe(1500);
+  });
+
+  it('should stop restoring once the user scrolls, taps or types', () => {
+    for (const input of [new WheelEvent('wheel'), new Event('touchstart'), new KeyboardEvent('keydown'), new Event('pointerdown')]) {
+      const root = navigate('/gallery/');
+      scrolledTo(1500);
+      navigate('/gallery/sub');
+      navigate('/gallery/', root);
+      expect(service.restoreTarget()).toBe(1500);
+
+      window.dispatchEvent(input);
+      expect(service.restoreTarget(), input.type).toBeNull();
+    }
   });
 
   it('should give the scroll position when going forward', () => {
@@ -61,10 +74,9 @@ describe('ScrollRestorationService', () => {
     const root = navigate('/gallery/');
     scrolledTo(1500);
     navigate('/gallery/Árvíztűrő', sub);
-    service.takePending();
     navigate('/gallery/', root);
 
-    expect(service.takePending()).toBe(1500);
+    expect(service.restoreTarget()).toBe(1500);
   });
 
   it('should go to the top of a page that it does not know', () => {
@@ -72,7 +84,7 @@ describe('ScrollRestorationService', () => {
     scrolledTo(1500);
     navigate('/gallery/sub', 1234);
 
-    expect(service.takePending()).toBe(0);
+    expect(service.restoreTarget()).toBe(0);
   });
 
   // the lightbox (?p=) scrolls the grid to its last photo itself
@@ -83,7 +95,7 @@ describe('ScrollRestorationService', () => {
     scrolledTo(1800);
     navigate('/gallery/', grid);
 
-    expect(service.takePending()).toBeNull();
+    expect(service.restoreTarget()).toBeNull();
   });
 
   it('should not restore after a link or a button navigation', () => {
@@ -91,7 +103,7 @@ describe('ScrollRestorationService', () => {
     scrolledTo(1500);
     navigate('/gallery/sub');
 
-    expect(service.takePending()).toBeNull();
+    expect(service.restoreTarget()).toBeNull();
   });
 
   it('should not give the position before the navigation ended', () => {
@@ -100,6 +112,6 @@ describe('ScrollRestorationService', () => {
     navigate('/gallery/sub');
     events.next(new NavigationStart(nextId++, '/gallery/', 'popstate', {navigationId: root}));
 
-    expect(service.takePending()).toBeNull();
+    expect(service.restoreTarget()).toBeNull();
   });
 });

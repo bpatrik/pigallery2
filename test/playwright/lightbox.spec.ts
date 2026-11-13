@@ -125,6 +125,21 @@ test.describe('Lightbox', () => {
     await expect(page).toHaveURL(url => url.pathname.startsWith('/gallery') && !url.searchParams.has('p'));
   });
 
+  // The search of the face is not cached yet (a fresh browser): its empty content removes the grid while the lightbox closes
+  test('Clicking a face should close the lightbox and open the search of the person', async ({page, isMobile}) => {
+    test.skip(isMobile, 'mouse: desktop only');
+    await page.goto('/gallery/?p=IMG_5910.jpg');
+    await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    const face = page.locator('app-lightbox-controls .faces-container a.face').filter({hasText: 'Alvin the Squirrel'});
+    await face.hover();
+    await face.click();
+
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(lightboxImages(page)).toHaveCount(0);
+    await expect(page.locator('app-gallery-grid .photo-link > img').first()).toBeVisible();
+  });
+
   // A phone has no hover: a tap shows the faces, a double tap zooms (also on a face), a tap on a shown face opens its search.
   test('Tapping a face on a phone should show the faces first, not open the search', async ({page, isMobile}) => {
     test.skip(!isMobile, 'touch gestures: mobile project only');
