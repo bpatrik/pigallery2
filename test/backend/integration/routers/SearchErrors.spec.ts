@@ -4,7 +4,6 @@ import * as path from 'node:path';
 import * as fs from 'node:fs';
 import * as chai from 'chai';
 import {expect} from 'chai';
-import {expectToFail} from '../../KnownFailures';
 import {default as chaiHttp, request} from 'chai-http';
 import {SuperAgentStatic} from 'superagent';
 import {DBTestHelper} from '../../DBTestHelper';
@@ -126,8 +125,8 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
       const res = await get('/search/' + q(distance('Balaton ' + Date.now())));
 
       expect(res.headers['content-type']).to.contain('application/json');
-      // today it is a GENERAL_ERROR ('Error during searching'), so the client can't name the place
-      await expectToFail('#1309', () => expect(res.body.error.code).to.equal(ErrorCodes.LocationLookUp_ERROR));
+      expect(res.body.error.code).to.equal(ErrorCodes.LocationLookUp_ERROR);
+      expect(res.body.error.message).to.contain('Balaton');
       await shouldStillSearch();
     });
   });
