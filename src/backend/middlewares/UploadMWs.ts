@@ -79,16 +79,16 @@ export class UploadMWs {
       return next(new ErrorDTO(ErrorCodes.UPLOAD_ERROR, 'No files uploaded'));
     }
 
+    let error: ErrorDTO | undefined;
     try {
       const directory = RequestParams.get(req, 'directory') || '';
       req.resultPipe = await ObjectManagers.getInstance().UploadManager.saveFiles(directory, files);
-      return next();
     } catch (e) {
-      return next(new ErrorDTO(e instanceof FolderNotWritable ? ErrorCodes.PERMISSION_DENIED : ErrorCodes.UPLOAD_ERROR, errorMessage(e)));
-    } finally {
-      // the files that were not moved to the gallery (e.g. one that already exists)
-      await Promise.all(files.filter((f) => f.path).map((f) => fs.promises.rm(f.path, {force: true})));
+      error = new ErrorDTO(e instanceof FolderNotWritable ? ErrorCodes.PERMISSION_DENIED : ErrorCodes.UPLOAD_ERROR, errorMessage(e));
     }
+    // before answering: the files that were not moved to the gallery (e.g. one that already exists)
+    await Promise.all(files.filter((f) => f.path).map((f) => fs.promises.rm(f.path, {force: true})));
+    return next(error);
   }
 
 }
