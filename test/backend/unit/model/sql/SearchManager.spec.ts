@@ -2400,4 +2400,35 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       expect(await names({type: SearchQueryTypes.directory, value: 'summer  trip   2024'} as TextSearch)).to.deep.equal(['beach  sunset']);
     });
   });
+
+  // '\' is the escape character of glob searches, so a plain text search has to escape it
+  describe('text with a backslash', () => {
+    const names = async (value: string, matchType?: TextSearchQueryMatchTypes): Promise<string[]> =>
+      (await new SearchManager().search(DBTestHelper.defaultSession, {type: SearchQueryTypes.caption, value, matchType} as TextSearch))
+        .media.map(m => m.name.split('_')[0]).sort();
+
+    before(async () => {
+      await sqlHelper.initDB();
+      const root = TestHelper.getDirectoryEntry(null, '.');
+      TestHelper.getRandomizedPhotoEntry(root, 'backslash').metadata.caption = 'C:\\photos\\ of the trip';
+      TestHelper.getRandomizedPhotoEntry(root, 'star').metadata.caption = 'C:\\photos* of the trip';
+      TestHelper.getRandomizedPhotoEntry(root, 'plain').metadata.caption = 'photos of the trip';
+      await DBTestHelper.persistTestDir(root);
+    });
+
+    after(async () => {
+      // restore the default gallery of this spec
+      await setUpSqlDB();
+    });
+
+    it('should find a backslash inside the text', async () => {
+      expect(await names('C:\\photos')).to.deep.equal(['backslash', 'star']);
+      expect(await names('C:\\photos\\ of the trip', TextSearchQueryMatchTypes.exact_match)).to.deep.equal(['backslash']);
+    });
+
+    it('should find a backslash at the end of the text', async () => {
+      // not escaped, it would escape the wildcard that a "like" search adds after it
+      expect(await names('photos\\')).to.deep.equal(['backslash']);
+    });
+  });
 });

@@ -1326,7 +1326,7 @@ export class SearchManager {
           `Invalid search query: ${SearchQueryTypes[query.type]}(type: ${query.type}) query should contain 'value' property. Query got: ${JSON.stringify(query)}`
         );
       }
-      (query as TextSearch).value =(query as TextSearch).value.replace(/([*?])/g, '\\$1');
+      (query as TextSearch).value = (query as TextSearch).value.replace(/([\\*?])/g, '\\$1');
       if ((query as TextSearch).matchType != TextSearchQueryMatchTypes.exact_match) {
         (query as TextSearch).value = `*${(query as TextSearch).value}*`;
       }

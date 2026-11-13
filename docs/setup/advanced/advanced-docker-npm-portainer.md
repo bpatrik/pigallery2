@@ -200,6 +200,9 @@ location / {
 }
 ```
 
+**Warning:** this configuration has no rate limiting, and PiGallery2 does not limit the request rate itself (e.g. password guessing on the login page).
+See the `limit_req` lines of the [default nginx.conf](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/default/nginx.conf) for what to add: the `limit_req_zone` lines belong to the `http` level (in NPM: `/data/nginx/custom/http_top.conf`), not to this field.
+
 ---
 
 ## Summary

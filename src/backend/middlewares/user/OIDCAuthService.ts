@@ -1,5 +1,6 @@
 import {Config} from '../../../common/config/private/Config';
 import {Request} from 'express';
+import {randomBytes} from 'node:crypto';
 import * as oidc from 'openid-client';
 import {UserDTO} from '../../../common/entities/UserDTO';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
@@ -146,7 +147,8 @@ export class OIDCAuthService {
   }
 
   private static createUser(name: string, oidcSubject?: string): Promise<UserDTO> {
-    const rnd = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+    // nobody knows this password, but it still has to be unguessable: it works on the login page too
+    const rnd = randomBytes(32).toString('base64url');
     const newUser: UserDTO = {name, password: rnd, role: Config.Users.oidc.autoCreateUserRole, oidcSubject} as UserDTO;
     return ObjectManagers.getInstance().UserManager.createUser(newUser);
   }
