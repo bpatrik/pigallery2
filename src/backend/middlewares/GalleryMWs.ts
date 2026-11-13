@@ -13,7 +13,7 @@ import {MediaDTO, MediaDTOUtils} from '../../common/entities/MediaDTO';
 import {VideoDTO} from '../../common/entities/VideoDTO';
 import {QueryParams} from '../../common/QueryParams';
 import {VideoProcessing} from '../model/fileaccess/fileprocessing/VideoProcessing';
-import {SearchQueryDTO, SearchQueryTypes,} from '../../common/entities/SearchQueryDTO';
+import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../common/SearchQueryUtils';
 import {LocationLookupException} from '../exceptions/LocationLookupException';
 import {ServerTime} from './ServerTimingMWs';
@@ -137,7 +137,8 @@ export class GalleryMWs {
       }
 
       res.set('Content-Type', 'application/zip');
-      res.set('Content-Disposition', 'attachment; filename=SearchResults.zip');
+      // sets filename* too, so non-ASCII names survive
+      res.attachment(GalleryMWs.zipName(query));
 
       const archive = new ZipArchive({
         store: true, // disable compression
@@ -191,6 +192,19 @@ export class GalleryMWs {
         new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Error creating search results zip', err)
       );
     }
+  }
+
+  /**
+   * The zip of a folder (the navbar's exact directory query) is named after the folder, other searches are SearchResults.zip.
+   */
+  private static zipName(query: SearchQueryDTO): string {
+    const dirQuery = query as TextSearch;
+    if (query.type !== SearchQueryTypes.directory || dirQuery.matchType !== TextSearchQueryMatchTypes.exact_match || dirQuery.negate) {
+      return 'SearchResults.zip';
+    }
+    // './a/b', 'a/b' or '.' (the root)
+    const folder = dirQuery.value.split('/').filter(p => p !== '' && p !== '.').pop();
+    return (folder ?? Config.Server.applicationTitle) + '.zip';
   }
 
   @ServerTime('3.pack', 'pack result')

@@ -28,7 +28,7 @@ test.describe('Zip download', () => {
     await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeVisible();
 
     const {download, names} = await downloadZip(page);
-    expect(download.suggestedFilename()).toMatch(/\.zip$/);
+    expect(download.suggestedFilename(), 'named after the folder').toBe(ACCENTED_DIR + '.zip');
     expect(names).toEqual(['IMG_8943.jpg', 'IMG_9697.jpg']);
   });
 

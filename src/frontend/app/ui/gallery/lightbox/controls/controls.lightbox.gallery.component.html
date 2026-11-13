@@ -55,6 +55,7 @@
               <a
                 [href]="originalMediaPath()"
                 [download]="activePhoto.media.name"
+                (click)="downloadOriginal($event)"
                 class="dropdown-item">
                 <ng-icon class="me-2"
                 name="ionDownloadOutline" title="Download" i18n-title />
