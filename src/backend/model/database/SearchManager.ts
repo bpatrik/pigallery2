@@ -59,19 +59,22 @@ export class SearchManager {
   /**
    * A text condition that ignores the accents and the case as far as the DB can, see foldsText().
    * @param escape '\' escapes the wildcards of the value (MySQL does it by default, SQLite only with ESCAPE)
+   * @param wrap an SQL expression around the compared text (not around the IS NOT NULL check)
    */
-  private static like(field: string, param: string, options: { negate?: boolean, escape?: boolean } = {}): string {
+  private static like(field: string, param: string, options: { negate?: boolean, escape?: boolean, wrap?: (expr: string) => string } = {}): string {
     const op = options.negate ? 'NOT LIKE' : 'LIKE';
+    const wrap = options.wrap ?? ((expr: string): string => expr);
     if (Config.Database.type === DatabaseType.sqlite) {
       const esc = options.escape ? ' ESCAPE \'\\\'' : '';
       if (!SearchManager.foldsText()) {
-        return `${field} ${op} :${param}${esc}`;
+        return `${wrap(field)} ${op} :${param}${esc}`;
       }
       // most captions, keywords and persons are empty: those rows need no call of the JS function (idea from #1218).
       // FALSE instead of NULL makes no difference, as the conditions are never negated with NOT (...)
-      return `(${field} IS NOT NULL AND fold(${field}) ${op} :${param}${esc})`;
+      // The raw column is checked and folded, so the wrap runs once and only for rows that have a text.
+      return `(${field} IS NOT NULL AND ${wrap(`fold(${field})`)} ${op} :${param}${esc})`;
     }
-    return `${field} ${op} :${param} COLLATE ${SQL_COLLATE}`;
+    return `${wrap(field)} ${op} :${param} COLLATE ${SQL_COLLATE}`;
   }
 
   // Whether an autocomplete text contains what was typed, ignoring the accents and the case (like MySQL's SQL_COLLATE)
@@ -1007,9 +1010,9 @@ export class SearchManager {
 
       const likeValue = (value: string): string => SearchManager.likeValue(value);
       // convertGlobToLike escapes with '\', that is the default in MySQL but SQLite has no default escape character
-      const likeExpr = (field: string, paramName: string): string =>
-        SearchManager.like(field, paramName + queryId, {negate: (query as TextSearch).negate, escape: true});
-      const getLikeExpr = (fieldName: string, paramName: string): string => likeExpr(collapseSpaces(fieldName), paramName);
+      const likeExpr = (field: string, paramName: string, wrap?: (expr: string) => string): string =>
+        SearchManager.like(field, paramName + queryId, {negate: (query as TextSearch).negate, escape: true, wrap});
+      const getLikeExpr = (fieldName: string, paramName: string): string => likeExpr(fieldName, paramName, collapseSpaces);
 
       const textParam: Record<string, unknown> = {};
       textParam['text' + queryId] = likeValue(createMatchString(textValue));
@@ -1112,6 +1115,14 @@ export class SearchManager {
                 const globPattern = convertGlobToLike((query as TextSearch).value);
 
                 textParam['CtextC' + queryId] = likeValue(`%,${globPattern},%`);
+                if (SearchManager.foldsText()) {
+                  // with a comma on both ends one pattern covers all four cases: one fold() call per row instead of four
+                  qb[whereFN](
+                    likeExpr(fieldName, 'CtextC', (expr): string => `(',' || ${expr} || ',')`),
+                    textParam
+                  );
+                  return;
+                }
                 textParam['Ctext' + queryId] = likeValue(`%,${globPattern}`);
                 textParam['textC' + queryId] = likeValue(`${globPattern},%`);
                 textParam['text_exact' + queryId] = likeValue(globPattern);

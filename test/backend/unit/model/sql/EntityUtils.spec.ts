@@ -16,6 +16,12 @@ describe('EntityUtils', () => {
       expect(foldText('Padmé')).to.equal('padme');
     });
 
+    // toLowerCase() makes a word-final Σ a ς, but a typed "οδοσ" has to find "ΟΔΟΣ" too
+    it('should fold the Greek final sigma to a sigma', () => {
+      expect(foldText('ΟΔΟΣ')).to.equal('οδοσ');
+      expect(foldText('οδός')).to.equal(foldText('%ΟΔΟΣ%')!.replace(/%/g, ''));
+    });
+
     it('should keep the letters that have no accent to remove', () => {
       expect(foldText('Øre Łódź straße Ω')).to.equal('øre łodz straße ω');
     });

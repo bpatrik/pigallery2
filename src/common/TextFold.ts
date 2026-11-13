@@ -8,7 +8,8 @@ const foldedChars = new Map<string, string>();
 export const foldChar = (char: string): string => {
   let folded = foldedChars.get(char);
   if (folded === undefined) {
-    folded = char.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '');
+    // ς is how a word-final σ is written: toLowerCase() makes it from Σ depending on what follows
+    folded = char.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace('ς', 'σ');
     foldedChars.set(char, folded);
   }
   return folded;
