@@ -14,6 +14,7 @@ import {VideoDTO} from '../../common/entities/VideoDTO';
 import {QueryParams} from '../../common/QueryParams';
 import {VideoProcessing} from '../model/fileaccess/fileprocessing/VideoProcessing';
 import {SearchQueryDTO, SearchQueryTypes,} from '../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../common/SearchQueryUtils';
 import {LocationLookupException} from '../exceptions/LocationLookupException';
 import {ServerTime} from './ServerTimingMWs';
 import {SortByTypes} from '../../common/entities/SortingMethods';
@@ -36,18 +37,8 @@ export class GalleryMWs {
         return next();
       }
 
-      let query: SearchQueryDTO;
-      try {
-        query = JSON.parse(rawQueryParam) as SearchQueryDTO;
-      } catch (parseError) {
-        return next(
-          new ErrorDTO(
-            ErrorCodes.INPUT_ERROR,
-            'Invalid search query JSON: ' + (parseError as SyntaxError).message, // JSON.parse only throws SyntaxError
-            parseError
-          )
-        );
-      }
+      // the shortened query of the search page urls (e.g. the random link of the gallery) or the full JSON
+      const query = SearchQueryUtils.parseURLifiedQuery(rawQueryParam);
 
       // Store the parsed query for use by subsequent middlewares
       req.resultPipe = query;
