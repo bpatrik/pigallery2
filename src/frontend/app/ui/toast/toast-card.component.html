@@ -1,9 +1,12 @@
-<ng-icon class="toast-icon text-{{ color() }}" [name]="icon()"/>
-<div class="toast-content">
-  <div class="toast-title"><ng-content select="[toastTitle]"/></div>
-  <div class="toast-text"><ng-content/></div>
+<!-- the body scrolls when the card hits its max-height, the bar stays at the bottom of the card -->
+<div class="toast-body">
+  <ng-icon class="toast-icon text-{{ color() }}" [name]="icon()"/>
+  <div class="toast-content">
+    <div class="toast-title"><ng-content select="[toastTitle]"/></div>
+    <div class="toast-text"><ng-content/></div>
+  </div>
+  <div class="toast-actions"><ng-content select="[toastAction]"/></div>
 </div>
-<ng-content select="[toastAction]"/>
 @if (countdown()) {
   <div class="toast-bar countdown bg-{{ color() }}" [style.animation-duration.ms]="countdown()"></div>
 } @else if (progress() !== null) {

@@ -7,7 +7,10 @@
   padding: 1rem;
   display: flex;
   gap: 0.5rem;
+  overflow-x: hidden; /* a closing toast slides out sideways, that must not scroll the stack */
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-secondary-color) transparent;
   pointer-events: none;
 }
 
@@ -30,6 +33,7 @@
 
 app-toast-card {
   flex-shrink: 0;
+  max-height: calc(80vh - 2rem); /* a long card scrolls itself, not the stack */
   pointer-events: auto;
 }
 
