@@ -27,6 +27,9 @@ import {Config} from '../../../../../../common/config/public/Config';
 import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../../common/entities/SearchQueryDTO';
+import {NotificationService} from '../../../../model/notification.service';
+import {By} from '@angular/platform-browser';
+import {BsDropdownDirective} from 'ngx-bootstrap/dropdown';
 
 class MockLightboxService {
   readonly controllersDimmed = signal(false);
@@ -52,6 +55,10 @@ class MockLightboxService {
   setPlayback(value: boolean): void {
     this.playback.set(value);
   }
+}
+
+class MockNotificationService {
+  warning = vi.fn<(text: string | null) => void>();
 }
 
 class MockFullScreenService {
@@ -94,6 +101,7 @@ describe('ControlsLightboxComponent - cursor visibility', () => {
         {provide: LightboxService, useClass: MockLightboxService},
         {provide: FullScreenService, useClass: MockFullScreenService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
+        {provide: NotificationService, useClass: MockNotificationService},
         provideRouter([]),
       ],
     }).compileComponents();
@@ -189,6 +197,7 @@ describe('ControlsLightboxComponent', () => {
         {provide: LightboxService, useClass: MockLightboxService},
         {provide: FullScreenService, useClass: MockFullScreenService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
+        {provide: NotificationService, useClass: MockNotificationService},
         provideRouter([]),
       ],
     }).compileComponents();
@@ -311,6 +320,69 @@ describe('ControlsLightboxComponent', () => {
       expect(component.zoom()).toBe(5);
       component.doubleTap();
       expect(component.zoom()).toBe(1);
+    });
+  });
+
+  // #1311: a file deleted from the disk is still in the DB until the next reindexing
+  describe('download', () => {
+    let notification: MockNotificationService;
+    let clicked: ReturnType<typeof vi.spyOn>;
+    let fetchMock: ReturnType<typeof vi.fn>;
+
+    const respond = (status: number): void => {
+      fetchMock = vi.fn().mockResolvedValue(new Response(null, {status}));
+      vi.stubGlobal('fetch', fetchMock);
+    };
+    const download = async (): Promise<void> => {
+      window.dispatchEvent(new KeyboardEvent('keydown', {key: 'D', shiftKey: true}));
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      await fixture.whenStable();
+    };
+
+    beforeEach(() => {
+      create();
+      notification = TestBed.inject(NotificationService) as unknown as MockNotificationService;
+      // jsdom can't download: only check that the download link is clicked
+      clicked = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+    });
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.restoreAllMocks();
+    });
+
+    it('should download the original file with its name', async () => {
+      respond(200);
+      await download();
+
+      expect(fetchMock).toHaveBeenCalledWith(photo().getOriginalMediaPath(), {method: 'HEAD'});
+      expect(clicked).toHaveBeenCalledTimes(1);
+      const link = clicked.mock.contexts[0] as HTMLAnchorElement;
+      expect(link.download).toBe('autumn hike.jpg');
+      expect(notification.warning).not.toHaveBeenCalled();
+    });
+
+    it('should tell that a file deleted from the disk is not available anymore', async () => {
+      respond(404);
+      await download();
+
+      expect(notification.warning).toHaveBeenCalledWith('This file is not available anymore.');
+      expect(clicked).not.toHaveBeenCalled();
+    });
+
+    it('should check the file also from the download menu item', async () => {
+      respond(404);
+      // the toggle button does not open the menu in jsdom
+      fixture.debugElement.query(By.directive(BsDropdownDirective)).injector.get(BsDropdownDirective).show();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      const click = new MouseEvent('click', {bubbles: true, cancelable: true});
+      query('a.dropdown-item[href]')!.dispatchEvent(click);
+
+      await vi.waitFor(() => expect(notification.warning).toHaveBeenCalledWith('This file is not available anymore.'));
+      expect(click.defaultPrevented, 'the unchecked download of the link itself').toBe(true);
+      expect(clicked).not.toHaveBeenCalled();
     });
   });
 

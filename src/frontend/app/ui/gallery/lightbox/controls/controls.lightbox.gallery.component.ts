@@ -20,6 +20,7 @@ import {FormsModule} from '@angular/forms';
 import {Router} from '@angular/router';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
 import {GestureDirective, PanEvent, PinchEvent, TapEvent} from '../../../utils/gesture/gesture.directive';
+import {NotificationService} from '../../../../model/notification.service';
 
 
 @Component({
@@ -46,6 +47,7 @@ export class ControlsLightboxComponent implements OnDestroy {
   private locale = inject(LOCALE_ID);
   private router = inject(Router);
   private locationStrategy = inject(LocationStrategy);
+  private notification = inject(NotificationService);
 
   readonly MAX_ZOOM = 10;
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
@@ -316,14 +318,8 @@ export class ControlsLightboxComponent implements OnDestroy {
         break;
       case 'd':
       case 'D':
-        if (event.shiftKey && activePhoto) {
-          const link = document.createElement('a');
-          link.setAttribute('type', 'hidden');
-          link.href = activePhoto.getOriginalMediaPath();
-          link.download = activePhoto.media.name;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
+        if (event.shiftKey) {
+          void this.downloadOriginal();
         }
         break;
       case 'Escape': // escape
@@ -335,6 +331,34 @@ export class ControlsLightboxComponent implements OnDestroy {
         }
         break;
     }
+  }
+
+  /**
+   * Downloads the original file. A file deleted from the disk stays in the DB until the next reindexing:
+   * it is checked first, so the user gets a message instead of a failed download (#1311).
+   */
+  public async downloadOriginal(event?: Event): Promise<void> {
+    event?.preventDefault();
+    const activePhoto = this.activePhoto();
+    if (!activePhoto) {
+      return;
+    }
+    const url = activePhoto.getOriginalMediaPath();
+    try {
+      if ((await fetch(url, {method: 'HEAD'})).status === 404) {
+        this.notification.warning($localize`This file is not available anymore.`);
+        return;
+      }
+    } catch {
+      // offline: the browser shows its own error for the download
+    }
+    const link = document.createElement('a');
+    link.setAttribute('type', 'hidden');
+    link.href = url;
+    link.download = activePhoto.media.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 
   private runSlideShow(): void {
