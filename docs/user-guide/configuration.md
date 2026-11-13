@@ -190,7 +190,7 @@ App CLI options:
   --Database-type                                                           SQLite is recommended. (default: 'sqlite')
   --Database-dbFolder                                                       All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   --Database-sqlite-DBFileName                                              Sqlite will save the db with this filename. (default: 'sqlite.db')
-  --Database-sqlite-accentInsensitiveSearch                                 Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Makes text search several times slower on a large gallery. (default: false)
+  --Database-sqlite-accentInsensitiveSearch                                 Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower. (default: false)
   --Database-mysql-host                                                      (default: 'localhost')
   --Database-mysql-port                                                      (default: 3306)
   --Database-mysql-database                                                  (default: 'pigallery2')
@@ -381,7 +381,7 @@ Environmental variables:
   Database-type                                                         SQLite is recommended. (default: 'sqlite')
   Database-dbFolder                                                     All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   Database-sqlite-DBFileName                                            Sqlite will save the db with this filename. (default: 'sqlite.db')
-  Database-sqlite-accentInsensitiveSearch                               Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Makes text search several times slower on a large gallery. (default: false)
+  Database-sqlite-accentInsensitiveSearch                               Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower. (default: false)
   Database-mysql-host                                                    (default: 'localhost')
   MYSQL_HOST                                                             same as Database-mysql-host
   Database-mysql-port                                                    (default: 3306)
@@ -1100,7 +1100,7 @@ Environmental variables:
         "sqlite": {
             "//[DBFileName]": "Sqlite will save the db with this filename.",
             "DBFileName": "sqlite.db",
-            "//[accentInsensitiveSearch]": "Search and autocomplete ignore the accents and the case of every letter (e.g. \"padme\" finds \"Padmé\"), like on MySQL. Without it SQLite ignores only the case of the English letters. Makes text search several times slower on a large gallery.",
+            "//[accentInsensitiveSearch]": "Search and autocomplete ignore the accents and the case of every letter (e.g. \"padme\" finds \"Padmé\"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower.",
             "accentInsensitiveSearch": false
         },
         "mysql": {

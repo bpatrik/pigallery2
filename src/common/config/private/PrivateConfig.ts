@@ -173,9 +173,13 @@ export class SQLiteConfig {
     tags:
       {
         name: $localize`Accent-insensitive search`,
-        priority: ConfigPriority.advanced
+        priority: ConfigPriority.advanced,
+        githubIssue: 729,
+        uiWarning: (v: unknown) => v === true ?
+          $localize`Slows down the database significantly: every text search and autocomplete becomes several times slower, which is noticeable on a large gallery or a Raspberry Pi.` :
+          undefined
       },
-    description: $localize`Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Makes text search several times slower on a large gallery.`,
+    description: $localize`Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower.`,
   })
   accentInsensitiveSearch: boolean = false;
 }
