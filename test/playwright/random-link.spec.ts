@@ -24,7 +24,6 @@ test.describe('Random link', () => {
     });
 
     test('should tell that no photos match', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1313: the browser shows the raw JSON error {"error":{"code":50,"message":"No photo found"...}}');
       await page.goto(randomLink('zzzznorandommatch.jpg'));
 
       await expect(page.getByText(/no photos match/i)).toBeVisible();

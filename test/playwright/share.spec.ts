@@ -385,16 +385,15 @@ test.describe('Share', () => {
     });
 
     test('Expired sharing should tell the guest that the link is invalid or has expired', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       // expires 1 ms after its creation
       const sharingKey = await createSharingForTest('timestamps', {valid: 1});
       await page.goto('/share/' + sharingKey);
 
       await expectInvalidLinkPage(page);
+      await expect(page).toHaveURL(url => url.pathname === '/share/' + sharingKey);
     });
 
     test('Sharing deleted while the guest has it open should show the invalid link page on the next navigation', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       const sharingKey = await createSharingForTest(ACCENTED_DIR, {recursive: true});
       await page.goto('/share/' + sharingKey);
       await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();

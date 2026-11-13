@@ -46,3 +46,9 @@ app-gallery-map, .gallery-map-placeholder {
   margin-left: 2px;
   display: block;
 }
+
+/* #1313: a photo frame with nothing to show, full screen */
+.empty-frame {
+  position: fixed;
+  inset: 0;
+}

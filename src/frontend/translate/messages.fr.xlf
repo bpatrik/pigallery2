@@ -3878,7 +3878,7 @@
         <source>Your session has ended. Please log in again.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/model/network/helper/error.interceptor.ts</context>
-          <context context-type="linenumber">24</context>
+          <context context-type="linenumber">20</context>
         </context-group>
         <target>Your session has ended. Please log in again.</target>
       </trans-unit>
@@ -5186,11 +5186,27 @@
         </context-group>
         <target>Shutter speed</target>
       </trans-unit>
+      <trans-unit id="5548426212082853170" datatype="html">
+        <source>No photos match this frame.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
+          <context context-type="linenumber">6</context>
+        </context-group>
+        <target>No photos match this frame.</target>
+      </trans-unit>
+      <trans-unit id="7706802473463189391" datatype="html">
+        <source>It shows the photos as soon as some match.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
+          <context context-type="linenumber">7,8</context>
+        </context-group>
+        <target>It shows the photos as soon as some match.</target>
+      </trans-unit>
       <trans-unit id="2817799343282769458" datatype="html">
         <source>Link availability</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
-          <context context-type="linenumber">8</context>
+          <context context-type="linenumber">17</context>
         </context-group>
         <target>Disponibilité des liens</target>
       </trans-unit>
@@ -5198,7 +5214,7 @@
         <source>days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
-          <context context-type="linenumber">10</context>
+          <context context-type="linenumber">19</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
@@ -5210,7 +5226,7 @@
         <source>Retry</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
-          <context context-type="linenumber">42,43</context>
+          <context context-type="linenumber">51,52</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
@@ -5222,7 +5238,7 @@
         <source> Too many results to show. Refine your search. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
-          <context context-type="linenumber">60,61</context>
+          <context context-type="linenumber">69,70</context>
         </context-group>
         <target> Trop de résultats à afficher. Précisez votre recherche. </target>
       </trans-unit>
@@ -5230,7 +5246,7 @@
         <source>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">125</context>
+          <context context-type="linenumber">127</context>
         </context-group>
         <target>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</target>
       </trans-unit>
@@ -5238,7 +5254,7 @@
         <source>Check the spelling or try fewer words.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">126</context>
+          <context context-type="linenumber">128</context>
         </context-group>
         <target>Check the spelling or try fewer words.</target>
       </trans-unit>
@@ -5246,7 +5262,7 @@
         <source>This folder is empty.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">130</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <target>This folder is empty.</target>
       </trans-unit>
@@ -6889,6 +6905,30 @@
           <context context-type="linenumber">342</context>
         </context-group>
         <target>Upload failed.</target>
+      </trans-unit>
+      <trans-unit id="6009155907060376263" datatype="html">
+        <source>This link is invalid or has expired.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/invalid-sharing/invalid-sharing.component.html</context>
+          <context context-type="linenumber">7</context>
+        </context-group>
+        <target>This link is invalid or has expired.</target>
+      </trans-unit>
+      <trans-unit id="6441339821362062110" datatype="html">
+        <source>Ask the person who shared it for a new link.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/invalid-sharing/invalid-sharing.component.html</context>
+          <context context-type="linenumber">8,9</context>
+        </context-group>
+        <target>Ask the person who shared it for a new link.</target>
+      </trans-unit>
+      <trans-unit id="8381456313279476438" datatype="html">
+        <source>Go to your gallery</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/invalid-sharing/invalid-sharing.component.html</context>
+          <context context-type="linenumber">10,11</context>
+        </context-group>
+        <target>Go to your gallery</target>
       </trans-unit>
       <trans-unit id="1692815930495952260" datatype="html">
         <source>Please log in</source>

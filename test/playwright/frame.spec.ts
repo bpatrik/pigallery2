@@ -28,7 +28,10 @@ test.describe('Photo frame', () => {
 
   // keeps showing the current photo and retries quietly (a small indicator only after a few failures is not checked here)
   test('should keep showing the photo when it loses the connection to the server', async ({page}) => {
+    // the lightbox can show the photo of the URL before the folder arrives; it shows it again from the folder then
+    const folder = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/gallery/content/');
     await page.goto('/gallery/?p=IMG_5910.jpg&' + frameParams(300, 1));
+    await folder;
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
 
     let failed = 0;
@@ -62,7 +65,6 @@ test.describe('Photo frame', () => {
     });
 
     test('should show a full screen message', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1313');
       const search = page.waitForResponse(res => isSearch(new URL(res.url())));
       await page.goto('/search/' + query + '?' + frameParams(1, 300));
       await search;
@@ -70,7 +72,7 @@ test.describe('Photo frame', () => {
       const message = page.getByText(/no photos match this frame/i);
       await expect(message).toBeVisible();
       // full screen: nothing of the gallery around it
-      await expect(page.locator('app-frame nav')).toBeHidden();
+      await expect(page.locator('app-frame')).toBeHidden();
       await expect(page.locator('app-toast-card')).toHaveCount(0);
     });
   });

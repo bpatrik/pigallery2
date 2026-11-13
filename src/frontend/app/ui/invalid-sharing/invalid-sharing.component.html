@@ -1,0 +1,13 @@
+<div class="container d-flex flex-column align-items-center">
+  <h1 class="title mt-5">
+    <app-icon [width]="60" />
+    {{ title }}
+  </h1>
+  <app-empty-state icon="ionUnlinkOutline">
+    <ng-container i18n>This link is invalid or has expired.</ng-container>
+    <span hint i18n>Ask the person who shared it for a new link.</span>
+    @if (canOpenGallery()) {
+      <button action type="button" class="btn btn-primary mt-4" (click)="openGallery()" i18n>Go to your gallery</button>
+    }
+  </app-empty-state>
+</div>

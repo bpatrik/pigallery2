@@ -472,7 +472,9 @@ export class GalleryMWs {
           RequestSession.getContext(req),
           query, [{method: SortByTypes.Random, ascending: null}], 1, true);
       if (!photos || photos.length !== 1) {
-        return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'No photo found'));
+        // the link opens in a browser, a photo frame or an <img> (#1313): a plain text, not a JSON error
+        res.status(404).type('text/plain').send('No photos match this random link.');
+        return;
       }
 
       req.params['mediaPath'] = path.join(

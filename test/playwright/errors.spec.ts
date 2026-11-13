@@ -39,17 +39,18 @@ test.describe('Errors', () => {
       test.use(notLoggedIn);
 
       test('should tell a guest that the link is invalid', async ({page}) => {
-        test.fail(true, 'Not implemented yet #1307');
         await page.goto(NOT_EXISTING_SHARING);
 
         await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});
+      await expect(page).toHaveURL(url => url.pathname === NOT_EXISTING_SHARING);
+        // the address bar keeps the link
+        await expect(page).toHaveURL(url => url.pathname === NOT_EXISTING_SHARING);
         // not the generic error page
         await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
       });
     });
 
     test('should tell a logged in user that the link is invalid', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1307');
       await page.goto(NOT_EXISTING_SHARING);
 
       await expect(page.getByText(invalidLinkMessage).first()).toBeVisible({timeout: 10000});

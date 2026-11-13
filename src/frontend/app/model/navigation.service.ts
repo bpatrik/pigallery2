@@ -9,6 +9,8 @@ import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 @Injectable({providedIn: 'root'})
 export class NavigationService {
   private static readonly RETURN_URL = 'returnUrl';
+  // shown without changing the address bar: it keeps the link, and a reload checks the link again
+  public static readonly INVALID_SHARING_URL = '/invalidSharing';
   private router = inject(Router);
   private shareService = inject(ShareService);
   // the url of the last successful navigation (the same as router.url once the navigation finished)
@@ -45,8 +47,7 @@ export class NavigationService {
     if (this.shareService.isSharing()) {
       const publicSharing = await this.shareService.getPublicSharing();
       if (!publicSharing) {
-        console.error('Navigating to share login with an invalid sharing');
-        return this.toError();
+        return this.toInvalidSharing();
       }
       if (publicSharing.passwordProtected === true) {
         return this.router.navigate(['shareLogin'], {
@@ -123,6 +124,13 @@ export class NavigationService {
 
   public async search(searchText: string): Promise<boolean> {
     return this.router.navigate(['search', searchText]);
+  }
+
+  /**
+   * A missing, expired or deleted sharing link (#1307).
+   */
+  public toInvalidSharing(): Promise<boolean> {
+    return this.router.navigateByUrl(NavigationService.INVALID_SHARING_URL, {skipLocationChange: true});
   }
 
   public async toError(): Promise<boolean> {

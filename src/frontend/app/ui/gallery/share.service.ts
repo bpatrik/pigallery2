@@ -323,6 +323,15 @@ export class ShareService {
     return this.publicSharing();
   }
 
+  /**
+   * Asks the server again whether the sharing is still valid (e.g. it might have been deleted or expired since).
+   * Returns its public info, or null if it is not valid anymore.
+   */
+  public async reloadPublicSharing(): Promise<PublicSharingDTO | null> {
+    await this.checkSharing();
+    return this.publicSharing();
+  }
+
   private async checkSharing(): Promise<void> {
     try {
       this.sharingIsValid.set(null);
@@ -338,6 +347,7 @@ export class ShareService {
       }
     } catch (e) {
       this.sharingIsValid.set(false);
+      this.publicSharing.set(null);
       console.error(e);
     }
   }

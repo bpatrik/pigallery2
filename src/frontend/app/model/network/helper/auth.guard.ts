@@ -1,9 +1,9 @@
 import {inject} from '@angular/core';
-import {CanActivateFn} from '@angular/router';
+import {ActivatedRouteSnapshot, RouterStateSnapshot} from '@angular/router';
 import {AuthenticationService} from '../authentication.service';
 import {NavigationService} from '../../navigation.service';
 
-export const authGuard: CanActivateFn = (_route, state): boolean => {
+export const authGuard = (_route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean => {
   if (inject(AuthenticationService).isAuthenticated() === true) {
     return true;
   }

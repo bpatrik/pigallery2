@@ -134,23 +134,17 @@ describe('Search errors', (sqlHelper: DBTestHelper) => {
   describe('random photo link that matches nothing (#1313)', () => {
     const noMatch = (): string => '/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'no such photo'} as TextSearch);
 
-    it('should answer a JSON error, not an image and not a crash', async () => {
+    // the link opens in a browser, a frame or an <img>: a plain text for a person, the status for the rest
+    it('should answer HTTP 404 with a plain text, not an image and not a crash', async () => {
       const res = await get(noMatch());
 
-      expect(res.status).to.not.equal(500);
-      expect(res.headers['content-type']).to.contain('application/json');
-      expect(res.body.error.code).to.equal(ErrorCodes.INPUT_ERROR);
-      expect(res.body.result).to.equal(null);
+      res.should.have.status(404);
+      expect(res.headers['content-type']).to.contain('text/plain');
+      expect(res.text).to.equal('No photos match this random link.');
       // the server keeps working, also for a random link that matches
       const ok = await get('/gallery/random/' + q({type: SearchQueryTypes.file_name, value: 'abbey'} as TextSearch));
       ok.should.have.status(200);
       expect(ok.headers['content-type']).to.equal('image/jpeg');
-    });
-
-    // a frame or an <img> only sees the status: INPUT_ERROR goes out as 400 (#1305)
-    it('should answer with an HTTP error status', async () => {
-      const res = await get(noMatch());
-      res.should.have.status(400);
     });
   });
 });
