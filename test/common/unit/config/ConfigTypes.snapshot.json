@@ -17,6 +17,7 @@
   "Database.mysql.username": "string",
   "Database.sqlite": "config",
   "Database.sqlite.DBFileName": "string",
+  "Database.sqlite.accentInsensitiveSearch": "boolean",
   "Database.type": "enum:mysql,sqlite",
   "Duplicates": "config",
   "Duplicates.listingLimit": "unsignedInt",

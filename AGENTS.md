@@ -223,6 +223,8 @@ Pitfalls seen so far:
 - Every `@ConfigProperty` needs an explicit `type` (and `arrayType` for arrays): the frontend is built without decorator metadata,
   so typeconfig can't infer it there. `test/common/unit/config/ConfigTypes.spec.ts` checks this and snapshots the resolved types;
   after an intended config change, regenerate the snapshot with `UPDATE_CONFIG_SNAPSHOT=true`.
+- A new config entry gets the GitHub issue that explains why it exists (`tags: {githubIssue: <n>}`), when there is one:
+  the settings page links it, so users find the background there.
 - Never expose private config values or another user's data to the client.
 - Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.

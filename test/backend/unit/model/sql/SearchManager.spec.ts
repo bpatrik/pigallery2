@@ -37,7 +37,6 @@ import {SessionUser, SessionContext} from '../../../../../src/backend/model/Sess
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';
-import {expectToFail} from '../../../KnownFailures';
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
 const chai = require('chai');
@@ -1654,6 +1653,32 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       describe('with accents', () => {
         const names = async (query: TextSearch): Promise<string[]> =>
           (await new SearchManager().search(DBTestHelper.defaultSession, query)).media.map(m => m.name);
+        const autocomplete = (value: string, type = SearchQueryTypes.any_text): Promise<AutoCompleteItem[]> =>
+          new SearchManager().autocomplete(DBTestHelper.defaultSession, value, type);
+
+        // MySQL ignores the accents by its collation, SQLite only with this switch (it makes the search slower)
+        beforeEach(() => {
+          Config.Database.sqlite!.accentInsensitiveSearch = true;
+        });
+        afterEach(sqlHelper.resetConfig);
+
+        it('should suggest accented text typed without the accents', async () => {
+          expect(await autocomplete('padme')).to.deep.equalInAnyOrder([
+            new AutoCompleteItem('Padmé Amidala', SearchQueryTypes.keyword),
+            new AutoCompleteItem('Padmé Amidala', SearchQueryTypes.person)]);
+          expect(await autocomplete('PADMÉ', SearchQueryTypes.keyword)).to.deep.equal([
+            new AutoCompleteItem('Padmé Amidala', SearchQueryTypes.keyword)]);
+        });
+
+        it('should ignore the accents on SQLite only when it is switched on', async () => {
+          if (sqlHelper.dbType !== DatabaseType.sqlite) {
+            return;
+          }
+          Config.Database.sqlite!.accentInsensitiveSearch = false;
+          expect(await names({value: 'padme', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([]);
+          expect(await autocomplete('padme')).to.deep.equal([]);
+          expect(await names({value: 'Padmé', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
+        });
 
         it('should find accented text typed with the accents', async () => {
           expect(await names({value: 'Padmé', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
@@ -1672,14 +1697,18 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
             await names({value: 'Padme Amidala', type: SearchQueryTypes.keyword} as TextSearch),
             await names({value: 'padme', type: SearchQueryTypes.person} as TextSearch)
           ];
-          const check = (): void => expect(found).to.deep.equal([[p2.name], [p2.name], [p2.name]]);
-          if (sqlHelper.dbType === DatabaseType.mysql) {
-            // utf8mb4_general_ci ignores the accents
-            check();
-            return;
-          }
-          // SQLite's LIKE compares the accented letters exactly
-          await expectToFail('#1309', check, /expected \[ \[\], \[\], \[\] \] to deeply equal/);
+          expect(found).to.deep.equal([[p2.name], [p2.name], [p2.name]]);
+        });
+
+        // SQLite's LIKE ignores the case only of ASCII letters
+        it('should ignore the case of accented letters', async () => {
+          expect(await names({value: 'PADMÉ', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({value: 'PADMÉ AMIDALA', type: SearchQueryTypes.person} as TextSearch)).to.deep.equal([p2.name]);
+        });
+
+        it('should leave out accented text from a negated search typed without the accents', async () => {
+          expect(await names({value: 'padme', type: SearchQueryTypes.person, negate: true} as TextSearch))
+            .to.not.include(p2.name);
         });
       });
 
