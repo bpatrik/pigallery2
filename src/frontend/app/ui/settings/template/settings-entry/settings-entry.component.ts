@@ -85,6 +85,7 @@ export class SettingsEntryComponent
   }
   isNumberArray = false;
   isNumber = false;
+  readonly rangeError = signal<string | null>(null);
   HTMLInputType = 'text';
   title!: string; // set by ngOnChanges()
   idName!: string; // set by ngOnChanges()
@@ -242,8 +243,8 @@ export class SettingsEntryComponent
     this.st.value = value;
     if (this.isNumber) {
       this.st.value = parseFloat(value);
+      this.updateRangeError();
     }
-
   }
 
   get AvailableThemes() {
@@ -378,6 +379,40 @@ export class SettingsEntryComponent
       this.required = this.required || !this.st.tags.uiOptional;
       this.experimental = this.st.tags.experimental;
     }
+    this.updateRangeError();
+  }
+
+  // shown on the field, as the form can't be saved with a value out of the limits (#1315)
+  private updateRangeError(): void {
+    if (!this.state() || !this.checkRange()) {
+      this.rangeError.set(null);
+      return;
+    }
+    const min = this.st.min;
+    const max = this.st.max;
+    if (typeof min === 'number' && typeof max === 'number') {
+      this.rangeError.set($localize`The value must be between ${min}:MIN: and ${max}:MAX:.`);
+    } else if (typeof min === 'number') {
+      this.rangeError.set($localize`The value must be at least ${min}:MIN:.`);
+    } else {
+      this.rangeError.set($localize`The value must be at most ${max}:MAX:.`);
+    }
+  }
+
+  // the limits of the config metadata; the server rejects the save otherwise
+  private checkRange(): ValidationErrors | null {
+    const value = this.st.value;
+    if (!this.isNumber || typeof value === 'undefined' || value === null || value === '') {
+      return null;
+    }
+    const n = Number(value);
+    if (typeof this.st.min === 'number' && n < this.st.min) {
+      return {min: {min: this.st.min, actual: n}};
+    }
+    if (typeof this.st.max === 'number' && n > this.st.max) {
+      return {max: {max: this.st.max, actual: n}};
+    }
+    return null;
   }
 
   // The state of a property of the array items. It is the same for every item, so a fresh item is used.
@@ -405,16 +440,11 @@ export class SettingsEntryComponent
   }
 
   validate(): ValidationErrors | null {
-    if (
-        !this.required ||
-        (this.state() &&
-            typeof this.st.value !== 'undefined' &&
-            this.st.value !== null &&
-            this.st.value !== '')
-    ) {
-      return null;
+    const value = this.state() ? this.st.value : undefined;
+    if (typeof value === 'undefined' || value === null || value === '') {
+      return this.required ? {required: true} : null;
     }
-    return {required: true};
+    return this.checkRange();
   }
 
   public onChange = (_value: unknown): void => {

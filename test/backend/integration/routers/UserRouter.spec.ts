@@ -15,7 +15,6 @@ import {CookieNames} from '../../../../src/common/CookieNames';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
-import {expectToFail} from '../../KnownFailures';
 
 process.env['NODE_ENV'] = 'test';
 const should = chai.should();
@@ -348,13 +347,10 @@ describe('UserRouter', () => {
     it('should not let an admin lower their own role, even if there is an other admin', async () => {
       await ObjectManagers.getInstance().UserManager.createUser({name: 'other_admin', password: 'pass', role: UserRoles.Admin} as UserDTO);
       const adminAgent = await loginAs(admin);
-      // UserRequestConstrainsMWs.notSelfRequestOr2Admins allows it when there is an other admin
-      const check = async (): Promise<void> => {
-        const res = await adminAgent.post(Config.Server.apiPath + '/user/' + adminId + '/role').send({newRole: UserRoles.User});
-        should.exist(res.body.error);
-        (await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}))!.role.should.equal(UserRoles.Admin);
-      };
-      await expectToFail('#1315', check, /expected null to exist/);
+      const res = await adminAgent.post(Config.Server.apiPath + '/user/' + adminId + '/role').send({newRole: UserRoles.User});
+      res.status.should.equal(403);
+      res.body.error.code.should.equal(ErrorCodes.NOT_AUTHORISED);
+      (await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}))!.role.should.equal(UserRoles.Admin);
       adminAgent.close();
     });
   });

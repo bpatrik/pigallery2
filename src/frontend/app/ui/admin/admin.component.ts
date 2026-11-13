@@ -1,9 +1,6 @@
 import { Component, ElementRef, OnInit, inject, viewChildren, computed } from '@angular/core';
-import {AuthenticationService} from '../../model/network/authentication.service';
-import {UserRoles} from '../../../../common/entities/UserDTO';
 import {CountedNotificationDTO, NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
-import {NavigationService} from '../../model/navigation.service';
 import {ViewportScroller, DatePipe} from '@angular/common';
 import {ConfigStyle, SettingsService} from '../settings/settings.service';
 import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
@@ -44,8 +41,6 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
 ]
 })
 export class AdminComponent implements OnInit {
-  private authService = inject(AuthenticationService);
-  private navigation = inject(NavigationService);
   viewportScroller = inject(ViewportScroller);
   notificationService = inject(NotificationService);
   settingsService = inject(SettingsService);
@@ -75,13 +70,7 @@ export class AdminComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (
-      !this.authService.isAuthenticated() ||
-      !this.authService.isAuthorized(UserRoles.Admin)
-    ) {
-      this.navigation.toLogin();
-      return;
-    }
+    // adminGuard lets only admins in
     this.piTitleService.setTitle($localize`Admin`);
   }
 
