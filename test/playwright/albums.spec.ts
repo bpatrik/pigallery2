@@ -122,20 +122,10 @@ test.describe('Album journey', () => {
 
     // deleting it removes it from the list
     await page.goto('/albums');
-    page.on('dialog', dialog => dialog.accept());
     const deleted = page.waitForResponse(res => res.request().method() === 'DELETE' && new URL(res.url()).pathname.startsWith('/pgapi/albums/'));
     await card.locator('ng-icon.delete').click();
-    // Today it deletes at once. With the confirmation of #1312 (a modal), confirm it; a browser dialog is accepted above.
-    const confirm = page.locator('modal-container').getByRole('button', {name: /delete|yes|ok/i});
-    // polls both, so no waitFor() stays pending once one of them happened
-    let isDeleted = false;
-    void deleted.then(() => {
-      isDeleted = true;
-    }, () => undefined); // a failure is reported by the await below
-    await expect.poll(async () => isDeleted || await confirm.isVisible(), {message: 'deleted or asked to confirm'}).toBe(true);
-    if (!isDeleted) {
-      await confirm.click();
-    }
+    // confirmed in a modal (#1312)
+    await page.locator('modal-container').getByRole('button', {name: 'Delete'}).click();
     await expectApiOk(await deleted, 'deleting the album');
     await expect(card).toHaveCount(0);
     const names = ((await (await page.request.get('/pgapi/albums')).json()).result as { name: string }[]).map(a => a.name);
@@ -143,24 +133,18 @@ test.describe('Album journey', () => {
   });
 
   test('should ask for confirmation before deleting an album', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1312');
     await saveSearchAsAlbum(page);
     const card = page.locator('app-album').filter({hasText: albumName});
     await expect(card).toBeVisible();
 
-    // either a browser confirm dialog or a modal; dismissed, so the album stays
-    let asked = false;
-    page.on('dialog', dialog => {
-      asked = true;
-      return dialog.dismiss();
-    });
+    // cancelled, so the album stays
     await card.locator('ng-icon.delete').click();
     const modal = page.locator('modal-container');
-    await expect.poll(async () => asked || await modal.isVisible(), {message: 'a confirmation is shown'}).toBe(true);
-    if (!asked) {
-      await modal.getByRole('button', {name: /cancel|no/i}).click();
-    }
+    await expect(modal).toContainText(albumName);
+    await modal.getByRole('button', {name: 'Cancel'}).click();
+    await expect(modal).toHaveCount(0);
     await expect(card).toBeVisible();
+    await expect(page, 'the album is not opened').toHaveURL(url => url.pathname === '/albums');
     const names = ((await (await page.request.get('/pgapi/albums')).json()).result as { name: string }[]).map(a => a.name);
     expect(names, 'the album is not deleted').toContain(albumName);
   });
