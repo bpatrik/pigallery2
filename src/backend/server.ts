@@ -86,6 +86,8 @@ export class Server {
       session({
         name: CookieNames.session,
         keys: Config.Server.sessionSecret,
+        // CSRF protection: other sites can't send the session with their POST requests
+        sameSite: 'lax',
       })
     );
 

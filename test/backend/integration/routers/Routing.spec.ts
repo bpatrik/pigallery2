@@ -429,6 +429,13 @@ describe('Routing', () => {
       return res.json.result.directoryQuery.value;
     };
 
+    it('should not let other sites send the session with their POST requests (CSRF)', () => {
+      expect(cookie.length).to.be.greaterThan(0);
+      for (const c of cookie) {
+        expect(c.toLowerCase(), c).to.contain('samesite=lax');
+      }
+    });
+
     it('should share folders', async () => {
       expect(await sharedDirectory('')).to.equal(path.sep);
       expect(await sharedDirectory('/')).to.equal(path.sep);
