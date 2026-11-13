@@ -128,7 +128,6 @@ test.describe('Lightbox', () => {
   // A phone has no hover: a tap shows the faces, a double tap zooms (also on a face), a tap on a shown face opens its search.
   test('Tapping a face on a phone should show the faces first, not open the search', async ({page, isMobile}) => {
     test.skip(!isMobile, 'touch gestures: mobile project only');
-    test.fail(true, 'Not implemented yet #1310: a tap on a hidden face box opens the search');
     await page.goto('/gallery/?p=IMG_5910.jpg');
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
     await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
@@ -138,11 +137,14 @@ test.describe('Lightbox', () => {
     expect(box, 'the face box of Alvin the Squirrel').not.toBeNull();
     const faceCenter = {x: box!.x + box!.width / 2, y: box!.y + box!.height / 2};
     const opacity = (): Promise<number> => faceBox.evaluate(el => Number(getComputedStyle(el).opacity));
+    // a tap counts once no second tap followed (not a double tap); the sticky :hover of a phone can show the face before that
+    const facesShown = page.locator('app-lightbox-controls .faces-container.faces-shown');
 
     // the face is hidden until a tap shows it; the tap does not follow the link
     expect(await opacity()).toBe(0);
     await page.touchscreen.tap(faceCenter.x, faceCenter.y);
     await expect.poll(opacity, {message: 'face box opacity after a tap'}).toBeGreaterThan(0);
+    await expect(facesShown).toBeAttached();
     await expect(page).toHaveURL(url => url.searchParams.get('p') === 'IMG_5910.jpg');
 
     // a double tap on the face zooms in and out, it does not open the search
@@ -155,6 +157,7 @@ test.describe('Lightbox', () => {
     // a tap on the shown face opens the search of that person
     await page.touchscreen.tap(faceCenter.x, faceCenter.y);
     await expect.poll(opacity, {message: 'face box opacity after a tap'}).toBeGreaterThan(0);
+    await expect(facesShown).toBeAttached();
     await page.touchscreen.tap(faceCenter.x, faceCenter.y);
     await expect(page).toHaveURL(/\/search\//);
   });

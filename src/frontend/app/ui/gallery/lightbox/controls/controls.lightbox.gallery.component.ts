@@ -12,14 +12,14 @@ import {AuthenticationService} from '../../../../model/network/authentication.se
 import {LightboxService} from '../lightbox.service';
 import {Utils} from '../../../../../../common/Utils';
 import {formatFileSize} from '../../../../pipes/FileSizePipe';
-import {formatDate} from '@angular/common';
+import {formatDate, LocationStrategy} from '@angular/common';
 import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 import {NgIconComponent} from '@ng-icons/core';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {FormsModule} from '@angular/forms';
-import {RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
-import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/gesture.directive';
+import {GestureDirective, PanEvent, PinchEvent, TapEvent} from '../../../utils/gesture/gesture.directive';
 
 
 @Component({
@@ -36,7 +36,6 @@ import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/ges
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
     FormsModule,
-    RouterLink,
     GestureDirective
 ]
 })
@@ -45,6 +44,8 @@ export class ControlsLightboxComponent implements OnDestroy {
   fullScreenService = inject(FullScreenService);
   private authService = inject(AuthenticationService);
   private locale = inject(LOCALE_ID);
+  private router = inject(Router);
+  private locationStrategy = inject(LocationStrategy);
 
   readonly MAX_ZOOM = 10;
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
@@ -84,19 +85,26 @@ export class ControlsLightboxComponent implements OnDestroy {
     }
     const size = photo.metadata.size;
     // a face without a box can't be placed on the photo
-    return photo.metadata.faces.filter(face => !!face.box).map(face => ({
-      name: face.name,
-      query: SearchQueryUtils.urlify({
+    return photo.metadata.faces.filter(face => !!face.box).map(face => {
+      const url = this.router.serializeUrl(this.router.createUrlTree(['/search', SearchQueryUtils.urlify({
         type: SearchQueryTypes.person,
         matchType: TextSearchQueryMatchTypes.exact_match,
         value: face.name,
-      } as TextSearch),
-      top: face.box!.top / size.height * 100,
-      left: face.box!.left / size.width * 100,
-      height: face.box!.height / size.height * 100,
-      width: face.box!.width / size.width * 100,
-    }));
+      } as TextSearch)]));
+      return {
+        name: face.name,
+        url,
+        // with the base href of the app, like a routerLink
+        href: this.locationStrategy.prepareExternalUrl(url),
+        top: face.box!.top / size.height * 100,
+        left: face.box!.left / size.width * 100,
+        height: face.box!.height / size.height * 100,
+        width: face.box!.width / size.width * 100,
+      };
+    });
   });
+  // A phone has no hover: a tap shows the faces until the controls dim (or a zoom moves them), a tap on a shown face opens its search.
+  readonly facesShown = signal(false);
   // the size of the photo on the screen, without zoom
   readonly faceContainerDim = computed((): { width: number, height: number } => {
     const activePhoto = this.activePhoto();
@@ -151,6 +159,7 @@ export class ControlsLightboxComponent implements OnDestroy {
     if (prevZoom === zoom) {
       return;
     }
+    this.facesShown.set(false);
     this.pauseClicked();
     const scale = (d: { x: number, y: number }) => ({x: (d.x / prevZoom) * zoom, y: (d.y / prevZoom) * zoom});
     this.zoom.set(zoom);
@@ -226,6 +235,34 @@ export class ControlsLightboxComponent implements OnDestroy {
 
     this.showControls();
     this.setZoom(this.zoom() > 1 ? 1 : 5);
+  }
+
+  // a single tap (not the first tap of a double tap) on the photo
+  onTap($event: TapEvent): void {
+    if ($event.pointerType !== 'touch') {
+      return; // a mouse hovers the faces; its click opens them (onFaceClick)
+    }
+    const faceIndex = ($event.target as Element | null)?.closest?.('a.face')?.getAttribute('data-face');
+    const url = faceIndex == null ? null : this.faces()[Number(faceIndex)]?.url;
+    if (url && (this.facesShown() || this.lightboxService.facesAlwaysOn())) {
+      this.router.navigateByUrl(url).catch(console.error);
+      return;
+    }
+    this.showControls();
+    this.facesShown.set(true);
+  }
+
+  // A tap on a face is handled by onTap: the first tap only shows the faces and a double tap zooms.
+  // A mouse or the keyboard opens the search of the face; with a modifier key the browser opens the link itself (e.g. new tab).
+  onFaceClick($event: MouseEvent, url: string): void {
+    if ($event.button !== 0 || $event.ctrlKey || $event.metaKey || $event.shiftKey || $event.altKey) {
+      return;
+    }
+    $event.preventDefault();
+    if (($event as PointerEvent).pointerType === 'touch') {
+      return;
+    }
+    this.router.navigateByUrl(url).catch(console.error);
   }
 
   zoomIn(): void {
@@ -539,6 +576,7 @@ export class ControlsLightboxComponent implements OnDestroy {
 
   private hideControls = () => {
     this.controllersDimmed.set(true);
+    this.facesShown.set(false);
   };
 
 }
