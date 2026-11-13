@@ -24,6 +24,7 @@ import {ExtensionService} from '../../../model/extension.service';
 import {MediaButtonModalService} from './photo/media-button-modal/media-button-modal.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {PageHelper} from '../../../model/page.helper';
+import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 
 class MockQueryService {
   getMediaStringId(media: MediaDTO): string {
@@ -306,6 +307,22 @@ describe('GalleryGridComponent', () => {
       }
       expect(component.getNumberOfRenderedMedia()).toBe(500);
       expect(steps).toBeGreaterThan(2);
+    });
+
+    // #1308: back to a folder that was scrolled down, the page must be high enough to scroll there
+    it('should render down to the scroll position of a browser back, then scroll there', async () => {
+      vi.spyOn(TestBed.inject(ScrollRestorationService), 'takePending').mockReturnValueOnce(5000);
+      vi.spyOn(document.documentElement, 'scrollHeight', 'get').mockImplementation(renderedHeight);
+      const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+      scroll();
+
+      (component as unknown as { restoreScroll(): void }).restoreScroll();
+      expect(renderedHeight()).toBeGreaterThanOrEqual(5000 + window.innerHeight);
+      expect(component.getNumberOfRenderedMedia(), 'not all at once').toBeLessThan(500);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(scrollTo).toHaveBeenCalledWith({left: window.scrollX, top: 5000, behavior: 'instant'});
     });
   });
 

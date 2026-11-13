@@ -16,6 +16,7 @@ import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
+import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -41,6 +42,7 @@ export class GalleryGridComponent
   private router = inject(Router);
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
+  private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
   // only read imperatively (revealMedia, onScroll), never in a template, computed or effect
@@ -402,7 +404,27 @@ export class GalleryGridComponent
   private renderMinimalPhotos(): void {
     this.helperTime = window.setTimeout((): void => {
       this.renderPhotos();
+      this.restoreScroll();
     }, 0);
+  }
+
+  /**
+   * Browser back or forward to this page: renders the rows down to its last scroll position, then scrolls there.
+   * The grid only renders as many rows as the screen needs, so without them the page is too short to scroll there.
+   */
+  private restoreScroll(): void {
+    if (!this.mediaGroups()?.length) {
+      return; // the content is loading
+    }
+    const y = this.scrollRestoration.takePending();
+    if (y === null) {
+      return;
+    }
+    let missing = y + window.innerHeight - document.documentElement.scrollHeight;
+    while (missing > 0 && this.isMoreToRender()) {
+      missing -= this.renderARow() ?? Infinity;
+    }
+    afterNextRender(() => window.scrollTo({left: window.scrollX, top: y, behavior: 'instant'}), {injector: this.injector});
   }
 
   private getMaxRowHeight(): number {

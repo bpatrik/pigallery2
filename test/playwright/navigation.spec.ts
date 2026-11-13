@@ -59,7 +59,6 @@ test.describe('Navigation', () => {
 
   // #1308: the browser history keeps the scroll position too, not only the URL and the content
   test('Browser back should restore the scroll position of the folder', async ({page}) => {
-    test.fail(true, 'Not implemented yet #1308: back from a subfolder opens the folder at the top');
     const scrollY = (): Promise<number> => page.evaluate(() => window.scrollY);
     const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
     await page.goto('/gallery/');

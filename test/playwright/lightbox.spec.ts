@@ -227,7 +227,6 @@ test.describe('Lightbox', () => {
 
   // #1310: closing scrolls the grid to the photo the lightbox was closed on; back closes it too
   test('Browser back should scroll the grid to the last shown photo, like closing', async ({page, isMobile}) => {
-    test.fail(true, 'Not implemented yet #1310: back closes the lightbox, but the grid stays where the lightbox was opened');
     const {first, last} = await openAndPageForward(page, isMobile);
 
     await page.goBack();
