@@ -51,6 +51,14 @@ export class SearchManager {
     return Config.Database.type === DatabaseType.sqlite && !!Config.Database.sqlite?.accentInsensitiveSearch;
   }
 
+  /**
+   * Whether the text conditions of like() ignore the accents: MySQL's SQL_COLLATE does, SQLite only with foldsText().
+   * Checks of the same texts without DB need to follow it (e.g. DirectoryAccess).
+   */
+  public static ignoresAccents(): boolean {
+    return Config.Database.type === DatabaseType.mysql || SearchManager.foldsText();
+  }
+
   // The value of a param of like()
   private static likeValue(value: string): string {
     return SearchManager.foldsText() ? foldText(value)! : value;
