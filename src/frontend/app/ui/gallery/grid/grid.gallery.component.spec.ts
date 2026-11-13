@@ -5,16 +5,17 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {GalleryGridComponent} from './grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {ContentService} from '../content.service';
-import {GallerySortingService} from '../navigator/sorting.service';
+import {GallerySortingService, ScrollLabelFn} from '../navigator/sorting.service';
 import {QueryService} from '../../../model/query.service';
 import {of} from 'rxjs';
+import {formatDate} from '@angular/common';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {GridMedia} from './GridMedia';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
-import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 import {provideHttpClient, withXhr} from '@angular/common/http';
 import {BlogService, GroupedMarkdown} from '../blog/blog.service';
 import {provideIcons} from '@ng-icons/core';
@@ -46,7 +47,17 @@ class MockContentService {
 }
 
 class MockGallerySortingService {
+  readonly sorting = signal({method: SortByTypes.Date, ascending: false});
   readonly grouping = signal({method: GroupByTypes.NoGrouping, ascending: true});
+  // the label of the scroll indicator, the real logic is tested with the sorting service
+  scrollLabelFn: ScrollLabelFn | null = {
+    order: SortByTypes.Date,
+    label: (m: MediaDTO) => formatDate(m.metadata.creationDate, 'MMMM y', 'en-US', 'UTC')
+  };
+
+  getScrollLabelFn(): ScrollLabelFn | null {
+    return this.scrollLabelFn;
+  }
 }
 
 class MockGalleryNavigatorService {
@@ -63,6 +74,7 @@ class MockBlogService {
 }
 
 describe('GalleryGridComponent', () => {
+  let sortingService: MockGallerySortingService;
   let component: GalleryGridComponent;
   let fixture: ComponentFixture<GalleryGridComponent>;
 
@@ -97,6 +109,7 @@ describe('GalleryGridComponent', () => {
     })
       .compileComponents();
 
+    sortingService = TestBed.inject(GallerySortingService) as unknown as MockGallerySortingService;
     fixture = TestBed.createComponent(GalleryGridComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -329,6 +342,173 @@ describe('GalleryGridComponent', () => {
       expect(component.getNumberOfRenderedMedia(), 'not all at once').toBeLessThan(500);
       expect(scrollTo).toHaveBeenCalledTimes(1);
       expect(scrollTo).toHaveBeenCalledWith({left: window.scrollX, top: 5000, behavior: 'instant'});
+    });
+  });
+
+  // #1209: the month and year of the first visible photo next to the scrollbar
+  describe('scroll date', () => {
+    const TILE_HEIGHT = 100;
+    let scrollY: number;
+    let frames: FrameRequestCallback[];
+
+    const photo = (i: number, date: number): PhotoDTO => ({
+      name: i + '.jpg',
+      directory: {name: 'd', path: 'p'},
+      metadata: {size: {width: 300, height: 200}, creationDate: date}
+    } as PhotoDTO);
+    // jsdom has no layout: the tiles are one below the other
+    const layOut = (): void => {
+      fixture.nativeElement.querySelectorAll('app-gallery-grid-photo').forEach((el: HTMLElement, i: number) => {
+        Object.defineProperty(el, 'offsetParent', {value: document.body});
+        Object.defineProperty(el, 'offsetTop', {value: i * TILE_HEIGHT});
+        Object.defineProperty(el, 'offsetLeft', {value: 0});
+        const img = el.querySelector('img');
+        Object.defineProperty(img, 'width', {value: 150});
+        Object.defineProperty(img, 'height', {value: TILE_HEIGHT});
+      });
+    };
+    const scroll = (): void => {
+      component.onScroll();
+      frames.splice(0).forEach(cb => cb(0));
+      fixture.detectChanges();
+    };
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      scrollY = 0;
+      frames = [];
+      vi.spyOn(PageHelper, 'ScrollY', 'get').mockImplementation(() => scrollY);
+      vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(1000);
+      vi.spyOn(window, 'requestAnimationFrame').mockImplementation((cb: FrameRequestCallback): number => {
+        frames.push(cb);
+        return frames.length;
+      });
+      // newest first, 10 tiles of every month, one below the other
+      const photos: PhotoDTO[] = [];
+      for (let i = 0; i < 20; ++i) {
+        photos.push(photo(i, Date.UTC(2021, i < 10 ? 5 : 2, 15, 12)));
+      }
+      fixture.componentRef.setInput('mediaGroups', [{name: 'all', media: photos}]);
+      component.mediaToRender.set([{
+        name: 'all',
+        media: photos.map((p, i) => new GridMedia(p, 150, TILE_HEIGHT, i))
+      }]);
+      fixture.detectChanges();
+      layOut();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    const label = (): HTMLElement | null => fixture.nativeElement.querySelector('.scroll-label');
+
+    it('should show the month and year of the first visible photo at the thumb position', () => {
+      scrollY = 250; // the 3rd tile is the first one that is not scrolled out
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('June 2021');
+      expect(label()?.style.getPropertyValue('--scroll-position')).toBe('0.25');
+
+      scrollY = 1050; // below the 10th tile
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('March 2021');
+      expect(label()?.style.getPropertyValue('--scroll-position')).toBe('1');
+    });
+
+    it('should hide after the scrolling stopped', async () => {
+      scrollY = 250;
+      scroll();
+      expect(label()).not.toBeNull();
+      await vi.advanceTimersByTimeAsync(1500);
+      fixture.detectChanges();
+      expect(label()).toBeNull();
+    });
+
+    it('should show the label of the sorting service', () => {
+      sortingService.scrollLabelFn = {order: SortByTypes.Name, label: (m: MediaDTO) => m.name.at(0) ?? ''};
+      scrollY = 250;
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('2');
+    });
+
+    it('should not show when the sorting service has no label', () => {
+      sortingService.scrollLabelFn = null;
+      scrollY = 250;
+      scroll();
+      expect(label()).toBeNull();
+    });
+
+    it('should be hidden from assistive technologies', () => {
+      scrollY = 250;
+      scroll();
+      expect(label()?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('should skip the tiles behind the navbar', () => {
+      const navbar = document.createElement('div');
+      navbar.className = 'navbar-container';
+      navbar.getBoundingClientRect = () => ({bottom: 100} as DOMRect);
+      document.body.appendChild(navbar);
+      try {
+        scrollY = 250; // the 3rd tile is behind the navbar, the 4th is the first visible one
+        scroll();
+        expect(label()?.textContent?.trim()).toBe('June 2021');
+        scrollY = 950; // the 10th tile is behind the navbar, the 11th is the first visible one
+        scroll();
+        expect(label()?.textContent?.trim()).toBe('March 2021');
+        expect(label()?.style.getPropertyValue('--navbar-bottom'), 'the label stays below the navbar').toBe('100px');
+      } finally {
+        navbar.remove();
+      }
+    });
+
+    it('should show the rating with stars like the group headers', () => {
+      sortingService.scrollLabelFn = {order: SortByTypes.Rating, label: () => '3'};
+      scrollY = 250;
+      scroll();
+      const stars = [...(label()?.querySelectorAll('ng-icon') ?? [])].map(i => i.innerHTML);
+      expect(stars.length).toBe(5);
+      expect(stars[0]).not.toBe('');
+      // 3 filled, 2 outlined
+      expect(stars.filter(s => s === stars[0]).length).toBe(3);
+      expect(stars[3]).toBe(stars[4]);
+      expect(stars[3]).not.toBe(stars[0]);
+      expect(label()?.textContent?.trim()).toBe('');
+    });
+
+    it('should show the person count with the people icon like the group headers', () => {
+      sortingService.scrollLabelFn = {order: SortByTypes.PersonCount, label: () => '2'};
+      scrollY = 250;
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('2');
+      expect(label()?.querySelectorAll('ng-icon').length).toBe(1);
+    });
+
+    // #1308: browser back or forward scrolls the page itself
+    it('should not show while the scroll position of a browser back is restored', () => {
+      const restoreTarget = vi.spyOn(TestBed.inject(ScrollRestorationService), 'restoreTarget').mockReturnValue(250);
+      scrollY = 250;
+      scroll();
+      expect(label()).toBeNull();
+      restoreTarget.mockReturnValue(null); // the user scrolls
+      scroll();
+      expect(label()).not.toBeNull();
+    });
+
+    it('should not update after the grid is removed', () => {
+      const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+      scrollY = 250;
+      const labelFrame = frames.length + 1; // the label asks for the first frame of the scroll
+      component.onScroll();
+      fixture.destroy();
+      expect(cancel).toHaveBeenCalledWith(labelFrame);
+    });
+
+    it('should not show when there is nothing to scroll', () => {
+      vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(0);
+      scroll();
+      expect(label()).toBeNull();
     });
   });
 

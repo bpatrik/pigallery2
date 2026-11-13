@@ -83,6 +83,7 @@
   "Gallery.NavBar.links[].type": "enum:gallery,faces,albums,search,url",
   "Gallery.NavBar.links[].url": "string",
   "Gallery.NavBar.showItemCount": "boolean",
+  "Gallery.NavBar.showScrollLabel": "enum:never,date,always",
   "Gallery.NavBar.showScrollUpButton": "enum:never,mobileOnly,always",
   "Gallery.Themes": "config",
   "Gallery.Themes.availableThemes": "array<config>",
