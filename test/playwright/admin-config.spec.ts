@@ -71,41 +71,42 @@ test.describe('Admin config', () => {
   });
 
   test.describe('Invalid setting', () => {
-    const sharingKeyLength = (page: Page) => page.locator('form#Sharing').getByLabel('Sharing key length');
-
-    // enters an out-of-range sharing key length (8-64) together with a valid change, and saves them
-    const saveInvalid = async (page: Page): Promise<void> => {
+    // the form knows the limits of the config (#1315): the sharing key length is 8-64
+    test('should show the limits on the field and not let the form be saved', async ({page}) => {
       await openAdmin(page);
       // the sharing key length is an "Under the hood" setting
       await switchMode(page, 'Under the hood');
-      await expect(sharingKeyLength(page)).toHaveValue(String(original['Sharing']['sharingKeyLength']));
+      const sharingKeyLength = page.locator('form#Sharing').getByLabel('Sharing key length');
+      await expect(sharingKeyLength).toHaveValue(String(original['Sharing']['sharingKeyLength']));
 
       await page.locator('form#Sharing').getByLabel('Require password').click();
-      await sharingKeyLength(page).fill('200');
-      const saved = page.waitForResponse(isSettingsSave);
-      await page.locator('form#Sharing button.btn-success', {hasText: 'Save'}).click();
-      expect((await (await saved).json()).error).not.toBeNull();
-    };
-
-    test('should show an error and save nothing of that save', async ({page}) => {
-      await saveInvalid(page);
-      await expect(page.locator('form#Sharing .alert-danger')).toBeVisible();
-      await expect(page.locator('form#Sharing .alert-danger')).toContainText('64');
-
-      // the server rejected the whole save: the valid change is not saved either (decision of #1315)
-      const saved = await getSettings(admin);
-      expect(saved['Sharing']['sharingKeyLength']).toBe(original['Sharing']['sharingKeyLength']);
-      expect(saved['Sharing']['passwordRequired']).toBe(original['Sharing']['passwordRequired']);
-      await openAdmin(page);
-      await expect(page.locator('form#Sharing .alert-danger')).toBeHidden();
-    });
-
-    test('should show the error inline on the field', async ({page}) => {
-      test.fail(true, 'Not implemented yet #1315: the error is shown at the top of the settings card');
-      await saveInvalid(page);
+      await sharingKeyLength.fill('200');
       const row = page.locator('form#Sharing app-settings-entry').filter({has: page.getByLabel('Sharing key length')});
       await expect(row).toHaveCount(1);
-      await expect(row.getByText(/64/)).toBeVisible();
+      await expect(row.getByRole('alert')).toContainText('64');
+      await expect(page.locator('form#Sharing button.btn-success', {hasText: 'Save'})).toBeDisabled();
+
+      await sharingKeyLength.fill(String(original['Sharing']['sharingKeyLength']));
+      await expect(row.getByRole('alert')).toHaveCount(0);
+      await expect(page.locator('form#Sharing button.btn-success', {hasText: 'Save'})).toBeEnabled();
+      // nothing was saved
+      const saved = await getSettings(admin);
+      expect(saved['Sharing']['passwordRequired']).toBe(original['Sharing']['passwordRequired']);
+    });
+
+    // what only the server can check, e.g. that the images folder exists
+    test('should show the error of a rejected save and save nothing of it', async ({page}) => {
+      await openAdmin(page);
+      const media = page.locator('form#Media');
+      await media.getByLabel('Images folder').fill('not-existing-images-folder');
+      const saved = page.waitForResponse(isSettingsSave);
+      await media.locator('button.btn-success', {hasText: 'Save'}).click();
+      expect((await (await saved).json()).error).not.toBeNull();
+      await expect(media.locator('.alert-danger')).toBeVisible();
+
+      expect((await getSettings(admin))['Media']['folder']).toBe(original['Media']['folder']);
+      await openAdmin(page);
+      await expect(media.locator('.alert-danger')).toBeHidden();
     });
   });
 

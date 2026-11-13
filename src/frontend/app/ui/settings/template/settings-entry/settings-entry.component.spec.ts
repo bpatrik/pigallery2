@@ -32,7 +32,7 @@ describe('SettingsEntryComponent', () => {
     fixture.componentInstance.writeValue(state);
     fixture.detectChanges();
     const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
-    return {component: fixture.componentInstance, input};
+    return {component: fixture.componentInstance, input, fixture};
   };
 
   it('should render a number setting as a number input with the min and max of the config', () => {
@@ -52,11 +52,33 @@ describe('SettingsEntryComponent', () => {
     expect(component.validate()).toBeNull();
   });
 
-  // TODO #1315: validate() only checks that a value is set, so the settings form can be saved with an out-of-range number
-  it.fails('should not let the settings form accept a value out of the limits', () => {
+  it('should not let the settings form accept a value out of the limits', () => {
     const state = sharingKeyLengthState();
     state.value = 200;
     const {component} = setUp(state);
-    expect(component.validate()).not.toBeNull();
+    expect(component.validate()).toEqual({max: {max: 64, actual: 200}});
+  });
+
+  it('should not let the settings form accept a value below the limits', () => {
+    const state = sharingKeyLengthState();
+    state.value = 4;
+    const {component} = setUp(state);
+    expect(component.validate()).toEqual({min: {min: 8, actual: 4}});
+  });
+
+  it('should show the limits on the field when the typed value is out of them', async () => {
+    const {input, fixture} = setUp(sharingKeyLengthState());
+    const error = (): Element | null => (fixture.nativeElement as HTMLElement).querySelector('.text-danger');
+    expect(error()).toBeNull();
+
+    input.value = '200';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    expect(error()!.textContent).toContain('The value must be between 8 and 64.');
+
+    input.value = '16';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    expect(error()).toBeNull();
   });
 });
