@@ -12,6 +12,14 @@ import {appIcons} from '../../../../icons';
 import {provideRouter, Router} from '@angular/router';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {QueryService} from '../../../../model/query.service';
+import {MediaDTO} from '../../../../../../common/entities/MediaDTO';
+
+class MockQueryService {
+  getParams(lightbox?: { media?: MediaDTO }): Record<string, string> {
+    return lightbox?.media ? {p: lightbox.media.name} : {};
+  }
+}
 
 class MockThumbnailManagerService {
   getThumbnail() {
@@ -63,10 +71,12 @@ describe('GalleryPhotoComponent - Live Photo badge', () => {
       imports: [GalleryPhotoComponent],
       providers: [
         provideIcons(appIcons),
+        provideRouter([]),
         {provide: ThumbnailManagerService, useClass: MockThumbnailManagerService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
         {provide: ExtensionService, useClass: MockExtensionService},
         {provide: MediaButtonModalService, useClass: MockMediaButtonModalService},
+        {provide: QueryService, useClass: MockQueryService},
       ],
     }).compileComponents();
 
@@ -105,10 +115,12 @@ describe('GalleryPhotoComponent - metadataFilter', () => {
       imports: [GalleryPhotoComponent],
       providers: [
         provideIcons(appIcons),
+        provideRouter([]),
         {provide: ThumbnailManagerService, useClass: MockThumbnailManagerService},
         {provide: AuthenticationService, useClass: MockAuthenticationService},
         {provide: ExtensionService, useClass: MockExtensionService},
         {provide: MediaButtonModalService, useClass: MockMediaButtonModalService},
+        {provide: QueryService, useClass: MockQueryService},
       ],
     }).compileComponents();
 
@@ -172,6 +184,7 @@ describe('GalleryPhotoComponent - search links', () => {
         {provide: AuthenticationService, useValue: {canSearch: (): boolean => true}},
         {provide: ExtensionService, useClass: MockExtensionService},
         {provide: MediaButtonModalService, useClass: MockMediaButtonModalService},
+        {provide: QueryService, useClass: MockQueryService},
       ],
     }).compileComponents();
 
@@ -207,6 +220,16 @@ describe('GalleryPhotoComponent - search links', () => {
       searchHref('tükörfúrógép (2)', SearchQueryTypes.keyword),
     ]);
     expect(fixture.nativeElement.querySelector('.photo-position a').textContent).toBe('Székesfehérvár');
+  });
+
+  // #1254: Tab reaches the photo, Enter opens it in the lightbox (a link also opens in a new tab)
+  it('should link the photo to the lightbox, so the keyboard can open it', () => {
+    fixture.componentRef.setInput('gridMedia', makeGridMedia({name: 'Árvíztűrő.jpg'} as any));
+    fixture.detectChanges();
+
+    const link: HTMLAnchorElement = fixture.nativeElement.querySelector('a.photo-link');
+    expect(link.querySelector('img')).not.toBeNull();
+    expect(link.getAttribute('href')).toBe(router.serializeUrl(router.createUrlTree([], {queryParams: {p: 'Árvíztűrő.jpg'}})));
   });
 
   it('should follow a new media', () => {

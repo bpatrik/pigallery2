@@ -116,6 +116,6 @@ test.describe('Session ends on a deep link', () => {
 
     // the folder the user was opening when the session ended
     await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
-    await expect(page.locator('.photo-container > img[alt="IMG_8824.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="IMG_8824.jpg"]')).toBeVisible();
   });
 });

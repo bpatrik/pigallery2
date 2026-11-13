@@ -6,7 +6,6 @@ import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
-import {Router} from '@angular/router';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
@@ -39,7 +38,6 @@ export class GalleryGridComponent
   private changeDetector = inject(ChangeDetectorRef);
   private injector = inject(Injector);
   queryService = inject(QueryService);
-  private router = inject(Router);
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
   private scrollRestoration = inject(ScrollRestorationService);
@@ -161,12 +159,6 @@ export class GalleryGridComponent
       }
       this.renderPhotos(renderedCount);
     }, 100);
-  }
-
-  photoClicked(media: MediaDTO): void {
-    this.router.navigate([], {
-      queryParams: this.queryService.getParams({media}),
-    });
   }
 
   ngAfterViewInit(): void {

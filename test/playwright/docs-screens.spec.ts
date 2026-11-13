@@ -66,7 +66,7 @@ test.describe('Docs generation', () => {
 
   test('lightbox', async ({page}) => {
     await page.goto('/gallery/?p=IMG_4330.jpg');
-    await expect(page.locator('.photo-container > img[alt="IMG_4330.jpg"]')).toBeAttached(); // the main photo should be visible
+    await expect(page.locator('.photo-link > img[alt="IMG_4330.jpg"]')).toBeAttached(); // the main photo should be visible
     await page.locator('div[title="info key: i"]').click();
     await expectLightboxPhoto(page, 'IMG_4330.jpg', LOAD_TIMEOUT);
     await lightboxScreenshot(page, 'lightbox');

@@ -71,7 +71,7 @@ test.describe('Login', () => {
 
     await page.reload();
     await expect(page).toHaveURL(/\/gallery/);
-    await expect(page.locator('.photo-container > img').first()).toBeVisible();
+    await expect(page.locator('.photo-link > img').first()).toBeVisible();
 
     // A response to a request sent before the logout logs the user back in (see the test below).
     // In a full run the server generates the thumbnails slowly, so they are still loading here: wait for them.
@@ -160,7 +160,7 @@ test.describe('Login', () => {
     await page.locator('.col-sm-12 > .btn').click();
 
     await expect(page).toHaveURL(url => url.pathname === '/search/big_ben');
-    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
   });
 
   test.describe('Session ends while the app is open', () => {

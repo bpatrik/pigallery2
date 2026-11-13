@@ -3,18 +3,21 @@
   (focusin)="mouseOver()" (focusout)="mouseOut()">
 
 
-  @if (thumbnail.Available) {
-    <img alt="{{gridMedia().media.name}}" #img [src]="thumbnail.Src"
-      (load)="loaded=true"
-      [class.loading]="!loaded"
-      >
-  }
+  <!-- a link to the lightbox: Tab reaches the photo and Enter opens it, also in a new tab -->
+  <a class="photo-link" [routerLink]="[]" [queryParams]="lightboxParams()">
+    @if (thumbnail.Available) {
+      <img alt="{{gridMedia().media.name}}" #img [src]="thumbnail.Src"
+        (load)="loaded=true"
+        [class.loading]="!loaded"
+        >
+    }
 
-  @if (!thumbnail.Available) {
-    <app-gallery-grid-photo-loading [error]="thumbnail.Error"
-      [animate]="thumbnail.Loading"
-       />
-  }
+    @if (!thumbnail.Available) {
+      <app-gallery-grid-photo-loading [error]="thumbnail.Error"
+        [animate]="thumbnail.Loading"
+         />
+    }
+  </a>
 
 
   @if (isVideo()) {

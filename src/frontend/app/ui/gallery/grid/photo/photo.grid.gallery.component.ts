@@ -18,6 +18,7 @@ import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
 import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {QueryService} from '../../../../model/query.service';
 
 export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaButtonConfig {
   extensionBasePath: string;
@@ -41,6 +42,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private extensionService = inject(ExtensionService);
   private modalService = inject(MediaButtonModalService);
   private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private queryService = inject(QueryService);
 
   readonly gridMedia = input.required<GridMedia>();
   readonly imageRef = viewChild<ElementRef>('img');
@@ -57,6 +59,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   loaded = false;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
+  // the query params of the link to this media in the lightbox
+  readonly lightboxParams = computed((): Record<string, string> => this.queryService.getParams({media: this.gridMedia().media}));
   readonly isVideo = computed((): boolean => this.gridMedia().isVideo());
   readonly isLivePhoto = computed((): boolean => this.gridMedia().isLivePhoto());
   readonly hasPositionData = computed((): boolean => this.gridMedia().hasPositionData());

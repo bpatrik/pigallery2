@@ -144,11 +144,11 @@ test.describe('Share', () => {
       await expectNoHorizontalScroll(page, 'sharing');
 
       // search links don't work in a sharing: the keywords and the place of the info bar are plain text
-      const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
+      const squirrel = page.locator('.photo-link > img[alt="IMG_5910.jpg"]');
       await scrollUntilAttached(page, squirrel);
       await squirrel.scrollIntoViewIfNeeded();
       await squirrel.hover();
-      const info = squirrel.locator('..').locator('.info');
+      const info = squirrel.locator('xpath=../..').locator('.info');
       await expect.soft(info.locator('.photo-keywords span').filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
       await expect.soft(info.locator('.photo-position span').filter({hasText: 'Berkeley'})).toBeVisible();
       await expect.soft(info.locator('a'), 'no search links in the info bar').toHaveCount(0);
@@ -171,7 +171,7 @@ test.describe('Share', () => {
       await openSharingAsGuest(page, link, contentUrl);
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
       // the parents are shown, but they can't be opened
       await expect(page.locator('#directory-path li').first().locator('a')).toHaveCount(0);
@@ -185,7 +185,7 @@ test.describe('Share', () => {
       await expectContent(page, contentUrl, () => loginToSharing(page, link, 'secret'));
 
       await expect(page).toHaveURL(/\/gallery\/timestamps/);
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
     });
 
@@ -207,7 +207,7 @@ test.describe('Share', () => {
       const link = await createSharing(page);
       await openSharingAsGuest(page, link, contentUrl);
 
-      await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+      await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
       await expect(page.locator('app-gallery-directory')).toHaveCount(0);
       // not available directories look like not existing ones
       expect((await page.request.get('/pgapi/gallery/content/timestamps')).status()).toBe(404);
@@ -215,7 +215,7 @@ test.describe('Share', () => {
       // the app navigates back to the shared directory
       await page.goto('/gallery/timestamps');
       await expect(page).not.toHaveURL(/timestamps/);
-      await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeAttached();
+      await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
       await expectCountDown(page);
       await expectVisiblePhotosLoaded(page);
     });
@@ -228,7 +228,7 @@ test.describe('Share', () => {
       // the directory listing, not its media (content/timestamps/big_ben.jpg/...)
       await expectContent(page, /\/pgapi\/gallery\/content\/timestamps(\?|$)/, () =>
         page.locator('app-gallery-directory .directory-name').filter({hasText: 'timestamps'}).click());
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
     });
 
@@ -239,13 +239,13 @@ test.describe('Share', () => {
 
       await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR);
       await expect(page.locator('#directory-path li').last()).toContainText('űáéú őóüö');
-      await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
 
       await expectContent(page, /\/pgapi\/gallery\/content\/[^?]*subdirectory(\?|$)/, () =>
         page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click());
       await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
-      await expect(page.locator('.photo-container > img[alt="IMG_8824.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="IMG_8824.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
     });
 
@@ -284,7 +284,7 @@ test.describe('Share', () => {
       await openSharingAsGuest(page, link, searchUrl);
 
       await expect(page).toHaveURL(/\/search\//);
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
       await expectVisiblePhotosLoaded(page);
       // only the directories with shared photos (and their parents) can be opened
       expect((await page.request.get('/pgapi/gallery/content/timestamps')).status()).toBe(200);
@@ -366,7 +366,7 @@ test.describe('Share', () => {
       // the right password opens the folder
       await page.locator('input#password').fill('secret');
       await page.locator('button#button-share-login').click();
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
     });
 
     test('Wrong password should show an error and stay on the sharing login', async ({page}) => {
@@ -396,7 +396,7 @@ test.describe('Share', () => {
     test('Sharing deleted while the guest has it open should show the invalid link page on the next navigation', async ({page}) => {
       const sharingKey = await createSharingForTest(ACCENTED_DIR, {recursive: true});
       await page.goto('/share/' + sharingKey);
-      await expect(page.locator('.photo-container > img[alt="IMG_8943.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeVisible();
 
       await expectApiOk(await admin.delete('/pgapi/share/' + sharingKey), 'deleting the sharing');
       await page.locator('app-gallery-directory .directory-name').filter({hasText: 'subdirectory'}).click();
@@ -408,7 +408,7 @@ test.describe('Share', () => {
       const sharingKey = await createSharingForTest('timestamps');
       // the guest has the sharing open: logged in to it, with its session cookie
       await page.goto('/share/' + sharingKey);
-      await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
       // a request of the open page (with the session cookie), and the link itself in a fresh browser (no session)
       const guestSessionRequest = (): Promise<number> =>
         page.request.get('/pgapi/gallery/content/timestamps?sk=' + sharingKey).then(r => r.status());

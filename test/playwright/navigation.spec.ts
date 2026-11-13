@@ -2,7 +2,7 @@
 import {expect, Page, test} from '@playwright/test';
 import {ACCENTED_DIR, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
 
-const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
+const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt="${name}"]`);
 const breadcrumb = (page: Page) => page.locator('app-gallery-navbar #directory-path .breadcrumb-item');
 const folderCard = (page: Page, name: string) => page.locator('app-gallery-directory').filter({hasText: name});
 
@@ -72,7 +72,7 @@ test.describe('Navigation', () => {
     }, 'scrolled down').toPass({intervals: [200], timeout: 15000});
     const scrolledTo = await scrollY();
     // a photo on the screen there
-    const belowName = await page.evaluate(() => [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-container > img')]
+    const belowName = await page.evaluate(() => [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-link > img')]
       .find(img => img.getBoundingClientRect().top >= 0 && img.getBoundingClientRect().bottom <= window.innerHeight)?.alt);
     expect(belowName, 'a photo on the screen').toBeTruthy();
 

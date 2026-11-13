@@ -231,3 +231,23 @@ a {
 .no-click {
   cursor: auto;
 }
+
+.photo-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.photo-link:focus-visible {
+  outline: 3px solid var(--bs-focus-ring-color, #0d6efd);
+  outline-offset: -3px;
+}
+
+/* a click on the info bar (except its links) or an indicator opens the photo, like a click on the photo */
+.info, .video-indicator, .live-photo-indicator {
+  pointer-events: none;
+}
+
+.info a {
+  pointer-events: auto;
+}

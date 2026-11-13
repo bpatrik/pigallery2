@@ -58,10 +58,10 @@ test.describe('Albums', () => {
     // opening it shows its photos
     await card.click();
     await expect(page).toHaveURL(/\/search\//);
-    const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
+    const squirrel = page.locator('.photo-link > img[alt="IMG_5910.jpg"]');
     await expect(squirrel).toBeVisible();
     await expectVisiblePhotosLoaded(page);
-    await expect.soft(page.locator('app-gallery-grid .photo-container > img'), 'the photos of the album').toHaveCount(count);
+    await expect.soft(page.locator('app-gallery-grid .photo-link > img'), 'the photos of the album').toHaveCount(count);
     await expectNoHorizontalScroll(page, 'album photos');
     await squirrel.click();
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
@@ -90,7 +90,7 @@ test.describe('Album journey', () => {
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/big_ben');
     await expectApiOk(await search, 'the search');
-    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
 
     await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
     await page.locator('modal-container').getByRole('button', {name: 'Save'}).click();
@@ -117,7 +117,7 @@ test.describe('Album journey', () => {
     // opening it shows the photos of the search
     await card.click();
     await expect(page).toHaveURL(/\/search\//);
-    await expect(page.locator('.photo-container > img[alt="big_ben.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
     await expectVisiblePhotosLoaded(page);
 
     // deleting it removes it from the list
@@ -232,6 +232,6 @@ test.describe('Album edge cases', () => {
     // Animals: the photos of any of the animals, e.g. the squirrel
     await page.locator('app-album').filter({hasText: 'Animals'}).click();
     await expect(page).toHaveURL(/\/search\//);
-    await expect(page.locator('.photo-container > img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeVisible();
   });
 });
