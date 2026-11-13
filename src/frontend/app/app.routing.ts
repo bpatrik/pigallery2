@@ -5,7 +5,7 @@ import {
 } from '@angular/router';
 import { GalleryComponent } from './ui/gallery/gallery.component';
 import { QueryParams } from '../../common/QueryParams';
-import { authGuard } from './model/network/helper/auth.guard';
+import { adminGuard, authGuard } from './model/network/helper/auth.guard';
 import { sharingGuard } from './model/network/helper/sharing.guard';
 import { ErrorComponent } from './ui/error/error.component';
 
@@ -60,7 +60,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () => import('./ui/admin/admin.component').then(m => m.AdminComponent),
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
   },
   {
     path: 'duplicates',
