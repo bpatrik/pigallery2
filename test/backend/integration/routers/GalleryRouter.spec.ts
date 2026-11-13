@@ -11,7 +11,7 @@ import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {UserRoles} from '../../../../src/common/entities/UserDTO';
-import {ORSearchQuery, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../src/common/entities/SearchQueryDTO';
+import {ORSearchQuery, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import AdmZip from 'adm-zip';
 import * as fs from 'node:fs';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
@@ -341,6 +341,20 @@ describe('GalleryRouter', (sqlHelper: DBTestHelper) => {
       for (const e of entries) {
         expect(sources.some(s => s.equals(e.getData())), e.entryName).to.be.true;
       }
+    });
+
+    it('should name the zip of the root folder after the gallery', async () => {
+      await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
+
+      // the root folder, as the navbar sends it
+      const result = await getZip({
+        type: SearchQueryTypes.directory,
+        matchType: TextSearchQueryMatchTypes.exact_match,
+        value: '.'
+      } as TextSearch);
+
+      (result.should as any).have.status(200);
+      expect(result.headers['content-disposition']).to.equal('attachment; filename="' + Config.Server.applicationTitle + '.zip"');
     });
 
     it('should not zip an empty search result', async () => {

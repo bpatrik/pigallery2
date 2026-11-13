@@ -97,6 +97,11 @@ describe('Gallery downloads', (sqlHelper: DBTestHelper) => {
   const fileUrl = (...parts: string[]): string => '/gallery/content/' + parts.map(encodeURIComponent).join('/');
   const zipUrl = (query: SearchQueryDTO): string => '/gallery/zip/' + encodeURIComponent(JSON.stringify(query));
   // the query the zip button of a folder sends (see navigator.gallery.component.ts)
+  // the name the browser saves the download with: filename* (RFC 5987) keeps the accents
+  const fileName = (res: Response): string => {
+    const encoded = /filename\*=UTF-8''([^;]+)/.exec(res.headers['content-disposition']);
+    return encoded ? decodeURIComponent(encoded[1]) : /filename="?([^";]+)"?/.exec(res.headers['content-disposition'])![1];
+  };
   const folderQuery = (dir: string): TextSearch => ({
     type: SearchQueryTypes.directory,
     matchType: TextSearchQueryMatchTypes.exact_match,
@@ -135,7 +140,7 @@ describe('Gallery downloads', (sqlHelper: DBTestHelper) => {
 
       res.should.have.status(200);
       expect(res.headers['content-type']).to.equal('application/zip');
-      expect(res.headers['content-disposition']).to.equal('attachment; filename=SearchResults.zip');
+      expect(fileName(res), 'not a folder, but a search').to.equal('SearchResults.zip');
       const entries = new AdmZip(res.body).getEntries();
       // no subfolder content, no folders
       expect(entries.map(e => e.entryName).sort()).to.deep.equal(Object.keys(FILES).sort());
@@ -149,6 +154,23 @@ describe('Gallery downloads', (sqlHelper: DBTestHelper) => {
 
       res.should.have.status(200);
       expect(new AdmZip(res.body).getEntries().map(e => e.entryName)).to.deep.equal([SUB_FILE]);
+      expect(fileName(res)).to.equal(SUB_DIR + '.zip');
+    });
+
+    it('should name the zip of a folder after the folder, with its accents', async () => {
+      const res = await get(zipUrl(folderQuery(DIR)));
+
+      res.should.have.status(200);
+      expect(res.headers['content-disposition']).to.match(/^attachment;/);
+      expect(fileName(res)).to.equal(DIR + '.zip');
+    });
+
+    it('should name the zip of a folder after the folder, as the navbar sends it', async () => {
+      // the navbar's query has no './' in front of a folder of the root (Utils.concatUrls)
+      const res = await get(zipUrl({...folderQuery(DIR), value: DIR} as TextSearch));
+
+      res.should.have.status(200);
+      expect(fileName(res)).to.equal(DIR + '.zip');
     });
 
     it('should still zip the other files when a file of the folder was deleted from disk', async () => {
