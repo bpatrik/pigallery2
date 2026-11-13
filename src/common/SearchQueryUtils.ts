@@ -217,7 +217,7 @@ export const SearchQueryUtils = {
   /**
    * The directory path as the directory searches compare it: normalized, lower case and with runs of spaces collapsed
    * (the SQL search collapses them too, see SearchManager; a double space in a name is usually a typo #1309).
-   * @param foldAccents also removes the accents, where the SQL search ignores them (see SearchManager.ignoresAccents)
+   * @param foldAccents also removes the accents, where the SQL search ignores them (see sqlIgnoresAccents of the backend)
    */
   comparableDirectoryPath: (dirPath: string, foldAccents = false): string => {
     const p = SearchQueryUtils.normalizeDirectoryPath(dirPath).toLowerCase().replace(/ {2,}/g, ' ');
