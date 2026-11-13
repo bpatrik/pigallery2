@@ -67,10 +67,10 @@ export class ToastContainerComponent {
     }
   }
 
-  // The cancel button sits on a clickable card, the click must not close or toggle it too
-  onCancel(event: Event, cancel: () => void): void {
+  // The cancel and retry buttons sit on a clickable card, the click must not close or toggle it too
+  onAction(event: Event, action: () => void): void {
     event.stopPropagation();
-    cancel();
+    action();
   }
 
   onCloseGroup(event: Event, group: string | undefined): void {

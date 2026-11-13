@@ -22,6 +22,8 @@ export interface ToastOptions {
   wrap?: boolean;
   // Shows a cancel button that calls it, e.g. to stop an upload
   onCancel?: () => void;
+  // Shows a retry button that calls it, e.g. to send an upload again
+  onRetry?: () => void;
   // Overrides the icon and the Bootstrap color of the type
   icon?: string;
   color?: string;

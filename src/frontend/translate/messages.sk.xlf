@@ -1414,7 +1414,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1949</context>
+          <context context-type="linenumber">1961</context>
         </context-group>
         <target>Rozšírenia</target>
       </trans-unit>
@@ -1426,7 +1426,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1958</context>
+          <context context-type="linenumber">1970</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
@@ -3446,11 +3446,27 @@
         </context-group>
         <target>Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.</target>
       </trans-unit>
+      <trans-unit id="8818632916733036686" datatype="html">
+        <source>Maximum file size</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">1858</context>
+        </context-group>
+        <target>Maximum file size</target>
+      </trans-unit>
+      <trans-unit id="2572644472095797693" datatype="html">
+        <source>Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
+          <context context-type="linenumber">1863</context>
+        </context-group>
+        <target>Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.</target>
+      </trans-unit>
       <trans-unit id="4782452434519048757" datatype="html">
         <source>Blocked extensions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1859</context>
+          <context context-type="linenumber">1871</context>
         </context-group>
         <target>Blocked extensions</target>
       </trans-unit>
@@ -3458,7 +3474,7 @@
         <source>Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1862</context>
+          <context context-type="linenumber">1874</context>
         </context-group>
         <target>Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.</target>
       </trans-unit>
@@ -3466,7 +3482,7 @@
         <source>Gallery</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1879</context>
+          <context context-type="linenumber">1891</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3486,7 +3502,7 @@
         <source>Album</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1894</context>
+          <context context-type="linenumber">1906</context>
         </context-group>
         <target>Album</target>
       </trans-unit>
@@ -3494,7 +3510,7 @@
         <source>Search</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1907</context>
+          <context context-type="linenumber">1919</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3522,7 +3538,7 @@
         <source>Map</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1919</context>
+          <context context-type="linenumber">1931</context>
         </context-group>
         <target>Mapa</target>
       </trans-unit>
@@ -3530,7 +3546,7 @@
         <source>Faces</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1928</context>
+          <context context-type="linenumber">1940</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -3566,7 +3582,7 @@
         <source>Random photo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1937</context>
+          <context context-type="linenumber">1949</context>
         </context-group>
         <target>Náhodná fotografia</target>
       </trans-unit>
@@ -3574,7 +3590,7 @@
         <source>This feature enables you to generate 'random photo' urls. That URL returns a photo random selected from your gallery. You can use the url with 3rd party application like random changing desktop background. Note: With the current implementation, random link also requires login.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
-          <context context-type="linenumber">1941</context>
+          <context context-type="linenumber">1953</context>
         </context-group>
         <target>Toto nastavenie vám umožní generovať URL adresy s „Náhodnou fotografiou“. Táto adresa vráti náhodnú fotografiu z vašej galérie. Môžete ju využiť v aplikáciach tretích strán napríklad pre zmenu pozadia plochy. Poznámka: pri aktuálnej implementácii náhodný odkaz takisto vyžaduje prihlásenie.</target>
       </trans-unit>
@@ -5256,6 +5272,10 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">28,29</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
+          <context context-type="linenumber">31,32</context>
+        </context-group>
         <target>Retry</target>
       </trans-unit>
       <trans-unit id="1018831956200649278" datatype="html">
@@ -5314,11 +5334,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">31</context>
+          <context context-type="linenumber">35</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">54</context>
+          <context context-type="linenumber">58</context>
         </context-group>
         <target>Zavrieť</target>
       </trans-unit>
@@ -6814,7 +6834,7 @@
         <source>Hide details</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">66</context>
         </context-group>
         <target>Hide details</target>
       </trans-unit>
@@ -6822,7 +6842,7 @@
         <source>Uploading files: <x id="count" equiv-text="toasts.length"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">64</context>
+          <context context-type="linenumber">66</context>
         </context-group>
         <target>Uploading files: <x id="count" equiv-text="toasts.length"/></target>
       </trans-unit>
@@ -6830,7 +6850,7 @@
         <source>Failed: <x id="count" equiv-text="failed"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">65</context>
+          <context context-type="linenumber">67</context>
         </context-group>
         <target>Failed: <x id="count" equiv-text="failed"/></target>
       </trans-unit>
@@ -6838,23 +6858,35 @@
         <source>Upload is not supported for this directory.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">96</context>
+          <context context-type="linenumber">98</context>
         </context-group>
         <target>Upload is not supported for this directory.</target>
       </trans-unit>
-      <trans-unit id="8724593970404476070" datatype="html">
-        <source>Some files were skipped due to unsupported format.</source>
+      <trans-unit id="6770061048832854987" datatype="html">
+        <source>Unsupported file format</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">109</context>
+          <context context-type="linenumber">110</context>
         </context-group>
-        <target>Some files were skipped due to unsupported format.</target>
+        <target>Unsupported file format</target>
+      </trans-unit>
+      <trans-unit id="1425437940123900524" datatype="html">
+        <source>The file is larger than the upload limit of <x id="limit" equiv-text="Config.Upload.maxFileSizeMB"/> MB</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
+          <context context-type="linenumber">115</context>
+        </context-group>
+        <target>The file is larger than the upload limit of <x id="limit" equiv-text="Config.Upload.maxFileSizeMB"/> MB</target>
       </trans-unit>
       <trans-unit id="383181061702648553" datatype="html">
         <source>Queued</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">142</context>
+          <context context-type="linenumber">151</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
+          <context context-type="linenumber">349</context>
         </context-group>
         <target>Queued</target>
       </trans-unit>
@@ -6862,7 +6894,7 @@
         <source>Files already exist: <x id="count" equiv-text="existingFiles.length"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">162</context>
+          <context context-type="linenumber">171</context>
         </context-group>
         <target>Files already exist: <x id="count" equiv-text="existingFiles.length"/></target>
       </trans-unit>
@@ -6870,15 +6902,35 @@
         <source>File already exists</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">163</context>
+          <context context-type="linenumber">172</context>
         </context-group>
         <target>File already exists</target>
+      </trans-unit>
+      <trans-unit id="983128193375990518" datatype="html">
+        <source>Can't save to this folder</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
+          <context context-type="linenumber">290</context>
+        </context-group>
+        <target>Can't save to this folder</target>
+      </trans-unit>
+      <trans-unit id="205445381296663832" datatype="html">
+        <source>Upload failed.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
+          <context context-type="linenumber">294</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
+          <context context-type="linenumber">390</context>
+        </context-group>
+        <target>Upload failed.</target>
       </trans-unit>
       <trans-unit id="6419424384925181938" datatype="html">
         <source>Upload canceled.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">333</context>
+          <context context-type="linenumber">381</context>
         </context-group>
         <target>Upload canceled.</target>
       </trans-unit>
@@ -6886,7 +6938,7 @@
         <source>Uploaded files: <x id="count" equiv-text="this.batchUploaded"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">384</context>
         </context-group>
         <target>Uploaded files: <x id="count" equiv-text="this.batchUploaded"/></target>
       </trans-unit>
@@ -6894,15 +6946,15 @@
         <source>Upload completed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">336</context>
+          <context context-type="linenumber">384</context>
         </context-group>
         <target>Upload completed.</target>
       </trans-unit>
       <trans-unit id="167942783952169868" datatype="html">
-        <source>Uploaded: <x id="uploaded" equiv-text="this.batchUploaded"/>, failed: <x id="failed" equiv-text="this.batchFailed"/></source>
+        <source>Uploaded: <x id="uploaded" equiv-text="this.batchUploaded"/>, failed: <x id="failed" equiv-text="this.batchFailed.size"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">339</context>
+          <context context-type="linenumber">387</context>
         </context-group>
         <target>Uploaded: <x id="uploaded" equiv-text="this.batchUploaded"/>, failed: <x id="failed" equiv-text="this.batchFailed"/></target>
       </trans-unit>
@@ -6910,25 +6962,17 @@
         <source>Upload completed with errors</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">340</context>
+          <context context-type="linenumber">388</context>
         </context-group>
         <target>Upload completed with errors</target>
       </trans-unit>
       <trans-unit id="6218888260949839774" datatype="html">
-        <source>Failed files: <x id="count" equiv-text="this.batchFailed"/></source>
+        <source>Failed files: <x id="count" equiv-text="this.batchFailed.size"/></source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">342</context>
+          <context context-type="linenumber">390</context>
         </context-group>
         <target>Failed files: <x id="count" equiv-text="this.batchFailed"/></target>
-      </trans-unit>
-      <trans-unit id="205445381296663832" datatype="html">
-        <source>Upload failed.</source>
-        <context-group purpose="location">
-          <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
-          <context context-type="linenumber">342</context>
-        </context-group>
-        <target>Upload failed.</target>
       </trans-unit>
       <trans-unit id="6009155907060376263" datatype="html">
         <source>This link is invalid or has expired.</source>
@@ -8235,7 +8279,7 @@
         <source>Cancel all</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
-          <context context-type="linenumber">51,52</context>
+          <context context-type="linenumber">55,56</context>
         </context-group>
         <target>Cancel all</target>
       </trans-unit>

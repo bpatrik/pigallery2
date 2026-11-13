@@ -24,7 +24,11 @@
           }
           @if (toast.onCancel) {
             <button toastAction type="button" class="btn btn-link btn-sm toast-cancel"
-                    (click)="onCancel($event, toast.onCancel)" i18n>Cancel</button>
+                    (click)="onAction($event, toast.onCancel)" i18n>Cancel</button>
+          }
+          @if (toast.onRetry) {
+            <button toastAction type="button" class="btn btn-link btn-sm toast-cancel toast-retry"
+                    (click)="onAction($event, toast.onRetry)" i18n>Retry</button>
           }
           @if (toast.closable) {
             <!-- clicking anywhere on the toast closes it, the button makes that visible -->
@@ -48,7 +52,7 @@
           }
           @if (summary.onCancel) {
             <button toastAction type="button" class="btn btn-link btn-sm toast-cancel"
-                    (click)="onCancel($event, summary.onCancel)" i18n>Cancel all</button>
+                    (click)="onAction($event, summary.onCancel)" i18n>Cancel all</button>
           }
           @if (summary.closable) {
             <button toastAction type="button" class="btn-close flex-shrink-0" aria-label="Close" i18n-aria-label

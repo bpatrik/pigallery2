@@ -11,6 +11,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import {ToastService} from '../../toast/toast.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
+import {ErrorCodes} from '../../../../../common/entities/Error';
 
 class MockNetworkService {
   requests: Subject<unknown>[] = [];
@@ -192,8 +193,7 @@ describe('UploaderService', () => {
       expect(toast('setup.exe')?.type).not.toBe('progress');
     });
 
-    // TODO #1314: today one generic warning ("Some files were skipped due to unsupported format.") without the file names
-    it.fails('should name the unsupported file in its message', async () => {
+    it('should name the unsupported file in its message', async () => {
       vi.useFakeTimers();
       service.uploadFiles([file('beach.jpg'), file('notes.txt')]);
       await vi.advanceTimersByTimeAsync(0);
@@ -205,17 +205,17 @@ describe('UploaderService', () => {
       expect(messages.some((m) => m.includes('notes.txt'))).toBe(true);
     });
 
-    // TODO #1314: there is no Upload.maxFileSizeMB setting yet; a file above it should fail right away with the limit in the message
-    it.fails('should reject a file above the size limit without sending it', async () => {
+    it('should reject a file above the size limit without sending it', async () => {
       vi.useFakeTimers();
-      (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'] = 1;
+      const maxFileSizeMB = Config.Upload.maxFileSizeMB;
+      Config.Upload.maxFileSizeMB = 1;
       try {
         service.uploadFiles([new File([new Uint8Array(1024 * 1024 + 1)], 'big.jpg'), file('beach.jpg')]);
         await vi.advanceTimersByTimeAsync(0);
         expect(toast('big.jpg')).toEqual(expect.objectContaining({type: 'error', text: expect.stringContaining('1 MB')}));
         expect(network.requests.length).toBe(1); // only beach.jpg is sent
       } finally {
-        delete (Config.Upload as unknown as Record<string, unknown>)['maxFileSizeMB'];
+        Config.Upload.maxFileSizeMB = maxFileSizeMB;
       }
     });
 
@@ -230,30 +230,33 @@ describe('UploaderService', () => {
       }
     });
 
-    // TODO #1314: the raw error of the request is shown instead
-    it.fails('should say "Can\'t save to this folder" when the server refuses the folder', async () => {
+    it('should say "Can\'t save to this folder" when the server refuses the folder', async () => {
       vi.useFakeTimers();
       service.uploadFiles([file('beach.jpg')]);
       await vi.advanceTimersByTimeAsync(0);
-      network.requests[0].error({status: 403, message: 'Http failure response: 403 Forbidden'});
+      // the error interceptor passes on the ErrorDTO of the response
+      network.requests[0].error({code: ErrorCodes.PERMISSION_DENIED, message: 'Upload is not enabled in this directory'});
       const messages = [
         ...toasts.toasts().map((t) => (t.title ?? '') + ' ' + (t.text ?? '')),
         ...notification.error.mock.calls.map((c) => c.join(' '))
       ];
       expect(messages.some((m) => m.includes('Can\'t save to this folder'))).toBe(true);
+      expect(toast('beach.jpg').onRetry).toBeUndefined(); // it would fail the same way
     });
 
-    // TODO #1314: a failed file can only be closed; it should offer a retry (e.g. an onRetry action of its toast)
-    it.fails('should offer a retry for a file whose connection dropped', async () => {
+    it('should offer a retry for a file whose connection dropped', async () => {
       vi.useFakeTimers();
       service.uploadFiles([file('beach.jpg')]);
       await vi.advanceTimersByTimeAsync(0);
       fail(0);
-      const retry = (toast('beach.jpg') as unknown as Record<string, unknown>)['onRetry'] as (() => void) | undefined;
-      expect(retry).toBeDefined();
-      retry!();
+      expect(toast('beach.jpg').onRetry).toBeDefined();
+      toast('beach.jpg').onRetry!();
       await vi.advanceTimersByTimeAsync(0);
       expect(network.requests.length).toBe(2);
+      expect(toast('beach.jpg')).toEqual(expect.objectContaining({type: 'progress', text: '0%', onRetry: undefined}));
+      finish(1);
+      expect(toast('beach.jpg').type).toBe('success');
+      expect(notification.success).toHaveBeenCalledWith('Uploaded files: 1', 'Upload completed.');
     });
   });
 });
