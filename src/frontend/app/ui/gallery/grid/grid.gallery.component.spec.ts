@@ -8,6 +8,7 @@ import {ContentService} from '../content.service';
 import {GallerySortingService} from '../navigator/sorting.service';
 import {QueryService} from '../../../model/query.service';
 import {of} from 'rxjs';
+import {formatDate} from '@angular/common';
 import {provideHttpClientTesting} from '@angular/common/http/testing';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
@@ -23,7 +24,6 @@ import {ThumbnailManagerService} from '../thumbnailManager.service';
 import {ExtensionService} from '../../../model/extension.service';
 import {MediaButtonModalService} from './photo/media-button-modal/media-button-modal.service';
 import {AuthenticationService} from '../../../model/network/authentication.service';
-import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
 
 class MockQueryService {
@@ -48,6 +48,12 @@ class MockContentService {
 class MockGallerySortingService {
   readonly sorting = signal({method: SortByTypes.Date, ascending: false});
   readonly grouping = signal({method: GroupByTypes.NoGrouping, ascending: true});
+  // the label of the scroll indicator, the real logic is tested with the sorting service
+  scrollLabelFn: ((m: MediaDTO) => string) | null = (m: MediaDTO) => formatDate(m.metadata.creationDate, 'MMMM y', 'en-US', 'UTC');
+
+  getScrollLabelFn(): ((m: MediaDTO) => string) | null {
+    return this.scrollLabelFn;
+  }
 }
 
 class MockGalleryNavigatorService {
@@ -370,7 +376,7 @@ describe('GalleryGridComponent', () => {
       vi.restoreAllMocks();
     });
 
-    const label = (): HTMLElement | null => fixture.nativeElement.querySelector('.scroll-date');
+    const label = (): HTMLElement | null => fixture.nativeElement.querySelector('.scroll-label');
 
     it('should show the month and year of the first visible photo at the thumb position', () => {
       scrollY = 250; // the 3rd tile is the first one that is not scrolled out
@@ -393,34 +399,47 @@ describe('GalleryGridComponent', () => {
       expect(label()).toBeNull();
     });
 
-    it('should not show when the grid is not sorted by date', () => {
-      sortingService.sorting.set({method: SortByTypes.Name, ascending: true});
+    it('should show the label of the sorting service', () => {
+      sortingService.scrollLabelFn = (m: MediaDTO) => m.name.at(0) ?? '';
+      scrollY = 250;
+      scroll();
+      expect(label()?.textContent?.trim()).toBe('2');
+    });
+
+    it('should not show when the sorting service has no label', () => {
+      sortingService.scrollLabelFn = null;
       scrollY = 250;
       scroll();
       expect(label()).toBeNull();
+    });
+
+    it('should be hidden from assistive technologies', () => {
+      scrollY = 250;
+      scroll();
+      expect(label()?.getAttribute('aria-hidden')).toBe('true');
+    });
+
+    it('should skip the tiles behind the navbar', () => {
+      const navbar = document.createElement('div');
+      navbar.className = 'navbar-container';
+      navbar.getBoundingClientRect = () => ({bottom: 100} as DOMRect);
+      document.body.appendChild(navbar);
+      try {
+        scrollY = 250; // the 3rd tile is behind the navbar, the 4th is the first visible one
+        scroll();
+        expect(label()?.textContent?.trim()).toBe('June 2021');
+        scrollY = 950; // the 10th tile is behind the navbar, the 11th is the first visible one
+        scroll();
+        expect(label()?.textContent?.trim()).toBe('March 2021');
+      } finally {
+        navbar.remove();
+      }
     });
 
     it('should not show when there is nothing to scroll', () => {
       vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(0);
       scroll();
       expect(label()).toBeNull();
-    });
-
-    it('should show the date in the time zone of the photo', () => {
-      const first = photo(0, Date.UTC(2021, 5, 30, 23, 30));
-      first.metadata.creationDateOffset = '+02:00';
-      fixture.componentRef.setInput('mediaGroups', [{name: 'all', media: [first]}]);
-      component.mediaToRender.set([{name: 'all', media: [new GridMedia(first, 150, TILE_HEIGHT, 0)]}]);
-      fixture.detectChanges();
-      layOut();
-      const ignoreOffset = Config.Gallery.ignoreTimestampOffset;
-      Config.Gallery.ignoreTimestampOffset = true;
-      try {
-        scroll();
-        expect(label()?.textContent?.trim()).toBe('July 2021');
-      } finally {
-        Config.Gallery.ignoreTimestampOffset = ignoreOffset;
-      }
     });
   });
 

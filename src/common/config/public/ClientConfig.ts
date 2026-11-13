@@ -34,6 +34,10 @@ export enum ScrollUpModes {
   never = 1, mobileOnly, always
 }
 
+export enum ScrollLabelModes {
+  never = 1, date, always
+}
+
 /**
  * Used for lightbox titles
  */
@@ -928,6 +932,16 @@ export class NavBarConfig {
     description: $localize`Set when the floating scroll-up button should be visible.`,
   })
   showScrollUpButton: ScrollUpModes = ScrollUpModes.mobileOnly;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Show scroll label`,
+      priority: ConfigPriority.underTheHood
+    },
+    type: ScrollLabelModes,
+    description: $localize`Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.`,
+  })
+  showScrollLabel: ScrollLabelModes = ScrollLabelModes.always;
 
 
   @ConfigProperty({

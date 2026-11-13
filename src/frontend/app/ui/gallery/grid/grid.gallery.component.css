@@ -25,7 +25,7 @@ app-gallery-grid-photo {
 }
 
 /* next to the scrollbar thumb: --scroll-position (0-1) moves it down the screen and back by the same part of its own height, so it stays on screen */
-.scroll-date {
+.scroll-label {
     position: fixed;
     top: calc(var(--scroll-position) * 100%);
     transform: translateY(calc(var(--scroll-position) * -100%));

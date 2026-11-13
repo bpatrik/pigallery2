@@ -6,6 +6,7 @@ import {ContentLoaderService} from '../contentLoader.service';
 import {ContentWrapper, ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
+import {ScrollLabelModes} from '../../../../../common/config/public/ClientConfig';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {DirectoryContent} from '../contentLoader.service';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
@@ -252,6 +253,76 @@ describe('GallerySortingService', () => {
       const first = names(dc, random);
       expect([...first[0]].sort()).toEqual(dc.media.map((m) => m.name).sort());
       expect(names(dc, random)).toEqual(first);
+    });
+  });
+
+  describe('getScrollLabelFn', () => {
+    const photo = detailedMedia('Bravo.jpg', Date.UTC(2021, 5, 30, 23, 30), 4, 2, 3 * 1024 * 1024);
+    const label = (s: SortingMethod, g: GroupingMethod) => service.getScrollLabelFn(s, g)?.(photo);
+    const sortBy = (method: SortingMethod['method']): SortingMethod => ({method, ascending: true});
+    const groupBy = (method: GroupingMethod['method']): GroupingMethod => ({method, ascending: true});
+    let mode: ScrollLabelModes;
+    let ignoreOffset: boolean;
+
+    beforeEach(() => {
+      mode = Config.Gallery.NavBar.showScrollLabel;
+      ignoreOffset = Config.Gallery.ignoreTimestampOffset;
+      Config.Gallery.NavBar.showScrollLabel = ScrollLabelModes.always;
+    });
+
+    afterEach(() => {
+      Config.Gallery.NavBar.showScrollLabel = mode;
+      Config.Gallery.ignoreTimestampOffset = ignoreOffset;
+    });
+
+    it('should be the month and year for the date order', () => {
+      expect(label(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))).toBe('June 2021');
+    });
+
+    it('should be empty for a media without date', () => {
+      const undated = {name: 'a.jpg', metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO;
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.(undated)).toBe('');
+    });
+
+    it('should use the time zone handling of the date grouping', () => {
+      const withOffset = {...photo, metadata: {...photo.metadata, creationDateOffset: '+02:00'}} as MediaDTO;
+      Config.Gallery.ignoreTimestampOffset = true;
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.(withOffset)).toBe('July 2021');
+      Config.Gallery.ignoreTimestampOffset = false;
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))?.(withOffset)).toBe('June 2021');
+    });
+
+    it('should reuse the group names of the other orders', () => {
+      expect(label(sortBy(SortByTypes.Name), groupBy(GroupByTypes.NoGrouping))).toBe('B');
+      expect(label(sortBy(SortByTypes.Rating), groupBy(GroupByTypes.NoGrouping))).toBe('4');
+      expect(label(sortBy(SortByTypes.FileSize), groupBy(GroupByTypes.NoGrouping))).toBe('2 - 5 MB');
+      expect(label(sortBy(SortByTypes.PersonCount), groupBy(GroupByTypes.NoGrouping))).toBe('2');
+    });
+
+    it('should not have a label for the random order', () => {
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Random), groupBy(GroupByTypes.NoGrouping))).toBeNull();
+    });
+
+    it('should follow the grouping and not the sorting', () => {
+      // grouped by name, sorted by date: the dates jump back and forth with every group
+      expect(label(sortBy(SortByTypes.Date), groupBy(GroupByTypes.Name))).toBe('B');
+      // grouped by date, sorted by name: the dates are in order
+      expect(label(sortBy(SortByTypes.Name), groupBy(GroupByTypes.Date))).toBe('June 2021');
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))).not.toBeNull();
+    });
+
+    it('should have no label in never mode', () => {
+      Config.Gallery.NavBar.showScrollLabel = ScrollLabelModes.never;
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.Date))).toBeNull();
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Name), groupBy(GroupByTypes.NoGrouping))).toBeNull();
+    });
+
+    it('should have a label only for the date order in date mode', () => {
+      Config.Gallery.NavBar.showScrollLabel = ScrollLabelModes.date;
+      expect(label(sortBy(SortByTypes.Name), groupBy(GroupByTypes.Date))).toBe('June 2021');
+      expect(label(sortBy(SortByTypes.Date), groupBy(GroupByTypes.NoGrouping))).toBe('June 2021');
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Date), groupBy(GroupByTypes.Name))).toBeNull();
+      expect(service.getScrollLabelFn(sortBy(SortByTypes.Name), groupBy(GroupByTypes.NoGrouping))).toBeNull();
     });
   });
 });

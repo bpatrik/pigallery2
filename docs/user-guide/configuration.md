@@ -77,6 +77,7 @@ App CLI options:
   --Gallery-NavBar-NavbarShowDelay                                          Ratio of the page height, you need to scroll to show the navigation bar. (default: 0.3)
   --Gallery-NavBar-NavbarHideDelay                                          Ratio of the page height, you need to scroll to hide the navigation bar. (default: 0.15)
   --Gallery-NavBar-showScrollUpButton                                       Set when the floating scroll-up button should be visible. (default: 'mobileOnly')
+  --Gallery-NavBar-showScrollLabel                                          Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random. (default: 'always')
   --Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-method          (default: 'Date')
   --Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-ascending       (default: true)
   --Gallery-NavBar-SortingGrouping-defaultSearchSortingMethod-method         (default: 'Date')
@@ -265,6 +266,7 @@ Environmental variables:
   Gallery-NavBar-NavbarShowDelay                                        Ratio of the page height, you need to scroll to show the navigation bar. (default: 0.3)
   Gallery-NavBar-NavbarHideDelay                                        Ratio of the page height, you need to scroll to hide the navigation bar. (default: 0.15)
   Gallery-NavBar-showScrollUpButton                                     Set when the floating scroll-up button should be visible. (default: 'mobileOnly')
+  Gallery-NavBar-showScrollLabel                                        Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random. (default: 'always')
   Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-method        (default: 'Date')
   Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-ascending     (default: true)
   Gallery-NavBar-SortingGrouping-defaultSearchSortingMethod-method       (default: 'Date')
@@ -539,6 +541,8 @@ Environmental variables:
             "NavbarHideDelay": 0.15,
             "//[showScrollUpButton]": "Set when the floating scroll-up button should be visible.",
             "showScrollUpButton": "mobileOnly",
+            "//[showScrollLabel]": "Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.",
+            "showScrollLabel": "always",
             "SortingGrouping": {
                 "//[defaultPhotoSortingMethod]": "Default sorting method for photo and video in a directory results.",
                 "defaultPhotoSortingMethod": {
