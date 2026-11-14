@@ -34,6 +34,13 @@ To keep development organized, please follow our feature workflow and rule of th
    * Note: you can skip this test if you use and IDE that supports typescript (e.g.: webstorm, vscode)
 5. Run the server `npm start`
 
+## Releasing
+
+The `pigallery2-extension-kit` npm package is published by CI (`.github/workflows/ci.yml`) with the app's version, once per version:
+bump the version in `package.json`; prereleases (e.g. `4.0.0-edge`) publish from `master` with the npm dist-tag `edge`,
+stable versions from their release tag (the tag must equal the version) with `latest`.
+Build it locally with `npm run build-extension-interface`.
+
 ## Developing with AI agents
 
 The repository contains an [`AGENTS.md`](https://github.com/bpatrik/pigallery2/blob/master/AGENTS.md) file with project context, commands and rules for AI coding agents.

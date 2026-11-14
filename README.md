@@ -1,7 +1,7 @@
 # PiGallery2
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/bpatrik/pigallery2)
 [![Coverage Status](https://coveralls.io/repos/github/bpatrik/pigallery2/badge.svg?branch=master)](https://coveralls.io/github/bpatrik/pigallery2?branch=master)
-[![Docker build](https://github.com/bpatrik/pigallery2/workflows/docker-buildx/badge.svg)](https://github.com/bpatrik/pigallery2/actions)
+[![CI](https://github.com/bpatrik/pigallery2/actions/workflows/ci.yml/badge.svg)](https://github.com/bpatrik/pigallery2/actions)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/bpatrik)
 
 PiGallery2 is a **fast** directory-first photo gallery website, optimized for running on low-resource servers (especially on Raspberry Pi).
