@@ -44,13 +44,25 @@
             i18n>Share</button>
           }
           @if (sharing()) {
-            <button type="button"
-              id="copyButton" name="copyButton"
-              [appCopy]="url()"
-              (copied)="onCopy()"
-              [disabled]="!shareForm.form.valid"
-              class="btn btn-primary btn-block float-end"
-            i18n>Copy</button>
+            <div class="btn-group float-end">
+              <button type="button"
+                id="copyButton" name="copyButton"
+                [appCopy]="url()"
+                (copied)="onCopy()"
+                [disabled]="!shareForm.form.valid"
+                class="btn btn-primary"
+              i18n>Copy</button>
+              @if (canNativeShare) {
+                <button type="button"
+                  id="nativeShareButton" name="nativeShareButton"
+                  (click)="nativeShare()"
+                  [disabled]="!shareForm.form.valid"
+                  class="btn btn-primary"
+                  title="Send with another app" i18n-title>
+                  <ng-icon name="ionShareSocialOutline" />
+                </button>
+              }
+            </div>
           }
         </div>
       </div>

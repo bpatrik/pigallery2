@@ -97,6 +97,8 @@ export class GalleryShareComponent {
   readonly sharing = signal<ResponseSharingDTO | null>(null);
   readonly passwordRequired = Config.Sharing.passwordRequired;
   readonly ValidityTypes = ValidityTypes;
+  // navigator.share only exists in secure contexts (https or localhost), mostly on phones
+  readonly canNativeShare = typeof navigator.share === 'function';
 
   modalRef: BsModalRef | null = null;
   invalidSettings = $localize`Invalid settings`;
@@ -276,6 +278,21 @@ export class GalleryShareComponent {
 
   onCopy(): void {
     this.notification.success($localize`Sharing link has been copied to clipboard`);
+  }
+
+  /**
+   * Opens the share sheet of the device (messaging apps, mail, ...) with the link
+   */
+  async nativeShare(): Promise<void> {
+    try {
+      await navigator.share({title: Config.Server.applicationTitle, url: this.url()});
+    } catch (e) {
+      // AbortError: the user closed the share sheet
+      if ((e as Error)?.name !== 'AbortError') {
+        console.error(e);
+        this.notification.error($localize`Could not share the link`);
+      }
+    }
   }
 
   public hideModal(): void {
