@@ -20,6 +20,7 @@ import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
 import {ReloadAfterUpgradeComponent} from '../../../model/lazy-loading';
+import {Location} from '@angular/common';
 
 export enum LightboxStates {
   Open = 1,
@@ -72,6 +73,7 @@ export class GalleryLightboxComponent implements OnDestroy {
   private wakeLockService = inject(WakeLockService);
   private lightboxService = inject(LightboxService);
   private notificationService = inject(NotificationService);
+  private location = inject(Location);
 
   readonly grid = input<LightboxGrid>();
   readonly mediaElement = viewChild.required<GalleryLightboxMediaComponent>('photo');
@@ -217,8 +219,16 @@ export class GalleryLightboxComponent implements OnDestroy {
   }
 
   public hide(): void {
+    if (this.queryService.lightboxClosesWithBack()) {
+      // the page it was opened from (the grid, the map) is the history entry before it: going back
+      // leaves no photo in the history that back would open again (#470)
+      this.location.back();
+      this.piTitleService.setLastNonMedia();
+      return;
+    }
+    // opened from a link: the folder replaces the photo, for the same reason
     this.router
-      .navigate([], {queryParams: this.queryService.getParams()})
+      .navigate([], {queryParams: this.queryService.getParams(), replaceUrl: true})
       .then(() => {
         this.piTitleService.setLastNonMedia();
       })
@@ -457,6 +467,7 @@ export class GalleryLightboxComponent implements OnDestroy {
         queryParams: {...this.queryService.getParams({media}), ...extraParams},
         queryParamsHandling: 'merge', // keep existing params
         replaceUrl: true,
+        state: this.queryService.keepLightboxState(),
       })
       .catch((err) => {
         console.error(`Can't navigate to photo ${media.name}`, err);

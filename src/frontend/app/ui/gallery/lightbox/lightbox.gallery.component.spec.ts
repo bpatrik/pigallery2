@@ -18,6 +18,7 @@ import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {NgIcon, provideIcons} from '@ng-icons/core';
 import {By} from '@angular/platform-browser';
 import {appIcons} from '../../../icons';
+import {Location} from '@angular/common';
 
 // Mock classes
 class MockFullScreenService {
@@ -49,6 +50,12 @@ class MockWakeLockService {
 }
 
 class MockQueryService {
+  lightboxClosesWithBack = vi.fn(() => false);
+
+  keepLightboxState() {
+    return {lightboxClosesWithBack: this.lightboxClosesWithBack()};
+  }
+
   getMediaStringId(media: MediaDTO) {
     return media.name;
   }
@@ -482,6 +489,31 @@ describe('GalleryLightboxComponent', () => {
     expect(grid.revealMedia).toHaveBeenCalledWith(photos[1]);
     expect(component.status()).toBe(LightboxStates.Closed);
     expect(component.activePhoto()).toBeNull();
+  });
+
+  // #470: back after closing must not open the photo again
+  it('should go back on close when the photo was opened from the page under it', async () => {
+    await openPhoto('photo1.jpg');
+    const location = TestBed.inject(Location);
+    (TestBed.inject(QueryService) as unknown as MockQueryService).lightboxClosesWithBack.mockReturnValue(true);
+    const back = vi.spyOn(location, 'back').mockImplementation(() => undefined);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    component.hide();
+
+    expect(back).toHaveBeenCalledTimes(1);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('should replace the photo with its folder on close when the photo was opened from a link', async () => {
+    await openPhoto('photo1.jpg');
+    const back = vi.spyOn(TestBed.inject(Location), 'back');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    component.hide();
+
+    expect(back).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({replaceUrl: true}));
   });
 
   it('should release the scroll lock and full screen when destroyed while open', () => {

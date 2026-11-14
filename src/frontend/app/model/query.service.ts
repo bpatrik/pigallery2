@@ -1,4 +1,5 @@
 import {Injectable, computed, inject} from '@angular/core';
+import {Location} from '@angular/common';
 import {ShareService} from '../ui/gallery/share.service';
 import {MediaDTO} from '../../../common/entities/MediaDTO';
 import {QueryParams} from '../../../common/QueryParams';
@@ -7,11 +8,18 @@ import {Config} from '../../../common/config/public/Config';
 import {ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import {ContentLoaderService} from '../ui/gallery/contentLoader.service';
 
+/**
+ * The history state of a media opened in the lightbox (see QueryService.getLightboxLink()).
+ */
+export interface LightboxHistoryState {
+  lightboxClosesWithBack?: boolean;
+}
+
 @Injectable({providedIn: 'root'})
 export class QueryService {
   private shareService = inject(ShareService);
   private galleryService = inject(ContentLoaderService);
-
+  private location = inject(Location);
 
   getMediaStringId(media: MediaDTO): string {
     if (this.galleryService.isSearchResult()) {
@@ -43,6 +51,29 @@ export class QueryService {
       }
     }
     return query;
+  }
+
+  /**
+   * The link that opens the lightbox on a media from the page it is opened on (the grid, the map).
+   * Its history state marks that page as the history entry before the media, so closing the lightbox
+   * goes back to it instead of adding the page again, which back would leave behind (#470).
+   */
+  getLightboxLink(media: MediaDTO): { queryParams: Record<string, string>, state: LightboxHistoryState } {
+    return {queryParams: this.getParams({media}), state: {lightboxClosesWithBack: true}};
+  }
+
+  /**
+   * The shown media was opened with getLightboxLink(): closing the lightbox goes back.
+   */
+  lightboxClosesWithBack(): boolean {
+    return !!(this.location.getState() as LightboxHistoryState | null)?.lightboxClosesWithBack;
+  }
+
+  /**
+   * The history state for a navigation that replaces the URL of the shown media: keeps lightboxClosesWithBack().
+   */
+  keepLightboxState(): LightboxHistoryState {
+    return {lightboxClosesWithBack: this.lightboxClosesWithBack()};
   }
 
   getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): Record<string, unknown> {

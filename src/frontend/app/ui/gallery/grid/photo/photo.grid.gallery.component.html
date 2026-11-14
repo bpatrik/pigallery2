@@ -4,7 +4,7 @@
 
 
   <!-- a link to the lightbox: Tab reaches the photo and Enter opens it, also in a new tab -->
-  <a class="photo-link" [routerLink]="[]" [queryParams]="lightboxParams()">
+  <a class="photo-link" [routerLink]="[]" [queryParams]="lightboxLink().queryParams" [state]="lightboxLink().state">
     @if (thumbnail.Available) {
       <img alt="{{gridMedia().media.name}}" #img [src]="thumbnail.Src"
         (load)="loaded=true"

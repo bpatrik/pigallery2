@@ -35,6 +35,10 @@ class MockQueryService {
   getParams(): Record<string, string> {
     return {};
   }
+
+  getLightboxLink(): { queryParams: Record<string, string>, state: Record<string, boolean> } {
+    return {queryParams: {}, state: {}};
+  }
 }
 
 class MockOverlayService {
