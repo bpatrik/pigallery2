@@ -52,7 +52,7 @@
               <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 @for (cp of configPriorities; track cp) {
                   <li>
-                    <button class="dropdown-item"
+                    <button type="button" class="dropdown-item"
                     (click)="settingsService.configPriority.set(cp.key); settingsService.configSetupChanged()">{{cp.value}}</button>
                   </li>
                 }
@@ -71,7 +71,7 @@
               <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 @for (cp of configStyles; track cp) {
                   <li>
-                    <button class="dropdown-item"
+                    <button type="button" class="dropdown-item"
                     (click)="settingsService.configStyle.set(cp.key); settingsService.configSetupChanged()">{{cp.value}}</button>
                   </li>
                 }
@@ -92,13 +92,13 @@
                 @for (s of settingsComponents(); track s) {
                   <div class="py-md-1 px-md-0"
                     [hidden]="!s.HasAvailableSettings">
-                    <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
+                    <button type="button" class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
                       (click)="viewportScroller.scrollToAnchor(s.ConfigPath() ?? '')"
                       >
                       <ng-icon [name]="s.icon()" /> {{s.Name()}}
                     </button>
                     @for (n of s.nestedConfigs(); track n.id) {
-                      <button class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"
+                      <button type="button" class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"
                         [hidden]="!n.visible()"
                         (click)="viewportScroller.scrollToAnchor(n.id)">
                         <ng-icon [name]="n.icon" /> {{n.name}}

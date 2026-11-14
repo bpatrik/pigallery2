@@ -36,7 +36,7 @@
         </div>
         <div class="col-5 col-sm-3">
           @if (!sharing()) {
-            <button
+            <button type="button"
               id="getShareButton" name="getShareButton"
               (click)="share()"
               [disabled]="!shareForm.form.valid"
@@ -44,7 +44,7 @@
             i18n>Share</button>
           }
           @if (sharing()) {
-            <button
+            <button type="button"
               id="copyButton" name="copyButton"
               [appCopy]="url()"
               (copied)="onCopy()"
@@ -193,7 +193,7 @@
               }
               <td>{{share.expires | date}}</td>
               <td>
-                <button (click)="deleteSharing(share)"
+                <button type="button" (click)="deleteSharing(share)"
                   [disabled]="share.sharingKey === sharing()?.sharingKey"
                   class="btn btn-danger float-end">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />

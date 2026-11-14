@@ -1,6 +1,6 @@
 // The admin page (#1315). Read-only: the tests that change the config or run jobs are in admin-config.spec.ts.
 import {expect, test} from '@playwright/test';
-import {asNormalUser, desktopViewport, expectApiOk, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
+import {asNormalUser, desktopViewport, expectApiOk, expectNoHorizontalScroll, expectVisiblePhotosLoaded, pressEnterLikeAPhoneKeyboard} from './helpers';
 
 test.describe('Admin', () => {
   test.use(desktopViewport({width: 1200, height: 800}));
@@ -47,6 +47,31 @@ test.describe('Admin', () => {
     await expect(page).toHaveURL(url => url.pathname === '/gallery/dupl');
     await expect(page.locator('.photo-link > img[alt="big_ben_only_time.jpg"]')).toBeVisible();
     await expectVisiblePhotosLoaded(page);
+  });
+
+  // The Enter key of a phone keyboard submits the form of the settings: it clicked the first button without a type,
+  // here the delete button of a cover sorting. Read-only: nothing is saved.
+  test('Enter in a search query setting should not change other settings', async ({page}) => {
+    const settingsLoaded = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings');
+    await page.goto('/admin');
+    await expectApiOk(await settingsLoaded, 'loading the settings');
+    // the cover sortings (whose delete button is the first button of the form) are under the hood settings
+    await page.locator('#config-priority').click();
+    await page.locator('.dropdown-menu button.dropdown-item', {hasText: 'Under the hood'}).click();
+
+    const form = page.locator('form#AlbumCover');
+    const queryText = form.locator('app-gallery-search-field input.search-text');
+    const deleteButtons = form.locator('button:has(ng-icon[name="ionTrashOutline"])');
+    await expect(deleteButtons.first(), 'cover sortings to delete').toBeVisible();
+    const deleteCount = await deleteButtons.count();
+    // Enter does not search here, so the keyboard does not show a search key
+    await expect.soft(queryText).not.toHaveAttribute('enterkeyhint');
+
+    await pressEnterLikeAPhoneKeyboard(queryText);
+    await queryText.press('Enter');
+
+    await expect(deleteButtons).toHaveCount(deleteCount);
+    await expect(form.getByRole('button', {name: 'Save'}), 'Save: nothing changed').toBeDisabled();
   });
 
   test.describe('as a normal user', () => {

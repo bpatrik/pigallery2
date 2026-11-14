@@ -112,7 +112,7 @@
                   @if (themesEnabled) {
                     <li role="menuitem">
                       <div class="dropdown-item bg-transparent">
-                        <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
+                        <button type="button" class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
                           @switch (themeService.mode()) {
                             @case (ThemeModes.light) {
                               <ng-icon name="ionSunnyOutline" />
@@ -264,7 +264,7 @@
                       }
                       @if (authenticationRequired) {
                         <li role="menuitem">
-                          <button class="dropdown-item btn btn-link" (click)="logout()">
+                          <button type="button" class="dropdown-item btn btn-link" (click)="logout()">
                             <ng-icon name="ionLogOutOutline" />
                             <ng-container i18n>Logout</ng-container>
                           </button>
@@ -283,7 +283,7 @@
     </div>
     <ng-content select="[body]" />
     @if (enableScrollUpButton) {
-      <button
+      <button type="button"
         (click)="scrollUp()"
         [class.show-btn-scroll-up]="!shouldHideNavbar && !navbarKeepTop"
         class="btn btn-tertiary rounded-pill btn-scroll-up">
