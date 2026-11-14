@@ -232,6 +232,50 @@ describe('PublicRouter', () => {
   });
 
 
+  describe('Installed app (PWA)', () => {
+    let publicUrl: string;
+    beforeEach(async () => {
+      await setUp();
+      publicUrl = Config.Server.publicUrl;
+    });
+    afterEach(async () => {
+      Config.Server.publicUrl = publicUrl;
+      await tearDown();
+    });
+
+    it('should install the app from the host it was opened on', async () => {
+      // a manifest with a start_url of an other host is invalid, e.g.: the app opened on the LAN address
+      Config.Server.publicUrl = 'https://gallery.example.com';
+      const res = await (request.execute(server.Server) as SuperAgentStatic).get('/manifest.json');
+      res.should.have.status(200);
+      expect(res.body.name).to.equal(Config.Server.applicationTitle);
+      expect(res.body.id).to.equal('/');
+      expect(res.body.start_url).to.equal('/');
+      expect(res.body.scope).to.equal('/');
+    });
+
+    it('should serve the png icons of the manifest and the apple-touch-icon in their size', async () => {
+      const manifest = await (request.execute(server.Server) as SuperAgentStatic).get('/manifest.json');
+      const pngs: { src: string, sizes: string }[] = manifest.body.icons.filter((i: { type?: string }) => i.type === 'image/png');
+      expect(pngs.map(i => i.sizes)).to.deep.equal(['192x192', '512x512']);
+
+      for (const icon of [...pngs, {src: 'icon_180.png', sizes: '180x180'}]) {
+        const res = await (request.execute(server.Server) as SuperAgentStatic)
+          .get('/' + icon.src)
+          .buffer(true)
+          .parse((r, callback) => {
+            const data: Buffer[] = [];
+            r.on('data', (chunk: Buffer) => data.push(chunk));
+            r.on('end', () => callback(null, Buffer.concat(data)));
+          });
+        expect(res.status, icon.src).to.equal(200);
+        expect(res.headers['content-type'], icon.src).to.equal('image/png');
+        // width and height of the png header (IHDR)
+        expect(res.body.readUInt32BE(16) + 'x' + res.body.readUInt32BE(20), icon.src).to.equal(icon.sizes);
+      }
+    });
+  });
+
   describe('Cache-Control', () => {
     let frontendFolder: string;
     beforeEach(async () => {

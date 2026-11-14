@@ -325,10 +325,22 @@ export class PhotoProcessing {
     outPath: string,
     color = '#000'
   ): Promise<string> {
-    // Generate hash from SVG content and color to create unique filename
+    const size = 256;
+    return this.renderSVGString(`<svg fill="${color}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"
+viewBox="${svgIcon.viewBox || '0 0 512 512'}">d="${svgIcon.items}</svg>`, size, outPath);
+  }
+
+  /**
+   * Renders the svg to a size x size png. The file name gets the hash of the svg, so a changed svg is a new file.
+   */
+  public static async renderSVGString(
+    svgString: string,
+    size: number,
+    outPath: string
+  ): Promise<string> {
     const contentHash = crypto
       .createHash('md5')
-      .update(JSON.stringify(svgIcon) + color)
+      .update(svgString + size)
       .digest('hex')
       .substring(0, 8);
 
@@ -346,12 +358,10 @@ export class PhotoProcessing {
       // ignoring errors
     }
 
-    const size = 256;
     // run on other thread
     const input = {
       type: ThumbnailSourceType.Photo,
-      svgString: `<svg fill="${color}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"
-viewBox="${svgIcon.viewBox || '0 0 512 512'}">d="${svgIcon.items}</svg>`,
+      svgString,
       size: size,
       outPath: hashedOutPath,
       makeSquare: false,

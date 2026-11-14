@@ -273,6 +273,27 @@ test.describe('Share', () => {
       await page.locator('input#share-recursive').uncheck();
       await expect(rows).toHaveCount(before + 2);
     });
+
+    test('Share dialog should hand the link to the share sheet of the device', async ({page}) => {
+      // the test browser has no share sheet: a fake one records what it gets
+      await page.addInitScript(() => {
+        Object.defineProperty(navigator, 'share', {
+          value: (data: ShareData): Promise<void> => {
+            (window as unknown as { sharedData: ShareData }).sharedData = data;
+            return Promise.resolve();
+          }
+        });
+      });
+      await openDirectory(page, 'timestamps');
+      await page.locator('button#shareButton').click();
+      await page.locator('button#getShareButton').click();
+      const shareLink = page.locator('input#shareLink');
+      await expect(shareLink).toHaveValue(/http/);
+
+      await page.locator('button#nativeShareButton').click();
+      await expect.poll(() => page.evaluate(() => (window as unknown as { sharedData?: ShareData }).sharedData?.url))
+        .toBe(await shareLink.inputValue());
+    });
   });
 
   test.describe('Search sharing', () => {

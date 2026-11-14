@@ -75,11 +75,11 @@ a.dropdown-item span.badge, button.dropdown-item span.badge {
   width: 3em;
   height: 3em;
   right: -3em;
-  bottom: 3em;
+  bottom: calc(3em + env(safe-area-inset-bottom));
   transition: 0.3s right;
   z-index: 999;
 }
 
 .show-btn-scroll-up {
-  right: 1em;
+  right: calc(1em + env(safe-area-inset-right));
 }

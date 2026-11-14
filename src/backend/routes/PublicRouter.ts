@@ -116,6 +116,9 @@ export class PublicRouter {
       res.sendStatus(200);
     });
 
+    // home screen icons: 180 is the apple-touch-icon, 192 and 512 are what Android asks for
+    const appIconSizes = [192, 512];
+
     app.get('/manifest.json', (req: Request, res: Response) => {
       res.send({
         name: Config.Server.applicationTitle,
@@ -132,23 +135,28 @@ export class PublicRouter {
             type: 'image/svg+xml',
             purpose: 'maskable'
           },
-          {
-            src: 'icon_white.png',
-            sizes: '48x48 72x72 96x96 128x128 256x256',
-          },
+          // png for the browsers that take no svg icon
+          ...appIconSizes.map(size => ({
+            src: 'icon_' + size + '.png',
+            sizes: size + 'x' + size,
+            type: 'image/png',
+            purpose: 'any'
+          })),
         ],
         display: 'standalone',
         categories: [
           'photo'
         ],
-        start_url:
-          Config.Server.getPublicUrl(),
+        // host relative: the app is installed from the host it was opened on (publicUrl can be another one)
+        id: Config.Server.getAppUrl(),
+        start_url: Config.Server.getAppUrl(),
+        scope: Config.Server.getAppUrl(),
         background_color: '#000000',
         theme_color: '#000000',
       });
     });
 
-    const getIcon = (theme: string | null = null, paddingPercent = 0): string => {
+    const getIcon = (theme: string | null = null, paddingPercent = 0, size: number | null = null): string => {
       const vBs = (Config.Server.svgIcon.viewBox || '').split(' ').slice(0, 4).map(s => parseFloat(s));
       vBs[0] = vBs[0] || 0;
       vBs[1] = vBs[1] || 0;
@@ -188,6 +196,7 @@ export class PublicRouter {
       };
       return '<svg ' +
         ' xmlns="http://www.w3.org/2000/svg"' +
+        (size ? ' width="' + size + '" height="' + size + '"' : '') +
         ' viewBox="' + vBs.join(' ') + '">' +
         (theme === 'auto' ? ('<style>' +
             '    path, circle {' +
@@ -279,6 +288,23 @@ export class PublicRouter {
         return next(e);
       }
     });
+
+    // The icon on its white background: a see-through png would get a black one on the iOS home screen.
+    for (const size of [180, ...appIconSizes]) {
+      app.get('/icon_' + size + '.png', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          const p = path.join(ProjectPath.TempFolder, '/icon_' + size + '.png');
+          const outP = await PhotoProcessing.renderSVGString(getIcon(null, 0, size), size, p);
+          res.set('Cache-Control', 'no-cache');
+          res.sendFile(outP, {
+            cacheControl: false,
+            dotfiles: 'allow',
+          });
+        } catch (e) {
+          return next(e);
+        }
+      });
+    }
 
     app.get(
       [
