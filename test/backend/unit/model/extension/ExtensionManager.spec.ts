@@ -1,8 +1,12 @@
 import {expect} from 'chai';
-import * as express from 'express';
+import express from 'express';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import * as http from 'node:http';
+import {AddressInfo} from 'node:net';
+import {ServerExtensionsEntryConfig} from '../../../../../src/common/config/private/subconfigs/ServerExtensionsConfig';
 import {ExtensionManager} from '../../../../../src/backend/model/extension/ExtensionManager';
+import {ExtensionEvent} from '../../../../../src/backend/model/extension/ExtensionEvent';
 import {IExtensionObject} from '../../../../../src/backend/model/extension/IExtension';
 import {TestHelper} from '../../../../TestHelper';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
@@ -23,7 +27,6 @@ describe('ExtensionManager', () => {
 
   it('should give every extension with the same name its own object', () => {
     const em = new ExtensionManager();
-    em.router = express.Router();
     const create = (folder: string): IExtensionObject<unknown> => (em as any).createUniqueExtensionObject('sample', folder);
 
     const ids = ['a', 'b', 'c', 'd'].map((folder) => create(folder).extensionId);
@@ -82,6 +85,104 @@ describe('ExtensionManager', () => {
       }
       expect(fs.readdirSync(extFolder)).to.deep.equal([]);
       expect(fs.readdirSync(tmpDir).sort()).to.deep.equal(['extensions', 'victim']);
+    });
+  });
+
+  describe('reload', () => {
+    const tmpDir = path.join(__dirname, 'tmp_ext_reload');
+    const extFolder = path.join(tmpDir, 'extensions');
+    const folder = 'reload-test';
+    let origExtFolder: string;
+    let server: http.Server;
+    let baseUrl: string;
+    let em: ExtensionManager;
+    const log = (): string[] => (global as any).__extReloadLog;
+
+    // the extension answers with its version on a route and logs its init and cleanUp calls
+    const writeExtension = (version: string): void => {
+      fs.writeFileSync(path.join(extFolder, folder, 'server.js'), `
+const version = '${version}';
+module.exports.init = async (ext) => {
+  global.__extReloadLog.push('init ' + version);
+  ext.RESTApi.get.rawMiddleware(['ping'], 0, (req, res) => res.send(version));
+  ext.events.gallery.DiskManager.excludeDir.before(async (input) => {
+    global.__extReloadLog.push('event ' + version);
+    return input;
+  });
+};
+module.exports.cleanUp = async () => {
+  global.__extReloadLog.push('cleanUp ' + version);
+};
+`);
+    };
+
+    const ping = async (): Promise<string> => {
+      const res = await fetch(baseUrl + '/' + folder + '/ping');
+      return res.status + ' ' + await res.text();
+    };
+
+    beforeEach(async () => {
+      origExtFolder = ProjectPath.ExtensionFolder;
+      fs.mkdirSync(path.join(extFolder, folder), {recursive: true});
+      ProjectPath.ExtensionFolder = extFolder;
+      Config.Extensions.enabled = true;
+      Config.Extensions.extensions.addProperty(folder, {type: ServerExtensionsEntryConfig}, new ServerExtensionsEntryConfig(folder));
+      (global as any).__extReloadLog = [];
+      writeExtension('v1');
+
+      em = new ExtensionManager();
+      const app = express();
+      app.use((req, res, next) => em.handleRequest(req, res, next));
+      app.use((req, res) => res.status(404).send('not found'));
+      server = app.listen(0);
+      await new Promise<void>((resolve) => server.once('listening', () => resolve()));
+      baseUrl = 'http://localhost:' + (server.address() as AddressInfo).port;
+      await (em as any).initExtensions();
+    });
+
+    afterEach(async () => {
+      await new Promise<void>((resolve) => server.close(() => resolve()));
+      ProjectPath.ExtensionFolder = origExtFolder;
+      fs.rmSync(tmpDir, {recursive: true, force: true});
+      delete (global as any).__extReloadLog;
+    });
+
+    after(TestHelper.resetConfig);
+
+    it('should run the changed code of the extension', async () => {
+      expect(await ping()).to.equal('200 v1');
+      writeExtension('v2');
+
+      await em.reloadExtension(folder);
+
+      expect(log()).to.deep.equal(['init v1', 'cleanUp v1', 'init v2']);
+      expect(await ping()).to.equal('200 v2');
+    });
+
+    it('should remove the routes of the extension on clean up', async () => {
+      expect(await ping()).to.equal('200 v1');
+      await em.cleanUp();
+      expect(await ping()).to.equal('404 not found');
+    });
+
+    it('should remove the event handlers of the extension on reload', async () => {
+      writeExtension('v2');
+      await em.reloadExtension(folder);
+      (global as any).__extReloadLog = [];
+
+      await (em.events.gallery.DiskManager.excludeDir as ExtensionEvent<[{name: string, parentDirRelativeName: string, parentDirAbsoluteName: string}], boolean>)
+        .triggerBefore([{name: 'a', parentDirRelativeName: '', parentDirAbsoluteName: ''}], {stopPropagation: false});
+
+      expect(log()).to.deep.equal(['event v2']);
+    });
+
+    it('should init an extension that had no extension object yet', async () => {
+      await em.cleanUp();
+      writeExtension('v2');
+
+      await em.reloadExtension(folder);
+
+      expect(await ping()).to.equal('200 v2');
     });
   });
 });
