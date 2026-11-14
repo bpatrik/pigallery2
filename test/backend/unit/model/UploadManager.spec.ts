@@ -6,6 +6,7 @@ import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {Config} from '../../../../src/common/config/private/Config';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {TestHelper} from '../../../TestHelper';
+import {DirectoryNotFound} from '../../../../src/backend/exceptions/DirectoryNotFound';
 
 declare const describe: any;
 declare const before: any;
@@ -29,6 +30,9 @@ describe('UploadManager', () => {
   before(async () => {
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, {recursive: true});
+    }
+    for (const dir of ['test_subdir', 'traversal_test', 'blocked_test', 'unblocked_test', 'blocked_jpg_test', 'multi_test', 'exists_test', 'no_config_dir']) {
+      fs.mkdirSync(path.join(testDir, dir), {recursive: true});
     }
     Config.Media.folder = testDir;
     Config.Upload.enabled = true;
@@ -61,6 +65,29 @@ describe('UploadManager', () => {
 
     expect(fs.readFileSync(path.join(testDir, 'moved.jpg')).toString()).to.equal('test image content');
     expect(fs.existsSync(file.path)).to.be.false;
+  });
+
+  it('should not create a missing folder', async () => {
+    const file = uploaded('nowhere.jpg', 'content');
+    for (const save of [() => uploadManager.saveFile('missing/sub', file), () => uploadManager.saveFiles('missing/sub', [file])]) {
+      try {
+        await save();
+        expect.fail('Should have thrown an error');
+      } catch (e) {
+        expect(e).to.be.instanceOf(DirectoryNotFound);
+      }
+    }
+    expect(fs.existsSync(path.join(testDir, 'missing'))).to.be.false;
+  });
+
+  it('should not upload into a file as if it was a folder', async () => {
+    fs.writeFileSync(path.join(testDir, 'a_file.jpg'), '');
+    try {
+      await uploadManager.saveFiles('a_file.jpg', [uploaded('inside.jpg', 'content')]);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      expect(e).to.be.instanceOf(DirectoryNotFound);
+    }
   });
 
   it('should reject a file above the size limit with the limit in the message', async () => {

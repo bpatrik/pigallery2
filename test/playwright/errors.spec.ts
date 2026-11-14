@@ -248,8 +248,9 @@ test.describe('Errors', () => {
   test.describe('Too old browser', () => {
 
     test('should say that the browser is not supported, not load forever (#1186)', async ({page}) => {
-      // an old browser can't parse the app's JavaScript, e.g. iOS 15 Safari the class static blocks
-      await page.route(url => /\/main(-[A-Z0-9]+)?\.js$/.test(url.pathname),
+      // an old browser can't parse the app's JavaScript, e.g. iOS 15 Safari the class static blocks.
+      // main.js (dev build) or en.main-1A2B3C4D.js (release build, see the localize-bundles gulp task)
+      await page.route(url => /\/([\w-]+\.)?main(-[A-Z0-9]+)?\.js$/.test(url.pathname),
         route => route.fulfill({contentType: 'text/javascript', body: 'class A { static { syntax error'}));
       await page.goto('/gallery/');
 
