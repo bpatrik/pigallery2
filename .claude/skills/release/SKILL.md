@@ -1,6 +1,6 @@
 ---
 name: release
-description: Walk the maintainer through releasing a new PiGallery2 version (man page, translations, Hungarian review, tests, tag, GitHub release with notes and the CI zip). Use when the maintainer asks to do / prepare / cut a release.
+description: Walk the maintainer through releasing a new PiGallery2 version (man page, translations, Hungarian review, tests, docs screenshots, tag, GitHub release with notes and the CI zip). Use when the maintainer asks to do / prepare / cut a release.
 ---
 
 # PiGallery2 release checklist
@@ -71,6 +71,20 @@ Save the output to the scratchpad and read only the summaries (see AGENTS.md "Bu
 - `npm run test-frontend`
 - `npm run build-en` (production build), then `npm run test-e2e`
 - Report failures with their output; don't release over a red suite unless the maintainer says so.
+
+## 5b. Docs screenshots **(ask)**
+
+The docs images (`docs/assets/*.png`, used by `docs/features.md`) come from a Playwright spec, so they show the current UI.
+
+- Needs the maintainer's docs photos in `demo/images2/docs/puerto rico` (not in git; ask if they're missing) and the
+  production build in `dist` from step 5.
+- `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens` (it starts its own server, `start-docs-e2e-server`;
+  stop any own server on 8080 first or set `E2E_PORT`). It writes `test/playwright/screenshots/*.png` (git-ignored).
+- Look at every new screenshot (Read the PNGs) and compare it with the one in `docs/assets` with the same name:
+  loading spinners, missing map tiles or thumbnails, toasts or dev-only UI mean a rerun, not a copy.
+- Copy the good ones over the same names in `docs/assets/`. Images the spec doesn't make (`extension.png`, `events.png`,
+  `demo.gif`, `demo.mp4`, icons) stay as they are; mention them if the UI they show changed a lot.
+- The maintainer checks the image diff in the IDE.
 
 Then the maintainer commits, the release PR is merged, and CI on master must be green
 (`gh run list --workflow ci.yml --branch master --limit 1`).
