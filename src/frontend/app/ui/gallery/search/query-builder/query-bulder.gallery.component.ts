@@ -36,6 +36,8 @@ export class GallerySearchQueryBuilderComponent
   public readonly searchQueryDTO = signal<SearchQueryDTO>({type: SearchQueryTypes.any_text, value: ''} as TextSearch);
   readonly searchSubmit = output<void>();
   readonly placeholder = input<string | undefined>($localize `Search`);
+  // the label of the Enter key of phone keyboards; only fields where Enter searches set it to 'search'
+  readonly enterKeyHint = input<'search' | undefined>();
   public readonly rawSearchText = signal('');
 
   /**

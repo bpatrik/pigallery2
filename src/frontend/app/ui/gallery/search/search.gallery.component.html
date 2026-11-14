@@ -7,10 +7,11 @@
     <app-gallery-search-field-base [(ngModel)]="rawSearchText"
       (ngModelChange)="validateRawSearchText()"
       class="search-field form-control p-0"
+      enterKeyHint="search"
       (searchSubmit)="Search()"
       name="search-field" />
 
-    <button class="btn btn-tertiary lh-0" type="submit">
+    <button class="btn btn-tertiary lh-0" type="submit" aria-label="Search" i18n-aria-label>
       <ng-icon name="ionSearchOutline" />
     </button>
     <button class="btn btn-tertiary lh-0"  type="button" (click)="openSearchModal(searchModal)">
@@ -28,37 +29,35 @@
     <button type="button" class="btn-close" (click)="hideSearchModal()" data-dismiss="modal" aria-label="Close">
     </button>
   </div>
-  <div class="modal-body">
-    <form #searchPanelForm="ngForm" class="form-horizontal">
-
+  <!-- the form also holds the footer: its Search button submits it, so the Enter key of phone keyboards searches here too -->
+  <form #searchPanelForm="ngForm" class="form-horizontal" (ngSubmit)="searchFromModal()">
+    <div class="modal-body">
       <app-gallery-search-query-builder name="search-query-builder"
         [(ngModel)]="searchQueryDTO"
         (ngModelChange)="onQueryChange()"
-        (searchSubmit)="Search()" />
-
-    </form>
-  </div>
-  <div class="modal-footer">
-    <div class="btn-group float-end row" style="display: block">
-      <div class="pe-0">
-        @if (CanCreateAlbum) {
-          <button
-            class="btn btn-secondary me-2" type="button"
-            [disabled]="rawSearchText() === ''"
-            (click)="openSaveSearchModal(saveSearchModal)">
-            <ng-icon name="ionSaveOutline" class="me-1" />
-            <ng-container i18n>Save</ng-container>
+        enterKeyHint="search"
+        (searchSubmit)="searchFromModal()" />
+    </div>
+    <div class="modal-footer">
+      <div class="btn-group float-end row" style="display: block">
+        <div class="pe-0">
+          @if (CanCreateAlbum) {
+            <button
+              class="btn btn-secondary me-2" type="button"
+              [disabled]="rawSearchText() === ''"
+              (click)="openSaveSearchModal(saveSearchModal)">
+              <ng-icon name="ionSaveOutline" class="me-1" />
+              <ng-container i18n>Save</ng-container>
+            </button>
+          }
+          <button class="btn btn-primary" type="submit">
+            <ng-icon name="ionSearchOutline" class="me-1" />
+            <ng-container i18n>Search</ng-container>
           </button>
-        }
-        <button class="btn btn-primary" type="button"
-          [routerLink]="['/search', HTMLSearchQuery]"
-          (click)="hideSearchModal()">
-          <ng-icon name="ionSearchOutline" class="me-1" />
-          <ng-container i18n>Search</ng-container>
-        </button>
+        </div>
       </div>
     </div>
-  </div>
+  </form>
 </ng-template>
 
 <ng-template #saveSearchModal>

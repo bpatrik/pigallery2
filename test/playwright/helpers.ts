@@ -285,6 +285,26 @@ export const expectApiOk = async (res: { ok(): boolean, json(): Promise<{ error?
   expect((await res.json())?.error ?? null, what + ': no error in the answer').toBeNull();
 };
 
+/**
+ * Presses Enter in a field the way Android keyboards often send it while a word is being typed:
+ * the keydown comes as an unidentified key (keyCode 229), so no Enter key handler of the page sees it,
+ * but the browser still submits the form of the field.
+ */
+export const pressEnterLikeAPhoneKeyboard = async (field: Locator): Promise<void> => {
+  await field.evaluate(() => {
+    const hideEnter = (e: KeyboardEvent): void => {
+      if (e.key !== 'Enter') {
+        return;
+      }
+      // only hidden from the handlers, the default action (submitting the form) still happens
+      e.stopImmediatePropagation();
+      window.removeEventListener('keydown', hideEnter, true);
+    };
+    window.addEventListener('keydown', hideEnter, true);
+  });
+  await field.press('Enter');
+};
+
 // what an expired, deleted or not existing sharing link tells the user (#1307): one message, so a key can't be probed
 export const INVALID_LINK_MESSAGE = 'This link is invalid or has expired';
 

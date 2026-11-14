@@ -1,5 +1,5 @@
 import {expect, Page, test} from '@playwright/test';
-import {ACCENTED_DIR, expectApiOk, expectLightboxPhoto, expectNoHorizontalScroll, expectVisiblePhotosLoaded} from './helpers';
+import {ACCENTED_DIR, expectApiOk, expectLightboxPhoto, expectNoHorizontalScroll, expectVisiblePhotosLoaded, pressEnterLikeAPhoneKeyboard} from './helpers';
 
 const SEARCH_KEYWORD = 104; // SearchQueryTypes.keyword
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
@@ -60,6 +60,52 @@ test.describe('Search', () => {
     await expect(page).toHaveURL(/\/search\//);
     await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeVisible();
     await expect(autocomplete).toHaveCount(0);
+  });
+
+  test('Search dialog should search on Enter and close', async ({page}) => {
+    await page.goto('/gallery/');
+    await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
+    const builderText = page.locator('modal-container app-gallery-search-field-base input.search-text');
+    await builderText.fill('big_ben');
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await builderText.press('Enter');
+    await expectApiOk(await search, 'the search');
+
+    await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+    // like its Search button
+    await expect(page.locator('modal-container')).toHaveCount(0);
+  });
+
+  // Android keyboards often send Enter as an unidentified key (229) that no keydown.enter handler sees
+  test.describe('Enter key of a phone keyboard', () => {
+    test('should search from the search bar', async ({page}) => {
+      await page.goto('/gallery/');
+      const searchBar = page.locator('app-gallery-search .search-text');
+      // the keyboard shows a search key
+      await expect.soft(searchBar).toHaveAttribute('enterkeyhint', 'search');
+      await searchBar.fill('big_ben');
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      await pressEnterLikeAPhoneKeyboard(searchBar);
+      await expectApiOk(await search, 'the search');
+
+      await expect(page).toHaveURL(/\/search\//);
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+    });
+
+    test('should search from the search dialog and close it', async ({page}) => {
+      await page.goto('/gallery/');
+      await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
+      const builderText = page.locator('modal-container app-gallery-search-field-base input.search-text');
+      await expect.soft(builderText).toHaveAttribute('enterkeyhint', 'search');
+      await builderText.fill('big_ben');
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      await pressEnterLikeAPhoneKeyboard(builderText);
+      await expectApiOk(await search, 'the search');
+
+      // the typed query, not an emptied one
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('modal-container')).toHaveCount(0);
+    });
   });
 
   test('Search deep link with a photo should open the lightbox on that photo', async ({page}) => {
