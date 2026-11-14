@@ -1,8 +1,8 @@
+import {ScrollLabelModes} from '../../../../../common/config/Enums';
 import { Injectable, LOCALE_ID, inject, linkedSignal } from '@angular/core';
 import {formatDate} from '@angular/common';
 import {GalleryCacheService} from '../cache.gallery.service';
 import {Config} from '../../../../../common/config/public/Config';
-import {ScrollLabelModes} from '../../../../../common/config/public/ClientConfig';
 import {GroupByTypes, GroupingMethod, SortByDirectionalTypes, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
 import {PhotoDTO} from '../../../../../common/entities/PhotoDTO';

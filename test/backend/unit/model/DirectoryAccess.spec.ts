@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import * as path from 'node:path';
 import {DBTestHelper} from '../../DBTestHelper';
@@ -10,7 +11,7 @@ import {SharingEntity} from '../../../../src/backend/model/database/enitites/Sha
 import {UserEntity} from '../../../../src/backend/model/database/enitites/UserEntity';
 import {TestHelper} from '../../../TestHelper';
 import {Config} from '../../../../src/common/config/private/Config';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
+
 
 declare let describe: any;
 declare const before: any;

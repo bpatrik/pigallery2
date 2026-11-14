@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
@@ -13,7 +14,6 @@ import {TestHelper} from '../../../TestHelper';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {SupportedFormats} from '../../../../src/common/SupportedFormats';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {SQLConnection} from '../../../../src/backend/model/database/SQLConnection';

@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../common/config/Enums';
 import {Brackets, DataSource} from 'typeorm';
 import {SQLConnection} from './SQLConnection';
 import {ProjectedDirectoryCacheEntity} from './enitites/ProjectedDirectoryCacheEntity';
@@ -18,7 +19,6 @@ import {MediaEntity} from './enitites/MediaEntity';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
 import {Config} from '../../../common/config/private/Config';
-import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {NotificationManager} from '../NotifocationManager';
 

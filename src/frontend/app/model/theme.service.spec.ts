@@ -1,7 +1,8 @@
+import {ThemeModes} from '../../../common/config/Enums';
 import {TestBed} from '@angular/core/testing';
 import {ThemeService} from './theme.service';
 import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
-import {ThemeModes} from '../../../common/config/public/ClientConfig';
+
 
 describe('ThemeService', () => {
 

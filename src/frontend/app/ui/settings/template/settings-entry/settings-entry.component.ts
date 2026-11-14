@@ -1,18 +1,10 @@
+import {NavigationLinkTypes} from '../../../../../../common/config/Enums';
 import { Component, forwardRef, OnChanges, TemplateRef, inject, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
 import {SearchQueryParserService} from '../../../gallery/search/search-query-parser.service';
-import {
-  MapLayers,
-  MapPathGroupConfig,
-  MapPathGroupThemeConfig,
-  NavigationLinkConfig,
-  NavigationLinkTypes,
-  PathThemeConfig,
-  SVGIconConfig,
-  ThemeConfig
-} from '../../../../../../common/config/public/ClientConfig';
+import {MapLayers, MapPathGroupConfig, MapPathGroupThemeConfig, NavigationLinkConfig, PathThemeConfig, SVGIconConfig, ThemeConfig} from '../../../../../../common/config/public/ClientConfig';
 import {ConfigStyle, SettingsService} from '../../settings.service';
 import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
@@ -20,7 +12,6 @@ import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
 import {DirectoryGroupByTypes, DirectorySortByTypes, GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
-
 import { GallerySearchFieldComponent } from '../../../gallery/search/search-field/search-field.gallery.component';
 import { NgIconComponent } from '@ng-icons/core';
 import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-method.settings-entry.component';

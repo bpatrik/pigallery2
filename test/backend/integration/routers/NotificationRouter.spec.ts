@@ -1,11 +1,11 @@
 // Admin notifications (#1315): the server warns the admins, e.g. that the default admin password is still in use.
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {NotificationManager} from '../../../../src/backend/model/NotifocationManager';
 import {NotificationDTO, NotificationType} from '../../../../src/common/entities/NotificationDTO';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {CookieNames} from '../../../../src/common/CookieNames';
 import {SuperAgentStatic} from 'superagent';
 import {expect} from 'chai';

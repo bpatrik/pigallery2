@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
@@ -9,7 +10,7 @@ import {SuperAgentStatic} from 'superagent';
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
+
 
 process.env['NODE_ENV'] = 'test';
 chai.should();

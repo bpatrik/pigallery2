@@ -1,3 +1,4 @@
+import {NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/Enums';
 import { Component, ElementRef, ViewEncapsulation, computed, inject, input, viewChild } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
@@ -5,7 +6,7 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {Config} from '../../../../common/config/public/Config';
 import {NotificationService} from '../../model/notification.service';
 import {QueryService} from '../../model/query.service';
-import {NavigationLinkConfig, NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/public/ClientConfig';
+import {NavigationLinkConfig} from '../../../../common/config/public/ClientConfig';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 import {Utils} from '../../../../common/Utils';
 import {PageHelper} from '../../model/page.helper';
@@ -15,7 +16,6 @@ import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {LoadingBarModule} from '@ngx-loading-bar/core';
 import {IconComponent} from '../../icon.component';
-
 import {GallerySearchComponent} from '../gallery/search/search.gallery.component';
 import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';

@@ -1,3 +1,4 @@
+import {ReIndexingSensitivity} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
@@ -10,7 +11,6 @@ import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
-import {ReIndexingSensitivity} from '../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 import {ContentWrapper, ContentWrapperUtils, PackedContentWrapper} from '../../../../src/common/entities/ContentWrapper';
 import {JobRepository} from '../../../../src/backend/model/jobs/JobRepository';

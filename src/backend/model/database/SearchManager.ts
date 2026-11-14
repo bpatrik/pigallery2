@@ -1,4 +1,5 @@
 /* eslint-disable no-case-declarations */
+import {DatabaseType} from '../../../common/config/Enums';
 import {AutoCompleteItem} from '../../../common/entities/AutoCompleteItem';
 import {SearchResultDTO} from '../../../common/entities/SearchResultDTO';
 import {SQLConnection} from './SQLConnection';
@@ -26,7 +27,6 @@ import {
   TextSearchQueryTypes,
 } from '../../../common/entities/SearchQueryDTO';
 import {ObjectManagers} from '../ObjectManagers';
-import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {Utils} from '../../../common/Utils';
 import {FileEntity} from './enitites/FileEntity';
 import {foldText, sqlFoldsText, SQL_COLLATE} from './enitites/EntityUtils';

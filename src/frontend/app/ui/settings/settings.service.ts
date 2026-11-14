@@ -1,9 +1,9 @@
+import {ConfigPriority} from '../../../../common/config/Enums';
 import {Injectable, inject, signal} from '@angular/core';
 import {NetworkService} from '../../model/network/network.service';
-
 import {WebConfig} from '../../../../common/config/private/WebConfig';
 import {WebConfigClassBuilder} from 'typeconfig/web';
-import {ConfigPriority, TAGS} from '../../../../common/config/public/ClientConfig';
+import {TAGS} from '../../../../common/config/public/ClientConfig';
 import {CookieNames} from '../../../../common/CookieNames';
 import {CookieHelper} from '../../model/cookie.helper';
 import {DefaultsJobs} from '../../../../common/entities/job/JobDTO';

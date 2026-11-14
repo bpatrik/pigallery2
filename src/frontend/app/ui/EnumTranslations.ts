@@ -1,13 +1,6 @@
+import {ConfigPriority, LightBoxTitleTexts, MapProviders, NavigationLinkTypes, ScrollLabelModes, ScrollUpModes, ReIndexingSensitivity} from '../../../common/config/Enums';
 import {UserRoles} from '../../../common/entities/UserDTO';
-import {
-  ConfigPriority,
-  LightBoxTitleTexts,
-  MapProviders,
-  NavigationLinkTypes,
-  ScrollLabelModes,
-  ScrollUpModes
-} from '../../../common/config/public/ClientConfig';
-import {ReIndexingSensitivity} from '../../../common/config/private/PrivateConfig';
+
 import {SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 import {ConfigStyle} from './settings/settings.service';
 import {GroupByTypes, SortByTypes} from '../../../common/entities/SortingMethods';

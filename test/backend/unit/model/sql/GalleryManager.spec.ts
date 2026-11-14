@@ -1,3 +1,4 @@
+import {ReIndexingSensitivity} from '../../../../../src/common/config/Enums';
 import fs from 'node:fs';
 import * as path from 'node:path';
 import {DBTestHelper} from '../../../DBTestHelper';
@@ -14,7 +15,7 @@ import {
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {DirectorySearchConfig, ReIndexingSensitivity} from '../../../../../src/common/config/private/PrivateConfig';
+import {DirectorySearchConfig} from '../../../../../src/common/config/private/PrivateConfig';
 import {UserRoles} from '../../../../../src/common/entities/UserDTO';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {SharingEntity} from '../../../../../src/backend/model/database/enitites/SharingEntity';

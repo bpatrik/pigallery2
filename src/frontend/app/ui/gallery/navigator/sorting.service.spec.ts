@@ -1,3 +1,4 @@
+import {ScrollLabelModes} from '../../../../../common/config/Enums';
 import {TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
 import {GallerySortingService} from './sorting.service';
@@ -6,7 +7,6 @@ import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 import {ContentWrapper, ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
-import {ScrollLabelModes} from '../../../../../common/config/public/ClientConfig';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 

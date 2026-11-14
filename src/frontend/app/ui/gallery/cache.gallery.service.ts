@@ -1,3 +1,4 @@
+import {ThemeModes} from '../../../../common/config/Enums';
 import { Injectable, effect, inject, untracked } from '@angular/core';
 import {ParentDirectoryDTO,} from '../../../../common/entities/DirectoryDTO';
 import {Utils} from '../../../../common/Utils';
@@ -13,7 +14,6 @@ import {
   PackedContentWrapper,
   PackedContentWrapperWithError
 } from '../../../../common/entities/ContentWrapper';
-import {ThemeModes} from '../../../../common/config/public/ClientConfig';
 import {GridSizes} from '../../../../common/entities/GridSizes';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {UserDTO} from '../../../../common/entities/UserDTO';

@@ -1,9 +1,9 @@
+import {LightBoxTitleTexts} from '../../../../../common/config/Enums';
 import {Injectable, inject, OnDestroy, signal} from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {Subscription} from 'rxjs';
-import {LightBoxTitleTexts} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
 import {QueryService} from '../../../model/query.service';
 

@@ -1,9 +1,9 @@
+import {NavigationLinkTypes} from '../../../common/config/Enums';
 import {Injectable, computed, inject} from '@angular/core';
-
 import {IsActiveMatchOptions, Router} from '@angular/router';
 import {ShareService} from '../ui/gallery/share.service';
 import {Config} from '../../../common/config/public/Config';
-import {NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
+
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 @Injectable({providedIn: 'root'})

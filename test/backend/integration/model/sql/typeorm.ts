@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
@@ -14,7 +15,6 @@ import {
   PositionMetaDataEntity
 } from '../../../../../src/backend/model/database/enitites/MediaEntity';
 import {VersionEntity} from '../../../../../src/backend/model/database/enitites/VersionEntity';
-import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {TestHelper} from '../../../../TestHelper';
 

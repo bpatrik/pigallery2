@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import * as path from 'node:path';
 import {expect} from 'chai';
 import {Config} from '../../../../src/common/config/private/Config';
@@ -5,7 +6,6 @@ import {GalleryMWs} from '../../../../src/backend/middlewares/GalleryMWs';
 import {ContentWrapper} from '../../../../src/common/entities/ContentWrapper';
 import {MediaDTO} from '../../../../src/common/entities/MediaDTO';
 import {ParentDirectoryDTO} from '../../../../src/common/entities/DirectoryDTO';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {GalleryManager} from '../../../../src/backend/model/database/GalleryManager';
 import {promises as fsp} from 'node:fs';

@@ -1,5 +1,5 @@
+import {ThemeModes} from '../../../common/config/Enums';
 import { Injectable, inject, signal } from '@angular/core';
-import {ThemeModes} from '../../../common/config/public/ClientConfig';
 import {Config} from '../../../common/config/public/Config';
 import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
 

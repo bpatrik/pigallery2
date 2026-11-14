@@ -1,10 +1,11 @@
+import {NavigationLinkTypes} from '../../../common/config/Enums';
 import {TestBed} from '@angular/core/testing';
 import {DefaultUrlSerializer, Router} from '@angular/router';
 import {NavigationService} from './navigation.service';
 import {ShareService} from '../ui/gallery/share.service';
 import {PublicSharingDTO} from '../../../common/entities/SharingDTO';
 import {Config} from '../../../common/config/public/Config';
-import {NavigationLinkConfig, NavigationLinkTypes} from '../../../common/config/public/ClientConfig';
+import {NavigationLinkConfig} from '../../../common/config/public/ClientConfig';
 import {SearchQueryTypes, TextSearch} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 

@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {Utils} from '../../../../../src/common/Utils';
@@ -6,7 +7,6 @@ import * as fs from 'node:fs';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {TestHelper} from '../../../../TestHelper';
 
 declare const before: any;

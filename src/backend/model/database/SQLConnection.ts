@@ -1,3 +1,4 @@
+import {DatabaseType, SQLLogLevel} from '../../../common/config/Enums';
 import 'reflect-metadata';
 import {DataSource, DataSourceOptions, LoggerOptions} from 'typeorm';
 import {UserEntity} from './enitites/UserEntity';
@@ -17,7 +18,7 @@ import {FileEntity} from './enitites/FileEntity';
 import {PersonEntry} from './enitites/person/PersonEntry';
 import {Utils} from '../../../common/Utils';
 import * as path from 'node:path';
-import {DatabaseType, MySQLConfig, ServerDataBaseConfig, SQLiteConfig, SQLLogLevel,} from '../../../common/config/private/PrivateConfig';
+import {MySQLConfig, ServerDataBaseConfig, SQLiteConfig} from '../../../common/config/private/PrivateConfig';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
 import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {NotificationManager} from '../NotifocationManager';

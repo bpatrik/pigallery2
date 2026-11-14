@@ -1,9 +1,9 @@
+import {DatabaseType} from '../../../common/config/Enums';
 import {Config} from '../../../common/config/private/Config';
 import {Brackets, SelectQueryBuilder, WhereExpressionBuilder} from 'typeorm';
 import {MediaEntity} from './enitites/MediaEntity';
 import {DiskManager} from '../fileaccess/DiskManager';
 import {ObjectManagers} from '../ObjectManagers';
-import {DatabaseType} from '../../../common/config/private/PrivateConfig';
 import {SQLConnection} from './SQLConnection';
 import {SearchQueryDTO, SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 import {DirectoryEntity} from './enitites/DirectoryEntity';

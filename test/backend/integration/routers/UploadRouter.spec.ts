@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {LoginCredential} from '../../../../src/common/entities/LoginCredential';
@@ -8,7 +9,6 @@ import {SQLConnection} from '../../../../src/backend/model/database/SQLConnectio
 import {ObjectManagers} from '../../../../src/backend/model/ObjectManagers';
 import {Utils} from '../../../../src/common/Utils';
 import {SuperAgentStatic} from 'superagent';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";
 import {ErrorCodes} from '../../../../src/common/entities/Error';
