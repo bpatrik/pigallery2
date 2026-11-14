@@ -17,7 +17,7 @@ export default defineConfig({
   reporter: [
     ['list'],
     ['html', {open: 'never'}],
-    // on CI: annotations of the failures, and results.json for the job summary (see build.yml)
+    // on CI: annotations of the failures, and results.json for the job summary (see ci.yml)
     ...(process.env.CI ? [['github'], ['json', {outputFile: 'test-results/results.json'}]] as const : []),
   ],
   use: {

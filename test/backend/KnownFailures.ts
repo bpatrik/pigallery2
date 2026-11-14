@@ -4,7 +4,7 @@ import * as chai from 'chai';
  * Tests of behaviour that doesn't work yet (mocha has no test.fail()).
  * expectToFail() passes while its check fails on an assertion, and fails once the check passes,
  * so the wrapper can't be forgotten after the fix. The root hooks below list every known failure
- * after the run; CI counts them in the job summary (see build.yml).
+ * after the run; CI counts them in the job summary (see ci.yml).
  */
 
 interface KnownFailure {
@@ -57,7 +57,7 @@ export const mochaHooks = {
     for (const f of knownFailures) {
       console.log(`    ${f.issue} ${f.title}`);
     }
-    // build.yml reads this line
+    // ci.yml reads this line
     console.log(`  Known failures: ${knownFailures.length}\n`);
   }
 };

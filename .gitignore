@@ -35,6 +35,8 @@ test2.*
 /db/
 /extensions/
 /extension/lib/
+/extension/index.js
+/extension/index.d.ts
 *.sublime-project
 *.sublime-workspace
 .DS_Store
