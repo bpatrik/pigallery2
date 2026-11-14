@@ -298,9 +298,15 @@ export class GalleryGridComponent
         break;
       }
 
-      if (groups[i].name !== mediaGroups[i].name || groups[i].directoryPath !== mediaGroups[i].directoryPath) {
+      if (groups[i].name !== mediaGroups[i].name || groups[i].directoryPath !== mediaGroups[i].directoryPath ||
+        !!groups[i].startsNewLine !== !!mediaGroups[i].startsNewLine) {
         // update name if only this changed
-        groups[i] = {...groups[i], name: mediaGroups[i].name, directoryPath: mediaGroups[i].directoryPath};
+        groups[i] = {
+          ...groups[i],
+          name: mediaGroups[i].name,
+          directoryPath: mediaGroups[i].directoryPath,
+          startsNewLine: mediaGroups[i].startsNewLine
+        };
       }
 
       let lastRowId = null;
@@ -381,6 +387,7 @@ export class GalleryGridComponent
         name: mediaGroups[groups.length].name,
         date: mediaGroups[groups.length].date,
         directoryPath: mediaGroups[groups.length].directoryPath,
+        startsNewLine: mediaGroups[groups.length].startsNewLine,
         media: []
       } as GridMediaGroup);
     }
@@ -711,4 +718,5 @@ interface GridMediaGroup {
   name: string;
   date?: Date;
   directoryPath?: string;
+  startsNewLine?: boolean;
 }

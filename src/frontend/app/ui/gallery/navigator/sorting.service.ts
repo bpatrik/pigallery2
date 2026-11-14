@@ -342,8 +342,13 @@ export class GallerySortingService {
 
     if (grouping.method === GroupByTypes.Date) {
       // We do not need the youngest as we group by day. All photos are from the same day
-      c.mediaGroups.forEach(g => {
+      c.mediaGroups.forEach((g, i) => {
         g.date = Utils.makeUTCMidnight(new Date(g.media?.[0]?.metadata?.creationDate), g.media?.[0]?.metadata?.creationDateOffset);
+        // small groups share a line in the grid: days far from each other (e.g. 2025 and 2022) should not
+        const prev = c.mediaGroups[i - 1]?.date;
+        if (prev && Math.abs(g.date.getTime() - prev.getTime()) > MAX_DAYS_ON_SHARED_LINE * DAY_MS) {
+          g.startsNewLine = true;
+        }
       });
     }
 
@@ -366,8 +371,13 @@ export interface MediaGroup {
   name: string;
   date?: Date; // used for blog. It allows to chop off blog to smaller pieces
   directoryPath?: string; // the directory of the media, when grouped by directory
+  startsNewLine?: boolean; // the grid does not put it on the line of the previous group
   media: MediaDTO[];
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+// date groups further apart than this do not share a line in the grid
+const MAX_DAYS_ON_SHARED_LINE = 30;
 
 export interface GroupedDirectoryContent {
   directories: SubDirectoryDTO[];

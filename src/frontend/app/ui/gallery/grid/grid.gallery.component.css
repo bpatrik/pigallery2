@@ -8,6 +8,12 @@
     vertical-align: top;
 }
 
+/* a block between the inline groups: the next group does not share the line of the previous one */
+.group-line-break {
+    display: block;
+    height: 0;
+}
+
 /* the group's width comes from its photos; the one-line blog preview would widen it past the gallery */
 app-gallery-blog {
     display: block;

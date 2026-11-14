@@ -254,6 +254,29 @@ describe('GalleryGridComponent', () => {
     expect(heights).toEqual([[heights[0][0]], [heights[0][0], heights[0][0]]]);
   });
 
+  it('should break the line before a group that starts a new line', () => {
+    const p = (name: string) => ({
+      name,
+      directory: {name: 'd', path: 'p'},
+      metadata: {size: {width: 3000, height: 2000}}
+    } as PhotoDTO);
+    component.containerWidth = 4000;
+    component.screenHeight = 1000;
+    fixture.componentRef.setInput('mediaGroups', [
+      {name: '2025', media: [p('1.jpg')]},
+      {name: '2022', startsNewLine: true, media: [p('2.jpg')]},
+      {name: '2022 too', media: [p('3.jpg')]}
+    ]);
+    component.mediaToRender.set([]);
+    component.renderARow();
+    component.renderARow();
+    component.renderARow();
+    fixture.detectChanges();
+    const children = [...fixture.nativeElement.querySelector('div').children] as HTMLElement[];
+    expect(children.map(c => c.classList.contains('group-line-break') ? 'break' : c.querySelector('h6')?.textContent?.trim()))
+      .toEqual(['2025', 'break', '2022', '2022 too']);
+  });
+
   // #1308, CUJ 6: a large folder renders while scrolling, not all media at once
   describe('on scroll', () => {
     let pageHeight: number;

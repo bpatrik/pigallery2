@@ -200,6 +200,24 @@ describe('GallerySortingService', () => {
         expect(groups.map(g => g.date)).toEqual([4, 3, 2, 1].map(d => new Date(Date.UTC(2025, 0, d))));
       });
 
+      it('should start a new line for a date group that is far from the previous one', () => {
+        const trips: DirectoryContent = {
+          directories: [],
+          metaFile: [],
+          media: [
+            media('Beach.jpg', Date.UTC(2026, 5, 10)),
+            media('Lake.jpg', Date.UTC(2025, 7, 20)),
+            media('Castle.jpg', Date.UTC(2022, 3, 5)),
+            media('Castle 2.jpg', Date.UTC(2022, 3, 3)),
+            media('Forest.jpg', Date.UTC(2022, 2, 20)),
+          ]
+        };
+        const groups = service.applySorting({...trips, media: [...trips.media]}, {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.Date, ascending: false})!.mediaGroups;
+        // 2026 -> 2025 -> 2022 are years apart; April 5, April 3 and March 20 of 2022 may share a line
+        expect(groups.map(g => g.startsNewLine ?? false)).toEqual([false, true, true, false, false]);
+      });
+
       it('should group by rating', () => {
         const groups = service.applySorting({...all, media: [...all.media]}, {method: SortByTypes.Name, ascending: true},
           {method: GroupByTypes.Rating, ascending: true})!.mediaGroups;

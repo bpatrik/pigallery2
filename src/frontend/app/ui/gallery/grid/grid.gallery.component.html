@@ -3,6 +3,9 @@
   @if (mediaToRender().length > 0) {
     <!-- by index: a group gets a new object when its media changes, its unchanged tiles are kept -->
     @for (group of mediaToRender(); track $index) {
+      @if (group.startsNewLine) {
+        <div class="group-line-break"></div>
+      }
       <div class="d-inline-block media-group">
         @if (group.name) {
           @switch (sortingService.grouping().method) {
