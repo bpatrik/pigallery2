@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {LoginCredential} from '../../../../src/common/entities/LoginCredential';
@@ -9,7 +10,6 @@ import {Utils} from '../../../../src/common/Utils';
 import {SuperAgentStatic} from 'superagent';
 import {RouteTestingHelper} from './RouteTestingHelper';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import * as chai from "chai";
 import {CookieNames} from '../../../../src/common/CookieNames';
 import {default as chaiHttp, request} from "chai-http";

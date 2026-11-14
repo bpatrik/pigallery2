@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../../src/common/config/Enums';
 import {LocationManager} from '../../../../../src/backend/model/database/LocationManager';
 import {SearchManager} from '../../../../../src/backend/model/database/SearchManager';
 import {SearchResultDTO} from '../../../../../src/common/entities/SearchResultDTO';
@@ -29,7 +30,6 @@ import {GPSMetadata, PhotoDTO, PhotoMetadata} from '../../../../../src/common/en
 import {VideoDTO} from '../../../../../src/common/entities/VideoDTO';
 import {AutoCompleteItem} from '../../../../../src/common/entities/AutoCompleteItem';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';

@@ -1,3 +1,4 @@
+import {FFmpegPresets} from '../../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -8,7 +9,7 @@ import {VideoConverterInput, VideoConverterWorker} from '../../../../../src/back
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {ConfigDiagnostics} from '../../../../../src/backend/model/diagnostics/ConfigDiagnostics';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {FFmpegPresets, videoResolutionType} from '../../../../../src/common/config/private/PrivateConfig';
+import {videoResolutionType} from '../../../../../src/common/config/private/PrivateConfig';
 import {TestHelper} from '../../../../TestHelper';
 
 const assets = path.join(__dirname, '/../../../assets');

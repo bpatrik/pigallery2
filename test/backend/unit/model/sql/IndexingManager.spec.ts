@@ -1,3 +1,4 @@
+import {ReIndexingSensitivity} from '../../../../../src/common/config/Enums';
 import fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SQLConnection} from '../../../../../src/backend/model/database/SQLConnection';
@@ -11,7 +12,6 @@ import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {IndexingManager} from '../../../../../src/backend/model/database/IndexingManager';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {DBTestHelper} from '../../../DBTestHelper';
-import {ReIndexingSensitivity} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../src/common/entities/SearchQueryDTO';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import * as path from 'node:path';

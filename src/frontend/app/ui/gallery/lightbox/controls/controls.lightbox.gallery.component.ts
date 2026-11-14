@@ -1,3 +1,4 @@
+import {LightBoxTitleTexts} from '../../../../../../common/config/Enums';
 import {Component, ElementRef, LOCALE_ID, OnDestroy, computed, effect, inject, input, model, output, signal, untracked, viewChild} from '@angular/core';
 import {MediaDTOUtils} from '../../../../../../common/entities/MediaDTO';
 import {FullScreenService} from '../../fullscreen.service';
@@ -13,7 +14,6 @@ import {LightboxService} from '../lightbox.service';
 import {Utils} from '../../../../../../common/Utils';
 import {formatFileSize} from '../../../../pipes/FileSizePipe';
 import {formatDate, LocationStrategy} from '@angular/common';
-import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 import {NgIconComponent} from '@ng-icons/core';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {FormsModule} from '@angular/forms';

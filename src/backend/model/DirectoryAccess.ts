@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../common/config/Enums';
 import * as path from 'node:path';
 import {Brackets, DataSource, WhereExpressionBuilder} from 'typeorm';
 import type {SessionContext} from './SessionContext';
@@ -9,7 +10,6 @@ import {GalleryManager} from './database/GalleryManager';
 import {sqlIgnoresAccents} from './database/enitites/EntityUtils';
 import {DiskManager} from './fileaccess/DiskManager';
 import {Config} from '../../common/config/private/Config';
-import {DatabaseType} from '../../common/config/private/PrivateConfig';
 import {DirectoryCacheDTO, SubDirectoryDTO} from '../../common/entities/DirectoryDTO';
 import {DirectorySearch} from '../../common/entities/SearchQueryDTO';
 

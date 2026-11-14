@@ -1,9 +1,10 @@
+import {MapProviders} from '../../../../../common/config/Enums';
 import { Injectable, inject } from '@angular/core';
 import {NetworkService} from '../../../model/network/network.service';
 import {FileDTO} from '../../../../../common/entities/FileDTO';
 import {Utils} from '../../../../../common/Utils';
 import {Config} from '../../../../../common/config/public/Config';
-import {MapLayers, MapProviders,} from '../../../../../common/config/public/ClientConfig';
+import {MapLayers} from '../../../../../common/config/public/ClientConfig';
 import {LatLng, LatLngLiteral} from 'leaflet';
 
 interface GpxStats {

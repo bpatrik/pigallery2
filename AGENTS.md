@@ -212,6 +212,9 @@ Pitfalls seen so far:
 
 ## Rules for changes
 
+- `src/common` is shared by the backend and the frontend: it never imports from `src/backend` or `src/frontend`
+  (`config/private/Config.ts` and `PrivateConfigClass.ts` still do; don't add more).
+- Config enums live in `src/common/config/Enums.ts`, which imports nothing: the extension kit ships it and `common/entities` as its runtime code.
 - Routers contain no logic: they only list the middlewares of each path. Put the logic in `*MWs` classes.
 - Middlewares are only called from routers. Helpers shared inside a middleware class are private;
   services and managers return values instead of using `res`.

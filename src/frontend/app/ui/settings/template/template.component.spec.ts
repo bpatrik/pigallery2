@@ -1,3 +1,4 @@
+import {ConfigPriority} from '../../../../../common/config/Enums';
 import {signal} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {WebConfigClassBuilder} from 'typeconfig/web';
@@ -11,7 +12,7 @@ import {NavigationService} from '../../../model/navigation.service';
 import {NotificationService} from '../../../model/notification.service';
 import {ExtensionInstallerService} from '../extension-installer/extension-installer.service';
 import {WebConfig} from '../../../../../common/config/private/WebConfig';
-import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientConfig';
+import {TAGS} from '../../../../../common/config/public/ClientConfig';
 import {JobDTOUtils} from '../../../../../common/entities/job/JobDTO';
 import {JobProgressDTO} from '../../../../../common/entities/job/JobProgressDTO';
 

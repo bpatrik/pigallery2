@@ -1,3 +1,4 @@
+import {ReIndexingSensitivity} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import * as path from 'node:path';
@@ -6,7 +7,6 @@ import {expect} from 'chai';
 import {SuperAgentStatic} from 'superagent';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import {DBTestHelper} from '../../DBTestHelper';
-import {ReIndexingSensitivity} from '../../../../src/common/config/private/PrivateConfig';
 import {TestHelper} from '../../../TestHelper';
 import {default as chaiHttp, request} from 'chai-http';
 import {ErrorCodes} from '../../../../src/common/entities/Error';

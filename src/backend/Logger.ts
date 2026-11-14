@@ -1,5 +1,5 @@
+import {LogLevel} from '../common/config/Enums';
 import {Config} from '../common/config/private/Config';
-import {LogLevel} from '../common/config/private/PrivateConfig';
 import {ErrorCodes} from '../common/entities/Error';
 
 

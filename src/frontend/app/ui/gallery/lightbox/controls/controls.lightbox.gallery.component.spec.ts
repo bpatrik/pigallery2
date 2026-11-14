@@ -1,3 +1,4 @@
+import {LightBoxTitleTexts} from '../../../../../../common/config/Enums';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
 import {provideRouter, Router} from '@angular/router';
@@ -15,14 +16,13 @@ import {
   ionAddOutline,
   ionRemoveOutline,
 } from '@ng-icons/ionicons';
-
 import {ControlsLightboxComponent} from './controls.lightbox.gallery.component';
 import {LightboxService} from '../lightbox.service';
 import {FullScreenService} from '../../fullscreen.service';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
 import {GridMedia} from '../../grid/GridMedia';
 import {PhotoDTO} from '../../../../../../common/entities/PhotoDTO';
-import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
+
 import {Config} from '../../../../../../common/config/public/Config';
 import {GalleryLightboxMediaComponent} from '../media/media.lightbox.gallery.component';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';

@@ -1,3 +1,4 @@
+import {NavigationLinkTypes, ThemeModes} from '../../../../common/config/Enums';
 import '../../../../common/config/public/Config';
 import {TestBed} from '@angular/core/testing';
 import {NO_ERRORS_SCHEMA, signal} from '@angular/core';
@@ -12,7 +13,7 @@ import {GalleryService} from '../gallery/gallery.service';
 import {UploaderService} from '../gallery/uploader/uploader.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {Config} from '../../../../common/config/public/Config';
-import {NavigationLinkConfig, NavigationLinkTypes, ThemeModes} from '../../../../common/config/public/ClientConfig';
+import {NavigationLinkConfig} from '../../../../common/config/public/ClientConfig';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 import {UserDTO, UserRoles} from '../../../../common/entities/UserDTO';

@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {UserDTO, UserRoles} from '../../../../src/common/entities/UserDTO';
@@ -9,7 +10,6 @@ import {Utils} from '../../../../src/common/Utils';
 import {SuperAgentStatic} from 'superagent';
 import {RouteTestingHelper} from './RouteTestingHelper';
 import {QueryParams} from '../../../../src/common/QueryParams';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import {TestHelper} from '../../../TestHelper';
 import {ProjectPath} from '../../../../src/backend/ProjectPath';
 import * as chai from "chai";

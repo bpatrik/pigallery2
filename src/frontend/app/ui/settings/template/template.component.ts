@@ -1,3 +1,4 @@
+import {ConfigPriority} from '../../../../../common/config/Enums';
 import {Component, OnInit, inject, viewChild, input, computed, signal, DestroyRef} from '@angular/core';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -10,7 +11,7 @@ import {JobDTOUtils} from '../../../../../common/entities/job/JobDTO';
 import {ScheduledJobsService} from '../scheduled-jobs.service';
 import {FormsModule, UntypedFormControl} from '@angular/forms';
 import {IWebConfigClassPrivate} from 'typeconfig/common';
-import {ConfigPriority, TAGS} from '../../../../../common/config/public/ClientConfig';
+import {TAGS} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {WebConfigClassBuilder} from 'typeconfig/web';

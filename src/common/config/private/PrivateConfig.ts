@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
+import {ConfigPriority, DatabaseType, FFmpegPresets, LogLevel, ReIndexingSensitivity, SQLLogLevel} from '../Enums';
 import {
   AfterJobTrigger,
   JobScheduleDTO,
@@ -8,22 +9,7 @@ import {
   PeriodicJobTrigger,
   ScheduledJobTrigger,
 } from '../../entities/job/JobScheduleDTO';
-import {
-  ClientConfig,
-  ClientGPXCompressingConfig,
-  ClientMediaConfig,
-  ClientMetaFileConfig,
-  ClientPhotoConfig,
-  ClientServiceConfig,
-  ClientSharingConfig,
-  ClientSortingConfig,
-  ClientUploadConfig,
-  ClientUserConfig,
-  ClientUserOIDCConfig,
-  ClientVideoConfig,
-  ConfigPriority,
-  TAGS
-} from '../public/ClientConfig';
+import {ClientConfig, ClientGPXCompressingConfig, ClientMediaConfig, ClientMetaFileConfig, ClientPhotoConfig, ClientServiceConfig, ClientSharingConfig, ClientSortingConfig, ClientUploadConfig, ClientUserConfig, ClientUserOIDCConfig, ClientVideoConfig, TAGS} from '../public/ClientConfig';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {DefaultsJobs} from '../../entities/job/JobDTO';
 import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../entities/SearchQueryDTO';
@@ -41,48 +27,6 @@ if (typeof $localize === 'undefined') {
   global.$localize = (s: TemplateStringsArray) => s;
 }
 
-
-export enum DatabaseType {
-  mysql = 2,
-  sqlite = 3,
-}
-
-export enum LogLevel {
-  error = 1,
-  warn = 2,
-  info = 3,
-  verbose = 4,
-  debug = 5,
-  silly = 6,
-}
-
-export enum SQLLogLevel {
-  none = 1,
-  error = 2,
-  all = 3,
-}
-
-export enum ReIndexingSensitivity {
-  // Order is important. It also used to do relative comparison.
-  // Keep space between items for future
-  never = 10,
-  low = 20,
-  medium = 30,
-  high = 40,
-}
-
-export enum FFmpegPresets {
-  ultrafast = 1,
-  superfast = 2,
-  veryfast = 3,
-  faster = 4,
-  fast = 5,
-  medium = 6,
-  slow = 7,
-  slower = 8,
-  veryslow = 9,
-  placebo = 10,
-}
 
 export type videoCodecType = 'libvpx-vp9' | 'libx264' | 'libvpx' | 'libx265';
 export type videoResolutionType =

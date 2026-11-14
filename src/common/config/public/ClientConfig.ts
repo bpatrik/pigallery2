@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
+import {ConfigPriority, LightBoxTitleTexts, MapProviders, NavigationLinkTypes, ScrollLabelModes, ScrollUpModes, ThemeModes} from '../Enums';
 import {DirectoryGroupByTypes, DirectorySortByTypes, FaceSortByTypes, GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
@@ -14,58 +15,6 @@ if (typeof $localize === 'undefined') {
   global.$localize = (s: TemplateStringsArray) => s[0];
 }
 
-
-export enum MapProviders {
-  OpenStreetMap = 1,
-  Mapbox = 2,
-  Custom = 3,
-}
-
-export enum ConfigPriority {
-  basic = 1, advanced, underTheHood
-}
-
-
-export enum ThemeModes {
-  light = 1, dark, auto
-}
-
-export enum ScrollUpModes {
-  never = 1, mobileOnly, always
-}
-
-export enum ScrollLabelModes {
-  never = 1, date, always
-}
-
-/**
- * Used for lightbox titles
- */
-export enum LightBoxTitleTexts {
-  NONE = 1,
-  file,
-  resolution,
-  size,
-
-  caption,
-  title,
-
-  keywords,
-  persons,
-  location,
-  date,
-
-  camera,
-  lens,
-  iso,
-  fstop,
-  focal_length,
-  directory,
-  titleOrCaption,
-  titleOrDirectory,
-  titleOrCaptionOrDirectory
-
-}
 
 export interface TAGS {
   client?: true,
@@ -667,10 +616,6 @@ export class ClientMapConfig {
     description: $localize`Map will bend the path if two points are this far apart on latitude axes. This intended to bend flight if only the end and the start points are given.`,
   })
   bendLongPathsTrigger: number = 0.5;
-}
-
-export enum NavigationLinkTypes {
-  gallery = 1, faces, albums, search, url
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})

@@ -1,6 +1,6 @@
+import {DatabaseType} from '../../../../common/config/Enums';
 import {Config} from '../../../../common/config/private/Config';
 import {ColumnOptions} from 'typeorm/decorator/options/ColumnOptions';
-import {DatabaseType} from '../../../../common/config/private/PrivateConfig';
 import {foldChar} from '../../../../common/TextFold';
 
 export class ColumnCharsetCS implements ColumnOptions {

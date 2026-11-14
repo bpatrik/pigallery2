@@ -1,3 +1,4 @@
+import {DatabaseType, ReIndexingSensitivity} from '../src/common/config/Enums';
 import {Config} from '../src/common/config/private/Config';
 import {ObjectManagers} from '../src/backend/model/ObjectManagers';
 import {DiskManager} from '../src/backend/model/fileaccess/DiskManager';
@@ -5,7 +6,6 @@ import {IndexingManager} from '../src/backend/model/database/IndexingManager';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import {Utils} from '../src/common/Utils';
-import {DatabaseType, ReIndexingSensitivity} from '../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../src/backend/ProjectPath';
 import {Benchmark} from './Benchmark';
 import {IndexingJob} from '../src/backend/model/jobs/jobs/IndexingJob';
