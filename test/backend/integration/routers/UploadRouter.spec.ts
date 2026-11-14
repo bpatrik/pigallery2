@@ -15,6 +15,7 @@ import {ErrorCodes} from '../../../../src/common/entities/Error';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
+import {DirectorySearch, SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 
 declare const describe: any;
 declare const it: any;
@@ -46,6 +47,9 @@ describe('UploadRouter', () => {
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, {recursive: true});
     }
+    for (const dir of ['sub_dir', 'Árvíztűrő tükörfúrógép', 'clash', 'size_limit', 'no_upload_conf', 'family', 'private']) {
+      fs.mkdirSync(path.join(testDir, dir), {recursive: true});
+    }
     Config.Media.folder = testDir;
     ProjectPath.reset();
   });
@@ -68,6 +72,7 @@ describe('UploadRouter', () => {
 
   const tearDown = async () => {
     Config.Upload.maxFileSizeMB = 500;
+    Config.Upload.minimumRole = UserRoles.Admin;
     Config.Upload.enforcedDirectoryConfig = false;
     await sqlHelper.clearDB();
   };
@@ -231,12 +236,86 @@ describe('UploadRouter', () => {
       fs.readdirSync(path.join(ProjectPath.TempFolder, 'upload')).should.deep.equal([]);
     });
 
+    it('should not create a missing folder', async () => {
+      const loginRes = await login(server);
+      const res = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/missing/sub')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.from('test image'), 'nowhere.jpg');
+
+      res.body.error.code.should.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+      fs.existsSync(path.join(testDir, 'missing')).should.be.false;
+      fs.readdirSync(path.join(ProjectPath.TempFolder, 'upload')).should.deep.equal([]);
+    });
+
+    it('should not tell the path on the disk if a file already exists', async () => {
+      const loginRes = await login(server);
+      const upload = () => request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/sub_dir')
+        .set('Cookie', loginRes.res.headers['set-cookie'])
+        .attach('files', Buffer.from('test image'), 'twice.jpg');
+
+      await upload();
+      const res = await upload();
+
+      res.body.result[0].error.should.contain('already exists');
+      res.body.result[0].error.should.not.contain(testDir);
+    });
+
     it('should return 401 if not authenticated', async () => {
       const res = await request.execute(server.Server)
         .post(Config.Server.apiPath + '/upload/')
         .attach('files', Buffer.from('test'), 'test.jpg');
 
       res.should.have.status(401);
+    });
+  });
+
+  describe('/POST upload with directory access', () => {
+    // can only open the family folder, so the root is only a parent (navigable, content hidden)
+    const familyUser = {
+      name: 'family', password: 'family', role: UserRoles.User,
+      overrideAllowBlockList: true,
+      allowDirectoryList: [{type: SearchQueryTypes.directory, value: 'family', matchType: TextSearchQueryMatchTypes.exact_match} as DirectorySearch]
+    } as UserDTO;
+
+    beforeEach(async () => {
+      Config.Upload.minimumRole = UserRoles.User; // read when the routes are set up
+      await setUp();
+      await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(familyUser));
+    });
+    afterEach(tearDown);
+
+    const uploadAsFamily = async (dir: string, filename: string): Promise<any> => {
+      const loginRes = await (request.execute(server.Server) as SuperAgentStatic)
+        .post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username: familyUser.name, password: familyUser.password, rememberMe: false} as LoginCredential});
+      return request.execute(server.Server)
+        .post(Config.Server.apiPath + '/upload/' + dir)
+        .set('Cookie', loginRes.headers['set-cookie'] as unknown as string[])
+        .attach('files', Buffer.from('test image'), filename);
+    };
+
+    it('should upload to an available folder', async () => {
+      const res = await uploadAsFamily('family', 'allowed.jpg');
+
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+      fs.existsSync(path.join(testDir, 'family', 'allowed.jpg')).should.be.true;
+    });
+
+    it('should answer a hidden folder as not existing', async () => {
+      const res = await uploadAsFamily('private', 'hidden.jpg');
+
+      res.body.error.code.should.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+      fs.existsSync(path.join(testDir, 'private', 'hidden.jpg')).should.be.false;
+    });
+
+    it('should not upload to a folder that can only be navigated', async () => {
+      const res = await uploadAsFamily('', 'parent.jpg');
+
+      res.body.error.code.should.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+      fs.existsSync(path.join(testDir, 'parent.jpg')).should.be.false;
     });
   });
 });

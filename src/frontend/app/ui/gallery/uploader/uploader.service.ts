@@ -74,6 +74,8 @@ export class UploaderService {
     });
   }
 
+  // Known gap: a folder the user can only navigate (DirectoryAccessTypes.parent, its content is hidden) still offers the upload,
+  // the server then answers 'Directory not found'. The client does not know the access of a folder.
   public readonly canUpload = computed((): boolean => {
     const dir = this.contentLoaderService.content().directory;
     if (!Config.Upload.enabled ||

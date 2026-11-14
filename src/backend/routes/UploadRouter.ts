@@ -17,6 +17,7 @@ export class UploadRouter {
       AuthenticationMWs.authenticate,
       AuthenticationMWs.authorise(Config.Upload.minimumRole),
       AuthenticationMWs.normalizePathParam('directory'),
+      AuthenticationMWs.authoriseDirectory('directory'),
       VersionMWs.injectGalleryVersion,
 
       UploadMWs.upload,

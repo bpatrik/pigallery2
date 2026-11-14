@@ -13,6 +13,8 @@ import {Config} from '../../common/config/private/Config';
 import {UploadUtils} from '../../common/UploadUtils';
 import {UploadedFile} from '../model/UploadManager';
 import {FolderNotWritable} from '../exceptions/FolderNotWritable';
+import {DirectoryNotFound} from '../exceptions/DirectoryNotFound';
+import {DirectoryAccessTypes} from '../model/DirectoryAccess';
 
 /**
  * Saves each file to the temp folder, so a large file is never held in RAM (a Pi has little of it).
@@ -67,6 +69,11 @@ export class UploadMWs {
     res: Response,
     next: NextFunction
   ): Promise<void> {
+    // set by AuthenticationMWs.authoriseDirectory. Only the content of available folders is visible, so only those can be written:
+    // a parent folder (navigable, content hidden) gets the same answer as a not existing one
+    if (req.directoryAccess !== DirectoryAccessTypes.available) {
+      return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
+    }
     try {
       await new Promise<void>((resolve, reject) =>
         upload(req, res, (err: unknown) => err ? reject(err instanceof Error ? err : new Error(errorMessage(err))) : resolve()));
@@ -84,7 +91,8 @@ export class UploadMWs {
       const directory = RequestParams.get(req, 'directory') || '';
       req.resultPipe = await ObjectManagers.getInstance().UploadManager.saveFiles(directory, files);
     } catch (e) {
-      error = new ErrorDTO(e instanceof FolderNotWritable ? ErrorCodes.PERMISSION_DENIED : ErrorCodes.UPLOAD_ERROR, errorMessage(e));
+      error = new ErrorDTO(e instanceof FolderNotWritable ? ErrorCodes.PERMISSION_DENIED
+        : e instanceof DirectoryNotFound ? ErrorCodes.DIRECTORY_NOT_FOUND : ErrorCodes.UPLOAD_ERROR, errorMessage(e));
     }
     // before answering: the files that were not moved to the gallery (e.g. one that already exists)
     await Promise.all(files.filter((f) => f.path).map((f) => fs.promises.rm(f.path, {force: true})));
