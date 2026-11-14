@@ -28,6 +28,20 @@ export const columnCharsetCSWith = (options: ColumnOptions): ColumnOptions =>
   Object.assign(new ColumnCharsetCS(), options);
 export const SQL_COLLATE = 'utf8mb4_general_ci';
 
+/**
+ * SQLite's LIKE ignores SQL_COLLATE and the case of non-English letters. With Database.sqlite.accentInsensitiveSearch
+ * both sides are folded instead: lowercase and without accents (#1309). It makes text search several times slower.
+ */
+export const sqlFoldsText = (): boolean =>
+  Config.Database.type === DatabaseType.sqlite && !!Config.Database.sqlite?.accentInsensitiveSearch;
+
+/**
+ * Whether the text search of the DB (SearchManager) ignores the accents: MySQL's SQL_COLLATE does, SQLite only with sqlFoldsText().
+ * Checks of the same texts without DB need to follow it (e.g. DirectoryAccess).
+ */
+export const sqlIgnoresAccents = (): boolean =>
+  Config.Database.type === DatabaseType.mysql || sqlFoldsText();
+
 // fold() runs for every row of a search: folding char by char from a table is faster than normalizing every text
 const NON_ASCII = /\P{ASCII}/u;
 const NON_ASCII_ALL = /\P{ASCII}/gu;
