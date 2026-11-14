@@ -101,27 +101,63 @@ export class GallerySortingService {
     }
   }
 
+  private compareByName(a: MediaDTO, b: MediaDTO): number {
+    const aSortable = Utils.sortableFilename(a.name);
+    const bSortable = Utils.sortableFilename(b.name);
+
+    if (aSortable === bSortable) {
+      // If the trimmed filenames match, use the full name as tie breaker
+      // This preserves a consistent final position for files named e.g.,
+      // 10.jpg and 10.png, even if their starting position in the list
+      // changes based on any previous sorting that's happened under different heuristics
+      return this.collator.compare(a.name, b.name);
+    }
+
+    return this.collator.compare(aSortable, bSortable);
+  }
+
+  /** The directory of the media relative to the gallery root, '.' for the root. It always uses '/', also on a Windows server. */
+  private directoryPath(m: MediaDTO): string {
+    return Utils.concatUrls(m.directory.path, m.directory.name);
+  }
+
+  private directoryName(path: string): string {
+    return path === '.' ? $localize`Home` : path;
+  }
+
+  /**
+   * Tree order: a directory comes right before its subdirectories (2020, 2020/Summer, 2021),
+   * so the paths are compared segment by segment, not as one string.
+   */
+  private sortByDirectory(media: MediaDTO[]): void {
+    const segments = new Map<MediaDTO, string[]>();
+    for (const m of media) {
+      const p = this.directoryPath(m);
+      segments.set(m, p === '.' ? [] : p.split('/'));
+    }
+    media.sort((a: MediaDTO, b: MediaDTO): number => {
+      const aS = segments.get(a)!;
+      const bS = segments.get(b)!;
+      for (let i = 0; i < Math.min(aS.length, bS.length); i++) {
+        const c = this.collator.compare(aS[i], bS[i]);
+        if (c !== 0) {
+          return c;
+        }
+      }
+      return (aS.length - bS.length) || this.compareByName(a, b);
+    });
+  }
+
   private sortMedia(sorting: SortingMethod | GroupingMethod, media: MediaDTO[]): void {
     if (!media) {
       return;
     }
     switch (sorting.method) {
       case SortByTypes.Name:
-        media.sort((a: PhotoDTO, b: PhotoDTO) => {
-            const aSortable = Utils.sortableFilename(a.name);
-            const bSortable = Utils.sortableFilename(b.name);
-
-            if (aSortable === bSortable) {
-              // If the trimmed filenames match, use the full name as tie breaker
-              // This preserves a consistent final position for files named e.g.,
-              // 10.jpg and 10.png, even if their starting position in the list
-              // changes based on any previous sorting that's happened under different heuristics
-              return this.collator.compare(a.name, b.name);
-            }
-
-            return this.collator.compare(aSortable, bSortable);
-          }
-        );
+        media.sort((a: PhotoDTO, b: PhotoDTO) => this.compareByName(a, b));
+        break;
+      case SortByTypes.Directory:
+        this.sortByDirectory(media);
         break;
       case SortByTypes.Date:
         media.sort((a: PhotoDTO, b: PhotoDTO): number => {
@@ -178,6 +214,9 @@ export class GallerySortingService {
         // by the first letter without its accent (Á is in the A group), like the names sort
         return (m: MediaDTO) => (m.name.normalize('NFD').at(0) ?? '').toUpperCase();
 
+      case SortByTypes.Directory:
+        return (m: MediaDTO) => this.directoryPath(m);
+
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();
 
@@ -217,6 +256,8 @@ export class GallerySortingService {
       case SortByTypes.Date:
         // coarser than the day of the group headers, but with the same time zone handling
         return {order: method, label: (m: MediaDTO) => m.metadata?.creationDate ? this.formatMediaDate(m, 'MMMM y') : ''};
+      case SortByTypes.Directory:
+        return {order: method, label: (m: MediaDTO) => this.directoryName(this.directoryPath(m))};
       case SortByTypes.Name:
       case SortByTypes.Rating:
       case SortByTypes.FileSize:
@@ -244,6 +285,7 @@ export class GallerySortingService {
         case SortByTypes.FileSize:
         case SortByTypes.PersonCount:
         case SortByTypes.Rating: // directories do not have rating
+        case SortByTypes.Directory:
         case SortByTypes.Name:
           c.directories.sort((a, b) =>
             this.collator.compare(a.name, b.name)
@@ -283,11 +325,16 @@ export class GallerySortingService {
       const groupFN = this.getGroupByNameFn(grouping);
 
       c.mediaGroups = [];
+      let lastKey: string | null = null;
 
       for (const m of mCopy) {
         const k = groupFN(m);
-        if (c.mediaGroups.length == 0 || c.mediaGroups[c.mediaGroups.length - 1].name != k) {
-          c.mediaGroups.push({name: k, media: []});
+        // by the key, the name of the root directory is not its key
+        if (lastKey !== k) {
+          lastKey = k;
+          c.mediaGroups.push(grouping.method === GroupByTypes.Directory ?
+            {name: this.directoryName(k), directoryPath: k, media: []} :
+            {name: k, media: []});
         }
         c.mediaGroups[c.mediaGroups.length - 1].media.push(m);
       }
@@ -318,6 +365,7 @@ export interface ScrollLabelFn {
 export interface MediaGroup {
   name: string;
   date?: Date; // used for blog. It allows to chop off blog to smaller pieces
+  directoryPath?: string; // the directory of the media, when grouped by directory
   media: MediaDTO[];
 }
 

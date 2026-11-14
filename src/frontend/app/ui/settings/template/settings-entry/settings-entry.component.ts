@@ -18,7 +18,7 @@ import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../
 import {enumToTranslatedArray} from '../../../EnumTranslations';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
-import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
+import {DirectoryGroupByTypes, DirectorySortByTypes, GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
 
 import { GallerySearchFieldComponent } from '../../../gallery/search/search-field/search-field.gallery.component';
@@ -108,6 +108,8 @@ export class SettingsEntryComponent
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
+  protected readonly DirectorySortByTypes = DirectorySortByTypes;
+  protected readonly DirectoryGroupByTypes = DirectoryGroupByTypes;
 
   // typed views of the value for the editors of the template (it depends on uiType)
   get ArrayValue(): unknown[] {

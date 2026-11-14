@@ -12,6 +12,7 @@ import {ContentWrapperWithError} from '../../../../../common/entities/ContentWra
 import {UserDTO, UserRoles} from '../../../../../common/entities/UserDTO';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
+import {GroupByTypes, SortByTypes} from '../../../../../common/entities/SortingMethods';
 
 describe('GalleryNavigatorComponent', () => {
   let component: GalleryNavigatorComponent;
@@ -124,6 +125,39 @@ describe('GalleryNavigatorComponent', () => {
     it('should not offer it for a search result', () => {
       content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Lake'}}} as unknown as ContentWrapperWithError);
       expect(component.directoryFlattenSearchQuery()).toBeNull();
+    });
+  });
+
+  // all media of a folder are in the same folder: sorting or grouping it by directory is meaningless
+  describe('sorting by directory', () => {
+    const offered = (): boolean[] => [
+      component.visibleSortingByTypes().some((t) => t.key === SortByTypes.Directory),
+      component.visibleGroupingByTypes().some((t) => t.key === GroupByTypes.Directory)
+    ];
+
+    it('should not be offered for a folder', () => {
+      content.set(folder('Vacation/', 'Árvíztűrő tükörfúrógép'));
+      expect(offered()).toEqual([false, false]);
+    });
+
+    it('should not be offered for an exact directory search', () => {
+      content.set({
+        searchResult: {
+          searchQuery: {type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.exact_match, value: './Vacation/Lake'}
+        }
+      } as unknown as ContentWrapperWithError);
+      expect(offered()).toEqual([false, false]);
+    });
+
+    it('should be offered for a search and a flattened folder', () => {
+      content.set({searchResult: {searchQuery: {type: SearchQueryTypes.any_text, value: 'Lake'}}} as unknown as ContentWrapperWithError);
+      expect(offered()).toEqual([true, true]);
+      content.set({
+        searchResult: {
+          searchQuery: {type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.globMatch, value: 'Vacation/Lake/*'}
+        }
+      } as unknown as ContentWrapperWithError);
+      expect(offered()).toEqual([true, true]);
     });
   });
 

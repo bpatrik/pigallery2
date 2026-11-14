@@ -2,13 +2,12 @@ import {TestBed} from '@angular/core/testing';
 import {signal} from '@angular/core';
 import {GallerySortingService} from './sorting.service';
 import {GalleryCacheService} from '../cache.gallery.service';
-import {ContentLoaderService} from '../contentLoader.service';
+import {ContentLoaderService, DirectoryContent} from '../contentLoader.service';
 import {ContentWrapper, ContentWrapperWithError} from '../../../../../common/entities/ContentWrapper';
 import {GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../../../../common/entities/SortingMethods';
 import {Config} from '../../../../../common/config/public/Config';
 import {ScrollLabelModes} from '../../../../../common/config/public/ClientConfig';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
-import {DirectoryContent} from '../contentLoader.service';
 import {SubDirectoryDTO} from '../../../../../common/entities/DirectoryDTO';
 
 // stores the sorting and grouping per folder, like the localStorage based cache
@@ -253,6 +252,54 @@ describe('GallerySortingService', () => {
       const first = names(dc, random);
       expect([...first[0]].sort()).toEqual(dc.media.map((m) => m.name).sort());
       expect(names(dc, random)).toEqual(first);
+    });
+
+    describe('by directory', () => {
+      // as the backend stores them: the root is ./ and ., its subdirectories are in ./
+      const dir = (path: string, name: string) => ({path, name});
+      const inDir = (name: string, directory: { path: string; name: string }): MediaDTO =>
+        ({name, directory, metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO);
+      const searchResult = (): DirectoryContent => ({
+        directories: [],
+        metaFile: [],
+        media: [
+          inDir('1.jpg', dir('2020/', 'Summer')),
+          inDir('2.jpg', dir('2021/', 'Summer')),
+          inDir('r.jpg', dir('./', '.')),
+          inDir('y.jpg', dir('./', '2021')),
+          inDir('t.jpg', dir('./', '2020 trip')),
+          inDir('3.jpg', dir('2020/', 'Summer')),
+          inDir('x.jpg', dir('./', '2020')),
+          inDir('4.jpg', dir('2021/', 'Summer')),
+          inDir('w.jpg', dir('2021\\', 'Winter')), // a Windows server
+        ]
+      });
+      // the tree: a directory is right before its subdirectories, same-named directories are not mixed
+      const tree = [['r.jpg'], ['x.jpg'], ['1.jpg', '3.jpg'], ['t.jpg'], ['y.jpg'], ['2.jpg', '4.jpg'], ['w.jpg']];
+
+      it('should sort in tree order', () => {
+        expect(names(searchResult(), {method: SortByTypes.Directory, ascending: true})).toEqual([tree.flat()]);
+      });
+
+      it('should reverse the tree order when descending', () => {
+        expect(names(searchResult(), {method: SortByTypes.Directory, ascending: false})).toEqual([tree.flat().reverse()]);
+      });
+
+      it('should group by the whole path, with / also on Windows and Home for the root', () => {
+        const groups = service.applySorting(searchResult(), {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.Directory, ascending: true})!.mediaGroups;
+        expect(groups.map(g => [g.name, g.directoryPath])).toEqual([
+          ['Home', '.'], ['2020', '2020'], ['2020/Summer', '2020/Summer'], ['2020 trip', '2020 trip'],
+          ['2021', '2021'], ['2021/Summer', '2021/Summer'], ['2021/Winter', '2021/Winter']
+        ]);
+        expect(groups.map(g => g.media.map(m => m.name))).toEqual(tree);
+      });
+
+      it('should label the scroll indicator with the path', () => {
+        const fn = service.getScrollLabelFn({method: SortByTypes.Directory, ascending: true}, noGrouping);
+        expect(searchResult().media.map(m => fn?.label(m))).toEqual(['2020/Summer', '2021/Summer', 'Home', '2021', '2020 trip',
+          '2020/Summer', '2020', '2021/Summer', '2021/Winter']);
+      });
     });
   });
 

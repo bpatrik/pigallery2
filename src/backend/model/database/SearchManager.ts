@@ -99,6 +99,16 @@ export class SearchManager {
         case SortByTypes.Name:
           query.addOrderBy('media.name', sort.ascending ? 'ASC' : 'DESC');
           break;
+        case SortByTypes.Directory:
+          // Not the same order as the frontend's (GallerySortingService): that compares the paths segment by segment
+          // (tree order: 2020, 2020/Summer, 2021) with a numeric collator. Here it is the parent path first
+          // (2020, 2021, 2020/Summer) in the DB's collation, as the tree order needs a string concat that
+          // differs between SQLite and MySQL. The frontend re-sorts the results anyway; this order only decides
+          // which media survive the maxMediaResult limit and which one is the cover with AlbumCover.Sorting.
+          query.addOrderBy('directory.path', sort.ascending ? 'ASC' : 'DESC');
+          query.addOrderBy('directory.name', sort.ascending ? 'ASC' : 'DESC');
+          query.addOrderBy('media.name', sort.ascending ? 'ASC' : 'DESC');
+          break;
         case SortByTypes.PersonCount:
           query.addOrderBy('media.metadata.personsLength', sort.ascending ? 'ASC' : 'DESC');
           break;
