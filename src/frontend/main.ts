@@ -1,7 +1,7 @@
 import {HttpClient, provideHttpClient, withInterceptors, withXhr} from '@angular/common/http';
 import {errorInterceptor} from './app/model/network/helper/error.interceptor';
 import {DefaultUrlSerializer, provideRouter, UrlSerializer, UrlTree, withNavigationErrorHandler, withPreloading} from '@angular/router';
-import {provideBrowserGlobalErrorListeners} from '@angular/core';
+import {inject, provideAppInitializer, provideBrowserGlobalErrorListeners} from '@angular/core';
 import {bootstrapApplication} from '@angular/platform-browser';
 import {routes} from './app/app.routing';
 import {provideIcons} from '@ng-icons/core';
@@ -9,6 +9,7 @@ import {provideMarkdown} from 'ngx-markdown';
 import {AppComponent} from './app/app.component';
 import {appIcons} from './app/icons';
 import {PreloadMarkedRoutes, reloadOnChunkLoadError} from './app/model/lazy-loading';
+import {ScrollRestorationService} from './app/model/scroll-restoration.service';
 
 export class CustomUrlSerializer implements UrlSerializer {
   private defaultUrlSerializer: DefaultUrlSerializer =
@@ -34,6 +35,10 @@ bootstrapApplication(AppComponent, {
     // Uncaught errors and unhandled promise rejections go to Angular's ErrorHandler, like in a new Angular app
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withPreloading(PreloadMarkedRoutes), withNavigationErrorHandler(reloadOnChunkLoadError)),
+    // before the first navigation: it remembers the scroll position of every history entry
+    provideAppInitializer(() => {
+      inject(ScrollRestorationService);
+    }),
     provideIcons(appIcons),
     provideMarkdown({loader: HttpClient}),
     {provide: UrlSerializer, useClass: CustomUrlSerializer},

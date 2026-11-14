@@ -9,10 +9,13 @@ import {UserRoles} from '../../../../src/common/entities/UserDTO';
 import {SharingEntity} from '../../../../src/backend/model/database/enitites/SharingEntity';
 import {UserEntity} from '../../../../src/backend/model/database/enitites/UserEntity';
 import {TestHelper} from '../../../TestHelper';
+import {Config} from '../../../../src/common/config/private/Config';
+import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 
 declare let describe: any;
 declare const before: any;
 declare const after: any;
+declare const afterEach: any;
 declare const it: any;
 const tmpDescribe = describe;
 describe = DBTestHelper.describe();
@@ -145,6 +148,41 @@ describe('DirectoryAccess', (sqlHelper: DBTestHelper) => {
       });
     });
 
+    // the lists are checked both in JS and in SQL, the two need to agree (MySQL's collation ignores the accents)
+    describe('accents in the lists', () => {
+      const isSQLite = (): boolean => Config.Database.type === DatabaseType.sqlite;
+      afterEach(() => {
+        Config.Database.sqlite!.accentInsensitiveSearch = false;
+      });
+
+      const check = async (ignoresAccents: boolean): Promise<void> => {
+        const blocked = await userSession({blockDirectoryList: [dq('PRÍVATE')]});
+        expect(await accessOf(blocked, ['private', 'public'])).to.deep.equal({
+          'private': ignoresAccents ? none : available, 'public': available
+        });
+        const allowedGlob = await userSession({allowDirectoryList: [glob('públic/súb/*')]});
+        expect(await accessOf(allowedGlob, ['/', 'public', 'public/sub', 'other'])).to.deep.equal(ignoresAccents
+          ? {'/': parent, 'public': parent, 'public/sub': available, 'other': none}
+          : {'/': parent, 'public': none, 'public/sub': none, 'other': none}); // root is a parent of any anchor
+        // the parents of a like search come from the DB, the directory itself from JS
+        const allowedLike = await userSession({allowDirectoryList: [dq('súb', TextSearchQueryMatchTypes.like)]});
+        expect(await accessOf(allowedLike, ['/', 'public', 'public/sub', 'other'])).to.deep.equal(ignoresAccents
+          ? {'/': parent, 'public': parent, 'public/sub': available, 'other': none}
+          : {'/': none, 'public': none, 'public/sub': none, 'other': none});
+      };
+
+      it('follow the DB', async () => {
+        await check(!isSQLite());
+      });
+
+      it('are ignored on SQLite with accentInsensitiveSearch', async () => {
+        if (!isSQLite()) {
+          return;
+        }
+        Config.Database.sqlite!.accentInsensitiveSearch = true;
+        await check(true);
+      });
+    });
   });
 
   describe('sharing with directory query', () => {

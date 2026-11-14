@@ -82,16 +82,86 @@ describe('SharingRouter', () => {
       res.body.result.should.deep.equal({sharingKey: sharing.sharingKey, passwordProtected: true});
     });
 
-    // Expected to fail until #1254 is fixed (mocha has no test.fail()): remove the rejected wrapper then.
-    it('should return 404 for a not existing sharing (expected to fail #1254)', async () => {
-      const check = async (): Promise<void> => {
-        const res = await getPublicInfo('doesnotexist');
+    it('should return 404 for a not existing sharing', async () => {
+      const res = await getPublicInfo('doesnotexist');
 
-        res.should.have.status(404);
-        res.body.error.should.be.a('object');
-        should.equal(res.body.result, null);
-      };
-      await check().should.be.rejectedWith(chai.AssertionError);
+      res.should.have.status(404);
+      res.body.error.code.should.equal(ErrorCodes.SHARING_NOT_FOUND);
+      should.equal(res.body.result, null);
+    });
+  });
+
+  describe('expired sharing', () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const expired = () => Date.now() - 1000;
+
+    // an expired sharing looks like a not existing one (#1307)
+    it('should not give the public info of an expired sharing', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, null, expired());
+      const res = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/share/' + sharing.sharingKey + '/publicInfo');
+
+      res.should.have.status(404);
+      res.body.error.code.should.equal(ErrorCodes.SHARING_NOT_FOUND);
+      should.equal(res.body.result, null);
+    });
+
+    it('should not login to an expired sharing', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass', expired());
+      const res = await shareLogin(server, sharing.sharingKey, 'secret_pass');
+
+      res.should.have.status(401);
+      should.equal(res.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
+      should.not.exist(res.headers['set-cookie']);
+    });
+
+    it('should not let a guest in with the key of an expired sharing without password', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, null, expired());
+      const res = await (request.execute(server.Server) as SuperAgentStatic)
+        .get(Config.Server.apiPath + '/gallery/content/?' + QueryParams.gallery.sharingKey_query + '=' + sharing.sharingKey);
+
+      res.should.have.status(401);
+      should.equal(res.body.error.code, ErrorCodes.NOT_AUTHENTICATED_SHARING);
+    });
+  });
+
+  describe('/DELETE share/:sharingKey', () => {
+
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    it('should end the session of a guest of the deleted sharing', async () => {
+      Config.Sharing.passwordRequired = false;
+      const sharing = await RouteTestingHelper.createSharing(testUser, 'secret_pass', Date.now() + 100000);
+      const guest = request.agent(server.Server);
+      const owner = request.agent(server.Server);
+      try {
+        const login = await guest.post(Config.Server.apiPath + '/share/login?' + QueryParams.gallery.sharingKey_query + '=' + sharing.sharingKey)
+          .send({password: 'secret_pass'});
+        login.should.have.status(200);
+        (await guest.get(Config.Server.apiPath + '/user/me')).should.have.status(200);
+
+        (await owner.post(Config.Server.apiPath + '/user/login')
+          .send({loginCredential: {username: testUser.name, password: testUser.password, rememberMe: false}})).should.have.status(200);
+        const del = await owner.delete(Config.Server.apiPath + '/share/' + sharing.sharingKey);
+        del.should.have.status(200);
+        should.equal(del.body.error, null);
+
+        // the next request of the guest is rejected, its session is gone
+        const me = await guest.get(Config.Server.apiPath + '/user/me');
+        me.should.have.status(401);
+        const content = await guest.get(Config.Server.apiPath + '/gallery/content/');
+        content.should.have.status(401);
+      } finally {
+        guest.close();
+        owner.close();
+      }
     });
   });
 

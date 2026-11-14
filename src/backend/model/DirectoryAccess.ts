@@ -6,6 +6,7 @@ import {SQLConnection} from './database/SQLConnection';
 import {DirectoryEntity} from './database/enitites/DirectoryEntity';
 import {ObjectManagers} from './ObjectManagers';
 import {GalleryManager} from './database/GalleryManager';
+import {sqlIgnoresAccents} from './database/enitites/EntityUtils';
 import {DiskManager} from './fileaccess/DiskManager';
 import {Config} from '../../common/config/private/Config';
 import {DatabaseType} from '../../common/config/private/PrivateConfig';
@@ -61,15 +62,16 @@ export class DirectoryAccess {
     return !!this.context?.user?.usedSharingKey;
   }
 
+  // The lists are also applied in SQL (allowQuery, notBlockedQuery): the checks here ignore the accents the same way
   public isBlocked(dirPath: string): boolean {
-    return !!this.blockList && SearchQueryUtils.matchDirectoryList(dirPath, this.blockList);
+    return !!this.blockList && SearchQueryUtils.matchDirectoryList(dirPath, this.blockList, sqlIgnoresAccents());
   }
 
   /**
    * True if the directory matches all allow lists (does not check the block list)
    */
   public isAllowed(dirPath: string): boolean {
-    return (this.allowLists || []).every(list => SearchQueryUtils.matchDirectoryList(dirPath, list));
+    return (this.allowLists || []).every(list => SearchQueryUtils.matchDirectoryList(dirPath, list, sqlIgnoresAccents()));
   }
 
   /**
@@ -193,7 +195,7 @@ export class DirectoryAccess {
   private isAnchoredParent(dirPath: string): boolean {
     // users only have one allow list
     const list = this.allowLists?.[0];
-    return !!list && SearchQueryUtils.isDirectoryAnchoredParent(dirPath, list);
+    return !!list && SearchQueryUtils.isDirectoryAnchoredParent(dirPath, list, sqlIgnoresAccents());
   }
 
   /**

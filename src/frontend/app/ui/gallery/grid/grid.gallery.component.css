@@ -23,3 +23,19 @@ app-gallery-grid-photo {
     display: inline-block;
     cursor: pointer;
 }
+
+/* next to the scrollbar thumb, below the navbar: --scroll-position (0-1) moves it down the rest of the screen and back by the same part of its own height, so it stays on screen */
+.scroll-label {
+    position: fixed;
+    top: calc(var(--navbar-bottom) + var(--scroll-position) * (100% - var(--navbar-bottom)));
+    transform: translateY(calc(var(--scroll-position) * -100%));
+    right: 24px;
+    z-index: 10;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+    pointer-events: none;
+    white-space: nowrap;
+}

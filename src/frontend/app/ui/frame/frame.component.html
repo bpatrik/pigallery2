@@ -85,9 +85,9 @@
                   type="button" class="btn btn-tertiary dropdown-toggle"
                   aria-controls="dropdown-frame-menu">
                   <ng-icon class="align-text-top" size="1.2em" name="ionMenuOutline" />
-                  @if (isAdmin() && notificationService.numberOfNotifications>0) {
+                  @if (isAdmin() && notificationService.numberOfNotifications()>0) {
                     <span
-                    class="navbar-badge badge text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                    class="navbar-badge badge text-bg-warning">{{ notificationService.numberOfNotifications() }}</span>
                   }
                 </button>
                 <ul id="dropdown-frame-menu" *dropdownMenu
@@ -254,9 +254,9 @@
                         <li role="menuitem">
                           <a class="dropdown-item" [routerLink]="['/admin']">
                             <ng-icon name="ionSettingsOutline" />
-                            @if (notificationService.numberOfNotifications>0) {
+                            @if (notificationService.numberOfNotifications()>0) {
                               <span
-                              class="badge rounded-pill position-absolute p-0 text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                              class="badge rounded-pill position-absolute p-0 text-bg-warning">{{ notificationService.numberOfNotifications() }}</span>
                             }
                             <ng-container i18n>Settings</ng-container>
                           </a>

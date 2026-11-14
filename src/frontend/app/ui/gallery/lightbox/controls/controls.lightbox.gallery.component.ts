@@ -12,14 +12,15 @@ import {AuthenticationService} from '../../../../model/network/authentication.se
 import {LightboxService} from '../lightbox.service';
 import {Utils} from '../../../../../../common/Utils';
 import {formatFileSize} from '../../../../pipes/FileSizePipe';
-import {formatDate} from '@angular/common';
+import {formatDate, LocationStrategy} from '@angular/common';
 import {LightBoxTitleTexts} from '../../../../../../common/config/public/ClientConfig';
 import {NgIconComponent} from '@ng-icons/core';
 import {BsDropdownDirective, BsDropdownMenuDirective, BsDropdownToggleDirective} from 'ngx-bootstrap/dropdown';
 import {FormsModule} from '@angular/forms';
-import {RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
-import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/gesture.directive';
+import {GestureDirective, PanEvent, PinchEvent, TapEvent} from '../../../utils/gesture/gesture.directive';
+import {NotificationService} from '../../../../model/notification.service';
 
 
 @Component({
@@ -36,7 +37,6 @@ import {GestureDirective, PanEvent, PinchEvent} from '../../../utils/gesture/ges
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
     FormsModule,
-    RouterLink,
     GestureDirective
 ]
 })
@@ -45,6 +45,9 @@ export class ControlsLightboxComponent implements OnDestroy {
   fullScreenService = inject(FullScreenService);
   private authService = inject(AuthenticationService);
   private locale = inject(LOCALE_ID);
+  private router = inject(Router);
+  private locationStrategy = inject(LocationStrategy);
+  private notification = inject(NotificationService);
 
   readonly MAX_ZOOM = 10;
   readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
@@ -53,7 +56,11 @@ export class ControlsLightboxComponent implements OnDestroy {
   readonly toggleFullScreen = output();
   readonly nextPhoto = output();
   readonly previousPhoto = output();
-  readonly navigation = input({hasPrev: true, hasNext: true});
+  // nextLoops: the next photo is the first one again (last photo with loop on)
+  readonly navigation = input<{ hasPrev: boolean, hasNext: boolean, nextLoops?: boolean }>({hasPrev: true, hasNext: true});
+  readonly nextButton = computed((): { icon: string, title: string } => this.navigation().nextLoops ?
+    {icon: 'ionReloadOutline', title: $localize`Start over from the first photo (key: right arrow)`} :
+    {icon: 'ionChevronForwardOutline', title: $localize`key: right arrow`});
   readonly activePhoto = input<GridMedia | null>(null);
   readonly mediaElement = input.required<GalleryLightboxMediaComponent>();
   readonly photoFrameDim = input({width: 1, height: 1, aspect: 1});
@@ -80,19 +87,26 @@ export class ControlsLightboxComponent implements OnDestroy {
     }
     const size = photo.metadata.size;
     // a face without a box can't be placed on the photo
-    return photo.metadata.faces.filter(face => !!face.box).map(face => ({
-      name: face.name,
-      query: SearchQueryUtils.urlify({
+    return photo.metadata.faces.filter(face => !!face.box).map(face => {
+      const url = this.router.serializeUrl(this.router.createUrlTree(['/search', SearchQueryUtils.urlify({
         type: SearchQueryTypes.person,
         matchType: TextSearchQueryMatchTypes.exact_match,
         value: face.name,
-      } as TextSearch),
-      top: face.box!.top / size.height * 100,
-      left: face.box!.left / size.width * 100,
-      height: face.box!.height / size.height * 100,
-      width: face.box!.width / size.width * 100,
-    }));
+      } as TextSearch)]));
+      return {
+        name: face.name,
+        url,
+        // with the base href of the app, like a routerLink
+        href: this.locationStrategy.prepareExternalUrl(url),
+        top: face.box!.top / size.height * 100,
+        left: face.box!.left / size.width * 100,
+        height: face.box!.height / size.height * 100,
+        width: face.box!.width / size.width * 100,
+      };
+    });
   });
+  // A phone has no hover: a tap shows the faces until the controls dim (or a zoom moves them), a tap on a shown face opens its search.
+  readonly facesShown = signal(false);
   // the size of the photo on the screen, without zoom
   readonly faceContainerDim = computed((): { width: number, height: number } => {
     const activePhoto = this.activePhoto();
@@ -147,6 +161,7 @@ export class ControlsLightboxComponent implements OnDestroy {
     if (prevZoom === zoom) {
       return;
     }
+    this.facesShown.set(false);
     this.pauseClicked();
     const scale = (d: { x: number, y: number }) => ({x: (d.x / prevZoom) * zoom, y: (d.y / prevZoom) * zoom});
     this.zoom.set(zoom);
@@ -224,6 +239,34 @@ export class ControlsLightboxComponent implements OnDestroy {
     this.setZoom(this.zoom() > 1 ? 1 : 5);
   }
 
+  // a single tap (not the first tap of a double tap) on the photo
+  onTap($event: TapEvent): void {
+    if ($event.pointerType !== 'touch') {
+      return; // a mouse hovers the faces; its click opens them (onFaceClick)
+    }
+    const faceIndex = ($event.target as Element | null)?.closest?.('a.face')?.getAttribute('data-face');
+    const url = faceIndex == null ? null : this.faces()[Number(faceIndex)]?.url;
+    if (url && (this.facesShown() || this.lightboxService.facesAlwaysOn())) {
+      this.router.navigateByUrl(url).catch(console.error);
+      return;
+    }
+    this.showControls();
+    this.facesShown.set(true);
+  }
+
+  // A tap on a face is handled by onTap: the first tap only shows the faces and a double tap zooms.
+  // A mouse or the keyboard opens the search of the face; with a modifier key the browser opens the link itself (e.g. new tab).
+  onFaceClick($event: MouseEvent, url: string): void {
+    if ($event.button !== 0 || $event.ctrlKey || $event.metaKey || $event.shiftKey || $event.altKey) {
+      return;
+    }
+    $event.preventDefault();
+    if (($event as PointerEvent).pointerType === 'touch') {
+      return;
+    }
+    this.router.navigateByUrl(url).catch(console.error);
+  }
+
   zoomIn(): void {
     this.showControls();
     this.setZoom(this.zoom() + this.zoom() / 10);
@@ -275,14 +318,8 @@ export class ControlsLightboxComponent implements OnDestroy {
         break;
       case 'd':
       case 'D':
-        if (event.shiftKey && activePhoto) {
-          const link = document.createElement('a');
-          link.setAttribute('type', 'hidden');
-          link.href = activePhoto.getOriginalMediaPath();
-          link.download = activePhoto.media.name;
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
+        if (event.shiftKey) {
+          void this.downloadOriginal();
         }
         break;
       case 'Escape': // escape
@@ -294,6 +331,34 @@ export class ControlsLightboxComponent implements OnDestroy {
         }
         break;
     }
+  }
+
+  /**
+   * Downloads the original file. A file deleted from the disk stays in the DB until the next reindexing:
+   * it is checked first, so the user gets a message instead of a failed download (#1311).
+   */
+  public async downloadOriginal(event?: Event): Promise<void> {
+    event?.preventDefault();
+    const activePhoto = this.activePhoto();
+    if (!activePhoto) {
+      return;
+    }
+    const url = activePhoto.getOriginalMediaPath();
+    try {
+      if ((await fetch(url, {method: 'HEAD'})).status === 404) {
+        this.notification.warning($localize`This file is not available anymore.`);
+        return;
+      }
+    } catch {
+      // offline: the browser shows its own error for the download
+    }
+    const link = document.createElement('a');
+    link.setAttribute('type', 'hidden');
+    link.href = url;
+    link.download = activePhoto.media.name;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   }
 
   private runSlideShow(): void {
@@ -535,6 +600,7 @@ export class ControlsLightboxComponent implements OnDestroy {
 
   private hideControls = () => {
     this.controllersDimmed.set(true);
+    this.facesShown.set(false);
   };
 
 }

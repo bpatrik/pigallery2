@@ -6,16 +6,16 @@ import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
-import {Router} from '@angular/router';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
-import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes, SortByDirectionalTypes} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
+import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -38,9 +38,9 @@ export class GalleryGridComponent
   private changeDetector = inject(ChangeDetectorRef);
   private injector = inject(Injector);
   queryService = inject(QueryService);
-  private router = inject(Router);
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
+  private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
   // only read imperatively (revealMedia, onScroll), never in a template, computed or effect
@@ -63,6 +63,13 @@ export class GalleryGridComponent
   private MAX_ROW_COUNT = 5;
   private onScrollFired = false;
   private helperTime: number | null = null;
+  private destroyed = false;
+  // the waits for the next render: a removed grid never renders again, so they end on destroy
+  private readonly pendingRenders = new Set<() => void>();
+  private scrollLabelFrame: number | null = null;
+  private scrollLabelHideTimer: number | null = null;
+  // the label of the first visible photo and where to show it next to the scrollbar, while scrolling
+  readonly scrollLabel = signal<ScrollLabel | null>(null);
 
   constructor() {
     effect(() => {
@@ -130,12 +137,23 @@ export class GalleryGridComponent
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.pendingRenders.forEach(resolve => resolve());
+    this.pendingRenders.clear();
     if (this.helperTime != null) {
       clearTimeout(this.helperTime);
     }
     if (this.renderDelayTimer) {
       clearTimeout(this.renderDelayTimer);
       this.renderDelayTimer = null;
+    }
+    if (this.scrollLabelFrame !== null) {
+      cancelAnimationFrame(this.scrollLabelFrame);
+      this.scrollLabelFrame = null;
+    }
+    if (this.scrollLabelHideTimer != null) {
+      clearTimeout(this.scrollLabelHideTimer);
+      this.scrollLabelHideTimer = null;
     }
   }
 
@@ -161,12 +179,6 @@ export class GalleryGridComponent
     }, 100);
   }
 
-  photoClicked(media: MediaDTO): void {
-    this.router.navigate([], {
-      queryParams: this.queryService.getParams({media}),
-    });
-  }
-
   ngAfterViewInit(): void {
     this.updateContainerDimensions();
     this.clearRenderedPhotos();
@@ -183,11 +195,17 @@ export class GalleryGridComponent
     if (!this.isAfterViewInit) {
       await this.afterRender();
     }
+    if (this.destroyed) {
+      return null;
+    }
     const id = this.queryService.getMediaStringId(media);
     if (!this.renderUpToMedia(id)) {
       return null;
     }
     await this.afterRender();
+    if (this.destroyed) {
+      return null;
+    }
     const tile = this.photoComponents().find(p => this.queryService.getMediaStringId(p.gridMedia().media) === id);
     if (!tile) {
       return null;
@@ -201,8 +219,21 @@ export class GalleryGridComponent
     return {rect, gridMedia: tile.gridMedia()};
   }
 
+  /**
+   * Resolves after the next render, or right away when the grid is (or gets) removed: it then never renders again.
+   */
   private afterRender(): Promise<void> {
-    return new Promise<void>(resolve => afterNextRender(() => resolve(), {injector: this.injector}));
+    if (this.destroyed) {
+      return Promise.resolve();
+    }
+    return new Promise<void>(resolve => {
+      const done = (): void => {
+        this.pendingRenders.delete(done);
+        resolve();
+      };
+      this.pendingRenders.add(done);
+      afterNextRender(done, {injector: this.injector});
+    });
   }
 
   private static hasSameLayout(m1: MediaDTO, m2: MediaDTO): boolean {
@@ -368,6 +399,7 @@ export class GalleryGridComponent
   }
 
   onScroll(): void {
+    this.requestScrollLabelUpdate();
     const prioritiseThumbnails = Config.Gallery.enableOnScrollThumbnailPrioritising === true;
     if (
       !this.onScrollFired &&
@@ -392,6 +424,77 @@ export class GalleryGridComponent
     }
   }
 
+  private requestScrollLabelUpdate(): void {
+    if (this.scrollLabelFrame !== null) {
+      return;
+    }
+    // a browser back or forward scrolls the page itself (#1308), the user did not scroll
+    if (this.scrollRestoration.restoreTarget() !== null ||
+      !this.sortingService.getScrollLabelFn(this.sortingService.sorting(), this.sortingService.grouping())) {
+      this.scrollLabel.set(null);
+      return;
+    }
+    this.scrollLabelFrame = window.requestAnimationFrame((): void => {
+      this.scrollLabelFrame = null;
+      this.updateScrollLabel();
+    });
+  }
+
+  private updateScrollLabel(): void {
+    const maxScrollY = PageHelper.MaxScrollY;
+    const labelFn = this.sortingService.getScrollLabelFn(this.sortingService.sorting(), this.sortingService.grouping());
+    const navbarBottom = this.getNavbarBottom();
+    const media = this.getFirstVisibleMedia(navbarBottom);
+    const text = labelFn && media?.metadata ? labelFn.label(media) : '';
+    if (maxScrollY <= 0 || !labelFn || !text) {
+      this.scrollLabel.set(null);
+      return;
+    }
+    const rating = labelFn.order === GroupByTypes.Rating ? parseInt(text, 10) : null;
+    this.scrollLabel.set({
+      text,
+      order: labelFn.order,
+      // like the group header of the rating
+      stars: rating === null ? [] : [0, 1, 2, 3, 4].map(i => i < rating),
+      // where the scrollbar thumb is: 0 at the top, 1 at the bottom
+      position: Math.min(1, Math.max(0, PageHelper.ScrollY / maxScrollY)),
+      navbarBottom
+    });
+    if (this.scrollLabelHideTimer != null) {
+      clearTimeout(this.scrollLabelHideTimer);
+    }
+    this.scrollLabelHideTimer = window.setTimeout((): void => {
+      this.scrollLabelHideTimer = null;
+      this.scrollLabel.set(null);
+    }, SCROLL_LABEL_VISIBLE_MS);
+  }
+
+  /** The bottom of the navbar on the screen, it is 0 if the navbar is hidden. */
+  private getNavbarBottom(): number {
+    const navbar = document.querySelector('.navbar-container');
+    return navbar ? Math.max(0, navbar.getBoundingClientRect().bottom) : 0;
+  }
+
+  /** The first media that is not scrolled out at the top or hidden behind the navbar. The tiles are in the order of their position, so it is a binary search. */
+  private getFirstVisibleMedia(navbarBottom: number): MediaDTO | null {
+    const tiles = this.photoComponents();
+    const visibleTop = PageHelper.ScrollY + navbarBottom;
+    let low = 0;
+    let high = tiles.length - 1;
+    let found = -1;
+    while (low <= high) {
+      const mid = Math.floor((low + high) / 2);
+      const d = tiles[mid].getDimension();
+      if (d.top + d.height > visibleTop) {
+        found = mid;
+        high = mid - 1;
+      } else {
+        low = mid + 1;
+      }
+    }
+    return found === -1 ? null : tiles[found].gridMedia().media;
+  }
+
   getNumberOfRenderedMedia(): number {
     return this.mediaToRender().reduce((c, mg) => c + mg.media.length, 0);
   }
@@ -402,7 +505,38 @@ export class GalleryGridComponent
   private renderMinimalPhotos(): void {
     this.helperTime = window.setTimeout((): void => {
       this.renderPhotos();
+      this.restoreScroll();
     }, 0);
+  }
+
+  /**
+   * Browser back or forward to this page: renders the rows down to its last scroll position, then scrolls there.
+   * The grid only renders as many rows as the screen needs, so without them the page is too short to scroll there.
+   * Runs after every render until the user scrolls: the first one may still show the previous content (e.g. the search).
+   * The page is measured only after a render: before it, the rows of the previous content are still on the page.
+   */
+  private restoreScroll(): void {
+    if (!this.mediaGroups()?.length || this.scrollRestoration.restoreTarget() === null) {
+      return;
+    }
+    afterNextRender(() => this.restoreScrollStep(), {injector: this.injector});
+  }
+
+  private restoreScrollStep(): void {
+    const y = this.scrollRestoration.restoreTarget();
+    if (y === null || this.destroyed) {
+      return;
+    }
+    let missing = y + window.innerHeight - document.documentElement.scrollHeight;
+    if (missing > 0 && this.isMoreToRender()) {
+      while (missing > 0 && this.isMoreToRender()) {
+        missing -= this.renderARow() ?? Infinity;
+      }
+      // measure again once the new rows are on the page
+      afterNextRender(() => this.restoreScrollStep(), {injector: this.injector});
+      return;
+    }
+    window.scrollTo({left: window.scrollX, top: y, behavior: 'instant'});
   }
 
   private getMaxRowHeight(): number {
@@ -536,6 +670,16 @@ export class GalleryGridComponent
     PageHelper.OverflowY = scrollY;
     return false;
   }
+}
+
+const SCROLL_LABEL_VISIBLE_MS = 1000;
+
+interface ScrollLabel {
+  text: string;
+  order: SortByDirectionalTypes;
+  stars: boolean[]; // filled or not, for the rating order
+  position: number; // 0-1
+  navbarBottom: number; // px, the label stays below the navbar
 }
 
 interface GridMediaGroup {

@@ -16,6 +16,15 @@ describe('UploadManager', () => {
   before(TestHelper.resetConfig);
   const uploadManager = new UploadManager();
   const testDir = path.join(__dirname, 'tmp');
+  // multer saves the uploaded files to the temp folder first
+  const tempDir = path.join(__dirname, 'tmp_upload_temp');
+  let tempFiles = 0;
+  const uploaded = (originalname: string, content: string): Express.Multer.File => {
+    fs.mkdirSync(tempDir, {recursive: true});
+    const tempPath = path.join(tempDir, String(tempFiles++));
+    fs.writeFileSync(tempPath, content);
+    return {originalname, path: tempPath} as Express.Multer.File;
+  };
 
   before(async () => {
     if (!fs.existsSync(testDir)) {
@@ -33,16 +42,12 @@ describe('UploadManager', () => {
 
   after(async () => {
     await ObjectManagers.reset();
-    if (fs.existsSync(testDir)) {
-      fs.rmSync(testDir, {recursive: true, force: true});
-    }
+    fs.rmSync(testDir, {recursive: true, force: true});
+    fs.rmSync(tempDir, {recursive: true, force: true});
   });
 
   it('should save a supported file', async () => {
-    const file: any = {
-      originalname: 'test.jpg',
-      buffer: Buffer.from('test image content')
-    };
+    const file: any = uploaded('test.jpg', 'test image content');
     await uploadManager.saveFile('test_subdir', file);
 
     const savedPath = path.join(testDir, 'test_subdir', 'test.jpg');
@@ -50,11 +55,27 @@ describe('UploadManager', () => {
     expect(fs.readFileSync(savedPath).toString()).to.equal('test image content');
   });
 
+  it('should move the uploaded file out of the temp folder', async () => {
+    const file = uploaded('moved.jpg', 'test image content');
+    await uploadManager.saveFile('', file);
+
+    expect(fs.readFileSync(path.join(testDir, 'moved.jpg')).toString()).to.equal('test image content');
+    expect(fs.existsSync(file.path)).to.be.false;
+  });
+
+  it('should reject a file above the size limit with the limit in the message', async () => {
+    const file = {...uploaded('too_large.jpg', 'content'), tooLarge: true};
+    try {
+      await uploadManager.saveFile('', file);
+      expect.fail('Should have thrown an error');
+    } catch (e) {
+      expect((e as Error).message).to.contain(Config.Upload.maxFileSizeMB + ' MB');
+    }
+    expect(fs.existsSync(path.join(testDir, 'too_large.jpg'))).to.be.false;
+  });
+
   it('should throw error for unsupported file', async () => {
-    const file: any = {
-      originalname: 'test.exe',
-      buffer: Buffer.from('test content')
-    };
+    const file: any = uploaded('test.exe', 'test content');
     try {
       await uploadManager.saveFile('', file);
       expect.fail('Should have thrown an error');
@@ -65,10 +86,7 @@ describe('UploadManager', () => {
 
   it('should reject filenames with path components', async () => {
     for (const name of ['../escape.jpg', '..\\escape.jpg', 'sub/escape.jpg', '../../../../../tmp/poc.gpx', '..', '.', '']) {
-      const file: any = {
-        originalname: name,
-        buffer: Buffer.from('test content')
-      };
+      const file: any = uploaded(name, 'test content');
       try {
         await uploadManager.saveFile('traversal_test', file);
         expect.fail('Should have thrown an error for: ' + name);
@@ -81,10 +99,7 @@ describe('UploadManager', () => {
   });
 
   it('should reject a directory outside of the image folder', async () => {
-    const file: any = {
-      originalname: 'outside.jpg',
-      buffer: Buffer.from('test content')
-    };
+    const file: any = uploaded('outside.jpg', 'test content');
     try {
       await uploadManager.saveFile('../outside_dir', file);
       expect.fail('Should have thrown an error');
@@ -101,10 +116,7 @@ describe('UploadManager', () => {
     fs.mkdirSync(outsideDir, {recursive: true});
     fs.writeFileSync(path.join(outsideDir, '.uploader.pg2conf'), '');
     try {
-      const file: any = {
-        originalname: 'outside.jpg',
-        buffer: Buffer.from('test content')
-      };
+      const file: any = uploaded('outside.jpg', 'test content');
       await uploadManager.saveFiles('../outside_conf_dir', [file]);
       expect.fail('Should have thrown an error');
     } catch (e) {
@@ -117,10 +129,7 @@ describe('UploadManager', () => {
 
   it('should not accept blocked extensions by default', async () => {
     for (const name of ['.uploader.pg2conf', 'sorting.PG2CONF', 'image.svg']) {
-      const file: any = {
-        originalname: name,
-        buffer: Buffer.from('{}')
-      };
+      const file: any = uploaded(name, '{}');
       try {
         await uploadManager.saveFile('blocked_test', file);
         expect.fail('Should have thrown an error for: ' + name);
@@ -135,10 +144,7 @@ describe('UploadManager', () => {
     Config.Upload.blockedExtensions = [];
     try {
       for (const name of ['.uploader.pg2conf', 'image.svg']) {
-        const file: any = {
-          originalname: name,
-          buffer: Buffer.from('{}')
-        };
+        const file: any = uploaded(name, '{}');
         await uploadManager.saveFile('unblocked_test', file);
         expect(fs.existsSync(path.join(testDir, 'unblocked_test', name)), name).to.be.true;
       }
@@ -151,10 +157,7 @@ describe('UploadManager', () => {
     const blocked = Config.Upload.blockedExtensions;
     Config.Upload.blockedExtensions = ['JPG'];
     try {
-      const file: any = {
-        originalname: 'image.jpg',
-        buffer: Buffer.from('test')
-      };
+      const file: any = uploaded('image.jpg', 'test');
       await uploadManager.saveFile('blocked_jpg_test', file);
       expect.fail('Should have thrown an error');
     } catch (e) {
@@ -166,14 +169,8 @@ describe('UploadManager', () => {
 
   it('should handle multiple files with some errors', async () => {
     const files: any[] = [
-      {
-        originalname: 'valid.jpg',
-        buffer: Buffer.from('valid jpg')
-      },
-      {
-        originalname: 'invalid.exe',
-        buffer: Buffer.from('invalid exe')
-      }
+      uploaded('valid.jpg', 'valid jpg'),
+      uploaded('invalid.exe', 'invalid exe')
     ];
 
     const errors = await uploadManager.saveFiles('multi_test', files);
@@ -188,10 +185,7 @@ describe('UploadManager', () => {
   it('should throw error if upload is disabled', async () => {
     Config.Upload.enabled = false;
     try {
-      const file: any = {
-        originalname: 'test.jpg',
-        buffer: Buffer.from('test content')
-      };
+      const file: any = uploaded('test.jpg', 'test content');
       await uploadManager.saveFiles('', [file]);
       expect.fail('Should have thrown an error');
     } catch (e) {
@@ -204,10 +198,7 @@ describe('UploadManager', () => {
   it('should throw error if enforcedDirectoryConfig is true and .uploader.pg2conf is missing', async () => {
     Config.Upload.enforcedDirectoryConfig = true;
     try {
-      const file: any = {
-        originalname: 'test.jpg',
-        buffer: Buffer.from('test content')
-      };
+      const file: any = uploaded('test.jpg', 'test content');
       await uploadManager.saveFiles('no_config_dir', [file]);
       expect.fail('Should have thrown an error');
     } catch (e) {
@@ -227,10 +218,7 @@ describe('UploadManager', () => {
     fs.writeFileSync(path.join(fullDirPath, '.uploader.pg2conf'), '');
 
     try {
-      const file: any = {
-        originalname: 'test.jpg',
-        buffer: Buffer.from('test content')
-      };
+      const file: any = uploaded('test.jpg', 'test content');
       await uploadManager.saveFiles(dir, [file]);
       const savedPath = path.join(fullDirPath, 'test.jpg');
       expect(fs.existsSync(savedPath)).to.be.true;
@@ -240,10 +228,7 @@ describe('UploadManager', () => {
   });
 
   it('should return error if file already exists', async () => {
-    const file: any = {
-      originalname: 'exists.jpg',
-      buffer: Buffer.from('content')
-    };
+    const file: any = uploaded('exists.jpg', 'content');
     await uploadManager.saveFile('exists_test', file);
 
     const errors = await uploadManager.saveFiles('exists_test', [file]);

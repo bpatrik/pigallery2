@@ -140,7 +140,7 @@ describe('ConfigDiagnostics', () => {
     });
 
     it('should reject a missing folder with an Error that names it', async () => {
-      const folder = path.join(__dirname, 'not-existing-képek');
+      const folder = path.join(__dirname, 'not-existing-images');
       let error: unknown = null;
       try {
         await ConfigDiagnostics.testImageFolder(folder);

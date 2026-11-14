@@ -2,9 +2,7 @@
   position: relative;
   overflow: hidden;
   display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 0.75rem 0.75rem calc(0.75rem + 3px) 1rem;
+  flex-direction: column;
   font-size: 0.875rem;
   color: var(--bs-body-color);
   background-color: var(--bs-body-bg);
@@ -15,6 +13,33 @@
 
 :host-context([data-bs-theme=dark]) {
   background-color: var(--bs-secondary-bg);
+}
+
+/* the scrollbar of a too long card sits right at its border */
+.toast-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 0;
+  padding: 0.75rem 0.75rem calc(0.75rem + 3px) 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bs-secondary-color) transparent;
+}
+
+/* the close button stays visible while the text scrolls */
+.toast-actions {
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.toast-actions:empty {
+  display: none;
 }
 
 .toast-icon {

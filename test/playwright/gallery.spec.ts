@@ -1,10 +1,92 @@
 import {expect, Page, test} from '@playwright/test';
-import {expectLightboxPhoto, isGalleryContent, loginWithUi, notLoggedIn, scrollUntilAttached} from './helpers';
+import {
+  asNormalUser,
+  desktopViewport,
+  expectCardCover,
+  expectLightboxPhoto,
+  expectNavbar,
+  expectNoHorizontalScroll,
+  expectVisiblePhotosLoaded,
+  isGalleryContent,
+  loginWithUi,
+  NavbarExpectation,
+  notLoggedIn,
+  scrollUntilAttached
+} from './helpers';
 
-const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
+const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt="${name}"]`);
 const lightboxTitle = (page: Page, text: string) =>
   page.locator('app-lightbox-controls > #controllers-container > .controls-title').filter({hasText: text});
 const lightboxFaceNames = (page: Page) => page.locator('app-lightbox-controls .faces-container > .face > .face-name');
+// the real title of demo/images/IMG_1252.jpg in its metadata: it tests a long title with accents
+const LONG_TITLE = 'This is a super long title with special characters -.,űáéúőpóüö';
+
+/**
+ * Sanity check of the gallery: what a logged in user notices right away when opening it.
+ * Soft checks, so one failure does not hide the others.
+ */
+const expectGalleryLooksRight = async (page: Page, navbar: NavbarExpectation): Promise<void> => {
+  const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+  await page.goto('/gallery/');
+  await content;
+
+  await expectNavbar(page, navbar);
+
+  // folders render with their covers (emptydirectory has nothing to show)
+  const folders = page.locator('app-gallery-directory').filter({hasNotText: 'emptydirectory'});
+  await expect(folders.first()).toBeVisible();
+  for (const folder of await folders.all()) {
+    await expectCardCover(folder);
+  }
+  await expectVisiblePhotosLoaded(page);
+  // the blog of the folder (index.md) shows its first lines
+  await expect.soft(page.locator('app-gallery-blog .blog .text-preview').first(), 'blog preview').toContainText('You can use this feature');
+  await expectNoHorizontalScroll(page, 'gallery');
+
+  // the lightbox shows the photo with its title and faces
+  const squirrel = photo(page, 'IMG_5910.jpg');
+  await scrollUntilAttached(page, squirrel);
+  await squirrel.click();
+  await expect.soft(lightboxTitle(page, 'Squirrel at berkely')).toBeVisible();
+  await expect.soft(page.locator('app-lightbox-controls .faces-container a.face .face-name')
+    .filter({hasText: 'Alvin the Squirrel'}), 'faces link to their search').toBeAttached();
+  await expectLightboxPhoto(page, 'IMG_5910.jpg');
+  await expectNoHorizontalScroll(page, 'lightbox');
+  // the info panel links its keywords to a search
+  await page.keyboard.press('i');
+  await expect.soft(page.locator('app-info-panel .keywords a').filter({hasText: 'Berkley'})).toBeVisible();
+  await page.locator('app-info-panel .btn-close').click();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('app-gallery-lightbox-media img')).toHaveCount(0);
+
+  // the info bar links the keywords and the place to a search, and the search finds the photo
+  await squirrel.scrollIntoViewIfNeeded();
+  await squirrel.hover();
+  const info = squirrel.locator('xpath=../..').locator('.info');
+  await expect.soft(info.locator('.photo-keywords a').filter({hasText: 'Alvin the Squirrel'})).toBeVisible();
+  const place = info.locator('.photo-position a').filter({hasText: 'Berkeley'});
+  await expect(place).toBeVisible();
+  await place.click();
+  await expect(page).toHaveURL(/\/search\//);
+  await expect.soft(photo(page, 'IMG_5910.jpg'), 'the search finds the photo').toBeVisible();
+  await expectVisiblePhotosLoaded(page);
+};
+
+test.describe('Gallery sanity', () => {
+  test.use(desktopViewport({width: 1400, height: 800}));
+
+  test('Gallery should look right for an admin', {tag: '@sanity'}, async ({page}) => {
+    await expectGalleryLooksRight(page, {tabs: ['Gallery', 'Albums', 'Faces'], search: true, share: true, admin: true});
+  });
+
+  test.describe('normal user', () => {
+    test.use(asNormalUser);
+
+    test('Gallery should look right for a normal user', {tag: '@sanity'}, async ({page}) => {
+      await expectGalleryLooksRight(page, {tabs: ['Gallery', 'Albums', 'Faces'], search: true, share: true, admin: false});
+    });
+  });
+});
 
 test.describe('Gallery', () => {
   test.beforeEach(async ({page}) => {
@@ -13,12 +95,8 @@ test.describe('Gallery', () => {
     await content;
   });
 
-  test('Gallery should open', async ({page}) => {
-    await expect(page.locator('.mb-0 > :nth-child(1) > .nav-link')).toContainText('Gallery');
-  });
-
   test('Gallery should filter', async ({page}) => {
-    const gridPhotos = page.locator('app-gallery-grid .photo-container > img');
+    const gridPhotos = page.locator('app-gallery-grid .photo-link > img');
     // without a filter, other photos are shown too
     await expect.poll(() => gridPhotos.count()).toBeGreaterThan(1);
 
@@ -46,7 +124,7 @@ test.describe('Gallery', () => {
   test('Gallery should keep the sorting and the grid size of a folder', async ({page}) => {
     const sortingButton = page.locator('app-gallery-navbar #button-alignment');
     const gridSizeButton = page.locator('app-gallery-navbar #button-grid-size');
-    const firstPhoto = page.locator('app-gallery-grid .photo-container > img').first();
+    const firstPhoto = page.locator('app-gallery-grid .photo-link > img').first();
 
     // sort by name, descending
     await sortingButton.click();
@@ -72,6 +150,26 @@ test.describe('Gallery', () => {
     await expect(gridSizeButton).toHaveClass(/\bbtn-secondary\b/);
   });
 
+  // CUJ 11: the index.md of a folder is its blog, collapsed to a preview until opened
+  test('Gallery should open and close the blog of the folder', async ({page}) => {
+    const blog = page.locator('app-gallery-blog .blog').first();
+    const toggle = blog.locator('button.btn-blog-details');
+    await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+
+    // opened: the whole markdown, rendered
+    await toggle.click();
+    await expect(blog.locator('.text-preview')).toHaveCount(0);
+    await expect(blog.getByRole('heading', {name: 'Blog', level: 1})).toBeVisible();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading', level: 2})).toBeVisible();
+    await expect(blog.locator('markdown strong').filter({hasText: 'This is bold text'}).first()).toBeVisible();
+    await expect(blog.locator('markdown blockquote').first()).toBeAttached();
+
+    await toggle.click();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+    await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
+  });
+
   test('Gallery should show infobar over photo', async ({page}) => {
     // contains a folder
     await expect(page.locator('app-gallery-directories.directories > app-gallery-directory > .button > .photo-container').first()).toBeVisible();
@@ -86,7 +184,7 @@ test.describe('Gallery', () => {
     await squirrel.hover();
 
     // the info bar slides up over the photo (it is below the photo, hidden, until then)
-    const container = squirrel.locator('..');
+    const container = squirrel.locator('xpath=../..');
     const info = container.locator('.info');
     await expect(info).toBeVisible();
     await expect(info).toBeInViewport({ratio: 0.99});
@@ -145,7 +243,7 @@ test.describe('Gallery', () => {
     await expect(page.locator('app-gallery-grid-photo').first()).toBeAttached();
     await expect(photo(page, 'IMG_1252.jpg')).toBeAttached(); // the main photo should be visible
 
-    await expect(lightboxTitle(page, 'This is a super long title with special characters -.,űáéúőpóüö')).toBeVisible();
+    await expect(lightboxTitle(page, LONG_TITLE)).toBeVisible();
     await expect(lightboxFaceNames(page)).toHaveCount(0);
   });
 });
@@ -171,7 +269,7 @@ test.describe('Gallery - dont wait for content load', () => {
     await expect(page.locator('app-gallery-grid-photo').first()).toBeAttached();
     await expect(photo(page, 'IMG_1252.jpg')).toBeAttached(); // the main photo should be visible
 
-    await expect(lightboxTitle(page, 'This is a super long title with special characters -.,űáéúőpóüö')).toBeVisible();
+    await expect(lightboxTitle(page, LONG_TITLE)).toBeVisible();
     await expect(page.locator('app-lightbox-controls .faces-container > .face')).toHaveCount(0);
   });
 });

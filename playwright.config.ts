@@ -1,5 +1,8 @@
 import {defineConfig, devices} from '@playwright/test';
-import {ADMIN_SESSION} from './test/playwright/global-setup';
+import {ADMIN_SESSION} from './test/playwright/helpers';
+
+// E2E_PORT: run several e2e servers side by side (e.g.: one per git worktree)
+const port = Number(process.env['E2E_PORT'] ?? 8080);
 
 /**
  * E2E tests. They need a frontend build in dist (e.g.: npm run build).
@@ -18,7 +21,7 @@ export default defineConfig({
     ...(process.env.CI ? [['github'], ['json', {outputFile: 'test-results/results.json'}]] as const : []),
   ],
   use: {
-    baseURL: 'http://localhost:8080',
+    baseURL: 'http://localhost:' + port,
     // Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer
     trace: 'on-first-retry',
     // logged in as admin, see global-setup.ts
@@ -27,13 +30,19 @@ export default defineConfig({
 
   globalSetup: './test/playwright/global-setup.ts',
   projects: [
-    {name: 'chromium', use: {...devices['Desktop Chrome']}},
+    {name: 'chromium', use: {...devices['Desktop Chrome']}, testIgnore: /admin-config\.spec\.ts/},
+    // the journeys that work differently on a phone (touch, small screen), with real touch events (#1316)
+    {name: 'mobile', use: {...devices['Pixel 7']}, testMatch: /(lightbox|navigation)\.spec\.ts/},
+    // the "... should look right" sanity test of every screen (tagged @sanity) on a phone too (#1316)
+    {name: 'mobile-sanity', use: {...devices['Pixel 7']}, testIgnore: /admin-config\.spec\.ts/, grep: /@sanity/},
+    // tests that change the server config or run jobs: after all the others, so they don't change the server under them (#1315)
+    {name: 'admin-config', use: {...devices['Desktop Chrome']}, testMatch: /admin-config\.spec\.ts/, dependencies: ['chromium', 'mobile', 'mobile-sanity']},
   ],
 
   // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.
   webServer: {
-    command: process.env.DOCS_SCREENSHOTS ? 'npm run start-docs-e2e-server' : 'npm run start-e2e-server',
-    url: 'http://localhost:8080',
+    command: (process.env.DOCS_SCREENSHOTS ? 'npm run start-docs-e2e-server' : 'npm run e2e-server') + ' -- --Server-port=' + port,
+    url: 'http://localhost:' + port,
     reuseExistingServer: !process.env.CI,
   },
 });

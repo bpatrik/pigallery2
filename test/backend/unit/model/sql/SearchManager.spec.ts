@@ -29,6 +29,7 @@ import {GPSMetadata, PhotoDTO, PhotoMetadata} from '../../../../../src/common/en
 import {VideoDTO} from '../../../../../src/common/entities/VideoDTO';
 import {AutoCompleteItem} from '../../../../../src/common/entities/AutoCompleteItem';
 import {Config} from '../../../../../src/common/config/private/Config';
+import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {SearchQueryParser} from '../../../../../src/common/SearchQueryParser';
 import {FileDTO} from '../../../../../src/common/entities/FileDTO';
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
@@ -502,13 +503,13 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       // a crafted query from the URL: only AND, OR and SOME_OF queries have a list, and it is an array
       const query = {
         type: SearchQueryTypes.caption,
-        value: 'kép',
+        value: 'photo',
         list: {length: 1000000000}
       } as unknown as TextSearch;
 
       const prepared = await sm.prepareQuery(query);
       expect(prepared.type).to.equal(SearchQueryTypes.caption);
-      expect((prepared as TextSearch).value).to.equal('*kép*'); // the default 'like' match as a glob
+      expect((prepared as TextSearch).value).to.equal('*photo*'); // the default 'like' match as a glob
     });
 
     it('should AND', async () => {
@@ -1648,6 +1649,69 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
 
       });
 
+      // #1309: p2 has the keyword and the person 'Padmé Amidala'
+      describe('with accents', () => {
+        const names = async (query: TextSearch): Promise<string[]> =>
+          (await new SearchManager().search(DBTestHelper.defaultSession, query)).media.map(m => m.name);
+        const autocomplete = (value: string, type = SearchQueryTypes.any_text): Promise<AutoCompleteItem[]> =>
+          new SearchManager().autocomplete(DBTestHelper.defaultSession, value, type);
+
+        // MySQL ignores the accents by its collation, SQLite only with this switch (it makes the search slower)
+        beforeEach(() => {
+          Config.Database.sqlite!.accentInsensitiveSearch = true;
+        });
+        afterEach(sqlHelper.resetConfig);
+
+        it('should suggest accented text typed without the accents', async () => {
+          expect(await autocomplete('padme')).to.deep.equalInAnyOrder([
+            new AutoCompleteItem('Padmé Amidala', SearchQueryTypes.keyword),
+            new AutoCompleteItem('Padmé Amidala', SearchQueryTypes.person)]);
+          expect(await autocomplete('PADMÉ', SearchQueryTypes.keyword)).to.deep.equal([
+            new AutoCompleteItem('Padmé Amidala', SearchQueryTypes.keyword)]);
+        });
+
+        it('should ignore the accents on SQLite only when it is switched on', async () => {
+          if (sqlHelper.dbType !== DatabaseType.sqlite) {
+            return;
+          }
+          Config.Database.sqlite!.accentInsensitiveSearch = false;
+          expect(await names({value: 'padme', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([]);
+          expect(await autocomplete('padme')).to.deep.equal([]);
+          expect(await names({value: 'Padmé', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
+        });
+
+        it('should find accented text typed with the accents', async () => {
+          expect(await names({value: 'Padmé', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({value: 'padmé amidala', type: SearchQueryTypes.keyword} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({value: 'Padmé', type: SearchQueryTypes.person} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({
+            value: 'Padmé Amidala',
+            type: SearchQueryTypes.person,
+            matchType: TextSearchQueryMatchTypes.exact_match
+          } as TextSearch)).to.deep.equal([p2.name]);
+        });
+
+        it('should find accented text typed without the accents', async () => {
+          const found = [
+            await names({value: 'padme', type: SearchQueryTypes.any_text} as TextSearch),
+            await names({value: 'Padme Amidala', type: SearchQueryTypes.keyword} as TextSearch),
+            await names({value: 'padme', type: SearchQueryTypes.person} as TextSearch)
+          ];
+          expect(found).to.deep.equal([[p2.name], [p2.name], [p2.name]]);
+        });
+
+        // SQLite's LIKE ignores the case only of ASCII letters
+        it('should ignore the case of accented letters', async () => {
+          expect(await names({value: 'PADMÉ', type: SearchQueryTypes.any_text} as TextSearch)).to.deep.equal([p2.name]);
+          expect(await names({value: 'PADMÉ AMIDALA', type: SearchQueryTypes.person} as TextSearch)).to.deep.equal([p2.name]);
+        });
+
+        it('should leave out accented text from a negated search typed without the accents', async () => {
+          expect(await names({value: 'padme', type: SearchQueryTypes.person, negate: true} as TextSearch))
+            .to.not.include(p2.name);
+        });
+      });
+
       it('with globMatch', async () => {
         const sm = new SearchManager();
 
@@ -2284,6 +2348,87 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
       // '_' and '%' would match any characters if they were not escaped
       expect(await searchMediaNames(DBTestHelper.defaultSession, dq('publi_'))).to.deep.equal([]);
       expect(await searchMediaNames(DBTestHelper.defaultSession, dq('pub%'))).to.deep.equal([]);
+    });
+  });
+
+  // #1309: the search query parser collapses double spaces (they are usually a typo),
+  // so a search with single spaces has to find the names that have more spaces on the disk
+  describe('names with double spaces', () => {
+    const names = async (query: TextSearch): Promise<string[]> =>
+      (await new SearchManager().search(DBTestHelper.defaultSession, query)).media.map(m => m.name.split('_')[0]).sort();
+    const dirNames = async (query: TextSearch): Promise<string[]> =>
+      (await new SearchManager().search(DBTestHelper.defaultSession, query)).directories.map(d => d.name).sort();
+
+    before(async () => {
+      await sqlHelper.initDB();
+      const root = TestHelper.getDirectoryEntry(null, '.');
+      const trip = TestHelper.getDirectoryEntry(root, 'summer  trip   2024');
+      const other = TestHelper.getDirectoryEntry(root, 'winter trip');
+      const sunset = TestHelper.getRandomizedPhotoEntry(trip, 'beach  sunset');
+      sunset.metadata.caption = 'sunset  over    the sea';
+      TestHelper.getRandomizedPhotoEntry(other, 'snow');
+      await DBTestHelper.persistTestDir(root);
+    });
+
+    after(async () => {
+      // restore the default gallery of this spec
+      await setUpSqlDB();
+    });
+
+    it('should find a directory', async () => {
+      expect(await dirNames({type: SearchQueryTypes.directory, value: 'summer trip 2024'} as TextSearch))
+        .to.deep.equal(['summer  trip   2024']);
+      expect(await names({type: SearchQueryTypes.directory, value: 'summer trip 2024'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({
+        type: SearchQueryTypes.directory,
+        value: 'summer trip 2024',
+        matchType: TextSearchQueryMatchTypes.exact_match
+      } as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.directory, value: 'summer trip 2024', negate: true} as TextSearch))
+        .to.deep.equal(['snow']);
+    });
+
+    it('should find a file name, a caption and any text', async () => {
+      expect(await names({type: SearchQueryTypes.file_name, value: 'beach sunset'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.caption, value: 'sunset over the sea'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.any_text, value: 'sunset over'} as TextSearch)).to.deep.equal(['beach  sunset']);
+    });
+
+    it('should find the names with a query that has double spaces', async () => {
+      // e.g. a query of the API or of a block list, that did not go through the parser
+      expect(await names({type: SearchQueryTypes.file_name, value: 'beach  sunset'} as TextSearch)).to.deep.equal(['beach  sunset']);
+      expect(await names({type: SearchQueryTypes.directory, value: 'summer  trip   2024'} as TextSearch)).to.deep.equal(['beach  sunset']);
+    });
+  });
+
+  // '\' is the escape character of glob searches, so a plain text search has to escape it
+  describe('text with a backslash', () => {
+    const names = async (value: string, matchType?: TextSearchQueryMatchTypes): Promise<string[]> =>
+      (await new SearchManager().search(DBTestHelper.defaultSession, {type: SearchQueryTypes.caption, value, matchType} as TextSearch))
+        .media.map(m => m.name.split('_')[0]).sort();
+
+    before(async () => {
+      await sqlHelper.initDB();
+      const root = TestHelper.getDirectoryEntry(null, '.');
+      TestHelper.getRandomizedPhotoEntry(root, 'backslash').metadata.caption = 'C:\\photos\\ of the trip';
+      TestHelper.getRandomizedPhotoEntry(root, 'star').metadata.caption = 'C:\\photos* of the trip';
+      TestHelper.getRandomizedPhotoEntry(root, 'plain').metadata.caption = 'photos of the trip';
+      await DBTestHelper.persistTestDir(root);
+    });
+
+    after(async () => {
+      // restore the default gallery of this spec
+      await setUpSqlDB();
+    });
+
+    it('should find a backslash inside the text', async () => {
+      expect(await names('C:\\photos')).to.deep.equal(['backslash', 'star']);
+      expect(await names('C:\\photos\\ of the trip', TextSearchQueryMatchTypes.exact_match)).to.deep.equal(['backslash']);
+    });
+
+    it('should find a backslash at the end of the text', async () => {
+      // not escaped, it would escape the wildcard that a "like" search adds after it
+      expect(await names('photos\\')).to.deep.equal(['backslash']);
     });
   });
 });

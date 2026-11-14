@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {GestureDirective, PanEvent, PinchEvent} from './gesture.directive';
+import {GestureDirective, PanEvent, PinchEvent, TapEvent} from './gesture.directive';
 
 @Component({
   template: `
@@ -8,6 +8,7 @@ import {GestureDirective, PanEvent, PinchEvent} from './gesture.directive';
          (swipeLeft)="events.push('swipeLeft')"
          (swipeRight)="events.push('swipeRight')"
          (swipeUp)="events.push('swipeUp')"
+         (tap)="taps.push($event)"
          (doubleTap)="events.push('doubleTap')"
          (pan)="pans.push($event)"
          (pinch)="pinches.push($event)"></div>`,
@@ -17,6 +18,7 @@ class HostComponent {
   events: string[] = [];
   pans: PanEvent[] = [];
   pinches: PinchEvent[] = [];
+  taps: TapEvent[] = [];
 }
 
 describe('GestureDirective', () => {
@@ -85,6 +87,46 @@ describe('GestureDirective', () => {
     time += 50;
     up(1, 102, 101);
     expect(host.events).toEqual(['doubleTap']);
+  });
+
+  describe('a single tap', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    // e.g. the lightbox shows the faces on a phone; it must not happen on the first tap of a double tap
+    it('should tap once no second tap followed, with where it started', async () => {
+      down(1, 100, 100);
+      time += 50;
+      up(1, 100, 100);
+      expect(host.taps).toEqual([]);
+      await vi.advanceTimersByTimeAsync(300);
+
+      expect(host.taps).toEqual([{pointerType: 'touch', target: element}]);
+      expect(host.events).toEqual([]);
+    });
+
+    it('should not tap on a double tap or a swipe', async () => {
+      down(1, 100, 100);
+      time += 50;
+      up(1, 100, 100);
+      time += 100;
+      down(1, 102, 101);
+      time += 50;
+      up(1, 102, 101);
+      down(1, 100, 100);
+      time += 50;
+      move(1, 200, 100);
+      up(1, 200, 100);
+      await vi.advanceTimersByTimeAsync(1000);
+
+      expect(host.taps).toEqual([]);
+      expect(host.events).toEqual(['doubleTap', 'swipeRight']);
+    });
   });
 
   it('should not double tap on two slow taps', () => {

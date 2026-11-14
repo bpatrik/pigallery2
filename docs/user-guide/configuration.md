@@ -77,6 +77,7 @@ App CLI options:
   --Gallery-NavBar-NavbarShowDelay                                          Ratio of the page height, you need to scroll to show the navigation bar. (default: 0.3)
   --Gallery-NavBar-NavbarHideDelay                                          Ratio of the page height, you need to scroll to hide the navigation bar. (default: 0.15)
   --Gallery-NavBar-showScrollUpButton                                       Set when the floating scroll-up button should be visible. (default: 'mobileOnly')
+  --Gallery-NavBar-showScrollLabel                                          Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random. (default: 'always')
   --Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-method          (default: 'Date')
   --Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-ascending       (default: true)
   --Gallery-NavBar-SortingGrouping-defaultSearchSortingMethod-method         (default: 'Date')
@@ -184,10 +185,12 @@ App CLI options:
   --Upload-enabled                                                           (default: false)
   --Upload-minimumRole                                                      Minimum user role to enable file upload. (default: 'Admin')
   --Upload-enforcedDirectoryConfig                                          Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
+  --Upload-maxFileSizeMB                                                    Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high. (default: 500)
   --Upload-blockedExtensions                                                Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts. (default: ["pg2conf","svg"])
   --Database-type                                                           SQLite is recommended. (default: 'sqlite')
   --Database-dbFolder                                                       All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   --Database-sqlite-DBFileName                                              Sqlite will save the db with this filename. (default: 'sqlite.db')
+  --Database-sqlite-accentInsensitiveSearch                                 Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower. (default: false)
   --Database-mysql-host                                                      (default: 'localhost')
   --Database-mysql-port                                                      (default: 3306)
   --Database-mysql-database                                                  (default: 'pigallery2')
@@ -265,6 +268,7 @@ Environmental variables:
   Gallery-NavBar-NavbarShowDelay                                        Ratio of the page height, you need to scroll to show the navigation bar. (default: 0.3)
   Gallery-NavBar-NavbarHideDelay                                        Ratio of the page height, you need to scroll to hide the navigation bar. (default: 0.15)
   Gallery-NavBar-showScrollUpButton                                     Set when the floating scroll-up button should be visible. (default: 'mobileOnly')
+  Gallery-NavBar-showScrollLabel                                        Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random. (default: 'always')
   Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-method        (default: 'Date')
   Gallery-NavBar-SortingGrouping-defaultPhotoSortingMethod-ascending     (default: true)
   Gallery-NavBar-SortingGrouping-defaultSearchSortingMethod-method       (default: 'Date')
@@ -372,10 +376,12 @@ Environmental variables:
   Upload-enabled                                                         (default: false)
   Upload-minimumRole                                                    Minimum user role to enable file upload. (default: 'Admin')
   Upload-enforcedDirectoryConfig                                        Only enable upload in folder where an ".uploader.pg2conf" is present in the folder. (default: false)
+  Upload-maxFileSizeMB                                                  Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high. (default: 500)
   Upload-blockedExtensions                                              Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts. (default: ["pg2conf","svg"])
   Database-type                                                         SQLite is recommended. (default: 'sqlite')
   Database-dbFolder                                                     All file-based data will be stored here (sqlite database, job history data). (default: 'db')
   Database-sqlite-DBFileName                                            Sqlite will save the db with this filename. (default: 'sqlite.db')
+  Database-sqlite-accentInsensitiveSearch                               Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower. (default: false)
   Database-mysql-host                                                    (default: 'localhost')
   MYSQL_HOST                                                             same as Database-mysql-host
   Database-mysql-port                                                    (default: 3306)
@@ -539,6 +545,8 @@ Environmental variables:
             "NavbarHideDelay": 0.15,
             "//[showScrollUpButton]": "Set when the floating scroll-up button should be visible.",
             "showScrollUpButton": "mobileOnly",
+            "//[showScrollLabel]": "Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.",
+            "showScrollLabel": "always",
             "SortingGrouping": {
                 "//[defaultPhotoSortingMethod]": "Default sorting method for photo and video in a directory results.",
                 "defaultPhotoSortingMethod": {
@@ -1076,6 +1084,8 @@ Environmental variables:
         "minimumRole": "Admin",
         "//[enforcedDirectoryConfig]": "Only enable upload in folder where an \".uploader.pg2conf\" is present in the folder.",
         "enforcedDirectoryConfig": false,
+        "//[maxFileSizeMB]": "Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.",
+        "maxFileSizeMB": 500,
         "//[blockedExtensions]": "Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.",
         "blockedExtensions": [
             "pg2conf",
@@ -1089,7 +1099,9 @@ Environmental variables:
         "dbFolder": "db",
         "sqlite": {
             "//[DBFileName]": "Sqlite will save the db with this filename.",
-            "DBFileName": "sqlite.db"
+            "DBFileName": "sqlite.db",
+            "//[accentInsensitiveSearch]": "Search and autocomplete ignore the accents and the case of every letter (e.g. \"padme\" finds \"Padmé\"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower.",
+            "accentInsensitiveSearch": false
         },
         "mysql": {
             "host": "localhost",

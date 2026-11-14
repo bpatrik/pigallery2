@@ -299,6 +299,11 @@ input[type="range"].zoom-progress::-moz-range-track {
   text-decoration: none;
 }
 
+/* a phone has no hover: a tap shows the faces */
+.faces-shown .face-box, .faces-shown .face-name {
+  opacity: 1.0;
+}
+
 .dim-controls {
   opacity: 0.0;
 }

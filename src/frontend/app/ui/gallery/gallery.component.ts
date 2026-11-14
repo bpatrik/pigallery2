@@ -35,6 +35,11 @@ import {SearchQueryUtils} from '../../../../common/SearchQueryUtils';
 import {UploaderService} from './uploader/uploader.service';
 import {GalleryService} from './gallery.service';
 import {UploaderComponent} from './uploader/uploader.gallery.component';
+import {NgIconComponent} from '@ng-icons/core';
+import {SpinnerComponent} from '../utils/spinner/spinner.component';
+import {LightboxService} from './lightbox/lightbox.service';
+import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
+import {SearchQueryParserService} from './search/search-query-parser.service';
 
 @Component({
   selector: 'app-gallery',
@@ -59,7 +64,10 @@ import {UploaderComponent} from './uploader/uploader.gallery.component';
     GPXFilesFilterPipe,
     PhotoFilterPipe,
     MediaButtonModalComponent,
-    UploaderComponent
+    UploaderComponent,
+    EmptyStateComponent,
+    NgIconComponent,
+    SpinnerComponent
 ]
 })
 export class GalleryComponent implements OnInit, OnDestroy {
@@ -75,6 +83,8 @@ export class GalleryComponent implements OnInit, OnDestroy {
   private sortingService = inject(GallerySortingService);
   private piTitleService = inject(PiTitleService);
   uploaderService = inject(UploaderService);
+  private searchQueryParser = inject(SearchQueryParserService);
+  private lightboxService = inject(LightboxService);
 
   readonly grid = viewChild(GalleryGridComponent);
 
@@ -102,7 +112,32 @@ export class GalleryComponent implements OnInit, OnDestroy {
       mediaGroup.media.some((m: PhotoDTO) => !!m.metadata?.positionData?.GPSData?.longitude)
     )
   );
+  // a loaded folder or search result without anything in it (the filters are not taken into account)
+  public readonly emptyState = computed((): { icon: string, message: string, hint?: string } | null => {
+    const content = this.contentLoader.content();
+    if (content.error) {
+      return null;
+    }
+    const isEmpty = (c: { directories?: unknown[], media?: unknown[] }): boolean =>
+      !c.directories?.length && !c.media?.length;
+    if (content.searchResult && isEmpty(content.searchResult)) {
+      const query = this.searchQueryParser.stringify(content.searchResult.searchQuery);
+      return {
+        icon: 'ionSearchOutline',
+        message: $localize`Search for "${query}:QUERY:" matched nothing.`,
+        hint: $localize`Check the spelling or try fewer words.`
+      };
+    }
+    if (content.directory && content.directory.isPartial !== true && isEmpty(content.directory) && !content.directory.metaFile?.length) {
+      return {icon: 'ionFolderOpenOutline', message: $localize`This folder is empty.`};
+    }
+    return null;
+  });
+  // a photo frame (a playing slideshow) with nothing to show (#1313)
+  public readonly isEmptyFrame = computed((): boolean => this.lightboxService.playback() && this.emptyState() !== null);
   public isUploadOver = false;
+  // the server was asked once whether the sharing ended, when its countdown reached zero
+  private expiryChecked = false;
   private $counter!: Observable<number>; // set by ngOnInit()
   private subscription: { route: Subscription | null, timer: Subscription | null } = {
     route: null,
@@ -143,9 +178,16 @@ export class GalleryComponent implements OnInit, OnDestroy {
       return;
     }
 
-    t = Math.floor(
+    // never below zero (#1307)
+    t = Math.max(0, Math.floor(
       (sharing.expires - Date.now()) / 1000
-    );
+    ));
+    if (t === 0 && !this.expiryChecked) {
+      // the server decides whether the sharing ended (the clock of the browser can be off):
+      // for an ended one it answers 401, and the guest gets the invalid link page
+      this.expiryChecked = true;
+      this.contentLoader.reloadCurrentContent().catch(console.error);
+    }
     const day = Math.floor(t / 86400);
     t -= day * 86400;
     const hour = Math.floor(t / 3600) % 24;
@@ -189,6 +231,10 @@ export class GalleryComponent implements OnInit, OnDestroy {
     return undefined;
   }
 
+  retry(): void {
+    this.contentLoader.reloadCurrentContent().catch(console.error);
+  }
+
   onDragOver(event: DragEvent): void {
     if (this.uploaderService.canUpload()) {
       event.preventDefault();
@@ -219,6 +265,10 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   private onRoute = async (params: Params): Promise<void> => {
     const searchQuery = SearchQueryUtils.parseURLifiedQuery(params[QueryParams.gallery.search.query]);
+    if (searchQuery && !SearchQueryUtils.isKnownQuery(searchQuery)) {
+      this.contentLoader.showBrokenSearchLink();
+      return;
+    }
     if (searchQuery) {
       this.contentLoader.search(searchQuery).catch(console.error);
       this.piTitleService.setSearchTitle(searchQuery);

@@ -27,8 +27,9 @@
     "merge-new-translation": "gulp merge-new-translation",
     "generate-man": "gulp generate-man",
     "lint": "ng lint",
-    "start-e2e-server": "node ./test/folder-reset test/e2e && node ./src/backend/index --config-path=test/e2e/config.json --Database-dbFolder=test/e2e --Server-port=8080 --Users.suppressDefUserWarn=true",
-    "start-docs-e2e-server": "npm run start-e2e-server -- \"--Media-folder=demo/images2/docs/puerto rico\" --Media-tempFolder=demo/tmp/docs --Extensions-enabled=false",
+    "start-e2e-server": "npm run e2e-server -- --Server-port=8080",
+    "e2e-server": "node ./test/folder-reset test/e2e && node ./src/backend/index --config-path=test/e2e/config.json --Database-dbFolder=test/e2e --Users.suppressDefUserWarn=true",
+    "start-docs-e2e-server": "npm run e2e-server -- \"--Media-folder=demo/images2/docs/puerto rico\" --Media-tempFolder=demo/tmp/docs --Extensions-enabled=false",
     "build-extension-interface": "tsc -p extension/ext-interface.tsconfig.json && tsc -p extension/ext-enums.tsconfig.json"
   },
   "repository": {

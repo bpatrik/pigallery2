@@ -10,6 +10,7 @@ import {AuthenticationService} from '../../../model/network/authentication.servi
 import {NotificationService} from '../../../model/notification.service';
 import {PG2ConfMap} from '../../../../../common/PG2ConfMap';
 import {ToastRef, ToastService, ToastSummary} from '../../toast/toast.service';
+import {ErrorCodes, ErrorDTO} from '../../../../../common/entities/Error';
 
 // A file while it is queued or uploading. Its toast shows the progress.
 export interface UploadProgress {
@@ -40,7 +41,8 @@ export class UploaderService {
   public uploadProgress: UploadProgress[] = [];
   // Result of the current batch: everything uploaded since the queue was last empty
   private batchUploaded = 0;
-  private batchFailed = 0;
+  // a retried file does not count as failed anymore
+  private batchFailed = new Set<UploadProgress>();
   private batchCanceled = 0;
   private uploadQueue: QueuedUpload[] = [];
   private activeUploads = 0;
@@ -102,12 +104,19 @@ export class UploaderService {
       return;
     }
     const directory = Utils.concatUrls(dirDto.path, dirDto.name);
-    const supportedFiles = files.filter(f =>
-      UploadUtils.isUploadableExtension(UploadUtils.getExtension(f.name), Config.Upload.blockedExtensions));
-
-    if (supportedFiles.length < files.length) {
-      this.notificationService.warning($localize`Some files were skipped due to unsupported format.`);
-    }
+    const maxBytes = Config.Upload.maxFileSizeMB * 1024 * 1024;
+    const supportedFiles = files.filter(f => {
+      if (!UploadUtils.isUploadableExtension(UploadUtils.getExtension(f.name), Config.Upload.blockedExtensions)) {
+        this.rejectFile(f, $localize`Unsupported file format`);
+        return false;
+      }
+      // the server would reject it too, only after the whole file was sent
+      if (f.size > maxBytes) {
+        this.rejectFile(f, $localize`The file is larger than the upload limit of ${Config.Upload.maxFileSizeMB}:limit: MB`);
+        return false;
+      }
+      return true;
+    });
 
     if (supportedFiles.length === 0) {
       return;
@@ -175,6 +184,16 @@ export class UploaderService {
     this.uploadProgress.push(...progressItems);
     this.startSpeedTracking();
     this.processQueue();
+  }
+
+  // Not sent at all. Like a failed file, its toast stays until it is closed.
+  private rejectFile(file: File, error: string): void {
+    this.toastService.open({
+      type: 'error',
+      title: file.name,
+      text: error,
+      group: UploaderService.TOAST_GROUP
+    });
   }
 
   private startSpeedTracking(): void {
@@ -249,7 +268,7 @@ export class UploaderService {
 
           const serverError = serverErrors.find((e) => e.filename === progressItem.name);
           if (serverError) {
-            this.onUploadFailed(progressItem, serverError.error);
+            this.onUploadFailed(upload, serverError.error);
           } else {
             this.batchUploaded++;
             // a success needs no action, so it hides like the other short messages
@@ -265,8 +284,14 @@ export class UploaderService {
           }
         }
       },
-      error: (err) => {
-        this.onUploadFailed(progressItem, err.message || err);
+      // the error interceptor passes on the ErrorDTO of the server, or a text when there was no answer from it
+      error: (err: ErrorDTO | string) => {
+        if (typeof err === 'object' && err?.code === ErrorCodes.PERMISSION_DENIED) {
+          this.onUploadFailed(upload, $localize`Can't save to this folder`);
+          return;
+        }
+        // e.g. the connection dropped: sending it again may work
+        this.onUploadFailed(upload, (typeof err === 'object' ? err?.message : err) || $localize`Upload failed.`, true);
       }
     });
   }
@@ -297,8 +322,9 @@ export class UploaderService {
   }
 
   // An error needs the user's attention, so its toast stays until it is closed
-  private onUploadFailed(progressItem: UploadProgress, error: string): void {
-    this.batchFailed++;
+  private onUploadFailed(upload: QueuedUpload, error: string, retryable = false): void {
+    const {progressItem} = upload;
+    this.batchFailed.add(progressItem);
     progressItem.toast.update({
       type: 'error',
       color: undefined,
@@ -306,9 +332,31 @@ export class UploaderService {
       progress: 100,
       closable: true,
       wrap: true,
-      onCancel: undefined
+      onCancel: undefined,
+      onRetry: retryable ? (): void => this.retry(upload) : undefined
     });
     this.onUploadFinished(progressItem);
+  }
+
+  private retry(upload: QueuedUpload): void {
+    const {progressItem} = upload;
+    this.batchFailed.delete(progressItem);
+    progressItem.progress = 0;
+    progressItem.status = 'queued';
+    progressItem.toast.update({
+      type: 'progress',
+      color: 'secondary',
+      text: $localize`Queued`,
+      progress: 0,
+      closable: false,
+      wrap: false,
+      onRetry: undefined,
+      onCancel: (): void => this.cancel(progressItem)
+    });
+    this.uploadProgress.push(progressItem);
+    this.uploadQueue.push(upload);
+    this.startSpeedTracking();
+    this.processQueue();
   }
 
   private onUploadFinished(progressItem: UploadProgress): void {
@@ -328,21 +376,21 @@ export class UploaderService {
     if (this.batchUploaded > 0) {
       this.contentLoaderService.reloadCurrentContent().catch(console.error);
     }
-    if (this.batchUploaded === 0 && this.batchFailed === 0) {
+    if (this.batchUploaded === 0 && this.batchFailed.size === 0) {
       if (this.batchCanceled > 0) {
         this.notificationService.info($localize`Upload canceled.`);
       }
-    } else if (this.batchFailed === 0) {
+    } else if (this.batchFailed.size === 0) {
       this.notificationService.success($localize`Uploaded files: ${this.batchUploaded}:count:`, $localize`Upload completed.`);
     } else if (this.batchUploaded > 0) {
       this.notificationService.warning(
-        $localize`Uploaded: ${this.batchUploaded}:uploaded:, failed: ${this.batchFailed}:failed:`,
+        $localize`Uploaded: ${this.batchUploaded}:uploaded:, failed: ${this.batchFailed.size}:failed:`,
         $localize`Upload completed with errors`);
     } else {
-      this.notificationService.error($localize`Failed files: ${this.batchFailed}:count:`, $localize`Upload failed.`);
+      this.notificationService.error($localize`Failed files: ${this.batchFailed.size}:count:`, $localize`Upload failed.`);
     }
     this.batchUploaded = 0;
-    this.batchFailed = 0;
+    this.batchFailed.clear();
     this.batchCanceled = 0;
   }
 }

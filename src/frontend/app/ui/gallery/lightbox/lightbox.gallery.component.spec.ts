@@ -15,7 +15,8 @@ import {GridMedia} from '../grid/GridMedia';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
-import {provideIcons} from '@ng-icons/core';
+import {NgIcon, provideIcons} from '@ng-icons/core';
+import {By} from '@angular/platform-browser';
 import {appIcons} from '../../../icons';
 
 // Mock classes
@@ -317,13 +318,16 @@ describe('GalleryLightboxComponent', () => {
 
   it('should tell whether there is a previous and a next photo', async () => {
     await openPhoto('photo1.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: false, hasNext: true});
+    expect(component.navigation()).toEqual({hasPrev: false, hasNext: true, nextLoops: false});
 
     await openPhoto('photo2.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: false});
 
     await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: true, hasNext: false});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: false, nextLoops: false});
+
+    await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: true});
   });
 
   it('should navigate by the content order, also beyond the rendered photos', async () => {
@@ -393,6 +397,76 @@ describe('GalleryLightboxComponent', () => {
     expect(component.status()).toBe(LightboxStates.Open);
     expect(component.activePhoto()!.media).toBe(photos[2]);
     expect(notifications.info).not.toHaveBeenCalled();
+  });
+
+  describe('paging with the keys (#1310)', () => {
+    const key = async (k: string): Promise<void> => {
+      window.dispatchEvent(new KeyboardEvent('keydown', {key: k}));
+      await settle();
+    };
+    const noLoop = {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'};
+
+    it('should page with the arrow keys and stop at the first and the last photo', async () => {
+      await openPhoto('photo1.jpg', noLoop);
+      await key('ArrowLeft');
+      expect(photoParam()).toBe('photo1.jpg');
+
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo2.jpg');
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo3.jpg');
+      expect(component.activePhoto()!.media).toBe(photos[2]);
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo3.jpg');
+
+      await key('ArrowLeft');
+      expect(photoParam()).toBe('photo2.jpg');
+      expect(component.activePhoto()!.media).toBe(photos[1]);
+    });
+
+    it('should wrap from the last photo to the first with loop on', async () => {
+      await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo1.jpg');
+      expect(component.activePhoto()!.media).toBe(photos[0]);
+    });
+  });
+
+  describe('next button icon (#1310)', () => {
+    // the icon of the right arrow button, and its tooltip
+    const nextButton = (): { icon: string | undefined, title: string | null } => {
+      const arrow = fixture.debugElement.query(By.css('#rightArrow'));
+      const icon = arrow.query(By.directive(NgIcon)).componentInstance as NgIcon;
+      return {icon: icon.name() as string | undefined, title: arrow.nativeElement.getAttribute('title')};
+    };
+
+    it('should show the normal next icon when there is a next photo', async () => {
+      await openPhoto('photo2.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+      expect(nextButton()).toEqual({icon: 'ionChevronForwardOutline', title: 'key: right arrow'});
+    });
+
+    // on the last photo the next button starts over from the first photo, so it does not look like the normal next button
+    it('should show the restart icon on the last photo with loop on', async () => {
+      await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+      const button = nextButton();
+      expect(button.icon).toBe('ionReloadOutline');
+      // a tooltip of its own, e.g.: "start over from the first photo"
+      expect(button.title).toBeTruthy();
+      expect(button.title).not.toBe('key: right arrow');
+    });
+  });
+
+  it('should reset the zoom when moving to another photo (#1310)', async () => {
+    await openPhoto('photo1.jpg');
+    component.zoom.set(3);
+    component.drag.set({x: 100, y: -50});
+
+    component.nextImage();
+    await settle();
+
+    expect(photoParam()).toBe('photo2.jpg');
+    expect(component.zoom()).toBe(1);
+    expect(component.drag()).toEqual({x: 0, y: 0});
   });
 
   it('should reveal the open photo in the grid on close', async () => {

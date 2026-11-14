@@ -34,6 +34,10 @@ export enum ScrollUpModes {
   never = 1, mobileOnly, always
 }
 
+export enum ScrollLabelModes {
+  never = 1, date, always
+}
+
 /**
  * Used for lightbox titles
  */
@@ -928,6 +932,16 @@ export class NavBarConfig {
     description: $localize`Set when the floating scroll-up button should be visible.`,
   })
   showScrollUpButton: ScrollUpModes = ScrollUpModes.mobileOnly;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Show scroll label`,
+      priority: ConfigPriority.underTheHood
+    },
+    type: ScrollLabelModes,
+    description: $localize`Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.`,
+  })
+  showScrollLabel: ScrollLabelModes = ScrollLabelModes.always;
 
 
   @ConfigProperty({
@@ -1837,6 +1851,18 @@ export class ClientUploadConfig {
     description: $localize`Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.`
   })
   enforcedDirectoryConfig: boolean = false;
+
+  @ConfigProperty({
+    type: 'unsignedInt', min: 1,
+    tags: {
+      name: $localize`Maximum file size`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 1314,
+      unit: 'MB'
+    },
+    description: $localize`Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.`
+  })
+  maxFileSizeMB: number = 500;
 
   @ConfigProperty({
     type: 'array',

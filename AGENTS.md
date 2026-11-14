@@ -31,6 +31,25 @@ The photo folder is never modified.
   and the app drops and rebuilds the DB on startup (users are kept). No migrations needed.
 - **Config breaking changes: avoid if easy.** Keep existing config keys working when that's cheap,
   but don't let config compatibility block a good feature.
+- **Keep the core small.** PiGallery2 is a hobby project, done in the maintainer's free time next to a day job and a family:
+  about 1-2 releases and 4-5 medium features a year. Every new setting or code path is maintenance work for one person,
+  so niche features belong in extensions, not in the core.
+
+## Contributing a feature (not the maintainer)
+
+The maintainer mostly merges bug fixes. Feature PRs have a low chance of being reviewed, let alone merged.
+If you work with anyone other than the maintainer (see "Maintaining this file") and the task adds a feature
+or changes behaviour (not a bug fix), tell them this up front, before writing code, and ask in this order:
+
+1. **Can it be done with an existing setting?** Check the config (`src/common/config`,
+   `docs/user-guide/configuration.md`); the admin page's "Under the hood" mode shows all settings.
+2. **Can it be done with a theme?** A theme (`Gallery.Themes`) adds custom CSS to every page, so look changes
+   (and hiding or pinning UI elements) usually need no code change.
+3. **Can it be done with an [extension](docs/development/extensions.md)?** Extensions can also change the config
+   and set the theme themselves, so an extension can bundle a setting and CSS change for others to install.
+   If the extension API is missing a hook, a small PR that extends it is more likely to be merged than the feature itself.
+
+Only if none of these work, suggest opening an issue to discuss it with the maintainer before writing the PR.
 
 ## Repository layout
 
@@ -64,6 +83,8 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     fail in their `before all` hooks and the run hangs. In a fresh worktree, build the frontend or copy `dist/en` from the main checkout first.
   - Every backend spec starts its top-level `describe` with `before(TestHelper.resetConfig)`: defaults plus cli/env,
     never the local `config.json`. Use it (not `Config.load()`) wherever a test needs a clean config.
+  - Tests must not leave servers, sockets, timers or child processes open: mocha then never exits (CI fails on the step timeout).
+    `test/backend/OpenHandles.ts` lists what keeps the process alive 10 s after the last test.
 - Single file: `npx tsc && npx mocha test/backend/unit/middlewares/GalleryMWs.spec.js`
 - Frontend unit tests: `npm run test-frontend` (Vitest in jsdom, no browser needed). Single file: `npx ng test --watch=false --include=<path>.spec.ts`.
   - The test setup is Angular's default (no Vitest config or setup file); keep it that way. Each spec is self-contained.
@@ -79,12 +100,25 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
 - E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
-  run against your DB. Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
-  It covers login, gallery (filters, lightbox, URL deep links), search, faces, sharing and error paths.
-  - Tests start logged in as admin (`global-setup.ts` saves the session); `test.use(notLoggedIn)` from `helpers.ts` starts as a guest.
-  - Tests run in parallel against one server: don't depend on data that other tests change (e.g. sharings of the same folder).
+  run against your DB. `E2E_PORT=8091 npm run test-e2e` runs it on another port (e.g. in parallel git worktrees). Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
+  It covers login (wrong password, deep links, logout, a session that ends while the app is open), gallery (filters, blog, map, lightbox, video, URL deep links),
+  folder navigation, search, faces, albums, sharing (incl. its expiry and who may share), zip downloads, the photo frame, the random link, the admin page (settings, jobs, users) and error paths.
+  The `mobile` project (Pixel 7, real touch events; `swipe()`, `pinch()`, `doubleTap()` of `helpers.ts`) runs `lightbox.spec.ts` and `navigation.spec.ts`;
+  `mobile-sanity` runs the sanity tests tagged `@sanity` on the same phone. Set a desktop viewport with `test.use(desktopViewport(...))`
+  (a phone keeps its own), and use helpers that handle the phone navbar (tabs and Share are in the menu: `expectNavbar`, `clickNavbarTab`).
+  - The lightbox controls, and so its keyboard shortcuts, only exist once the opening animation ended: wait for
+    `app-lightbox-controls #rightArrow` before pressing a key, or the key is lost.
+  - `global-setup.ts` indexes all folders, creates a normal user and saves both sessions. Tests start logged in as admin;
+    `test.use(asNormalUser)` / `test.use(notLoggedIn)` from `helpers.ts` start as the normal user / a guest.
+  - Tests run in parallel against one server, so non-idempotent tests must be isolated: don't depend on data that other tests change
+    (e.g. sharings of the same folder), give data a test adds a unique name and delete it afterwards (see `albums.spec.ts`).
+    Server-wide changes (config, jobs) belong in `global-setup.ts`, or in `admin-config.spec.ts`: its `admin-config` project runs after the others.
+  - Every screen has a sanity test (`... should look right`, tagged `@sanity`): one `test()` per screen and role with `expect.soft()` checks
+    of what a person notices right away, incl. `expectNoHorizontalScroll()` (on the screen and with the lightbox open).
+    Extend it rather than adding a new test that opens the same screen.
   - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
-    with `test.fail()` (in mocha: assert that the check is rejected, see `SharingRouter.spec.ts`).
+    with `test.fail()` (Vitest: `it.fails()`; mocha: `expectToFail('#<issue>', check)` of `test/backend/KnownFailures.ts`, see `SharingRouter.spec.ts`).
+    CI counts them as "Known failures" in the job summaries.
   - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
     git-ignored test folders (e.g. `demo/images/sub_dir`, `demo/images2`) that CI doesn't have.
     `demo/images` is also the public demo page: don't add test-only files or folders to it.
@@ -93,7 +127,8 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     `chromium_headless_shell-<rev>` folders there to the installed ones.
   - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens` saves them to `test/playwright/screenshots`.
     It starts its own server (`start-docs-e2e-server`) on the maintainer's `demo/images2/docs/puerto rico` photos, which are not in git.
-  - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `build.yml`).
+  - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `build.yml`),
+    and a table of the unit tests (parsed from their output).
 - Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
   read only the summary:
   - backend: `TEST_MYSQL=false npm run test-backend > <tmp>/be.log 2>&1; grep -aE "passing|failing|pending" -A40 <tmp>/be.log`
@@ -150,6 +185,9 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Sessions**: the session lives in the signed `cookie-session` cookie. `req.session.stamp` (see `SessionManager.getSessionStamp`)
   ties it to its user or sharing DB row, and `AuthenticationMWs` ends the session once that row changes. Only `AuthenticationMWs`
   starts, restores or ends sessions. Call `SessionManager.invalidateSessionCache()` after every write to users or sharings.
+  An illegal move (`NOT_AUTHORISED`, HTTP 403) logs the user out in the frontend (`error.interceptor.ts`); a wrong password does not.
+- **Albums** are saved searches: an album links to its search (`/search/<query>`), not to an album URL.
+  The link of a deleted album keeps working as a plain search; that's intended.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
@@ -185,6 +223,8 @@ Pitfalls seen so far:
 - Every `@ConfigProperty` needs an explicit `type` (and `arrayType` for arrays): the frontend is built without decorator metadata,
   so typeconfig can't infer it there. `test/common/unit/config/ConfigTypes.spec.ts` checks this and snapshots the resolved types;
   after an intended config change, regenerate the snapshot with `UPDATE_CONFIG_SNAPSHOT=true`.
+- A new config entry gets the GitHub issue that explains why it exists (`tags: {githubIssue: <n>}`), when there is one:
+  the settings page links it, so users find the background there.
 - Never expose private config values or another user's data to the client.
 - Build app URLs with `Config.Server.getAppUrl()` / `getApiUrl()` / `getPublicUrl()` (they handle `urlBase` and `publicUrl`);
   don't concat `urlBase`, `apiPath` or `publicUrl` by hand.
@@ -209,12 +249,17 @@ Pitfalls seen so far:
 - Keep strict typing; prefer explicit return types.
 - Angular components: separate `.ts`, `.html` and `.css` files (`templateUrl` / `styleUrls`), no inline `template` or `styles`.
 - Match the style of the surrounding code.
+- English only: identifiers, comments, test data and names (files, folders, people, albums, ...) use English words, never Hungarian.
+  The only exception is test data whose purpose is to test accents / non-ASCII text (e.g. `Árvíztűrő tükörfúrógép`).
 
 ## Git
 
 - Commit messages: short imperative summary, with the GitHub issue when there is one (e.g. `Fix X #1234`).
 - `git add` every new file that belongs in the repo as soon as you create it (not scratch or generated files),
   so it shows up in the IDE's diff before the commit.
+- Mark AI-written text: anything an AI agent generates and posts online itself (PR and issue descriptions, comments,
+  reviews, replies) must say that an AI wrote it, e.g. end with `🤖 Generated with Claude Code` (use your own tool's name).
+  Do this every time, also when the tool doesn't add it on its own.
 
 ## Maintaining this file
 

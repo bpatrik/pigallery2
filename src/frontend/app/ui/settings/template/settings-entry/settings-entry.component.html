@@ -640,6 +640,9 @@
           </div>
         }
       </div>
+      @if (rangeError(); as error) {
+        <small class="form-text text-danger d-block" role="alert">{{error}}</small>
+      }
       @if (warning) {
         <small class="form-text text-warning d-block">
           <ng-icon name="ionWarningOutline" />
