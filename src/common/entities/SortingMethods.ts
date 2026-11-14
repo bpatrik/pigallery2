@@ -43,6 +43,20 @@ export const GroupByTypes = {
   ...SortByDirectionalTypes,
   ...GroupByBasicTypes
 };
+
+/**
+ * All media of a directory are in the same directory, so sorting or grouping it by directory is meaningless:
+ * only search results (incl. albums and flattened directories) can use SortByTypes.Directory.
+ */
+const withoutDirectory = <T extends object>(types: T): Omit<T, 'Directory'> => {
+  const ret = {...types} as Record<string | number, unknown>;
+  delete ret['Directory'];
+  delete ret[SortByDirectionalTypes.Directory];
+  return ret as Omit<T, 'Directory'>;
+};
+export const DirectorySortByTypes = withoutDirectory(SortByTypes);
+export const DirectoryGroupByTypes = withoutDirectory(GroupByTypes);
+
 export const GroupSortByTypes = {
   ...SortByDirectionalTypes,
   ...SortByBasicTypes,

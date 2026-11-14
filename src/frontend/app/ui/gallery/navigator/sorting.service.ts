@@ -116,24 +116,36 @@ export class GallerySortingService {
     return this.collator.compare(aSortable, bSortable);
   }
 
-  // Root directory is represented as ['', ''], other directories as [parent path, name],
-  // matching the ORDER BY directory.path, directory.name used by the backend.
-  private directorySortKey(dir: { path: string; name: string }): [string, string] {
-    if (!dir || dir.name === '.') {
-      return ['', ''];
+  /** The directory of the media relative to the gallery root, '.' for the root. It always uses '/', also on a Windows server. */
+  private directoryPath(m: MediaDTO): string {
+    return Utils.concatUrls(m.directory.path, m.directory.name);
+  }
+
+  private directoryName(path: string): string {
+    return path === '.' ? $localize`Home` : path;
+  }
+
+  /**
+   * Tree order: a directory comes right before its subdirectories (2020, 2020/Summer, 2021),
+   * so the paths are compared segment by segment, not as one string.
+   */
+  private sortByDirectory(media: MediaDTO[]): void {
+    const segments = new Map<MediaDTO, string[]>();
+    for (const m of media) {
+      const p = this.directoryPath(m);
+      segments.set(m, p === '.' ? [] : p.split('/'));
     }
-    return [dir.path.replace(/^\.[\\/]/, ''), dir.name];
-  }
-
-  private compareByDirectory(a: MediaDTO, b: MediaDTO): number {
-    const [aPath, aName] = this.directorySortKey(a.directory);
-    const [bPath, bName] = this.directorySortKey(b.directory);
-    return this.collator.compare(aPath, bPath) || this.collator.compare(aName, bName);
-  }
-
-  private directoryGroupKey(m: MediaDTO): string {
-    const [path, name] = this.directorySortKey(m.directory);
-    return path + name;
+    media.sort((a: MediaDTO, b: MediaDTO): number => {
+      const aS = segments.get(a)!;
+      const bS = segments.get(b)!;
+      for (let i = 0; i < Math.min(aS.length, bS.length); i++) {
+        const c = this.collator.compare(aS[i], bS[i]);
+        if (c !== 0) {
+          return c;
+        }
+      }
+      return (aS.length - bS.length) || this.compareByName(a, b);
+    });
   }
 
   private sortMedia(sorting: SortingMethod | GroupingMethod, media: MediaDTO[]): void {
@@ -145,9 +157,7 @@ export class GallerySortingService {
         media.sort((a: PhotoDTO, b: PhotoDTO) => this.compareByName(a, b));
         break;
       case SortByTypes.Directory:
-        media.sort((a: PhotoDTO, b: PhotoDTO) =>
-          this.compareByDirectory(a, b) || this.compareByName(a, b)
-        );
+        this.sortByDirectory(media);
         break;
       case SortByTypes.Date:
         media.sort((a: PhotoDTO, b: PhotoDTO): number => {
@@ -205,7 +215,7 @@ export class GallerySortingService {
         return (m: MediaDTO) => (m.name.normalize('NFD').at(0) ?? '').toUpperCase();
 
       case SortByTypes.Directory:
-        return (m: MediaDTO) => this.directoryGroupKey(m);
+        return (m: MediaDTO) => this.directoryPath(m);
 
       case SortByTypes.Rating:
         return (m: MediaDTO) => ((m as PhotoDTO).metadata.rating || 0).toString();
@@ -247,7 +257,7 @@ export class GallerySortingService {
         // coarser than the day of the group headers, but with the same time zone handling
         return {order: method, label: (m: MediaDTO) => m.metadata?.creationDate ? this.formatMediaDate(m, 'MMMM y') : ''};
       case SortByTypes.Directory:
-        return {order: method, label: (m: MediaDTO) => this.directoryGroupKey(m) || $localize`Home`};
+        return {order: method, label: (m: MediaDTO) => this.directoryName(this.directoryPath(m))};
       case SortByTypes.Name:
       case SortByTypes.Rating:
       case SortByTypes.FileSize:
@@ -319,10 +329,12 @@ export class GallerySortingService {
 
       for (const m of mCopy) {
         const k = groupFN(m);
-        if (c.mediaGroups.length === 0 || lastKey !== k) {
+        // by the key, the name of the root directory is not its key
+        if (lastKey !== k) {
           lastKey = k;
-          const name = (grouping.method === SortByTypes.Directory && k === '') ? $localize`Home` : k;
-          c.mediaGroups.push({name, media: []});
+          c.mediaGroups.push(grouping.method === GroupByTypes.Directory ?
+            {name: this.directoryName(k), directoryPath: k, media: []} :
+            {name: k, media: []});
         }
         c.mediaGroups[c.mediaGroups.length - 1].media.push(m);
       }
@@ -353,6 +365,7 @@ export interface ScrollLabelFn {
 export interface MediaGroup {
   name: string;
   date?: Date; // used for blog. It allows to chop off blog to smaller pieces
+  directoryPath?: string; // the directory of the media, when grouped by directory
   media: MediaDTO[];
 }
 

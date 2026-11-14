@@ -254,50 +254,52 @@ describe('GallerySortingService', () => {
       expect(names(dc, random)).toEqual(first);
     });
 
-    it('should not interleave media of same-named directories when sorting', () => {
-      const root = {path: './', name: '.'};
-      const summer2020 = {path: '2020/', name: 'Summer'};
-      const summer2021 = {path: '2021/', name: 'Summer'};
-      const dirMedia = (name: string, directory: { path: string; name: string }): MediaDTO =>
+    describe('by directory', () => {
+      // as the backend stores them: the root is ./ and ., its subdirectories are in ./
+      const dir = (path: string, name: string) => ({path, name});
+      const inDir = (name: string, directory: { path: string; name: string }): MediaDTO =>
         ({name, directory, metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO);
-
-      const res = service.applySorting({
+      const searchResult = (): DirectoryContent => ({
         directories: [],
         metaFile: [],
         media: [
-          dirMedia('1.jpg', summer2020),
-          dirMedia('2.jpg', summer2021),
-          dirMedia('r.jpg', root),
-          dirMedia('3.jpg', summer2020),
-          dirMedia('4.jpg', summer2021),
+          inDir('1.jpg', dir('2020/', 'Summer')),
+          inDir('2.jpg', dir('2021/', 'Summer')),
+          inDir('r.jpg', dir('./', '.')),
+          inDir('y.jpg', dir('./', '2021')),
+          inDir('t.jpg', dir('./', '2020 trip')),
+          inDir('3.jpg', dir('2020/', 'Summer')),
+          inDir('x.jpg', dir('./', '2020')),
+          inDir('4.jpg', dir('2021/', 'Summer')),
+          inDir('w.jpg', dir('2021\\', 'Winter')), // a Windows server
         ]
-      }, {method: SortByTypes.Directory, ascending: true}, noGrouping);
+      });
+      // the tree: a directory is right before its subdirectories, same-named directories are not mixed
+      const tree = [['r.jpg'], ['x.jpg'], ['1.jpg', '3.jpg'], ['t.jpg'], ['y.jpg'], ['2.jpg', '4.jpg'], ['w.jpg']];
 
-      expect(res!.mediaGroups.length).toBe(1);
-      expect(res!.mediaGroups[0].media.map((m) => m.name)).toEqual(['r.jpg', '1.jpg', '3.jpg', '2.jpg', '4.jpg']);
-    });
+      it('should sort in tree order', () => {
+        expect(names(searchResult(), {method: SortByTypes.Directory, ascending: true})).toEqual([tree.flat()]);
+      });
 
-    it('should group media by directory path, keeping same-named directories separate', () => {
-      const root = {path: './', name: '.'};
-      const summer2020 = {path: '2020/', name: 'Summer'};
-      const summer2021 = {path: '2021/', name: 'Summer'};
-      const dirMedia = (name: string, directory: { path: string; name: string }): MediaDTO =>
-        ({name, directory, metadata: {size: {width: 10, height: 10}}} as unknown as MediaDTO);
+      it('should reverse the tree order when descending', () => {
+        expect(names(searchResult(), {method: SortByTypes.Directory, ascending: false})).toEqual([tree.flat().reverse()]);
+      });
 
-      const res = service.applySorting({
-        directories: [],
-        metaFile: [],
-        media: [
-          dirMedia('1.jpg', summer2020),
-          dirMedia('2.jpg', summer2021),
-          dirMedia('r.jpg', root),
-          dirMedia('3.jpg', summer2020),
-          dirMedia('4.jpg', summer2021),
-        ]
-      }, {method: SortByTypes.Directory, ascending: true}, {method: GroupByTypes.Directory, ascending: true});
+      it('should group by the whole path, with / also on Windows and Home for the root', () => {
+        const groups = service.applySorting(searchResult(), {method: SortByTypes.Name, ascending: true},
+          {method: GroupByTypes.Directory, ascending: true})!.mediaGroups;
+        expect(groups.map(g => [g.name, g.directoryPath])).toEqual([
+          ['Home', '.'], ['2020', '2020'], ['2020/Summer', '2020/Summer'], ['2020 trip', '2020 trip'],
+          ['2021', '2021'], ['2021/Summer', '2021/Summer'], ['2021/Winter', '2021/Winter']
+        ]);
+        expect(groups.map(g => g.media.map(m => m.name))).toEqual(tree);
+      });
 
-      expect(res!.mediaGroups.map((g) => g.name)).toEqual(['Home', '2020/Summer', '2021/Summer']);
-      expect(res!.mediaGroups.map((g) => g.media.map((m) => m.name))).toEqual([['r.jpg'], ['1.jpg', '3.jpg'], ['2.jpg', '4.jpg']]);
+      it('should label the scroll indicator with the path', () => {
+        const fn = service.getScrollLabelFn({method: SortByTypes.Directory, ascending: true}, noGrouping);
+        expect(searchResult().media.map(m => fn?.label(m))).toEqual(['2020/Summer', '2021/Summer', 'Home', '2021', '2020 trip',
+          '2020/Summer', '2020', '2021/Summer', '2021/Winter']);
+      });
     });
   });
 
@@ -342,10 +344,6 @@ describe('GallerySortingService', () => {
       expect(label(sortBy(SortByTypes.Rating), groupBy(GroupByTypes.NoGrouping))).toBe('4');
       expect(label(sortBy(SortByTypes.FileSize), groupBy(GroupByTypes.NoGrouping))).toBe('2 - 5 MB');
       expect(label(sortBy(SortByTypes.PersonCount), groupBy(GroupByTypes.NoGrouping))).toBe('2');
-      const inFolder = {name: 'a.jpg', directory: {path: '2020/', name: 'Summer'}} as unknown as MediaDTO;
-      const inRoot = {name: 'r.jpg', directory: {path: './', name: '.'}} as unknown as MediaDTO;
-      expect(service.getScrollLabelFn(sortBy(SortByTypes.Directory), groupBy(GroupByTypes.NoGrouping))?.label(inFolder)).toBe('2020/Summer');
-      expect(service.getScrollLabelFn(sortBy(SortByTypes.Directory), groupBy(GroupByTypes.NoGrouping))?.label(inRoot)).toBe('Home');
     });
 
     it('should not have a label for the random order', () => {

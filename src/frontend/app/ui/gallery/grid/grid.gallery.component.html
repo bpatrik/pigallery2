@@ -23,9 +23,16 @@
               </div>
             }
             @case (GroupByTypes.Directory) {
-              <div class="mt-4 mb-3">
-                <h6 class="ms-2">
-                  <ng-icon class="me-1" name="ionFolderOutline" />{{ group.name }}
+              <!-- the path does not widen the group, its start is cut instead: hover shows the whole, a tap on a phone too -->
+              <div class="mt-4 mb-3 directory-header">
+                <h6 class="ms-2 d-flex align-items-center">
+                  <ng-icon class="me-1 flex-shrink-0" name="ionFolderOutline" />
+                  <a class="directory-link trim-start"
+                    [class.expanded]="expandedDirectory() === group.directoryPath"
+                    [title]="group.name"
+                    [routerLink]="(!touchOnly || expandedDirectory() === group.directoryPath) ? ['/gallery', group.directoryPath] : null"
+                    [queryParams]="queryService.params()"
+                    (click)="onDirectoryHeaderClick($event, group.directoryPath)"><bdi>{{ group.name }}</bdi></a>
                 </h6>
               </div>
             }
@@ -55,6 +62,7 @@
 
 @if (scrollLabel(); as label) {
   <div class="scroll-label shadow" aria-hidden="true"
+    [class.directory-label]="label.order === GroupByTypes.Directory"
     [style.--scroll-position]="label.position"
     [style.--navbar-bottom.px]="label.navbarBottom">
     <!-- like the group headers -->
@@ -69,7 +77,7 @@
         <ng-icon class="ms-1" name="ionPeopleOutline" />
       }
       @case (GroupByTypes.Directory) {
-        <ng-icon class="me-1" name="ionFolderOutline" />{{ label.text }}
+        <ng-icon class="me-1 flex-shrink-0" name="ionFolderOutline" /><span class="trim-start"><bdi>{{ label.text }}</bdi></span>
       }
       @default {
         {{ label.text }}

@@ -16,6 +16,7 @@ import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
 import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
+import {Router, RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -29,7 +30,8 @@ import {ScrollRestorationService} from '../../../model/scroll-restoration.servic
     NgIconComponent,
     GalleryBlogComponent,
     GalleryPhotoComponent,
-    ParseIntPipe
+    ParseIntPipe,
+    RouterLink
 ]
 })
 export class GalleryGridComponent
@@ -41,6 +43,7 @@ export class GalleryGridComponent
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
   private scrollRestoration = inject(ScrollRestorationService);
+  private router = inject(Router);
 
   readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
   // only read imperatively (revealMedia, onScroll), never in a template, computed or effect
@@ -68,6 +71,9 @@ export class GalleryGridComponent
   private readonly pendingRenders = new Set<() => void>();
   private scrollLabelFrame: number | null = null;
   private scrollLabelHideTimer: number | null = null;
+  // no hover on a phone to see the whole path of a directory group header: its first tap shows it (only this one at a time)
+  readonly touchOnly = typeof window.matchMedia === 'function' && window.matchMedia('(hover: none)').matches;
+  readonly expandedDirectory = signal<string | null>(null);
   // the label of the first visible photo and where to show it next to the scrollbar, while scrolling
   readonly scrollLabel = signal<ScrollLabel | null>(null);
 
@@ -134,6 +140,22 @@ export class GalleryGridComponent
     }
     this.clearRenderedPhotos();
     this.renderMinimalPhotos();
+  }
+
+  /**
+   * On a phone, the first tap on a directory group header shows its whole path if it was cut, the next one opens the directory.
+   * Otherwise (or with a mouse) the header is a plain link.
+   */
+  onDirectoryHeaderClick(event: MouseEvent, directoryPath: string | undefined): void {
+    if (!this.touchOnly || !directoryPath || this.expandedDirectory() === directoryPath) {
+      return; // the routerLink opens it
+    }
+    const link = event.currentTarget as HTMLElement;
+    if (link.scrollWidth > link.clientWidth) {
+      this.expandedDirectory.set(directoryPath);
+      return;
+    }
+    this.router.navigate(['/gallery', directoryPath], {queryParams: this.queryService.params()}).catch(console.error);
   }
 
   ngOnDestroy(): void {
@@ -276,8 +298,9 @@ export class GalleryGridComponent
         break;
       }
 
-      if (groups[i].name !== mediaGroups[i].name) {
-        groups[i] = {...groups[i], name: mediaGroups[i].name}; // update name if only this changed
+      if (groups[i].name !== mediaGroups[i].name || groups[i].directoryPath !== mediaGroups[i].directoryPath) {
+        // update name if only this changed
+        groups[i] = {...groups[i], name: mediaGroups[i].name, directoryPath: mediaGroups[i].directoryPath};
       }
 
       let lastRowId = null;
@@ -357,6 +380,7 @@ export class GalleryGridComponent
       groups.push({
         name: mediaGroups[groups.length].name,
         date: mediaGroups[groups.length].date,
+        directoryPath: mediaGroups[groups.length].directoryPath,
         media: []
       } as GridMediaGroup);
     }
@@ -686,4 +710,5 @@ interface GridMediaGroup {
   media: GridMedia[];
   name: string;
   date?: Date;
+  directoryPath?: string;
 }

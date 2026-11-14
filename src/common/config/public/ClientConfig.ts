@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {FaceSortByTypes, GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../entities/SortingMethods';
+import {DirectoryGroupByTypes, DirectorySortByTypes, FaceSortByTypes, GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {SearchQueryDTO} from '../../entities/SearchQueryDTO';
@@ -795,18 +795,68 @@ export class ClientGroupingConfig implements GroupingMethod {
 }
 
 
+// the sorting of a directory: all its media are in the same directory, so no sorting by directory
+@SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
+export class ClientDirectorySortingConfig implements SortingMethod {
+  @ConfigProperty({
+    type: DirectorySortByTypes,
+    tags: {
+      name: $localize`Method`,
+    },
+  })
+  method: SortingMethod['method'] = SortByTypes.Date;
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Ascending`,
+    },
+  })
+  ascending: boolean = true;
+
+  constructor(method: SortingMethod['method'] = SortByTypes.Date, ascending: boolean = true) {
+    this.method = method;
+    this.ascending = ascending;
+  }
+}
+
+
+// the grouping of a directory: all its media are in the same directory, so no grouping by directory
+@SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
+export class ClientDirectoryGroupingConfig implements GroupingMethod {
+  @ConfigProperty({
+    type: DirectoryGroupByTypes,
+    tags: {
+      name: $localize`Method`,
+    },
+  })
+  method: number = GroupByTypes.Date;
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Ascending`,
+    },
+  })
+  ascending: boolean = true;
+
+  constructor(method: number = GroupByTypes.Date, ascending: boolean = true) {
+    this.method = method;
+    this.ascending = ascending;
+  }
+}
+
+
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class NavBarSortingAndGroupingConfig {
 
   @ConfigProperty({
-    type: ClientSortingConfig,
+    type: ClientDirectorySortingConfig,
     tags: {
       name: $localize`Default sorting`,
       priority: ConfigPriority.advanced,
     },
     description: $localize`Default sorting method for photo and video in a directory results.`
   })
-  defaultPhotoSortingMethod: ClientSortingConfig = new ClientSortingConfig(SortByTypes.Date, true);
+  defaultPhotoSortingMethod: ClientDirectorySortingConfig = new ClientDirectorySortingConfig(SortByTypes.Date, true);
 
   @ConfigProperty({
     type: ClientSortingConfig,
@@ -819,7 +869,7 @@ export class NavBarSortingAndGroupingConfig {
   defaultSearchSortingMethod: ClientSortingConfig = new ClientSortingConfig(SortByTypes.Date, false);
 
   @ConfigProperty({
-    type: ClientGroupingConfig,
+    type: ClientDirectoryGroupingConfig,
     tags: {
       name: $localize`Default grouping`,
       githubIssue: 706,
@@ -827,7 +877,7 @@ export class NavBarSortingAndGroupingConfig {
     },
     description: $localize`Default grouping method for photo and video in a directory results.`
   })
-  defaultPhotoGroupingMethod: ClientGroupingConfig = new ClientGroupingConfig(GroupByTypes.Date, true);
+  defaultPhotoGroupingMethod: ClientDirectoryGroupingConfig = new ClientDirectoryGroupingConfig(GroupByTypes.Date, true);
 
   @ConfigProperty({
     type: ClientGroupingConfig,

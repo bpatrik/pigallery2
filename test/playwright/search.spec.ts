@@ -3,6 +3,8 @@ import {ACCENTED_DIR, expectApiOk, expectLightboxPhoto, expectNoHorizontalScroll
 
 const SEARCH_KEYWORD = 104; // SearchQueryTypes.keyword
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+const SEARCH_DIRECTORY = 102; // SearchQueryTypes.directory
+const GLOB_MATCH = 3; // TextSearchQueryMatchTypes.globMatch
 
 test.describe('Search', () => {
   test('Search builder should propagate to search bar', async ({page}) => {
@@ -114,6 +116,32 @@ test.describe('Search', () => {
   });
 
   // Sanity check: what a user notices right away when opening search results. Soft checks, so one failure does not hide the others.
+  test('Search should group by directory in tree order and link the directories', async ({page}) => {
+    // the flattened accented folder: the media of the folder and of its subfolder
+    const query = {type: SEARCH_DIRECTORY, value: ACCENTED_DIR + '/*', matchType: GLOB_MATCH};
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await page.goto('/search/' + encodeURIComponent(JSON.stringify(query)));
+    await expectApiOk(await search, 'the search');
+
+    // the grouping follows the sorting
+    await page.locator('app-gallery-navbar #button-alignment').click();
+    await page.locator('#sorting-dropdown .sorting-grouping-item').filter({hasText: 'directory'}).first().click();
+    await page.locator('#sorting-dropdown .sorting-grouping-item').filter({hasText: 'ascending'}).first().click();
+    await page.locator('body').click({position: {x: 0, y: 0}});
+
+    // the whole path, the folder before its subfolder
+    const headers = page.locator('app-gallery-grid .directory-link');
+    await expect(headers).toHaveText([ACCENTED_DIR, ACCENTED_DIR + '/subdirectory']);
+    await expect(headers.first()).toHaveAttribute('title', ACCENTED_DIR);
+    // too long for the width of its photos: the start is cut, the end stays visible
+    expect.soft(await headers.first().evaluate(el => el.scrollWidth > el.clientWidth), 'cut header').toBe(true);
+    await expectNoHorizontalScroll(page, 'grouped by directory');
+
+    await headers.last().click();
+    await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
+    await expect(page.locator('.photo-link > img[alt="IMG_8824.jpg"]')).toBeVisible();
+  });
+
   test('Search results should look right', {tag: '@sanity'}, async ({page}) => {
     const query = {type: SEARCH_KEYWORD, value: 'Berkley', matchType: EXACT_MATCH};
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
