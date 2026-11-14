@@ -50,6 +50,8 @@ export default tseslint.config(
       // Modernisation guardrails (#1250)
       "@angular-eslint/template/prefer-control-flow": "error",
       "@angular-eslint/template/prefer-self-closing-tags": "error",
+      // a button without a type submits its form: the Enter key in any field of the form clicks the first one
+      "@angular-eslint/template/button-has-type": "error",
     },
   },
   {

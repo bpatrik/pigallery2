@@ -38,7 +38,7 @@
   @if (mediaButtons.length > 0) {
     <div class="media-buttons">
       @for (button of mediaButtons; track button) {
-        <button
+        <button type="button"
           class="media-button"
           [class.always-visible]="button.alwaysVisible"
           [class.no-click]="!button.apiPath"

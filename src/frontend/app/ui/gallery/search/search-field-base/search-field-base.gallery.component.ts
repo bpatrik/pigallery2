@@ -39,6 +39,8 @@ export class GallerySearchFieldBaseComponent
   router = inject(Router);
 
   readonly placeholder = input<string | undefined>($localize `Search`);
+  // the label of the Enter key of phone keyboards; only fields where Enter searches set it to 'search'
+  readonly enterKeyHint = input<'search' | undefined>();
   readonly searchSubmit = output<void>();
 
   readonly searchField = viewChild.required<ElementRef>('SearchField');

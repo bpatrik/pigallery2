@@ -12,13 +12,13 @@
       </div>
       <p class="card-text" i18n>Something went spectacularly wrong. We've sent our best squirrels to look into it.</p>
       <div class="d-grid gap-2 mb-3">
-        <button class="btn btn-primary btn-lg" (click)="onGoBack()" i18n>
+        <button type="button" class="btn btn-primary btn-lg" (click)="onGoBack()" i18n>
           Take me back to safety
         </button>
       </div>
 
       <div class="text-start mt-4">
-        <button class="btn btn-link p-0 text-decoration-none float-end" (click)="toggleHelp()">
+        <button type="button" class="btn btn-link p-0 text-decoration-none float-end" (click)="toggleHelp()">
           <span i18n>help me fix this</span> {{ showHelp ? '<<' : '>>' }}
         </button>
 

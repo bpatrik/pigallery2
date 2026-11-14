@@ -1,7 +1,7 @@
 // The random link (#1313, CUJ 33): /pgapi/gallery/random/<query> answers with a random photo of the query,
 // as the "Random link" dialog of the gallery builds it (random-query-builder.gallery.component.ts).
 import {expect, test} from '@playwright/test';
-import {ACCENTED_DIR} from './helpers';
+import {ACCENTED_DIR, pressEnterLikeAPhoneKeyboard} from './helpers';
 
 const SEARCH_FILE_NAME = 103; // SearchQueryTypes.file_name
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
@@ -32,6 +32,25 @@ test.describe('Random link', () => {
     const res = await page.request.get(link);
     expect(res.status()).toBe(200);
     expect(res.headers()['content-type']).toBe('image/jpeg');
+  });
+
+  // the Enter key of a phone keyboard submits the form of the dialog; it clicked the delete button of the query (a button without a type)
+  test('should keep the typed query on the Enter key of a phone keyboard', async ({page}) => {
+    await page.goto('/gallery/');
+    await page.locator('ng-icon[name="ionMenuOutline"]').click();
+    await page.locator('ng-icon[name="ionHammerOutline"]').click();
+    await page.locator('ng-icon[name="ionShuffleOutline"]').click();
+
+    const queryText = page.locator('modal-container app-gallery-search-field-base input.search-text');
+    // Enter does not search here, so the keyboard does not show a search key
+    await expect.soft(queryText).not.toHaveAttribute('enterkeyhint');
+    await queryText.fill('big_ben');
+    await pressEnterLikeAPhoneKeyboard(queryText);
+    await queryText.blur();
+
+    await expect(queryText).toHaveValue('big_ben');
+    await expect(page.locator('#randomLink')).toHaveValue(/big_ben/);
+    await expect(page.locator('modal-container')).toHaveCount(1);
   });
 
   test.describe('whose query matches nothing', () => {

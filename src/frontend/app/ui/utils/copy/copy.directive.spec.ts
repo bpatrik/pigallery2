@@ -3,7 +3,7 @@ import {TestBed} from '@angular/core/testing';
 import {copyToClipboard, CopyDirective} from './copy.directive';
 
 @Component({
-  template: `<button [appCopy]="text" (copied)="copied = copied + 1">Copy</button>`,
+  template: `<button type="button" [appCopy]="text" (copied)="copied = copied + 1">Copy</button>`,
   imports: [CopyDirective]
 })
 class HostComponent {

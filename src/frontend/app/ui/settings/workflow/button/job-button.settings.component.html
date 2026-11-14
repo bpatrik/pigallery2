@@ -1,5 +1,5 @@
 @if (!Running) {
-  <button class="btn {{danger() ? 'btn-danger': 'btn-success'}}"
+  <button type="button" class="btn {{danger() ? 'btn-danger': 'btn-success'}}"
     [class.progress-bar-striped]="Progress?.onTimer"
     title="Trigger job run manually"
     i18n-title
@@ -13,7 +13,7 @@
   </button>
 }
 @if (Running) {
-  <button class="btn btn-secondary"
+  <button type="button" class="btn btn-secondary"
     [disabled]="disabled() || jobsService.jobStartingStopping()[jobName()] || Progress?.state !== JobProgressStates.running"
     (click)="stop();">
     <ng-icon name="ionStopOutline" />

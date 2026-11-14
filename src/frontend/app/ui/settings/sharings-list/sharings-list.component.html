@@ -26,7 +26,7 @@
             <td>{{row.share.creator?.name}}</td>
             <td>{{row.share.expires | date}}</td>
             <td>
-              <button (click)="deleteSharing(row.share)" class="btn btn-danger float-end">
+              <button type="button" (click)="deleteSharing(row.share)" class="btn btn-danger float-end">
                 <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
               </button>
             </td>

@@ -34,7 +34,7 @@
         @if (queryEntry.type !== SearchQueryTypes.SOME_OF) {
           <div class="col"></div>
         }
-        <button
+        <button type="button"
           class="btn btn-danger float-end col-1 align-self-center"
           (click)="deleteItem()">
           <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -47,7 +47,7 @@
           }
         </div>
         <div class="col query-list d-flex justify-content-start">
-          <button class="btn btn-primary" (click)="addQuery()">
+          <button class="btn btn-primary" type="button" (click)="addQuery()">
             <ng-icon class="me-1"
               style="margin-left: -0.1em; margin-right: -0.1em"
               name="ionAddOutline"
@@ -310,7 +310,7 @@
                                       }
                                     }
                                     <div class="col-2 col-lg-1 align-self-center">
-                                      <button
+                                      <button type="button"
                                         class="btn btn-danger w-auto float-end"
                                         (click)="deleteItem()">
                                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
