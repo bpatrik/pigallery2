@@ -64,7 +64,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
   // the query params of the link to this media in the lightbox
-  readonly lightboxParams = computed((): Record<string, string> => this.queryService.getParams({media: this.gridMedia().media}));
+  readonly lightboxLink = computed(() => this.queryService.getLightboxLink(this.gridMedia().media));
   readonly isVideo = computed((): boolean => this.gridMedia().isVideo());
   readonly isLivePhoto = computed((): boolean => this.gridMedia().isLivePhoto());
   readonly hasPositionData = computed((): boolean => this.gridMedia().hasPositionData());

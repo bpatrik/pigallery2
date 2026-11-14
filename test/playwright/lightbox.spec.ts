@@ -243,6 +243,45 @@ test.describe('Lightbox', () => {
     await expectLightboxPhoto(page, last);
   });
 
+  // #470: closing the lightbox leaves no photo in the history, so back goes to the previous folder
+  test('Browser back after closing the lightbox should go to the previous folder, not open the photo again', async ({page, isMobile}) => {
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await page.locator('app-gallery-directory').filter({hasText: ACCENTED_DIR}).click();
+    await photo(page, 'IMG_8943.jpg').click();
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    // paging replaces the photo's history entry; closing still knows it was opened from the folder
+    await next(page, isMobile);
+    await expect(page).toHaveURL(url => url.searchParams.get('p') === 'IMG_9697.jpg');
+
+    await page.keyboard.press('Escape');
+    await expect(lightboxImages(page)).toHaveCount(0);
+    await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR && !url.searchParams.has('p'));
+
+    await page.goBack();
+    await expect(page).toHaveURL(url => url.pathname.replace(/\/$/, '') === '/gallery' && !url.searchParams.has('p'));
+    await expect(photo(page, 'IMG_5910.jpg')).toBeVisible();
+    await expect(lightboxImages(page)).toHaveCount(0);
+  });
+
+  test('Browser back after closing a photo opened from a link should not open the photo again', async ({page}) => {
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await page.goto('/gallery/' + encodeURIComponent(ACCENTED_DIR) + '?p=IMG_8943.jpg');
+    await expectLightboxPhoto(page, 'IMG_8943.jpg');
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+
+    await page.keyboard.press('Escape');
+    await expect(lightboxImages(page)).toHaveCount(0);
+    await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR && !url.searchParams.has('p'));
+
+    await page.goBack();
+    await expect(page).toHaveURL(url => url.pathname.replace(/\/$/, '') === '/gallery' && !url.searchParams.has('p'));
+    await expect(lightboxImages(page)).toHaveCount(0);
+  });
+
   // #1310: closing scrolls the grid to the photo the lightbox was closed on; back closes it too
   test('Browser back should scroll the grid to the last shown photo, like closing', async ({page, isMobile}) => {
     const {first, last} = await openAndPageForward(page, isMobile);

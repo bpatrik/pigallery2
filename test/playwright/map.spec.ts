@@ -48,6 +48,51 @@ test.describe('Map', () => {
     await expect(page).toHaveURL(url => !url.searchParams.has('map'));
   });
 
+  // #470: closing a photo opened from the map goes back to the map; back then closes the map, it does not open the photo again
+  // The grid under the map does not scroll to the photo, so closing the map does not scroll back either
+  test('Closing a photo opened from the map should go back to the map', async ({page}) => {
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    const map = page.locator('app-gallery-map');
+    await map.scrollIntoViewIfNeeded();
+    const scrollY = (): Promise<number> => page.evaluate(() => window.scrollY);
+    const startY = await scrollY();
+    await map.locator('button.overlay').click();
+    await expect(page).toHaveURL(url => url.searchParams.get('map') === 'true');
+    const bigMap = page.locator('app-gallery-map-lightbox');
+    await expect.poll(() => bigMap.locator('.leaflet-marker-pane .leaflet-marker-icon').count(), {message: 'markers on the big map'})
+      .toBeGreaterThan(0);
+
+    // a cluster zooms in on a click; a photo marker opens its popup
+    const photoMarker = bigMap.locator('.leaflet-marker-pane .leaflet-marker-icon.photo-icon').first(); // not a GPX track marker
+    for (let i = 0; i < 10 && !(await photoMarker.isVisible()); i++) {
+      await bigMap.locator('.leaflet-marker-pane .marker-cluster').first().click();
+      await page.waitForTimeout(500); // the zoom animation of the cluster
+    }
+    await photoMarker.click();
+    const preview = bigMap.locator('.leaflet-popup img.clickable');
+    await preview.click();
+    await expect(page).toHaveURL(url => url.searchParams.has('p') && !url.searchParams.has('map'));
+    // the controls show up once the opening animation ended (the last photo has no right arrow)
+    await expect(page.locator('app-lightbox-controls ng-icon[name="ionCloseOutline"]')).toBeVisible();
+    // the map listens to Escape until its closing animation ended
+    await expect(bigMap.locator('.leaflet-container')).toBeHidden();
+    expect(await scrollY(), 'the grid did not scroll to the photo').toBe(startY);
+
+    await page.keyboard.press('Escape');
+    await expect(page).toHaveURL(url => url.searchParams.get('map') === 'true' && !url.searchParams.has('p'));
+    await expect(bigMap.locator('.leaflet-container')).toBeVisible();
+    expect(await scrollY(), 'closing the photo did not scroll the grid').toBe(startY);
+
+    await page.goBack();
+    await expect(page).toHaveURL(url => !url.searchParams.has('map') && !url.searchParams.has('p'));
+    await expect(page.locator('app-gallery-lightbox-media img')).toHaveCount(0);
+    // the map closes into the small map, which is still on the screen: the page stays where it was
+    await expect(bigMap.locator('.leaflet-container')).toBeHidden();
+    await expect.poll(scrollY, {message: 'the page did not scroll'}).toBe(startY);
+  });
+
   test('Info panel should show the place of a photo on the map', async ({page}) => {
     // IMG_5910.jpg was taken in Berkeley
     await page.goto('/gallery/?p=IMG_5910.jpg');

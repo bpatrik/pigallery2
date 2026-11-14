@@ -20,6 +20,10 @@ class MockQueryService {
   getParams(lightbox?: { media?: MediaDTO }): Record<string, string> {
     return lightbox?.media ? {p: lightbox.media.name} : {};
   }
+
+  getLightboxLink(media: MediaDTO): { queryParams: Record<string, string>, state: Record<string, boolean> } {
+    return {queryParams: this.getParams({media}), state: {lightboxClosesWithBack: true}};
+  }
 }
 
 class MockThumbnailManagerService {

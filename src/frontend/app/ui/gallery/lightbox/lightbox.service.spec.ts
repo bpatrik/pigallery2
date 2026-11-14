@@ -4,6 +4,7 @@ import {BehaviorSubject} from 'rxjs';
 
 import {LightboxService} from './lightbox.service';
 import {QueryParams} from '../../../../../common/QueryParams';
+import {QueryService} from '../../../model/query.service';
 
 describe('LightboxService', () => {
   let queryParams: BehaviorSubject<Record<string, string>>;
@@ -18,6 +19,7 @@ describe('LightboxService', () => {
       providers: [
         {provide: ActivatedRoute, useValue: {queryParams}},
         {provide: Router, useValue: {navigate: () => Promise.resolve(true)}},
+        {provide: QueryService, useValue: {keepLightboxState: () => ({})}},
       ]
     });
   });
