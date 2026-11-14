@@ -6,11 +6,13 @@
 //   node .claude/skills/release/translation-review.mjs apply <file> [--lang hu]
 //
 // export lists the units that are new or whose English source changed since <git-ref> (default: the last tag),
-// plus every unit whose translation still equals the English source. Units used only by the admin UI
-// (settings, admin, duplicates, config) are skipped unless --with-admin is given.
+// plus every unit whose translation still equals the English source. Units already reviewed (listed in
+// translation-reviewed.<lang>.json next to this file) and units used only by the admin UI
+// (settings, admin, duplicates, job texts, config) are skipped; --with-admin includes the admin ones.
 // Output: [{id, reason, where, source, target}], text with XML entities decoded; placeholders stay as <x .../> tags.
 // apply reads the same JSON (only `id` and `target` are used) and replaces those targets in the .xlf.
-// It refuses a translation whose placeholders differ from the source's.
+// It refuses a translation whose placeholders differ from the source's, and records the ids as reviewed
+// (the id is a hash of the English text, so a changed English string comes back as a new id).
 
 import {execFileSync} from 'node:child_process';
 import {readFileSync, writeFileSync} from 'node:fs';
@@ -25,11 +27,11 @@ const ADMIN_PATHS = [
   'src/frontend/app/model/backendtext.service.ts', // job and messenger texts of the settings page
   'src/common/config/',
 ];
-// ids whose translation may equal the English source (FPS, OpenStreetMap, ...); `apply` adds to it
-const sameOkPath = (lang) => resolve(dirname(fileURLToPath(import.meta.url)), `translation-same-ok.${lang}.json`);
-const readSameOk = (lang) => {
+// ids of reviewed units (also those that stay the same as the English on purpose: FPS, OpenStreetMap, ...)
+const reviewedPath = (lang) => resolve(dirname(fileURLToPath(import.meta.url)), `translation-reviewed.${lang}.json`);
+const readReviewed = (lang) => {
   try {
-    return new Set(JSON.parse(readFileSync(sameOkPath(lang), 'utf8')));
+    return new Set(JSON.parse(readFileSync(reviewedPath(lang), 'utf8')));
   } catch {
     return new Set();
   }
@@ -77,7 +79,7 @@ function exportUnits() {
     execFileSync('git', ['describe', '--tags', '--abbrev=0'], {cwd: root, encoding: 'utf8'}).trim();
   const withAdmin = args.includes('--with-admin');
   const units = parse(readFileSync(xlfPath, 'utf8'));
-  const sameOk = readSameOk(lang);
+  const reviewed = readReviewed(lang);
   let old = new Map();
   try {
     old = parse(execFileSync('git', ['show', `${since}:${xlfRel}`], {cwd: root, encoding: 'utf8', maxBuffer: 64 << 20}));
@@ -88,6 +90,9 @@ function exportUnits() {
   const out = [];
   let skippedAdmin = 0;
   for (const u of units.values()) {
+    if (reviewed.has(u.id)) {
+      continue;
+    }
     const reasons = [];
     const before = old.get(u.id);
     if (old.size && !before) {
@@ -95,7 +100,7 @@ function exportUnits() {
     } else if (before && before.source !== u.source) {
       reasons.push('source changed');
     }
-    if (u.target === undefined || u.target.trim() === '' || (u.target === u.source && !sameOk.has(u.id))) {
+    if (u.target === undefined || u.target.trim() === '' || u.target === u.source) {
       reasons.push('untranslated');
     }
     if (!reasons.length) {
@@ -163,18 +168,10 @@ function applyUnits() {
     return whole.replace(body, () => newBody);
   });
   writeFileSync(xlfPath, xml);
-  // a reviewed translation that equals the source is intended: don't list it as untranslated again
-  const sameOk = readSameOk(lang);
-  const sizeBefore = sameOk.size;
-  for (const [id, target] of wanted) {
-    if (target === decode(units.get(id).source)) {
-      sameOk.add(id);
-    }
-  }
-  if (sameOk.size !== sizeBefore) {
-    writeFileSync(sameOkPath(lang), JSON.stringify([...sameOk].sort(), null, 1) + '\n');
-  }
-  console.error(`Updated ${changed} of ${wanted.size} units in ${xlfRel}; ${sameOk.size - sizeBefore} new ids in ${sameOkPath(lang)}.`);
+  // remember what was reviewed (and forget ids that are no longer in the file), so the next export skips them
+  const allReviewed = new Set([...readReviewed(lang), ...wanted.keys()].filter((id) => units.has(id)));
+  writeFileSync(reviewedPath(lang), JSON.stringify([...allReviewed].sort(), null, 1) + '\n');
+  console.error(`Updated ${changed} of ${wanted.size} units in ${xlfRel}; ${allReviewed.size} ids in ${reviewedPath(lang)}.`);
 }
 
 if (command === 'export') {

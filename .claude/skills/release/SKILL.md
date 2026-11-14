@@ -46,15 +46,15 @@ Don't read `messages.hu.xlf` itself (~470 KB). Use the script next to this file:
   (`[{id, reason, where, source, target}]`) of the units that are new or whose English changed since the last tag
   (`--since <ref>` to change), plus units whose translation still equals the English. It skips units used only by the
   admin UI (settings, admin, duplicates, job texts, config); `--with-admin` includes them.
-  Units in `translation-same-ok.hu.json` (reviewed, same as English on purpose: `FPS`, `OpenStreetMap`, ...) aren't listed as untranslated.
+  Units listed in `translation-reviewed.hu.json` (reviewed earlier, including those that stay English on purpose: `FPS`, `OpenStreetMap`, ...) are skipped.
 - Propose natural Hungarian wording for each, consistent with the terms the file already uses (to check a term, grep
   `<target>` lines for it rather than reading the file). Keep every `<x id="..." .../>` placeholder; write plain text
   (`&`, `<`, `>`), the script encodes it. Keep a translation that is right as it is.
 - Show the proposals as a table (source / old / new, mark the ones you'd keep or leave English) and let the maintainer adjust.
 - Write the agreed list as `[{id, target}]` to a JSON file and run
   `node .claude/skills/release/translation-review.mjs apply <file>`. It checks the placeholders, writes nothing if any
-  unit is wrong, and adds the ids whose target equals the English to `translation-same-ok.hu.json` (`git add` it if it's new).
-- Run the export again: what's left should only be what the maintainer chose to leave.
+  unit is wrong, and adds every applied id to `translation-reviewed.hu.json` (commit it with the translations). Include the units that are fine as they are (with their current target), so they count as reviewed too.
+- Run the export again: it should come out empty, apart from what the maintainer chose to leave for later.
 
 ## 4. Version bump
 
