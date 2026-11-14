@@ -31,12 +31,22 @@ describe('QueryService', () => {
 
     location.go('/gallery/?p=photo.jpg', '', link.state);
     expect(service.lightboxClosesWithBack()).toBe(true);
-    expect(service.keepLightboxState()).toEqual({lightboxClosesWithBack: true});
+    expect(service.lightboxRevealsInGrid()).toBe(true);
+    expect(service.keepLightboxState()).toEqual({lightboxClosesWithBack: true, lightboxRevealsInGrid: true});
+  });
+
+  // the map is the page under the photo: the grid behind it does not scroll to the photo
+  it('should open the lightbox from the map without revealing the photo in the grid', () => {
+    location.go('/gallery/?p=photo.jpg', '', service.getLightboxLink(media, false).state);
+    expect(service.lightboxClosesWithBack()).toBe(true);
+    expect(service.lightboxRevealsInGrid()).toBe(false);
+    expect(service.keepLightboxState()).toEqual({lightboxClosesWithBack: true, lightboxRevealsInGrid: false});
   });
 
   it('should not close the lightbox with back when it was opened from somewhere else (e.g. a link)', () => {
     location.go('/gallery/?p=photo.jpg');
     expect(service.lightboxClosesWithBack()).toBe(false);
-    expect(service.keepLightboxState()).toEqual({lightboxClosesWithBack: false});
+    expect(service.lightboxRevealsInGrid()).toBe(true);
+    expect(service.keepLightboxState()).toEqual({lightboxClosesWithBack: false, lightboxRevealsInGrid: true});
   });
 });

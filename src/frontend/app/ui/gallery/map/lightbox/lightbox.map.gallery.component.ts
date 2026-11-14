@@ -337,7 +337,7 @@ export class GalleryMapLightboxComponent implements OnChanges, OnDestroy, OnInit
               const img = container.querySelector('img');
               if (img) {
                 img.onclick = () => {
-                  this.router.navigate([], this.queryService.getLightboxLink(p)).catch(console.error);
+                  this.router.navigate([], this.queryService.getLightboxLink(p, false)).catch(console.error);
                 };
               }
             }

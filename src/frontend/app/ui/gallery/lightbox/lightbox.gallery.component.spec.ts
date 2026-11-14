@@ -52,8 +52,10 @@ class MockWakeLockService {
 class MockQueryService {
   lightboxClosesWithBack = vi.fn(() => false);
 
+  lightboxRevealsInGrid = vi.fn(() => true);
+
   keepLightboxState() {
-    return {lightboxClosesWithBack: this.lightboxClosesWithBack()};
+    return {lightboxClosesWithBack: this.lightboxClosesWithBack(), lightboxRevealsInGrid: this.lightboxRevealsInGrid()};
   }
 
   getMediaStringId(media: MediaDTO) {
@@ -514,6 +516,19 @@ describe('GalleryLightboxComponent', () => {
 
     expect(back).not.toHaveBeenCalled();
     expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({replaceUrl: true}));
+  });
+
+  // e.g. opened from the map: the grid under it does not scroll to the photo
+  it('should not reveal the photo in the grid when its link says so, also on close', async () => {
+    (TestBed.inject(QueryService) as unknown as MockQueryService).lightboxRevealsInGrid.mockReturnValue(false);
+    await openPhoto('photo1.jpg');
+    component.nextImage();
+    await settle();
+    component.hide();
+    await settle();
+
+    expect(grid.revealMedia).not.toHaveBeenCalled();
+    expect(component.status()).toBe(LightboxStates.Closed);
   });
 
   it('should release the scroll lock and full screen when destroyed while open', () => {

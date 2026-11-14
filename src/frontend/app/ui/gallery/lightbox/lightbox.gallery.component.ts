@@ -143,6 +143,9 @@ export class GalleryLightboxComponent implements OnDestroy {
   private navigationId = 0;
   // increases with every open and close: an outdated animation end is ignored
   private openCloseId = 0;
+  // zooms in from the tile of the photo and back into it (scrolls the grid there); set on open, as the history
+  // state is already the one of the page under the lightbox when back closes it
+  private revealInGrid = true;
   private photoPlayer: Animation | null = null;
   private lightboxPlayer: Animation | null = null;
 
@@ -368,7 +371,10 @@ export class GalleryLightboxComponent implements OnDestroy {
     const navigationId = ++this.navigationId;
     this.shownId = this.queryService.getMediaStringId(media);
     this.resetZoom();
-    const tile = await this.grid()?.revealMedia(media);
+    if (this.status() === LightboxStates.Closed || this.status() === LightboxStates.Closing) {
+      this.revealInGrid = this.queryService.lightboxRevealsInGrid();
+    }
+    const tile = this.revealInGrid ? await this.grid()?.revealMedia(media) : null;
     if (navigationId !== this.navigationId) {
       return;
     }
@@ -420,7 +426,7 @@ export class GalleryLightboxComponent implements OnDestroy {
     this.blackCanvasOpacity.set(0);
 
     const activePhoto = this.activePhoto();
-    const tile = activePhoto ? await this.grid()?.revealMedia(activePhoto.media) : null;
+    const tile = activePhoto && this.revealInGrid ? await this.grid()?.revealMedia(activePhoto.media) : null;
     if (navigationId !== this.navigationId) {
       return; // opened again meanwhile
     }

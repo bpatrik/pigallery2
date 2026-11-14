@@ -13,6 +13,7 @@ import {ContentLoaderService} from '../ui/gallery/contentLoader.service';
  */
 export interface LightboxHistoryState {
   lightboxClosesWithBack?: boolean;
+  lightboxRevealsInGrid?: boolean;
 }
 
 @Injectable({providedIn: 'root'})
@@ -57,9 +58,11 @@ export class QueryService {
    * The link that opens the lightbox on a media from the page it is opened on (the grid, the map).
    * Its history state marks that page as the history entry before the media, so closing the lightbox
    * goes back to it instead of adding the page again, which back would leave behind (#470).
+   * @param revealInGrid the lightbox zooms in from the tile of the media and back into it, scrolling the grid there;
+   * false when the grid is not the page under it (the map), so the page does not scroll behind it.
    */
-  getLightboxLink(media: MediaDTO): { queryParams: Record<string, string>, state: LightboxHistoryState } {
-    return {queryParams: this.getParams({media}), state: {lightboxClosesWithBack: true}};
+  getLightboxLink(media: MediaDTO, revealInGrid = true): { queryParams: Record<string, string>, state: LightboxHistoryState } {
+    return {queryParams: this.getParams({media}), state: {lightboxClosesWithBack: true, lightboxRevealsInGrid: revealInGrid}};
   }
 
   /**
@@ -70,10 +73,17 @@ export class QueryService {
   }
 
   /**
-   * The history state for a navigation that replaces the URL of the shown media: keeps lightboxClosesWithBack().
+   * The lightbox zooms in from the tile of the shown media (see getLightboxLink()); also for a media opened from a link.
+   */
+  lightboxRevealsInGrid(): boolean {
+    return (this.location.getState() as LightboxHistoryState | null)?.lightboxRevealsInGrid !== false;
+  }
+
+  /**
+   * The history state for a navigation that replaces the URL of the shown media: keeps the state of getLightboxLink().
    */
   keepLightboxState(): LightboxHistoryState {
-    return {lightboxClosesWithBack: this.lightboxClosesWithBack()};
+    return {lightboxClosesWithBack: this.lightboxClosesWithBack(), lightboxRevealsInGrid: this.lightboxRevealsInGrid()};
   }
 
   getParamsForDirs(directory: ParentDirectoryDTO | SubDirectoryDTO): Record<string, unknown> {
