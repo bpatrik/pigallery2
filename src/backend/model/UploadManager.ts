@@ -8,6 +8,7 @@ import {DiskManager} from './fileaccess/DiskManager';
 import {Config} from '../../common/config/private/Config';
 import {PG2ConfMap} from '../../common/PG2ConfMap';
 import {FolderNotWritable} from '../exceptions/FolderNotWritable';
+import {DirectoryNotFound} from '../exceptions/DirectoryNotFound';
 
 export interface UploadError {
   filename: string;
@@ -30,6 +31,7 @@ export class UploadManager {
     if (!fullDirPath) {
       throw new FolderNotWritable('Invalid upload path: ' + directory);
     }
+    await UploadManager.assertDirectoryExists(fullDirPath);
 
     if (Config.Upload.enforcedDirectoryConfig === true) {
       const hasUploadConf = Object.keys(PG2ConfMap.upload).some(filename => {
@@ -86,12 +88,12 @@ export class UploadManager {
       throw new Error('File is larger than the upload limit of ' + Config.Upload.maxFileSizeMB + ' MB: ' + filename);
     }
 
-    if (fs.existsSync(fullFilePath)) {
-      throw new FileAlreadyExists('File already exists: ' + fullFilePath, file.originalname);
-    }
+    // upload never creates folders, only saves to existing ones
+    await UploadManager.assertDirectoryExists(fullDirPath);
 
-    if (!fs.existsSync(fullDirPath)) {
-      await fs.promises.mkdir(fullDirPath, {recursive: true});
+    if (fs.existsSync(fullFilePath)) {
+      // only the name: the path on the disk is not the client's business
+      throw new FileAlreadyExists('File already exists: ' + filename, filename);
     }
 
     try {
@@ -103,6 +105,13 @@ export class UploadManager {
       }
       await fs.promises.copyFile(file.path, fullFilePath, fs.constants.COPYFILE_EXCL);
       await fs.promises.rm(file.path, {force: true});
+    }
+  }
+
+  private static async assertDirectoryExists(fullDirPath: string): Promise<void> {
+    const stat = await fs.promises.stat(fullDirPath).catch((): null => null);
+    if (!stat?.isDirectory()) {
+      throw new DirectoryNotFound('Directory not found');
     }
   }
 }
