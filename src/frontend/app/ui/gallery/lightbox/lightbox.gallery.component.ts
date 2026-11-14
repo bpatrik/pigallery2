@@ -117,7 +117,8 @@ export class GalleryLightboxComponent implements OnDestroy {
     if (index + 1 < media.length) {
       return media[index + 1];
     }
-    return this.lightboxService.loopSlideshow() ? media[0] : null;
+    // a single photo has nothing to loop to
+    return this.lightboxService.loopSlideshow() && media.length > 1 ? media[0] : null;
   });
   readonly hasNext = computed((): boolean => !!this.nextMedia());
   readonly navigation = computed(() => ({
