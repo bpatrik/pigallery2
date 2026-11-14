@@ -244,4 +244,17 @@ test.describe('Errors', () => {
       await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeAttached();
     });
   });
+
+  test.describe('Too old browser', () => {
+
+    test('should say that the browser is not supported, not load forever (#1186)', async ({page}) => {
+      // an old browser can't parse the app's JavaScript, e.g. iOS 15 Safari the class static blocks
+      await page.route(url => /\/main(-[A-Z0-9]+)?\.js$/.test(url.pathname),
+        route => route.fulfill({contentType: 'text/javascript', body: 'class A { static { syntax error'}));
+      await page.goto('/gallery/');
+
+      await expect(page.getByText(/browser is too old/i)).toBeVisible();
+      await expect(page.getByText('Loading...')).toHaveCount(0);
+    });
+  });
 });

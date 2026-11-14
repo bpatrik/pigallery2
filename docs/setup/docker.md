@@ -124,5 +124,22 @@ You do not need the `<path to your db file folder>/sqlite.db` line if you don't 
 You can clone the repository and build the image, or you can just use the 'self-contained' Dockerfile: [debian-trixie/selfcontained/Dockerfile](https://github.com/bpatrik/pigallery2/blob/master/docker/debian-trixie/selfcontained/Dockerfile)
 Note: 'self-contained' is not well tested, bug fix PRs are welcome.
 
+### Older browsers
+
+The frontend supports the browsers that [Angular supports](https://angular.dev/reference/versions#browser-support).
+An older browser (e.g. Safari on iOS 15) shows "This browser is too old" instead of the gallery.
+If you need such a browser, you can build the image for it yourself with the 'self-contained' Dockerfile.
+Its `BROWSERSLIST` build argument sets the [browsers](https://browsersl.ist/) that the frontend is built for:
+
+```bash
+curl -O https://raw.githubusercontent.com/bpatrik/pigallery2/master/docker/debian-trixie/selfcontained/Dockerfile
+docker build --build-arg BROWSERSLIST="defaults, iOS >= 15.4" -t pigallery2-old-browsers .
+```
+
+Then use `pigallery2-old-browsers` instead of `bpatrik/pigallery2:latest` in your `docker-compose.yml` or `docker run` command.
+This is not supported: it builds the latest development version (`master`), only changes the JavaScript syntax
+(missing browser APIs are not added), and a later version may need a newer browser again.
+iOS 15.4 is the oldest Safari that works this way; earlier versions lack APIs that the app uses.
+
 ## Contributing to Docker
 See the [Docker Contribution Guide](../development/docker-contributing.md).

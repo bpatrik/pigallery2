@@ -23,6 +23,18 @@
   </script>
 
   <script>
+    // A browser older than what Angular supports can't parse the app (e.g. iOS 15 Safari, #1186).
+    // Say so instead of an endless "Loading...". Old-style JS, so that this script itself runs there.
+    window.addEventListener('error', function (e) {
+      var loading = document.getElementById('app-loading-text');
+      if (!loading || !(e.error instanceof SyntaxError || /SyntaxError/.test(e.message))) {
+        return;
+      }
+      loading.textContent = 'This browser is too old for PiGallery2. Please update it or use a newer browser.';
+    });
+  </script>
+
+  <script>
     <%- customHTMLHead %>
   </script>
 
@@ -43,7 +55,7 @@
          viewBox="<%- Config.Server.svgIcon.viewBox || '0 0 512 512' %>">
      <!-- <%- "-->"+Config.Server.svgIcon.items+"<!--" %> -->
     </svg>
-    <h2 style="margin-top: 1em">Loading...</h2>
+    <h2 id="app-loading-text" style="margin-top: 1em">Loading...</h2>
   </div>
 </app-pi-gallery2>
 

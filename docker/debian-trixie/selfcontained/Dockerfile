@@ -16,6 +16,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl python3 gi
 # copying only package{-lock}.json to make node_modules cachable
 RUN git clone https://github.com/bpatrik/pigallery2.git /build
 WORKDIR /build
+# optional: the browsers to build the frontend for (default: what Angular supports), e.g.:
+# docker build --build-arg BROWSERSLIST="defaults, iOS >= 15.4" .
+ARG BROWSERSLIST
 RUN npm install \
     && mkdir -p /build/release/data/config \
     && mkdir -p /build/release/data/db \
