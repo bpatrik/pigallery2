@@ -28,6 +28,8 @@ import {ScrollRestorationService} from '../../../model/scroll-restoration.servic
 import {GridLayout} from './GridLayout';
 import {GridScrollWindow} from './GridScrollWindow';
 import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
+import {GalleryGridScrollLabelComponent} from './scroll-label/scroll-label.grid.gallery.component';
+import {By} from '@angular/platform-browser';
 
 class MockQueryService {
   getMediaStringId(media: MediaDTO): string {
@@ -86,7 +88,6 @@ const photo = (name: string, date = 0): PhotoDTO => ({
 } as PhotoDTO);
 
 describe('GalleryGridComponent', () => {
-  let sortingService: MockGallerySortingService;
   let component: GalleryGridComponent;
   let fixture: ComponentFixture<GalleryGridComponent>;
   let scrollY: number;
@@ -101,12 +102,14 @@ describe('GalleryGridComponent', () => {
   // a scroll event, then the next frame
   const scroll = (y: number): void => {
     scrollY = y;
-    component.onScroll();
+    window.dispatchEvent(new Event('scroll'));
     frames.splice(0).forEach(cb => cb(0));
     fixture.detectChanges();
   };
   const renderedMedia = (): MediaDTO[] => component.renderedLines().flatMap(l => l.segments.flatMap(s => s.tiles.map(t => t.gridMedia.media)));
   const layout = (): GridLayout => component.layout()!;
+  const scrollLabel = (): GalleryGridScrollLabelComponent =>
+    fixture.debugElement.query(By.directive(GalleryGridScrollLabelComponent)).componentInstance;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -138,7 +141,6 @@ describe('GalleryGridComponent', () => {
     })
       .compileComponents();
 
-    sortingService = TestBed.inject(GallerySortingService) as unknown as MockGallerySortingService;
     fixture = TestBed.createComponent(GalleryGridComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('mediaGroups', []);
@@ -351,7 +353,7 @@ describe('GalleryGridComponent', () => {
       });
 
       it('should not move the photos when the scroll handle is grabbed while the page still scrolls', async () => {
-        (component as unknown as { touchOnly: boolean }).touchOnly = true;
+        (scrollLabel() as unknown as { touchOnly: boolean }).touchOnly = true;
         const handle = {getBoundingClientRect: () => ({top: 100}), offsetHeight: 40} as unknown as HTMLElement;
         const pointer = (clientY: number): PointerEvent => ({pointerId: 1, clientY, currentTarget: handle, preventDefault: () => undefined} as unknown as PointerEvent);
         for (let i = 0; i < 6; ++i) {
@@ -361,14 +363,14 @@ describe('GalleryGridComponent', () => {
         const top = screenTop();
         expect(top).toBeCloseTo(3 * window.innerHeight, 0);
 
-        component.onHandlePointerDown(pointer(110));
+        scrollLabel().onHandlePointerDown(pointer(110));
         // the last scroll event of the page, the finger did not move yet
         scroll(scrollY);
         expect(screenTop(), 'grabbed').toBeCloseTo(top, 0);
 
         // the drag itself is a big jump: from the same photos
-        component.onHandlePointerMove(pointer(110));
-        component.onHandlePointerUp(pointer(110));
+        scrollLabel().onHandlePointerMove(pointer(110));
+        scrollLabel().onHandlePointerUp(pointer(110));
         fixture.detectChanges();
         expect(screenTop(), 'dragged').toBeCloseTo(top, 0);
       });
@@ -404,206 +406,52 @@ describe('GalleryGridComponent', () => {
     });
   });
 
-  // #1209: the month and year of the first visible photo next to the scrollbar
+  // the label itself is tested with the GalleryGridScrollLabelComponent
   describe('scroll label', () => {
+    let photos: PhotoDTO[];
+    const label = (): HTMLElement | null => fixture.nativeElement.querySelector('.scroll-label');
+
     beforeEach(() => {
-      // timers only: the frames are counted by the test
-      vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout']});
-      // newest first, 30 photos of every month
-      const photos: PhotoDTO[] = [];
-      for (let i = 0; i < 60; ++i) {
-        photos.push(photo(i + '.jpg', Date.UTC(2021, i < 30 ? 5 : 2, 15, 12)));
+      // newest first, a month each
+      photos = [];
+      for (let i = 0; i < 500; ++i) {
+        photos.push(photo(i + '.jpg', Date.UTC(2021, 11 - Math.floor(i / 50), 15, 12)));
       }
       setUp([{name: '', media: photos}]);
     });
 
-    const label = (): HTMLElement | null => fixture.nativeElement.querySelector('.scroll-label');
-    // the line of the first March photo; its line has June photos too
-    const marchLine = (): number => layout().lines.findIndex(l => l.segments[0].media.some(m => m.media.name === '30.jpg'));
-
-    it('should show the month and year of the first visible photo, also if it is not rendered', () => {
-      scroll(layout().top(1) + 1);
-      expect(label()?.textContent?.trim()).toBe('June 2021');
-      expect(label()?.classList.contains('handle'), 'only on a touch screen').toBe(false);
-      expect(label()?.style.top, 'the CSS puts it next to the thumb').toBe('');
-      const thumb = innerHeight * innerHeight / (PageHelper.MaxScrollY + innerHeight);
-      const thumbCenter = (): number => parseFloat(label()?.style.getPropertyValue('--thumb-center') ?? '');
-      expect(thumbCenter()).toBeCloseTo(scrollY / PageHelper.MaxScrollY * (innerHeight - thumb) + thumb / 2);
-
-      scroll(layout().top(marchLine() + 1));
-      expect(label()?.textContent?.trim()).toBe('March 2021');
-
-      scroll(PageHelper.MaxScrollY + 100);
-      expect(thumbCenter(), 'the thumb at the bottom').toBeCloseTo(innerHeight - thumb / 2);
+    it('should show the label of the first visible photo, also if it was not rendered before', () => {
+      expect(label()).toBeNull();
+      const line = layout().lineOf(photos[420]);
+      scroll(layout().top(line) + 1);
+      expect(label()?.textContent?.trim()).toBe('April 2021');
     });
 
-    it('should be next to the thumb between the arrow buttons of a classic scrollbar', () => {
-      vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(innerWidth - 15);
-      const thumbCenter = (): number => parseFloat(label()?.style.getPropertyValue('--thumb-center') ?? '');
-      scroll(0);
-      scroll(1);
-      const thumb = Math.max(20, (innerHeight - 30) * innerHeight / (PageHelper.MaxScrollY + innerHeight));
-      expect(thumbCenter(), 'below the button at the top').toBeCloseTo(15 + 1 / PageHelper.MaxScrollY * (innerHeight - 30 - thumb) + thumb / 2);
-      scroll(PageHelper.MaxScrollY + 100);
-      expect(thumbCenter(), 'above the button at the bottom').toBeCloseTo(innerHeight - 15 - thumb / 2);
-    });
+    it('should render the lines less often while the scroll handle is dragged', async () => {
+      vi.useFakeTimers({toFake: ['setTimeout', 'clearTimeout', 'performance']});
+      scroll(layout().top(layout().lineOf(photos[100])));
+      expect(renderedMedia()).toContain(photos[100]);
+      // the page is open for a while
+      await vi.advanceTimersByTimeAsync(1000);
 
-    it('should hide after the scrolling stopped', async () => {
-      scroll(250);
-      expect(label()).not.toBeNull();
-      await vi.advanceTimersByTimeAsync(1500);
+      // dragged across the photos: they would not even show up
+      scrollLabel().dragChange.emit(true);
+      scroll(layout().top(layout().lineOf(photos[250])));
+      await vi.advanceTimersByTimeAsync(10);
+      scroll(layout().top(layout().lineOf(photos[400])));
+      expect(renderedMedia()).toContain(photos[250]);
+      expect(renderedMedia(), 'passed by').not.toContain(photos[400]);
+
+      await vi.advanceTimersByTimeAsync(200);
       fixture.detectChanges();
-      expect(label()).toBeNull();
-    });
+      expect(renderedMedia(), 'where the drag is now').toContain(photos[400]);
 
-    it('should show the label of the sorting service', () => {
-      sortingService.scrollLabelFn = {order: SortByTypes.Name, label: (m: MediaDTO) => m.name.at(0) ?? ''};
-      scroll(layout().top(1) + 1);
-      expect(label()?.textContent?.trim()).toBe(layout().lines[1].segments[0].media[0].media.name.at(0));
-    });
-
-    it('should not show when the sorting service has no label', () => {
-      sortingService.scrollLabelFn = null;
-      scroll(250);
-      expect(label()).toBeNull();
-    });
-
-    it('should be hidden from assistive technologies', () => {
-      scroll(250);
-      expect(label()?.getAttribute('aria-hidden')).toBe('true');
-    });
-
-    it('should skip the photos behind the navbar', () => {
-      const navbar = document.createElement('div');
-      navbar.className = 'navbar-container';
-      navbar.getBoundingClientRect = () => ({bottom: 100} as DOMRect);
-      document.body.appendChild(navbar);
-      try {
-        // the line of the first March photo is behind the navbar, the next one is the first visible one
-        scroll(layout().top(marchLine() + 1) - 50);
-        expect(label()?.textContent?.trim()).toBe('March 2021');
-        expect(label()?.style.getPropertyValue('--navbar-bottom'), 'the label stays below the navbar').toBe('100px');
-      } finally {
-        navbar.remove();
-      }
-    });
-
-    it('should show the rating with stars like the group headers', () => {
-      sortingService.scrollLabelFn = {order: SortByTypes.Rating, label: () => '3'};
-      scroll(250);
-      const stars = [...(label()?.querySelectorAll('ng-icon') ?? [])].map(i => i.innerHTML);
-      expect(stars.length).toBe(5);
-      expect(stars[0]).not.toBe('');
-      // 3 filled, 2 outlined
-      expect(stars.filter(s => s === stars[0]).length).toBe(3);
-      expect(stars[3]).toBe(stars[4]);
-      expect(stars[3]).not.toBe(stars[0]);
-      expect(label()?.textContent?.trim()).toBe('');
-    });
-
-    it('should show the person count with the people icon like the group headers', () => {
-      sortingService.scrollLabelFn = {order: SortByTypes.PersonCount, label: () => '2'};
-      scroll(250);
-      expect(label()?.textContent?.trim()).toBe('2');
-      expect(label()?.querySelectorAll('ng-icon').length).toBe(1);
-    });
-
-    // #1308: browser back or forward scrolls the page itself
-    it('should not show while the scroll position of a browser back is restored', () => {
-      const restoreTarget = vi.spyOn(TestBed.inject(ScrollRestorationService), 'restoreTarget').mockReturnValue(250);
-      scroll(250);
-      expect(label()).toBeNull();
-      restoreTarget.mockReturnValue(null); // the user scrolls
-      scroll(260);
-      expect(label()).not.toBeNull();
-    });
-
-    it('should not update after the grid is removed', () => {
-      const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
-      scrollY = 250;
-      const labelFrame = frames.length + 1; // the label asks for the first frame of the scroll
-      component.onScroll();
-      fixture.destroy();
-      expect(cancel).toHaveBeenCalledWith(labelFrame);
-    });
-
-    it('should not show when there is nothing to scroll', () => {
-      vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(0);
-      scroll(0);
-      expect(label()).toBeNull();
-    });
-
-    describe('on a touch screen', () => {
-      let scrollTo: ReturnType<typeof vi.spyOn>;
-      // the handle on the screen: 40px high, 100px from the top
-      const handle = {getBoundingClientRect: () => ({top: 100}), offsetHeight: 40} as unknown as HTMLElement;
-      const pointer = (clientY: number): PointerEvent => ({pointerId: 1, clientY, currentTarget: handle, preventDefault: () => undefined} as unknown as PointerEvent);
-
-      beforeEach(() => {
-        (component as unknown as { touchOnly: boolean }).touchOnly = true;
-        // a long page
-        vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(10000);
-        scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
-      });
-
-      it('should be a handle to drag, also without a label', () => {
-        sortingService.scrollLabelFn = null;
-        scroll(250);
-        expect(label()?.classList.contains('handle')).toBe(true);
-        expect(label()?.textContent?.trim()).toBe('');
-      });
-
-      it('should scroll the page like the thumb of a scrollbar while dragged, from where it was grabbed', () => {
-        scroll(250);
-        const scrolledTo = (top: number): void =>
-          expect(scrollTo).toHaveBeenLastCalledWith({left: window.scrollX, top, behavior: 'instant'});
-        const bottom = window.innerHeight - 40;
-        component.onHandlePointerDown(pointer(110)); // 10px below its top
-        fixture.detectChanges();
-        expect(label()?.style.top, 'at the finger').toBe('100px');
-
-        component.onHandlePointerMove(pointer(110));
-        scrolledTo(250);
-        // below where it was grabbed: to the end
-        component.onHandlePointerMove(pointer(10 + (100 + bottom) / 2));
-        scrolledTo(250 + (PageHelper.MaxScrollY - 250) / 2);
-        component.onHandlePointerMove(pointer(10 + bottom + 100));
-        scrolledTo(PageHelper.MaxScrollY);
-        // above it: to the top
-        component.onHandlePointerMove(pointer(10 + 50));
-        scrolledTo(125);
-        fixture.detectChanges();
-        expect(label()?.style.top).toBe('50px');
-        component.onHandlePointerMove(pointer(-500));
-        scrolledTo(0);
-
-        component.onHandlePointerUp(pointer(-500));
-        scrollTo.mockClear();
-        component.onHandlePointerMove(pointer(300));
-        expect(scrollTo, 'released').not.toHaveBeenCalled();
-      });
-
-      it('should stay while dragged and hide after the release', async () => {
-        scroll(250);
-        component.onHandlePointerDown(pointer(110));
-        await vi.advanceTimersByTimeAsync(5000);
-        fixture.detectChanges();
-        expect(label()?.classList.contains('dragging')).toBe(true);
-
-        component.onHandlePointerUp(pointer(110));
-        await vi.advanceTimersByTimeAsync(1000);
-        fixture.detectChanges();
-        expect(label(), 'longer than without touch: to be grabbed').not.toBeNull();
-        await vi.advanceTimersByTimeAsync(1500);
-        fixture.detectChanges();
-        expect(label()).toBeNull();
-      });
-
-      it('should not be a handle on a short page', () => {
-        vi.spyOn(PageHelper, 'MaxScrollY', 'get').mockReturnValue(window.innerHeight);
-        scroll(250);
-        expect(label()?.classList.contains('handle')).toBe(false);
-      });
+      // released: right away
+      scroll(layout().top(layout().lineOf(photos[100])));
+      expect(renderedMedia()).not.toContain(photos[100]);
+      scrollLabel().dragChange.emit(false);
+      fixture.detectChanges();
+      expect(renderedMedia()).toContain(photos[100]);
     });
   });
 

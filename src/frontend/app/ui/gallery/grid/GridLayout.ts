@@ -136,6 +136,11 @@ export class GridLayout {
     return found;
   }
 
+  /** The first media of the line at y (see lineAt()), also if it is not rendered; null if the grid is empty. */
+  firstMediaAt(y: number): MediaDTO | null {
+    return this.lines[this.lineAt(y)]?.segments[0].media[0].media ?? null;
+  }
+
   /** The rendered height of a line. Returns true if it changed; call updateTops() after the changes. */
   setHeight(index: number, height: number): boolean {
     this.measured[index] = true;
