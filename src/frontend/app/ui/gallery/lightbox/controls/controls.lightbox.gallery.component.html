@@ -50,20 +50,22 @@
         </button>
         <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu dropdown-menu-right"
           role="menu" aria-labelledby="button-basic">
-          <li role="menuitem">
-            @if (activePhoto(); as activePhoto) {
-              <a
-                [href]="originalMediaPath()"
-                [download]="activePhoto.media.name"
-                (click)="downloadOriginal($event)"
-                class="dropdown-item">
-                <ng-icon class="me-2"
-                name="ionDownloadOutline" title="Download" i18n-title />
-                <span i18n>Download</span>
-                <small>(shift + D)</small>
-              </a>
-            }
-          </li>
+          @if (canDownload()) {
+            <li role="menuitem">
+              @if (activePhoto(); as activePhoto) {
+                <a
+                  [href]="originalMediaPath()"
+                  [download]="activePhoto.media.name"
+                  (click)="downloadOriginal($event)"
+                  class="dropdown-item">
+                  <ng-icon class="me-2"
+                  name="ionDownloadOutline" title="Download" i18n-title />
+                  <span i18n>Download</span>
+                  <small>(shift + D)</small>
+                </a>
+              }
+            </li>
+          }
           <li role="menuitem"
             dropdown>
             <div class="dropdown-item">

@@ -15,6 +15,7 @@ import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import { DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearchQueryMatchTypes } from '../../../../../common/entities/SearchQueryDTO';
 import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
+import { PopoverDirective } from 'ngx-bootstrap/popover';
 
 @Component({
     selector: 'app-gallery-share',
@@ -25,7 +26,8 @@ import { StringifySearchQuery } from '../../../pipes/StringifySearchQuery';
     FormsModule,
     CopyDirective,
     DatePipe,
-    StringifySearchQuery
+    StringifySearchQuery,
+    PopoverDirective
 ]
 })
 export class GalleryShareComponent {
@@ -49,6 +51,9 @@ export class GalleryShareComponent {
   };
   // share the subdirectories too (directory sharing only)
   readonly recursive = signal(false);
+  // hides the download options in the sharing session (not bulletproof, see the info popover)
+  readonly preventDownload = signal(false);
+  readonly preventDownloadInfo = $localize`Hides the download buttons and blocks right click saving. Downloading can't be fully prevented: what the browser shows can still be saved, e.g.: with a screenshot or the developer tools.`;
   // what the current content would share
   private readonly target = computed((): {
     enabled: boolean;
@@ -155,6 +160,12 @@ export class GalleryShareComponent {
     } as DirectorySearch;
   }
 
+  async onPreventDownloadChange(): Promise<void> {
+    if (this.sharing()) {
+      await this.update();
+    }
+  }
+
   async onRecursiveChange(): Promise<void> {
     if (!this.isDirectorySharing()) {
       return;
@@ -221,13 +232,15 @@ export class GalleryShareComponent {
         query as DirectorySearch,
         this.input.password,
         this.calcValidity(),
+        this.preventDownload(),
         this.currentDir()
       )
       : await this.sharingService.updateSharingByQuery(
         sharing.id,
         query,
         this.input.password,
-        this.calcValidity()
+        this.calcValidity(),
+        this.preventDownload()
       );
     this.sharing.set(updated);
     this.urlValid.set(true);
@@ -252,12 +265,14 @@ export class GalleryShareComponent {
         query as DirectorySearch,
         this.input.password,
         this.calcValidity(),
+        this.preventDownload(),
         this.currentDir()
       )
       : await this.sharingService.createSharingByQuery(
         query,
         this.input.password,
-        this.calcValidity()
+        this.calcValidity(),
+        this.preventDownload()
       );
     this.sharing.set(created);
     this.url.set(this.sharingService.getUrl(created));
@@ -270,6 +285,7 @@ export class GalleryShareComponent {
     this.urlValid.set(false);
     this.sharing.set(null);
     this.input.password = '';
+    this.preventDownload.set(false);
     if (this.modalRef) {
       this.modalRef?.hide();
     }

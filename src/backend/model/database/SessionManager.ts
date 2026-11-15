@@ -49,6 +49,7 @@ export class SessionManager {
       name: 'Guest',
       role: UserRoles.LimitedGuest,
       usedSharingKey: sharing.sharingKey,
+      preventDownload: sharing.preventDownload === true,
       overrideAllowBlockList: true,
       allowQuery: SessionManager.andQueries(this.getMediaQueryForUser(sharing.creator), sharing.searchQuery ?? null),
       allowDirectoryList: creatorLists.allow,

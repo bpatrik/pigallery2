@@ -70,6 +70,8 @@ class MockFullScreenService {
 }
 
 class MockAuthenticationService {
+  readonly canDownload = signal(true);
+
   canSearch() {
     return false;
   }
@@ -382,6 +384,21 @@ describe('ControlsLightboxComponent', () => {
 
       await vi.waitFor(() => expect(notification.warning).toHaveBeenCalledWith('This file is not available anymore.'));
       expect(click.defaultPrevented, 'the unchecked download of the link itself').toBe(true);
+      expect(clicked).not.toHaveBeenCalled();
+    });
+
+    it('should not offer downloading in a sharing that prevents it (#1158)', async () => {
+      respond(200);
+      (TestBed.inject(AuthenticationService) as unknown as MockAuthenticationService).canDownload.set(false);
+      fixture.debugElement.query(By.directive(BsDropdownDirective)).injector.get(BsDropdownDirective).show();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(query('a.dropdown-item[href]'), 'download menu item').toBeNull();
+
+      window.dispatchEvent(new KeyboardEvent('keydown', {key: 'D', shiftKey: true}));
+      await fixture.whenStable();
+      expect(fetchMock).not.toHaveBeenCalled();
       expect(clicked).not.toHaveBeenCalled();
     });
   });

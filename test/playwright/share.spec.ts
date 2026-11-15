@@ -274,6 +274,23 @@ test.describe('Share', () => {
       await expect(rows).toHaveCount(before + 2);
     });
 
+    test('Share dialog should create a sharing that prevents downloading (#1158)', async ({page}) => {
+      await openDirectory(page, 'timestamps');
+      await page.locator('button#shareButton').click();
+      const preventDownload = page.locator('input#share-prevent-download');
+      await expect(preventDownload).not.toBeChecked();
+      // the info tells that it can't be fully prevented
+      await page.locator('#share-prevent-download-info').hover();
+      await expect(page.locator('popover-container')).toContainText('can\'t be fully prevented');
+      await preventDownload.check();
+
+      const created = page.waitForResponse(res => res.url().endsWith('/pgapi/share/') && res.request().method() === 'POST');
+      await page.locator('button#getShareButton').click();
+      const sharing = (await (await created).json()).result;
+      expect(sharing.preventDownload).toBe(true);
+      await deleteSharingsWithApi(page.request, [sharing.sharingKey]);
+    });
+
     test('Share dialog should hand the link to the share sheet of the device', async ({page}) => {
       // the test browser has no share sheet: a fake one records what it gets
       await page.addInitScript(() => {

@@ -15,6 +15,7 @@ export interface UserDTO {
   role: UserRoles;
   oidcSubject?: string | null; // set if the user is linked to an OIDC account (strict security mode)
   usedSharingKey?: string;
+  preventDownload?: boolean; // sharing session: the download options are hidden (not bulletproof)
   projectionKey?: string; // allow- and blocklist projection hash. if null, no projection
   // Optional per-user query overrides
   overrideAllowBlockList?: boolean;

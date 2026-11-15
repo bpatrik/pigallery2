@@ -124,6 +124,10 @@ export class GalleryMWs {
       return next();
     }
 
+    if (RequestSession.getContext(req).user.preventDownload) {
+      return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED, 'Downloading is disabled for this sharing'));
+    }
+
     // Handle search-query-based zip
     try {
       const query = req.resultPipe as SearchQueryDTO;

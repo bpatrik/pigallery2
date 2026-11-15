@@ -164,6 +164,9 @@ export class SharingManager {
     } else if (inSharing.defaultDirectoryView === null) {
       sharing.defaultDirectoryView = null;
     }
+    if (typeof inSharing.preventDownload === 'boolean') {
+      sharing.preventDownload = inSharing.preventDownload;
+    }
     sharing.expires = inSharing.expires;
 
     const ret = await connection.getRepository(SharingEntity).save(sharing);

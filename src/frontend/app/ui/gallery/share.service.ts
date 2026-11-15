@@ -146,6 +146,7 @@ export class ShareService {
     searchQuery: SearchQueryDTO,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
@@ -155,6 +156,7 @@ export class ShareService {
         valid,
         ...(!!password && {password: password}),
         searchQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
         ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
@@ -168,6 +170,7 @@ export class ShareService {
     directoryQuery: DirectorySearch,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
     return this.networkService.postJson('/share/', {
@@ -175,6 +178,7 @@ export class ShareService {
         valid,
         ...(!!password && {password: password}),
         directoryQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
       } as CreateSharingDTO,
     });
@@ -185,6 +189,7 @@ export class ShareService {
     directoryQuery: DirectorySearch,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
     return this.networkService.putJson('/share/', {
@@ -193,6 +198,7 @@ export class ShareService {
         valid,
         password,
         directoryQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
       } as CreateSharingDTO,
     });
@@ -245,6 +251,7 @@ export class ShareService {
     searchQuery: SearchQueryDTO,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
@@ -255,6 +262,7 @@ export class ShareService {
         valid,
         password,
         searchQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
         ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,

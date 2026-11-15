@@ -92,3 +92,9 @@ This is mostly btn-dark + border fix
 
 
 body {overflow-y: scroll;}
+
+/* sharing that prevents downloading: no "Save image" on a long press on iOS (see GalleryComponent.onMediaSaveAttempt) */
+app-gallery.prevent-download img,
+app-gallery.prevent-download video {
+  -webkit-touch-callout: none;
+}
