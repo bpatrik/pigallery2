@@ -4646,23 +4646,23 @@
         <source>Up time</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">146</context>
+          <context context-type="linenumber">145</context>
         </context-group>
         <target state="translated">Up time</target>
       </trans-unit>
-      <trans-unit id="8113063424795575035" datatype="html">
-        <source>Enjoying PiGallery2? Support its development:</source>
+      <trans-unit id="2893267918775618600" datatype="html">
+        <source>Sponsor:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">155,156</context>
+          <context context-type="linenumber">151,152</context>
         </context-group>
-        <target>Enjoying PiGallery2? Support its development:</target>
+        <target>Sponsor:</target>
       </trans-unit>
       <trans-unit id="714730744313654167" datatype="html">
         <source>Application version</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">170</context>
+          <context context-type="linenumber">167</context>
         </context-group>
         <target state="translated">Versione applicazione</target>
       </trans-unit>
@@ -4670,7 +4670,7 @@
         <source>Built at</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">173</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target state="translated">Compilata il</target>
       </trans-unit>
@@ -4678,7 +4678,7 @@
         <source>Git commit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">177</context>
+          <context context-type="linenumber">174</context>
         </context-group>
         <target state="translated">Git commit</target>
       </trans-unit>

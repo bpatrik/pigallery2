@@ -140,26 +140,23 @@
         </div>
       </div>
 
-      <div class="row mb-3">
-        <div class="col-12">
-          <div class="text-end">
-            <ng-container i18n>Up time</ng-container><!--
-            -->: {{settingsService.settings().Environment.upTime | date:'medium'}}
-          </div>
-        </div>
-      </div>
-
-      @if (!settingsService.settings().Server.hideSponsorLinks) {
-        <div class="row mb-3">
-          <div class="col-12 text-center text-body-secondary">
-            <span i18n>Enjoying PiGallery2? Support its development:</span>
-            <a class="ms-2" href="https://github.com/sponsors/bpatrik" target="_blank" rel="noopener">
-              <ng-icon name="ionHeartOutline" class="align-text-top" /> GitHub Sponsors</a>
-            <a class="ms-2" href="https://ko-fi.com/pigallery2" target="_blank" rel="noopener">
-              <ng-icon name="ionHeartOutline" class="align-text-top" /> Ko-fi</a>
-          </div>
-        </div>
-      }
+      <footer class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-3 mt-4 mb-3 border-top small">
+        <span class="text-body-secondary">
+          <ng-container i18n>Up time</ng-container><!--
+          -->: {{settingsService.settings().Environment.upTime | date:'medium'}}
+        </span>
+        @if (!settingsService.settings().Server.hideSponsorLinks) {
+          <span>
+            <ng-icon name="ionHeartOutline" class="align-text-top text-danger" />
+            <span class="text-body-secondary ms-1" i18n>Sponsor:</span>
+            <a class="sponsor-link ms-1" href="https://github.com/sponsors/bpatrik" target="_blank" rel="noopener"
+               title="GitHub Sponsors">GitHub</a>
+            <span class="text-body-secondary mx-1">·</span>
+            <a class="sponsor-link" href="https://ko-fi.com/pigallery2" target="_blank" rel="noopener"
+               title="Ko-fi">Ko-fi</a>
+          </span>
+        }
+      </footer>
 
     </div>
   </app-frame>

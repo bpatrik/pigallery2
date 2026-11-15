@@ -35,3 +35,13 @@ nav.sticky-top {
   margin: calc(-1 * var(--bs-popover-body-padding-y)) calc(-1 * var(--bs-popover-body-padding-x));
   padding: var(--bs-popover-body-padding-y) var(--bs-popover-body-padding-x);
 }
+
+.sponsor-link {
+  color: var(--bs-danger);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.sponsor-link:hover {
+  text-decoration: underline;
+}
