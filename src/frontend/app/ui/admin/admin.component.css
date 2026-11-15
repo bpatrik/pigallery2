@@ -36,12 +36,12 @@ nav.sticky-top {
   padding: var(--bs-popover-body-padding-y) var(--bs-popover-body-padding-x);
 }
 
-.sponsor-link {
+.heart-link {
   color: var(--bs-danger);
   font-weight: 600;
   text-decoration: none;
 }
 
-.sponsor-link:hover {
+.heart-link:hover {
   text-decoration: underline;
 }
