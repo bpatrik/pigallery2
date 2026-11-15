@@ -13,6 +13,12 @@ Versions: `master` carries `X.Y.Z-edge` in `package.json`; a release is `X.Y.Z` 
 The extension kit (`pigallery2-extension-kit`) needs no publish step: the tag's CI run publishes it with the app's version.
 The sample extension that uses it is updated in step 8b.
 
+Release candidate (since 3.8.0): do steps 0-5b with the version `X.Y.Z-rc.1` instead of `X.Y.Z` (branch `release-X.Y.Z-rc.1`)
+and merge it without a tag. Its master CI run pushes Docker `edge` and publishes the kit `X.Y.Z-rc.1` with the npm dist-tag `edge`
+(every prerelease version is published once, from master). The maintainer runs it for about a week; fixes land on master as usual
+(bump to `-rc.2` only if the kit should be republished). Then the release itself is only step 4 with `X.Y.Z`
+(rerun step 2/3 if strings changed since the RC), then steps 6-9.
+
 ## 0. Preconditions **(ask)**
 
 - On `master`, clean, up to date with `origin/master`, and the latest CI run on master is green
