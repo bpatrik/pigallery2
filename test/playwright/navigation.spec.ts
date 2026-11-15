@@ -229,8 +229,13 @@ test.describe('Navbar menu', () => {
     await expect(menu).toBeVisible();
 
     // the language selector
-    await menu.locator('app-language button#language').click();
+    const languageButton = menu.locator('app-language button#language');
+    await languageButton.click();
     await expect(menu.locator('app-language .dropdown-menu')).toBeVisible();
+    await expect(menu).toBeVisible();
+    // closed again: with all languages (a release build) its list covers the rest of the menu
+    await languageButton.click();
+    await expect(menu.locator('app-language .dropdown-menu')).toBeHidden();
     await expect(menu).toBeVisible();
 
     // the Tools submenu (rendered into the body) and its switch
