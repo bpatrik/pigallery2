@@ -254,3 +254,7 @@ a {
 .info a {
   pointer-events: auto;
 }
+
+.info a:hover {
+  text-decoration: underline;
+}
