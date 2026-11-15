@@ -17,11 +17,14 @@ test.describe('Photo frame', () => {
   test.use({viewport: {width: 1200, height: 800}});
 
   test('should show a photo and move on to the next one on its own', async ({page}) => {
-    await page.goto('/gallery/?p=IMG_5910.jpg&' + frameParams(1, 300));
+    // the slideshow moves on also if the large photo has not loaded yet: it has to load within one slide,
+    // also while the server makes the thumbnails of the other tests
+    const slideSeconds = 5;
+    await page.goto('/gallery/?p=IMG_5910.jpg&' + frameParams(slideSeconds, 300));
 
-    await expectLightboxPhoto(page, 'IMG_5910.jpg');
-    await expect(page).toHaveURL(url => url.searchParams.get('p') !== 'IMG_5910.jpg', {timeout: 15000});
-    await expectLightboxPhoto(page, new URL(page.url()).searchParams.get('p')!);
+    await expectLightboxPhoto(page, 'IMG_5910.jpg', slideSeconds * 1000);
+    await expect(page).toHaveURL(url => url.searchParams.get('p') !== 'IMG_5910.jpg', {timeout: 3 * slideSeconds * 1000});
+    await expectLightboxPhoto(page, new URL(page.url()).searchParams.get('p')!, slideSeconds * 1000);
     // a frame shows only the photo, no error
     await expect(page.locator('app-toast-card')).toHaveCount(0);
   });
@@ -32,7 +35,8 @@ test.describe('Photo frame', () => {
     const folder = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/gallery/content/');
     await page.goto('/gallery/?p=IMG_5910.jpg&' + frameParams(300, 1));
     await folder;
-    await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    // the server may still make the large photo (and the thumbnails of the other tests)
+    await expectLightboxPhoto(page, 'IMG_5910.jpg', 15000);
 
     let failed = 0;
     await page.route(url => url.pathname.startsWith('/pgapi/'), route => {

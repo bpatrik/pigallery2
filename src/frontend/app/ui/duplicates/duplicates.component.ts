@@ -4,7 +4,6 @@ import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
 import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
 import {DirectoryPathDTO} from '../../../../common/entities/DirectoryDTO';
-import {Config} from '../../../../common/config/public/Config';
 import {PageHelper} from '../../model/page.helper';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
 import {PiTitleService} from '../../model/pi-title.service';
@@ -210,7 +209,6 @@ export class DuplicateComponent implements OnInit {
 
   private shouldRenderMore(): boolean {
     return (
-        Config.Gallery.enableOnScrollRendering === false ||
         PageHelper.ScrollY >= PageHelper.MaxScrollY * 0.7 ||
         document.body.clientHeight * 0.85 < window.innerHeight
     );

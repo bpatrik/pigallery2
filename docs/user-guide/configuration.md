@@ -66,7 +66,6 @@ App CLI options:
   --Users-blockDirectoryList                                                The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately. (default: [])
   --Users-suppressDefUserWarn                                               if true, the app won't show a warning for using the default user. (default: false)
   --Gallery-enableCache                                                     Caches directory contents and search results for better performance. (default: true)
-  --Gallery-enableOnScrollRendering                                         Those thumbnails get higher priority that are visible on the screen. (default: true)
   --Gallery-enableDirectorySortingByDate                                    If enabled, directories will be sorted by date, like photos, otherwise by name. Directory date is the last modification time of that directory not the creation date of the oldest photo. (default: false)
   --Gallery-ignoreTimestampOffset                                           If enabled, timestamp offsets are ignored, meaning that the local times of pictures are used for searching, sorting and grouping. If disabled, global time is used and pictures with no timestamp are assumed to be in UTC (offset +00:00). (default: true)
   --Gallery-enableOnScrollThumbnailPrioritising                             Those thumbnails will be rendered first that are in view. (default: true)
@@ -258,7 +257,6 @@ Environmental variables:
   Users-blockDirectoryList                                              The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately. (default: [])
   Users-suppressDefUserWarn                                             if true, the app won't show a warning for using the default user. (default: false)
   Gallery-enableCache                                                   Caches directory contents and search results for better performance. (default: true)
-  Gallery-enableOnScrollRendering                                       Those thumbnails get higher priority that are visible on the screen. (default: true)
   Gallery-enableDirectorySortingByDate                                  If enabled, directories will be sorted by date, like photos, otherwise by name. Directory date is the last modification time of that directory not the creation date of the oldest photo. (default: false)
   Gallery-ignoreTimestampOffset                                         If enabled, timestamp offsets are ignored, meaning that the local times of pictures are used for searching, sorting and grouping. If disabled, global time is used and pictures with no timestamp are assumed to be in UTC (offset +00:00). (default: true)
   Gallery-enableOnScrollThumbnailPrioritising                           Those thumbnails will be rendered first that are in view. (default: true)
@@ -514,8 +512,6 @@ Environmental variables:
     "Gallery": {
         "//[enableCache]": "Caches directory contents and search results for better performance.",
         "enableCache": true,
-        "//[enableOnScrollRendering]": "Those thumbnails get higher priority that are visible on the screen.",
-        "enableOnScrollRendering": true,
         "//[enableDirectorySortingByDate]": "If enabled, directories will be sorted by date, like photos, otherwise by name. Directory date is the last modification time of that directory not the creation date of the oldest photo.",
         "enableDirectorySortingByDate": false,
         "//[ignoreTimestampOffset]": "If enabled, timestamp offsets are ignored, meaning that the local times of pictures are used for searching, sorting and grouping. If disabled, global time is used and pictures with no timestamp are assumed to be in UTC (offset +00:00).",

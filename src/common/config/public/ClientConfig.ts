@@ -1204,15 +1204,6 @@ export class ClientGalleryConfig {
     description: $localize`Caches directory contents and search results for better performance.`
   })
   enableCache: boolean = true;
-  @ConfigProperty({
-    type: 'boolean',
-    tags: {
-      name: $localize`Scroll based thumbnail generation`,
-      priority: ConfigPriority.advanced,
-    },
-    description: $localize`Those thumbnails get higher priority that are visible on the screen.`
-  })
-  enableOnScrollRendering: boolean = true;
 
   @ConfigProperty({
     type: 'boolean',

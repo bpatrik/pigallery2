@@ -170,6 +170,26 @@ test.describe('Gallery', () => {
     await expect(blog.locator('.text-preview')).toContainText('You can use this feature');
   });
 
+  // the grid renders only the photos near the screen: when the blog above it shrinks, the photos that move onto the screen render too
+  test('Closing the blog of the folder at its end should show the photos below it', async ({page}) => {
+    const blog = page.locator('app-gallery-blog .blog').first();
+    const toggle = blog.locator('button.btn-blog-details');
+    await toggle.click();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading', level: 2})).toBeVisible();
+    const viewport = page.viewportSize()!;
+    expect((await blog.boundingBox())!.height, 'the blog is longer than the grid renders ahead').toBeGreaterThan(1.5 * viewport.height);
+    // read to its end: the close button is at the bottom of the screen
+    await toggle.evaluate(e => window.scrollBy({top: e.getBoundingClientRect().bottom - window.innerHeight + 20, behavior: 'instant'}));
+    await expect(toggle).toBeInViewport();
+
+    await toggle.click();
+    await expect(blog.getByRole('heading', {name: 'h2 Heading'})).toHaveCount(0);
+    // no scroll: the grid moved up onto the screen
+    const lowestPhotoOnScreen = (): Promise<number> => page.locator('app-gallery-grid app-gallery-grid-photo').evaluateAll(els =>
+      Math.max(0, ...els.map(e => e.getBoundingClientRect()).filter(r => r.top < window.innerHeight).map(r => r.bottom)));
+    await expect.poll(lowestPhotoOnScreen, {message: 'the photos fill the screen'}).toBeGreaterThanOrEqual(viewport.height);
+  });
+
   test('Gallery should show infobar over photo', async ({page}) => {
     // contains a folder
     await expect(page.locator('app-gallery-directories.directories > app-gallery-directory > .button > .photo-container').first()).toBeVisible();

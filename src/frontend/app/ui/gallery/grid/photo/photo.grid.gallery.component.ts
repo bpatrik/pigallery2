@@ -47,6 +47,8 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridMedia = input.required<GridMedia>();
+  // the grid rendered this photo already (e.g. it was scrolled out and back): it shows up at once, without fading in again
+  readonly shownBefore = input(false);
   readonly imageRef = viewChild<ElementRef>('img');
   readonly container = viewChild.required<ElementRef>('photoContainer');
 
@@ -59,7 +61,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean | null = null;
   loaded = false;
-  // browser back and forward show the same photos again: they show up at once, a new screen or row fades in
+  // only a photo shown the first time fades in: browser back and forward or a scroll back show the same photos again at once
   fadeIn = true;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
@@ -230,7 +232,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
-    this.fadeIn = this.scrollRestoration.restoreTarget() === null;
+    this.fadeIn = this.scrollRestoration.restoreTarget() === null && !this.shownBefore();
     this.updateMediaButtons();
   }
 

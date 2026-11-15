@@ -11,8 +11,10 @@ const getSettings = async (api: APIRequestContext): Promise<Settings> =>
   (await (await api.get('/pgapi/settings')).json()).result;
 
 const openAdmin = async (page: Page): Promise<void> => {
-  const settingsLoaded = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings');
-  await page.goto('/admin');
+  // waits for the settings only once the new page replaced the old one: the old page may still load them (a save reloads them),
+  // and the body of an answer to a page that was navigated away from can't be read. The app loads them only after it started.
+  await page.goto('/admin', {waitUntil: 'commit'});
+  const settingsLoaded = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/settings' && res.request().method() === 'GET');
   await expectApiOk(await settingsLoaded, 'loading the settings');
 };
 
