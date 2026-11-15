@@ -1,6 +1,6 @@
 // Browsing folders (#1308, CUJ 5) on the folder with accents in its name (#1316). Also runs on a phone (mobile project).
 import {expect, Page, test} from '@playwright/test';
-import {ACCENTED_DIR, desktopViewport, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
+import {ACCENTED_DIR, desktopViewport, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached, swipe, touchDrag} from './helpers';
 
 const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt="${name}"]`);
 const breadcrumb = (page: Page) => page.locator('app-gallery-navbar #directory-path .breadcrumb-item');
@@ -96,6 +96,54 @@ test.describe('Navigation', () => {
     await breadcrumb(page).getByRole('link', {name: 'Home'}).click();
     await expect(breadcrumb(page)).toHaveText(['Home']);
     await expect(page.locator('app-gallery-grid .photo-link > img').first()).toHaveClass(/fade-in/);
+  });
+
+  // the grid renders only the photos on and near the screen, but the page is as high as all of them: the end is one scroll away
+  test('The page should be as high as all photos before they are rendered', async ({page}) => {
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+    const pageHeight = (): Promise<number> => page.evaluate(() => document.documentElement.scrollHeight);
+    const height = await pageHeight();
+    expect(height, 'a few screens long').toBeGreaterThan(3 * page.viewportSize()!.height);
+    const firstPhoto = await page.locator('app-gallery-grid .photo-link > img').first().getAttribute('alt');
+
+    await page.evaluate(() => window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'instant'}));
+    // not all are loaded: the last one is a broken image
+    await expect(page.locator('app-gallery-grid app-gallery-grid-photo').last()).toBeInViewport();
+    expect(Math.abs(await pageHeight() - height), 'it did not grow').toBeLessThan(50);
+    await expect(photo(page, firstPhoto!), 'the photos far above are not rendered').toHaveCount(0);
+
+    await page.evaluate(() => window.scrollTo({top: 0, behavior: 'instant'}));
+    await expect(photo(page, firstPhoto!)).toBeVisible();
+  });
+
+  // a phone has no scrollbar to grab: the scroll label is the handle
+  test('Dragging the scroll label should scroll the page on a phone', async ({page, isMobile}) => {
+    test.skip(!isMobile, 'touch screen only');
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+    const toBottom = (): Promise<number> => page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - window.scrollY);
+
+    await swipe(page, 0, -200); // shows the handle
+    const handle = page.locator('app-gallery-grid .scroll-label.handle');
+    await expect(handle).toBeVisible();
+    const box = (await handle.boundingBox())!;
+    const x = box.x + box.width / 2;
+    await touchDrag(page, {x, y: box.y + box.height / 2}, {x, y: page.viewportSize()!.height - 1});
+    await expect.poll(toBottom, {message: 'scrolled to the end'}).toBeLessThan(5);
+    await expect(page.locator('app-gallery-grid app-gallery-grid-photo').last()).toBeInViewport();
+
+    // and back up; it hides a while after the scrolling stopped: a scroll shows it again
+    await swipe(page, 0, 100);
+    await expect(handle).toBeVisible();
+    const end = (await handle.boundingBox())!;
+    const endX = end.x + end.width / 2;
+    await touchDrag(page, {x: endX, y: end.y + end.height / 2}, {x: endX, y: 0});
+    await expect.poll(() => page.evaluate(() => window.scrollY), {message: 'scrolled to the top'}).toBeLessThan(5);
   });
 });
 

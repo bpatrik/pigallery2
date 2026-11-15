@@ -229,16 +229,22 @@ export const expectNoHorizontalScroll = async (page: Page, where: string): Promi
 export const swipe = async (page: Page, dx: number, dy = 0): Promise<void> => {
   const size = page.viewportSize() ?? {width: 400, height: 800};
   const start = {x: Math.round(size.width / 2 - dx / 2), y: Math.round(size.height / 2 - dy / 2)};
+  await touchDrag(page, start, {x: start.x + dx, y: start.y + dy}, 5);
+};
+
+/**
+ * Drags a finger from one point of the screen to another, with a real touch (Chromium only, the context needs hasTouch).
+ */
+export const touchDrag = async (page: Page, from: { x: number, y: number }, to: { x: number, y: number }, steps = 10): Promise<void> => {
   const cdp = await page.context().newCDPSession(page);
   const touch = (type: 'touchStart' | 'touchMove' | 'touchEnd', x: number, y: number) => cdp.send('Input.dispatchTouchEvent', {
-    type, touchPoints: type === 'touchEnd' ? [] : [{x, y}],
+    type, touchPoints: type === 'touchEnd' ? [] : [{x: Math.round(x), y: Math.round(y)}],
   });
-  await touch('touchStart', start.x, start.y);
-  const steps = 5;
+  await touch('touchStart', from.x, from.y);
   for (let i = 1; i <= steps; i++) {
-    await touch('touchMove', start.x + dx * i / steps, start.y + dy * i / steps);
+    await touch('touchMove', from.x + (to.x - from.x) * i / steps, from.y + (to.y - from.y) * i / steps);
   }
-  await touch('touchEnd', start.x + dx, start.y + dy);
+  await touch('touchEnd', to.x, to.y);
   await cdp.detach();
 };
 

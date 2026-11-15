@@ -3,15 +3,20 @@
     width: 100%;
 }
 
+/* the grid corrects the scroll position itself when a line above the screen gets its real height */
+.grid-container {
+    overflow-anchor: none;
+}
+
+/* padding, not margin: the measured height of a header is all of it */
+.group-header {
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+}
+
 /* groups that share a line should be top aligned, not baseline aligned */
 .media-group {
     vertical-align: top;
-}
-
-/* a block between the inline groups: the next group does not share the line of the previous one */
-.group-line-break {
-    display: block;
-    height: 0;
 }
 
 /* the group's width comes from its photos; the one-line blog preview would widen it past the gallery */
@@ -84,4 +89,34 @@ app-gallery-grid-photo {
     display: flex;
     align-items: center;
     max-width: min(60vw, 20rem);
+}
+
+/* on a touch screen: the handle to drag the page, like the thumb of a scrollbar. Right at the edge, big enough for a finger */
+.scroll-label.handle {
+    display: flex;
+    align-items: center;
+    right: 4px;
+    min-height: 2.5rem;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+}
+
+/* a bigger area to grab than what it shows */
+.scroll-label.handle::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem -4px -0.5rem -0.5rem;
+}
+
+.scroll-label.handle.dragging {
+    background-color: var(--bs-secondary-bg);
+}
+
+.handle-icon {
+    font-size: 1.25rem;
+}
+
+.scroll-label.handle .handle-icon:not(:last-child) {
+    margin-right: 0.25rem;
 }

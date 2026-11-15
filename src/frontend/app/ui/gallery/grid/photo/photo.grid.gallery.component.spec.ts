@@ -146,6 +146,15 @@ describe('GalleryPhotoComponent - fade in', () => {
     expect(render().classList).toContain('fade-in');
   });
 
+  it('should not fade in a photo that the grid rendered before', () => {
+    const fixture = TestBed.createComponent(GalleryPhotoComponent);
+    fixture.componentRef.setInput('gridMedia', makeGridMedia());
+    fixture.componentRef.setInput('shownBefore', true);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('img').classList).not.toContain('fade-in');
+  });
+
   it('should not fade in the photos while browser back restores the page', () => {
     restoreTarget = 1500;
 
