@@ -97,7 +97,6 @@
   "Gallery.captionFirstNaming": "boolean",
   "Gallery.enableCache": "boolean",
   "Gallery.enableDirectorySortingByDate": "boolean",
-  "Gallery.enableOnScrollRendering": "boolean",
   "Gallery.enableOnScrollThumbnailPrioritising": "boolean",
   "Gallery.ignoreTimestampOffset": "boolean",
   "Indexing": "config",
