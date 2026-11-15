@@ -12,6 +12,7 @@ import {NavigationEnd, NavigationStart, Router} from '@angular/router';
  * The page can render more than once until it shows the right content (e.g. it keeps showing the previous search
  * while the folder loads), so the target stays until the user scrolls, taps or types, or navigates again.
  * Only a change of the path is restored: the query params (e.g. the lightbox ?p=, sorting) keep the page where it is.
+ * A page opened any other way (a link, a button) starts at its top.
  */
 @Injectable({providedIn: 'root'})
 export class ScrollRestorationService {
@@ -36,10 +37,15 @@ export class ScrollRestorationService {
         ScrollRestorationService.path(e.url) !== this.lastPath ?
           {id: e.id, y: this.positions.get(restoredId) ?? 0} : null;
       } else if (e instanceof NavigationEnd) {
+        const path = ScrollRestorationService.path(e.urlAfterRedirects);
+        const newPage = path !== this.lastPath;
         this.lastId = e.id;
-        this.lastPath = ScrollRestorationService.path(e.urlAfterRedirects);
+        this.lastPath = path;
         if (this.restoring?.id === e.id) {
           this.setTarget(this.restoring.y);
+        } else if (newPage) {
+          // its content may replace the previous one right away (e.g. a cached search): the page would keep its scroll position
+          window.scrollTo({left: window.scrollX, top: 0, behavior: 'instant'});
         }
         this.restoring = null;
       }

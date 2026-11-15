@@ -20,7 +20,8 @@ import {
 import type {LightboxGrid, LightboxGridTile} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
 import {GridLayout, GridLayoutParams, GridSegment} from './GridLayout';
-import {GridScrollWindow} from './GridScrollWindow';
+import {GridScroller} from './GridScroller';
+import {GalleryGridScrollLabelComponent} from './scroll-label/scroll-label.grid.gallery.component';
 import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
@@ -28,7 +29,7 @@ import {PageHelper} from '../../../model/page.helper';
 import {QueryService} from '../../../model/query.service';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
-import {GroupByTypes, SortByDirectionalTypes} from '../../../../../common/entities/SortingMethods';
+import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
@@ -50,6 +51,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     NgIconComponent,
     GalleryBlogComponent,
     GalleryPhotoComponent,
+    GalleryGridScrollLabelComponent,
     ParseIntPipe,
     RouterLink
   ]
@@ -103,10 +105,16 @@ export class GalleryGridComponent
     }, GalleryGridComponent.heightCache);
   });
   private readonly layoutVersion = signal(0);
-  // a huge grid is higher than a page can be: the page holds a window of it, see GridScrollWindow
-  private readonly scrollWindow = new GridScrollWindow();
-  // the shown part of the grid (0 is the top of the grid, in the layout: with the offset of the window)
-  private readonly viewport = signal<{ top: number, height: number }>({top: 0, height: window.innerHeight});
+  // where the page is in the grid: all scrolling of the grid goes through it
+  readonly scroller = new GridScroller({
+    height: () => this.layout()?.totalHeight ?? 0,
+    top: () => this.getGridTop(),
+    afterRender: callback => afterNextRender(() => {
+      if (!this.destroyed) {
+        callback();
+      }
+    }, {injector: this.injector})
+  });
   // the lines on and near the screen, only these are rendered
   private readonly range = computed((): { first: number, last: number } => {
     const layout = this.layout();
@@ -114,7 +122,7 @@ export class GalleryGridComponent
     if (!layout || layout.length === 0) {
       return {first: 0, last: -1};
     }
-    const {top, height} = this.viewport();
+    const {top, height} = this.scroller.viewport();
     return {
       first: layout.lineAt(top - height * RENDER_BUFFER_SCREENS),
       last: layout.lineAt(top + height * (1 + RENDER_BUFFER_SCREENS))
@@ -128,10 +136,11 @@ export class GalleryGridComponent
     if (!layout || last < first) {
       return {top: 0, bottom: 0};
     }
-    const offset = this.scrollWindow.offset(layout.totalHeight);
+    // in the page: a huge grid is only as high there as a page can be, see GridScrollWindow
+    const offset = this.scroller.offset();
     return {
       top: Math.max(0, layout.top(first) - offset),
-      bottom: Math.max(0, this.scrollWindow.height(layout.totalHeight) - (layout.top(last) + layout.height(last) - offset))
+      bottom: Math.max(0, this.scroller.pageHeight() - (layout.top(last) + layout.height(last) - offset))
     };
   });
   private readonly openBlogs = signal<ReadonlyMap<number, boolean>>(new Map());
@@ -182,20 +191,11 @@ export class GalleryGridComponent
   // the waits for the next render: a removed grid never renders again, so they end on destroy
   private readonly pendingRenders = new Set<() => void>();
   private resizeObserver: ResizeObserver | null = null;
-  private scrollLabelFrame: number | null = null;
-  private scrollLabelHideTimer: number | null = null;
   // no hover on a phone to see the whole path of a directory group header: its first tap shows it (only this one at a time)
   readonly touchOnly = typeof window.matchMedia === 'function' && window.matchMedia('(hover: none)').matches;
   readonly expandedDirectory = signal<string | null>(null);
-  // the label of the first visible photo, in the middle of the screen next to the scrollbar, while scrolling
-  readonly scrollLabel = signal<ScrollLabel | null>(null);
-  // dragging the scroll label on a touch screen: where the finger holds it, and where the handle and the page were when it was grabbed
-  private drag: { pointerId: number, offset: number, startTop: number, startScrollY: number } | null = null;
-  // the drag scrolled the page and the window did not follow it yet, see followScroll()
-  private dragScrolled = false;
-  // the top of the dragged handle on the screen; null if it is not dragged
-  readonly dragTop = signal<number | null>(null);
-  readonly dragging = computed(() => this.dragTop() !== null);
+  // the scroll handle is dragged, see renderVisibleLines()
+  private handleDragged = false;
   private lastDragRender = 0;
   // the lines in the DOM, set after each render: a resize can be observed before the render of new lines
   private linesInDom: RenderedLine[] = [];
@@ -204,13 +204,7 @@ export class GalleryGridComponent
   private readonly shownTiles = new Set<string>();
   private shownTilesPath: string | null = null;
   private dragRenderTimer: number | null = null;
-  // where to scroll after the next render, see scrollToLineAfterRender()
-  private pendingScroll: { layout: GridLayout, line: number, offset: number } | null = null;
-  // the page's scroll position the window followed last, see followScroll()
-  private lastScrollY = 0;
-  // the scroll that keeps the screen after the window got a new offset: it is done after the render of the new offset
-  private pendingShift = 0;
-  private readonly scrollOffset = (): number => this.offset();
+  private readonly scrollOffset = (): number => this.scroller.offset();
 
   constructor() {
     // a browser back comes back to the same place of a huge grid
@@ -291,14 +285,6 @@ export class GalleryGridComponent
       cancelAnimationFrame(this.scrollFrame);
       this.scrollFrame = null;
     }
-    if (this.scrollLabelFrame !== null) {
-      cancelAnimationFrame(this.scrollLabelFrame);
-      this.scrollLabelFrame = null;
-    }
-    if (this.scrollLabelHideTimer != null) {
-      clearTimeout(this.scrollLabelHideTimer);
-      this.scrollLabelHideTimer = null;
-    }
     if (this.dragRenderTimer != null) {
       clearTimeout(this.dragRenderTimer);
       this.dragRenderTimer = null;
@@ -323,7 +309,6 @@ export class GalleryGridComponent
   }
 
   ngAfterViewInit(): void {
-    this.lastScrollY = PageHelper.ScrollY;
     this.updateContainerDimensions();
     this.updateViewport();
     this.isAfterViewInit = true;
@@ -363,8 +348,8 @@ export class GalleryGridComponent
     if (!layout || line === -1) {
       return null;
     }
-    const lineTop = this.getGridTop() + layout.top(line) - this.offset();
-    if (this.scrollY() > lineTop || this.scrollY() + window.innerHeight < lineTop + layout.height(line)) {
+    const screenTop = this.scroller.screenTop();
+    if (screenTop > layout.top(line) || screenTop + window.innerHeight < layout.top(line) + layout.height(line)) {
       this.scrollToLineAfterRender(layout, line, 0);
     }
     await this.afterRender();
@@ -379,7 +364,7 @@ export class GalleryGridComponent
     // if the tile is out of the screen -> scroll to there.
     // Instantly (the page has smooth scrolling): the lightbox animates from the tile's place right away.
     if (PageHelper.ScrollY > rect.top || PageHelper.ScrollY + window.innerHeight < rect.top) {
-      this.scrollToInstantly(rect.top);
+      this.scroller.scrollTo(rect.top);
     }
     return {rect, gridMedia: tile.gridMedia()};
   }
@@ -402,7 +387,6 @@ export class GalleryGridComponent
   }
 
   onScroll(): void {
-    this.requestScrollLabelUpdate();
     if (this.scrollFrame !== null) {
       return;
     }
@@ -421,11 +405,11 @@ export class GalleryGridComponent
 
   /**
    * Renders the lines of the shown part of the page.
-   * While the scroll label is dragged (e.g. across thousands of photos), only every few frames:
+   * While the scroll handle is dragged (e.g. across thousands of photos), only every few frames:
    * the photos it passes would not even show up, but would ask for their thumbnails.
    */
   private renderVisibleLines(): void {
-    if (!this.drag) {
+    if (!this.handleDragged) {
       this.updateViewport();
       return;
     }
@@ -443,101 +427,37 @@ export class GalleryGridComponent
     }
   }
 
+  /** The scroll handle of a touch screen got grabbed or released. */
+  onScrollHandleDrag(dragged: boolean): void {
+    this.handleDragged = dragged;
+    if (dragged) {
+      return;
+    }
+    if (this.dragRenderTimer != null) {
+      clearTimeout(this.dragRenderTimer);
+      this.dragRenderTimer = null;
+    }
+    this.updateViewport();
+  }
+
   private updateViewport(): void {
     if (!this.isAfterViewInit && this.containerWidth() === 0) {
       return;
     }
-    if (this.pendingScroll === null) {
-      this.followScroll();
-    }
-    const y = this.pendingScrollTop() ?? this.scrollY();
-    this.viewport.set({top: y - this.getGridTop() + this.offset(), height: window.innerHeight});
-  }
-
-  /** The window of a huge grid follows the scroll of the page, see GridScrollWindow. */
-  private followScroll(): void {
-    const scrollY = this.scrollY();
-    // the scroll handle is dragged like the scrollbar thumb: the page goes to the same ratio of the grid.
-    // Only a scroll of the drag itself: the page can still scroll on its own while the handle is held (e.g. grabbed in a fling)
-    const scrolled = this.dragScrolled ? Infinity : scrollY - this.lastScrollY;
-    this.dragScrolled = false;
-    this.lastScrollY = scrollY;
-    const layout = this.layout();
-    if (!layout) {
-      return;
-    }
-    const shift = this.scrollWindow.follow(layout.totalHeight, scrollY - this.getGridTop(), scrolled, window.innerHeight);
-    if (Math.abs(shift) < 0.5) {
-      return;
-    }
-    // the page scrolls with the render of the new offset (the paddings): not before, not a frame later, or the screen jumps.
-    // Relative: the page may scroll on until then (e.g. a fling)
-    const queued = this.pendingShift !== 0;
-    this.pendingShift += shift;
-    this.lastScrollY += shift;
-    if (queued) {
-      return;
-    }
-    afterNextRender(() => {
-      const pending = this.pendingShift;
-      this.pendingShift = 0;
-      if (pending !== 0 && !this.destroyed) {
-        window.scrollBy({left: 0, top: pending, behavior: 'instant'});
-      }
-    }, {injector: this.injector});
-  }
-
-  /** The offset of the window of a huge grid: the not rendered part of the grid above the page, 0 if the page has the whole grid. */
-  private offset(): number {
-    const layout = this.layout();
-    return layout ? this.scrollWindow.offset(layout.totalHeight) : 0;
-  }
-
-  /** The scroll position of the page, also with the scroll that waits for the render of a new offset. */
-  private scrollY(): number {
-    return PageHelper.ScrollY + this.pendingShift;
+    this.scroller.update();
   }
 
   /**
-   * Renders the lines at a line, then scrolls there (offset px below its top).
-   * The page may not be high enough to scroll there before that render (e.g. when the grid just got its content).
+   * Renders the lines at a line, then scrolls there (offset px below its top), see GridScroller.scrollToAfterRender().
+   * Not if the grid gets another layout until then.
    */
   private scrollToLineAfterRender(layout: GridLayout, line: number, offset: number): void {
-    // a huge grid shows the part of the line in the page
-    this.scrollWindow.jumpTo(layout.totalHeight, layout.top(line) + offset);
-    this.pendingShift = 0;
-    this.pendingScroll = {layout, line, offset};
-    this.updateViewport();
-    afterNextRender(() => {
-      const top = this.pendingScrollTop();
-      this.pendingScroll = null;
-      if (top !== null && !this.destroyed) {
-        this.scrollToInstantly(top);
-      }
-    }, {injector: this.injector});
-  }
-
-  /** Where scrollToLineAfterRender() scrolls to, in the page. The line can move until then: the lines above it are measured. */
-  private pendingScrollTop(): number | null {
-    const p = this.pendingScroll;
-    if (!p || p.layout !== this.layout()) {
-      return null;
-    }
-    return this.getGridTop() + p.layout.top(p.line) + p.offset - this.offset();
+    this.scroller.scrollToAfterRender(() => this.layout() === layout ? layout.top(line) + offset : null);
   }
 
   /** The top of the grid in the page. */
   private getGridTop(): number {
     return this.gridContainer().nativeElement.getBoundingClientRect().top + PageHelper.ScrollY;
-  }
-
-  private scrollToInstantly(top: number): void {
-    window.scrollTo({left: window.scrollX, top, behavior: 'instant'});
-    // it is in the page of the current offset: not a scroll the window follows
-    this.pendingShift = 0;
-    this.lastScrollY = PageHelper.ScrollY;
-    // the lines of the new position render right away, not on the next scroll event
-    this.updateViewport();
   }
 
   /**
@@ -549,20 +469,30 @@ export class GalleryGridComponent
     if (!layout || this.destroyed) {
       return;
     }
+    // the first line on the screen stays where it is on the screen
+    const screenTop = this.scroller.screenTop();
+    const anchor = layout.lineAt(screenTop);
+    const anchorTop = layout.top(anchor);
+    if (!this.setMeasuredHeights(layout)) {
+      return;
+    }
+    layout.updateTops();
+    this.layoutVersion.update(v => v + 1);
+    const moved = screenTop > 0 && screenTop >= anchorTop ? layout.top(anchor) - anchorTop : 0;
+    this.scroller.restoreScreenTop(screenTop + moved);
+    this.updateViewport();
+  }
+
+  /** Sets the heights of the rendered lines and of the group header in the layout. Returns true if any changed. */
+  private setMeasuredHeights(layout: GridLayout): boolean {
     const container = this.linesContainer().nativeElement;
     const elements = container.children;
     const lines = this.linesInDom;
     if (elements.length !== lines.length) {
-      return;
+      return false;
     }
-    const header = container.querySelector<HTMLElement>('.group-header');
-    const headerHeight = header?.getBoundingClientRect().height ?? 0;
-
-    const offset = this.offset();
-    const viewTop = this.scrollY() - this.getGridTop() + offset;
-    const anchor = layout.lineAt(viewTop);
-    const anchorOffset = viewTop - layout.top(anchor);
     let changed = false;
+    const headerHeight = container.querySelector<HTMLElement>('.group-header')?.getBoundingClientRect().height ?? 0;
     if (headerHeight > 0) {
       GalleryGridComponent.headerHeight = headerHeight;
       changed = layout.setHeaderHeight(headerHeight);
@@ -574,31 +504,17 @@ export class GalleryGridComponent
         changed = layout.setHeight(lines[i].index, height) || changed;
       }
     }
-    if (!changed) {
-      return;
-    }
-    const oldTop = layout.top(anchor);
-    layout.updateTops();
-    this.layoutVersion.update(v => v + 1);
-    // a lower grid can need a smaller offset of the window: the page scrolls by that too
-    this.scrollWindow.fit(layout.totalHeight);
-    const offsetShift = offset - this.offset();
-    const shift = (viewTop > 0 && anchorOffset >= 0 ? layout.top(anchor) - oldTop : 0) + offsetShift;
-    // a pending scroll goes to its line, wherever it moved
-    if (Math.abs(shift) >= 0.5 && !this.pendingScroll) {
-      window.scrollBy({left: 0, top: shift, behavior: 'instant'});
-      this.lastScrollY += shift;
-    }
-    this.updateViewport();
+    return changed;
   }
 
   /**
    * Relayouts the grid (e.g. a new width) so that the first photo on the screen stays on the top of the screen.
    */
   private keepFirstVisibleMedia(relayout: () => void): void {
-    const navbarBottom = this.getNavbarBottom();
-    const media = this.getFirstVisibleMedia(navbarBottom);
+    // the first one that is not scrolled out at the top or hidden behind the navbar; also if it is not rendered
+    const navbarBottom = PageHelper.NavbarBottom;
     const before = this.layout();
+    const media = before?.firstMediaAt(this.scroller.screenTop() + navbarBottom) ?? null;
     relayout();
     const layout = this.layout();
     if (!media || !layout || layout === before) {
@@ -609,165 +525,6 @@ export class GalleryGridComponent
       return;
     }
     this.scrollToLineAfterRender(layout, line, -navbarBottom);
-  }
-
-  private requestScrollLabelUpdate(): void {
-    if (this.scrollLabelFrame !== null) {
-      return;
-    }
-    // a browser back or forward scrolls the page itself (#1308), the user did not scroll
-    if (this.scrollRestoration.restoreTarget() !== null ||
-      (!this.touchOnly && !this.sortingService.getScrollLabelFn(this.sortingService.sorting(), this.sortingService.grouping()))) {
-      this.scrollLabel.set(null);
-      return;
-    }
-    this.scrollLabelFrame = window.requestAnimationFrame((): void => {
-      this.scrollLabelFrame = null;
-      this.updateScrollLabel();
-    });
-  }
-
-  private updateScrollLabel(): void {
-    const maxScrollY = PageHelper.MaxScrollY;
-    const labelFn = this.sortingService.getScrollLabelFn(this.sortingService.sorting(), this.sortingService.grouping());
-    const navbarBottom = this.getNavbarBottom();
-    const media = this.getFirstVisibleMedia(navbarBottom);
-    const text = labelFn && media?.metadata ? labelFn.label(media) : '';
-    // on a touch screen it is the handle to drag the page, also without a label; only for long pages
-    const handle = this.touchOnly && maxScrollY > window.innerHeight * HANDLE_MIN_SCREENS;
-    if (maxScrollY <= 0 || (!text && !handle)) {
-      this.scrollLabel.set(null);
-      return;
-    }
-    const order = labelFn?.order ?? null;
-    const rating = text && order === GroupByTypes.Rating ? parseInt(text, 10) : null;
-    this.scrollLabel.set({
-      text,
-      order,
-      handle,
-      // like the group header of the rating
-      stars: rating === null ? [] : [0, 1, 2, 3, 4].map(i => i < rating),
-      thumbCenter: GalleryGridComponent.thumbCenter(PageHelper.ScrollY, maxScrollY),
-      navbarBottom
-    });
-    this.hideScrollLabelLater();
-  }
-
-  /**
-   * The middle of the scrollbar thumb on the screen. A classic scrollbar (Windows) has an arrow button at both ends,
-   * about as high as the bar is wide, and the thumb is at least a bit higher (measured on Chrome on Windows: 20px of a 15px bar);
-   * an overlay scrollbar has no width.
-   * Between the buttons, the thumb is as much of the track as the screen is of the page.
-   */
-  private static thumbCenter(scrollY: number, maxScrollY: number): number {
-    const screen = window.innerHeight;
-    const width = document.documentElement.clientWidth;
-    const bar = width > 0 ? Math.max(0, window.innerWidth - width) : 0;
-    const track = screen - 2 * bar;
-    const thumb = Math.max(bar * 4 / 3, track * screen / (maxScrollY + screen));
-    return bar + Math.min(1, Math.max(0, scrollY / maxScrollY)) * (track - thumb) + thumb / 2;
-  }
-
-  private hideScrollLabelLater(): void {
-    if (this.scrollLabelHideTimer != null) {
-      clearTimeout(this.scrollLabelHideTimer);
-    }
-    this.scrollLabelHideTimer = window.setTimeout((): void => {
-      this.scrollLabelHideTimer = null;
-      if (!this.drag) {
-        this.scrollLabel.set(null);
-      }
-    }, this.touchOnly ? SCROLL_HANDLE_VISIBLE_MS : SCROLL_LABEL_VISIBLE_MS);
-  }
-
-  onHandlePointerDown(event: PointerEvent): void {
-    const label = this.scrollLabel();
-    if (!label?.handle) {
-      return;
-    }
-    event.preventDefault();
-    const handle = event.currentTarget as HTMLElement;
-    handle.setPointerCapture?.(event.pointerId);
-    const top = handle.getBoundingClientRect().top;
-    const startTop = Math.min(window.innerHeight - handle.offsetHeight, Math.max(label.navbarBottom, top));
-    this.drag = {pointerId: event.pointerId, offset: event.clientY - top, startTop, startScrollY: this.dragStartScrollY()};
-    this.dragTop.set(startTop);
-  }
-
-  /**
-   * Where the page has to be for the drag (a big jump of the window, see followScroll()) to show what the screen shows:
-   * grabbing the handle does not move the page.
-   */
-  private dragStartScrollY(): number {
-    const layout = this.layout();
-    const scrollY = this.scrollY();
-    const gridTop = this.getGridTop();
-    const gridY = scrollY - gridTop + this.offset();
-    if (!layout || gridY <= 0) {
-      return scrollY;
-    }
-    return gridTop + this.scrollWindow.bigJumpPageY(layout.totalHeight, gridY, window.innerHeight);
-  }
-
-  /**
-   * The handle follows the finger, like the thumb of a scrollbar. Grabbing it does not move the page, also where the
-   * handle is not exactly where a scrollbar thumb would be (below the navbar, a huge grid, see dragStartScrollY()):
-   * above where it was grabbed it scrolls the page up to the top, below it down to the end.
-   */
-  onHandlePointerMove(event: PointerEvent): void {
-    const label = this.scrollLabel();
-    if (!this.drag || event.pointerId !== this.drag.pointerId || !label) {
-      return;
-    }
-    event.preventDefault();
-    const handle = event.currentTarget as HTMLElement;
-    const trackTop = label.navbarBottom;
-    const trackBottom = window.innerHeight - handle.offsetHeight;
-    if (trackBottom <= trackTop) {
-      return;
-    }
-    const top = Math.min(trackBottom, Math.max(trackTop, event.clientY - this.drag.offset));
-    const {startTop, startScrollY} = this.drag;
-    const maxScrollY = PageHelper.MaxScrollY;
-    let scrollY = startScrollY;
-    if (top < startTop) {
-      scrollY = startScrollY * (top - trackTop) / (startTop - trackTop);
-    } else if (top > startTop) {
-      scrollY = startScrollY + (maxScrollY - startScrollY) * (top - startTop) / (trackBottom - startTop);
-    }
-    this.dragTop.set(top);
-    this.dragScrolled = true;
-    window.scrollTo({left: window.scrollX, top: scrollY, behavior: 'instant'});
-  }
-
-  onHandlePointerUp(event: PointerEvent): void {
-    if (!this.drag || event.pointerId !== this.drag.pointerId) {
-      return;
-    }
-    this.drag = null;
-    this.dragTop.set(null);
-    if (this.dragRenderTimer != null) {
-      clearTimeout(this.dragRenderTimer);
-      this.dragRenderTimer = null;
-    }
-    this.updateViewport();
-    this.hideScrollLabelLater();
-  }
-
-  /** The bottom of the navbar on the screen, it is 0 if the navbar is hidden. */
-  private getNavbarBottom(): number {
-    const navbar = document.querySelector('.navbar-container');
-    return navbar ? Math.max(0, navbar.getBoundingClientRect().bottom) : 0;
-  }
-
-  /** The first media of the first line that is not scrolled out at the top or hidden behind the navbar. Also if it is not rendered. */
-  private getFirstVisibleMedia(navbarBottom: number): MediaDTO | null {
-    const layout = this.layout();
-    if (!layout || layout.length === 0) {
-      return null;
-    }
-    const line = layout.lineAt(this.scrollY() + navbarBottom - this.getGridTop() + this.offset());
-    return layout.lines[line].segments[0].media[0].media;
   }
 
   /**
@@ -787,12 +544,12 @@ export class GalleryGridComponent
       // y is in the whole grid (see ScrollRestorationService.setScrollOffset()): a huge grid shows that part first
       const layout = this.layout();
       const gridY = y - this.getGridTop();
-      if (layout && gridY > 0 && layout.totalHeight > this.scrollWindow.height(layout.totalHeight)) {
+      if (layout && gridY > 0 && this.scroller.isWindowed()) {
         const line = layout.lineAt(gridY);
         this.scrollToLineAfterRender(layout, line, gridY - layout.top(line));
         return;
       }
-      this.scrollToInstantly(y);
+      this.scroller.scrollTo(y);
     }, {injector: this.injector});
   }
 
@@ -820,11 +577,7 @@ export class GalleryGridComponent
 
 // rendered above and below the screen, so a scroll shows rendered photos
 const RENDER_BUFFER_SCREENS = 1;
-const SCROLL_LABEL_VISIBLE_MS = 1000;
-// longer on a touch screen: it is there to be grabbed
-const SCROLL_HANDLE_VISIBLE_MS = 2000;
-// a page shorter than this many screens scrolls well without the handle
-const HANDLE_MIN_SCREENS = 3;
+// the lines render this often while the scroll handle is dragged
 const DRAG_RENDER_INTERVAL_MS = 150;
 
 const GRID_PARAMS: Record<GridSizes, Omit<GridLayoutParams, 'width' | 'screenHeight' | 'headerHeight'>> = {
@@ -834,15 +587,6 @@ const GRID_PARAMS: Record<GridSizes, Omit<GridLayoutParams, 'width' | 'screenHei
   [GridSizes.large]: {targetColCount: 2, minRowCount: 1, maxRowCount: 3, imageMargin: 2},
   [GridSizes.extraLarge]: {targetColCount: 1, minRowCount: 1, maxRowCount: 2, imageMargin: 2},
 };
-
-interface ScrollLabel {
-  text: string;
-  order: SortByDirectionalTypes | null;
-  handle: boolean; // it can be dragged
-  stars: boolean[]; // filled or not, for the rating order
-  thumbCenter: number; // px from the top of the screen, the middle of the scrollbar thumb
-  navbarBottom: number; // px, the label stays below the navbar
-}
 
 interface RenderedTile {
   gridMedia: GridMedia;

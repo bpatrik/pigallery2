@@ -38,6 +38,17 @@ describe('GridScrollWindow', () => {
       expect(scrollWindow.offset(TOTAL)).toBe(0);
     });
 
+    // Chrome's limit is in device px: an Android phone cut the end of a 15M px high page
+    it('should be lower in the page on a screen of a high pixel ratio (a phone, a zoomed page)', () => {
+      vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(2.625);
+      const height = scrollWindow.height(TOTAL);
+      expect(height * 2.625).toBeLessThan(33_554_432);
+      expect(height).toBeGreaterThan(10_000_000);
+      // the window still ends at the end of the grid
+      scrollWindow.follow(TOTAL, height - SCREEN, Infinity, SCREEN);
+      expect(scrollWindow.offset(TOTAL)).toBe(TOTAL - height);
+    });
+
     it('should move the photos as much as the page on a small scroll, inside a part', () => {
       expect(scrollWindow.follow(TOTAL, 500, 500, SCREEN)).toBe(0);
       expect(scrollWindow.follow(TOTAL, PART - 1, SCREEN - 1, SCREEN)).toBe(0);
@@ -126,8 +137,9 @@ describe('GridScrollWindow', () => {
     // the thumb moves by a device pixel: a third of a CSS pixel here
     it('should take a slow drag of the scrollbar thumb as a big jump on a high density screen', () => {
       vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(3);
-      const pageY = (MAX - SCREEN) / 2;
-      expect(scrollWindow.follow(TOTAL, pageY, MAX / SCREEN / 3, SCREEN)).toBe(0);
+      const height = scrollWindow.height(TOTAL);
+      const pageY = (height - SCREEN) / 2;
+      expect(scrollWindow.follow(TOTAL, pageY, height / SCREEN / 3, SCREEN)).toBe(0);
       expect(pageY + scrollWindow.offset(TOTAL)).toBeCloseTo((TOTAL - SCREEN) / 2);
     });
 

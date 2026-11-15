@@ -2,8 +2,9 @@ import {signal} from '@angular/core';
 
 /**
  * Browsers can't lay out a page higher than about 17.9M px (Firefox) or 33.5M px (Chrome, Safari),
+ * Chrome counts that in device px: it is 33.5M / devicePixelRatio px (e.g. 12.8M px on a phone with a ratio of 2.625),
  * but the grid of a huge gallery is higher (e.g. 80M px for 200k photos in large tiles).
- * So the page holds at most MAX_HEIGHT px of the grid: a window that slides over the grid.
+ * So the page holds at most maxHeight() px of the grid: a window that slides over the grid.
  * The offset is where the window starts in the grid:
  *
  *   position in the grid (layout) = position in the page's grid + offset
@@ -13,15 +14,18 @@ import {signal} from '@angular/core';
  *   Going a screen into the next part changes the offset, and the page scrolls back by the same amount
  *   (see follow()): the screen stays, only the scrollbar thumb jumps back a bit.
  * - A big jump (the scrollbar thumb, the scroll handle, End) goes to the same ratio of the grid as of the page.
+ *   It lasts until the scroll rests: the page is not scrolled under a smooth scroll (it would stop before its target).
  *
- * A grid lower than MAX_HEIGHT has no offset: the page has the whole grid.
+ * A grid lower than maxHeight() has no offset: the page has the whole grid.
  * All positions here are relative to the top of the grid.
  */
 export class GridScrollWindow {
   // below the lowest limit (Firefox), also with what is above the grid (e.g. a long blog); the tests set a lower one
   static MAX_HEIGHT = 15_000_000;
+  // below the limit of Chrome, that is in device px (a phone, a zoomed page)
+  static MAX_DEVICE_HEIGHT = 30_000_000;
   // more parts: smaller but more frequent jumps of the scrollbar thumb.
-  // A part has to be a few screens high in the page (about MAX_HEIGHT / PARTS): the lines rendered above the screen
+  // A part has to be a few screens high in the page (about maxHeight() / PARTS): the lines rendered above the screen
   // have to fit between the start of the window and the screen. The tests set fewer parts for their lower limit.
   static PARTS = 100;
 
@@ -29,9 +33,14 @@ export class GridScrollWindow {
   // the part of the offset; null after a big jump: its offset is not the one of a part
   private part: number | null = 0;
 
+  /** The highest grid the page can hold. */
+  private static maxHeight(): number {
+    return Math.floor(Math.min(GridScrollWindow.MAX_HEIGHT, GridScrollWindow.MAX_DEVICE_HEIGHT / (window.devicePixelRatio || 1)));
+  }
+
   /** The height of the grid in the page. */
   height(total: number): number {
-    return Math.min(total, GridScrollWindow.MAX_HEIGHT);
+    return Math.min(total, GridScrollWindow.maxHeight());
   }
 
   /** The offset of the window for a grid of this height (it may have been set for a higher one). */
@@ -45,11 +54,7 @@ export class GridScrollWindow {
    */
   follow(total: number, pageY: number, scrolled: number, screenHeight: number): number {
     const offset = this.offset(total);
-    // A fast scroll (a fling, a smooth scroll) can move more than a screen in a frame, the scrollbar thumb moves the page
-    // by about height / screenHeight per px of the device: a big jump is at least half of that
-    // (only a degenerate low limit makes these close)
-    const thumbStep = this.height(total) / screenHeight / (window.devicePixelRatio || 1);
-    if (Math.abs(scrolled) < Math.max(screenHeight, thumbStep / 2)) {
+    if (!this.isBigJump(total, scrolled, screenHeight)) {
       return this.followSmallScroll(total, pageY + offset, offset, screenHeight);
     }
     // a big jump: to the same ratio of the grid
@@ -61,6 +66,15 @@ export class GridScrollWindow {
     this.offsetValue.set(pageY <= 0 ? 0 : Math.min(this.maxOffset(total), Math.max(0, y - pageY)));
     this.part = null;
     return 0;
+  }
+
+  /** A scroll of `scrolled` px of the page is a big jump, not a small scroll. */
+  isBigJump(total: number, scrolled: number, screenHeight: number): boolean {
+    // A fast scroll (a fling, a smooth scroll) can move more than a screen in a frame, the scrollbar thumb moves the page
+    // by about height / screenHeight per px of the device: a big jump is at least half of that
+    // (only a degenerate low limit makes these close)
+    const thumbStep = this.height(total) / screenHeight / (window.devicePixelRatio || 1);
+    return Math.abs(scrolled) >= Math.max(screenHeight, thumbStep / 2);
   }
 
   /** A small scroll to y (in the grid): the offset only changes with the part. */
@@ -101,7 +115,7 @@ export class GridScrollWindow {
   }
 
   private maxOffset(total: number): number {
-    return Math.max(0, total - GridScrollWindow.MAX_HEIGHT);
+    return Math.max(0, total - GridScrollWindow.maxHeight());
   }
 
   /** The part of y (in the grid). */

@@ -41,6 +41,15 @@ describe('GridLayout', () => {
     }
   });
 
+  it('should give the first media of the line at a place of the grid', () => {
+    const layout = new GridLayout([{name: '', media: photos(40)}], params);
+    expect(layout.firstMediaAt(0)).toBe(layout.lines[0].segments[0].media[0].media);
+    expect(layout.firstMediaAt(layout.top(3) - 1), 'the line still ends below it').toBe(layout.lines[2].segments[0].media[0].media);
+    expect(layout.firstMediaAt(layout.top(3))).toBe(layout.lines[3].segments[0].media[0].media);
+    expect(layout.firstMediaAt(layout.totalHeight + 100), 'below the grid').toBe(layout.lines[layout.length - 1].segments[0].media[0].media);
+    expect(new GridLayout([], params).firstMediaAt(0), 'an empty grid').toBeNull();
+  });
+
   it('should stack the lines', () => {
     const layout = new GridLayout([{name: 'a', media: photos(20, 'a')}, {name: 'b', media: photos(20, 'b')}], params);
     let top = 0;
