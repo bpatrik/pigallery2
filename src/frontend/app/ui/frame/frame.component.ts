@@ -36,7 +36,8 @@ export interface NavbarLinkItem {
 @Component({
   selector: 'app-frame',
   host: {
-    '(window:scroll)': 'onScroll()'
+    '(window:scroll)': 'onScroll()',
+    '(document:click)': 'onDocumentClick($event)'
   },
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.css',
@@ -197,6 +198,24 @@ export class FrameComponent {
     }
 
     this.lastScroll.any = scrollPosition;
+  }
+
+  /**
+   * Closes the navbar menu on a click outside of it.
+   * The menu has no autoClose, so its submenus (Tools, language) and controls (theme, switches) keep it open:
+   * a click inside any dropdown menu (the submenus are rendered into the body) or on the toggle does not close it.
+   * composedPath(), not the target: the click may re-render the clicked element (e.g.: the theme button's icon).
+   */
+  onDocumentClick(event: Event): void {
+    const dropdown = this.dropdown();
+    if (!dropdown?.isOpen) {
+      return;
+    }
+    const inside = event.composedPath().some((el) =>
+      el instanceof Element && el.matches('.dropdown-menu, #button-frame-menu'));
+    if (!inside) {
+      dropdown.hide();
+    }
   }
 
   scrollUp(): void {

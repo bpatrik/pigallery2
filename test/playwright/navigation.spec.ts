@@ -161,3 +161,46 @@ test.describe('Empty folder', () => {
     await expect(page.locator('app-gallery-navbar a[href*="/pgapi/gallery/zip/"] ng-icon[name="ionDownloadOutline"]')).toBeVisible();
   });
 });
+
+test.describe('Navbar menu', () => {
+  // below the xl breakpoint: the language selector is in the menu too
+  test.use(desktopViewport({width: 1000, height: 800}));
+
+  test('should close on a click outside, but not on its submenus and controls', async ({page}) => {
+    await page.goto('/gallery/');
+    const menuButton = page.locator('button#button-frame-menu');
+    const menu = page.locator('#dropdown-frame-menu');
+    await menuButton.click();
+    await expect(menu).toBeVisible();
+
+    // the theme mode button
+    const themeButton = menu.locator('button.btn-secondary');
+    const mode = await themeButton.innerText();
+    await themeButton.click();
+    await expect(themeButton).not.toHaveText(mode);
+    await expect(menu).toBeVisible();
+
+    // the language selector
+    await menu.locator('app-language button#language').click();
+    await expect(menu.locator('app-language .dropdown-menu')).toBeVisible();
+    await expect(menu).toBeVisible();
+
+    // the Tools submenu (rendered into the body) and its switch
+    await menu.locator('a.dropdown-item').filter({hasText: 'Tools'}).click();
+    const fixNavbar = page.locator('#fix-switch');
+    await fixNavbar.click();
+    await expect(fixNavbar).toBeChecked();
+    await expect(menu).toBeVisible();
+
+    // outside: closes the menu with its submenus
+    await page.locator('app-gallery-navbar #directory-path').click();
+    await expect(menu).toHaveCount(0);
+    await expect(fixNavbar).toHaveCount(0);
+
+    // the toggle still opens and closes it
+    await menuButton.click();
+    await expect(menu).toBeVisible();
+    await menuButton.click();
+    await expect(menu).toHaveCount(0);
+  });
+});

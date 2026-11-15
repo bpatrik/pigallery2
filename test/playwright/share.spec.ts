@@ -80,10 +80,8 @@ const createSharing = async (page: Page, options: { password?: string, recursive
   const link = await shareLink.inputValue();
   // the "copied to clipboard" toast has a close button too
   await page.locator('modal-container button.btn-close').click();
-  // the menu of the navbar stays open after its Share item
+  // the clicks in the dialog are outside of the navbar menu: it closed behind the dialog
   if (fromMenu) {
-    await expect(page.locator('#dropdown-frame-menu')).toBeVisible();
-    await page.locator('button#button-frame-menu').click();
     await expect(page.locator('#dropdown-frame-menu')).toHaveCount(0);
   }
   return link;
