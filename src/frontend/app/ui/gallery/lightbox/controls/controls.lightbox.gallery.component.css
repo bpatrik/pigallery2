@@ -29,6 +29,12 @@
   transform: translate(-45%,-50%);
 }
 
+/* the round restart icon fills its box, unlike the narrow chevron: smaller and centered, inside the slideshow's progress ring */
+.navigation-arrow-right ng-icon.restart-icon {
+  font-size: xx-large;
+  transform: translate(-50%, -50%);
+}
+
 #controllers-container {
   z-index: 1100;
   color: white;

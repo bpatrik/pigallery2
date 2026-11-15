@@ -339,6 +339,14 @@ describe('GalleryLightboxComponent', () => {
     expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: true});
   });
 
+  it('should have no next photo to loop to when there is only one photo', async () => {
+    grid.media.set([photos[0]]);
+    await openPhoto('photo1.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+
+    expect(component.nextMedia()).toBeNull();
+    expect(component.navigation()).toEqual({hasPrev: false, hasNext: false, nextLoops: false});
+  });
+
   it('should navigate by the content order, also beyond the rendered photos', async () => {
     const many: PhotoDTO[] = [];
     for (let i = 0; i < 50; ++i) {

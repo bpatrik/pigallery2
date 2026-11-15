@@ -229,7 +229,7 @@
             <div role="button" tabindex="-1" [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-right highlight rounded-start"
               [title]="nextButton().title" id="rightArrow"
               (click)="nextMediaManuallyTriggered()">
-              <ng-icon [name]="nextButton().icon" />
+              <ng-icon [name]="nextButton().icon" [class.restart-icon]="navigation().nextLoops" />
               @if (slideShowRunning()) {
                 <canvas
                 #canvas width="55px" height="55px"></canvas>
