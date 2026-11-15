@@ -31,8 +31,13 @@
 
 /* the round restart icon fills its box, unlike the narrow chevron: smaller and centered, inside the slideshow's progress ring */
 .navigation-arrow-right ng-icon.restart-icon {
-  font-size: xx-large;
+  font-size: 2.5rem; /* between xx-large (2rem) and the chevron's xxx-large (3rem) */
   transform: translate(-50%, -50%);
+}
+
+/* drawn smaller than the chevron, so it needs a thicker stroke to look as bold (overrides styles.css's 40 on the svg) */
+.navigation-arrow-right ng-icon.restart-icon ::ng-deep svg {
+  --ng-icon__stroke-width: 48;
 }
 
 #controllers-container {
