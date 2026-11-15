@@ -104,13 +104,36 @@ const resetAppModule = async (language: string): Promise<void> => {
   await fsp.writeFile(file, data);
 };
 
+const getCommitHash = (): string => {
+  try {
+    return child_process.execSync('git rev-parse HEAD').toString().trim();
+  } catch (e) {
+    return '';
+  }
+};
+
+/**
+ * Stamps the client bundle with its version, build time and commit (see main.ts),
+ * so the browser console tells which build a page runs.
+ * The values contain no quotes, so single quoted JS strings work in both cmd.exe and sh.
+ */
+const getBuildInfoDefines = (): string => {
+  const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8')) as { version: string };
+  const defines: Record<string, string> = {
+    PIGALLERY2_VERSION: pkg.version,
+    PIGALLERY2_BUILD_TIME: new Date().toISOString(),
+    PIGALLERY2_COMMIT: getCommitHash()
+  };
+  return Object.entries(defines).map(([k, v]): string => ` --define "${k}='${v}'"`).join('');
+};
+
 const createFrontendTask = (
   type: string,
   script: string
 ): void => {
   gulp.task(type, async (cb): Promise<void> => {
     try {
-      const {stdout, stderr} = await execPr(script);
+      const {stdout, stderr} = await execPr(script + getBuildInfoDefines());
       console.log(stdout);
       console.error(stderr);
     } catch (e) {
@@ -230,16 +253,7 @@ gulp.task('copy-package', (): any =>
             delete (json as {optionalDependencies?: unknown}).optionalDependencies;
           }
           json.buildTime = new Date().toISOString();
-
-          try {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            json.buildCommitHash = require('node:child_process')
-              .execSync('git rev-parse HEAD')
-              .toString()
-              .trim();
-            // eslint-disable-next-line no-empty
-          } catch (e) {
-          }
+          json.buildCommitHash = getCommitHash();
 
           return json;
         }
