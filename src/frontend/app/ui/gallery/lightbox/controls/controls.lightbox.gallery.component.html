@@ -296,22 +296,18 @@
             }
 
             @if (isVideo()) {
-              <div class="controls controls-video row mb-3">
-                <div class="col-1">
-                  <ng-icon [name]="!mediaElement().paused() ? 'ionPauseOutline' :'ionPlayOutline'"
+              <div class="controls controls-video mb-3">
+                <ng-icon [name]="!mediaElement().paused() ? 'ionPauseOutline' :'ionPlayOutline'"
                   (click)="mediaElement().playPause()" />
-                </div>
                 <input type="range" [ngModel]="mediaElement().videoProgress()" (ngModelChange)="mediaElement().setVideoProgress($event)"
-                  min="0" max="100" step="0.1" class="col video-progress rounded">
-                  <div class="col-1">
-                    <ng-icon [name]="mediaElement().muted() ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
-                    (click)="mediaElement().mute()" />
-                  </div>
-                  <input type="range"
-                    [ngModel]="mediaElement().videoVolume()" (ngModelChange)="mediaElement().setVideoVolume($event)" min="0" max="1" step="0.1"
-                    value="1" class="col-2 col-md-1 volume rounded">
-                  </div>
-                }
+                  min="0" max="100" step="0.1" class="video-progress rounded">
+                <ng-icon [name]="mediaElement().muted() ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
+                  (click)="mediaElement().mute()" />
+                <input type="range"
+                  [ngModel]="mediaElement().videoVolume()" (ngModelChange)="mediaElement().setVideoVolume($event)" min="0" max="1" step="0.1"
+                  value="1" class="volume rounded">
+              </div>
+            }
 
 
               </div>

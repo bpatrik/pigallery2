@@ -154,7 +154,10 @@
 }
 
 .controls-video {
-  padding-left: env(safe-area-inset-left);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: calc(15px + env(safe-area-inset-left));
   padding-right: calc(15px + env(safe-area-inset-right));
   bottom: env(safe-area-inset-bottom);
   position: absolute;
@@ -178,13 +181,26 @@
 
 .controls-video input[type=range] {
   padding: 0;
-  margin-top: 10px;
+  margin: 0;
+}
+
+.controls-video .video-progress {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.controls-video .volume {
+  flex: 0 0 4rem;
+}
+
+@media (min-width: 768px) {
+  .controls-video .volume {
+    flex-basis: 8rem;
+  }
 }
 
 .controls-video ng-icon {
-  text-align: center;
-  max-width: 45px;
-  margin-left: 10px;
+  flex: 0 0 auto;
 }
 
 .highlight {
