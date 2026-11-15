@@ -21,6 +21,9 @@ extra:
     - icon: fontawesome/solid/heart
       link: https://github.com/sponsors/bpatrik
       name: Sponsor PiGallery2
+    - icon: simple/kofi
+      link: https://ko-fi.com/pigallery2
+      name: Support PiGallery2 on Ko-fi
 
 
 plugins:

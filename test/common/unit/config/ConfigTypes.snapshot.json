@@ -223,6 +223,7 @@
   "Server.apiPath": "string",
   "Server.applicationTitle": "string",
   "Server.customHTMLHead": "string",
+  "Server.hideSponsorLinks": "boolean",
   "Server.host": "string",
   "Server.languages": "array<string>",
   "Server.port": "unsignedInt",

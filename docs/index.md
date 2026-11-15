@@ -34,5 +34,5 @@ See what others are saying about PiGallery2.
 PiGallery2 is free, and I build it alone in my free time, which, since my daughter was born, mostly means nap time 👶.
 WebStorm and AI coding agents help me make the most of those short windows.
 
-If PiGallery2 makes your photos a bit nicer to browse, consider [sponsoring me on GitHub](https://github.com/sponsors/bpatrik).
+If PiGallery2 makes your photos a bit nicer to browse, consider [sponsoring me on GitHub](https://github.com/sponsors/bpatrik) or [buying me a coffee on Ko-fi](https://ko-fi.com/pigallery2).
 A coffee is plenty, and pizza or a date night with my wife is even better 🍕.
