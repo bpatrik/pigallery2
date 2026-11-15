@@ -1,4 +1,4 @@
-import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, afterRenderEffect, computed, inject, signal, viewChild } from '@angular/core';
 import {Router, RouterLink} from '@angular/router';
 import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
@@ -67,6 +67,9 @@ export class GalleryNavigatorComponent {
   public readonly filterMaxHeight = signal<string | null>(null);
   readonly dropdown = viewChild<BsDropdownDirective>('dropdown');
   readonly navigatorElement = viewChild('navigator', { read: ElementRef });
+  private readonly sortingMenu = viewChild<ElementRef<HTMLElement>>('sortingMenu');
+  readonly sortingMenuOpen = signal(false);
+  private sortingMenuShift = 0;
   public groupingFollowSorting = true; // if grouping should be set after sorting automatically
   protected readonly GroupByTypes = GroupByTypes;
   private readonly RootFolderName: string;
@@ -169,6 +172,33 @@ export class GalleryNavigatorComponent {
     this.groupingByTypes = Utils.enumToArray(GroupByTypes);
     this.gridSizes = Utils.enumToArray(GridSizes);
     this.RootFolderName = $localize`Home`;
+
+    // The sorting menu opens leftwards from its button. When it doesn't fit there (phones, long translations),
+    // shift it right into the free space instead of letting it run off the left edge of the screen.
+    afterRenderEffect({
+      earlyRead: (): number => {
+        const menu = this.sortingMenu()?.nativeElement;
+        // the menu grows when the direction options appear
+        this.isDirectionalSorting();
+        this.isDirectionalGrouping();
+        if (!this.sortingMenuOpen() || !menu) {
+          return this.sortingMenuShift;
+        }
+        const gutter = 8;
+        const rect = menu.getBoundingClientRect();
+        const left = rect.left - this.sortingMenuShift;
+        const spaceOnRight = document.documentElement.clientWidth - gutter - (rect.right - this.sortingMenuShift);
+        return Math.max(0, Math.min(gutter - left, spaceOnRight));
+      },
+      write: (shift): void => {
+        const menu = this.sortingMenu()?.nativeElement;
+        if (!menu || shift() === this.sortingMenuShift) {
+          return;
+        }
+        this.sortingMenuShift = shift();
+        menu.style.marginRight = this.sortingMenuShift ? `-${this.sortingMenuShift}px` : '';
+      }
+    });
   }
 
   public readonly isDirectory = computed((): boolean => {
