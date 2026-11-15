@@ -2,6 +2,9 @@ import {signal} from '@angular/core';
 import {GridScrollWindow} from './GridScrollWindow';
 import {PageHelper} from '../../../model/page.helper';
 
+// a scroll that comes this soon after a big jump is still a part of it (e.g. the next frame of a smooth scroll)
+const BIG_JUMP_REST_MS = 150;
+
 /** What the scroller has to know of the grid it scrolls. */
 export interface ScrolledGrid {
   /** The height of the whole grid; 0 while it has no layout. */
@@ -36,6 +39,8 @@ export class GridScroller {
   private pendingShift = 0;
   // the next scroll is a big jump, see bigJumpTo()
   private bigJump = false;
+  // the scrolls until then are parts of the last big jump, see BIG_JUMP_REST_MS
+  private bigJumpUntil = 0;
   // where the page scrolls after the next render (in the grid), see scrollToAfterRender()
   private pendingTarget: (() => number | null) | null = null;
 
@@ -76,6 +81,7 @@ export class GridScroller {
     window.scrollTo({left: window.scrollX, top: pageY, behavior: 'instant'});
     // it is in the page of the current offset: not a scroll the window follows
     this.pendingShift = 0;
+    this.bigJumpUntil = 0;
     this.followedScrollY = PageHelper.ScrollY;
     // the lines of the new position render right away, not on the next scroll event
     this.update();
@@ -149,14 +155,22 @@ export class GridScroller {
   /** The window of a huge grid follows the scroll of the page, see GridScrollWindow. */
   private follow(): void {
     const scrollY = this.scrollY();
-    const scrolled = this.bigJump ? Infinity : scrollY - this.followedScrollY;
+    const scrolled = scrollY - this.followedScrollY;
+    const now = performance.now();
+    const total = this.grid.height();
+    // The slow end of a smooth scroll (e.g. End) is still that jump: as a small scroll it could get into another part,
+    // and the scroll that keeps the screen then would stop the smooth scroll before its target
+    const bigJump = this.bigJump || (scrolled !== 0 && now < this.bigJumpUntil)
+      || (total > 0 && this.scrollWindow.isBigJump(total, scrolled, window.innerHeight));
     this.bigJump = false;
     this.followedScrollY = scrollY;
-    const total = this.grid.height();
     if (total <= 0) {
       return;
     }
-    const shift = this.scrollWindow.follow(total, scrollY - this.grid.top(), scrolled, window.innerHeight);
+    if (bigJump) {
+      this.bigJumpUntil = now + BIG_JUMP_REST_MS;
+    }
+    const shift = this.scrollWindow.follow(total, scrollY - this.grid.top(), bigJump ? Infinity : scrolled, window.innerHeight);
     if (Math.abs(shift) < 0.5) {
       return;
     }

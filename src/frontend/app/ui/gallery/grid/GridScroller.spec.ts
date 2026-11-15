@@ -190,6 +190,27 @@ describe('GridScroller', () => {
       expect(scrollBy).not.toHaveBeenCalled();
     });
 
+    // a scroll of the window would stop the smooth scroll before its end
+    it('should go on with a big jump until the scroll rests (e.g. the last, small steps of a smooth scroll to the end)', () => {
+      vi.useFakeTimers();
+      try {
+        const end = GRID_TOP + max - SCREEN;
+        for (const y of [end * 0.4, end * 0.8, end - 2 * SCREEN, end - SCREEN / 2, end - 10, end]) {
+          vi.advanceTimersByTime(16);
+          scroll(y);
+        }
+        expect(scrollBy).not.toHaveBeenCalled();
+        expect(scroller.screenTop(), 'the end').toBeCloseTo(gridHeight - SCREEN);
+
+        // the scroll rested: a small scroll again
+        vi.advanceTimersByTime(1000);
+        scroll(scrollY - 10);
+        expect(scroller.screenTop()).toBeCloseTo(gridHeight - SCREEN - 10);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('should scroll to a place far down in the page of its part', () => {
       const target = gridHeight * 0.8;
       scroller.scrollToAfterRender(() => target);
