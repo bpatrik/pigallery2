@@ -350,6 +350,29 @@ describe('GalleryGridComponent', () => {
         expect(renderedMedia()).toContain(photos[0]);
       });
 
+      it('should not move the photos when the scroll handle is grabbed while the page still scrolls', async () => {
+        (component as unknown as { touchOnly: boolean }).touchOnly = true;
+        const handle = {getBoundingClientRect: () => ({top: 100}), offsetHeight: 40} as unknown as HTMLElement;
+        const pointer = (clientY: number): PointerEvent => ({pointerId: 1, clientY, currentTarget: handle, preventDefault: () => undefined} as unknown as PointerEvent);
+        for (let i = 0; i < 6; ++i) {
+          scroll(scrollY + window.innerHeight / 2);
+        }
+        await fixture.whenStable();
+        const top = screenTop();
+        expect(top).toBeCloseTo(3 * window.innerHeight, 0);
+
+        component.onHandlePointerDown(pointer(110));
+        // the last scroll event of the page, the finger did not move yet
+        scroll(scrollY);
+        expect(screenTop(), 'grabbed').toBeCloseTo(top, 0);
+
+        // the drag itself is a big jump: from the same photos
+        component.onHandlePointerMove(pointer(110));
+        component.onHandlePointerUp(pointer(110));
+        fixture.detectChanges();
+        expect(screenTop(), 'dragged').toBeCloseTo(top, 0);
+      });
+
       it('should scroll to a photo far down for the lightbox', async () => {
         const target = photos[1800];
         // jsdom has no layout: the tile is on the screen

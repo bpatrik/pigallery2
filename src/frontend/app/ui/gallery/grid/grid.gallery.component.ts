@@ -191,6 +191,8 @@ export class GalleryGridComponent
   readonly scrollLabel = signal<ScrollLabel | null>(null);
   // dragging the scroll label on a touch screen: where the finger holds it, and where the handle and the page were when it was grabbed
   private drag: { pointerId: number, offset: number, startTop: number, startScrollY: number } | null = null;
+  // the drag scrolled the page and the window did not follow it yet, see followScroll()
+  private dragScrolled = false;
   // the top of the dragged handle on the screen; null if it is not dragged
   readonly dragTop = signal<number | null>(null);
   readonly dragging = computed(() => this.dragTop() !== null);
@@ -455,8 +457,10 @@ export class GalleryGridComponent
   /** The window of a huge grid follows the scroll of the page, see GridScrollWindow. */
   private followScroll(): void {
     const scrollY = this.scrollY();
-    // the scroll handle is dragged like the scrollbar thumb: the page goes to the same ratio of the grid
-    const scrolled = this.drag ? Infinity : scrollY - this.lastScrollY;
+    // the scroll handle is dragged like the scrollbar thumb: the page goes to the same ratio of the grid.
+    // Only a scroll of the drag itself: the page can still scroll on its own while the handle is held (e.g. grabbed in a fling)
+    const scrolled = this.dragScrolled ? Infinity : scrollY - this.lastScrollY;
+    this.dragScrolled = false;
     this.lastScrollY = scrollY;
     const layout = this.layout();
     if (!layout) {
@@ -732,6 +736,7 @@ export class GalleryGridComponent
       scrollY = startScrollY + (maxScrollY - startScrollY) * (top - startTop) / (trackBottom - startTop);
     }
     this.dragTop.set(top);
+    this.dragScrolled = true;
     window.scrollTo({left: window.scrollX, top: scrollY, behavior: 'instant'});
   }
 

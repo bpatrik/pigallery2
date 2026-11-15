@@ -19,6 +19,7 @@ describe('GridScrollWindow', () => {
 
   afterEach(() => {
     GridScrollWindow.MAX_HEIGHT = originalMax;
+    vi.restoreAllMocks();
   });
 
   describe('a grid lower than the limit', () => {
@@ -44,21 +45,49 @@ describe('GridScrollWindow', () => {
     });
 
     it('should keep the screen when a small scroll crosses into the next part, and scroll the page back', () => {
-      // at the end of the first part
-      expect(scrollWindow.follow(TOTAL, PART + 10, 20, SCREEN)).toBeCloseTo(-STEP);
+      // a screen into the second part
+      const y = PART + SCREEN + 10;
+      expect(scrollWindow.follow(TOTAL, y, 20, SCREEN)).toBeCloseTo(-STEP);
       expect(scrollWindow.offset(TOTAL)).toBeCloseTo(STEP);
       // the page scrolled back: the same place of the grid
-      const pageY = PART + 10 - STEP;
-      expect(pageY + scrollWindow.offset(TOTAL)).toBeCloseTo(PART + 10);
+      const pageY = y - STEP;
+      expect(pageY + scrollWindow.offset(TOTAL)).toBeCloseTo(y);
 
-      // and back up into the first part
-      expect(scrollWindow.follow(TOTAL, pageY - 20, -20, SCREEN)).toBeCloseTo(STEP);
+      // and back up, a screen into the first part
+      expect(scrollWindow.follow(TOTAL, pageY - 2 * SCREEN - 20, -20, SCREEN)).toBeCloseTo(STEP);
       expect(scrollWindow.offset(TOTAL)).toBe(0);
     });
 
+    it('should not switch back and forth when a scroll rests on the border of two parts', () => {
+      expect(scrollWindow.follow(TOTAL, PART + 10, 20, SCREEN), 'just over the border').toBe(0);
+      expect(scrollWindow.follow(TOTAL, PART - 10, -20, SCREEN)).toBe(0);
+      expect(scrollWindow.offset(TOTAL)).toBe(0);
+
+      scrollWindow.follow(TOTAL, PART + SCREEN + 10, SCREEN, SCREEN);
+      const pageY = PART - STEP;
+      expect(scrollWindow.follow(TOTAL, pageY - 10, -SCREEN - 20, SCREEN), 'just back over the border').toBe(0);
+      expect(scrollWindow.follow(TOTAL, pageY + 10, 20, SCREEN)).toBe(0);
+      expect(scrollWindow.offset(TOTAL)).toBeCloseTo(STEP);
+    });
+
+    it('should keep the offset inside a part when the grid changes its height a bit (e.g. measured lines)', () => {
+      const y = 50.5 * PART;
+      scrollWindow.jumpTo(TOTAL, y);
+      const offset = scrollWindow.offset(TOTAL);
+      expect(scrollWindow.follow(TOTAL + 200, y - offset + 10, 10, SCREEN)).toBe(0);
+      expect(scrollWindow.offset(TOTAL + 200)).toBe(offset);
+    });
+
+    it('should end the last part at the end of the grid, also when the grid gets higher', () => {
+      scrollWindow.jumpTo(TOTAL, TOTAL - SCREEN);
+      expect(scrollWindow.follow(TOTAL + 200, MAX - SCREEN, 10, SCREEN)).toBeCloseTo(-200);
+      expect(scrollWindow.offset(TOTAL + 200)).toBeCloseTo(TOTAL + 200 - MAX);
+    });
+
     it('should move the photos as much as the page on a fast scroll of a few screens in a frame (a fling)', () => {
-      expect(scrollWindow.follow(TOTAL, PART + 10, 3 * SCREEN, SCREEN)).toBeCloseTo(-STEP);
-      expect(PART + 10 - STEP + scrollWindow.offset(TOTAL)).toBeCloseTo(PART + 10);
+      const y = PART + 2 * SCREEN;
+      expect(scrollWindow.follow(TOTAL, y, 3 * SCREEN, SCREEN)).toBeCloseTo(-STEP);
+      expect(y - STEP + scrollWindow.offset(TOTAL)).toBeCloseTo(y);
     });
 
     it('should reach the end of the grid at the end of the page with small scrolls', () => {
@@ -92,6 +121,14 @@ describe('GridScrollWindow', () => {
       // Home
       expect(scrollWindow.follow(TOTAL, 0, -(MAX - SCREEN), SCREEN)).toBe(0);
       expect(scrollWindow.offset(TOTAL)).toBe(0);
+    });
+
+    // the thumb moves by a device pixel: a third of a CSS pixel here
+    it('should take a slow drag of the scrollbar thumb as a big jump on a high density screen', () => {
+      vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(3);
+      const pageY = (MAX - SCREEN) / 2;
+      expect(scrollWindow.follow(TOTAL, pageY, MAX / SCREEN / 3, SCREEN)).toBe(0);
+      expect(pageY + scrollWindow.offset(TOTAL)).toBeCloseTo((TOTAL - SCREEN) / 2);
     });
 
     it('should give where a big jump has to go to show a place of the grid', () => {
