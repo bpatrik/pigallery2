@@ -64,6 +64,7 @@ class MockAuthenticationService {
   readonly user = signal(null);
   isAuthenticated = vi.fn().mockReturnValue(true);
   canSearch = vi.fn().mockReturnValue(true);
+  canDownload = vi.fn().mockReturnValue(true);
   isAuthorized = vi.fn().mockReturnValue(true);
   isAdmin = vi.fn().mockReturnValue(false);
   logout = vi.fn(); // Also add logout method if needed
@@ -544,6 +545,36 @@ describe('GalleryComponent', () => {
       Config.RandomPhoto.enabled = false;
       await component.ngOnInit();
       expect(component.showRandomPhotoBuilder()).toBe(false);
+    });
+
+    describe('sharing that prevents downloading (#1158)', () => {
+      // right click (and a long press on Android) and dragging a photo out; returns whether it got blocked
+      const blocked = (type: 'contextmenu' | 'dragstart', tag: 'img' | 'video' | 'div'): boolean => {
+        const element = document.createElement(tag);
+        fixture.nativeElement.appendChild(element);
+        const event = new Event(type, {bubbles: true, cancelable: true});
+        element.dispatchEvent(event);
+        element.remove();
+        return event.defaultPrevented;
+      };
+
+      it('should block saving the photos and videos', () => {
+        mockAuthService.canDownload.mockReturnValue(false);
+        fixture.detectChanges();
+        expect(fixture.nativeElement.classList.contains('prevent-download'), 'no long press menu on iOS').toBe(true);
+        for (const type of ['contextmenu', 'dragstart'] as const) {
+          expect(blocked(type, 'img'), type + ' img').toBe(true);
+          expect(blocked(type, 'video'), type + ' video').toBe(true);
+          expect(blocked(type, 'div'), type + ' anything else').toBe(false);
+        }
+      });
+
+      it('should not block anything otherwise', () => {
+        fixture.detectChanges();
+        expect(fixture.nativeElement.classList.contains('prevent-download')).toBe(false);
+        expect(blocked('contextmenu', 'img')).toBe(false);
+        expect(blocked('dragstart', 'img')).toBe(false);
+      });
     });
   });
 

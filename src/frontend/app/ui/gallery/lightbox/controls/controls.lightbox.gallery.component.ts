@@ -76,6 +76,7 @@ export class ControlsLightboxComponent implements OnDestroy {
   readonly topLeftSubtitle = computed((): string | null => this.getText(this.lightboxService.topLeftSubtitle()));
   readonly bottomLeftTitle = computed((): string | null => this.getText(this.lightboxService.bottomLeftTitle()));
   readonly bottomLeftSubtitle = computed((): string | null => this.getText(this.lightboxService.bottomLeftSubtitle()));
+  readonly canDownload = this.authService.canDownload;
   readonly isPhoto = computed((): boolean => !!this.activePhoto()?.isPhoto());
   readonly isVideo = computed((): boolean => !!this.activePhoto()?.isVideo());
   readonly originalMediaPath = computed((): string | null => this.activePhoto()?.getOriginalMediaPath() ?? null);
@@ -318,7 +319,7 @@ export class ControlsLightboxComponent implements OnDestroy {
         break;
       case 'd':
       case 'D':
-        if (event.shiftKey) {
+        if (event.shiftKey && this.canDownload()) {
           void this.downloadOriginal();
         }
         break;

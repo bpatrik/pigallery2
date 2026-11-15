@@ -1,6 +1,6 @@
 // Downloading a folder as a zip from the navbar of the gallery (#1311, CUJ 32), as a user and as a guest of a sharing.
 // The single photo download of the lightbox is in lightbox.spec.ts, the zip contents in detail in GalleryDownload.spec.ts (backend).
-import {APIRequestContext, Download, expect, Page, test} from '@playwright/test';
+import {APIRequestContext, Download, expect, Locator, Page, test} from '@playwright/test';
 import AdmZip from 'adm-zip';
 import {ADMIN_SESSION, ACCENTED_DIR, createDirectorySharingWithApi, expectApiOk, notLoggedIn} from './helpers';
 
@@ -78,6 +78,54 @@ test.describe('Zip download', () => {
         'sydney_opera_house.jpg',
         'sydney_opera_house_no_tsoffset_but_gps_utc.jpg',
       ]);
+    });
+  });
+
+  test.describe('in a sharing that prevents downloading (#1158)', () => {
+    test.use(notLoggedIn);
+    let admin: APIRequestContext;
+    let sharingKey: string;
+
+    test.beforeEach(async ({playwright, baseURL}) => {
+      admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
+      sharingKey = (await createDirectorySharingWithApi(admin, 'timestamps', {preventDownload: true})).sharingKey;
+    });
+
+    test.afterEach(async () => {
+      await admin.delete('/pgapi/share/' + sharingKey);
+      await admin.dispose();
+    });
+
+    /**
+     * Right clicks the middle of the element, also if something covers it (e.g.: the lightbox controls cover the photo).
+     * The browser offers "Save image as" only if an img or video gets the click and the page does not prevent it:
+     * returns whether that could happen.
+     */
+    const canSaveWithRightClick = async (page: Page, element: Locator): Promise<boolean> => {
+      await page.evaluate(() => window.addEventListener('contextmenu', e => {
+        (window as unknown as { lastMenu: unknown }).lastMenu = {tag: (e.target as HTMLElement).tagName, prevented: e.defaultPrevented};
+      }, {once: true}));
+      const box = (await element.boundingBox())!;
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2, {button: 'right'});
+      const menu = await page.evaluate(() => (window as unknown as { lastMenu: { tag: string, prevented: boolean } }).lastMenu);
+      return ['IMG', 'VIDEO'].includes(menu.tag) && !menu.prevented;
+    };
+
+    test('Guest should not get the download options', async ({page}) => {
+      await page.goto('/share/' + sharingKey);
+      const photo = '.photo-link > img[alt="big_ben.jpg"]';
+      await expect(page.locator(photo)).toBeVisible();
+      await expect(zipButton(page), 'zip').toHaveCount(0);
+      expect(await canSaveWithRightClick(page, page.locator(photo)), 'save the photo of the grid').toBe(false);
+
+      await page.locator(photo).click();
+      await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+      await expect(page.locator('app-gallery-lightbox-media img').last()).toBeVisible();
+      // the large photo is the last img, on top of the thumbnail
+      expect(await canSaveWithRightClick(page, page.locator('app-gallery-lightbox-media img').last()), 'save the photo of the lightbox').toBe(false);
+      await page.locator('app-lightbox-controls button#button-basic').click();
+      await expect(page.locator('app-lightbox-controls #dropdown-basic')).toBeVisible();
+      await expect(page.locator('app-lightbox-controls #dropdown-basic a.dropdown-item').filter({hasText: 'Download'})).toHaveCount(0);
     });
   });
 });

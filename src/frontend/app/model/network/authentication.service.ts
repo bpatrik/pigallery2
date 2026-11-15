@@ -84,6 +84,8 @@ export class AuthenticationService {
   }
 
   public readonly canSearch = computed((): boolean => Config.Search.enabled && this.isAuthorized(UserRoles.Guest));
+  // false in a sharing session that prevents downloading (only hides the options, the browser can still save what it shows)
+  public readonly canDownload = computed((): boolean => !this.user()?.preventDownload);
 
   /**
    * @param reason why the session ended; none when the user logs out

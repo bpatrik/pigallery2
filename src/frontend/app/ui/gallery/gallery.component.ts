@@ -46,7 +46,10 @@ import {SearchQueryParserService} from './search/search-query-parser.service';
   host: {
     '(dragover)': 'onDragOver($event)',
     '(dragleave)': 'onDragLeave($event)',
-    '(drop)': 'onDrop($event)'
+    '(drop)': 'onDrop($event)',
+    '(contextmenu)': 'onMediaSaveAttempt($event)',
+    '(dragstart)': 'onMediaSaveAttempt($event)',
+    '[class.prevent-download]': '!canDownload()'
   },
   templateUrl: './gallery.component.html',
   styleUrl: './gallery.component.css',
@@ -75,6 +78,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
   contentService = inject(ContentService);
   galleryService = inject(GalleryService);
   private authService = inject(AuthenticationService);
+  protected readonly canDownload = this.authService.canDownload;
   private router = inject(Router);
   private shareService = inject(ShareService);
   private route = inject(ActivatedRoute);
@@ -233,6 +237,17 @@ export class GalleryComponent implements OnInit, OnDestroy {
 
   retry(): void {
     this.contentLoader.reloadCurrentContent().catch(console.error);
+  }
+
+  /**
+   * A sharing that prevents downloading blocks "Save image as" (right click) and dragging the photos and videos out.
+   * Not bulletproof: anything the browser shows can still be saved.
+   */
+  onMediaSaveAttempt(event: Event): void {
+    const target = event.target as HTMLElement | null;
+    if (!this.canDownload() && (target?.tagName === 'IMG' || target?.tagName === 'VIDEO')) {
+      event.preventDefault();
+    }
   }
 
   onDragOver(event: DragEvent): void {

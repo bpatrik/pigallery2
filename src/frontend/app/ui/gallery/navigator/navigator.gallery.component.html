@@ -34,7 +34,7 @@
         <div class="divider">&nbsp;</div>
       }
 
-      @if (config.Gallery.NavBar.enableDownloadZip  && itemCount() > 0) {
+      @if (config.Gallery.NavBar.enableDownloadZip && authService.canDownload() && itemCount() > 0) {
         <a [href]="downloadZipLink()"
           class="btn  btn-outline-secondary btn-navigator">
           <ng-icon name="ionDownloadOutline" title="Download" i18n-title />

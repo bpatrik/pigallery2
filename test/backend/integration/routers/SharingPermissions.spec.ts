@@ -16,6 +16,7 @@ import {ResponseSharingDTO} from '../../../../src/common/entities/SharingDTO';
 import {QueryParams} from '../../../../src/common/QueryParams';
 import {Utils} from '../../../../src/common/Utils';
 import {ContentWrapperUtils, PackedContentWrapper} from '../../../../src/common/entities/ContentWrapper';
+import {SearchQueryTypes, TextSearchQueryMatchTypes} from '../../../../src/common/entities/SearchQueryDTO';
 
 process.env['NODE_ENV'] = 'test';
 chai.should();
@@ -277,6 +278,84 @@ describe('Sharing permissions', (sqlHelper: DBTestHelper) => {
       // still the sharing of its owner
       expect(await listForDir(owner, mine)).to.deep.equal([mine.sharingKey]);
       (await shareLogin(request.agent(server.Server), mine.sharingKey, 'admin password')).should.have.status(200);
+    });
+  });
+
+  describe('preventing downloads (#1158)', () => {
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const createWith = async (preventDownload?: boolean): Promise<ResponseSharingDTO> => {
+      const res = await as(owner).post(api('/share/' + encodeURIComponent(SHARED)))
+        .send({createSharing: {password: 'password', valid: 60 * 60 * 1000, preventDownload}});
+      expect(res.body.error).to.equal(null);
+      return res.body.result as ResponseSharingDTO;
+    };
+    const zipUrl = api('/gallery/zip/' + encodeURIComponent(JSON.stringify({
+      type: SearchQueryTypes.directory, matchType: TextSearchQueryMatchTypes.exact_match, value: SHARED
+    })));
+    // logs in as the guest of the sharing and returns what the session allows
+    const asGuest = async (sharingKey: string): Promise<{ preventDownload: boolean, zip: any, photo: any }> => {
+      // closing an agent stops the server, tearDown closes it
+      const guestAgent = request.agent(server.Server);
+      agents['guest ' + Object.keys(agents).length] = guestAgent;
+      (await shareLogin(guestAgent, sharingKey, 'password')).should.have.status(200);
+      const me = await guestAgent.get(api('/user/me'));
+      me.should.have.status(200);
+      return {
+        preventDownload: (me.body.result as UserDTO).preventDownload === true,
+        zip: await guestAgent.get(zipUrl).buffer(true),
+        photo: await guestAgent.get(api('/gallery/content/' + encodeURIComponent(SHARED) + '/' + PHOTO)),
+      };
+    };
+
+    it('should allow downloading by default', async () => {
+      const sharing = await createWith();
+      expect(sharing.preventDownload).to.be.false;
+      const guestSession = await asGuest(sharing.sharingKey);
+      expect(guestSession.preventDownload).to.be.false;
+      guestSession.zip.should.have.status(200);
+      expect(guestSession.zip.headers['content-type']).to.contain('application/zip');
+    });
+
+    it('should refuse the zip, but still show the photos to the guest of a sharing that prevents downloading', async () => {
+      const sharing = await createWith(true);
+      expect(sharing.preventDownload).to.be.true;
+      const guestSession = await asGuest(sharing.sharingKey);
+      expect(guestSession.preventDownload, 'the frontend hides the download options').to.be.true;
+      shouldBeRefused(guestSession.zip, 'zip');
+      // the photos are shown in the browser, so it can't be prevented to save them
+      guestSession.photo.should.have.status(200);
+      // the creator is not affected
+      (await as(owner).get(zipUrl).buffer(true)).should.have.status(200);
+    });
+
+    it('should switch it with an update and keep it when the update does not set it', async () => {
+      const sharing = await createWith(false);
+      const updateWith = async (preventDownload?: boolean): Promise<ResponseSharingDTO> => {
+        const res = await as(owner).put(api('/share/' + encodeURIComponent(SHARED)))
+          .send({updateSharing: {id: sharing.id, password: 'password', valid: -1, preventDownload}});
+        expect(res.body.error).to.equal(null);
+        return res.body.result as ResponseSharingDTO;
+      };
+      expect((await updateWith(true)).preventDownload).to.be.true;
+      expect((await asGuest(sharing.sharingKey)).preventDownload).to.be.true;
+      expect((await updateWith()).preventDownload, 'not set').to.be.true;
+      expect((await updateWith(false)).preventDownload).to.be.false;
+      expect((await asGuest(sharing.sharingKey)).preventDownload).to.be.false;
+    });
+
+    it('should end the session of a guest when it gets switched on', async () => {
+      const sharing = await createWith(false);
+      const guestAgent = request.agent(server.Server);
+      try {
+        (await shareLogin(guestAgent, sharing.sharingKey, 'password')).should.have.status(200);
+        await as(owner).put(api('/share/' + encodeURIComponent(SHARED)))
+          .send({updateSharing: {id: sharing.id, password: 'password', valid: -1, preventDownload: true}});
+        (await guestAgent.get(zipUrl)).should.have.status(401);
+      } finally {
+        guestAgent.close();
+      }
     });
   });
 

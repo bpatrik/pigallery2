@@ -324,13 +324,14 @@ export interface CreatedSharing {
  * @param options.valid how long the sharing is available in ms
  */
 export const createDirectorySharingWithApi = async (creator: APIRequestContext, dir: string,
-                                                    options: { password?: string, recursive?: boolean, valid?: number } = {}):
+                                                    options: { password?: string, recursive?: boolean, valid?: number, preventDownload?: boolean } = {}):
   Promise<CreatedSharing> => {
   const res = await creator.post('/pgapi/share/', {
     data: {
       createSharing: {
         valid: options.valid ?? 24 * 60 * 60 * 1000,
         ...(options.password && {password: options.password}),
+        ...(options.preventDownload && {preventDownload: true}),
         directoryQuery: options.recursive
           ? {type: SEARCH_DIRECTORY, value: dir + '/*', matchType: GLOB_MATCH}
           : {type: SEARCH_DIRECTORY, value: dir, matchType: EXACT_MATCH},

@@ -78,11 +78,11 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">121</context>
+          <context context-type="linenumber">141</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">133,134</context>
+          <context context-type="linenumber">153,154</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/login/login.component.html</context>
@@ -1390,7 +1390,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">179,180</context>
+          <context context-type="linenumber">199,200</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
@@ -2682,7 +2682,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">86,87</context>
+          <context context-type="linenumber">88,89</context>
         </context-group>
         <target>Always show captions</target>
       </trans-unit>
@@ -2702,7 +2702,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">101,102</context>
+          <context context-type="linenumber">103,104</context>
         </context-group>
         <target>Always show faces</target>
       </trans-unit>
@@ -2738,7 +2738,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">116,117</context>
+          <context context-type="linenumber">118,119</context>
         </context-group>
         <target>Loop Slideshow</target>
       </trans-unit>
@@ -4694,7 +4694,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">211</context>
+          <context context-type="linenumber">231</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
@@ -5174,7 +5174,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">86</context>
+          <context context-type="linenumber">88</context>
         </context-group>
         <target>key: c</target>
       </trans-unit>
@@ -5426,7 +5426,7 @@
         <source>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">127</context>
+          <context context-type="linenumber">131</context>
         </context-group>
         <target>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</target>
       </trans-unit>
@@ -5434,7 +5434,7 @@
         <source>Check the spelling or try fewer words.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">128</context>
+          <context context-type="linenumber">132</context>
         </context-group>
         <target>Check the spelling or try fewer words.</target>
       </trans-unit>
@@ -5442,7 +5442,7 @@
         <source>This folder is empty.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">132</context>
+          <context context-type="linenumber">136</context>
         </context-group>
         <target>This folder is empty.</target>
       </trans-unit>
@@ -5550,15 +5550,15 @@
         <source>Download</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">61</context>
+          <context context-type="linenumber">62</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">62,63</context>
+          <context context-type="linenumber">63,64</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">71</context>
+          <context context-type="linenumber">73</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
@@ -5570,7 +5570,7 @@
         <source>Slideshow playback speed</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">72</context>
+          <context context-type="linenumber">74</context>
         </context-group>
         <target>Slideshow playback speed</target>
       </trans-unit>
@@ -5578,7 +5578,7 @@
         <source>Slideshow speed:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">72,73</context>
+          <context context-type="linenumber">74,75</context>
         </context-group>
         <target>Slideshow speed:</target>
       </trans-unit>
@@ -5586,7 +5586,7 @@
         <source>key: a</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">101</context>
+          <context context-type="linenumber">103</context>
         </context-group>
         <target>key: a</target>
       </trans-unit>
@@ -5594,11 +5594,11 @@
         <source>key: l</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">116</context>
+          <context context-type="linenumber">118</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">133</context>
+          <context context-type="linenumber">135</context>
         </context-group>
         <target>key: l</target>
       </trans-unit>
@@ -5606,7 +5606,7 @@
         <source>Loop videos</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">133,134</context>
+          <context context-type="linenumber">135,136</context>
         </context-group>
         <target>Loop videos</target>
       </trans-unit>
@@ -5614,7 +5614,7 @@
         <source>close, key: Escape</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">151</context>
+          <context context-type="linenumber">153</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/lightbox/lightbox.map.gallery.component.html</context>
@@ -5626,7 +5626,7 @@
         <source>key: left arrow</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">223</context>
+          <context context-type="linenumber">225</context>
         </context-group>
         <target>key: left arrow</target>
       </trans-unit>
@@ -5634,7 +5634,7 @@
         <source>Zoom out, key: '-'</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">257,258</context>
+          <context context-type="linenumber">259,260</context>
         </context-group>
         <target>Zoom out, key: '-'</target>
       </trans-unit>
@@ -5642,7 +5642,7 @@
         <source>Zoom in, key: '+'</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">264,265</context>
+          <context context-type="linenumber">266,267</context>
         </context-group>
         <target>Zoom in, key: '+'</target>
       </trans-unit>
@@ -5650,7 +5650,7 @@
         <source>Pause</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">277</context>
+          <context context-type="linenumber">279</context>
         </context-group>
         <target>Pause</target>
       </trans-unit>
@@ -5658,7 +5658,7 @@
         <source>Auto play</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
-          <context context-type="linenumber">283</context>
+          <context context-type="linenumber">285</context>
         </context-group>
         <target>Auto play</target>
       </trans-unit>
@@ -5682,7 +5682,7 @@
         <source>This file is not available anymore.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">349</context>
+          <context context-type="linenumber">350</context>
         </context-group>
         <target>This file is not available anymore.</target>
       </trans-unit>
@@ -5690,7 +5690,7 @@
         <source>Home</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">424</context>
+          <context context-type="linenumber">425</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
@@ -6042,7 +6042,7 @@
         <source>The photo is not available anymore. Showing the first one.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">357</context>
+          <context context-type="linenumber">358</context>
         </context-group>
         <target>The photo is not available anymore. Showing the first one.</target>
       </trans-unit>
@@ -6778,11 +6778,27 @@
         </context-group>
         <target>Include subfolders</target>
       </trans-unit>
+      <trans-unit id="5606674604448378979" datatype="html">
+        <source>Prevent downloading</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
+          <context context-type="linenumber">123,124</context>
+        </context-group>
+        <target>Prevent downloading</target>
+      </trans-unit>
+      <trans-unit id="3587177038543313825" datatype="html">
+        <source>About preventing downloads</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
+          <context context-type="linenumber">131,132</context>
+        </context-group>
+        <target>About preventing downloads</target>
+      </trans-unit>
       <trans-unit id="3621339913652620986" datatype="html">
         <source>Valid:</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">140,141</context>
+          <context context-type="linenumber">160,161</context>
         </context-group>
         <target>Valid:</target>
       </trans-unit>
@@ -6790,7 +6806,7 @@
         <source>Minutes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">153,154</context>
+          <context context-type="linenumber">173,174</context>
         </context-group>
         <target>Minutes</target>
       </trans-unit>
@@ -6798,7 +6814,7 @@
         <source>Hours</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">154,155</context>
+          <context context-type="linenumber">174,175</context>
         </context-group>
         <target>Hours</target>
       </trans-unit>
@@ -6806,7 +6822,7 @@
         <source>Days</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">155,156</context>
+          <context context-type="linenumber">175,176</context>
         </context-group>
         <target>Days</target>
       </trans-unit>
@@ -6814,7 +6830,7 @@
         <source>Months</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">156,157</context>
+          <context context-type="linenumber">176,177</context>
         </context-group>
         <target>Months</target>
       </trans-unit>
@@ -6822,7 +6838,7 @@
         <source>Forever</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">157,158</context>
+          <context context-type="linenumber">177,178</context>
         </context-group>
         <target>Forever</target>
       </trans-unit>
@@ -6830,7 +6846,7 @@
         <source>active share(s) for this folder. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">170,171</context>
+          <context context-type="linenumber">190,191</context>
         </context-group>
         <target>active share(s) for this folder. </target>
       </trans-unit>
@@ -6838,7 +6854,7 @@
         <source>Subfolders</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">180,181</context>
+          <context context-type="linenumber">200,201</context>
         </context-group>
         <target>Subfolders</target>
       </trans-unit>
@@ -6846,7 +6862,7 @@
         <source>Creator</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">182,183</context>
+          <context context-type="linenumber">202,203</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
@@ -6858,7 +6874,7 @@
         <source>Expires</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">184,185</context>
+          <context context-type="linenumber">204,205</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/settings/sharings-list/sharings-list.component.html</context>
@@ -6870,15 +6886,23 @@
         <source>Copy link</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
-          <context context-type="linenumber">197</context>
+          <context context-type="linenumber">217</context>
         </context-group>
         <target>Copy link</target>
+      </trans-unit>
+      <trans-unit id="7750572232357775694" datatype="html">
+        <source>Hides the download buttons and blocks right click saving. Downloading can't be fully prevented: what the browser shows can still be saved, e.g.: with a screenshot or the developer tools.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
+          <context context-type="linenumber">56</context>
+        </context-group>
+        <target>Hides the download buttons and blocks right click saving. Downloading can't be fully prevented: what the browser shows can still be saved, e.g.: with a screenshot or the developer tools.</target>
       </trans-unit>
       <trans-unit id="3302121187449737262" datatype="html">
         <source>Search query</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">75</context>
+          <context context-type="linenumber">80</context>
         </context-group>
         <target>Search query</target>
       </trans-unit>
@@ -6886,11 +6910,11 @@
         <source>Invalid settings</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">104</context>
+          <context context-type="linenumber">109</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">245</context>
+          <context context-type="linenumber">258</context>
         </context-group>
         <target>Invalid settings</target>
       </trans-unit>
@@ -6898,7 +6922,7 @@
         <source>Yes</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">122</context>
+          <context context-type="linenumber">127</context>
         </context-group>
         <target>Yes</target>
       </trans-unit>
@@ -6906,7 +6930,7 @@
         <source>No</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">123</context>
+          <context context-type="linenumber">128</context>
         </context-group>
         <target>No</target>
       </trans-unit>
@@ -6914,11 +6938,11 @@
         <source>loading..</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">217</context>
+          <context context-type="linenumber">228</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">249</context>
+          <context context-type="linenumber">262</context>
         </context-group>
         <target>loading..</target>
       </trans-unit>
@@ -6926,7 +6950,7 @@
         <source>Set password.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">240</context>
+          <context context-type="linenumber">253</context>
         </context-group>
         <target>Set password.</target>
       </trans-unit>
@@ -6934,7 +6958,7 @@
         <source>Click share to get a link.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">269</context>
+          <context context-type="linenumber">284</context>
         </context-group>
         <target>Click share to get a link.</target>
       </trans-unit>
@@ -6942,7 +6966,7 @@
         <source>Sharing link has been copied to clipboard</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">280</context>
+          <context context-type="linenumber">296</context>
         </context-group>
         <target>Sharing link has been copied to clipboard</target>
       </trans-unit>
@@ -6950,7 +6974,7 @@
         <source>Could not share the link</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
-          <context context-type="linenumber">293</context>
+          <context context-type="linenumber">309</context>
         </context-group>
         <target>Could not share the link</target>
       </trans-unit>

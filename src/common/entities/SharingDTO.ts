@@ -20,6 +20,7 @@ export interface BaseSharingDTO extends SharingDTOKey {
   sharingKey: string;
   expires: number;
   timeStamp: number;
+  preventDownload?: boolean; // hides the download options in the sharing session (not bulletproof)
   creator?: UserDTO; // does not travel to client side
 }
 
@@ -33,6 +34,7 @@ export interface ResponseSharingDTO extends BaseSharingDTO, PublicSharingDTO {
   sharingKey: string;
   expires: number;
   timeStamp: number;
+  preventDownload?: boolean;
   creator?: UserDTO; // does not travel to client side
   passwordProtected: boolean;
 }
@@ -47,6 +49,7 @@ export interface UpdateSharingDTO extends BaseSharingDTO {
   password?: string | null;
   expires: number;
   timeStamp: number;
+  preventDownload?: boolean;
   creator?: UserDTO; // does not travel to client side
 }
 
@@ -58,4 +61,5 @@ export interface CreateSharingDTO {
   defaultDirectoryView?: string;
   searchQuery: SearchQueryDTO;
   directoryQuery?: DirectorySearch; // the directories that are available through the sharing
+  preventDownload?: boolean;
 }
