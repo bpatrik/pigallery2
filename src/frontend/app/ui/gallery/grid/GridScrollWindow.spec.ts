@@ -143,6 +143,20 @@ describe('GridScrollWindow', () => {
       expect(pageY + scrollWindow.offset(TOTAL)).toBeCloseTo((TOTAL - SCREEN) / 2);
     });
 
+    // snapping to the offset of the part would scroll the page, e.g. under the held scrollbar thumb or a smooth scroll
+    it('should keep the window of a big jump while the page does not scroll (e.g. its lines are measured)', () => {
+      const pageY = (MAX - SCREEN) * 0.63;
+      scrollWindow.follow(TOTAL, pageY, Infinity, SCREEN);
+      const offset = scrollWindow.offset(TOTAL);
+      expect(scrollWindow.follow(TOTAL, pageY, 0, SCREEN)).toBe(0);
+      expect(scrollWindow.offset(TOTAL)).toBe(offset);
+
+      // a small scroll gets the offset of its part, the screen stays
+      const shift = scrollWindow.follow(TOTAL, pageY + 10, 10, SCREEN);
+      expect(shift).not.toBe(0);
+      expect(scrollWindow.offset(TOTAL) + shift).toBeCloseTo(offset);
+    });
+
     it('should give where a big jump has to go to show a place of the grid', () => {
       for (const y of [0, PART / 2, TOTAL / 3, TOTAL - SCREEN]) {
         const pageY = scrollWindow.bigJumpPageY(TOTAL, y, SCREEN);

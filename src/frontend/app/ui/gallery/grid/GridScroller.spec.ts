@@ -44,6 +44,7 @@ describe('GridScroller', () => {
   afterEach(() => {
     GridScrollWindow.MAX_HEIGHT = originalMax;
     GridScrollWindow.PARTS = originalParts;
+    scroller.destroy();
     vi.restoreAllMocks();
   });
 
@@ -209,6 +210,34 @@ describe('GridScroller', () => {
       } finally {
         vi.useRealTimers();
       }
+    });
+
+    // e.g. a burst of PageDown, a free spinning wheel: many screens in a frame
+    it('should move the grid as much as the page on a fast scroll of the wheel, the keys or a finger', () => {
+      for (const input of [new WheelEvent('wheel'), new KeyboardEvent('keydown', {key: 'PageDown'}), new Event('touchmove')]) {
+        scroll(GRID_TOP);
+        const top = scroller.screenTop();
+        window.dispatchEvent(input);
+        scroll(scrollY + 5 * SCREEN);
+        expect(scroller.screenTop(), input.type).toBeCloseTo(top + 5 * SCREEN);
+        scroll(scrollY + 5 * SCREEN);
+        expect(scroller.screenTop(), input.type).toBeCloseTo(top + 10 * SCREEN);
+        scroller.scrollTo(0);
+      }
+    });
+
+    it('should take Home and End as big jumps, also right after the wheel', () => {
+      window.dispatchEvent(new WheelEvent('wheel'));
+      window.dispatchEvent(new KeyboardEvent('keydown', {key: 'End'}));
+      scroll(GRID_TOP + (max - SCREEN) / 2);
+      expect(scroller.screenTop()).toBeCloseTo((gridHeight - SCREEN) / 2);
+    });
+
+    it('should not listen to the input after it is destroyed', () => {
+      scroller.destroy();
+      window.dispatchEvent(new WheelEvent('wheel'));
+      scroll(GRID_TOP + (max - SCREEN) / 2);
+      expect(scroller.screenTop(), 'a big jump').toBeCloseTo((gridHeight - SCREEN) / 2);
     });
 
     it('should scroll to a place far down in the page of its part', () => {

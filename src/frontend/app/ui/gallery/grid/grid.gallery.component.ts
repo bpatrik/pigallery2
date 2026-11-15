@@ -274,6 +274,7 @@ export class GalleryGridComponent
   ngOnDestroy(): void {
     this.destroyed = true;
     this.scrollRestoration.clearScrollOffset(this.scrollOffset);
+    this.scroller.destroy();
     this.pendingRenders.forEach(resolve => resolve());
     this.pendingRenders.clear();
     this.resizeObserver?.disconnect();

@@ -4,6 +4,9 @@ import {PageHelper} from '../../../model/page.helper';
 
 // a scroll that comes this soon after a big jump is still a part of it (e.g. the next frame of a smooth scroll)
 const BIG_JUMP_REST_MS = 150;
+// the scrolls this long after the wheel, a key or a finger moved are theirs (e.g. their smooth scroll, a fling)
+const DIRECT_SCROLL_MS = 1000;
+const DIRECT_SCROLL_EVENTS = ['wheel', 'keydown', 'touchstart', 'touchmove'];
 
 /** What the scroller has to know of the grid it scrolls. */
 export interface ScrolledGrid {
@@ -41,10 +44,23 @@ export class GridScroller {
   private bigJump = false;
   // the scrolls until then are parts of the last big jump, see BIG_JUMP_REST_MS
   private bigJumpUntil = 0;
+  // the scrolls until then are of the wheel, the keys or a finger: never a big jump, however fast they are
+  private directScrollUntil = 0;
+  private readonly onDirectInput = (event: Event): void => {
+    const key = (event as KeyboardEvent).key;
+    // Home and End go to the start and the end of the grid
+    this.directScrollUntil = key === 'Home' || key === 'End' ? 0 : performance.now() + DIRECT_SCROLL_MS;
+  };
   // where the page scrolls after the next render (in the grid), see scrollToAfterRender()
   private pendingTarget: (() => number | null) | null = null;
 
   constructor(private readonly grid: ScrolledGrid) {
+    DIRECT_SCROLL_EVENTS.forEach(e => window.addEventListener(e, this.onDirectInput, {capture: true, passive: true}));
+  }
+
+  /** The grid is removed. */
+  destroy(): void {
+    DIRECT_SCROLL_EVENTS.forEach(e => window.removeEventListener(e, this.onDirectInput, {capture: true}));
   }
 
   /** The height of the grid in the page: lower than the grid if it is huge. */
@@ -160,8 +176,9 @@ export class GridScroller {
     const total = this.grid.height();
     // The slow end of a smooth scroll (e.g. End) is still that jump: as a small scroll it could get into another part,
     // and the scroll that keeps the screen then would stop the smooth scroll before its target
-    const bigJump = this.bigJump || (scrolled !== 0 && now < this.bigJumpUntil)
-      || (total > 0 && this.scrollWindow.isBigJump(total, scrolled, window.innerHeight));
+    // A burst of PageDown or a free spinning wheel is as fast as the scrollbar thumb, but moves the photos as much as the page
+    const bigJump = this.bigJump || (now >= this.directScrollUntil && (
+      (scrolled !== 0 && now < this.bigJumpUntil) || (total > 0 && this.scrollWindow.isBigJump(total, scrolled, window.innerHeight))));
     this.bigJump = false;
     this.followedScrollY = scrollY;
     if (total <= 0) {
@@ -170,7 +187,9 @@ export class GridScroller {
     if (bigJump) {
       this.bigJumpUntil = now + BIG_JUMP_REST_MS;
     }
-    const shift = this.scrollWindow.follow(total, scrollY - this.grid.top(), bigJump ? Infinity : scrolled, window.innerHeight);
+    // not a big jump: at most a screen, whatever it scrolled
+    const followed = bigJump ? Infinity : Math.sign(scrolled) * Math.min(Math.abs(scrolled), window.innerHeight - 1);
+    const shift = this.scrollWindow.follow(total, scrollY - this.grid.top(), followed, window.innerHeight);
     if (Math.abs(shift) < 0.5) {
       return;
     }
