@@ -23,12 +23,13 @@ export class ScrollRestorationService {
   private lastPath: string | null = null;
   private restoring: { id: number, y: number } | null = null;
   private target: number | null = null;
+  private scrollOffset: (() => number) | null = null;
 
   constructor() {
     history.scrollRestoration = 'manual';
     this.router.events.subscribe((e): void => {
       if (e instanceof NavigationStart) {
-        this.positions.set(this.lastId, window.scrollY);
+        this.positions.set(this.lastId, window.scrollY + (this.scrollOffset?.() ?? 0));
         this.clearTarget();
         const restoredId = e.restoredState?.navigationId;
         this.restoring = e.navigationTrigger === 'popstate' && restoredId !== undefined &&
@@ -55,6 +56,21 @@ export class ScrollRestorationService {
    */
   restoreTarget(): number | null {
     return this.target;
+  }
+
+  /**
+   * The page holds only a window of a huge grid (see GridScrollWindow): the positions are saved in the whole grid,
+   * the scroll position plus this offset of the window. The grid sets it while it is shown.
+   */
+  setScrollOffset(offset: () => number): void {
+    this.scrollOffset = offset;
+  }
+
+  /** Clears the offset that setScrollOffset() set, if no other grid set its own since. */
+  clearScrollOffset(offset: () => number): void {
+    if (this.scrollOffset === offset) {
+      this.scrollOffset = null;
+    }
   }
 
   private setTarget(y: number): void {

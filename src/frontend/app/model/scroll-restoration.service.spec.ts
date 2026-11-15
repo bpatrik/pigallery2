@@ -54,6 +54,36 @@ describe('ScrollRestorationService', () => {
     expect(service.restoreTarget()).toBe(1500);
   });
 
+  // the page holds only a window of a huge grid, see GridScrollWindow
+  it('should give the position in the whole grid of a huge folder', () => {
+    const gridOffset = (): number => 50_000_000;
+    service.setScrollOffset(gridOffset);
+    const root = navigate('/gallery/');
+    scrolledTo(1500);
+    navigate('/gallery/Holiday%202024');
+    navigate('/gallery/', root);
+    expect(service.restoreTarget()).toBe(50_001_500);
+  });
+
+  it('should keep the offset of the grid that set it last', () => {
+    const shown = (): number => 1000;
+    service.setScrollOffset(() => 5000);
+    service.setScrollOffset(shown);
+    // the previous grid is removed after the new one was created
+    service.clearScrollOffset(() => 5000);
+    const root = navigate('/gallery/');
+    scrolledTo(1500);
+    navigate('/gallery/Holiday%202024');
+    navigate('/gallery/', root);
+    expect(service.restoreTarget()).toBe(2500);
+
+    service.clearScrollOffset(shown);
+    const holiday = navigate('/gallery/Holiday%202024');
+    navigate('/gallery/');
+    navigate('/gallery/Holiday%202024', holiday);
+    expect(service.restoreTarget(), 'no grid').toBe(1500);
+  });
+
   it('should stop restoring once the user scrolls, taps or types', () => {
     for (const input of [new WheelEvent('wheel'), new Event('touchstart'), new KeyboardEvent('keydown'), new Event('pointerdown')]) {
       const root = navigate('/gallery/');

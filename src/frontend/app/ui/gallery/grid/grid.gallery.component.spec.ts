@@ -26,6 +26,8 @@ import {AuthenticationService} from '../../../model/network/authentication.servi
 import {PageHelper} from '../../../model/page.helper';
 import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 import {GridLayout} from './GridLayout';
+import {GridScrollWindow} from './GridScrollWindow';
+import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
 
 class MockQueryService {
   getMediaStringId(media: MediaDTO): string {
@@ -202,7 +204,7 @@ describe('GalleryGridComponent', () => {
 
     // the paddings stand for the not rendered lines
     const pageHeight = (): number => {
-      const first = layout().lineAt(component.padding().top);
+      const first = component.renderedLines()[0].index;
       const rendered = component.renderedLines().reduce((sum, _, i) => sum + layout().height(first + i), 0);
       return component.padding().top + rendered + component.padding().bottom;
     };
@@ -274,6 +276,109 @@ describe('GalleryGridComponent', () => {
       expect(scrollTo).toHaveBeenCalledWith({left: window.scrollX, top: layout().top(line), behavior: 'instant'});
       expect(renderedMedia()).toContain(firstVisible);
     });
+
+    // e.g. 200k photos: a page can't be that high, it holds a window of the grid, see GridScrollWindow
+    describe('of a grid higher than a page can be', () => {
+      const originalMax = GridScrollWindow.MAX_HEIGHT;
+      const originalParts = GridScrollWindow.PARTS;
+      let max: number;
+      let scrollTo: ReturnType<typeof vi.spyOn>;
+      // the not rendered part of the grid above the page
+      const offset = (): number => layout().top(component.renderedLines()[0].index) - component.padding().top;
+      // the top of the screen in the grid
+      const screenTop = (): number => scrollY + offset();
+
+      beforeEach(() => {
+        for (let i = photos.length; i < 2000; ++i) {
+          photos.push(photo(i + '.jpg'));
+        }
+        fixture.componentRef.setInput('mediaGroups', [{name: '', media: [...photos]}]);
+        fixture.detectChanges();
+        max = Math.round(layout().totalHeight / 2);
+        GridScrollWindow.MAX_HEIGHT = max;
+        // a part is a few screens high in the page, like with the real limit
+        GridScrollWindow.PARTS = 4;
+        expect(max / 6).toBeGreaterThan(3 * window.innerHeight);
+        fixture.componentRef.setInput('mediaGroups', [{name: '', media: [...photos]}]);
+        fixture.detectChanges();
+        scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation((options) => {
+          scrollY = (options as ScrollToOptions).top!;
+        });
+        vi.spyOn(window, 'scrollBy').mockImplementation((options) => {
+          scrollY += (options as ScrollToOptions).top!;
+        });
+      });
+
+      afterEach(() => {
+        GridScrollWindow.MAX_HEIGHT = originalMax;
+        GridScrollWindow.PARTS = originalParts;
+      });
+
+      it('should make the page only as high as the limit', () => {
+        expect(pageHeight()).toBeCloseTo(max);
+        expect(renderedMedia()[0]).toBe(photos[0]);
+      });
+
+      it('should move the photos as much as the page on small scrolls, through the whole grid', async () => {
+        const step = window.innerHeight / 2;
+        let expected = 0;
+        while (expected + step < layout().totalHeight - window.innerHeight) {
+          scroll(scrollY + step);
+          expected += step;
+          // the page scrolls back with the render of a new offset
+          await fixture.whenStable();
+          expect(screenTop()).toBeCloseTo(expected, 0);
+          expect(scrollY).toBeGreaterThanOrEqual(0);
+          expect(scrollY).toBeLessThanOrEqual(max);
+        }
+        expect(offset(), 'the window moved').toBeGreaterThan(0);
+        expect(renderedMedia()).toContain(photos[1999]);
+      });
+
+      it('should go to the same ratio of the grid on a big jump, e.g. with the scrollbar thumb', () => {
+        scroll((max - window.innerHeight) / 2);
+        expect(screenTop()).toBeCloseTo((layout().totalHeight - window.innerHeight) / 2, 0);
+        expect(renderedMedia()).toContain(layout().lines[layout().lineAt(screenTop())].segments[0].media[0].media);
+
+        scroll(max - window.innerHeight);
+        expect(screenTop()).toBeCloseTo(layout().totalHeight - window.innerHeight, 0);
+        expect(renderedMedia()).toContain(photos[1999]);
+        expect(component.padding().bottom).toBe(0);
+
+        scroll(0);
+        expect(offset()).toBe(0);
+        expect(renderedMedia()).toContain(photos[0]);
+      });
+
+      it('should scroll to a photo far down for the lightbox', async () => {
+        const target = photos[1800];
+        // jsdom has no layout: the tile is on the screen
+        vi.spyOn(GalleryPhotoComponent.prototype, 'getDimension').mockImplementation(() => ({top: scrollY + 10, left: 0, width: 0, height: 0}));
+        const revealed = component.revealMedia(target);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(renderedMedia()).toContain(target);
+        const top = (scrollTo.mock.calls[0][0] as ScrollToOptions).top!;
+        expect(top).toBeLessThanOrEqual(max);
+        expect(top + offset()).toBeCloseTo(layout().top(layout().lineOf(target)), 0);
+        expect((await revealed)?.gridMedia.media).toBe(target);
+      });
+
+      it('should come back to the same place of the grid on a browser back', async () => {
+        // saved in the whole grid, see ScrollRestorationService.setScrollOffset()
+        const target = Math.round(layout().totalHeight * 0.8);
+        vi.spyOn(TestBed.inject(ScrollRestorationService), 'restoreTarget').mockReturnValue(target);
+
+        fixture.componentRef.setInput('mediaGroups', [{name: '', media: [...photos]}]);
+        component.ngOnChanges();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(scrollY).toBeLessThanOrEqual(max);
+        expect(screenTop()).toBeCloseTo(target, 0);
+      });
+    });
   });
 
   // #1209: the month and year of the first visible photo next to the scrollbar
@@ -293,17 +398,31 @@ describe('GalleryGridComponent', () => {
     // the line of the first March photo; its line has June photos too
     const marchLine = (): number => layout().lines.findIndex(l => l.segments[0].media.some(m => m.media.name === '30.jpg'));
 
-    it('should show the month and year of the first visible photo at the thumb position, also if it is not rendered', () => {
+    it('should show the month and year of the first visible photo, also if it is not rendered', () => {
       scroll(layout().top(1) + 1);
       expect(label()?.textContent?.trim()).toBe('June 2021');
-      expect(label()?.style.getPropertyValue('--scroll-position')).toBe(String(scrollY / PageHelper.MaxScrollY));
       expect(label()?.classList.contains('handle'), 'only on a touch screen').toBe(false);
+      expect(label()?.style.top, 'the CSS puts it next to the thumb').toBe('');
+      const thumb = innerHeight * innerHeight / (PageHelper.MaxScrollY + innerHeight);
+      const thumbCenter = (): number => parseFloat(label()?.style.getPropertyValue('--thumb-center') ?? '');
+      expect(thumbCenter()).toBeCloseTo(scrollY / PageHelper.MaxScrollY * (innerHeight - thumb) + thumb / 2);
 
       scroll(layout().top(marchLine() + 1));
       expect(label()?.textContent?.trim()).toBe('March 2021');
 
       scroll(PageHelper.MaxScrollY + 100);
-      expect(label()?.style.getPropertyValue('--scroll-position')).toBe('1');
+      expect(thumbCenter(), 'the thumb at the bottom').toBeCloseTo(innerHeight - thumb / 2);
+    });
+
+    it('should be next to the thumb between the arrow buttons of a classic scrollbar', () => {
+      vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(innerWidth - 15);
+      const thumbCenter = (): number => parseFloat(label()?.style.getPropertyValue('--thumb-center') ?? '');
+      scroll(0);
+      scroll(1);
+      const thumb = Math.max(20, (innerHeight - 30) * innerHeight / (PageHelper.MaxScrollY + innerHeight));
+      expect(thumbCenter(), 'below the button at the top').toBeCloseTo(15 + 1 / PageHelper.MaxScrollY * (innerHeight - 30 - thumb) + thumb / 2);
+      scroll(PageHelper.MaxScrollY + 100);
+      expect(thumbCenter(), 'above the button at the bottom').toBeCloseTo(innerHeight - 15 - thumb / 2);
     });
 
     it('should hide after the scrolling stopped', async () => {
@@ -411,16 +530,29 @@ describe('GalleryGridComponent', () => {
         expect(label()?.textContent?.trim()).toBe('');
       });
 
-      it('should scroll the page like the thumb of a scrollbar while dragged', () => {
+      it('should scroll the page like the thumb of a scrollbar while dragged, from where it was grabbed', () => {
         scroll(250);
-        const track = window.innerHeight - 40;
+        const scrolledTo = (top: number): void =>
+          expect(scrollTo).toHaveBeenLastCalledWith({left: window.scrollX, top, behavior: 'instant'});
+        const bottom = window.innerHeight - 40;
         component.onHandlePointerDown(pointer(110)); // 10px below its top
-        component.onHandlePointerMove(pointer(110 + track));
-        expect(scrollTo).toHaveBeenLastCalledWith({left: window.scrollX, top: PageHelper.MaxScrollY, behavior: 'instant'});
-        component.onHandlePointerMove(pointer(10 + track / 2));
-        expect(scrollTo).toHaveBeenLastCalledWith({left: window.scrollX, top: PageHelper.MaxScrollY / 2, behavior: 'instant'});
+        fixture.detectChanges();
+        expect(label()?.style.top, 'at the finger').toBe('100px');
+
+        component.onHandlePointerMove(pointer(110));
+        scrolledTo(250);
+        // below where it was grabbed: to the end
+        component.onHandlePointerMove(pointer(10 + (100 + bottom) / 2));
+        scrolledTo(250 + (PageHelper.MaxScrollY - 250) / 2);
+        component.onHandlePointerMove(pointer(10 + bottom + 100));
+        scrolledTo(PageHelper.MaxScrollY);
+        // above it: to the top
+        component.onHandlePointerMove(pointer(10 + 50));
+        scrolledTo(125);
+        fixture.detectChanges();
+        expect(label()?.style.top).toBe('50px');
         component.onHandlePointerMove(pointer(-500));
-        expect(scrollTo).toHaveBeenLastCalledWith({left: window.scrollX, top: 0, behavior: 'instant'});
+        scrolledTo(0);
 
         component.onHandlePointerUp(pointer(-500));
         scrollTo.mockClear();
