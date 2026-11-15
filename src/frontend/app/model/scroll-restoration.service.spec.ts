@@ -9,11 +9,14 @@ describe('ScrollRestorationService', () => {
   let events: Subject<RouterEvent>;
   let originalRestoration: ScrollRestoration;
   let nextId = 1;
+  let scrollTo: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     originalRestoration = history.scrollRestoration;
     events = new Subject<RouterEvent>();
     nextId = 1;
+    // jsdom does not scroll
+    scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
     TestBed.configureTestingModule({
       providers: [{provide: Router, useValue: {events}}]
     });
@@ -134,6 +137,50 @@ describe('ScrollRestorationService', () => {
     navigate('/gallery/sub');
 
     expect(service.restoreTarget()).toBeNull();
+  });
+
+  // the content of a new page can be cached: it replaces the scrolled one right away, the page does not get short in between
+  describe('a new page', () => {
+    it('should start at its top after a link or a button navigation', () => {
+      navigate('/gallery/');
+      scrolledTo(1500);
+      scrollTo.mockClear();
+      navigate('/search/%7B%22text%22%3A%22Alvin%22%7D');
+
+      expect(scrollTo).toHaveBeenCalledWith({left: window.scrollX, top: 0, behavior: 'instant'});
+    });
+
+    it('should start at its top again when it is opened again after a browser back', () => {
+      const root = navigate('/gallery/');
+      scrolledTo(1500);
+      navigate('/search/Alvin');
+      navigate('/gallery/', root);
+      scrollTo.mockClear();
+      navigate('/search/Alvin');
+
+      expect(scrollTo).toHaveBeenCalledWith({left: window.scrollX, top: 0, behavior: 'instant'});
+      expect(service.restoreTarget()).toBeNull();
+    });
+
+    it('should stay where it is when only the query params change (e.g. the lightbox, the sorting)', () => {
+      navigate('/gallery/');
+      scrolledTo(1500);
+      scrollTo.mockClear();
+      navigate('/gallery/?p=IMG_5910.jpg');
+      navigate('/gallery/');
+
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
+
+    it('should be left to the page on a browser back: it scrolls to the restored position', () => {
+      const root = navigate('/gallery/');
+      scrolledTo(1500);
+      navigate('/gallery/sub');
+      scrollTo.mockClear();
+      navigate('/gallery/', root);
+
+      expect(scrollTo).not.toHaveBeenCalled();
+    });
   });
 
   it('should not give the position before the navigation ended', () => {
