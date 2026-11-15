@@ -111,9 +111,6 @@ export class GalleryGridComponent
     if (!layout || layout.length === 0) {
       return {first: 0, last: -1};
     }
-    if (Config.Gallery.enableOnScrollRendering === false) {
-      return {first: 0, last: layout.length - 1};
-    }
     const {top, height} = this.viewport();
     return {
       first: layout.lineAt(top - height * RENDER_BUFFER_SCREENS),
@@ -310,10 +307,16 @@ export class GalleryGridComponent
     this.updateContainerDimensions();
     this.updateViewport();
     this.isAfterViewInit = true;
-    // an inline blog opens or closes, a directory path is shown whole: the rendered lines change their height
+    // An inline blog opens or closes, a directory path is shown whole: the rendered lines change their height.
+    // The page changes its height when something above the grid does (e.g. the blog of the folder closes):
+    // the grid moves without a scroll, other lines are on the screen.
     if (typeof ResizeObserver !== 'undefined') {
-      this.resizeObserver = new ResizeObserver(() => this.measureLines());
+      this.resizeObserver = new ResizeObserver(() => {
+        this.measureLines();
+        this.renderVisibleLines();
+      });
       this.resizeObserver.observe(this.linesContainer().nativeElement);
+      this.resizeObserver.observe(document.body);
     }
     this.restoreScroll();
   }
