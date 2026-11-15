@@ -83,6 +83,10 @@ export const expectLightboxPhoto = async (page: Page, name: string, timeout?: nu
       return imgs.length + ' images: ' + imgs.map(i => i.getAttribute('src')).join(', ');
     }
     const img = imgs[0];
+    // e.g. while it zooms in from the tile: the thumbnail is not upscaled yet, but the large photo is not loading yet either
+    if (img.classList.contains('thumbnail')) {
+      return 'only the thumbnail: ' + img.getAttribute('src');
+    }
     if (!img.complete || img.naturalWidth === 0) {
       return 'loading: ' + img.getAttribute('src');
     }

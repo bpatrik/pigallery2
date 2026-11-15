@@ -1,7 +1,7 @@
 <div class="imgContainer" #imgContainer>
   @for (item of mediaItems(); track item.key) {
     @if (showThumbnail()) {
-      <img [alt]="gridMedia()?.media.name"
+      <img class="thumbnail" [alt]="gridMedia()?.media.name"
         [style.width.%]="imageSize().width"
         [style.height.%]="imageSize().height"
         [style.transform]="imageTransform()"
