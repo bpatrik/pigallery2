@@ -171,6 +171,7 @@ Build your own extensions. Mostly server-side changes are supported with minimal
 - **Faces (Persons)**: Reads Adobe's XMP Face region metadata.
 - **Internationalization**: Full translation support.
 - **Responsive Design**: Phone, tablet, and desktop support.
+- **Installable (PWA)**: Install it on your phone as an app. See: [Apps & 3rd party tools](third-party.md)
 - **Setup Page**: Easy configuration UI.
 - **Random Photo URL**: For 3rd party integrations.
 - **Video Support**:

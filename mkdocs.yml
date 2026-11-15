@@ -46,6 +46,7 @@ nav:
   - Home: index.md
   - FAQ: faq.md
   - Features: features.md
+  - Apps & 3rd party tools: third-party.md
   - Getting Started:
       - Docker (Recommended): setup/docker.md
       - Advanced:

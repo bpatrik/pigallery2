@@ -32,6 +32,13 @@ For more detailed information, please see our [Documentation Website](http://bpa
 - [User Rights](https://bpatrik.github.io/pigallery2/user-guide/user-rights)
 - [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing)
 
+## 📱 Apps & 3rd party tools
+- **Install it as an app**: PiGallery2 is a PWA, so you can install it on your phone as it is (browser menu -> *Add to Home screen*).
+- **[Extensions](extension/REPOSITORY.md)**: community extensions that you can install from the settings page.
+- **[Native Android app](https://github.com/dasmaetthes/pigallery2_android)**: a community-made Android (and Android TV) client.
+
+3rd party tools are not maintained by me, and I take no responsibility for them. [More details](https://bpatrik.github.io/pigallery2/third-party).
+
 ## 🤝 Contributing
 Bug fixes are welcome! I mostly merge bug fixes: to keep the app simple, new features should be a setting, a theme or an [extension](https://bpatrik.github.io/pigallery2/development/extensions) when possible.
 Please read the [Contribution Guide](https://bpatrik.github.io/pigallery2/development/contributing) before you start.
