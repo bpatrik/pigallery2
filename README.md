@@ -3,6 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/bpatrik/pigallery2/badge.svg?branch=master)](https://coveralls.io/github/bpatrik/pigallery2?branch=master)
 [![CI](https://github.com/bpatrik/pigallery2/actions/workflows/ci.yml/badge.svg)](https://github.com/bpatrik/pigallery2/actions)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ea4aaa?logo=githubsponsors)](https://github.com/sponsors/bpatrik)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support-ff5e5b?logo=kofi&logoColor=white)](https://ko-fi.com/pigallery2)
 
 PiGallery2 is a **fast** directory-first photo gallery website, optimized for running on low-resource servers (especially on Raspberry Pi).
 
@@ -48,7 +49,7 @@ Using an AI coding agent? See [AGENTS.md](AGENTS.md).
 PiGallery2 is free, and I build it alone in my free time, which, since my daughter was born, mostly means nap time 👶.
 WebStorm and AI coding agents help me make the most of those short windows.
 
-If PiGallery2 makes your photos a bit nicer to browse, consider [sponsoring me on GitHub](https://github.com/sponsors/bpatrik).
+If PiGallery2 makes your photos a bit nicer to browse, consider [sponsoring me on GitHub](https://github.com/sponsors/bpatrik) or [buying me a coffee on Ko-fi](https://ko-fi.com/pigallery2).
 A coffee is plenty, and pizza or a date night with my wife is even better 🍕.
 
 ## ⭐ Star History

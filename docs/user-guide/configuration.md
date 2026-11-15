@@ -37,6 +37,7 @@ App CLI options:
   --Server-sessionSecret                                                     (default: [])
   --Server-sessionTimeout                                                   Users kept logged in for this long time. (default: 604800000)
   --Server-trustProxy                                                       Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html (default: 'false')
+  --Server-hideSponsorLinks                                                 Hides the links at the bottom of the settings page that ask for supporting the development of PiGallery2. (default: false)
   --Server-port                                                             Port number. Port 80 is usually what you need. (default: 80)
   --Server-host                                                             Server will accept connections from this IPv6 or IPv4 address. (default: '0.0.0.0')
   --Server-Log-level                                                        Logging level. (default: 'info')
@@ -226,6 +227,7 @@ Environmental variables:
   Server-sessionSecret                                                   (default: [])
   Server-sessionTimeout                                                 Users kept logged in for this long time. (default: 604800000)
   Server-trustProxy                                                     Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html (default: 'false')
+  Server-hideSponsorLinks                                               Hides the links at the bottom of the settings page that ask for supporting the development of PiGallery2. (default: false)
   Server-port                                                           Port number. Port 80 is usually what you need. (default: 80)
   PORT                                                                   same as Server-port
   Server-host                                                           Server will accept connections from this IPv6 or IPv4 address. (default: '0.0.0.0')
@@ -438,6 +440,8 @@ Environmental variables:
         "sessionTimeout": 604800000,
         "//[trustProxy]": "Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html",
         "trustProxy": "false",
+        "//[hideSponsorLinks]": "Hides the links at the bottom of the settings page that ask for supporting the development of PiGallery2.",
+        "hideSponsorLinks": false,
         "//[port]": "Port number. Port 80 is usually what you need.",
         "port": 80,
         "//[host]": "Server will accept connections from this IPv6 or IPv4 address.",

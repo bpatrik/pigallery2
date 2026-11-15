@@ -10,7 +10,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1284</context>
+          <context context-type="linenumber">1294</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/subconfigs/MessagingConfig.ts</context>
@@ -26,7 +26,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1271</context>
+          <context context-type="linenumber">1281</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/subconfigs/MessagingConfig.ts</context>
@@ -42,7 +42,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1341</context>
+          <context context-type="linenumber">1351</context>
         </context-group>
         <target state="translated">Database</target>
       </trans-unit>
@@ -1286,11 +1286,27 @@
         </context-group>
         <target>Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html</target>
       </trans-unit>
+      <trans-unit id="8708158225145066350" datatype="html">
+        <source>Hide sponsor links</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1272</context>
+        </context-group>
+        <target>Hide sponsor links</target>
+      </trans-unit>
+      <trans-unit id="1704551696435591698" datatype="html">
+        <source>Hides the links at the bottom of the settings page that ask for supporting the development of PiGallery2.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">1275</context>
+        </context-group>
+        <target>Hides the links at the bottom of the settings page that ask for supporting the development of PiGallery2.</target>
+      </trans-unit>
       <trans-unit id="2521241309786115337" datatype="html">
         <source>Port number. Port 80 is usually what you need.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1276</context>
+          <context context-type="linenumber">1286</context>
         </context-group>
         <target state="translated">Numero porta. Di solito è 80.</target>
       </trans-unit>
@@ -1298,7 +1314,7 @@
         <source>Server will accept connections from this IPv6 or IPv4 address.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1289</context>
+          <context context-type="linenumber">1299</context>
         </context-group>
         <target state="translated">Il server accetterà connessioni su questo indirizzo IPv4 o IPv6.</target>
       </trans-unit>
@@ -1306,7 +1322,7 @@
         <source>Logs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1296</context>
+          <context context-type="linenumber">1306</context>
         </context-group>
         <target state="translated">Logs</target>
       </trans-unit>
@@ -1314,7 +1330,7 @@
         <source>Server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1332</context>
+          <context context-type="linenumber">1342</context>
         </context-group>
         <target>Server</target>
       </trans-unit>
@@ -1322,7 +1338,7 @@
         <source>Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1350</context>
+          <context context-type="linenumber">1360</context>
         </context-group>
         <target>Users</target>
       </trans-unit>
@@ -1330,7 +1346,7 @@
         <source>Indexing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1359</context>
+          <context context-type="linenumber">1369</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
@@ -1342,7 +1358,7 @@
         <source>If you add a new folder to your gallery, the site indexes it automatically.  If you would like to trigger indexing manually, click index button. (Note: search only works among the indexed directories.)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1364</context>
+          <context context-type="linenumber">1374</context>
         </context-group>
         <target>If you add a new folder to your gallery, the site indexes it automatically. If you would like to trigger indexing manually, click index button. (Note: search only works among the indexed directories.)</target>
       </trans-unit>
@@ -1350,7 +1366,7 @@
         <source>Media</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1376</context>
+          <context context-type="linenumber">1386</context>
         </context-group>
         <target>Media</target>
       </trans-unit>
@@ -1358,7 +1374,7 @@
         <source>Meta file</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1385</context>
+          <context context-type="linenumber">1395</context>
         </context-group>
         <target state="translated">Meta file</target>
       </trans-unit>
@@ -1366,7 +1382,7 @@
         <source>Album cover</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1394</context>
+          <context context-type="linenumber">1404</context>
         </context-group>
         <target>Album cover</target>
       </trans-unit>
@@ -1374,7 +1390,7 @@
         <source>Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1405</context>
+          <context context-type="linenumber">1415</context>
         </context-group>
         <target>Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.</target>
       </trans-unit>
@@ -1382,7 +1398,7 @@
         <source>Sharing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1412</context>
+          <context context-type="linenumber">1422</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
@@ -1402,7 +1418,7 @@
         <source>Duplicates</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1421</context>
+          <context context-type="linenumber">1431</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
@@ -1418,7 +1434,7 @@
         <source>Messaging</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1430</context>
+          <context context-type="linenumber">1440</context>
         </context-group>
         <target>Messaging</target>
       </trans-unit>
@@ -1426,7 +1442,7 @@
         <source>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1434</context>
+          <context context-type="linenumber">1444</context>
         </context-group>
         <target>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</target>
       </trans-unit>
@@ -1434,7 +1450,7 @@
         <source>Extensions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1442</context>
+          <context context-type="linenumber">1452</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
@@ -1446,7 +1462,7 @@
         <source>Upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1451</context>
+          <context context-type="linenumber">1461</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
@@ -1462,7 +1478,7 @@
         <source>Jobs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1460</context>
+          <context context-type="linenumber">1470</context>
         </context-group>
         <target state="translated">Lavori</target>
       </trans-unit>
@@ -4634,11 +4650,19 @@
         </context-group>
         <target state="translated">Up time</target>
       </trans-unit>
+      <trans-unit id="8113063424795575035" datatype="html">
+        <source>Enjoying PiGallery2? Support its development:</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
+          <context context-type="linenumber">155,156</context>
+        </context-group>
+        <target>Enjoying PiGallery2? Support its development:</target>
+      </trans-unit>
       <trans-unit id="714730744313654167" datatype="html">
         <source>Application version</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">158</context>
+          <context context-type="linenumber">170</context>
         </context-group>
         <target state="translated">Versione applicazione</target>
       </trans-unit>
@@ -4646,7 +4670,7 @@
         <source>Built at</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">161</context>
+          <context context-type="linenumber">173</context>
         </context-group>
         <target state="translated">Compilata il</target>
       </trans-unit>
@@ -4654,7 +4678,7 @@
         <source>Git commit</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/admin/admin.component.html</context>
-          <context context-type="linenumber">165</context>
+          <context context-type="linenumber">177</context>
         </context-group>
         <target state="translated">Git commit</target>
       </trans-unit>

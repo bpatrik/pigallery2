@@ -25,6 +25,9 @@ test.describe('Admin', () => {
     const ownRow = page.locator('app-settings-users tr').filter({has: page.locator('td', {hasText: /^admin$/})});
     await expect.soft(ownRow, 'own row in the user list').toHaveCount(1);
     await expect.soft(ownRow.locator('button:has(ng-icon[name="ionTrashOutline"])'), 'no delete on the own row').toBeDisabled();
+    // the sponsor links at the bottom (Server.hideSponsorLinks is false by default)
+    await expect.soft(page.locator('a[href="https://github.com/sponsors/bpatrik"]'), 'GitHub Sponsors link').toBeVisible();
+    await expect.soft(page.locator('a[href="https://ko-fi.com/pigallery2"]'), 'Ko-fi link').toBeVisible();
     await expectNoHorizontalScroll(page, 'admin');
   });
 
