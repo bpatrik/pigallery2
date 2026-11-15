@@ -201,7 +201,7 @@ describe('JobManager (#1315)', () => {
     expect(indexed.sort()).to.deep.equal(['.', 'beach', 'mountains'].sort());
     const progress = progressOf(indexingName);
     expect(progress.state).to.equal(JobProgressStates.finished);
-    expect(progress.logs.map(l => l.comment).join('\n')).to.contain('Indexing failed for: /unreadable');
+    expect(progress.logs.map(l => l.comment).join('\n')).to.contain('Indexing failed for: ' + path.join('/', 'unreadable'));
   });
 });
 
