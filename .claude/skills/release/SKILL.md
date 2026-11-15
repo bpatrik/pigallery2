@@ -1,6 +1,6 @@
 ---
 name: release
-description: Walk the maintainer through releasing a new PiGallery2 version (man page, translations, Hungarian review, tests, docs screenshots, tag, GitHub release with notes and the CI zip). Use when the maintainer asks to do / prepare / cut a release.
+description: Walk the maintainer through releasing a new PiGallery2 version (man page, translations, Hungarian review, tests, docs screenshots, tag, GitHub release with notes and the CI zip, sample extension update). Use when the maintainer asks to do / prepare / cut a release.
 ---
 
 # PiGallery2 release checklist
@@ -10,7 +10,8 @@ The global rules still apply: never commit unasked (leave each step's changes fo
 and pushing a tag or publishing a release is outward-facing, so confirm it first.
 
 Versions: `master` carries `X.Y.Z-edge` in `package.json`; a release is `X.Y.Z` with a git tag of exactly that name.
-The extension kit (`pigallery2-extension-kit`) needs no step: CI publishes it on its own with the app's version.
+The extension kit (`pigallery2-extension-kit`) needs no publish step: the tag's CI run publishes it with the app's version.
+The sample extension that uses it is updated in step 8b.
 
 ## 0. Preconditions **(ask)**
 
@@ -120,6 +121,23 @@ Then the maintainer commits, the release PR is merged, and CI on master must be 
   - Sanity-check it: `unzip -l` shows `package.json`, `src/backend/index.js` and the `dist/` languages.
 - `gh release create X.Y.Z --title X.Y.Z --notes-file <draft> --verify-tag <scratchpad>/pigallery2-release.zip`
   (add `--draft` if the maintainer wants a last look on GitHub), then give the release URL.
+
+## 8b. Sample extension **(ask)**
+
+The [sample extension](https://github.com/bpatrik/pigallery2-sample-extension) (listed in `extension/REPOSITORY.md`)
+must work with the new release. Its local checkout is `extensions/pigallery2-sample-extension` (its own git repo, branch `main`).
+
+- Wait until the tag's CI run has published the kit: `npm view pigallery2-extension-kit@X.Y.Z version`.
+- In the sample's `package.json`: set `version` and `pigallery2-extension-kit` to `X.Y.Z`, and the devDependencies that the
+  app also has (`typescript`, `typeconfig`, `typeorm`, `@types/node`, `@types/express`) to the app's versions. Bump `lodash` to its latest.
+- `npm install`, then `npm run build`. Fix compile errors against the new kit and TypeScript (keep its `tsconfig.json`
+  close to the app's: `module: nodenext`, CommonJS output). `server.js` / `server.js.map` / `config.js` are committed there, so rebuild them.
+- Its CI (`.github/workflows/ci.yml`) builds on the Node versions of the app's `ci.yml` matrix; keep that matrix and the
+  action versions in line with the app's.
+- Try it in the real app (see AGENTS.md "Running the app"), with `--Extensions-folder=<abs path>/extensions` and a throwaway config/DB:
+  the log should show `Running init on extension: pigallery2-sample-extension`, its routes and `SampleMessenger`, and no errors;
+  after logging in as `admin`, `GET /pgapi/extension/pigallery2-sample-extension/sample` returns the saved rows.
+- Leave the changes for review; the maintainer commits and pushes them in that repo.
 
 ## 9. Back to edge
 
