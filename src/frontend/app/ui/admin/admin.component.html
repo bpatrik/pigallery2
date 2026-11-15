@@ -27,9 +27,12 @@
     <div class="form-horizontal">
       <div class="d-flex justify-content-between">
         <div>
-          <a triggers="mouseenter:mouseleave"
+          <a triggers=""
             placement="bottom"
             [popover]="popTemplate"
+            #versionPop="bs-popover"
+            (mouseenter)="showVersionPopover(versionPop)"
+            (mouseleave)="hideVersionPopover(versionPop)"
             class="version"
             href="https://github.com/bpatrik/pigallery2/releases">
             <span
@@ -149,13 +152,17 @@
     </div>
   </app-frame>
   <ng-template #popTemplate>
-    <span i18n>Application version</span>: v{{settingsService.settings().Environment.appVersion}}
-    @if (settingsService.settings().Environment.buildTime) {
-      <br/>
-      <span i18n>Built at</span>: {{settingsService.settings().Environment.buildTime | date:'medium' }}
-    }
-    @if (settingsService.settings().Environment.buildCommitHash) {
-      <br/>
-      <span i18n>Git commit</span>: {{settingsService.settings().Environment.buildCommitHash}}
-    }
+    <div class="version-popover"
+      (mouseenter)="showVersionPopover(versionPop)"
+      (mouseleave)="hideVersionPopover(versionPop)">
+      <span i18n>Application version</span>: v{{settingsService.settings().Environment.appVersion}}
+      @if (settingsService.settings().Environment.buildTime) {
+        <br/>
+        <span i18n>Built at</span>: {{settingsService.settings().Environment.buildTime | date:'medium' }}
+      }
+      @if (settingsService.settings().Environment.buildCommitHash) {
+        <br/>
+        <span i18n>Git commit</span>: <a [href]="commitUrl()" target="_blank" rel="noopener">{{settingsService.settings().Environment.buildCommitHash}}</a>
+      }
+    </div>
   </ng-template>
