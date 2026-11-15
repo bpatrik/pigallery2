@@ -81,12 +81,8 @@ import {Config} from '../../../../../common/config/public/Config';
       u.searchParams.delete(QueryParams.gallery.autoPollInterval);
     }
 
-    // Loop slideshow toggle
-    if (this.loopSlideshow) {
-      u.searchParams.set(QueryParams.gallery.lightbox.loopSlideshow, 'true');
-    } else {
-      u.searchParams.delete(QueryParams.gallery.lightbox.loopSlideshow);
-    }
+    // Loop slideshow toggle: always explicit, as the gallery loops by default
+    u.searchParams.set(QueryParams.gallery.lightbox.loopSlideshow, String(this.loopSlideshow));
 
     // Captions always on
     if (this.captionAlwaysOn) {

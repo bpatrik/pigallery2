@@ -1072,7 +1072,7 @@ export class ClientLightboxConfig {
     },
     description: $localize`If enabled, lightbox will start from the first photo when it reached the last one.`
   })
-  loopSlideshow: boolean = false;
+  loopSlideshow: boolean = true;
 
   @ConfigProperty({
     type: 'boolean',

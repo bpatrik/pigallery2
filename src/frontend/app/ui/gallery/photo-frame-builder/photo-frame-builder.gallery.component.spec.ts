@@ -77,7 +77,7 @@ describe('PhotoFrameBuilderGalleryComponent', () => {
     expect(url.searchParams.get('play')).toBe('true');
   });
 
-  it('should leave out the options that are turned off', () => {
+  it('should leave out the options that are turned off, but turn looping off explicitly', () => {
     component.loopSlideshow = false;
     component.captionAlwaysOn = false;
     component.hideControls = false;
@@ -88,7 +88,7 @@ describe('PhotoFrameBuilderGalleryComponent', () => {
     component.bottomLeftSubtitle = [];
     const url = build('/gallery/');
 
-    expect(Object.fromEntries(url.searchParams)).toEqual({play: 'true', auInt: '300'});
+    expect(Object.fromEntries(url.searchParams)).toEqual({play: 'true', auInt: '300', ls: 'false'});
   });
 
   it('should use the chosen slideshow speed and poll interval', () => {
@@ -105,7 +105,8 @@ describe('PhotoFrameBuilderGalleryComponent', () => {
     const url = build('/gallery/?play=false&ls=true&ssp=7');
 
     expect(url.searchParams.get('play')).toBe('true');
-    expect(url.searchParams.has('ls')).toBe(false);
+    // looping is on by default, so a frame without looping needs ls=false
+    expect(url.searchParams.get('ls')).toBe('false');
     expect(url.searchParams.get('ssp')).toBe('300');
   });
 });

@@ -91,7 +91,7 @@ App CLI options:
   --Gallery-Lightbox-captionAlwaysOn                                        If enabled, lightbox will always show caption by default, not only on hover. (default: false)
   --Gallery-Lightbox-facesAlwaysOn                                          If enabled, lightbox will always show faces by default, not only on hover. (default: false)
   --Gallery-Lightbox-loopVideos                                             If enabled, lightbox will loop videos by default. (default: false)
-  --Gallery-Lightbox-loopSlideshow                                          If enabled, lightbox will start from the first photo when it reached the last one. (default: false)
+  --Gallery-Lightbox-loopSlideshow                                          If enabled, lightbox will start from the first photo when it reached the last one. (default: true)
   --Gallery-Lightbox-loadFullImageOnZoom                                    Enables loading the full resolution image on zoom in the lightbox (preview). (default: true)
   --Gallery-Lightbox-loadFullImageIfPreviewTooSmall                         When enabled, the lightbox will load the full resolution image if all available preview thumbnails are too small for the current view. (default: true)
   --Gallery-Lightbox-Titles-topLeftTitle                                     (default: [6])
@@ -282,7 +282,7 @@ Environmental variables:
   Gallery-Lightbox-captionAlwaysOn                                      If enabled, lightbox will always show caption by default, not only on hover. (default: false)
   Gallery-Lightbox-facesAlwaysOn                                        If enabled, lightbox will always show faces by default, not only on hover. (default: false)
   Gallery-Lightbox-loopVideos                                           If enabled, lightbox will loop videos by default. (default: false)
-  Gallery-Lightbox-loopSlideshow                                        If enabled, lightbox will start from the first photo when it reached the last one. (default: false)
+  Gallery-Lightbox-loopSlideshow                                        If enabled, lightbox will start from the first photo when it reached the last one. (default: true)
   Gallery-Lightbox-loadFullImageOnZoom                                  Enables loading the full resolution image on zoom in the lightbox (preview). (default: true)
   Gallery-Lightbox-loadFullImageIfPreviewTooSmall                       When enabled, the lightbox will load the full resolution image if all available preview thumbnails are too small for the current view. (default: true)
   Gallery-Lightbox-Titles-topLeftTitle                                   (default: [6])
@@ -583,7 +583,7 @@ Environmental variables:
             "//[loopVideos]": "If enabled, lightbox will loop videos by default.",
             "loopVideos": false,
             "//[loopSlideshow]": "If enabled, lightbox will start from the first photo when it reached the last one.",
-            "loopSlideshow": false,
+            "loopSlideshow": true,
             "//[loadFullImageOnZoom]": "Enables loading the full resolution image on zoom in the lightbox (preview).",
             "loadFullImageOnZoom": true,
             "//[loadFullImageIfPreviewTooSmall]": "When enabled, the lightbox will load the full resolution image if all available preview thumbnails are too small for the current view.",
