@@ -10,11 +10,12 @@ import {signal} from '@angular/core';
  *   position in the grid (layout) = position in the page's grid + offset
  *
  * The grid is cut into PARTS parts, each has a fixed offset; the last one ends at the end of the window.
- * - A small scroll (wheel, keys, a finger) moves the photos as much as the page: the offset stays.
+ * - A small scroll (and any scroll of the wheel, the keys or a finger) moves the photos as much as the page: the offset stays.
  *   Going a screen into the next part changes the offset, and the page scrolls back by the same amount
  *   (see follow()): the screen stays, only the scrollbar thumb jumps back a bit.
  * - A big jump (the scrollbar thumb, the scroll handle, End) goes to the same ratio of the grid as of the page.
  *   It lasts until the scroll rests: the page is not scrolled under a smooth scroll (it would stop before its target).
+ *   Its offset stays until the next small scroll: the page is not scrolled under the held scrollbar thumb either.
  *
  * A grid lower than maxHeight() has no offset: the page has the whole grid.
  * All positions here are relative to the top of the grid.
@@ -55,6 +56,10 @@ export class GridScrollWindow {
   follow(total: number, pageY: number, scrolled: number, screenHeight: number): number {
     const offset = this.offset(total);
     if (!this.isBigJump(total, scrolled, screenHeight)) {
+      // the page did not scroll (e.g. the lines were measured): the window of a big jump stays where it is
+      if (scrolled === 0 && this.part === null) {
+        return 0;
+      }
       return this.followSmallScroll(total, pageY + offset, offset, screenHeight);
     }
     // a big jump: to the same ratio of the grid
