@@ -11,6 +11,24 @@ export class AdminRouter {
     this.addGetDuplicates(app);
     this.addJobs(app);
     this.addMessengers(app);
+    this.addReleaseNotes(app);
+  }
+
+  private static addReleaseNotes(app: Express): void {
+    app.get(
+      Config.Server.apiPath + '/admin/release-notes',
+      AuthenticationMWs.authenticate,
+      AuthenticationMWs.authorise(UserRoles.Admin),
+      AdminMWs.loadReleaseNotes,
+      RenderingMWs.renderResult
+    );
+    app.post(
+      Config.Server.apiPath + '/admin/release-notes/seen',
+      AuthenticationMWs.authenticate,
+      AuthenticationMWs.authorise(UserRoles.Admin),
+      AdminMWs.setReleaseNotesSeen,
+      RenderingMWs.renderOK
+    );
   }
 
   private static addGetStatistic(app: Express): void {

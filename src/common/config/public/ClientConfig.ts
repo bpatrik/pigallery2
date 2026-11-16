@@ -1693,6 +1693,16 @@ export class ClientServiceConfig {
   })
   reloadClientOnServerUpdate: boolean = true;
 
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Hide sponsor links`,
+      priority: ConfigPriority.underTheHood,
+    },
+    description: $localize`Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes).`,
+  })
+  hideSponsorLinks: boolean = false;
+
   /**
    * Normalized urlBase: '' or a path with a leading and no trailing '/' (e.g.: '/myGallery').
    */

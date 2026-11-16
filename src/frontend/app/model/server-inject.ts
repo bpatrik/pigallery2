@@ -1,6 +1,7 @@
 import type {UserDTO} from '../../../common/entities/UserDTO';
 import type {ClientConfig} from '../../../common/config/public/ClientConfig';
 import type {UIExtensionDTO} from '../../../common/entities/extension/IClientUIConfig';
+import type {BuildInfoDTO} from '../../../common/entities/ReleaseNotesDTO';
 
 /**
  * Injected config / user from the server side into the global scope (see index.html).
@@ -9,6 +10,7 @@ import type {UIExtensionDTO} from '../../../common/entities/extension/IClientUIC
 // eslint-disable-next-line @typescript-eslint/no-namespace
 declare namespace ServerInject {
   const user: UserDTO | undefined;
+  const buildInfo: BuildInfoDTO | null | undefined;
   const ConfigInject: ClientConfig | undefined;
   const UIExtensionConfigs: UIExtensionDTO[] | undefined;
 }
@@ -23,3 +25,7 @@ export const getInjectedConfig = (): ClientConfig | undefined =>
 
 export const getInjectedUIExtensionConfigs = (): UIExtensionDTO[] | undefined =>
   isInjected() ? ServerInject.UIExtensionConfigs : undefined;
+
+// only set for admins
+export const getInjectedBuildInfo = (): BuildInfoDTO | null =>
+  isInjected() ? ServerInject.buildInfo ?? null : null;

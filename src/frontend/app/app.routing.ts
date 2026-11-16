@@ -63,6 +63,11 @@ export const routes: Routes = [
     canActivate: [adminGuard],
   },
   {
+    path: 'about',
+    loadComponent: () => import('./ui/about/about.component').then(m => m.AboutComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'duplicates',
     loadComponent: () => import('./ui/duplicates/duplicates.component').then(m => m.DuplicateComponent),
     canActivate: [authGuard],

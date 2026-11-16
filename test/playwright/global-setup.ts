@@ -35,6 +35,8 @@ export default async function globalSetup(config: FullConfig): Promise<void> {
   const admin = await request.newContext({baseURL});
   await login(admin, 'admin', 'admin');
   await admin.storageState({path: ADMIN_SESSION});
+  // the "What's new" popup would cover the page in every admin test (about.spec.ts opens it itself)
+  await expectApiOk(await admin.post('/pgapi/admin/release-notes/seen'), 'confirming the release notes');
   await indexAllFolders(admin);
 
   // a reused local server might have the user already

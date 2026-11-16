@@ -1,0 +1,99 @@
+<app-frame>
+  <div body class="container about-page py-4 py-md-5">
+    <header class="d-flex align-items-start align-items-sm-center gap-3 mb-4">
+      <app-icon class="about-icon" [icon]="appIcon" [width]="56" [height]="56" />
+      <div class="min-w-0">
+        <h1 class="h2 mb-1">
+          PiGallery2
+          @if (build(); as build) {
+            <span class="badge rounded-pill text-bg-secondary align-middle about-version-badge" id="about-app-version">v{{ build.appVersion }}</span>
+          }
+        </h1>
+        <p class="text-body-secondary mb-0" i18n>A fast, directory-first photo gallery for low-resource servers like a Raspberry Pi. Free and open source.</p>
+      </div>
+    </header>
+
+    <nav class="d-flex flex-wrap gap-2 mb-4">
+      <a class="btn btn-sm btn-outline-secondary" href="https://bpatrik.github.io/pigallery2/" target="_blank" rel="noopener">
+        <ng-icon name="ionBookOutline" class="align-text-top me-1" /><ng-container i18n>Documentation</ng-container>
+      </a>
+      <a class="btn btn-sm btn-outline-secondary" href="https://github.com/bpatrik/pigallery2" target="_blank" rel="noopener">
+        <ng-icon name="ionLogoGithub" class="align-text-top me-1" />GitHub
+      </a>
+      <a class="btn btn-sm btn-outline-secondary" [href]="releasesUrl" target="_blank" rel="noopener">
+        <ng-icon name="ionDocumentTextOutline" class="align-text-top me-1" /><ng-container i18n>Release notes</ng-container>
+      </a>
+    </nav>
+
+    @if (!hideSponsorLinks) {
+      <section class="card mb-3" id="about-support">
+        <div class="card-body">
+          <h2 class="h6 mb-2" i18n>Support PiGallery2</h2>
+          <p class="text-body-secondary small" i18n>PiGallery2 is a hobby project, developed in free time. If it makes your photos a bit nicer to browse, consider supporting its development.</p>
+          <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-danger" href="https://github.com/sponsors/bpatrik" target="_blank" rel="noopener">
+              <ng-icon name="ionHeartOutline" class="align-text-top me-1" />GitHub Sponsors
+            </a>
+            <a class="btn btn-kofi" href="https://ko-fi.com/pigallery2" target="_blank" rel="noopener">
+              <ng-icon name="ionCafeOutline" class="align-text-top me-1" />Ko-fi
+            </a>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (isAdmin()) {
+      <section class="card" id="about-version">
+        <div class="card-body">
+          <div class="d-flex flex-wrap align-items-baseline justify-content-between column-gap-3 mb-3">
+            <h2 class="h6 mb-0" i18n>Build</h2>
+            <small class="text-body-secondary fst-italic" i18n>*Only admins see this</small>
+          </div>
+          @if (build(); as build) {
+            <dl class="build-grid small mb-3">
+              <div>
+                <dt i18n>Version</dt>
+                <dd id="about-build-version">v{{ build.appVersion }}</dd>
+              </div>
+              @if (commit(); as commit) {
+                <div>
+                  <dt i18n>Git commit</dt>
+                  <dd>
+                    <a class="font-monospace" id="about-commit" [href]="commit.url" target="_blank" rel="noopener"
+                       [title]="build.buildCommitHash">{{ commit.short }}</a>
+                  </dd>
+                </div>
+              }
+              @if (build.buildTime) {
+                <div>
+                  <dt i18n>Built at</dt>
+                  <dd>{{ build.buildTime | date:'medium' }}</dd>
+                </div>
+              }
+              @if (build.upTime) {
+                <div>
+                  <dt i18n>Running since</dt>
+                  <dd id="about-up-time">{{ build.upTime | date:'medium' }}</dd>
+                </div>
+              }
+              <div>
+                <dt i18n>Runs on</dt>
+                <dd id="about-runtime">{{ runtime() }}</dd>
+              </div>
+            </dl>
+            <div class="d-flex flex-wrap gap-2">
+              @if (hasNotes()) {
+                <button type="button" class="btn btn-sm btn-outline-primary" id="about-whats-new"
+                        (click)="releaseNotesService.open()" i18n>What's new in this version</button>
+              }
+              <button type="button" class="btn btn-sm btn-outline-secondary" id="about-copy-build"
+                      [appCopy]="bugReportText()" (copied)="onBuildInfoCopied()">
+                <ng-icon name="ionCopyOutline" class="align-text-top me-1" /><ng-container i18n>Copy for a bug report</ng-container>
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+</app-frame>

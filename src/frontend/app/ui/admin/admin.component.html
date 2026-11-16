@@ -27,14 +27,8 @@
     <div class="form-horizontal">
       <div class="d-flex justify-content-between">
         <div>
-          <a triggers=""
-            placement="bottom"
-            [popover]="popTemplate"
-            #versionPop="bs-popover"
-            (mouseenter)="showVersionPopover(versionPop)"
-            (mouseleave)="hideVersionPopover(versionPop)"
-            class="version"
-            href="https://github.com/bpatrik/pigallery2/releases">
+          <!-- the build details and release notes are on the about page -->
+          <a class="version" [routerLink]="['/about']">
             <span
               i18n>App version:</span>&nbsp;<span>{{'v' + (settingsService.settings().Environment.appVersion || '----')}}</span>
             </a>
@@ -140,38 +134,12 @@
         </div>
       </div>
 
-      <footer class="d-flex flex-wrap justify-content-between align-items-center gap-2 py-3 mt-4 mb-3 border-top small">
+      <footer class="d-flex flex-wrap justify-content-end align-items-center me-1 mb-3 small">
         <span class="text-body-secondary">
           <ng-container i18n>Up time</ng-container><!--
           -->: {{settingsService.settings().Environment.upTime | date:'medium'}}
         </span>
-        @if (!settingsService.settings().Server.hideSponsorLinks) {
-          <span>
-            <ng-icon name="ionHeartOutline" class="align-text-top text-danger" />
-            <span class="text-body-secondary ms-1" i18n>Sponsor:</span>
-            <a class="heart-link ms-1" href="https://github.com/sponsors/bpatrik" target="_blank" rel="noopener"
-               title="GitHub Sponsors">GitHub</a>
-            <span class="text-body-secondary mx-1">·</span>
-            <a class="heart-link" href="https://ko-fi.com/pigallery2" target="_blank" rel="noopener"
-               title="Ko-fi">Ko-fi</a>
-          </span>
-        }
       </footer>
 
     </div>
   </app-frame>
-  <ng-template #popTemplate>
-    <div class="version-popover"
-      (mouseenter)="showVersionPopover(versionPop)"
-      (mouseleave)="hideVersionPopover(versionPop)">
-      <span i18n>Application version</span>: v{{settingsService.settings().Environment.appVersion}}
-      @if (settingsService.settings().Environment.buildTime) {
-        <br/>
-        <span i18n>Built at</span>: {{settingsService.settings().Environment.buildTime | date:'medium' }}
-      }
-      @if (settingsService.settings().Environment.buildCommitHash) {
-        <br/>
-        <span i18n>Git commit</span>: <a [href]="commitUrl()" target="_blank" rel="noopener">{{settingsService.settings().Environment.buildCommitHash}}</a>
-      }
-    </div>
-  </ng-template>

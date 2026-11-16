@@ -112,28 +112,13 @@ const getCommitHash = (): string => {
   }
 };
 
-/**
- * Stamps the client bundle with its version, build time and commit (see main.ts),
- * so the browser console tells which build a page runs.
- * The values contain no quotes, so single quoted JS strings work in both cmd.exe and sh.
- */
-const getBuildInfoDefines = (): string => {
-  const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8')) as { version: string };
-  const defines: Record<string, string> = {
-    PIGALLERY2_VERSION: pkg.version,
-    PIGALLERY2_BUILD_TIME: new Date().toISOString(),
-    PIGALLERY2_COMMIT: getCommitHash()
-  };
-  return Object.entries(defines).map(([k, v]): string => ` --define "${k}='${v}'"`).join('');
-};
-
 const createFrontendTask = (
   type: string,
   script: string
 ): void => {
   gulp.task(type, async (cb): Promise<void> => {
     try {
-      const {stdout, stderr} = await execPr(script + getBuildInfoDefines());
+      const {stdout, stderr} = await execPr(script);
       console.log(stdout);
       console.error(stderr);
     } catch (e) {
@@ -198,6 +183,8 @@ gulp.task('copy-static-text', (): any =>
     .src(
       [
         'README.md',
+        // the admins see it in the app (see BuildInfo.loadReleaseNotes)
+        'RELEASE_NOTES.md',
         //  'package-lock.json', should not add, it keeps optional packages optional even with --force-opt-packages.
         'LICENSE',
       ],

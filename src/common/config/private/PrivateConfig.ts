@@ -1267,16 +1267,6 @@ export class ServerServiceConfig extends ClientServiceConfig {
   trustProxy: string = 'false';
 
   @ConfigProperty({
-    type: 'boolean',
-    tags: {
-      name: $localize`Hide sponsor links`,
-      priority: ConfigPriority.underTheHood,
-    },
-    description: $localize`Hides the links at the bottom of the settings page that ask for supporting the development of PiGallery2.`,
-  })
-  hideSponsorLinks: boolean = false;
-
-  @ConfigProperty({
     tags: {
       name: $localize`Port`,
       priority: ConfigPriority.advanced,

@@ -11,6 +11,8 @@ import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {RequestParams} from '../middlewares/RequestParams';
+import {UserRoles} from '../../common/entities/UserDTO';
+import {BuildInfo} from '../model/BuildInfo';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -107,6 +109,8 @@ export class PublicRouter {
       res.tpl['usedTheme'] = selectedTheme;
 
       res.tpl['UIExtensionConfigs'] = ObjectManagers.getInstance().ExtensionManager.getUIExtensionConfigs();
+      // only admins learn the version; anyone else could look up the known bugs of it
+      res.tpl['buildInfo'] = (req.session.context?.user?.role ?? 0) >= UserRoles.Admin ? BuildInfo.get() : null;
 
       return next();
     };
@@ -324,6 +328,7 @@ export class PublicRouter {
         '/share/:' + QueryParams.gallery.sharingKey_params,
         '/shareLogin',
         '/admin',
+        '/about',
         '/duplicates',
         '/faces',
         '/albums',

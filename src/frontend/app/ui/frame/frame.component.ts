@@ -106,6 +106,9 @@ export class FrameComponent {
     this.authService.isAuthorized(UserRoles.User)
   );
 
+  // a sharing guest looks at someone else's photos: the about page (and its sponsor links) is not for them
+  public readonly showAbout = computed((): boolean => !this.user()?.usedSharingKey);
+
   public readonly isAlbumsAvailable = computed((): boolean =>
     Config.Album.enabled &&
     this.authService.isAuthorized(Config.Album.readAccessMinRole)

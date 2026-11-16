@@ -7,16 +7,22 @@ import {NavigationService} from './model/navigation.service';
 import {ThemeService} from './model/theme.service';
 import { RouterOutlet } from '@angular/router';
 import {ToastContainerComponent} from './ui/toast/toast-container.component';
+import {ReleaseNotesPopupComponent} from './ui/release-notes/release-notes-popup.component';
 
 @Component({
     selector: 'app-pi-gallery2',
     template: `
     <router-outlet />
-    <app-toast-container />`,
-    imports: [RouterOutlet, ToastContainerComponent]
+    <app-toast-container />
+    <!-- only admins load the "What's new" popup -->
+    @defer (when isAdmin()) {
+      <app-release-notes-popup />
+    }`,
+    imports: [RouterOutlet, ToastContainerComponent, ReleaseNotesPopupComponent]
 })
 export class AppComponent implements OnInit {
   private authenticationService = inject(AuthenticationService);
+  readonly isAdmin = this.authenticationService.isAdmin;
   private shareService = inject(ShareService);
   private navigation = inject(NavigationService);
   private title = inject(Title);

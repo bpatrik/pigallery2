@@ -10,7 +10,7 @@ import {WebConfigClassBuilder} from 'typeconfig/web';
 import {enumToTranslatedArray} from '../EnumTranslations';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
-import { PopoverDirective } from 'ngx-bootstrap/popover';
+import {RouterLink} from '@angular/router';
 import { BsDropdownDirective, BsDropdownToggleDirective, BsDropdownMenuDirective } from 'ngx-bootstrap/dropdown';
 import { NgIconComponent } from '@ng-icons/core';
 import { TemplateComponent } from '../settings/template/template.component';
@@ -26,7 +26,7 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     styleUrl: './admin.component.css',
     imports: [
     FrameComponent,
-    PopoverDirective,
+    RouterLink,
     BsDropdownDirective,
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
@@ -55,14 +55,11 @@ export class AdminComponent implements OnInit {
       css: this.getCss(notification.type),
       details: notification.details ? NotificationService.formatDetails(notification.details) : null
     })));
-  readonly commitUrl = computed((): string =>
-    'https://github.com/bpatrik/pigallery2/commit/' + this.settingsService.settings().Environment.buildCommitHash);
   configPriorities: { key: number; value: string; }[];
   configStyles: { key: number; value: string; }[];
   public readonly ConfigPriority = ConfigPriority;
   public readonly ConfigStyle = ConfigStyle;
   public readonly configPaths: string[] = [];
-  private versionPopoverHideTimer: ReturnType<typeof setTimeout> | undefined;
 
   constructor() {
     this.configPriorities = enumToTranslatedArray(ConfigPriority);
@@ -75,21 +72,6 @@ export class AdminComponent implements OnInit {
   ngOnInit(): void {
     // adminGuard lets only admins in
     this.piTitleService.setTitle($localize`Admin`);
-  }
-
-  // The version popover stays open while the mouse is over the link or the popover,
-  // so its links (e.g. the git commit) can be clicked.
-  showVersionPopover(pop: PopoverDirective): void {
-    clearTimeout(this.versionPopoverHideTimer);
-    if (!pop.isOpen()) {
-      pop.show();
-    }
-  }
-
-  hideVersionPopover(pop: PopoverDirective): void {
-    clearTimeout(this.versionPopoverHideTimer);
-    // the delay lets the mouse cross the gap between the link and the popover
-    this.versionPopoverHideTimer = setTimeout(() => pop.hide(), 200);
   }
 
   private getCss(type: NotificationType): string {

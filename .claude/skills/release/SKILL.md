@@ -17,7 +17,7 @@ Release candidate (since 3.8.0): do steps 0-5b with the version `X.Y.Z-rc.1` ins
 and merge it without a tag. Its master CI run pushes Docker `edge` and publishes the kit `X.Y.Z-rc.1` with the npm dist-tag `edge`
 (every prerelease version is published once, from master). The maintainer runs it for about a week; fixes land on master as usual
 (bump to `-rc.2` only if the kit should be republished). Then the release itself is only step 4 with `X.Y.Z`
-(rerun step 2/3 if strings changed since the RC), then steps 6-9.
+(rerun step 2/3 if strings changed since the RC, and step 3b if anything landed), then steps 6-9.
 
 ## 0. Preconditions **(ask)**
 
@@ -63,6 +63,23 @@ Don't read `messages.hu.xlf` itself (~470 KB). Use the script next to this file:
   unit is wrong, and adds every applied id to `translation-reviewed.hu.json` (commit it with the translations). Include the units that are fine as they are (with their current target), so they count as reviewed too.
 - Run the export again: it should come out empty, apart from what the maintainer chose to leave for later.
 
+## 3b. Release notes **(ask)**
+
+`RELEASE_NOTES.md` collects the notes while the release is developed (AGENTS.md "Release notes"). It ships in the release
+zip, and admins see it in the app ("What's new" popup once per version, about page), so finish it before the version bump.
+
+- Collect what it may miss: `git log --oneline <last-tag>..HEAD`, merged PRs since the last release
+  (`gh pr list --state merged --base master --search "merged:>=<last-release-date>" --limit 200 --json number,title,author,body`)
+  and the issues closed by them.
+- Look specifically for:
+  - a `DataStructureVersion` bump (`git diff <last-tag> -- src/common/DataStructureVersion.ts`) → the DB is rebuilt on first start (users kept),
+  - config changes that need user action (diff of `docs/user-guide/configuration.md`),
+  - extension API breaking changes (PR descriptions list them; `extension/` and `src/backend/model/extension/IExtension.ts` diffs).
+- Update the file in the style of earlier releases (`gh release view <last-tag>`): **Breaking changes**, **Main new features**,
+  **Further changes**, with full issue/PR links (the app does not link a bare `#1234`). Drop empty sections.
+  Keep the comment at the top. The maintainer edits it in the IDE.
+- For a release after its RC, rerun this step if anything landed since the RC.
+
 ## 4. Version bump
 
 - `npm version X.Y.Z --no-git-tag-version` (updates `package.json` and `package-lock.json`).
@@ -105,15 +122,8 @@ Then the maintainer commits, the release PR is merged, and CI on master must be 
 
 ## 7. Release notes **(ask)**
 
-- Collect: `git log --oneline <last-tag>..X.Y.Z`, merged PRs since the last release
-  (`gh pr list --state merged --base master --search "merged:>=<last-release-date>" --limit 200 --json number,title,author,body`),
-  issues closed by them, and first-time contributors.
-- Look specifically for:
-  - a `DataStructureVersion` bump (`git diff <last-tag>..X.Y.Z -- src/common/DataStructureVersion.ts`) → the DB is rebuilt on first start (users kept),
-  - config changes that need user action (diff of `docs/user-guide/configuration.md`),
-  - extension API breaking changes (PR descriptions list them; `extension/` and `src/backend/model/extension/IExtension.ts` diffs).
-- Draft in the style of earlier releases (`gh release view <last-tag>`): **Breaking changes**, **Main new features**
-  (with issue/PR links), **Further changes**, **New Contributors**, and
+- Start from `RELEASE_NOTES.md` of the tag (step 3b), without its top comment. Add **New Contributors**
+  (first-time contributors of the merged PRs since the last release) and
   `**Full Changelog**: https://github.com/bpatrik/pigallery2/compare/<last-tag>...X.Y.Z`.
 - Write the draft to a file in the scratchpad (give the full path) and let the maintainer edit it.
   These notes are written by the maintainer about their own project; don't add an AI footer unless they want one.
@@ -149,6 +159,8 @@ must work with the new release. Its local checkout is `extensions/pigallery2-sam
 
 - Bump master to the next prerelease, e.g. `npm version X.(Y+1).0-edge --no-git-tag-version`
   (commit `Version bump to X.(Y+1).0-edge`, like `42af9167`).
+- Reset `RELEASE_NOTES.md` to its top comment and the three empty headings (Breaking changes, Main new features,
+  Further changes), in the same commit. Edge never opens the "What's new" popup by itself.
 - Wrap up with what was released, links (release, Docker Hub), and anything left open.
 
 ## Improving this checklist

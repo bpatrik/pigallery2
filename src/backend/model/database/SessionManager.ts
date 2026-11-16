@@ -104,7 +104,12 @@ export class SessionManager {
     if (typeof user.id !== 'number') {
       return null;
     }
-    return connection.getRepository(UserEntity).findOneBy({id: user.id});
+    const row = await connection.getRepository(UserEntity).findOneBy({id: user.id});
+    // confirming the release notes must not end the session
+    if (row) {
+      delete row.releaseNotesSeenVersion;
+    }
+    return row;
   }
 
   /**

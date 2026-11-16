@@ -1,0 +1,60 @@
+.about-page {
+  max-width: 48rem;
+}
+
+.about-icon {
+  flex-shrink: 0;
+  color: var(--bs-emphasis-color);
+}
+
+.about-version-badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* label above value; as many columns as fit */
+.build-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.75rem 1.5rem;
+}
+
+.build-grid dt {
+  font-weight: normal;
+  color: var(--bs-secondary-color);
+}
+
+.build-grid dd {
+  margin-bottom: 0;
+  overflow-wrap: anywhere;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+/* Ko-fi in coffee colors, so it stands next to the red GitHub Sponsors button */
+.btn-kofi {
+  --bs-btn-color: #7a4419;
+  --bs-btn-bg: #fbf1e4;
+  --bs-btn-border-color: #c98a4b;
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #9a5a26;
+  --bs-btn-hover-border-color: #9a5a26;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: #7a4419;
+  --bs-btn-active-border-color: #7a4419;
+  --bs-btn-focus-shadow-rgb: 201, 138, 75;
+}
+
+:host-context([data-bs-theme=dark]) .btn-kofi {
+  --bs-btn-color: #e8b583;
+  --bs-btn-bg: rgba(201, 138, 75, 0.12);
+  --bs-btn-border-color: #a8703d;
+  --bs-btn-hover-color: #2b1a0d;
+  --bs-btn-hover-bg: #e8b583;
+  --bs-btn-hover-border-color: #e8b583;
+  --bs-btn-active-color: #2b1a0d;
+  --bs-btn-active-bg: #d39a62;
+  --bs-btn-active-border-color: #d39a62;
+}
