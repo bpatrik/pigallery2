@@ -40,6 +40,7 @@ This is the bulk of this release:
 * Extensions: manual-install listings by @v-marinkov in [#1182](https://github.com/bpatrik/pigallery2/pull/1182)
 * Grid: photos in grouped view have the same height when groups share a row [#1208](https://github.com/bpatrik/pigallery2/issues/1208)
 * Random sort is no longer biased (Fisher-Yates) by @infinitejones in [#1131](https://github.com/bpatrik/pigallery2/pull/1131)
+* Docker: the release images are rebuilt every week on fresh base images, so OS and Node security fixes arrive without a new release (same tags, e.g. `latest`; Watchtower picks them up). The release zip now ships a `package-lock.json`, so every build installs the npm versions that were tested.
 * Only admins see the app version: it is no longer in the browser console or the page source of every visitor.
 * The sponsor links moved from the bottom of the settings page to the about page.
 * The server log tells when the DB got rebuilt, when the default `admin` / `admin` user was created, and when a login failed because the user does not exist. [#1399](https://github.com/bpatrik/pigallery2/issues/1399)

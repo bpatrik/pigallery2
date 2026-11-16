@@ -185,7 +185,6 @@ gulp.task('copy-static-text', (): any =>
         'README.md',
         // the admins see it in the app (see BuildInfo.loadReleaseNotes)
         'RELEASE_NOTES.md',
-        //  'package-lock.json', should not add, it keeps optional packages optional even with --force-opt-packages.
         'LICENSE',
       ],
       {base: '.'}
@@ -248,6 +247,14 @@ gulp.task('copy-package', (): any =>
     )
     .pipe(gulp.dest('./release'))
 );
+
+// The repo lock does not match the trimmed release package.json (no devDependencies, skipped or forced optional packages),
+// so let npm reconcile it: same versions as CI tested, only for what the release installs.
+// All platforms stay in the lock (sharp's per-platform packages), so it works on every architecture.
+gulp.task('create-package-lock', async (): Promise<void> => {
+  await fsp.copyFile('package-lock.json', 'release/package-lock.json');
+  await execPr('npm install --package-lock-only --ignore-scripts --no-audit --no-fund', {cwd: 'release'});
+});
 
 gulp.task('zip-release', (): any =>
   gulp
@@ -518,6 +525,7 @@ gulp.task(
     'build-backend',
     'copy-static',
     'copy-package',
+    'create-package-lock',
     'zip-release'
   )
 );
