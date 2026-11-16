@@ -6,7 +6,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 -->
 
 ## Breaking changes
-* The DB gets rebuilt on the first start (users are kept), so the first indexing takes a while.
+* The DB gets rebuilt on the first start, so the first indexing takes a while. Users are kept now; older updates (e.g. to 3.5.2) deleted them, then log in with `admin` / `admin`. [#1399](https://github.com/bpatrik/pigallery2/issues/1399)
 * Docker: the images run on Node 26 and there is no `linux/arm/v7` image anymore. 32-bit Raspberry Pi OS users need a 64-bit OS (or stay on 3.5.2). [#1284](https://github.com/bpatrik/pigallery2/issues/1284)
 * Extensions: the backend moved to Express 5 and TypeORM 1. Extension REST paths need the Express 5 path syntax (no regex params, `:id?` becomes `{:id}`, wildcards need a name like `*path`); a path that doesn't parse is logged and skipped. `getCacheForDirectory` gets a `DataSource` instead of a `Connection`, and `invalidateDirectoryCache` gets a `DirectoryPathDTO`. Update to the latest extension kit (now on npm, [#1319](https://github.com/bpatrik/pigallery2/issues/1319)). [#1291](https://github.com/bpatrik/pigallery2/issues/1291) [#1290](https://github.com/bpatrik/pigallery2/issues/1290)
 <!-- TODO check: anything user-facing from cleaning up the Guest role (#1204)? -->
@@ -42,6 +42,7 @@ This is the bulk of this release:
 * Random sort is no longer biased (Fisher-Yates) by @infinitejones in [#1131](https://github.com/bpatrik/pigallery2/pull/1131)
 * Only admins see the app version: it is no longer in the browser console or the page source of every visitor.
 * The sponsor links moved from the bottom of the settings page to the about page.
+* The server log tells when the DB got rebuilt, when the default `admin` / `admin` user was created, and when a login failed because the user does not exist. [#1399](https://github.com/bpatrik/pigallery2/issues/1399)
 
 ## Bug fixes
 * Photos lost all metadata when their XMP segment started right before 64 KiB by @PhilippMundhenk in [#1270](https://github.com/bpatrik/pigallery2/pull/1270) ([#1269](https://github.com/bpatrik/pigallery2/issues/1269))

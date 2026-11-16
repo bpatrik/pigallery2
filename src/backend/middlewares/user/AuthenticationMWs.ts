@@ -305,8 +305,10 @@ export class AuthenticationMWs {
       await AuthenticationMWs.startSession(req, user, credential.rememberMe);
       return next();
     } catch (err) {
+      // tell the admin in the log if the user is missing, e.g. because the DB got rebuilt; the client never learns it
+      const exists = !!(await ObjectManagers.getInstance().UserManager.findOne({name: credential.username}).catch(() => null));
       Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` for user:' + credential.username
-        + ', bad password');
+        + (exists ? ', bad password' : ', the user does not exist'));
       return next(
         new ErrorDTO(
           ErrorCodes.CREDENTIAL_NOT_FOUND,
