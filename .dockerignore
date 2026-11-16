@@ -14,9 +14,7 @@ src/**/*.js
 src/**/*.js.map
 gulpfile.js
 gulpfile.js.map
-.travis.yml
 config.json
 karma.conf.js
 protractor.conf.js
-Procfile
 .*ignore
