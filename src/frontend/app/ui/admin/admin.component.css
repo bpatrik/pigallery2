@@ -29,19 +29,3 @@ nav.sticky-top {
   color: inherit;
   font-size: 0.85em;
 }
-
-/* covers the popover body's padding, so moving onto the popover keeps it open */
-.version-popover {
-  margin: calc(-1 * var(--bs-popover-body-padding-y)) calc(-1 * var(--bs-popover-body-padding-x));
-  padding: var(--bs-popover-body-padding-y) var(--bs-popover-body-padding-x);
-}
-
-.heart-link {
-  color: var(--bs-danger);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.heart-link:hover {
-  text-decoration: underline;
-}

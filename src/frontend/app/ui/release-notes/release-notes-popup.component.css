@@ -1,0 +1,42 @@
+.release-notes {
+  overflow-wrap: anywhere;
+}
+
+/* the sections of the notes (Breaking changes, ...) as small labels, not as big headings */
+.release-notes ::ng-deep h1,
+.release-notes ::ng-deep h2,
+.release-notes ::ng-deep h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--bs-secondary-color);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.release-notes ::ng-deep markdown > :first-child {
+  margin-top: 0;
+}
+
+.release-notes ::ng-deep ul {
+  padding-left: 1.25rem;
+  margin-bottom: 0;
+}
+
+.release-notes ::ng-deep li + li {
+  margin-top: 0.35rem;
+}
+
+/* Ko-fi in coffee colors (see the about page) */
+.link-kofi {
+  color: #9a5a26;
+  text-decoration: none;
+}
+
+.link-kofi:hover {
+  text-decoration: underline;
+}
+
+:host-context([data-bs-theme=dark]) .link-kofi {
+  color: #e8b583;
+}

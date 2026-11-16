@@ -4,6 +4,9 @@ import {ObjectManagers} from '../../model/ObjectManagers';
 import {MessengerRepository} from '../../model/messenger/MessengerRepository';
 import {JobStartDTO} from '../../../common/entities/job/JobDTO';
 import {RequestParams} from '../RequestParams';
+import {BuildInfo} from '../../model/BuildInfo';
+import {ReleaseNotesDTO} from '../../../common/entities/ReleaseNotesDTO';
+import {Config} from '../../../common/config/private/Config';
 
 export class AdminMWs {
   public static async loadStatistic(
@@ -224,6 +227,46 @@ export class AdminMWs {
           err
         )
       );
+    }
+  }
+
+  public static async loadReleaseNotes(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const id = req.session.context?.user?.id;
+      // a user without id (no authentication) never confirmed anything
+      const user = typeof id === 'number' ? await ObjectManagers.getInstance().UserManager.findOne({id}) : null;
+      const releaseNotes: ReleaseNotesDTO = {
+        build: BuildInfo.get(),
+        notes: await BuildInfo.loadReleaseNotes(),
+        seenVersion: user?.releaseNotesSeenVersion ?? null
+      };
+      req.resultPipe = releaseNotes;
+      return next();
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Error while loading the release notes', err));
+    }
+  }
+
+  /**
+   * Saves the running version (not one the client sends) as the one whose release notes the admin confirmed.
+   */
+  public static async setReleaseNotesSeen(
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> {
+    try {
+      const id = req.session.context?.user?.id;
+      if (typeof id === 'number') {
+        await ObjectManagers.getInstance().UserManager.setReleaseNotesSeenVersion(id, Config.Environment.appVersion ?? null);
+      }
+      return next();
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, 'Error while saving the release notes as seen', err));
     }
   }
 }

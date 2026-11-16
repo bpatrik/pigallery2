@@ -1,0 +1,28 @@
+<ng-template #modal>
+  @if (releaseNotesService.notes(); as notes) {
+    <div class="modal-header border-0 pb-0">
+      <div>
+        <div class="small text-body-secondary" i18n>What's new</div>
+        <h5 class="modal-title" id="release-notes-title">PiGallery2 v{{ notes.build.appVersion }}</h5>
+      </div>
+      <button type="button" class="btn-close align-self-start" (click)="close()" aria-label="Close" i18n-aria-label></button>
+    </div>
+    <div class="modal-body release-notes" #notesBody>
+      <markdown [data]="notes.notes ?? ''" (ready)="openLinksInNewTab(notesBody)" />
+    </div>
+    <div class="modal-footer justify-content-between gap-2">
+      <div class="small text-body-secondary d-flex flex-wrap column-gap-3 row-gap-1">
+        <a class="link-secondary" [href]="releasesUrl" target="_blank" rel="noopener" i18n>All releases</a>
+        @if (!hideSponsorLinks) {
+          <a class="link-danger" href="https://github.com/sponsors/bpatrik" target="_blank" rel="noopener">
+            <ng-icon name="ionHeartOutline" class="align-text-top me-1" /><ng-container i18n>Sponsor</ng-container>
+          </a>
+          <a class="link-kofi" href="https://ko-fi.com/pigallery2" target="_blank" rel="noopener">
+            <ng-icon name="ionCafeOutline" class="align-text-top me-1" />Ko-fi
+          </a>
+        }
+      </div>
+      <button type="button" class="btn btn-primary px-4" id="release-notes-ok" (click)="close()" i18n>OK</button>
+    </div>
+  }
+</ng-template>

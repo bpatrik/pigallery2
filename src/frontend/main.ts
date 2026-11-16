@@ -10,17 +10,13 @@ import {AppComponent} from './app/app.component';
 import {appIcons} from './app/icons';
 import {PreloadMarkedRoutes, reloadOnChunkLoadError} from './app/model/lazy-loading';
 import {ScrollRestorationService} from './app/model/scroll-restoration.service';
+import {getInjectedBuildInfo} from './app/model/server-inject';
 
-// Set by `ng build --define` in gulpfile.ts; missing in dev builds (npm run run-dev)
-declare const PIGALLERY2_VERSION: string;
-declare const PIGALLERY2_BUILD_TIME: string;
-declare const PIGALLERY2_COMMIT: string;
-
-// tells in the browser console which build of the client the page runs (e.g. to spot a stale bundle)
-if (typeof PIGALLERY2_BUILD_TIME !== 'undefined') {
-  console.info(`PiGallery2 client v${PIGALLERY2_VERSION}, built ${PIGALLERY2_BUILD_TIME}, commit ${PIGALLERY2_COMMIT || 'unknown'}`);
-} else {
-  console.info('PiGallery2 client: dev build');
+// Tells admins in the browser console which build the server runs.
+// Only admins get it (see PublicRouter): a page loaded before the login shows it after a reload.
+const buildInfo = getInjectedBuildInfo();
+if (buildInfo) {
+  console.info(`PiGallery2 v${buildInfo.appVersion}, built ${buildInfo.buildTime ?? 'unknown'}, commit ${buildInfo.buildCommitHash ?? 'unknown'}`);
 }
 
 export class CustomUrlSerializer implements UrlSerializer {

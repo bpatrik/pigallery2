@@ -110,6 +110,15 @@ export class UserManager {
     return userRepository.save(user);
   }
 
+  /**
+   * Not part of the session stamp (see SessionManager.loadSessionRow), so the session cache stays valid.
+   */
+  public async setReleaseNotesSeenVersion(id: number, version: string | null): Promise<void> {
+    UserManager.validateId(id);
+    const connection = await SQLConnection.getConnection();
+    await connection.getRepository(UserEntity).update({id}, {releaseNotesSeenVersion: version});
+  }
+
   public async updateSettings(id: number, settings: UserSettingsDTO): Promise<UserEntity> {
     UserManager.validateId(id);
     const connection = await SQLConnection.getConnection();

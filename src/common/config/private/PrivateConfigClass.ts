@@ -84,11 +84,14 @@ export class PrivateConfigClass extends ServerConfig {
   }
 
   getClientConfig() {
-    return (this as unknown as IConfigClass<TAGS>).toJSON({
+    const config = (this as unknown as IConfigClass<TAGS>).toJSON({
       attachVolatile: true,
       skipTags: {secret: true},
       keepTags: {client: true}
     }) as unknown as ClientConfig;
+    // the server environment (e.g.: the app version) is only for admins, they get it from the settings
+    delete (config as unknown as Partial<ServerConfig>).Environment;
+    return config;
   }
 
 
