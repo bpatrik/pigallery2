@@ -19,6 +19,7 @@ import {DataStructureVersion} from '../../../src/common/DataStructureVersion';
 import {UserDTO, UserRoles} from '../../../src/common/entities/UserDTO';
 import {CookieNames} from '../../../src/common/CookieNames';
 import {SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes} from '../../../src/common/entities/SearchQueryDTO';
+import {Logger} from '../../../src/backend/Logger';
 
 process.env['NODE_ENV'] = 'test';
 chai.use(chaiHttp);
@@ -35,6 +36,21 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
 
   let server: Server;
 
+  // warnings and errors the server logged during the test
+  let logged: string[] = [];
+  const origWarn = Logger.warn;
+  const origError = Logger.error;
+
+  beforeEach(() => {
+    logged = [];
+    Logger.warn = (...args: unknown[]): void => {
+      logged.push(args.join(' '));
+    };
+    Logger.error = (...args: unknown[]): void => {
+      logged.push(args.join(' '));
+    };
+  });
+
   beforeEach(async () => {
     await sqlHelper.initDB();
     Config.Users.authenticationRequired = true;
@@ -45,6 +61,8 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
   });
 
   afterEach(async () => {
+    Logger.warn = origWarn;
+    Logger.error = origError;
     await sqlHelper.clearDB();
   });
 
@@ -104,6 +122,40 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
     expect(JSON.stringify(search.body.result)).to.include('test image öüóőúéáű-.,.jpg');
   });
 
+  it('should tell in the log that the default admin was created and how to log in', async () => {
+    await startServer();
+    expect(logged.join('\n')).to.match(/created the default admin.*"admin".*"admin"/i);
+  });
+
+  it('should warn in the log on every start while the default admin password is used, unless suppressed', async () => {
+    await startServer();
+    logged = [];
+    await SQLConnection.init();
+    expect(logged.join('\n'), 'suppressed').to.not.match(/default admin/i);
+
+    Config.Users.suppressDefUserWarn = false;
+    await SQLConnection.init();
+    expect(logged.join('\n')).to.match(/default admin.*"admin".*"admin"/i);
+  });
+
+  it('should tell in the log if a user does not exist, instead of a bad password', async () => {
+    await startServer();
+    await ObjectManagers.getInstance().UserManager.createUser({name: 'existing user', password: 'right pass', role: UserRoles.User} as UserDTO);
+    logged = [];
+    const loginRes = async (username: string, password: string): Promise<void> => {
+      const res = await (request.execute(server.Server) as SuperAgentStatic)
+        .post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username, password, rememberMe: false}});
+      expect(res.body.error, 'login of ' + username).to.not.equal(null);
+    };
+    await loginRes('missing user', 'any pass');
+    await loginRes('existing user', 'wrong pass');
+    const lines = logged.filter(l => l.includes('Failed login'));
+    expect(lines.length).to.equal(2);
+    expect(lines[0]).to.include('missing user').and.to.match(/does not exist/);
+    expect(lines[1]).to.include('existing user').and.to.include('bad password');
+  });
+
   it('should rebuild the DB on a new DataStructureVersion and keep the users and their passwords', async () => {
     await startServer();
     await ObjectManagers.getInstance().UserManager.createUser({name: 'kept user', password: 'kept pass', role: UserRoles.User} as UserDTO);
@@ -127,6 +179,7 @@ describe('Fresh install', (sqlHelper: DBTestHelper) => {
     expect(await connection.getRepository(DirectoryEntity).count(), 'the index is dropped').to.equal(0);
     const users = (await connection.getRepository(UserEntity).find()).map(u => u.name).sort();
     expect(users).to.deep.equal(['admin', 'kept user']);
+    expect(logged.join('\n'), 'the log tells about the rebuild').to.match(/rebuilt the DB and kept 2 users/i);
 
     // the kept user can still log in, and the gallery is indexed again
     await startServer();

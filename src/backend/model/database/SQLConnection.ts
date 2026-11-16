@@ -137,6 +137,7 @@ export class SQLConnection {
     }
 
     // Add dummy Admin to the db
+    let createdDefAdmin = false;
     const admins = await userRepository.findBy({role: UserRoles.Admin});
     const devs = await userRepository.findBy({role: UserRoles.Developer});
     if (admins.length === 0 && devs.length === 0) {
@@ -145,6 +146,9 @@ export class SQLConnection {
       a.password = PasswordHelper.cryptPassword('admin');
       a.role = UserRoles.Admin;
       await userRepository.save(a);
+      Logger.warn(LOG_TAG, 'There is no admin in the DB (fresh install or the DB got rebuilt), ' +
+        'created the default admin. Log in with user: "admin", password: "admin" and change the password.');
+      createdDefAdmin = true;
     }
 
     const defAdmin = await userRepository.findOneBy({
@@ -156,6 +160,10 @@ export class SQLConnection {
       PasswordHelper.comparePassword('admin', defAdmin.password)
     ) {
       if (!Config.Users.suppressDefUserWarn) {
+        if (!createdDefAdmin) {
+          Logger.warn(LOG_TAG, 'The default admin is in use (user: "admin", password: "admin"). ' +
+            'That is a security issue: change its password or remove it.');
+        }
         NotificationManager.error(
           'Using default admin user!',
           'You are using the default user: "admin", password: "admin". The is a security issue. Please change the password or remove the user.'
@@ -241,10 +249,11 @@ export class SQLConnection {
     if (version && version.version === DataStructureVersion) {
       return;
     }
-    Logger.info(LOG_TAG, 'Updating database scheme');
+    const isUpgrade = !!version;
     if (!version) {
       version = new VersionEntity();
     }
+    const oldVersion = version.version;
     version.version = DataStructureVersion;
 
     let users: UserEntity[] = [];
@@ -270,13 +279,20 @@ export class SQLConnection {
     await connection.getRepository(VersionEntity).save(version);
     try {
       await connection.getRepository(UserEntity).save(users);
+      if (isUpgrade) {
+        Logger.warn(LOG_TAG, 'The DB scheme changed (version ' + oldVersion + ' -> ' + DataStructureVersion + '), rebuilt the DB and kept ' +
+          users.length + ' users. Photos and videos get indexed again, that takes a while.');
+      } else {
+        Logger.info(LOG_TAG, 'Created the DB scheme');
+      }
     } catch (e) {
       await connection.dropDatabase();
       await connection.synchronize();
       await connection.getRepository(VersionEntity).save(version);
-      Logger.warn(
+      Logger.error(
         LOG_TAG,
-        'Could not move users to the new db scheme, deleting them. Details:' +
+        'The DB scheme changed, but could not keep the users, deleted them. ' +
+        'Log in with the default admin (user: "admin", password: "admin") and add them again. Details: ' +
         String(e)
       );
     }
