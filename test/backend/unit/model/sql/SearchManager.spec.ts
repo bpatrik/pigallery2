@@ -860,6 +860,91 @@ describe('SearchManager', (sqlHelper: DBTestHelper) => {
         metaFile: [],
         resultOverflow: false
       } as SearchResultDTO));
+
+      // rating!:1..2
+      query = ({min: 1, max: 2, negate: true, type: SearchQueryTypes.rating} as RatingSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [pFaceLess],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
+
+      // rating!=2
+      query = ({min: 2, max: 2, negate: true, type: SearchQueryTypes.rating} as RatingSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [p, pFaceLess],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
+    });
+
+    it('should search date by whole days', async () => {
+      const sm = new SearchManager();
+      const DAY = 24 * 60 * 60 * 1000;
+      // the parser and the query builder give midnight (UTC) of the day, compared to the local time of the photo
+      const dayOf = (m: PhotoDTO | VideoDTO): number =>
+        Math.floor((m.metadata.creationDate + 2 * 60 * 60 * 1000) / DAY) * DAY;
+
+      // date=<day of p2>
+      let query = ({min: dayOf(p2), max: dayOf(p2), type: SearchQueryTypes.date} as DateSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [p2],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
+
+      // date!=<day of p2>
+      query = ({min: dayOf(p2), max: dayOf(p2), negate: true, type: SearchQueryTypes.date} as DateSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [p, pFaceLess, p4, v],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
+
+      // date:<day of v>..<day of p2> includes both ends
+      query = ({min: dayOf(v), max: dayOf(p2), type: SearchQueryTypes.date} as DateSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [p2, v],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
+
+      // date<=<day of p2>
+      query = ({max: dayOf(p2), type: SearchQueryTypes.date} as DateSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [p2, v, p4, pFaceLess],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
+
+      // date!:<day of v>..<day of p2>
+      query = ({min: dayOf(v), max: dayOf(p2), negate: true, type: SearchQueryTypes.date} as DateSearch);
+      expect(Utils.clone(await sm.search(DBTestHelper.defaultSession, query)))
+        .to.deep.equalInAnyOrder(removeDir({
+        searchQuery: query,
+        directories: [],
+        media: [p, pFaceLess, p4],
+        metaFile: [],
+        resultOverflow: false
+      } as SearchResultDTO));
     });
 
 

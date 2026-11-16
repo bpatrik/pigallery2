@@ -711,32 +711,31 @@ export class SearchManager {
         }
 
 
+        // dates are searched by whole days: the parser and the query builder give the max as midnight of the last day,
+        // so the range ends right before the next day starts
+        let maxRelation = '<=';
+        if (query.type === SearchQueryTypes.date && typeof max !== 'undefined') {
+          max += 24 * 60 * 60 * 1000;
+          maxRelation = '<';
+        }
+
         return new Brackets((q): unknown => {
-
-
+          const negate = (query as NegatableSearchQuery).negate === true;
           const textParam: Record<string, unknown> = {};
-          if (min === max) {
-            textParam['eql' + queryId] = min;
-            q.where(
-              `${field} ${timeOffset} = :eql${queryId}`,
-              textParam
-            );
-            return q;
-          }
-          const minRelation = (query as NegatableSearchQuery).negate ? '<' : '>=';
-          const maxRelation = (query as NegatableSearchQuery).negate ? '>' : '<=';
-
+          // reminder: !(a && b) = (!a || !b)
+          const whereFN = negate ? 'orWhere' : 'andWhere';
           if (typeof min !== 'undefined') {
             textParam['min' + queryId] = min;
             q.where(
-              `${field} ${timeOffset} ${minRelation} :min${queryId}`,
+              `${field} ${timeOffset} ${negate ? '<' : '>='} :min${queryId}`,
               textParam
             );
           }
           if (typeof max !== 'undefined') {
             textParam['max' + queryId] = max;
-            q.andWhere(
-              `${field} ${timeOffset} ${maxRelation} :max${queryId}`,
+            const relation = negate ? (maxRelation === '<' ? '>=' : '>') : maxRelation;
+            q[typeof min !== 'undefined' ? whereFN : 'where'](
+              `${field} ${timeOffset} ${relation} :max${queryId}`,
               textParam
             );
           }
