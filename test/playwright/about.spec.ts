@@ -54,8 +54,9 @@ test.describe('About', () => {
     const popup = page.locator('.modal-content');
     await expect(popup.locator('.modal-title')).toHaveText(/^PiGallery2 v\d/);
     await expect.soft(popup.locator('markdown li').first(), 'the notes').toBeVisible();
+    await expect.soft(popup.locator('markdown a').first(), 'links open in a new tab').toHaveAttribute('target', '_blank');
     // the empty sections of a release in progress are not shown
-    await expect.soft(popup.locator('markdown h2', {hasText: 'Breaking changes'}), 'no empty section').toHaveCount(0);
+    await expect.soft(popup.locator('markdown h2 + h2, markdown h2:last-child'), 'no empty section').toHaveCount(0);
     await expectNoHorizontalScroll(page, 'about with the release notes');
     await popup.locator('#release-notes-ok').click();
     await expect(popup).toHaveCount(0);

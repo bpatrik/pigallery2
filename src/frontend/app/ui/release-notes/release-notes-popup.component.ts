@@ -33,6 +33,16 @@ export class ReleaseNotesPopupComponent {
     });
   }
 
+  /**
+   * The links of the notes (issues, PRs) open in a new tab, so the gallery stays open.
+   */
+  openLinksInNewTab(notes: HTMLElement): void {
+    notes.querySelectorAll('a[href]').forEach(a => {
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener');
+    });
+  }
+
   close(): void {
     this.releaseNotesService.close().catch(console.error);
   }

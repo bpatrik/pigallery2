@@ -75,8 +75,9 @@ zip, and admins see it in the app ("What's new" popup once per version, about pa
   - a `DataStructureVersion` bump (`git diff <last-tag> -- src/common/DataStructureVersion.ts`) → the DB is rebuilt on first start (users kept),
   - config changes that need user action (diff of `docs/user-guide/configuration.md`),
   - extension API breaking changes (PR descriptions list them; `extension/` and `src/backend/model/extension/IExtension.ts` diffs).
-- Update the file in the style of earlier releases (`gh release view <last-tag>`): **Breaking changes**, **Main new features**,
-  **Further changes**, with full issue/PR links (the app does not link a bare `#1234`). Drop empty sections.
+- Update the file in the style of earlier releases (`gh release view <last-tag>`): `## Breaking changes`, `## Main new features`,
+  `## Under the hood`, `## Further changes`, `## Bug fixes`, with full issue/PR links (the app does not link a bare `#1234`)
+  and the contributors (`by @name in [#1234](...)`). Drop empty sections. Resolve the `TODO` comments with the maintainer.
   Keep the comment at the top. The maintainer edits it in the IDE.
 - For a release after its RC, rerun this step if anything landed since the RC.
 
@@ -122,7 +123,7 @@ Then the maintainer commits, the release PR is merged, and CI on master must be 
 
 ## 7. Release notes **(ask)**
 
-- Start from `RELEASE_NOTES.md` of the tag (step 3b), without its top comment. Add **New Contributors**
+- Start from `RELEASE_NOTES.md` of the tag (step 3b), without its comments (the top one, `TODO`s, the contributor list at the end). Add **New Contributors**
   (first-time contributors of the merged PRs since the last release) and
   `**Full Changelog**: https://github.com/bpatrik/pigallery2/compare/<last-tag>...X.Y.Z`.
 - Write the draft to a file in the scratchpad (give the full path) and let the maintainer edit it.
@@ -159,8 +160,8 @@ must work with the new release. Its local checkout is `extensions/pigallery2-sam
 
 - Bump master to the next prerelease, e.g. `npm version X.(Y+1).0-edge --no-git-tag-version`
   (commit `Version bump to X.(Y+1).0-edge`, like `42af9167`).
-- Reset `RELEASE_NOTES.md` to its top comment and the three empty headings (Breaking changes, Main new features,
-  Further changes), in the same commit. Edge never opens the "What's new" popup by itself.
+- Reset `RELEASE_NOTES.md` to its top comment and the five empty headings (Breaking changes, Main new features,
+  Under the hood, Further changes, Bug fixes), in the same commit. Edge never opens the "What's new" popup by itself.
 - Wrap up with what was released, links (release, Docker Hub), and anything left open.
 
 ## Improving this checklist

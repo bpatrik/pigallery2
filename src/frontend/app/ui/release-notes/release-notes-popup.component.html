@@ -7,8 +7,8 @@
       </div>
       <button type="button" class="btn-close align-self-start" (click)="close()" aria-label="Close" i18n-aria-label></button>
     </div>
-    <div class="modal-body release-notes">
-      <markdown [data]="notes.notes ?? ''" />
+    <div class="modal-body release-notes" #notesBody>
+      <markdown [data]="notes.notes ?? ''" (ready)="openLinksInNewTab(notesBody)" />
     </div>
     <div class="modal-footer justify-content-between gap-2">
       <div class="small text-body-secondary d-flex flex-wrap column-gap-3 row-gap-1">
