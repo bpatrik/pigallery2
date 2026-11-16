@@ -229,6 +229,9 @@ Pitfalls seen so far:
 - A new config entry gets the GitHub issue that explains why it exists (`tags: {githubIssue: <n>}`), when there is one:
   the settings page links it, so users find the background there.
 - Never expose private config values or another user's data to the client.
+- CodeQL must stay green on every PR. The only accepted alerts are the missing rate limiting ones: rate limiting is the
+  reverse proxy's (e.g. nginx) job. Fix the code rather than dismissing an alert, also when it can't be exploited in
+  practice, and avoid patterns CodeQL can't prove safe (e.g. stripping HTML with a regex).
 - Only admins learn the app version (it tells which known bugs a server has): the `buildInfo` of `index.html` and
   `/admin/release-notes`. Don't put it into the bundle, headers or other non-admin responses.
 - **Release notes**: a user-visible change (feature, behaviour change, and above all a breaking change: DB rebuild, config,

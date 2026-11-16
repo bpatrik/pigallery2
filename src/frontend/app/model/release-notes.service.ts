@@ -49,17 +49,17 @@ export class ReleaseNotesService {
   }
 
   /**
-   * RELEASE_NOTES.md keeps a comment for its writers and the empty headings of a release in progress:
-   * shows neither. Null if nothing is left.
+   * RELEASE_NOTES.md starts with a comment for its writers and has the empty headings of a release in progress:
+   * shows the sections from the first heading on, without the empty ones. Null if nothing is left.
+   * (No HTML stripping here: the markdown component sanitizes what it renders.)
    */
   public static cleanNotes(markdown: string | null): string | null {
     const sections = (markdown ?? '')
-      .replace(/<!--[\s\S]*?-->/g, '')
       .split(/^(?=#{1,6}\s)/m)
       .map(s => s.trim())
       .filter(s => {
         const [first, ...rest] = s.split('\n');
-        return /^#{1,6}\s/.test(first) ? rest.join('').trim() !== '' : first !== '';
+        return /^#{1,6}\s/.test(first) && rest.join('').trim() !== '';
       });
     return sections.length > 0 ? sections.join('\n\n') : null;
   }
