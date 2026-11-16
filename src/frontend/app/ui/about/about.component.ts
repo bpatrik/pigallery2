@@ -8,6 +8,8 @@ import {ReleaseNotesService} from '../../model/release-notes.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {NotificationService} from '../../model/notification.service';
 import {CopyDirective} from '../utils/copy/copy.directive';
+import {RouterLink} from '@angular/router';
+import {QueryService} from '../../model/query.service';
 import {Config} from '../../../../common/config/public/Config';
 import {ClientServiceConfig} from '../../../../common/config/public/ClientConfig';
 
@@ -18,12 +20,13 @@ import {ClientServiceConfig} from '../../../../common/config/public/ClientConfig
   selector: 'app-about',
   templateUrl: './about.component.html',
   styleUrl: './about.component.css',
-  imports: [FrameComponent, IconComponent, NgIconComponent, DatePipe, CopyDirective]
+  imports: [FrameComponent, IconComponent, NgIconComponent, DatePipe, CopyDirective, RouterLink]
 })
 export class AboutComponent implements OnInit {
   private authService = inject(AuthenticationService);
   private piTitleService = inject(PiTitleService);
   private notification = inject(NotificationService);
+  readonly queryService = inject(QueryService);
   readonly releaseNotesService = inject(ReleaseNotesService);
 
   readonly isAdmin = this.authService.isAdmin;

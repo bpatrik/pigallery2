@@ -262,14 +262,13 @@
                           </a>
                         </li>
                       }
-                      @if (showAbout()) {
-                        <li role="menuitem">
-                          <a class="dropdown-item" id="menu-about" [routerLink]="['/about']">
-                            <ng-icon name="ionInformationCircleOutline" />
-                            <ng-container i18n>About</ng-container>
-                          </a>
-                        </li>
-                      }
+                      <li role="menuitem">
+                        <!-- also for sharing guests: everyone may see what this app is; the query keeps the sharing -->
+                        <a class="dropdown-item" id="menu-about" [routerLink]="['/about']" [queryParams]="queryService.params()">
+                          <ng-icon name="ionInformationCircleOutline" />
+                          <ng-container i18n>About</ng-container>
+                        </a>
+                      </li>
                       @if (authenticationRequired) {
                         <li role="menuitem">
                           <button type="button" class="dropdown-item btn btn-link" (click)="logout()">

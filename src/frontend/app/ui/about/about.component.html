@@ -1,5 +1,10 @@
 <app-frame>
-  <div body class="container about-page py-4 py-md-5">
+  <div body class="container about-page py-3 py-md-4">
+    <!-- the way back on a phone (no navbar icon) and for a sharing guest (no Gallery tab); the query keeps the sharing -->
+    <a class="d-inline-block small link-secondary text-decoration-none mb-3" id="about-back"
+       [routerLink]="['/gallery']" [queryParams]="queryService.params()">
+      <ng-icon name="ionChevronBackOutline" class="align-text-top" /><ng-container i18n>Back to the gallery</ng-container>
+    </a>
     <header class="d-flex align-items-start align-items-sm-center gap-3 mb-4">
       <app-icon class="about-icon" [icon]="appIcon" [width]="56" [height]="56" />
       <div class="min-w-0">

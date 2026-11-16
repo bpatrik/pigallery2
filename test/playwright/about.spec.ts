@@ -3,7 +3,9 @@ import {expect, Page, test} from '@playwright/test';
 import {
   ADMIN_SESSION,
   asNormalUser,
+  createDirectorySharingWithApi,
   createUserWithApi,
+  deleteSharingsWithApi,
   deleteUserWithApi,
   desktopViewport,
   expectApiOk,
@@ -19,7 +21,7 @@ const isReleaseNotes = (url: string): boolean => new URL(url).pathname === '/pga
  * (the gallery's own navigation would otherwise override the click).
  */
 const openAboutWithMenu = async (page: Page): Promise<void> => {
-  await expect(page.locator('app-gallery-grid, app-gallery-directories').first()).toBeVisible();
+  await expect(page.locator('app-gallery-grid, app-gallery-directories').locator('visible=true').first()).toBeVisible();
   await page.locator('button#button-frame-menu').click();
   await page.locator('#menu-about').click();
   await expect(page).toHaveURL(url => url.pathname === '/about');
@@ -86,6 +88,33 @@ test.describe('About', () => {
       expect.soft(await page.evaluate(() => (window as unknown as { ServerInject: { buildInfo: unknown } }).ServerInject.buildInfo),
         'injected build info').toBe(null);
       expect.soft(consoleLines.filter(l => l.includes(version)), 'the version in the console').toEqual([]);
+    });
+  });
+
+  test.describe('as a sharing guest', () => {
+    test.use(notLoggedIn);
+
+    test('About page should look right for a sharing guest', {tag: '@sanity'}, async ({page, playwright, baseURL}) => {
+      const admin = await playwright.request.newContext({baseURL, storageState: ADMIN_SESSION});
+      const {sharingKey} = await createDirectorySharingWithApi(admin, 'timestamps');
+      try {
+        await page.goto('/share/' + sharingKey);
+        await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+
+        await openAboutWithMenu(page);
+        await expect.soft(page.locator('h1'), 'title').toHaveText('PiGallery2');
+        await expect.soft(page.locator('a[href="https://github.com/sponsors/bpatrik"]'), 'GitHub Sponsors link').toBeVisible();
+        await expect.soft(page.locator('a[href="https://ko-fi.com/pigallery2"]'), 'Ko-fi link').toBeVisible();
+        await expect.soft(page.locator('#about-version'), 'no version').toHaveCount(0);
+        await expectNoHorizontalScroll(page, 'about');
+
+        // the sharing stays: back to the shared folder
+        await page.locator('#about-back').click();
+        await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+      } finally {
+        await deleteSharingsWithApi(admin, [sharingKey]);
+        await admin.dispose();
+      }
     });
   });
 

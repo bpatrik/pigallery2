@@ -8,6 +8,8 @@ import {AuthenticationService} from '../../model/network/authentication.service'
 import {ReleaseNotesService} from '../../model/release-notes.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {NotificationService} from '../../model/notification.service';
+import {QueryService} from '../../model/query.service';
+import {provideRouter} from '@angular/router';
 import {ReleaseNotesDTO} from '../../../../common/entities/ReleaseNotesDTO';
 import {appIcons} from '../../icons';
 
@@ -29,6 +31,8 @@ describe('AboutComponent', () => {
         {provide: ReleaseNotesService, useValue: {notes: computed(() => admin ? releaseNotes : null), open}},
         {provide: PiTitleService, useValue: {setTitle: (): void => undefined}},
         {provide: NotificationService, useValue: {success: vi.fn()}},
+        {provide: QueryService, useValue: {params: signal({})}},
+        provideRouter([]),
       ]
     });
     // the navbar (app-frame) is not needed: only the page itself is rendered
