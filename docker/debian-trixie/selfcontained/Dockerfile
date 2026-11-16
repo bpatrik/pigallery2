@@ -26,7 +26,7 @@ RUN npm install \
     && mkdir -p /build/release/data/tmp \
     && npm run create-release
 WORKDIR /build/release
-RUN npm install --no-package-lock node-addon-api@8.9.2 node-gyp@13.1.0
+RUN npm install node-addon-api@8.9.2 node-gyp@13.1.0
 
 #-----------------MAIN--------------------
 #-----------------------------------------
