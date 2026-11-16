@@ -258,6 +258,16 @@ export class ClientAlbumConfig {
     description: $localize`Required minimum right to show the albums tab.`
   })
   readAccessMinRole: UserRoles = UserRoles.User;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Album creation right`,
+      priority: ConfigPriority.underTheHood
+    },
+    description: $localize`Required minimum role to create albums.`
+  })
+  createAccessMinRole: UserRoles = UserRoles.User;
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})

@@ -3,7 +3,7 @@ import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryTypes, TextSearch,} from '../../../../common/entities/SearchQueryDTO';
-import {UserRoles} from '../../../../common/entities/UserDTO';
+import {Config} from '../../../../common/config/public/Config';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {FrameComponent} from '../frame/frame.component';
@@ -58,7 +58,7 @@ export class AlbumsComponent implements OnInit {
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.isAuthorized(UserRoles.Admin);
+    return this.authenticationService.isAuthorized(Config.Album.createAccessMinRole);
   }
 
   get IsSearchQueryEmpty(): boolean {
