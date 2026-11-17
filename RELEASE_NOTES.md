@@ -53,6 +53,7 @@ This is the bulk of this release:
 * Non-standard time offsets without zero padding by @grasdk in [#1138](https://github.com/bpatrik/pigallery2/pull/1138)
 * Random link creator URLs returned errors [#1140](https://github.com/bpatrik/pigallery2/issues/1140)
 * Can't create albums based on date [#1152](https://github.com/bpatrik/pigallery2/issues/1152)
+* Search: negated ranges (e.g. `rating!:1..2`, `rating!=2`) found nothing, date searches (e.g. `date=2020-05-05`, `date<=2020-05-05`) missed the photos of their last day, and decimal resolutions and distances (e.g. `resolution>=0.5`, `1.5-km-from:Budapest`) were searched as plain text. The query builder showed an empty relation (`=` / `!=`) for non-text searches.
 * Saving a search link without a query broke routing [#1176](https://github.com/bpatrik/pigallery2/issues/1176)
 * Memory leak during indexing [#1070](https://github.com/bpatrik/pigallery2/issues/1070)
 * `vips_colourspace` error [#1122](https://github.com/bpatrik/pigallery2/issues/1122), `creationDate` null error [#1126](https://github.com/bpatrik/pigallery2/issues/1126), numeric tags shown twice [#1103](https://github.com/bpatrik/pigallery2/issues/1103)

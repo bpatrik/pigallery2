@@ -4,6 +4,7 @@ import {
   DatePatternSearch,
   DistanceSearch,
   ListSearchQueryTypes,
+  NegatableSearchQuery,
   OrientationSearch,
   RangeSearch,
   RangeSearchQueryTypes,
@@ -120,6 +121,8 @@ export class GallerySearchQueryEntryComponent
     .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, true)}));
   private readonly negatableMatchingTypes = ['=', '!='] //normal negatable query
     .map(value => ({value, description: TextSearchMatchingTypes.getDescription(value, false)}));
+  // orientation has no negation: its opposite is the other orientation
+  private readonly notNegatableMatchingTypes = this.negatableMatchingTypes.slice(0, 1);
 
   get MatchingTypes(): { value: string; description: string | undefined }[] {
     if (this.IsListQuery) {
@@ -128,11 +131,17 @@ export class GallerySearchQueryEntryComponent
     if (this.IsTextQuery) {
       return this.textMatchingTypes;
     }
+    if (this.queryEntry()?.type === SearchQueryTypes.orientation) {
+      return this.notNegatableMatchingTypes;
+    }
     return this.negatableMatchingTypes;
   }
 
   get SelectedMatchType(): string | undefined {
-    return TextSearchMatchingTypes.get(this.AsTextQuery);
+    if (this.IsTextQuery) {
+      return TextSearchMatchingTypes.get(this.AsTextQuery);
+    }
+    return (this.queryEntry() as NegatableSearchQuery | undefined)?.negate ? '!=' : '=';
   }
 
   set SelectedMatchType(value: string) {
@@ -140,7 +149,7 @@ export class GallerySearchQueryEntryComponent
       return;
     }
     if (!this.IsTextQuery) {
-      this.AsTextQuery.negate = value.charAt(0) === '!';
+      (this.queryEntry() as NegatableSearchQuery).negate = value.charAt(0) === '!';
       return;
     }
     TextSearchMatchingTypes.set(this.AsTextQuery, value);
@@ -181,6 +190,10 @@ export class GallerySearchQueryEntryComponent
     }
     if (!this.IsTextQuery) {
       deleteField('value');
+      deleteField('matchType');
+    }
+    if (this.IsListQuery || entry.type === SearchQueryTypes.orientation) {
+      deleteField('negate');
     }
     if (entry.type === SearchQueryTypes.distance) {
       this.AsDistanceQuery.distance = 1;

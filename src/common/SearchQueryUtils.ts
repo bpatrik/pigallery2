@@ -40,6 +40,7 @@ export const SearchQueryUtils = {
       case SearchQueryTypes.resolution:
       case SearchQueryTypes.person_count:
       case SearchQueryTypes.distance:
+      case SearchQueryTypes.date_pattern:
       case SearchQueryTypes.any_text:
       case SearchQueryTypes.person:
       case SearchQueryTypes.position:
