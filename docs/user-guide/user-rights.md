@@ -11,11 +11,12 @@ The following users are supported in the app with these rights:
 | 5  | Developer     | + see errors in more detail             | no one (you can set it manually in the db, if necessary) |
 
 Some of these rights can be changed in the settings (*Under the hood* mode), e.g.:
-`Album.writeAccessMinRole` (create and delete albums), `Faces.writeAccessMinRole` (star faces), `Upload.minimumRole`.
+`Album.readAccessMinRole` (list albums), `Album.writeAccessMinRole` (create and delete albums), `Faces.writeAccessMinRole` (star faces), `Upload.minimumRole`.
 Changing one of these needs a server restart.
 
 Nobody can give a role above their own: an Admin can't make a user Developer
 or set a role setting to Developer. Only a Developer can, or you directly in the db or `config.json`.
+Nobody can change or delete a user whose role is above their own either (e.g. an Admin can't touch a Developer).
 
 **Note:** If you would like to set a user rights and does not work with the role name (string) use its id.
 

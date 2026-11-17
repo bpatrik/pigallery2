@@ -255,7 +255,9 @@ export class ClientAlbumConfig {
       name: $localize`Albums listing right`,
       priority: ConfigPriority.underTheHood,
       // albums are shared by all users, so guests (incl. sharing links) should not see them
-      uiOptions: [UserRoles.User, UserRoles.Admin]
+      uiOptions: [UserRoles.User, UserRoles.Admin],
+      // the album routes read it when they are registered
+      uiResetNeeded: {server: true}
     },
     constraint: {
       assert: (v: UserRoles) => v >= UserRoles.User && v <= UserRoles.Admin,

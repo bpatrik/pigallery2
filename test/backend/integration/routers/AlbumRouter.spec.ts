@@ -45,12 +45,13 @@ describe('AlbumRouter', (sqlHelper: DBTestHelper) => {
   let agents: Record<string, ReturnType<typeof request.agent>> = {};
 
   // the route reads Album.writeAccessMinRole when it is registered, so it is set before the server starts
-  const setUp = async (writeAccessMinRole: UserRoles): Promise<void> => {
+  const setUp = async (writeAccessMinRole: UserRoles, readAccessMinRole = UserRoles.User): Promise<void> => {
     await sqlHelper.initDB();
     const galleryFolder = path.join(TestHelper.TMP_DIR, 'album-gallery');
     fs.mkdirSync(galleryFolder, {recursive: true});
     fs.copyFileSync(path.join(__dirname, '../../assets/wild-1-small.jpg'), path.join(galleryFolder, 'photo.jpg'));
     Config.Users.authenticationRequired = true;
+    Config.Album.readAccessMinRole = readAccessMinRole;
     Config.Album.writeAccessMinRole = writeAccessMinRole;
     Config.Media.folder = galleryFolder;
     Config.Media.tempFolder = path.join(TestHelper.TMP_DIR, 'album-temp');
@@ -108,6 +109,18 @@ describe('AlbumRouter', (sqlHelper: DBTestHelper) => {
       expect(await albumNames()).to.deep.equal(['By admin']);
       (await as(admin).delete(api('/albums/1'))).should.have.status(200);
       expect(await albumNames()).to.deep.equal([]);
+    });
+  });
+
+  describe('with Admin read right', () => {
+    beforeEach(() => setUp(UserRoles.Admin, UserRoles.Admin));
+    afterEach(tearDown);
+
+    it('should list the albums only to an Admin', async () => {
+      shouldBeRefused(await as(user).get(api('/albums')), 'user');
+      const res = await as(admin).get(api('/albums'));
+      res.should.have.status(200);
+      expect(res.body.error).to.equal(null);
     });
   });
 

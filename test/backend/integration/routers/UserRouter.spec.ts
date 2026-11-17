@@ -354,6 +354,28 @@ describe('UserRouter', () => {
       adminAgent.close();
     });
 
+    it('should not let an admin change, delete or unlink a Developer', async () => {
+      const um = ObjectManagers.getInstance().UserManager;
+      const dev = {name: 'developer', password: 'dev', role: UserRoles.Developer} as UserDTO;
+      const devId = (await um.createUser(Utils.clone(dev))).id;
+      const adminAgent = await loginAs(admin);
+      const api = (p: string) => Config.Server.apiPath + '/user/' + devId + p;
+
+      const responses = [
+        await adminAgent.post(api('/role')).send({newRole: UserRoles.User}),
+        await adminAgent.post(api('/settings')).send({settings: {newPassword: 'hacked'}}),
+        await adminAgent.delete(api('/oidc')),
+        await adminAgent.delete(api('')),
+      ];
+      chai.expect(responses.map(r => r.body.error?.code)).to.deep.equal(Array(4).fill(ErrorCodes.NOT_AUTHORISED));
+      adminAgent.close();
+
+      const stored = (await um.findOne({id: devId}))!;
+      stored.role.should.equal(UserRoles.Developer);
+      // the password did not change
+      (await loginAs(dev)).close();
+    });
+
     it('should not let an admin create a Developer or make a user Developer', async () => {
       const adminAgent = await loginAs(admin);
       const um = ObjectManagers.getInstance().UserManager;
