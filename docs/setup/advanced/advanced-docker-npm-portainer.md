@@ -15,7 +15,7 @@ This setup is ideal for users who want:
 
 1.  **Docker and Docker Compose** installed on your server.
 2.  **A Domain Name** with DNS records pointing to your server's IP address.
-3.  **Ports 80 and 443** open on your firewall.
+3.  **Ports 80 and 443** open on your firewall. Keep the admin ports of Portainer (9443) and NPM (81) closed to the internet: reach them from your local network or through a VPN.
 
 ---
 
@@ -40,7 +40,7 @@ Portainer provides a web UI for managing Docker stacks, containers, and networks
 Run the following command to start Portainer:
 
 ```bash
-docker run -d -p 8000:8000 -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
+docker run -d -p 9443:9443 --name portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:latest
 ```
 
 Access it at `https://<your-server-ip>:9443`.
@@ -110,8 +110,8 @@ services:
         limits:
           memory: 3G # <1GB RAM might also work. It will trigger GC more often. GC is slow. See https://github.com/bpatrik/pigallery2/issues/1080
     environment:
-      - NODE_ENV=production
-      - # - NODE_OPTIONS=--enable-source-maps # enable source map support on the backend  for development
+      - NODE_ENV=production # set to 'debug' for full debug logging
+      # - NODE_OPTIONS=--enable-source-maps # enable source map support on the backend for development
     volumes:
       - "/home/<user>/configs/pigallery2/config:/app/data/config"
       - "db-data:/app/data/db"
@@ -143,17 +143,35 @@ Access the NPM admin interface at `http://<your-server-ip>:81`.
 2.  **Scheme:** `http`
 3.  **Forward Hostname / IP:** `pigallery2`
 4.  **Forward Port:** `80`
-5.  **SSL Tab:** Select "Request a new SSL Certificate", enable "Force SSL" and "HTTP/2 Support".
+5.  **SSL Tab:** Select "Request a new SSL Certificate", enable "Force SSL", "HTTP/2 Support" and "HSTS Enabled".
 
 ![screen](assets/npm.png)]
 ![screen](assets/npm2.png)
 
+#### Rate limiting
+PiGallery2 does not limit the request rate itself (e.g. password guessing on the login page), it relies on the reverse proxy for that.
+The rate limits need zones on the `http` level of nginx, which NPM reads from `/data/nginx/custom/http_top.conf`.
+Create `~/configs/nginx-proxy-manager/data/nginx/custom/http_top.conf` with:
+
+```nginx
+# The limits are per client IP. Raise them if many users share one IP (e.g. an office behind a NAT).
+# login attempts (password guessing): 1 per second on average
+limit_req_zone $binary_remote_addr zone=pigallery2_login:10m rate=1r/s;
+# everything else. Opening a folder loads many thumbnails at once, so keep it generous.
+limit_req_zone $binary_remote_addr zone=pigallery2_api:10m rate=50r/s;
+limit_req_status 429;
+```
+
+Then restart the NPM stack so it reads the file.
+
 #### Advanced Tab
-Paste the following to enable Gzip compression and handle API/UI routing correctly:
+Paste the following to enable Gzip compression, rate limiting and handle API/UI routing correctly
+(the same as the [default nginx.conf](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/default/nginx.conf)):
 
 ![screen](assets/npm3.png)
 
 ```nginx
+# text/html is always compressed. Photos and videos are already compressed, so they are not listed.
 gzip on;
 gzip_proxied any;
 gzip_comp_level 6;
@@ -164,46 +182,60 @@ gzip_types
     text/markdown
     application/javascript
     application/json
+    application/manifest+json
     application/gpx+xml
-    application/x-javascript
     application/xml
-    application/xml+rss
-    application/xhtml+xml
-    application/x-font-ttf
-    application/x-font-opentype
-    application/vnd.ms-fontobject
     image/svg+xml
-    image/x-icon
-    application/rss+xml
-    application/atom_xml;
-gzip_disable "MSIE [1-6]\.(?!.*SV1)";
+    image/x-icon;
+
+# Browsers don't guess the type of a file (e.g. don't run an uploaded file as a script).
+add_header X-Content-Type-Options "nosniff" always;
+
+# Login of users and of password protected sharings: limited strictly to slow down password guessing.
+# Case-insensitive (~*), as PiGallery2 also accepts e.g. /pgapi/USER/login.
+# NOTE: change '/pgapi' here too if you changed Server.apiPath or Server.urlBase.
+location ~* ^/pgapi/(user|share)/login/?$ {
+    limit_req zone=pigallery2_login burst=10 nodelay;
+    proxy_pass http://pigallery2:80;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    # the client IP for PiGallery2's logs (e.g. failed logins), see Server.trustProxy
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
 
 # API handles all methods (GET, POST, PUT, DELETE, etc.)
 location /pgapi {
+    # uploads: NPM allows 2000 MB bodies, this sends them on without storing the whole file first
+    proxy_request_buffering off;
+    limit_req zone=pigallery2_api burst=500 nodelay;
     proxy_pass http://pigallery2:80;
     proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
     proxy_set_header Host $host;
-    proxy_cache_bypass $http_upgrade;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 
-# UI is restricted to GET for security
+# UI is restricted to GET (and HEAD) for security
 location / {
     limit_except GET {
         deny all;
     }
+    limit_req zone=pigallery2_api burst=500 nodelay;
     proxy_pass http://pigallery2:80;
     proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
     proxy_set_header Host $host;
-    proxy_cache_bypass $http_upgrade;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
 
-**Warning:** this configuration has no rate limiting, and PiGallery2 does not limit the request rate itself (e.g. password guessing on the login page).
-See the `limit_req` lines of the [default nginx.conf](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/default/nginx.conf) for what to add: the `limit_req_zone` lines belong to the `http` level (in NPM: `/data/nginx/custom/http_top.conf`), not to this field.
+**Note:** create `http_top.conf` first: without its zones nginx rejects the `limit_req` lines of the Advanced tab.
+
+#### Client IP in the logs
+PiGallery2 logs the IP of failed logins (useful e.g. for fail2ban). Behind a proxy it only sees the proxy's IP,
+unless you tell it to trust the proxy: set `Server.trustProxy` (Settings → Server, "Under the hood" mode) to `uniquelocal`.
+That trusts the `X-Forwarded-For` header from private network addresses, like the Docker network of NPM.
 
 ---
 

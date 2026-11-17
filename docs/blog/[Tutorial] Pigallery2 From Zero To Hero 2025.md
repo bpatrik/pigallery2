@@ -216,6 +216,9 @@ In NPM, add a **new Proxy Host**.
 
 ### Advanced configuration
 
+> **Update (November 2026):** the config below is outdated: it has no rate limiting, so nothing slows down password guessing on the login page.
+> Use the up-to-date NPM config of the [Portainer & NPM setup guide](../setup/advanced/advanced-docker-npm-portainer.md#rate-limiting) instead.
+
 Paste the following into the **Advanced** tab:
 
 ```nginx
