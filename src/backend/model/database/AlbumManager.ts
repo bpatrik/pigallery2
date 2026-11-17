@@ -17,13 +17,14 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
   /**
    * Throws if the album can't be saved: its name is empty or its search query is not valid.
    */
-  public static validateSavedSearch(name: string, searchQuery: SearchQueryDTO): void {
+  private static validateSavedSearch(name: string, searchQuery: SearchQueryDTO): void {
     if (typeof name !== 'string' || name.trim() === '') {
       throw new Error('Invalid saved search, name is missing');
     }
-    if (!searchQuery || typeof searchQuery !== 'object' || !SearchQueryUtils.isKnownQuery(searchQuery)) {
-      throw new Error(`Invalid saved search '${name}', search query is missing or not valid: ${JSON.stringify(searchQuery)}`);
+    if (!searchQuery) {
+      throw new Error(`Invalid saved search '${name}', search query is missing`);
     }
+    // also rejects unknown query types
     SearchQueryUtils.validateSearchQuery(searchQuery, `Saved search '${name}'`);
   }
 

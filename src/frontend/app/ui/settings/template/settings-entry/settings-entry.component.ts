@@ -328,11 +328,11 @@ export class SettingsEntryComponent
     }
 
     this.optionsView = this.uiType === 'EnumType' || this.uiType === 'EnumArray' ?
-      this.getOptionsView(this.st) : [];
+      this.getOptionsView(this.st, Array.isArray(this.st.value) ? this.st.value : [this.st.value]) : [];
     this.navigationLinkTypeOptions = this.arrayType === 'NavigationLinkConfig' ?
       this.getOptionsView(this.newArrayItemState('type')) : [];
     this.userRoleOptions = this.arrayType === 'UserConfig' ?
-      this.getOptionsView(this.newArrayItemState('role')) : [];
+      this.getOptionsView(this.newArrayItemState('role'), (this.st.value as { role: UserRoles }[]).map(u => u.role)) : [];
 
     this.placeholder = (this.st.tags?.hint || this.st.default) as string;
 
@@ -416,11 +416,15 @@ export class SettingsEntryComponent
     return new (this.st.arrayType as new () => StatefulConfig)().__state[property];
   }
 
-  private getOptionsView(state: RecursiveState): OptionView[] {
+  /**
+   * @param currentValues the values that are set now, they are always offered so that the select can show them
+   */
+  private getOptionsView(state: RecursiveState, currentValues: unknown[] = []): OptionView[] {
     const options = this.getEnumOptionsView(state);
     if ((state.isEnumType ? state.type : state.arrayType) === UserRoles) {
-      // nobody can grant a role above their own (e.g. Developer), the server rejects it too
-      return options.filter(o => this.authService.isAuthorized(o.key as UserRoles));
+      // nobody can grant a role above their own (e.g. Developer), the server rejects it too.
+      // A role that is already set (e.g. by a Developer) is still shown, so it can be lowered.
+      return options.filter(o => this.authService.isAuthorized(o.key as UserRoles) || currentValues.includes(o.key));
     }
     return options;
   }

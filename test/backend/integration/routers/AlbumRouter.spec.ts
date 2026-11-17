@@ -141,9 +141,9 @@ describe('AlbumRouter', (sqlHelper: DBTestHelper) => {
     it('should not save an album with an invalid search query', async () => {
       for (const bad of [{type: 999}, {type: SearchQueryTypes.any_text}, null, 'text']) {
         const res = await save(user, 'Broken', bad);
-        expect(res.body.error?.code, JSON.stringify(bad)).to.equal(ErrorCodes.INPUT_ERROR);
+        expect(res.body.error?.code, JSON.stringify(bad)).to.be.oneOf([ErrorCodes.INPUT_ERROR, ErrorCodes.ALBUM_ERROR]);
       }
-      expect((await save(user, '', query)).body.error?.code).to.equal(ErrorCodes.INPUT_ERROR);
+      expect((await save(user, '', query)).body.error?.code).to.equal(ErrorCodes.ALBUM_ERROR);
       expect(await albumNames()).to.deep.equal([]);
     });
   });

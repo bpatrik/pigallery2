@@ -53,7 +53,8 @@ export class UserRequestConstrainsMWs {
   ): Promise<void> {
     const id = parseInt(RequestParams.get(req, 'id') ?? '', 10);
     if (!Utils.isUInt32(id)) {
-      return next();
+      // fail closed: a route without an :id param can't be checked, so it should not use this middleware
+      return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'User id is missing or not valid'));
     }
     try {
       const user = await ObjectManagers.getInstance().UserManager.findOne({id});

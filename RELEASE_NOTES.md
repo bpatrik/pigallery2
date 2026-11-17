@@ -25,7 +25,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 * Upload limits: `Upload.maxFileSizeMB` and `Upload.blockedExtensions`
 * About page (in the menu, for everyone): what PiGallery2 is, links to the docs and the release notes, and how to support it. Admins also see the build details there, ready to copy into a bug report.
 * Admins get a "What's new" popup with these notes once after every update.
-* Let normal users create and delete albums (`Album.writeAccessMinRole`, default: Admin; needs a server restart) by @dasmaetthes in [#1400](https://github.com/bpatrik/pigallery2/pull/1400) ([#557](https://github.com/bpatrik/pigallery2/issues/557)). Albums are visible to everyone who can list them, and `Album.readAccessMinRole` can only be User or Admin. The server now also checks `Album.readAccessMinRole` when listing albums (before it only hid the tab).
+* Let normal users create and delete albums (`Album.writeAccessMinRole`, default: Admin; needs a server restart) by @dasmaetthes in [#1400](https://github.com/bpatrik/pigallery2/pull/1400) ([#557](https://github.com/bpatrik/pigallery2/issues/557)). Albums are visible to everyone who can list them, and both album rights are at least User. The server now also checks `Album.readAccessMinRole` when listing albums (before it only hid the tab).
 * Nobody can give a role above their own or change a user above it: an Admin can't make a user Developer, set a role setting to Developer, or change, delete or set the password of a Developer. Changing `Faces.writeAccessMinRole`, `Faces.readAccessMinRole` or `Upload.minimumRole` is marked as needing a server restart (it always needed one).
 
 ## Under the hood

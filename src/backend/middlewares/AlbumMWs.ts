@@ -6,7 +6,6 @@ import {Utils} from '../../common/Utils';
 import {Config} from '../../common/config/private/Config';
 import {RequestParams} from './RequestParams';
 import {RequestSession} from './RequestSession';
-import {AlbumManager} from '../model/database/AlbumManager';
 
 export class AlbumMWs {
   public static async listAlbums(
@@ -74,11 +73,7 @@ export class AlbumMWs {
       );
     }
     try {
-      AlbumManager.validateSavedSearch(body.name, body.searchQuery);
-    } catch (err) {
-      return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, (err as Error).message, err));
-    }
-    try {
+      // it also validates the album
       await ObjectManagers.getInstance().AlbumManager.addSavedSearch(
         body.name,
         body.searchQuery
@@ -89,7 +84,7 @@ export class AlbumMWs {
       return next(
         new ErrorDTO(
           ErrorCodes.ALBUM_ERROR,
-          'Error during creating saved search albums',
+          'Error during creating saved search album: ' + ((err as Error)?.message ?? err),
           err
         )
       );

@@ -237,6 +237,10 @@ export class ClientSearchConfig {
   listMetafiles: boolean = true;
 }
 
+// albums are shared by all users, so only logged-in users can list or edit them
+// (typeconfig already rejects values that are not a role)
+const isAlbumRole = (v: UserRoles): boolean => v >= UserRoles.User;
+
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientAlbumConfig {
   @ConfigProperty({
@@ -254,14 +258,13 @@ export class ClientAlbumConfig {
     type: UserRoles, tags: {
       name: $localize`Albums listing right`,
       priority: ConfigPriority.underTheHood,
-      // albums are shared by all users, so guests (incl. sharing links) should not see them
-      uiOptions: [UserRoles.User, UserRoles.Admin],
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer],
       // the album routes read it when they are registered
       uiResetNeeded: {server: true}
     },
     constraint: {
-      assert: (v: UserRoles) => v >= UserRoles.User && v <= UserRoles.Admin,
-      assertReason: 'Album.readAccessMinRole should be User or Admin.',
+      assert: isAlbumRole,
+      assertReason: 'Album.readAccessMinRole should be at least User.',
       fallBackValue: UserRoles.User
     },
     description: $localize`Required minimum right to show the albums tab.`
@@ -279,10 +282,8 @@ export class ClientAlbumConfig {
       uiResetNeeded: {server: true}
     },
     constraint: {
-      assert: (v: UserRoles, c?: { Album?: { readAccessMinRole?: UserRoles } }) =>
-        v >= UserRoles.User && v >= (c?.Album?.readAccessMinRole ?? UserRoles.User),
-      assertReason: 'Album.writeAccessMinRole should be at least User and at least Album.readAccessMinRole.',
-      // Album.readAccessMinRole is at most Admin, so this always passes
+      assert: isAlbumRole,
+      assertReason: 'Album.writeAccessMinRole should be at least User.',
       fallBackValue: UserRoles.Admin
     },
     description: $localize`Required minimum right to create and delete albums. Albums are visible to every user who can list them.`

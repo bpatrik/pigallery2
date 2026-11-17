@@ -48,6 +48,15 @@ describe('SettingsEntryComponent', () => {
       .toEqual([UserRoles.User, UserRoles.Admin, UserRoles.Developer]);
   });
 
+  // a Developer value (set by a Developer or in the config file) shows normally for an Admin, who can lower it
+  it('should also offer a role above the own role if it is set already', () => {
+    const wc = WebConfigClassBuilder.attachPrivateInterface(new WebConfig()) as IWebConfigClassPrivate<TAGS> & WebConfig;
+    wc.Album.writeAccessMinRole = UserRoles.Developer;
+    const state = (wc.Album as unknown as StatefulConfig).__state['writeAccessMinRole'];
+    expect(setUp(state).component.optionsView.map(o => o.key))
+      .toEqual([UserRoles.User, UserRoles.Admin, UserRoles.Developer]);
+  });
+
   it('should render a number setting as a number input with the min and max of the config', () => {
     const state = sharingKeyLengthState();
     expect(state.min).toBe(8);
