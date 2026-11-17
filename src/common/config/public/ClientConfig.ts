@@ -253,7 +253,14 @@ export class ClientAlbumConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Albums listing right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      // albums are shared by all users, so guests (incl. sharing links) should not see them
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer]
+    },
+    constraint: {
+      assert: (v: UserRoles) => v >= UserRoles.User,
+      assertReason: 'Album.readAccessMinRole should be at least User.',
+      fallBackValue: UserRoles.User
     },
     description: $localize`Required minimum right to show the albums tab.`
   })
@@ -262,12 +269,21 @@ export class ClientAlbumConfig {
   @ConfigProperty({
     type: UserRoles,
     tags: {
-      name: $localize`Album creation right`,
-      priority: ConfigPriority.underTheHood
+      name: $localize`Album editing right`,
+      priority: ConfigPriority.underTheHood,
+      githubIssue: 557,
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer],
+      uiResetNeeded: {server: true}
     },
-    description: $localize`Required minimum role to create albums.`
+    constraint: {
+      assert: (v: UserRoles, c?: { Album?: { readAccessMinRole?: UserRoles } }) =>
+        v >= UserRoles.User && v >= (c?.Album?.readAccessMinRole ?? UserRoles.User),
+      assertReason: 'Album.writeAccessMinRole should be at least User and at least Album.readAccessMinRole.',
+      fallBackValue: UserRoles.Developer
+    },
+    description: $localize`Required minimum right to create and delete albums. Albums are visible to every user who can list them.`
   })
-  createAccessMinRole: UserRoles = UserRoles.User;
+  writeAccessMinRole: UserRoles = UserRoles.Admin;
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})

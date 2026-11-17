@@ -57,11 +57,21 @@ export class IndexingManager {
         const savedSearches =
           JSON.parse(await fs.promises.readFile(fullMediaPath, 'utf8')) as { name: string; searchQuery: SearchQueryDTO }[];
         for (const s of savedSearches) {
-          await ObjectManagers.getInstance().AlbumManager.addIfNotExistSavedSearch(
-            s.name,
-            s.searchQuery,
-            true
-          );
+          try {
+            await ObjectManagers.getInstance().AlbumManager.addIfNotExistSavedSearch(
+              s.name,
+              s.searchQuery,
+              true
+            );
+          } catch (e) {
+            // a bad entry should not stop indexing, tell the admins instead
+            Logger.warn(LOG_TAG, `Skipping saved search '${s?.name}' of ${fullMediaPath}:`, e);
+            NotificationManager.warning(`Could not save album '${s?.name}' of ${fullMediaPath}. Is its search query valid?`, {
+              name: s?.name,
+              searchQuery: s?.searchQuery,
+              error: String(e)
+            });
+          }
         }
       }
     }
