@@ -1996,7 +1996,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">277</context>
         </context-group>
-        <target>Album editing right</target>
+        <target>Recht zum Bearbeiten von Alben</target>
       </trans-unit>
       <trans-unit id="8609662966028705976" datatype="html">
         <source>Required minimum right to create and delete albums. Albums are visible to every user who can list them.</source>
@@ -2004,7 +2004,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">289</context>
         </context-group>
-        <target>Required minimum right to create and delete albums. Albums are visible to every user who can list them.</target>
+        <target>Mindestens erforderliches Recht zum Erstellen und Löschen von Alben. Alben sind für alle Benutzer sichtbar, die sie auflisten können.</target>
       </trans-unit>
       <trans-unit id="6475889191924902342" datatype="html">
         <source>Enables sharing.</source>
@@ -3412,7 +3412,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1734</context>
         </context-group>
-        <target>Hide sponsor links</target>
+        <target>Unterstützer-Links ausblenden</target>
       </trans-unit>
       <trans-unit id="9150550378488986765" datatype="html">
         <source>Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes).</source>
@@ -3420,7 +3420,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1737</context>
         </context-group>
-        <target>Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes).</target>
+        <target>Blendet die Links aus, die um Unterstützung der Entwicklung von PiGallery2 bitten (auf der Info-Seite und in den Versionshinweisen).</target>
       </trans-unit>
       <trans-unit id="2409672154570643758" datatype="html">
         <source>Display name</source>
@@ -4623,7 +4623,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">6</context>
         </context-group>
-        <target>Back to the gallery</target>
+        <target>Zurück zur Galerie</target>
       </trans-unit>
       <trans-unit id="890523246758747303" datatype="html">
         <source>A fast, directory-first photo gallery for low-resource servers like a Raspberry Pi. Free and open source.</source>
@@ -4631,7 +4631,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">17,18</context>
         </context-group>
-        <target>A fast, directory-first photo gallery for low-resource servers like a Raspberry Pi. Free and open source.</target>
+        <target>Eine schnelle, ordnerbasierte Fotogalerie für leistungsschwache Server wie einen Raspberry Pi. Kostenlos und Open Source.</target>
       </trans-unit>
       <trans-unit id="4895326106573044490" datatype="html">
         <source>Documentation</source>
@@ -4639,7 +4639,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>Documentation</target>
+        <target>Dokumentation</target>
       </trans-unit>
       <trans-unit id="5457938796893098392" datatype="html">
         <source>Release notes</source>
@@ -4647,7 +4647,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>Release notes</target>
+        <target>Versionshinweise</target>
       </trans-unit>
       <trans-unit id="6721205010170319800" datatype="html">
         <source>Support PiGallery2</source>
@@ -4655,7 +4655,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">36,37</context>
         </context-group>
-        <target>Support PiGallery2</target>
+        <target>PiGallery2 unterstützen</target>
       </trans-unit>
       <trans-unit id="4085878702814598080" datatype="html">
         <source>PiGallery2 is a hobby project, developed in free time. If it makes your photos a bit nicer to browse, consider supporting its development.</source>
@@ -4663,7 +4663,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">37,38</context>
         </context-group>
-        <target>PiGallery2 is a hobby project, developed in free time. If it makes your photos a bit nicer to browse, consider supporting its development.</target>
+        <target>PiGallery2 ist ein Hobbyprojekt, das in der Freizeit entwickelt wird. Wenn es das Durchstöbern Ihrer Fotos ein wenig schöner macht, erwägen Sie, die Entwicklung zu unterstützen.</target>
       </trans-unit>
       <trans-unit id="6924245241744002654" datatype="html">
         <source>Build</source>
@@ -4679,7 +4679,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">55,56</context>
         </context-group>
-        <target>*Only admins see this</target>
+        <target>*Nur Admins sehen dies</target>
       </trans-unit>
       <trans-unit id="2724055831234181057" datatype="html">
         <source>Version</source>
@@ -4711,7 +4711,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">80,81</context>
         </context-group>
-        <target>Running since</target>
+        <target>Läuft seit</target>
       </trans-unit>
       <trans-unit id="2202928432763705815" datatype="html">
         <source>Runs on</source>
@@ -4719,7 +4719,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">85,86</context>
         </context-group>
-        <target>Runs on</target>
+        <target>Läuft auf</target>
       </trans-unit>
       <trans-unit id="4388270932893066992" datatype="html">
         <source>What's new in this version</source>
@@ -4727,7 +4727,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">92,93</context>
         </context-group>
-        <target>What's new in this version</target>
+        <target>Neu in dieser Version</target>
       </trans-unit>
       <trans-unit id="4033992635603367601" datatype="html">
         <source>Copy for a bug report</source>
@@ -4735,7 +4735,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">96</context>
         </context-group>
-        <target>Copy for a bug report</target>
+        <target>Für einen Fehlerbericht kopieren</target>
       </trans-unit>
       <trans-unit id="4756116217328528070" datatype="html">
         <source>The build info has been copied to the clipboard</source>
@@ -4743,7 +4743,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.ts</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <target>The build info has been copied to the clipboard</target>
+        <target>Die Build-Informationen wurden in die Zwischenablage kopiert</target>
       </trans-unit>
       <trans-unit id="1726363342938046830" datatype="html">
         <source>About</source>
@@ -4755,7 +4755,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">269</context>
         </context-group>
-        <target>About</target>
+        <target>Über</target>
       </trans-unit>
       <trans-unit id="3443810994372262728" datatype="html">
         <source>Server notifications</source>
@@ -6920,7 +6920,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">123,124</context>
         </context-group>
-        <target>Prevent downloading</target>
+        <target>Herunterladen verhindern</target>
       </trans-unit>
       <trans-unit id="3587177038543313825" datatype="html">
         <source>About preventing downloads</source>
@@ -6928,7 +6928,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">131,132</context>
         </context-group>
-        <target>About preventing downloads</target>
+        <target>Über das Verhindern von Downloads</target>
       </trans-unit>
       <trans-unit id="3621339913652620986" datatype="html">
         <source>Valid:</source>
@@ -7032,7 +7032,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">56</context>
         </context-group>
-        <target>Hides the download buttons and blocks right click saving. Downloading can't be fully prevented: what the browser shows can still be saved, e.g.: with a screenshot or the developer tools.</target>
+        <target>Blendet die Download-Schaltflächen aus und blockiert das Speichern per Rechtsklick. Herunterladen lässt sich nicht vollständig verhindern: Was der Browser anzeigt, kann trotzdem gespeichert werden, z. B. mit einem Screenshot oder den Entwicklertools.</target>
       </trans-unit>
       <trans-unit id="3302121187449737262" datatype="html">
         <source>Search query</source>
@@ -7368,7 +7368,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/release-notes/release-notes-popup.component.html</context>
           <context context-type="linenumber">5,6</context>
         </context-group>
-        <target>What's new</target>
+        <target>Neuigkeiten</target>
       </trans-unit>
       <trans-unit id="5209375229038355212" datatype="html">
         <source>All releases</source>
@@ -7376,7 +7376,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/release-notes/release-notes-popup.component.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
-        <target>All releases</target>
+        <target>Alle Versionen</target>
       </trans-unit>
       <trans-unit id="5681346778475396643" datatype="html">
         <source>Sponsor</source>
@@ -7384,7 +7384,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/release-notes/release-notes-popup.component.html</context>
           <context context-type="linenumber">18</context>
         </context-group>
-        <target>Sponsor</target>
+        <target>Unterstützen</target>
       </trans-unit>
       <trans-unit id="8998179362936748717" datatype="html">
         <source>OK</source>
