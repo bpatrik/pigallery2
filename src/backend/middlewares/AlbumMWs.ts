@@ -6,6 +6,7 @@ import {Utils} from '../../common/Utils';
 import {Config} from '../../common/config/private/Config';
 import {RequestParams} from './RequestParams';
 import {RequestSession} from './RequestSession';
+import {AlbumManager} from '../model/database/AlbumManager';
 
 export class AlbumMWs {
   public static async listAlbums(
@@ -69,8 +70,13 @@ export class AlbumMWs {
       typeof body.searchQuery !== 'object'
     ) {
       return next(
-        new ErrorDTO(ErrorCodes.INPUT_ERROR, 'updateSharing filed is missing')
+        new ErrorDTO(ErrorCodes.INPUT_ERROR, 'name or searchQuery field is missing')
       );
+    }
+    try {
+      AlbumManager.validateSavedSearch(body.name, body.searchQuery);
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, (err as Error).message, err));
     }
     try {
       await ObjectManagers.getInstance().AlbumManager.addSavedSearch(

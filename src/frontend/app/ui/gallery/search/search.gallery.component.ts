@@ -75,7 +75,7 @@ export class GallerySearchComponent implements OnDestroy {
   get CanCreateAlbum(): boolean {
     return (
       Config.Album.enabled &&
-      this.authenticationService.isAuthorized(Config.Album.createAccessMinRole)
+      this.authenticationService.isAuthorized(Config.Album.writeAccessMinRole)
     );
   }
 

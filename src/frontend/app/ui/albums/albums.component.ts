@@ -58,7 +58,7 @@ export class AlbumsComponent implements OnInit {
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.isAuthorized(Config.Album.createAccessMinRole);
+    return this.authenticationService.isAuthorized(Config.Album.writeAccessMinRole);
   }
 
   get IsSearchQueryEmpty(): boolean {

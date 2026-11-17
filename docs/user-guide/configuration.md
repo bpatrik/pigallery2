@@ -144,6 +144,7 @@ App CLI options:
   --MetaFile-supportedFormats                                               The app will read and process these files. (default: ["gpx","pg2conf","md"])
   --Album-enabled                                                            (default: true)
   --Album-readAccessMinRole                                                 Required minimum right to show the albums tab. (default: 'User')
+  --Album-writeAccessMinRole                                                Required minimum right to create and delete albums. Albums are visible to every user who can list them. (default: 'Admin')
   --Search-enabled                                                          Enables searching. (default: true)
   --Search-searchCacheTimeout                                               Search cache timeout. (default: 3600000)
   --Search-AutoComplete-enabled                                             Show hints while typing search query. (default: true)
@@ -335,6 +336,7 @@ Environmental variables:
   MetaFile-supportedFormats                                             The app will read and process these files. (default: ["gpx","pg2conf","md"])
   Album-enabled                                                          (default: true)
   Album-readAccessMinRole                                               Required minimum right to show the albums tab. (default: 'User')
+  Album-writeAccessMinRole                                              Required minimum right to create and delete albums. Albums are visible to every user who can list them. (default: 'Admin')
   Search-enabled                                                        Enables searching. (default: true)
   Search-searchCacheTimeout                                             Search cache timeout. (default: 3600000)
   Search-AutoComplete-enabled                                           Show hints while typing search query. (default: true)
@@ -767,7 +769,9 @@ Environmental variables:
     "Album": {
         "enabled": true,
         "//[readAccessMinRole]": "Required minimum right to show the albums tab.",
-        "readAccessMinRole": "User"
+        "readAccessMinRole": "User",
+        "//[writeAccessMinRole]": "Required minimum right to create and delete albums. Albums are visible to every user who can list them.",
+        "writeAccessMinRole": "Admin"
     },
     "Search": {
         "//[enabled]": "Enables searching.",

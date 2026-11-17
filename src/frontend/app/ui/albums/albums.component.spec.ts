@@ -19,7 +19,7 @@ import {SavedSearchPopupComponent} from './saved-search-popup/saved-search-popup
 import {appIcons} from '../../icons';
 
 describe('AlbumsComponent - CanCreateAlbum', () => {
-  it('allows users when the configured minimum role is User', () => {
+  it('asks for the configured album write right', () => {
     const isAuthorized = vi.fn((minimumRole: UserRoles): boolean => UserRoles.User >= minimumRole);
     TestBed.configureTestingModule({
       providers: [
@@ -33,9 +33,9 @@ describe('AlbumsComponent - CanCreateAlbum', () => {
     });
     const component = TestBed.runInInjectionContext(() => new AlbumsComponent());
 
-    expect(Config.Album.createAccessMinRole).toBe(UserRoles.User);
-    expect(component.CanCreateAlbum).toBe(true);
-    expect(isAuthorized).toHaveBeenCalledWith(UserRoles.User);
+    expect(Config.Album.writeAccessMinRole).toBe(UserRoles.Admin);
+    expect(component.CanCreateAlbum).toBe(false);
+    expect(isAuthorized).toHaveBeenCalledWith(UserRoles.Admin);
   });
 });
 
