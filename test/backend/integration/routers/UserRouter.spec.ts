@@ -353,5 +353,65 @@ describe('UserRouter', () => {
       (await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}))!.role.should.equal(UserRoles.Admin);
       adminAgent.close();
     });
+
+    it('should not let an admin create a Developer or make a user Developer', async () => {
+      const adminAgent = await loginAs(admin);
+      const um = ObjectManagers.getInstance().UserManager;
+
+      let res = await adminAgent.put(Config.Server.apiPath + '/user')
+        .send({newUser: {name: 'dev', password: 'dev', role: UserRoles.Developer}});
+      res.body.error.code.should.equal(ErrorCodes.USER_CREATION_ERROR);
+      should.equal(await um.findOne({name: 'dev'}), null);
+
+      res = await adminAgent.post(Config.Server.apiPath + '/user/' + testUserId + '/role').send({newRole: UserRoles.Developer});
+      res.body.error.code.should.equal(ErrorCodes.INPUT_ERROR);
+      (await um.findOne({name: testUser.name}))!.role.should.equal(UserRoles.User);
+
+      res = await adminAgent.post(Config.Server.apiPath + '/user/' + testUserId + '/role').send({newRole: UserRoles.Admin});
+      should.equal(res.body.error, null);
+      (await um.findOne({name: testUser.name}))!.role.should.equal(UserRoles.Admin);
+      adminAgent.close();
+    });
+
+    it('should not let an admin set a role setting to Developer, but a Developer can', async () => {
+      const putAlbum = (agent: ReturnType<typeof request.agent>, writeAccessMinRole: UserRoles) =>
+        agent.put(Config.Server.apiPath + '/settings').send({
+          settingsPath: 'Album',
+          settings: {...JSON.parse(JSON.stringify(Config.Album)), writeAccessMinRole}
+        });
+      const putEnforcedUsers = (agent: ReturnType<typeof request.agent>, role: UserRoles) =>
+        agent.put(Config.Server.apiPath + '/settings').send({
+          settingsPath: 'Users',
+          settings: {...JSON.parse(JSON.stringify(Config.Users)), enforcedUsers: [{name: 'enforced', password: 'pass', role}]}
+        });
+      const adminAgent = await loginAs(admin);
+
+      let res = await putAlbum(adminAgent, UserRoles.Developer);
+      res.body.error.code.should.equal(ErrorCodes.SETTINGS_ERROR);
+      Config.Album.writeAccessMinRole.should.equal(UserRoles.Admin);
+      res = await putEnforcedUsers(adminAgent, UserRoles.Developer);
+      res.body.error.code.should.equal(ErrorCodes.SETTINGS_ERROR);
+      Config.Users.enforcedUsers.should.deep.equal([]);
+
+      res = await putAlbum(adminAgent, UserRoles.User);
+      should.equal(res.body.error, null);
+      Config.Album.writeAccessMinRole.should.equal(UserRoles.User);
+      adminAgent.close();
+
+      const dev = {name: 'developer', password: 'dev', role: UserRoles.Developer} as UserDTO;
+      await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(dev));
+      const devAgent = await loginAs(dev);
+      res = await putAlbum(devAgent, UserRoles.Developer);
+      should.equal(res.body.error, null);
+      Config.Album.writeAccessMinRole.should.equal(UserRoles.Developer);
+      devAgent.close();
+
+      // an admin can still save the settings that a Developer set to Developer
+      const adminAgent2 = await loginAs(admin);
+      res = await putAlbum(adminAgent2, UserRoles.Developer);
+      should.equal(res.body.error, null);
+      adminAgent2.close();
+      TestHelper.resetConfig();
+    });
   });
 });
