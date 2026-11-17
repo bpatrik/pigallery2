@@ -79,6 +79,7 @@ John or Kate # photos with "John" or "Kate" (any string match)
 ### Folder Sorting
 Add an empty file like `.order_[ORDER].pg2conf` to a folder to override the default sorting for that folder. It's not recursively applied to subfolders.
 Replace `[ORDER]` with one of the following:
+
 - `descending_name`
 - `ascending_name`
 - `descending_date`

@@ -96,6 +96,7 @@ Backend structure:
 Scenario: Web UI wants to show the `/demoDir` directory, using SQL database with low reindexing severity.
 
 Client side:
+
 1. Navigating to `http://<domain>/demoDir` 
 2. URL changed: [gallery.component.ts]: `onRoute` triggered
 3. Calling: [gallery.component.ts]: `galleryService.loadDirectory('/demoDir')`

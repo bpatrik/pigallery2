@@ -19,6 +19,7 @@ Downloading a lot of data was also an important aspect when I used the app on a 
 ### Indexing and Caching in DB
 Now as the photos are small, scanning a directory all the time was still slow. Especially when the app also started reading more and more metadata. So with every directory open (load), the app needed to also read all the photos in that directory. This means opening and reading a few hundred megabytes from an external HDD at every directory open. That took seconds. During that the client could only show a boring loading animation. This is not acceptable in the world of webpages (on web users only wait 2-3s top).
 So I added multi layer caching:
+
 1. The app scans the directory when the user first navigates to it
   * no change up-to this point
 2. App stores the scanned file structure in DB for future reuse and also sends that data to the client
@@ -37,6 +38,7 @@ So, I need to set boundaries on some features and prioritize those that I actual
 
 ### Editing
 Any sort of editing is a frequently asked feature (well,not that much after I said in the Readme that there is no editing support :) ). There are two reasons for no editing support: :
+
 1. I don't want my family to touch my photos in any way as I carefully edited them
   * So I just have no incentive to implement it.
 2. The app is made from bottom to top with the assumption that the DB write path is infrequent but the read path is frequent
@@ -46,6 +48,7 @@ Any sort of editing is a frequently asked feature (well,not that much after I sa
 I also frequently get feature requests about only doing edits in the DB. Like manually setting directory cover, hiding photos, adding keywords.
 
 I'm not allowing it because of two reasons:
+
 1. I want the app to show the best possible look with the least possible human configuration
   * This means the app should be able to select the best photo show in a directory without manually picking them.
 2. Developer velocity
@@ -78,12 +81,14 @@ Let’s discuss some of the main areas where the app can improve and where I wil
 
 ## Time to Gallery
 This is one of the main areas I want to improve. If you read my previous post on [how do I use the app](https://github.com/bpatrik/pigallery2/discussions/292), I spend a lot of time on organizing my photos  (collecting all raw photos, selecting good ones, retouching, keyword tagging, face tagging, geotagging, uploading to the gallery). I want to improve on it by:
+
 * Allowing raw photo to show up in the app, so before I have time to do proper edits, my family can already enjoy those photos
 * Allowing photo uploads a “not yet organized raw” folder. I might just do it a 3rd party app, like nextcloud or allow add-ons in pigallery and create an upload addon. I don’t see this to be part of the main app.
 * Let the app auto face keyword tag the photos and use gpx tracks to auto assign gps coordinates to the photos
 
 ## Discoverability
 This is the other main focus for me. I want to improve on how people can discover new photos. This includes ideas like:
+
 * Auto sending weekly photos
   * This already possible with mails, but would be better to post to FB messenger chats
 * Easier sharing
@@ -92,6 +97,7 @@ This is the other main focus for me. I want to improve on how people can discove
 
 ## Scalability
 Scalability is threefold:
+
 1. Better user support. As explained above, I’m not going to invest in this area.
 2. Improving performance. I will keep investing here, but there was recently a bug update on it, so I don't expect major improvements in this area.
 3. Improved developer velocity / more features. I’m significantly considering adding add-on support at some sort, so people can do easy alteration of the logic without touching the main app.
@@ -105,6 +111,7 @@ I consider the app rather reliable in terms of low number of annoying bugs and a
 
 ## TL,DR
 To sum up the discussed areas, I plan to invest in the following 3 features soonish:
+
 1. AI support for auto tagging photos
 2. Add-on support
 3. Raw photo support

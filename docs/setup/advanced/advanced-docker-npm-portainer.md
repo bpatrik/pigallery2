@@ -3,6 +3,7 @@
 This tutorial covers an advanced deployment scenario using **Portainer** for container management and **Nginx Proxy Manager (NPM)** as a reverse proxy.
 
 This setup is ideal for users who want:
+
 - A GUI to manage Docker containers (Portainer).
 - Automatic SSL/TLS certificates (NPM + Let's Encrypt).
 - Optimized Nginx configuration for PiGallery2.
@@ -51,6 +52,7 @@ Access it at `https://<your-server-ip>:9443`.
 To allow NPM to communicate with other containers, we use a shared Docker network named `frontend`.
 
 In Portainer, go to **Networks** -> **Add network**:
+
 - **Name:** `frontend`
 - **Driver:** `bridge`
 
@@ -208,6 +210,7 @@ See the `limit_req` lines of the [default nginx.conf](https://github.com/bpatrik
 ## Summary
 
 With this setup, you have:
+
 - **Portainer** to easily manage and update your containers.
 - **Nginx Proxy Manager** providing SSL and routing.
 - **PiGallery2** securely accessible via your own subdomain.

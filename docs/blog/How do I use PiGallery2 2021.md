@@ -13,6 +13,7 @@ I like photography. I own a Canon 77D and a gopro. I always took photos in raw (
 
 ### Retouching the photos
 A retouch all of my photos. I use Adobe Lightroom for this (I was considering to switch to an open source app, but I was lazy). Without a retouch no photos can end up in my photo gallery. I also do not show my photos to anyone before I would retouch them. (I’m strict about it, not as much as I was a few years ago, but still quite strict :) ).
+
 * Once I finished retouching them, I annotate them:
 * I assign keywords,
 * tag faces. Ligthroom mediumly helpful with this. At some point I would like to implement face detection for pigallery2 #57. Until that is ready, I do it manually, so by the time it is ready, the ML model would already have some samples to classify the faces too.
