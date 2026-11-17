@@ -22,6 +22,8 @@ import {DirectorySearchListSettingsComponent} from '../../directory-search-list/
 import {RecursiveState, Stateful, StatefulConfig} from '../RecursiveState';
 import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 import {errorMessage} from '../../../../../../common/entities/Error';
+import {UserRoles} from '../../../../../../common/entities/UserDTO';
+import {AuthenticationService} from '../../../../model/network/authentication.service';
 
 interface OptionView {
   key: number | string;
@@ -60,6 +62,7 @@ export class SettingsEntryComponent
   private searchQueryParserService = inject(SearchQueryParserService);
   settingsService = inject(SettingsService);
   private modalService = inject(BsModalService);
+  private authService = inject(AuthenticationService);
 
   name: string | undefined;
   required!: boolean; // set by ngOnChanges()
@@ -414,6 +417,15 @@ export class SettingsEntryComponent
   }
 
   private getOptionsView(state: RecursiveState): OptionView[] {
+    const options = this.getEnumOptionsView(state);
+    if ((state.isEnumType ? state.type : state.arrayType) === UserRoles) {
+      // nobody can grant a role above their own (e.g. Developer), the server rejects it too
+      return options.filter(o => this.authService.isAuthorized(o.key as UserRoles));
+    }
+    return options;
+  }
+
+  private getEnumOptionsView(state: RecursiveState): OptionView[] {
     const eClass = state.isEnumType
         ? state.type
         : state.arrayType;

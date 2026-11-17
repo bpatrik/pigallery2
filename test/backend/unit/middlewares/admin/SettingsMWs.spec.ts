@@ -27,7 +27,7 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
 
   it('should save empty enforced users settings', (done: (err?: any) => void) => {
     const req: any = {
-      session: {},
+      session: {context: {user: {role: UserRoles.Admin}}},
       sessionOptions: {},
       query: {},
       params: {},
@@ -54,7 +54,7 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
   it('should save enforced users settings', (done: (err?: any) => void) => {
 
     const req: any = {
-      session: {},
+      session: {context: {user: {role: UserRoles.Admin}}},
       sessionOptions: {},
       query: {},
       params: {},
@@ -100,7 +100,7 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
     const before = Config.Media.folder;
     const media = ConfigClassBuilder.attachPrivateInterface(Config.Media).toJSON({skipTags: {secret: true}}) as Record<string, unknown>;
     const req: any = {
-      session: {}, sessionOptions: {}, query: {}, params: {},
+      session: {context: {user: {role: UserRoles.Admin}}}, sessionOptions: {}, query: {}, params: {},
       body: {settingsPath: 'Media', settings: {...media, folder: path.join(TestHelper.TMP_DIR, 'not-existing-images-folder')}}
     };
     const err = await new Promise<ErrorDTO | undefined>((resolve) => {

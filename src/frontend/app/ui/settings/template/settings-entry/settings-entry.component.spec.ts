@@ -10,6 +10,8 @@ import {SearchQueryParserService} from '../../../gallery/search/search-query-par
 import {WebConfig} from '../../../../../../common/config/private/WebConfig';
 import {TAGS} from '../../../../../../common/config/public/ClientConfig';
 import {RecursiveState, StatefulConfig} from '../RecursiveState';
+import {AuthenticationService} from '../../../../model/network/authentication.service';
+import {UserRoles} from '../../../../../../common/entities/UserDTO';
 
 // #1315: the client limits the input to the boundaries in the config metadata
 describe('SettingsEntryComponent', () => {
@@ -19,13 +21,14 @@ describe('SettingsEntryComponent', () => {
     return (wc.Sharing as unknown as StatefulConfig).__state['sharingKeyLength'];
   };
 
-  const setUp = (state: RecursiveState) => {
+  const setUp = (state: RecursiveState, ownRole = UserRoles.Admin) => {
     TestBed.configureTestingModule({
       imports: [SettingsEntryComponent],
       providers: [
         {provide: SettingsService, useValue: {configStyle: signal(ConfigStyle.full), edits: signal(0), settings: signal({Environment: {isDocker: false}})}},
         {provide: SearchQueryParserService, useValue: {}},
         {provide: BsModalService, useValue: {}},
+        {provide: AuthenticationService, useValue: {isAuthorized: (r: UserRoles): boolean => r <= ownRole}},
       ]
     });
     const fixture = TestBed.createComponent(SettingsEntryComponent);
@@ -34,6 +37,16 @@ describe('SettingsEntryComponent', () => {
     const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
     return {component: fixture.componentInstance, input, fixture};
   };
+
+  // nobody can grant a role above their own, e.g. an Admin can't set anything to Developer
+  it('should offer only the roles up to the own role', () => {
+    const wc = WebConfigClassBuilder.attachPrivateInterface(new WebConfig()) as IWebConfigClassPrivate<TAGS> & WebConfig;
+    const state = (): RecursiveState => (wc.Album as unknown as StatefulConfig).__state['writeAccessMinRole'];
+    expect(setUp(state()).component.optionsView.map(o => o.key)).toEqual([UserRoles.User, UserRoles.Admin]);
+    TestBed.resetTestingModule();
+    expect(setUp(state(), UserRoles.Developer).component.optionsView.map(o => o.key))
+      .toEqual([UserRoles.User, UserRoles.Admin, UserRoles.Developer]);
+  });
 
   it('should render a number setting as a number input with the min and max of the config', () => {
     const state = sharingKeyLengthState();

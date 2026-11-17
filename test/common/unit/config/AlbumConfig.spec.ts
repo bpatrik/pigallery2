@@ -23,10 +23,17 @@ describe('Album config rights #557', () => {
     expect(Config.Album.writeAccessMinRole).to.equal(UserRoles.User);
   });
 
-  it('should not let the write right go below the read right', () => {
+  it('should let the read right be only User or Admin', () => {
+    expect(() => Config.Album.readAccessMinRole = UserRoles.Developer).to.throw();
+    expect(Config.Album.readAccessMinRole).to.equal(UserRoles.User);
     Config.Album.readAccessMinRole = UserRoles.Admin;
-    expect(() => Config.Album.writeAccessMinRole = UserRoles.User).to.throw();
+    expect(Config.Album.readAccessMinRole).to.equal(UserRoles.Admin);
+  });
+
+  it('should not let the write right go below the read right, it falls back to Admin', () => {
+    Config.Album.readAccessMinRole = UserRoles.Admin;
     Config.Album.writeAccessMinRole = UserRoles.Developer;
-    expect(Config.Album.writeAccessMinRole).to.equal(UserRoles.Developer);
+    expect(() => Config.Album.writeAccessMinRole = UserRoles.User).to.throw();
+    expect(Config.Album.writeAccessMinRole).to.equal(UserRoles.Admin);
   });
 });

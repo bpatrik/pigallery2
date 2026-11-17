@@ -322,10 +322,10 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
     };
 
     it('keeps the own session after changing the own role', async () => {
-      await createUser('frank', UserRoles.Admin);
-      const session = await changeOwnUser(await login('frank', true), UserMWs.changeRole, {newRole: UserRoles.Developer});
+      await createUser('frank', UserRoles.Developer);
+      const session = await changeOwnUser(await login('frank', true), UserMWs.changeRole, {newRole: UserRoles.Admin});
       const s = await expectAlive(session);
-      expect(s.context.user.role).to.equal(UserRoles.Developer);
+      expect(s.context.user.role).to.equal(UserRoles.Admin);
       expect(s.context.user.password).to.be.undefined;
       expect(s.rememberMe).to.be.true;
     });
