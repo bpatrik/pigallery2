@@ -1,7 +1,6 @@
 import {AuthenticationMWs} from '../middlewares/user/AuthenticationMWs';
 import {Express} from 'express';
 import {RenderingMWs} from '../middlewares/RenderingMWs';
-import {UserRoles} from '../../common/entities/UserDTO';
 import {VersionMWs} from '../middlewares/VersionMWs';
 import {AlbumMWs} from '../middlewares/AlbumMWs';
 import {ServerTimingMWs} from '../middlewares/ServerTimingMWs';
@@ -19,7 +18,7 @@ export class AlbumRouter {
         [Config.Server.apiPath + '/albums'],
         // common part
         AuthenticationMWs.authenticate,
-        AuthenticationMWs.authorise(UserRoles.User),
+        AuthenticationMWs.authorise(Config.Album.readAccessMinRole),
         VersionMWs.injectGalleryVersion,
 
         // specific part

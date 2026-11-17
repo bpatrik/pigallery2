@@ -191,7 +191,7 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
 - **Roles** (`UserRoles`): in practice LimitedGuest (sharing links), User and Admin. Guest is rarely used; Developer only
   exists when set by hand in the DB (e.g. for more detailed errors). Nobody can grant a role above their own (settings
-  role options, `SettingsMWs`, `UserMWs`). Role settings that a router passes to `AuthenticationMWs.authorise()` are read
+  role options, `SettingsMWs`, `UserMWs`) or change a user above it (`UserRequestConstrainsMWs.notAboveOwnRole`). Role settings that a router passes to `AuthenticationMWs.authorise()` are read
   once at start, so they get `uiResetNeeded: {server: true}`.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
