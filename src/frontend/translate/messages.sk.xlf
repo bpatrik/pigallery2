@@ -120,7 +120,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">119</context>
         </context-group>
-        <target>Accent-insensitive search</target>
+        <target>Vyhľadávanie bez ohľadu na diakritiku</target>
       </trans-unit>
       <trans-unit id="6105061748772488313" datatype="html">
         <source>Slows down the database significantly: every text search and autocomplete becomes several times slower, which is noticeable on a large gallery or a Raspberry Pi.</source>
@@ -128,7 +128,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">123</context>
         </context-group>
-        <target>Slows down the database significantly: every text search and autocomplete becomes several times slower, which is noticeable on a large gallery or a Raspberry Pi.</target>
+        <target>Výrazne spomaľuje databázu: každé textové vyhľadávanie a automatické dopĺňanie je niekoľkonásobne pomalšie, čo je citeľné pri veľkej galérii alebo na Raspberry Pi.</target>
       </trans-unit>
       <trans-unit id="8734030467791833531" datatype="html">
         <source>Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower.</source>
@@ -136,7 +136,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">126</context>
         </context-group>
-        <target>Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower.</target>
+        <target>Vyhľadávanie a automatické dopĺňanie ignorujú diakritiku a veľkosť každého písmena (napr. "padme" nájde "Padmé"), ako v MySQL. Bez tejto voľby SQLite ignoruje len veľkosť anglických písmen. Upozornenie: výrazne spomaľuje databázu, textové vyhľadávanie je niekoľkonásobne pomalšie.</target>
       </trans-unit>
       <trans-unit id="8953033926734869941" datatype="html">
         <source>Name</source>
@@ -264,7 +264,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">258</context>
         </context-group>
-        <target>Issuer URL</target>
+        <target>URL vydavateľa (Issuer)</target>
       </trans-unit>
       <trans-unit id="3212891706564693326" datatype="html">
         <source>With an http:// Issuer URL, the provider can't be verified and the login can be read on the network. Use it only for local tests.</source>
@@ -272,7 +272,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">265</context>
         </context-group>
-        <target>With an http:// Issuer URL, the provider can't be verified and the login can be read on the network. Use it only for local tests.</target>
+        <target>S URL vydavateľa cez http:// nemožno overiť poskytovateľa a prihlásenie sa dá v sieti odčítať. Používajte to len na lokálne testy.</target>
       </trans-unit>
       <trans-unit id="7296879388063614952" datatype="html">
         <source>OIDC provider Issuer URL</source>
@@ -280,7 +280,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">268</context>
         </context-group>
-        <target>OIDC provider Issuer URL</target>
+        <target>URL vydavateľa (Issuer) poskytovateľa OIDC</target>
       </trans-unit>
       <trans-unit id="5273501066845923426" datatype="html">
         <source>Client ID</source>
@@ -288,7 +288,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">275</context>
         </context-group>
-        <target>Client ID</target>
+        <target>ID klienta</target>
       </trans-unit>
       <trans-unit id="6535310354973070697" datatype="html">
         <source>Client secret</source>
@@ -296,7 +296,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">287</context>
         </context-group>
-        <target>Client secret</target>
+        <target>Tajný kľúč klienta</target>
       </trans-unit>
       <trans-unit id="4143780631358607416" datatype="html">
         <source>Redirect URI</source>
@@ -304,7 +304,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">299</context>
         </context-group>
-        <target>Redirect URI</target>
+        <target>URI presmerovania</target>
       </trans-unit>
       <trans-unit id="4525703077826489014" datatype="html">
         <source>Full callback URL registered at the provider (e.g.: https://example.com/pgapi/auth/oidc/callback)</source>
@@ -312,7 +312,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">306</context>
         </context-group>
-        <target>Full callback URL registered at the provider (e.g.: https://example.com/pgapi/auth/oidc/callback)</target>
+        <target>Úplná URL spätného volania zaregistrovaná u poskytovateľa (napr.: https://example.com/pgapi/auth/oidc/callback)</target>
       </trans-unit>
       <trans-unit id="4762525426208239051" datatype="html">
         <source>Scopes</source>
@@ -328,7 +328,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">324</context>
         </context-group>
-        <target>Username claim</target>
+        <target>Claim pre používateľské meno</target>
       </trans-unit>
       <trans-unit id="6088551510074444592" datatype="html">
         <source>JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty.</source>
@@ -336,7 +336,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">328</context>
         </context-group>
-        <target>JWT claim to use for matching user name. Defaults to preferred_username; fallbacks to email if empty.</target>
+        <target>JWT claim na priradenie používateľského mena. Predvolene preferred_username; ak je prázdny, použije sa email.</target>
       </trans-unit>
       <trans-unit id="1700089619768939005" datatype="html">
         <source>Email claim</source>
@@ -344,7 +344,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">335</context>
         </context-group>
-        <target>Email claim</target>
+        <target>Claim pre email</target>
       </trans-unit>
       <trans-unit id="1618137294648073529" datatype="html">
         <source>Allowed email domains</source>
@@ -352,7 +352,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">346</context>
         </context-group>
-        <target>Allowed email domains</target>
+        <target>Povolené emailové domény</target>
       </trans-unit>
       <trans-unit id="7183109614647759292" datatype="html">
         <source>If set, only identities with emails in these domains will be accepted.</source>
@@ -360,7 +360,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">351</context>
         </context-group>
-        <target>If set, only identities with emails in these domains will be accepted.</target>
+        <target>Ak je nastavené, prijímajú sa len identity s emailom v týchto doménach.</target>
       </trans-unit>
       <trans-unit id="8214900430518116840" datatype="html">
         <source>Auto-create users</source>
@@ -368,7 +368,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">358</context>
         </context-group>
-        <target>Auto-create users</target>
+        <target>Automaticky vytvárať používateľov</target>
       </trans-unit>
       <trans-unit id="4426465691156250470" datatype="html">
         <source>If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.</source>
@@ -376,7 +376,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">362</context>
         </context-group>
-        <target>If enabled, unknown users will be created on first login. If disabled, only existing app users can log in.</target>
+        <target>Ak je zapnuté, neznámi používatelia sa vytvoria pri prvom prihlásení. Ak je vypnuté, prihlásiť sa môžu len existujúci používatelia aplikácie.</target>
       </trans-unit>
       <trans-unit id="2708908062160090133" datatype="html">
         <source>Auto-created user role</source>
@@ -384,7 +384,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">369</context>
         </context-group>
-        <target>Auto-created user role</target>
+        <target>Rola automaticky vytvorených používateľov</target>
       </trans-unit>
       <trans-unit id="7556416109206024714" datatype="html">
         <source>Role of the users that are created on their first OIDC login.</source>
@@ -392,7 +392,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">380</context>
         </context-group>
-        <target>Role of the users that are created on their first OIDC login.</target>
+        <target>Rola používateľov vytvorených pri prvom prihlásení cez OIDC.</target>
       </trans-unit>
       <trans-unit id="1381114785805221776" datatype="html">
         <source>Strict security</source>
@@ -400,7 +400,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">387</context>
         </context-group>
-        <target>Strict security</target>
+        <target>Prísne zabezpečenie</target>
       </trans-unit>
       <trans-unit id="8122496315512920341" datatype="html">
         <source>Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider.</source>
@@ -408,7 +408,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">391</context>
         </context-group>
-        <target>Enable if not everyone at your OIDC provider is trusted. Users get linked to their provider account on first login and later only that account can log in as them. Only users up to "Max role for linking" can be linked. The email fallback requires a verified, full email. Unlink users in the user list, e.g. after reinstalling the provider.</target>
+        <target>Zapnite, ak nie všetci u vášho poskytovateľa OIDC sú dôveryhodní. Pri prvom prihlásení sa používatelia prepoja so svojím účtom u poskytovateľa a potom sa za nich môže prihlásiť len tento účet. Prepojiť možno len používateľov do „Najvyššej roly na prepojenie“. Náhradné priradenie podľa emailu vyžaduje overený, úplný email. Prepojenie používateľov zrušíte v zozname používateľov, napr. po preinštalovaní poskytovateľa.</target>
       </trans-unit>
       <trans-unit id="50948139513109243" datatype="html">
         <source>Max role for linking</source>
@@ -416,7 +416,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">398</context>
         </context-group>
-        <target>Max role for linking</target>
+        <target>Najvyššia rola na prepojenie</target>
       </trans-unit>
       <trans-unit id="4116668961706518910" datatype="html">
         <source>Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back.</source>
@@ -424,7 +424,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">403</context>
         </context-group>
-        <target>Highest role an existing, not yet linked app user can have to get linked on the first OIDC login. To link an admin: set this to Admin, log in with OIDC once, then set it back.</target>
+        <target>Najvyššia rola, ktorú môže mať existujúci, ešte neprepojený používateľ, aby sa prepojil pri prvom prihlásení cez OIDC. Prepojenie administrátora: nastavte Admin, raz sa prihláste cez OIDC a potom hodnotu vráťte späť.</target>
       </trans-unit>
       <trans-unit id="5256256049865563765" datatype="html">
         <source>Directory</source>
@@ -448,7 +448,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">429</context>
         </context-group>
-        <target>Directory path relative to the images folder. E.g.: /photos/private. With glob match, * and ? wildcards can be used: /photos/private/* matches the directory and everything below it, /photos/private/?* matches only below it.</target>
+        <target>Cesta k priečinku relatívne k priečinku obrázkov. Napr.: /photos/private. Pri zhode glob možno použiť zástupné znaky * a ?: /photos/private/* zodpovedá priečinku a všetkému pod ním, /photos/private/?* len tomu, čo je pod ním.</target>
       </trans-unit>
       <trans-unit id="5501193014831795283" datatype="html">
         <source>Match type</source>
@@ -456,7 +456,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">436</context>
         </context-group>
-        <target>Match type</target>
+        <target>Typ zhody</target>
       </trans-unit>
       <trans-unit id="4927624354879263771" datatype="html">
         <source>exact_match: only the given directory. like: any directory whose path contains the text. globMatch: the whole path matches the pattern, * matches anything (including /), ? matches one character.</source>
@@ -464,7 +464,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">439</context>
         </context-group>
-        <target>exact_match: only the given directory. like: any directory whose path contains the text. globMatch: the whole path matches the pattern, * matches anything (including /), ? matches one character.</target>
+        <target>exact_match: len zadaný priečinok. like: každý priečinok, ktorého cesta obsahuje text. globMatch: celá cesta zodpovedá vzoru, * zodpovedá čomukoľvek (aj /), ? jednému znaku.</target>
       </trans-unit>
       <trans-unit id="7051066787135970070" datatype="html">
         <source>Negate</source>
@@ -472,7 +472,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">446</context>
         </context-group>
-        <target>Negate</target>
+        <target>Negovať</target>
       </trans-unit>
       <trans-unit id="145309251594547519" datatype="html">
         <source>Matches directories that do NOT match the search.</source>
@@ -480,7 +480,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">449</context>
         </context-group>
-        <target>Matches directories that do NOT match the search.</target>
+        <target>Zodpovedá priečinkom, ktoré NEZODPOVEDAJÚ vyhľadávaniu.</target>
       </trans-unit>
       <trans-unit id="4719488548459812147" datatype="html">
         <source>Enforced users</source>
@@ -504,7 +504,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">481</context>
         </context-group>
-        <target>Media allow list</target>
+        <target>Zoznam povolených médií</target>
       </trans-unit>
       <trans-unit id="2297303209691401090" datatype="html">
         <source>Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately.</source>
@@ -512,7 +512,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">486</context>
         </context-group>
-        <target>Setting a non empty search query here will make the app to only SHOW photos and videos that match the query. You can override this at every user separately.</target>
+        <target>Ak tu nastavíte neprázdny vyhľadávací dopyt, aplikácia bude ZOBRAZOVAŤ len fotky a videá, ktoré mu zodpovedajú. Môžete to prepísať pre každého používateľa zvlášť.</target>
       </trans-unit>
       <trans-unit id="6440879911587092235" datatype="html">
         <source>Media block list</source>
@@ -520,7 +520,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">496</context>
         </context-group>
-        <target>Media block list</target>
+        <target>Zoznam blokovaných médií</target>
       </trans-unit>
       <trans-unit id="7274827546487319402" datatype="html">
         <source>Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately.</source>
@@ -528,7 +528,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">501</context>
         </context-group>
-        <target>Setting a non empty search query here will make the app to HIDE photos and videos that match the query. You can override this at every user separately.</target>
+        <target>Ak tu nastavíte neprázdny vyhľadávací dopyt, aplikácia bude SKRÝVAŤ fotky a videá, ktoré mu zodpovedajú. Môžete to prepísať pre každého používateľa zvlášť.</target>
       </trans-unit>
       <trans-unit id="2723081188903230183" datatype="html">
         <source>Directory allow list</source>
@@ -536,7 +536,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">512</context>
         </context-group>
-        <target>Directory allow list</target>
+        <target>Zoznam povolených priečinkov</target>
       </trans-unit>
       <trans-unit id="4696620408102538617" datatype="html">
         <source>If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately.</source>
@@ -544,7 +544,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">516</context>
         </context-group>
-        <target>If not empty, the app only SHOWS directories (and the photos and videos in them) that match any of these directory searches. Parent directories of an allowed directory are still navigable, but their content is hidden. You can override this at every user separately.</target>
+        <target>Ak zoznam nie je prázdny, aplikácia ZOBRAZUJE len priečinky (a fotky a videá v nich), ktoré zodpovedajú niektorému z týchto vyhľadávaní priečinkov. Nadradené priečinky povoleného priečinka sa dajú prechádzať, ale ich obsah je skrytý. Môžete to prepísať pre každého používateľa zvlášť.</target>
       </trans-unit>
       <trans-unit id="2571972441877359365" datatype="html">
         <source>Directory block list</source>
@@ -552,7 +552,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">524</context>
         </context-group>
-        <target>Directory block list</target>
+        <target>Zoznam blokovaných priečinkov</target>
       </trans-unit>
       <trans-unit id="7339862981685591866" datatype="html">
         <source>The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately.</source>
@@ -560,7 +560,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">528</context>
         </context-group>
-        <target>The app HIDES directories (and the photos and videos in them) that match any of these directory searches. Use a glob match (e.g.: /photos/private/*) to block a directory with all of its subdirectories. You can override this at every user separately.</target>
+        <target>Aplikácia SKRÝVA priečinky (a fotky a videá v nich), ktoré zodpovedajú niektorému z týchto vyhľadávaní priečinkov. Na zablokovanie priečinka so všetkými podpriečinkami použite zhodu glob (napr.: /photos/private/*). Môžete to prepísať pre každého používateľa zvlášť.</target>
       </trans-unit>
       <trans-unit id="211401599061871086" datatype="html">
         <source>Suppress default user warning</source>
@@ -568,7 +568,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">536</context>
         </context-group>
-        <target>Suppress default user warning</target>
+        <target>Nezobrazovať upozornenie na predvoleného používateľa</target>
       </trans-unit>
       <trans-unit id="1613293985413823611" datatype="html">
         <source>if true, the app won't show a warning for using the default user.</source>
@@ -576,7 +576,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">539</context>
         </context-group>
-        <target>if true, the app won't show a warning for using the default user.</target>
+        <target>Ak je zapnuté, aplikácia nezobrazuje upozornenie na používanie predvoleného používateľa.</target>
       </trans-unit>
       <trans-unit id="1933149130011573488" datatype="html">
         <source>OpenID Connect</source>
@@ -600,7 +600,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1840</context>
         </context-group>
-        <target>Setup SSO with external authentication apps like Authentik or Authelia</target>
+        <target>Nastavenie SSO s externými overovacími aplikáciami, ako je Authentik alebo Authelia</target>
       </trans-unit>
       <trans-unit id="5469820923661123729" datatype="html">
         <source>High quality resampling</source>
@@ -656,7 +656,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">595</context>
         </context-group>
-        <target>Sharp options</target>
+        <target>Možnosti sharp</target>
       </trans-unit>
       <trans-unit id="7599421344814816245" datatype="html">
         <source>Add any sharp options here. They will be added to sharp constructor as raw params. See: https://sharp.pixelplumbing.com/api-constructor/.</source>
@@ -664,7 +664,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">599</context>
         </context-group>
-        <target>Add any sharp options here. They will be added to sharp constructor as raw params. See: https://sharp.pixelplumbing.com/api-constructor/.</target>
+        <target>Sem pridajte ľubovoľné možnosti sharp. Odovzdajú sa konštruktoru sharp bez zmeny. Pozri: https://sharp.pixelplumbing.com/api-constructor/.</target>
       </trans-unit>
       <trans-unit id="5353755005542296188" datatype="html">
         <source>Person face margin</source>
@@ -832,7 +832,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">740</context>
         </context-group>
-        <target>Exclude folders</target>
+        <target>Vylúčiť priečinky</target>
       </trans-unit>
       <trans-unit id="2548733975133306777" datatype="html">
         <source>Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path.</source>
@@ -840,7 +840,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">746</context>
         </context-group>
-        <target>Folders to skip. A name (e.g.: temp*) matches folders anywhere, supports * and ? and is case-sensitive. 'a/b' is relative to the images folder, '/a/b' is an absolute path.</target>
+        <target>Priečinky, ktoré sa preskočia. Názov (napr.: temp*) zodpovedá priečinkom kdekoľvek, podporuje * a ? a rozlišuje veľké a malé písmená. 'a/b' je relatívne k priečinku obrázkov, '/a/b' je absolútna cesta.</target>
       </trans-unit>
       <trans-unit id="1814265820766536268" datatype="html">
         <source>Exclude folders containing</source>
@@ -848,7 +848,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">754</context>
         </context-group>
-        <target>Exclude folders containing</target>
+        <target>Vylúčiť priečinky obsahujúce</target>
       </trans-unit>
       <trans-unit id="3805748632901985219" datatype="html">
         <source>.ignore;.pg2ignore</source>
@@ -864,7 +864,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">760</context>
         </context-group>
-        <target>Skip folders that contain a file with any of these names.</target>
+        <target>Preskočí priečinky, ktoré obsahujú súbor s niektorým z týchto názvov.</target>
       </trans-unit>
       <trans-unit id="881625234780844913" datatype="html">
         <source>Exclude files</source>
@@ -872,7 +872,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">768</context>
         </context-group>
-        <target>Exclude files</target>
+        <target>Vylúčiť súbory</target>
       </trans-unit>
       <trans-unit id="9075895663698999849" datatype="html">
         <source>.*;*.rm</source>
@@ -888,7 +888,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">774</context>
         </context-group>
-        <target>Photos and videos to skip by file name. Supports * and ?, case-sensitive. E.g.: ._* or *.rm</target>
+        <target>Fotky a videá, ktoré sa preskočia podľa názvu súboru. Podporuje * a ?, rozlišuje veľké a malé písmená. Napr.: ._* alebo *.rm</target>
       </trans-unit>
       <trans-unit id="3089345247204108252" datatype="html">
         <source>Max duplicates</source>
@@ -952,7 +952,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">819</context>
         </context-group>
-        <target>If enabled, the app adds "Server-Timing" http header to the response.</target>
+        <target>Ak je zapnuté, aplikácia pridá do odpovede hlavičku HTTP "Server-Timing".</target>
       </trans-unit>
       <trans-unit id="6011589038643567137" datatype="html">
         <source>Max saved progress</source>
@@ -984,7 +984,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">955</context>
         </context-group>
-        <target>Jobs load this many photos or videos from the DB for processing at once.</target>
+        <target>Úlohy načítajú z databázy naraz toľkoto fotiek alebo videí na spracovanie.</target>
       </trans-unit>
       <trans-unit id="547146152434765833" datatype="html">
         <source>Scheduled jobs</source>
@@ -1008,7 +1008,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1016</context>
         </context-group>
-        <target>Target bit rate of the output video will be scaled down to this. This should be less than the upload rate of your home server.</target>
+        <target>Dátový tok výstupného videa sa zníži na túto hodnotu. Mal by byť nižší ako rýchlosť odosielania vášho domáceho servera.</target>
       </trans-unit>
       <trans-unit id="1963136290621768454" datatype="html">
         <source>Resolution</source>
@@ -1052,7 +1052,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1039</context>
         </context-group>
-        <target>Target frame per second (fps) of the output video will be scaled down to this.</target>
+        <target>Počet snímok za sekundu (fps) výstupného videa sa zníži na túto hodnotu.</target>
       </trans-unit>
       <trans-unit id="7513076467032912668" datatype="html">
         <source>Format</source>
@@ -1188,7 +1188,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1172</context>
         </context-group>
-        <target>If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method.</target>
+        <target>Ak je k dispozícii viac obálok, zoradia sa týmito metódami a vyberie sa prvá. Pri náhodnom radení nemožno použiť iné metódy radenia.</target>
       </trans-unit>
       <trans-unit id="4487775872787805732" datatype="html">
         <source>Images folder</source>
@@ -1276,7 +1276,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1261</context>
         </context-group>
-        <target>Trust Proxy</target>
+        <target>Dôverovať proxy</target>
       </trans-unit>
       <trans-unit id="6628643830998398978" datatype="html">
         <source>Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html</source>
@@ -1284,7 +1284,7 @@
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
           <context context-type="linenumber">1265</context>
         </context-group>
-        <target>Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html</target>
+        <target>Či má backend dôverovať proxy serverom pri zisťovaní IP adresy klienta. Platné hodnoty nájdete v dokumentácii express: https://expressjs.com/en/guide/behind-proxies.html</target>
       </trans-unit>
       <trans-unit id="2521241309786115337" datatype="html">
         <source>Port number. Port 80 is usually what you need.</source>
@@ -1456,7 +1456,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">247</context>
         </context-group>
-        <target>Upload</target>
+        <target>Nahrávanie</target>
       </trans-unit>
       <trans-unit id="3229595422546554334" datatype="html">
         <source>Jobs</source>
@@ -1488,7 +1488,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/MessagingConfig.ts</context>
           <context context-type="linenumber">41</context>
         </context-group>
-        <target>isSecure</target>
+        <target>Zabezpečené pripojenie</target>
       </trans-unit>
       <trans-unit id="3595369311836927260" datatype="html">
         <source>Is the connection secure. See https://nodemailer.com/smtp/#tls-options for more details</source>
@@ -1628,7 +1628,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/ServerExtensionsConfig.ts</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>Sub-folder of the given extension.</target>
+        <target>Podpriečinok daného rozšírenia.</target>
       </trans-unit>
       <trans-unit id="2892412979837680989" datatype="html">
         <source>Config</source>
@@ -1636,7 +1636,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/ServerExtensionsConfig.ts</context>
           <context context-type="linenumber">44</context>
         </context-group>
-        <target>Config</target>
+        <target>Konfigurácia</target>
       </trans-unit>
       <trans-unit id="1149527040796748252" datatype="html">
         <source>Repository url</source>
@@ -1644,7 +1644,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/ServerExtensionsConfig.ts</context>
           <context context-type="linenumber">57</context>
         </context-group>
-        <target>Repository url</target>
+        <target>URL repozitára</target>
       </trans-unit>
       <trans-unit id="5472970103675574005" datatype="html">
         <source>Repository url that points to a list of extensions in .md format.</source>
@@ -1652,7 +1652,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/ServerExtensionsConfig.ts</context>
           <context context-type="linenumber">60</context>
         </context-group>
-        <target>Repository url that points to a list of extensions in .md format.</target>
+        <target>URL repozitára, ktorá odkazuje na zoznam rozšírení vo formáte .md.</target>
       </trans-unit>
       <trans-unit id="2924988255719666772" datatype="html">
         <source>Folder where the app stores all extensions. Individual extensions live in their own sub-folders.</source>
@@ -1660,7 +1660,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/ServerExtensionsConfig.ts</context>
           <context context-type="linenumber">72</context>
         </context-group>
-        <target>Folder where the app stores all extensions. Individual extensions live in their own sub-folders.</target>
+        <target>Priečinok, v ktorom aplikácia uchováva všetky rozšírenia. Každé rozšírenie má vlastný podpriečinok.</target>
       </trans-unit>
       <trans-unit id="4224237992290449495" datatype="html">
         <source>Installed extensions</source>
@@ -1668,7 +1668,7 @@
           <context context-type="sourcefile">src/common/config/private/subconfigs/ServerExtensionsConfig.ts</context>
           <context context-type="linenumber">79</context>
         </context-group>
-        <target>Installed extensions</target>
+        <target>Nainštalované rozšírenia</target>
       </trans-unit>
       <trans-unit id="5208383456628250463" datatype="html">
         <source>Clean up unused tables</source>
@@ -1700,7 +1700,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>Maximum number autocomplete items shown at once. If there is not enough items to reach this value, it takes up to double of the individual items.</target>
+        <target>Najväčší počet návrhov zobrazených naraz. Ak nie je dosť položiek na dosiahnutie tejto hodnoty, každá kategória môže zobraziť až dvojnásobok svojho limitu.</target>
       </trans-unit>
       <trans-unit id="1975560396569090938" datatype="html">
         <source>Max photo items</source>
@@ -1980,7 +1980,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">259</context>
         </context-group>
-        <target>Albums listing right</target>
+        <target>Právo na zobrazenie albumov</target>
       </trans-unit>
       <trans-unit id="5476002626858994759" datatype="html">
         <source>Required minimum right to show the albums tab.</source>
@@ -1988,7 +1988,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">270</context>
         </context-group>
-        <target>Required minimum right to show the albums tab.</target>
+        <target>Minimálne právo potrebné na zobrazenie karty albumov.</target>
       </trans-unit>
       <trans-unit id="3138135770009713234" datatype="html">
         <source>Album editing right</source>
@@ -1996,7 +1996,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">277</context>
         </context-group>
-        <target>Album editing right</target>
+        <target>Právo na úpravu albumov</target>
       </trans-unit>
       <trans-unit id="8609662966028705976" datatype="html">
         <source>Required minimum right to create and delete albums. Albums are visible to every user who can list them.</source>
@@ -2004,7 +2004,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">289</context>
         </context-group>
-        <target>Required minimum right to create and delete albums. Albums are visible to every user who can list them.</target>
+        <target>Minimálne právo potrebné na vytváranie a mazanie albumov. Albumy vidia všetci používatelia, ktorí si môžu zobraziť ich zoznam.</target>
       </trans-unit>
       <trans-unit id="6475889191924902342" datatype="html">
         <source>Enables sharing.</source>
@@ -2036,7 +2036,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">321</context>
         </context-group>
-        <target>Sharing key length</target>
+        <target>Dĺžka kľúča zdieľania</target>
       </trans-unit>
       <trans-unit id="8352833623629464431" datatype="html">
         <source>The longer the keys are, the harder they are to guess. Changing this number won't invalidate existing sharing.</source>
@@ -2044,7 +2044,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">324</context>
         </context-group>
-        <target>The longer the keys are, the harder they are to guess. Changing this number won't invalidate existing sharing.</target>
+        <target>Čím dlhšie sú kľúče, tým ťažšie sa uhádnu. Zmena tohto čísla nezneplatní existujúce zdieľania.</target>
       </trans-unit>
       <trans-unit id="700572637665748593" datatype="html">
         <source>Enables random link generation.</source>
@@ -2320,7 +2320,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">647</context>
         </context-group>
-        <target>Map will bend the path if two points are this far apart on latitude axes. This intended to bend flight if only the end and the start points are given.</target>
+        <target>Mapa ohne trasu, ak sú dva body takto ďaleko od seba na osi zemepisnej šírky. Slúži na ohnutie letov, keď je známy len začiatočný a koncový bod.</target>
       </trans-unit>
       <trans-unit id="7466923289878135364" datatype="html">
         <source>SearchQuery</source>
@@ -2472,7 +2472,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">880</context>
         </context-group>
-        <target>Enable zipped download of the listed directory or search results.</target>
+        <target>Zapne sťahovanie zobrazeného priečinka alebo výsledkov vyhľadávania ako ZIP.</target>
       </trans-unit>
       <trans-unit id="6121078413919868273" datatype="html">
         <source>Directory flattening</source>
@@ -2488,7 +2488,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">892</context>
         </context-group>
-        <target>Adds a button to flatten the file structure, by listing the content of all subdirectories. (Won't work if the gallery has multiple folders with the same path.)</target>
+        <target>Pridá tlačidlo, ktoré sploští štruktúru súborov zobrazením obsahu všetkých podpriečinkov. (Nefunguje, ak má galéria viac priečinkov s rovnakou cestou.)</target>
       </trans-unit>
       <trans-unit id="2057017984457052518" datatype="html">
         <source>Default grid size</source>
@@ -2592,7 +2592,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">964</context>
         </context-group>
-        <target>Show scroll label</target>
+        <target>Zobraziť štítok posúvania</target>
       </trans-unit>
       <trans-unit id="5430416755075409709" datatype="html">
         <source>Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.</source>
@@ -2600,7 +2600,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">968</context>
         </context-group>
-        <target>Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.</target>
+        <target>Nastaví, kedy sa pri posúvaní vedľa posuvníka zobrazí štítok (napr.: mesiac a rok) prvej viditeľnej fotky. Dátum: len ak sú fotky zoradené podľa dátumu. Vždy: pri každom radení okrem náhodného.</target>
       </trans-unit>
       <trans-unit id="7921800793872747437" datatype="html">
         <source>Sorting and grouping</source>
@@ -2616,7 +2616,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">992</context>
         </context-group>
-        <target>Top left titles</target>
+        <target>Nadpisy vľavo hore</target>
       </trans-unit>
       <trans-unit id="2203110196418114339" datatype="html">
         <source>Top left subtitles</source>
@@ -2624,7 +2624,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1002</context>
         </context-group>
-        <target>Top left subtitles</target>
+        <target>Podnadpisy vľavo hore</target>
       </trans-unit>
       <trans-unit id="1044595752773863958" datatype="html">
         <source>Bottom left titles</source>
@@ -2632,7 +2632,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1012</context>
         </context-group>
-        <target>Bottom left titles</target>
+        <target>Nadpisy vľavo dole</target>
       </trans-unit>
       <trans-unit id="898604340042884955" datatype="html">
         <source>Bottom left subtitles</source>
@@ -2640,7 +2640,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1022</context>
         </context-group>
-        <target>Bottom left subtitles</target>
+        <target>Podnadpisy vľavo dole</target>
       </trans-unit>
       <trans-unit id="7027211040487903083" datatype="html">
         <source>Enable auto update</source>
@@ -2648,7 +2648,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1034</context>
         </context-group>
-        <target>Enable auto update</target>
+        <target>Zapnúť automatickú aktualizáciu</target>
       </trans-unit>
       <trans-unit id="5425674856031619872" datatype="html">
         <source>Enable auto polling for new photos and videos in the gallery.</source>
@@ -2656,7 +2656,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1038</context>
         </context-group>
-        <target>Enable auto polling for new photos and videos in the gallery.</target>
+        <target>Zapne automatickú kontrolu nových fotiek a videí v galérii.</target>
       </trans-unit>
       <trans-unit id="3350676806684249188" datatype="html">
         <source>Interval</source>
@@ -2672,7 +2672,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1050</context>
         </context-group>
-        <target>Frequency of the auto polling in seconds.</target>
+        <target>Frekvencia automatickej kontroly v sekundách.</target>
       </trans-unit>
       <trans-unit id="8685965882892653885" datatype="html">
         <source>Default slideshow speed</source>
@@ -2756,7 +2756,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.html</context>
           <context context-type="linenumber">118,119</context>
         </context-group>
-        <target>Loop Slideshow</target>
+        <target>Opakovať prezentáciu</target>
       </trans-unit>
       <trans-unit id="4721975384140236719" datatype="html">
         <source>If enabled, lightbox will start from the first photo when it reached the last one.</source>
@@ -2764,7 +2764,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1104</context>
         </context-group>
-        <target>If enabled, lightbox will start from the first photo when it reached the last one.</target>
+        <target>Ak je zapnuté, prehliadač po poslednej fotke začne znova od prvej.</target>
       </trans-unit>
       <trans-unit id="8044411854765524879" datatype="html">
         <source>Load full resolution image on zoom.</source>
@@ -2780,7 +2780,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1114</context>
         </context-group>
-        <target>Enables loading the full resolution image on zoom in the lightbox (preview).</target>
+        <target>Zapne načítanie obrázka v plnom rozlíšení pri priblížení v prehliadači (náhľad).</target>
       </trans-unit>
       <trans-unit id="5264842305416924636" datatype="html">
         <source>Load full image if previews are too small</source>
@@ -2788,7 +2788,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1121</context>
         </context-group>
-        <target>Load full image if previews are too small</target>
+        <target>Načítať celý obrázok, ak sú náhľady príliš malé</target>
       </trans-unit>
       <trans-unit id="1064792107979708394" datatype="html">
         <source>When enabled, the lightbox will load the full resolution image if all available preview thumbnails are too small for the current view.</source>
@@ -2796,7 +2796,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1124</context>
         </context-group>
-        <target>When enabled, the lightbox will load the full resolution image if all available preview thumbnails are too small for the current view.</target>
+        <target>Ak je zapnuté, prehliadač načíta obrázok v plnom rozlíšení, keď sú všetky dostupné náhľady pre aktuálne zobrazenie príliš malé.</target>
       </trans-unit>
       <trans-unit id="1946105722838813236" datatype="html">
         <source>Titles</source>
@@ -2804,7 +2804,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1131</context>
         </context-group>
-        <target>Titles</target>
+        <target>Nadpisy</target>
       </trans-unit>
       <trans-unit id="8077487110063548929" datatype="html">
         <source>Set these to customize the text (caption, location, etc.) in the lightbox that are always visible over the photo (not in the info panel).</source>
@@ -2812,7 +2812,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1135</context>
         </context-group>
-        <target>Set these to customize the text (caption, location, etc.) in the lightbox that are always visible over the photo (not in the info panel).</target>
+        <target>Nastavte text (popis, miesto atď.), ktorý je v prehliadači vždy viditeľný nad fotkou (nie v informačnom paneli).</target>
       </trans-unit>
       <trans-unit id="3660810634447085698" datatype="html">
         <source>Name of the theme</source>
@@ -2884,7 +2884,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1204</context>
         </context-group>
-        <target>Selected theme CSS</target>
+        <target>CSS vybranej témy</target>
       </trans-unit>
       <trans-unit id="6498040093931519818" datatype="html">
         <source>Adds these CSS settings as it is to the end of the body tag of the page.</source>
@@ -2892,7 +2892,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1208</context>
         </context-group>
-        <target>Adds these CSS settings as it is to the end of the body tag of the page.</target>
+        <target>Pridá tieto nastavenia CSS bez zmeny na koniec značky body stránky.</target>
       </trans-unit>
       <trans-unit id="6385104003676355545" datatype="html">
         <source>Cache</source>
@@ -2932,7 +2932,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1252</context>
         </context-group>
-        <target>Ignore timestamp offsets (use local time)</target>
+        <target>Ignorovať posun časového pásma (miestny čas)</target>
       </trans-unit>
       <trans-unit id="3716472412960653122" datatype="html">
         <source>If enabled, timestamp offsets are ignored, meaning that the local times of pictures are used for searching, sorting and grouping. If disabled, global time is used and pictures with no timestamp are assumed to be in UTC (offset +00:00).</source>
@@ -2940,7 +2940,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1255</context>
         </context-group>
-        <target>If enabled, timestamp offsets are ignored, meaning that the local times of pictures are used for searching, sorting and grouping. If disabled, global time is used and pictures with no timestamp are assumed to be in UTC (offset +00:00).</target>
+        <target>Ak je zapnuté, posuny časového pásma sa ignorujú, teda na vyhľadávanie, radenie a zoskupovanie sa používa miestny čas fotiek. Ak je vypnuté, používa sa globálny čas a fotky bez časového pásma sa považujú za UTC (posun +00:00).</target>
       </trans-unit>
       <trans-unit id="7060776697703711531" datatype="html">
         <source>On scroll thumbnail prioritising</source>
@@ -2996,7 +2996,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1298</context>
         </context-group>
-        <target>Photo and video preview window.</target>
+        <target>Okno náhľadu fotiek a videí.</target>
       </trans-unit>
       <trans-unit id="2798270190074840767" datatype="html">
         <source>Themes</source>
@@ -3028,7 +3028,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1319</context>
         </context-group>
-        <target>Makes inline blog (*.md files content) auto-open.</target>
+        <target>Automaticky otvorí vložený blog (obsah súborov *.md).</target>
       </trans-unit>
       <trans-unit id="8496975322830640739" datatype="html">
         <source>Top blog starts open</source>
@@ -3044,7 +3044,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1330</context>
         </context-group>
-        <target>Makes top blog (*.md files content) auto-open.</target>
+        <target>Automaticky otvorí horný blog (obsah súborov *.md).</target>
       </trans-unit>
       <trans-unit id="33736683524635029" datatype="html">
         <source>Auto update</source>
@@ -3052,7 +3052,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1337</context>
         </context-group>
-        <target>Auto update</target>
+        <target>Automatická aktualizácia</target>
       </trans-unit>
       <trans-unit id="3890284669394451538" datatype="html">
         <source>makes the gallery poll the backend for new photos in the given directory or search</source>
@@ -3060,7 +3060,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1340</context>
         </context-group>
-        <target>makes the gallery poll the backend for new photos in the given directory or search</target>
+        <target>galéria sa pýta servera na nové fotky v aktuálnom priečinku alebo vyhľadávaní</target>
       </trans-unit>
       <trans-unit id="9185454837312696816" datatype="html">
         <source>Supported formats with transcoding</source>
@@ -3076,7 +3076,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1365</context>
         </context-group>
-        <target>Video formats that are supported after transcoding (with the built-in ffmpeg support).</target>
+        <target>Formáty videa podporované po prekódovaní (so zabudovaným ffmpeg).</target>
       </trans-unit>
       <trans-unit id="2099861843042326383" datatype="html">
         <source>Supported formats without transcoding</source>
@@ -3132,7 +3132,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1413</context>
         </context-group>
-        <target>Thumbnail and photo preview sizes</target>
+        <target>Veľkosti miniatúr a náhľadov</target>
       </trans-unit>
       <trans-unit id="3704348113521249276" datatype="html">
         <source>Size of the thumbnails and photo previews. The best matching size will be used (smaller for photo and video thumbnail, bigger for photo preview). More sizes give better quality, but use more storage and CPU to render. If size is 240, that shorter side of the thumbnail will be 240 pixels.</source>
@@ -3140,7 +3140,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1417</context>
         </context-group>
-        <target>Size of the thumbnails and photo previews. The best matching size will be used (smaller for photo and video thumbnail, bigger for photo preview). More sizes give better quality, but use more storage and CPU to render. If size is 240, that shorter side of the thumbnail will be 240 pixels.</target>
+        <target>Veľkosti miniatúr a náhľadov fotiek. Použije sa najvhodnejšia veľkosť (menšia pre miniatúry fotiek a videí, väčšia pre náhľad fotky). Viac veľkostí dáva lepšiu kvalitu, ale zaberá viac miesta a výkonu procesora. Ak je veľkosť 240, kratšia strana miniatúry bude mať 240 pixelov.</target>
       </trans-unit>
       <trans-unit id="5933955420526664656" datatype="html">
         <source>Concurrent photo generation limit</source>
@@ -3148,7 +3148,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1433</context>
         </context-group>
-        <target>Concurrent photo generation limit</target>
+        <target>Limit súbežného generovania fotiek</target>
       </trans-unit>
       <trans-unit id="1269143586062804510" datatype="html">
         <source>Supported photo formats</source>
@@ -3188,7 +3188,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1496</context>
         </context-group>
-        <target>Pairs Apple Live Photo still images with their companion video clips using Content Identifier metadata.</target>
+        <target>Spáruje statické obrázky Apple Live Photo s ich videami pomocou metadát Content Identifier.</target>
       </trans-unit>
       <trans-unit id="4514481054118132400" datatype="html">
         <source>Live Photo</source>
@@ -3268,7 +3268,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1606</context>
         </context-group>
-        <target>Default sorting on the faces page</target>
+        <target>Predvolené radenie na stránke tvárí</target>
       </trans-unit>
       <trans-unit id="6946816815826261880" datatype="html">
         <source>Override keywords</source>
@@ -3332,7 +3332,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1655</context>
         </context-group>
-        <target>If you access the page from local network it's good to know the public url for creating sharing link.</target>
+        <target>Ak stránku otvárate z lokálnej siete, je dobré poznať verejnú URL na vytváranie odkazov na zdieľanie.</target>
       </trans-unit>
       <trans-unit id="5093650417970469070" datatype="html">
         <source>Page public url</source>
@@ -3348,7 +3348,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1666</context>
         </context-group>
-        <target>If you access the gallery under a sub url (like: https://mydomain.com/myGallery), set it here. If it is not working you might miss the '/' from the beginning of the url.</target>
+        <target>Ak galériu otvárate pod podcestou (napr.: https://mydomain.com/myGallery), nastavte ju tu. Ak to nefunguje, možno chýba '/' na začiatku.</target>
       </trans-unit>
       <trans-unit id="4312373114061005708" datatype="html">
         <source>Url Base</source>
@@ -3372,7 +3372,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1694</context>
         </context-group>
-        <target>Injects the content of this between the &lt;head&gt;&lt;/head&gt; HTML tags of the app. (You can use it to add analytics or custom code to the app).</target>
+        <target>Vloží tento obsah medzi značky HTML &lt;head&gt;&lt;/head&gt; aplikácie. (Môžete to použiť na štatistiky alebo vlastný kód.)</target>
       </trans-unit>
       <trans-unit id="6764366823411649793" datatype="html">
         <source>Custom HTML Head</source>
@@ -3388,7 +3388,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1714</context>
         </context-group>
-        <target>Sets the icon of the app. Rendered icons are cached in the tmp folder.</target>
+        <target>Nastaví ikonu aplikácie. Vygenerované ikony sa ukladajú do priečinka tmp.</target>
       </trans-unit>
       <trans-unit id="6617781683991195570" datatype="html">
         <source>Reload client on server update</source>
@@ -3396,7 +3396,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1723</context>
         </context-group>
-        <target>Reload client on server update</target>
+        <target>Znova načítať klienta po aktualizácii servera</target>
       </trans-unit>
       <trans-unit id="9156520540572156299" datatype="html">
         <source>If set the UI will auto reload when client related config changed or the app was restarted (except when the UI shows the settings page).</source>
@@ -3404,7 +3404,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1727</context>
         </context-group>
-        <target>If set the UI will auto reload when client related config changed or the app was restarted (except when the UI shows the settings page).</target>
+        <target>Ak je zapnuté, rozhranie sa automaticky znova načíta pri zmene konfigurácie klienta alebo reštarte aplikácie (okrem prípadu, keď je otvorená stránka nastavení).</target>
       </trans-unit>
       <trans-unit id="8708158225145066350" datatype="html">
         <source>Hide sponsor links</source>
@@ -3412,7 +3412,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1734</context>
         </context-group>
-        <target>Hide sponsor links</target>
+        <target>Skryť odkazy na podporu</target>
       </trans-unit>
       <trans-unit id="9150550378488986765" datatype="html">
         <source>Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes).</source>
@@ -3420,7 +3420,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1737</context>
         </context-group>
-        <target>Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes).</target>
+        <target>Skryje odkazy, ktoré žiadajú o podporu vývoja PiGallery2 (na stránke O aplikácii a v poznámkach k vydaniu).</target>
       </trans-unit>
       <trans-unit id="2409672154570643758" datatype="html">
         <source>Display name</source>
@@ -3428,7 +3428,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1791</context>
         </context-group>
-        <target>Display name</target>
+        <target>Zobrazované meno</target>
       </trans-unit>
       <trans-unit id="3388803959674943447" datatype="html">
         <source>Shown on the login button (client-visible).</source>
@@ -3436,7 +3436,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1797</context>
         </context-group>
-        <target>Shown on the login button (client-visible).</target>
+        <target>Zobrazí sa na tlačidle prihlásenia (viditeľné pre klienta).</target>
       </trans-unit>
       <trans-unit id="7321299026311900359" datatype="html">
         <source>Password protection</source>
@@ -3476,7 +3476,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1871</context>
         </context-group>
-        <target>Minimum user role</target>
+        <target>Minimálna rola používateľa</target>
       </trans-unit>
       <trans-unit id="6880722216701381598" datatype="html">
         <source>Minimum user role to enable file upload.</source>
@@ -3484,7 +3484,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1875</context>
         </context-group>
-        <target>Minimum user role to enable file upload.</target>
+        <target>Minimálna rola používateľa potrebná na nahrávanie súborov.</target>
       </trans-unit>
       <trans-unit id="5181767623758776555" datatype="html">
         <source>Require uploader.pg2conf</source>
@@ -3492,7 +3492,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1882</context>
         </context-group>
-        <target>Require uploader.pg2conf</target>
+        <target>Vyžadovať uploader.pg2conf</target>
       </trans-unit>
       <trans-unit id="1674841704956331939" datatype="html">
         <source>Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.</source>
@@ -3500,7 +3500,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1884</context>
         </context-group>
-        <target>Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.</target>
+        <target>Povolí nahrávanie len do priečinkov, ktoré obsahujú súbor ".uploader.pg2conf".</target>
       </trans-unit>
       <trans-unit id="8818632916733036686" datatype="html">
         <source>Maximum file size</source>
@@ -3508,7 +3508,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1891</context>
         </context-group>
-        <target>Maximum file size</target>
+        <target>Maximálna veľkosť súboru</target>
       </trans-unit>
       <trans-unit id="2572644472095797693" datatype="html">
         <source>Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.</source>
@@ -3516,7 +3516,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1896</context>
         </context-group>
-        <target>Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.</target>
+        <target>Väčšie súbory sa nenahrajú. Reverzná proxy pred galériou má vlastný limit (napr. client_max_body_size v nginx): nastavte ho aspoň na túto hodnotu.</target>
       </trans-unit>
       <trans-unit id="4782452434519048757" datatype="html">
         <source>Blocked extensions</source>
@@ -3524,7 +3524,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1904</context>
         </context-group>
-        <target>Blocked extensions</target>
+        <target>Blokované prípony</target>
       </trans-unit>
       <trans-unit id="8241791515603653668" datatype="html">
         <source>Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.</source>
@@ -3532,7 +3532,7 @@
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
           <context context-type="linenumber">1907</context>
         </context-group>
-        <target>Files with these extensions cannot be uploaded, even if they are supported. *.pg2conf files control sorting, saved searches and upload permission of a folder, *.svg files can contain scripts.</target>
+        <target>Súbory s týmito príponami nemožno nahrať, ani keď sú podporované. Súbory *.pg2conf riadia radenie, uložené vyhľadávania a právo nahrávať do priečinka, súbory *.svg môžu obsahovať skripty.</target>
       </trans-unit>
       <trans-unit id="2181154762165715522" datatype="html">
         <source>Gallery</source>
@@ -3676,7 +3676,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">18</context>
         </context-group>
-        <target>Max video size</target>
+        <target>Maximálna veľkosť videa</target>
       </trans-unit>
       <trans-unit id="6218342726930405349" datatype="html">
         <source>Sizes bigger than this value won't be generated for videos. Videos does not use photo based previews, so it is not needed to generate big previews for them.</source>
@@ -3684,7 +3684,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">20</context>
         </context-group>
-        <target>Sizes bigger than this value won't be generated for videos. Videos does not use photo based previews, so it is not needed to generate big previews for them.</target>
+        <target>Väčšie veľkosti ako táto hodnota sa pre videá negenerujú. Videá nepoužívajú náhľady založené na fotkách, takže veľké náhľady nepotrebujú.</target>
       </trans-unit>
       <trans-unit id="3188623303493603851" datatype="html">
         <source>Indexed only</source>
@@ -3772,7 +3772,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">42</context>
         </context-group>
-        <target>Message</target>
+        <target>Správa</target>
       </trans-unit>
       <trans-unit id="2752906962332824457" datatype="html">
         <source>E-mail text.</source>
@@ -3876,7 +3876,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">90</context>
         </context-group>
-        <target>It is not necessary to run this job explicitly as the app can do this on-the-file while navigation the gallery. This only speeds up the navigation speed in the app.</target>
+        <target>Túto úlohu netreba spúšťať samostatne, pretože aplikácia to robí priebežne pri prehliadaní galérie. Len zrýchľuje navigáciu v aplikácii.</target>
       </trans-unit>
       <trans-unit id="4793522720209559817" datatype="html">
         <source>Scans the whole gallery from disk and indexes it to the DB.</source>
@@ -3908,7 +3908,7 @@
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
           <context context-type="linenumber">99</context>
         </context-group>
-        <target>Generates thumbnails and high-res photos from all media files and stores them in the tmp folder. Smaller sizes will be used for thumbnail (in the grid view), bigger sizes for previews (in the lightbox). Videos does not use photo previews (the app loads the video file instead).</target>
+        <target>Vygeneruje miniatúry a fotky vo vysokom rozlíšení zo všetkých mediálnych súborov a uloží ich do priečinka tmp. Menšie veľkosti sa používajú pre miniatúry (v mriežke), väčšie pre náhľady (v prehliadači). Videá nepoužívajú náhľady fotiek (aplikácia načíta priamo videosúbor).</target>
       </trans-unit>
       <trans-unit id="681839472013852986" datatype="html">
         <source>Transcodes all videos and stores them in the tmp folder.</source>
@@ -3972,7 +3972,7 @@
           <context context-type="sourcefile">src/frontend/app/model/network/helper/auth.guard.ts</context>
           <context context-type="linenumber">30</context>
         </context-group>
-        <target>Only admins can open the admin page.</target>
+        <target>Stránku správy môžu otvoriť len administrátori.</target>
       </trans-unit>
       <trans-unit id="5567329162136900412" datatype="html">
         <source>Your session has ended. Please log in again.</source>
@@ -3980,7 +3980,7 @@
           <context context-type="sourcefile">src/frontend/app/model/network/helper/error.interceptor.ts</context>
           <context context-type="linenumber">20</context>
         </context-group>
-        <target>Your session has ended. Please log in again.</target>
+        <target>Vaša relácia skončila. Prihláste sa znova.</target>
       </trans-unit>
       <trans-unit id="3257486285145946953" datatype="html">
         <source>Show fewer notifications</source>
@@ -3988,7 +3988,7 @@
           <context context-type="sourcefile">src/frontend/app/model/notification.service.ts</context>
           <context context-type="linenumber">31</context>
         </context-group>
-        <target>Show fewer notifications</target>
+        <target>Zobraziť menej upozornení</target>
       </trans-unit>
       <trans-unit id="3706893844385254004" datatype="html">
         <source>More notifications: <x id="count" equiv-text="hidden.length"/></source>
@@ -3996,7 +3996,7 @@
           <context context-type="sourcefile">src/frontend/app/model/notification.service.ts</context>
           <context context-type="linenumber">31</context>
         </context-group>
-        <target>More notifications: <x id="count" equiv-text="hidden.length"/></target>
+        <target>Ďalšie upozornenia: <x id="count" equiv-text="hidden.length"/></target>
       </trans-unit>
       <trans-unit id="8398233202919865612" datatype="html">
         <source>h</source>
@@ -4014,7 +4014,7 @@
           <context context-type="linenumber">20</context>
         </context-group>
         <note priority="1" from="description">minute</note>
-        <target>m</target>
+        <target>min</target>
       </trans-unit>
       <trans-unit id="2155832126259145609" datatype="html">
         <source>s</source>
@@ -4115,7 +4115,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target>Only by date</target>
+        <target>Len podľa dátumu</target>
       </trans-unit>
       <trans-unit id="1920513678812261969" datatype="html">
         <source>Full</source>
@@ -4327,7 +4327,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">77</context>
         </context-group>
-        <target>None</target>
+        <target>Žiadne</target>
       </trans-unit>
       <trans-unit id="8455204924704616723" datatype="html">
         <source>File</source>
@@ -4335,7 +4335,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">78</context>
         </context-group>
-        <target>File</target>
+        <target>Súbor</target>
       </trans-unit>
       <trans-unit id="45739481977493163" datatype="html">
         <source>Size</source>
@@ -4383,7 +4383,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">27</context>
         </context-group>
-        <target>Title</target>
+        <target>Názov</target>
       </trans-unit>
       <trans-unit id="1604795977599078115" datatype="html">
         <source>Keywords</source>
@@ -4419,7 +4419,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">85</context>
         </context-group>
-        <target>Location</target>
+        <target>Miesto</target>
       </trans-unit>
       <trans-unit id="3973931101896534797" datatype="html">
         <source>Date</source>
@@ -4431,7 +4431,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">102</context>
         </context-group>
-        <target>Date</target>
+        <target>Dátum</target>
       </trans-unit>
       <trans-unit id="5087678602655068553" datatype="html">
         <source>Camera</source>
@@ -4463,7 +4463,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">89</context>
         </context-group>
-        <target>Iso</target>
+        <target>ISO</target>
       </trans-unit>
       <trans-unit id="1704968122791871295" datatype="html">
         <source>f-stop</source>
@@ -4471,7 +4471,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">90</context>
         </context-group>
-        <target>f-stop</target>
+        <target>Clona (f)</target>
       </trans-unit>
       <trans-unit id="6542951666153347128" datatype="html">
         <source>Focal length</source>
@@ -4491,7 +4491,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">93</context>
         </context-group>
-        <target>Title or Caption</target>
+        <target>Názov alebo popis</target>
       </trans-unit>
       <trans-unit id="4805419876790547892" datatype="html">
         <source>Title or Directory</source>
@@ -4499,7 +4499,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">94</context>
         </context-group>
-        <target>Title or Directory</target>
+        <target>Názov alebo priečinok</target>
       </trans-unit>
       <trans-unit id="7167605811323407067" datatype="html">
         <source>Title or Caption or Directory</source>
@@ -4507,7 +4507,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">95</context>
         </context-group>
-        <target>Title or Caption or Directory</target>
+        <target>Názov, popis alebo priečinok</target>
       </trans-unit>
       <trans-unit id="188313477943387511" datatype="html">
         <source>And</source>
@@ -4567,7 +4567,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
           <context context-type="linenumber">105</context>
         </context-group>
-        <target>Person count</target>
+        <target>Počet osôb</target>
       </trans-unit>
       <trans-unit id="2300247576851644080" datatype="html">
         <source>File name</source>
@@ -4623,7 +4623,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">6</context>
         </context-group>
-        <target>Back to the gallery</target>
+        <target>Späť do galérie</target>
       </trans-unit>
       <trans-unit id="890523246758747303" datatype="html">
         <source>A fast, directory-first photo gallery for low-resource servers like a Raspberry Pi. Free and open source.</source>
@@ -4631,7 +4631,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">17,18</context>
         </context-group>
-        <target>A fast, directory-first photo gallery for low-resource servers like a Raspberry Pi. Free and open source.</target>
+        <target>Rýchla fotogaléria založená na priečinkoch pre slabé servery, ako je Raspberry Pi. Zadarmo a s otvoreným zdrojovým kódom.</target>
       </trans-unit>
       <trans-unit id="4895326106573044490" datatype="html">
         <source>Documentation</source>
@@ -4639,7 +4639,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>Documentation</target>
+        <target>Dokumentácia</target>
       </trans-unit>
       <trans-unit id="5457938796893098392" datatype="html">
         <source>Release notes</source>
@@ -4647,7 +4647,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>Release notes</target>
+        <target>Poznámky k vydaniu</target>
       </trans-unit>
       <trans-unit id="6721205010170319800" datatype="html">
         <source>Support PiGallery2</source>
@@ -4655,7 +4655,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">36,37</context>
         </context-group>
-        <target>Support PiGallery2</target>
+        <target>Podporte PiGallery2</target>
       </trans-unit>
       <trans-unit id="4085878702814598080" datatype="html">
         <source>PiGallery2 is a hobby project, developed in free time. If it makes your photos a bit nicer to browse, consider supporting its development.</source>
@@ -4663,7 +4663,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">37,38</context>
         </context-group>
-        <target>PiGallery2 is a hobby project, developed in free time. If it makes your photos a bit nicer to browse, consider supporting its development.</target>
+        <target>PiGallery2 je hobby projekt, ktorý vzniká vo voľnom čase. Ak vďaka nemu prezeráte svoje fotky o niečo radšej, zvážte podporu jeho vývoja.</target>
       </trans-unit>
       <trans-unit id="6924245241744002654" datatype="html">
         <source>Build</source>
@@ -4671,7 +4671,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">54,55</context>
         </context-group>
-        <target>Build</target>
+        <target>Zostavenie</target>
       </trans-unit>
       <trans-unit id="8756475128047662297" datatype="html">
         <source>*Only admins see this</source>
@@ -4679,7 +4679,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">55,56</context>
         </context-group>
-        <target>*Only admins see this</target>
+        <target>*Toto vidia len administrátori</target>
       </trans-unit>
       <trans-unit id="2724055831234181057" datatype="html">
         <source>Version</source>
@@ -4687,7 +4687,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">60,61</context>
         </context-group>
-        <target>Version</target>
+        <target>Verzia</target>
       </trans-unit>
       <trans-unit id="7076930552474914340" datatype="html">
         <source>Git commit</source>
@@ -4711,7 +4711,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">80,81</context>
         </context-group>
-        <target>Running since</target>
+        <target>Beží od</target>
       </trans-unit>
       <trans-unit id="2202928432763705815" datatype="html">
         <source>Runs on</source>
@@ -4719,7 +4719,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">85,86</context>
         </context-group>
-        <target>Runs on</target>
+        <target>Beží na</target>
       </trans-unit>
       <trans-unit id="4388270932893066992" datatype="html">
         <source>What's new in this version</source>
@@ -4727,7 +4727,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">92,93</context>
         </context-group>
-        <target>What's new in this version</target>
+        <target>Novinky v tejto verzii</target>
       </trans-unit>
       <trans-unit id="4033992635603367601" datatype="html">
         <source>Copy for a bug report</source>
@@ -4735,7 +4735,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.html</context>
           <context context-type="linenumber">96</context>
         </context-group>
-        <target>Copy for a bug report</target>
+        <target>Kopírovať do hlásenia chyby</target>
       </trans-unit>
       <trans-unit id="4756116217328528070" datatype="html">
         <source>The build info has been copied to the clipboard</source>
@@ -4743,7 +4743,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/about/about.component.ts</context>
           <context context-type="linenumber">64</context>
         </context-group>
-        <target>The build info has been copied to the clipboard</target>
+        <target>Informácie o zostavení boli skopírované do schránky</target>
       </trans-unit>
       <trans-unit id="1726363342938046830" datatype="html">
         <source>About</source>
@@ -4755,7 +4755,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">269</context>
         </context-group>
-        <target>About</target>
+        <target>O aplikácii</target>
       </trans-unit>
       <trans-unit id="3443810994372262728" datatype="html">
         <source>Server notifications</source>
@@ -4904,7 +4904,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/album/album.component.html</context>
           <context context-type="linenumber">42,43</context>
         </context-group>
-        <target>Delete album</target>
+        <target>Odstrániť album</target>
       </trans-unit>
       <trans-unit id="7819314041543176992" datatype="html">
         <source>Close</source>
@@ -4952,7 +4952,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/album/album.component.html</context>
           <context context-type="linenumber">45,46</context>
         </context-group>
-        <target>Delete the album "<x id="INTERPOLATION" equiv-text="{{album().name}}"/>"? Only the album is deleted, its photos stay.</target>
+        <target>Odstrániť album „<x id="INTERPOLATION" equiv-text="{{album().name}}"/>“? Odstráni sa len album, fotky zostanú.</target>
       </trans-unit>
       <trans-unit id="2159130950882492111" datatype="html">
         <source>Cancel</source>
@@ -4980,7 +4980,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
           <context context-type="linenumber">14</context>
         </context-group>
-        <target>No albums yet.</target>
+        <target>Zatiaľ žiadne albumy.</target>
       </trans-unit>
       <trans-unit id="8860025461729905837" datatype="html">
         <source>Search for something, then save the search as an album with the save button next to the search bar.</source>
@@ -4988,7 +4988,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/albums/albums.component.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
-        <target>Search for something, then save the search as an album with the save button next to the search bar.</target>
+        <target>Niečo vyhľadajte a potom vyhľadávanie uložte ako album tlačidlom uloženia vedľa vyhľadávacieho poľa.</target>
       </trans-unit>
       <trans-unit id="7786160088790041328" datatype="html">
         <source>Add saved search</source>
@@ -5056,7 +5056,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">20,21</context>
         </context-group>
-        <target>Loading...</target>
+        <target>Načítava sa...</target>
       </trans-unit>
       <trans-unit id="706701817138815411" datatype="html">
         <source> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </source>
@@ -5064,7 +5064,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.html</context>
           <context context-type="linenumber">13,15</context>
         </context-group>
-        <target> Listing <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> duplicates (<x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/> photos). </target>
+        <target> Zobrazené duplikáty: <x id="START_TAG_STRONG" ctype="x-strong" equiv-text="&lt;strong&gt;"/><x id="INTERPOLATION" equiv-text="{{duplicateCount().pairs}}"/><x id="CLOSE_TAG_STRONG" ctype="x-strong" equiv-text="&lt;/strong&gt;"/> (fotky: <x id="INTERPOLATION_1" equiv-text="{{duplicateCount().photos}}"/>).</target>
       </trans-unit>
       <trans-unit id="2904029998096758375" datatype="html">
         <source> No duplicates found </source>
@@ -5080,7 +5080,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">13,14</context>
         </context-group>
-        <target>Something went spectacularly wrong. We've sent our best squirrels to look into it.</target>
+        <target>Niečo sa pokazilo vskutku veľkolepo. Poslali sme našich najlepších veveričiek, aby to preskúmali.</target>
       </trans-unit>
       <trans-unit id="6495872455508248337" datatype="html">
         <source> Take me back to safety </source>
@@ -5088,7 +5088,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">16,17</context>
         </context-group>
-        <target> Take me back to safety </target>
+        <target> Vezmi ma späť do bezpečia</target>
       </trans-unit>
       <trans-unit id="8195169877713600295" datatype="html">
         <source>help me fix this</source>
@@ -5096,7 +5096,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">22</context>
         </context-group>
-        <target>help me fix this</target>
+        <target>pomôžte mi to opraviť</target>
       </trans-unit>
       <trans-unit id="7518561630481101389" datatype="html">
         <source>How to debug this?</source>
@@ -5104,7 +5104,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">27,28</context>
         </context-group>
-        <target>How to debug this?</target>
+        <target>Ako to odladiť?</target>
       </trans-unit>
       <trans-unit id="5917461858931004049" datatype="html">
         <source>To enable full debug logging, set the <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>NODE_ENV<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> environment variable to <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>debug<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>.</source>
@@ -5112,7 +5112,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">28,29</context>
         </context-group>
-        <target>To enable full debug logging, set the <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>NODE_ENV<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> environment variable to <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>debug<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>.</target>
+        <target>Na zapnutie úplného ladiaceho záznamu nastavte premennú prostredia <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>NODE_ENV<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> na <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>debug<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/>.</target>
       </trans-unit>
       <trans-unit id="456108619869570861" datatype="html">
         <source>How to look at the server logs?</source>
@@ -5120,7 +5120,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">29,30</context>
         </context-group>
-        <target>How to look at the server logs?</target>
+        <target>Ako si pozrieť záznamy servera?</target>
       </trans-unit>
       <trans-unit id="58975010189247311" datatype="html">
         <source>If you're using Docker, you can follow these steps:</source>
@@ -5128,7 +5128,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">30,31</context>
         </context-group>
-        <target>If you're using Docker, you can follow these steps:</target>
+        <target>Ak používate Docker, postupujte takto:</target>
       </trans-unit>
       <trans-unit id="803668820873468657" datatype="html">
         <source>List all containers with <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker ps -a<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> to get pigallery2's container.</source>
@@ -5136,7 +5136,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">32,33</context>
         </context-group>
-        <target>List all containers with <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker ps -a<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> to get pigallery2's container.</target>
+        <target>Vypíšte všetky kontajnery príkazom <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker ps -a<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/> a nájdite kontajner pigallery2.</target>
       </trans-unit>
       <trans-unit id="3158902713337245438" datatype="html">
         <source>Get logs for the pigallery2 container: <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker logs -f pigallery2<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/></source>
@@ -5144,7 +5144,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">33,34</context>
         </context-group>
-        <target>Get logs for the pigallery2 container: <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker logs -f pigallery2<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/></target>
+        <target>Zobrazte záznamy kontajnera pigallery2: <x id="START_TAG_CODE" ctype="x-code" equiv-text="&lt;code&gt;"/>docker logs -f pigallery2<x id="CLOSE_TAG_CODE" ctype="x-code" equiv-text="&lt;/code&gt;"/></target>
       </trans-unit>
       <trans-unit id="4337191822861341684" datatype="html">
         <source>For non-Docker setups, check the standard output of the Node.js process.</source>
@@ -5152,7 +5152,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">35,36</context>
         </context-group>
-        <target>For non-Docker setups, check the standard output of the Node.js process.</target>
+        <target>Bez Dockera si pozrite štandardný výstup procesu Node.js.</target>
       </trans-unit>
       <trans-unit id="5401849320730344211" datatype="html">
         <source>How to look at the client logs?</source>
@@ -5160,7 +5160,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">36,37</context>
         </context-group>
-        <target>How to look at the client logs?</target>
+        <target>Ako si pozrieť záznamy prehliadača?</target>
       </trans-unit>
       <trans-unit id="3676366460437959825" datatype="html">
         <source>In most browser</source>
@@ -5168,7 +5168,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>In most browser</target>
+        <target>Vo väčšine prehliadačov</target>
       </trans-unit>
       <trans-unit id="5450957722149396181" datatype="html">
         <source>right-&gt;click inspect</source>
@@ -5176,7 +5176,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>right-&gt;click inspect</target>
+        <target>pravý klik -&gt; Preskúmať</target>
       </trans-unit>
       <trans-unit id="5717996689880003909" datatype="html">
         <source>should bring up the developer console.</source>
@@ -5184,7 +5184,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>should bring up the developer console.</target>
+        <target>otvorí konzolu pre vývojárov.</target>
       </trans-unit>
       <trans-unit id="596018110493075337" datatype="html">
         <source>If you're still stuck, please <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;"/> report the issue on GitHub <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. </source>
@@ -5192,7 +5192,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/error/error.component.html</context>
           <context context-type="linenumber">39,43</context>
         </context-group>
-        <target>If you're still stuck, please <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;"/> report the issue on GitHub <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>. </target>
+        <target>Ak si stále neviete rady, <x id="START_LINK" ctype="x-a" equiv-text="&lt;a href=&quot;https://github.com/bpatrik/pigallery2/issues/new?template=bug_report.md&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;"/> nahláste problém na GitHube <x id="CLOSE_LINK" ctype="x-a" equiv-text="&lt;/a&gt;"/>.</target>
       </trans-unit>
       <trans-unit id="1262530507063329624" datatype="html">
         <source>No faces to show.</source>
@@ -5208,7 +5208,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/faces/faces.component.html</context>
           <context context-type="linenumber">23,24</context>
         </context-group>
-        <target>Faces come from the face regions in the metadata of the photos. Tag the faces in your photo manager (e.g. digiKam, Lightroom), then index the photos again.</target>
+        <target>Tváre pochádzajú z oblastí tvárí v metadátach fotiek. Označte tváre vo svojom programe na fotky (napr. digiKam, Lightroom) a potom fotky znova zaindexujte.</target>
       </trans-unit>
       <trans-unit id="5146398958364876914" datatype="html">
         <source>Sort</source>
@@ -5216,7 +5216,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/faces/navigator/navigator.faces.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-        <target>Sort</target>
+        <target>Zoradiť</target>
       </trans-unit>
       <trans-unit id="2774613742044941352" datatype="html">
         <source>Sorting</source>
@@ -5292,7 +5292,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">128</context>
         </context-group>
-        <target>Auto</target>
+        <target>Automaticky</target>
       </trans-unit>
       <trans-unit id="1684734235599362204" datatype="html">
         <source>Tools</source>
@@ -5328,7 +5328,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">219</context>
         </context-group>
-        <target>Automatically shows new photos and videos</target>
+        <target>Automaticky zobrazuje nové fotky a videá</target>
       </trans-unit>
       <trans-unit id="8212072664576357764" datatype="html">
         <source>Auto update gallery</source>
@@ -5340,7 +5340,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">51,52</context>
         </context-group>
-        <target>Auto update gallery</target>
+        <target>Automaticky aktualizovať galériu</target>
       </trans-unit>
       <trans-unit id="4930506384627295710" datatype="html">
         <source>Settings</source>
@@ -5376,7 +5376,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
           <context context-type="linenumber">171</context>
         </context-group>
-        <target>Directory not found</target>
+        <target>Priečinok sa nenašiel</target>
       </trans-unit>
       <trans-unit id="8561662210686953155" datatype="html">
         <source>Folder "<x id="FOLDER" equiv-text="directoryName"/>" not found. Showing Home.</source>
@@ -5384,7 +5384,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
           <context context-type="linenumber">176</context>
         </context-group>
-        <target>Folder "<x id="FOLDER" equiv-text="directoryName"/>" not found. Showing Home.</target>
+        <target>Priečinok „<x id="FOLDER" equiv-text="directoryName"/>“ sa nenašiel. Zobrazuje sa domovská stránka.</target>
       </trans-unit>
       <trans-unit id="665354434676729572" datatype="html">
         <source>Cannot find location</source>
@@ -5400,7 +5400,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/contentLoader.service.ts</context>
           <context context-type="linenumber">229</context>
         </context-group>
-        <target>This search link is broken</target>
+        <target>Tento odkaz na vyhľadávanie nefunguje</target>
       </trans-unit>
       <trans-unit id="1146494050504614738" datatype="html">
         <source>Select only this</source>
@@ -5464,7 +5464,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/filter/filter.service.ts</context>
           <context context-type="linenumber">94</context>
         </context-group>
-        <target>State</target>
+        <target>Kraj</target>
       </trans-unit>
       <trans-unit id="516176798986294299" datatype="html">
         <source>Country</source>
@@ -5504,7 +5504,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
           <context context-type="linenumber">6</context>
         </context-group>
-        <target>No photos match this frame.</target>
+        <target>Tomuto fotorámiku nezodpovedá žiadna fotka.</target>
       </trans-unit>
       <trans-unit id="7706802473463189391" datatype="html">
         <source>It shows the photos as soon as some match.</source>
@@ -5512,7 +5512,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
           <context context-type="linenumber">7,8</context>
         </context-group>
-        <target>It shows the photos as soon as some match.</target>
+        <target>Fotky sa zobrazia, hneď ako niektoré budú zodpovedať.</target>
       </trans-unit>
       <trans-unit id="2817799343282769458" datatype="html">
         <source>Link availability</source>
@@ -5548,7 +5548,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
           <context context-type="linenumber">31,32</context>
         </context-group>
-        <target>Retry</target>
+        <target>Skúsiť znova</target>
       </trans-unit>
       <trans-unit id="1018831956200649278" datatype="html">
         <source> Too many results to show. Refine your search. </source>
@@ -5564,7 +5564,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
           <context context-type="linenumber">131</context>
         </context-group>
-        <target>Search for "<x id="QUERY" equiv-text="query"/>" matched nothing.</target>
+        <target>Vyhľadávanie „<x id="QUERY" equiv-text="query"/>“ nič nenašlo.</target>
       </trans-unit>
       <trans-unit id="1624903707791719841" datatype="html">
         <source>Check the spelling or try fewer words.</source>
@@ -5572,7 +5572,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
           <context context-type="linenumber">132</context>
         </context-group>
-        <target>Check the spelling or try fewer words.</target>
+        <target>Skontrolujte pravopis alebo skúste menej slov.</target>
       </trans-unit>
       <trans-unit id="6641316732085362970" datatype="html">
         <source>This folder is empty.</source>
@@ -5580,7 +5580,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
           <context context-type="linenumber">136</context>
         </context-group>
-        <target>This folder is empty.</target>
+        <target>Tento priečinok je prázdny.</target>
       </trans-unit>
       <trans-unit id="8282018551586977212" datatype="html">
         <source>Camera Data</source>
@@ -5588,7 +5588,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">29</context>
         </context-group>
-        <target>Camera Data</target>
+        <target>Údaje fotoaparátu</target>
       </trans-unit>
       <trans-unit id="3159246240145181884" datatype="html">
         <source>Position Data</source>
@@ -5596,7 +5596,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">30</context>
         </context-group>
-        <target>Position Data</target>
+        <target>Údaje o polohe</target>
       </trans-unit>
       <trans-unit id="6004681856910260407" datatype="html">
         <source>Creation Date</source>
@@ -5604,7 +5604,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">33</context>
         </context-group>
-        <target>Creation Date</target>
+        <target>Dátum vytvorenia</target>
       </trans-unit>
       <trans-unit id="3942479424208948984" datatype="html">
         <source>Creation Date Offset</source>
@@ -5612,7 +5612,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">34</context>
         </context-group>
-        <target>Creation Date Offset</target>
+        <target>Posun dátumu vytvorenia</target>
       </trans-unit>
       <trans-unit id="1757533608372394778" datatype="html">
         <source>Bit Rate</source>
@@ -5620,7 +5620,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target>Bit Rate</target>
+        <target>Dátový tok</target>
       </trans-unit>
       <trans-unit id="7410432243549869948" datatype="html">
         <source>Duration</source>
@@ -5628,7 +5628,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target>Duration</target>
+        <target>Trvanie</target>
       </trans-unit>
       <trans-unit id="2492098975665776610" datatype="html">
         <source>File Size</source>
@@ -5636,7 +5636,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
           <context context-type="linenumber">37</context>
         </context-group>
-        <target>File Size</target>
+        <target>Veľkosť súboru</target>
       </trans-unit>
       <trans-unit id="2069125519776358850" datatype="html">
         <source>Action completed successfully</source>
@@ -5644,7 +5644,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.service.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>Action completed successfully</target>
+        <target>Akcia bola úspešne dokončená</target>
       </trans-unit>
       <trans-unit id="2199729617043400249" datatype="html">
         <source>Action failed:</source>
@@ -5652,7 +5652,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.service.ts</context>
           <context context-type="linenumber">63</context>
         </context-group>
-        <target>Action failed:</target>
+        <target>Akcia zlyhala:</target>
       </trans-unit>
       <trans-unit id="5920553521143471222" datatype="html">
         <source>info key: i</source>
@@ -5804,7 +5804,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
           <context context-type="linenumber">62</context>
         </context-group>
-        <target>Start over from the first photo (key: right arrow)</target>
+        <target>Začať znova od prvej fotky (kláves: šípka vpravo)</target>
       </trans-unit>
       <trans-unit id="5015670487371268284" datatype="html">
         <source>key: right arrow</source>
@@ -5820,7 +5820,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/controls/controls.lightbox.gallery.component.ts</context>
           <context context-type="linenumber">350</context>
         </context-group>
-        <target>This file is not available anymore.</target>
+        <target>Tento súbor už nie je k dispozícii.</target>
       </trans-unit>
       <trans-unit id="2821179408673282599" datatype="html">
         <source>Home</source>
@@ -5848,7 +5848,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">3,4</context>
         </context-group>
-        <target>Info</target>
+        <target>Informácie</target>
       </trans-unit>
       <trans-unit id="770516408014371538" datatype="html">
         <source>Title and description of the media</source>
@@ -5856,7 +5856,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">9,10</context>
         </context-group>
-        <target>Title and description of the media</target>
+        <target>Názov a popis média</target>
       </trans-unit>
       <trans-unit id="3640011644300041248" datatype="html">
         <source>Title and caption</source>
@@ -5864,7 +5864,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">12</context>
         </context-group>
-        <target>Title and caption</target>
+        <target>Názov a popis</target>
       </trans-unit>
       <trans-unit id="2016079677918283121" datatype="html">
         <source>File information and properties</source>
@@ -5872,7 +5872,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">44</context>
         </context-group>
-        <target>File information and properties</target>
+        <target>Informácie a vlastnosti súboru</target>
       </trans-unit>
       <trans-unit id="4773531632587937560" datatype="html">
         <source>File information</source>
@@ -5880,7 +5880,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">46</context>
         </context-group>
-        <target>File information</target>
+        <target>Informácie o súbore</target>
       </trans-unit>
       <trans-unit id="7003790776240394114" datatype="html">
         <source>Filename</source>
@@ -5888,7 +5888,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">49</context>
         </context-group>
-        <target>Filename</target>
+        <target>Názov súboru</target>
       </trans-unit>
       <trans-unit id="1155281725253456037" datatype="html">
         <source>Image dimensions in pixels</source>
@@ -5896,7 +5896,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">53</context>
         </context-group>
-        <target>Image dimensions in pixels</target>
+        <target>Rozmery obrázka v pixeloch</target>
       </trans-unit>
       <trans-unit id="8286353735372978645" datatype="html">
         <source>Megapixels</source>
@@ -5904,7 +5904,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">57</context>
         </context-group>
-        <target>Megapixels</target>
+        <target>Megapixely</target>
       </trans-unit>
       <trans-unit id="3046229164148573722" datatype="html">
         <source>File size on disk</source>
@@ -5912,7 +5912,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">60,61</context>
         </context-group>
-        <target>File size on disk</target>
+        <target>Veľkosť súboru na disku</target>
       </trans-unit>
       <trans-unit id="1141044007914309895" datatype="html">
         <source>Companion video</source>
@@ -5920,7 +5920,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">69</context>
         </context-group>
-        <target>Companion video</target>
+        <target>Pridružené video</target>
       </trans-unit>
       <trans-unit id="8999620139352664250" datatype="html">
         <source>Live Photo video</source>
@@ -5928,7 +5928,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>Live Photo video</target>
+        <target>Video Live Photo</target>
       </trans-unit>
       <trans-unit id="1346245992787687995" datatype="html">
         <source>Video filename</source>
@@ -5936,7 +5936,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">74</context>
         </context-group>
-        <target>Video filename</target>
+        <target>Názov videosúboru</target>
       </trans-unit>
       <trans-unit id="3848221153424122981" datatype="html">
         <source>Video dimensions in pixels</source>
@@ -5944,7 +5944,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">79,80</context>
         </context-group>
-        <target>Video dimensions in pixels</target>
+        <target>Rozmery videa v pixeloch</target>
       </trans-unit>
       <trans-unit id="63105154917174934" datatype="html">
         <source>Video file size on disk</source>
@@ -5952,7 +5952,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">84,85</context>
         </context-group>
-        <target>Video file size on disk</target>
+        <target>Veľkosť videosúboru na disku</target>
       </trans-unit>
       <trans-unit id="9135163487225329583" datatype="html">
         <source>Video duration</source>
@@ -5960,7 +5960,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">89,90</context>
         </context-group>
-        <target>Video duration</target>
+        <target>Dĺžka videa</target>
       </trans-unit>
       <trans-unit id="6951325160266155400" datatype="html">
         <source>When this photo or video was taken</source>
@@ -5968,7 +5968,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">99</context>
         </context-group>
-        <target>When this photo or video was taken</target>
+        <target>Kedy bola táto fotka alebo video nasnímané</target>
       </trans-unit>
       <trans-unit id="1905960341659988030" datatype="html">
         <source>Creation date and time</source>
@@ -5976,7 +5976,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">101</context>
         </context-group>
-        <target>Creation date and time</target>
+        <target>Dátum a čas vytvorenia</target>
       </trans-unit>
       <trans-unit id="7529285370807790311" datatype="html">
         <source>Click to search for media from the same date</source>
@@ -5984,7 +5984,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">104</context>
         </context-group>
-        <target>Click to search for media from the same date</target>
+        <target>Kliknutím vyhľadáte médiá z rovnakého dňa</target>
       </trans-unit>
       <trans-unit id="5671737581644785349" datatype="html">
         <source>Detailed time information</source>
@@ -5992,7 +5992,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">117,118</context>
         </context-group>
-        <target>Detailed time information</target>
+        <target>Podrobné informácie o čase</target>
       </trans-unit>
       <trans-unit id="655705146872372927" datatype="html">
         <source>Video technical information</source>
@@ -6000,7 +6000,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">127,128</context>
         </context-group>
-        <target>Video technical information</target>
+        <target>Technické informácie o videu</target>
       </trans-unit>
       <trans-unit id="9030236302996110008" datatype="html">
         <source>Video properties</source>
@@ -6008,7 +6008,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">130</context>
         </context-group>
-        <target>Video properties</target>
+        <target>Vlastnosti videa</target>
       </trans-unit>
       <trans-unit id="4656742369752525718" datatype="html">
         <source>How long the video is</source>
@@ -6016,7 +6016,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">138</context>
         </context-group>
-        <target>How long the video is</target>
+        <target>Ako dlho trvá video</target>
       </trans-unit>
       <trans-unit id="5602245631444655788" datatype="html">
         <source>duration</source>
@@ -6036,7 +6036,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">144</context>
         </context-group>
-        <target>Frames per second - video smoothness</target>
+        <target>Snímky za sekundu - plynulosť videa</target>
       </trans-unit>
       <trans-unit id="7186132833378378379" datatype="html">
         <source>Data rate - video quality indicator</source>
@@ -6044,7 +6044,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">149</context>
         </context-group>
-        <target>Data rate - video quality indicator</target>
+        <target>Dátový tok - ukazovateľ kvality videa</target>
       </trans-unit>
       <trans-unit id="593870536587305607" datatype="html">
         <source>bit rate</source>
@@ -6060,7 +6060,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">161</context>
         </context-group>
-        <target>Camera and lens information used to take this photo</target>
+        <target>Informácie o fotoaparáte a objektíve, ktorými bola fotka nasnímaná</target>
       </trans-unit>
       <trans-unit id="6162126656841206230" datatype="html">
         <source>Camera information</source>
@@ -6068,7 +6068,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">163</context>
         </context-group>
-        <target>Camera information</target>
+        <target>Informácie o fotoaparáte</target>
       </trans-unit>
       <trans-unit id="5658155907785769571" datatype="html">
         <source>ISO sensitivity - higher values for darker conditions</source>
@@ -6076,7 +6076,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">171,172</context>
         </context-group>
-        <target>ISO sensitivity - higher values for darker conditions</target>
+        <target>Citlivosť ISO - vyššie hodnoty pri horšom svetle</target>
       </trans-unit>
       <trans-unit id="2245970337741475942" datatype="html">
         <source>Aperture - lower numbers mean more background blur</source>
@@ -6084,7 +6084,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">176,177</context>
         </context-group>
-        <target>Aperture - lower numbers mean more background blur</target>
+        <target>Clona - nižšie čísla znamenajú rozmazanejšie pozadie</target>
       </trans-unit>
       <trans-unit id="8821940706324167024" datatype="html">
         <source>Shutter speed - how long the sensor was exposed to light</source>
@@ -6092,7 +6092,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">181,182</context>
         </context-group>
-        <target>Shutter speed - how long the sensor was exposed to light</target>
+        <target>Čas uzávierky - ako dlho bol snímač vystavený svetlu</target>
       </trans-unit>
       <trans-unit id="7702947123339506801" datatype="html">
         <source>Focal length - zoom level of the lens</source>
@@ -6100,7 +6100,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">187</context>
         </context-group>
-        <target>Focal length - zoom level of the lens</target>
+        <target>Ohnisková vzdialenosť - úroveň priblíženia objektívu</target>
       </trans-unit>
       <trans-unit id="9032833148061793372" datatype="html">
         <source>Specific lens model used</source>
@@ -6108,7 +6108,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">192</context>
         </context-group>
-        <target>Specific lens model used</target>
+        <target>Použitý model objektívu</target>
       </trans-unit>
       <trans-unit id="1210791539986223611" datatype="html">
         <source>Keywords and people tags associated with this media</source>
@@ -6116,7 +6116,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">220</context>
         </context-group>
-        <target>Keywords and people tags associated with this media</target>
+        <target>Kľúčové slová a označenia osôb tohto média</target>
       </trans-unit>
       <trans-unit id="4610729320125397936" datatype="html">
         <source>Keywords and people</source>
@@ -6124,7 +6124,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">222</context>
         </context-group>
-        <target>Keywords and people</target>
+        <target>Kľúčové slová a osoby</target>
       </trans-unit>
       <trans-unit id="7195371920105502592" datatype="html">
         <source>Location information where this media was captured</source>
@@ -6132,7 +6132,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">249,250</context>
         </context-group>
-        <target>Location information where this media was captured</target>
+        <target>Informácie o mieste, kde bolo médium zachytené</target>
       </trans-unit>
       <trans-unit id="6645821668279955876" datatype="html">
         <source>Location information</source>
@@ -6140,7 +6140,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">252</context>
         </context-group>
-        <target>Location information</target>
+        <target>Informácie o mieste</target>
       </trans-unit>
       <trans-unit id="7823382006949517425" datatype="html">
         <source>Click location parts to search for media from the same area</source>
@@ -6148,7 +6148,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">255,256</context>
         </context-group>
-        <target>Click location parts to search for media from the same area</target>
+        <target>Kliknutím na časti miesta vyhľadáte médiá z rovnakej oblasti</target>
       </trans-unit>
       <trans-unit id="1209108263738040397" datatype="html">
         <source>Click GPS coordinates to search for nearby media</source>
@@ -6156,7 +6156,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.html</context>
           <context context-type="linenumber">272</context>
         </context-group>
-        <target>Click GPS coordinates to search for nearby media</target>
+        <target>Kliknutím na súradnice GPS vyhľadáte médiá v okolí</target>
       </trans-unit>
       <trans-unit id="5294987439623514854" datatype="html">
         <source>Error during loading the video.</source>
@@ -6180,7 +6180,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/lightbox.gallery.component.ts</context>
           <context context-type="linenumber">358</context>
         </context-group>
-        <target>The photo is not available anymore. Showing the first one.</target>
+        <target>Fotka už nie je k dispozícii. Zobrazuje sa prvá.</target>
       </trans-unit>
       <trans-unit id="3681011128402308176" datatype="html">
         <source>Sport</source>
@@ -6232,7 +6232,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/map/map.gallery.component.html</context>
           <context context-type="linenumber">13</context>
         </context-group>
-        <target>Open the map</target>
+        <target>Otvoriť mapu</target>
       </trans-unit>
       <trans-unit id="6560708001470959956" datatype="html">
         <source>street</source>
@@ -6288,7 +6288,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.html</context>
           <context context-type="linenumber">50</context>
         </context-group>
-        <target>Show all subdirectories</target>
+        <target>Zobraziť všetky podpriečinky</target>
       </trans-unit>
       <trans-unit id="4163272119298020373" datatype="html">
         <source>Filters</source>
@@ -6360,7 +6360,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">3</context>
         </context-group>
-        <target>Photo frame link</target>
+        <target>Odkaz pre fotorámik</target>
       </trans-unit>
       <trans-unit id="6425197837199542842" datatype="html">
         <source>Photo frame link creator</source>
@@ -6368,7 +6368,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">10,11</context>
         </context-group>
-        <target>Photo frame link creator</target>
+        <target>Vytvorenie odkazu pre fotorámik</target>
       </trans-unit>
       <trans-unit id="5351591262168826856" datatype="html">
         <source>Copy </source>
@@ -6388,7 +6388,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">73,74</context>
         </context-group>
-        <target>Loop slideshow</target>
+        <target>Opakovať prezentáciu</target>
       </trans-unit>
       <trans-unit id="8629810467170644077" datatype="html">
         <source>Show captions always</source>
@@ -6396,7 +6396,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">85,86</context>
         </context-group>
-        <target>Show captions always</target>
+        <target>Vždy zobrazovať popisy</target>
       </trans-unit>
       <trans-unit id="3066912563319984708" datatype="html">
         <source>Hide controls</source>
@@ -6404,7 +6404,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">97,98</context>
         </context-group>
-        <target>Hide controls</target>
+        <target>Skryť ovládacie prvky</target>
       </trans-unit>
       <trans-unit id="6067456988448555675" datatype="html">
         <source>Slideshow speed</source>
@@ -6412,7 +6412,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">109,110</context>
         </context-group>
-        <target>Slideshow speed</target>
+        <target>Rýchlosť prezentácie</target>
       </trans-unit>
       <trans-unit id="6008963299286018508" datatype="html">
         <source>Top-left title(s)</source>
@@ -6420,7 +6420,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">130,131</context>
         </context-group>
-        <target>Top-left title(s)</target>
+        <target>Nadpis(y) vľavo hore</target>
       </trans-unit>
       <trans-unit id="1297862450688118254" datatype="html">
         <source>Top-left subtitle(s)</source>
@@ -6428,7 +6428,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">150,151</context>
         </context-group>
-        <target>Top-left subtitle(s)</target>
+        <target>Podnadpis(y) vľavo hore</target>
       </trans-unit>
       <trans-unit id="1452842969715820442" datatype="html">
         <source>Bottom-left title(s)</source>
@@ -6436,7 +6436,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">170,171</context>
         </context-group>
-        <target>Bottom-left title(s)</target>
+        <target>Nadpis(y) vľavo dole</target>
       </trans-unit>
       <trans-unit id="3017416222164079621" datatype="html">
         <source>Bottom-left subtitle(s)</source>
@@ -6444,7 +6444,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">190,191</context>
         </context-group>
-        <target>Bottom-left subtitle(s)</target>
+        <target>Podnadpis(y) vľavo dole</target>
       </trans-unit>
       <trans-unit id="3676436557981898473" datatype="html">
         <source>Autoplay is always enabled for photo frames.</source>
@@ -6452,7 +6452,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/photo-frame-builder/photo-frame-builder.gallery.component.html</context>
           <context context-type="linenumber">208,209</context>
         </context-group>
-        <target>Autoplay is always enabled for photo frames.</target>
+        <target>Pri fotorámikoch je automatické prehrávanie vždy zapnuté.</target>
       </trans-unit>
       <trans-unit id="8681331350836567926" datatype="html">
         <source>Url has been copied to clipboard</source>
@@ -6488,7 +6488,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/TextSearchMatchingTypes.ts</context>
           <context context-type="linenumber">48</context>
         </context-group>
-        <target>Exact match (e.g.: bb matches for ' bb ')</target>
+        <target>Presná zhoda (napr.: bb zodpovedá ' bb ')</target>
       </trans-unit>
       <trans-unit id="9180173992399180575" datatype="html">
         <source>Exact match</source>
@@ -6496,7 +6496,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/TextSearchMatchingTypes.ts</context>
           <context context-type="linenumber">50</context>
         </context-group>
-        <target>Exact match</target>
+        <target>Presná zhoda</target>
       </trans-unit>
       <trans-unit id="3725725084690908534" datatype="html">
         <source>Exact negative match</source>
@@ -6504,7 +6504,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/TextSearchMatchingTypes.ts</context>
           <context context-type="linenumber">52</context>
         </context-group>
-        <target>Exact negative match</target>
+        <target>Presné vylúčenie</target>
       </trans-unit>
       <trans-unit id="4025339860805823722" datatype="html">
         <source>Open and start match (e.g.: bb matches for 'abba' and ' bb ')</source>
@@ -6512,7 +6512,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/TextSearchMatchingTypes.ts</context>
           <context context-type="linenumber">55</context>
         </context-group>
-        <target>Open and start match (e.g.: bb matches for 'abba' and ' bb ')</target>
+        <target>Čiastočná zhoda (napr.: bb zodpovedá 'abba' a ' bb ')</target>
       </trans-unit>
       <trans-unit id="5083056847784623118" datatype="html">
         <source>Negative open and start  match</source>
@@ -6528,7 +6528,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/TextSearchMatchingTypes.ts</context>
           <context context-type="linenumber">59</context>
         </context-group>
-        <target>glob match (supports wildcards: * and ?)</target>
+        <target>zhoda glob (podporuje zástupné znaky: * a ?)</target>
       </trans-unit>
       <trans-unit id="5492171040756727724" datatype="html">
         <source>Negative glob match</source>
@@ -6536,7 +6536,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/TextSearchMatchingTypes.ts</context>
           <context context-type="linenumber">61</context>
         </context-group>
-        <target>Negative glob match</target>
+        <target>Vylúčenie glob</target>
       </trans-unit>
       <trans-unit id="8291852809381837252" datatype="html">
         <source>At least this many</source>
@@ -6600,7 +6600,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
           <context context-type="linenumber">16,17</context>
         </context-group>
-        <target>Matching type</target>
+        <target>Typ zhody</target>
       </trans-unit>
       <trans-unit id="3548274206254483489" datatype="html">
         <source>Search text</source>
@@ -6624,7 +6624,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">124,125</context>
         </context-group>
-        <target>Location or coordinates (lat, lng)</target>
+        <target>Miesto alebo súradnice (šírka, dĺžka)</target>
       </trans-unit>
       <trans-unit id="7382546590159708114" datatype="html">
         <source>start date</source>
@@ -6632,7 +6632,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">141,142</context>
         </context-group>
-        <target>start date</target>
+        <target>dátum začiatku</target>
       </trans-unit>
       <trans-unit id="8615958092383580706" datatype="html">
         <source>end date</source>
@@ -6640,7 +6640,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/search/query-enrty/query-entry.search.gallery.component.html</context>
           <context context-type="linenumber">152,153</context>
         </context-group>
-        <target>end date</target>
+        <target>dátum konca</target>
       </trans-unit>
       <trans-unit id="7832159846251736760" datatype="html">
         <source>Minimum Rating</source>
@@ -6856,7 +6856,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">61</context>
         </context-group>
-        <target>Send with another app</target>
+        <target>Odoslať inou aplikáciou</target>
       </trans-unit>
       <trans-unit id="7682626963030103121" datatype="html">
         <source>Sharing:</source>
@@ -6872,7 +6872,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">88</context>
         </context-group>
-        <target>at least</target>
+        <target>aspoň</target>
       </trans-unit>
       <trans-unit id="3719149245527424371" datatype="html">
         <source>photos and videos.</source>
@@ -6880,7 +6880,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">90</context>
         </context-group>
-        <target>photos and videos.</target>
+        <target>fotiek a videí.</target>
       </trans-unit>
       <trans-unit id="7771400599327335168" datatype="html">
         <source>Subfolders are shared too.</source>
@@ -6888,7 +6888,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">93,94</context>
         </context-group>
-        <target>Subfolders are shared too.</target>
+        <target>Zdieľajú sa aj podpriečinky.</target>
       </trans-unit>
       <trans-unit id="7836234602969924662" datatype="html">
         <source>Subfolders are not shared.</source>
@@ -6896,7 +6896,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">96,97</context>
         </context-group>
-        <target>Subfolders are not shared.</target>
+        <target>Podpriečinky sa nezdieľajú.</target>
       </trans-unit>
       <trans-unit id="2744825717465420830" datatype="html">
         <source>Only folders that contain shared photos can be opened.</source>
@@ -6904,7 +6904,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">100,101</context>
         </context-group>
-        <target>Only folders that contain shared photos can be opened.</target>
+        <target>Otvoriť možno len priečinky, ktoré obsahujú zdieľané fotky.</target>
       </trans-unit>
       <trans-unit id="1434794623170476429" datatype="html">
         <source>Include subfolders</source>
@@ -6912,7 +6912,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">112,113</context>
         </context-group>
-        <target>Include subfolders</target>
+        <target>Zahrnúť podpriečinky</target>
       </trans-unit>
       <trans-unit id="5606674604448378979" datatype="html">
         <source>Prevent downloading</source>
@@ -6920,7 +6920,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">123,124</context>
         </context-group>
-        <target>Prevent downloading</target>
+        <target>Zabrániť sťahovaniu</target>
       </trans-unit>
       <trans-unit id="3587177038543313825" datatype="html">
         <source>About preventing downloads</source>
@@ -6928,7 +6928,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">131,132</context>
         </context-group>
-        <target>About preventing downloads</target>
+        <target>O zabránení sťahovaniu</target>
       </trans-unit>
       <trans-unit id="3621339913652620986" datatype="html">
         <source>Valid:</source>
@@ -6992,7 +6992,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">200,201</context>
         </context-group>
-        <target>Subfolders</target>
+        <target>Podpriečinky</target>
       </trans-unit>
       <trans-unit id="1043390381565182083" datatype="html">
         <source>Creator</source>
@@ -7024,7 +7024,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
           <context context-type="linenumber">217</context>
         </context-group>
-        <target>Copy link</target>
+        <target>Kopírovať odkaz</target>
       </trans-unit>
       <trans-unit id="7750572232357775694" datatype="html">
         <source>Hides the download buttons and blocks right click saving. Downloading can't be fully prevented: what the browser shows can still be saved, e.g.: with a screenshot or the developer tools.</source>
@@ -7032,7 +7032,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">56</context>
         </context-group>
-        <target>Hides the download buttons and blocks right click saving. Downloading can't be fully prevented: what the browser shows can still be saved, e.g.: with a screenshot or the developer tools.</target>
+        <target>Skryje tlačidlá sťahovania a zablokuje ukladanie pravým klikom. Sťahovaniu sa nedá úplne zabrániť: to, čo zobrazuje prehliadač, sa dá aj tak uložiť, napr. snímkou obrazovky alebo nástrojmi pre vývojárov.</target>
       </trans-unit>
       <trans-unit id="3302121187449737262" datatype="html">
         <source>Search query</source>
@@ -7040,7 +7040,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">80</context>
         </context-group>
-        <target>Search query</target>
+        <target>Vyhľadávací dopyt</target>
       </trans-unit>
       <trans-unit id="1625809888219597132" datatype="html">
         <source>Invalid settings</source>
@@ -7112,7 +7112,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.ts</context>
           <context context-type="linenumber">309</context>
         </context-group>
-        <target>Could not share the link</target>
+        <target>Odkaz sa nepodarilo zdieľať</target>
       </trans-unit>
       <trans-unit id="4969042627845082374" datatype="html">
         <source>Drop files to upload</source>
@@ -7120,7 +7120,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.gallery.component.html</context>
           <context context-type="linenumber">7,8</context>
         </context-group>
-        <target>Drop files to upload</target>
+        <target>Pustite súbory na nahratie</target>
       </trans-unit>
       <trans-unit id="2673650530090297132" datatype="html">
         <source>Hide details</source>
@@ -7128,7 +7128,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">66</context>
         </context-group>
-        <target>Hide details</target>
+        <target>Skryť podrobnosti</target>
       </trans-unit>
       <trans-unit id="7007482846398115512" datatype="html">
         <source>Uploading files: <x id="count" equiv-text="toasts.length"/></source>
@@ -7136,7 +7136,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">66</context>
         </context-group>
-        <target>Uploading files: <x id="count" equiv-text="toasts.length"/></target>
+        <target>Nahrávajú sa súbory: <x id="count" equiv-text="toasts.length"/></target>
       </trans-unit>
       <trans-unit id="8332396608065786351" datatype="html">
         <source>Failed: <x id="count" equiv-text="failed"/></source>
@@ -7144,7 +7144,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target>Failed: <x id="count" equiv-text="failed"/></target>
+        <target>Zlyhalo: <x id="count" equiv-text="failed"/></target>
       </trans-unit>
       <trans-unit id="6532503826534474594" datatype="html">
         <source>Upload is not supported for this directory.</source>
@@ -7152,7 +7152,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">100</context>
         </context-group>
-        <target>Upload is not supported for this directory.</target>
+        <target>Nahrávanie do tohto priečinka nie je podporované.</target>
       </trans-unit>
       <trans-unit id="6770061048832854987" datatype="html">
         <source>Unsupported file format</source>
@@ -7160,7 +7160,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">112</context>
         </context-group>
-        <target>Unsupported file format</target>
+        <target>Nepodporovaný formát súboru</target>
       </trans-unit>
       <trans-unit id="1425437940123900524" datatype="html">
         <source>The file is larger than the upload limit of <x id="limit" equiv-text="Config.Upload.maxFileSizeMB"/> MB</source>
@@ -7168,7 +7168,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">117</context>
         </context-group>
-        <target>The file is larger than the upload limit of <x id="limit" equiv-text="Config.Upload.maxFileSizeMB"/> MB</target>
+        <target>Súbor je väčší ako limit nahrávania <x id="limit" equiv-text="Config.Upload.maxFileSizeMB"/> MB</target>
       </trans-unit>
       <trans-unit id="383181061702648553" datatype="html">
         <source>Queued</source>
@@ -7180,7 +7180,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">351</context>
         </context-group>
-        <target>Queued</target>
+        <target>V poradí</target>
       </trans-unit>
       <trans-unit id="3532182196874917619" datatype="html">
         <source>Files already exist: <x id="count" equiv-text="existingFiles.length"/></source>
@@ -7188,7 +7188,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">173</context>
         </context-group>
-        <target>Files already exist: <x id="count" equiv-text="existingFiles.length"/></target>
+        <target>Súbory už existujú: <x id="count" equiv-text="existingFiles.length"/></target>
       </trans-unit>
       <trans-unit id="862202801941657955" datatype="html">
         <source>File already exists</source>
@@ -7196,7 +7196,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">174</context>
         </context-group>
-        <target>File already exists</target>
+        <target>Súbor už existuje</target>
       </trans-unit>
       <trans-unit id="983128193375990518" datatype="html">
         <source>Can't save to this folder</source>
@@ -7204,7 +7204,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">292</context>
         </context-group>
-        <target>Can't save to this folder</target>
+        <target>Do tohto priečinka nemožno uložiť</target>
       </trans-unit>
       <trans-unit id="205445381296663832" datatype="html">
         <source>Upload failed.</source>
@@ -7216,7 +7216,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">392</context>
         </context-group>
-        <target>Upload failed.</target>
+        <target>Nahrávanie zlyhalo.</target>
       </trans-unit>
       <trans-unit id="6419424384925181938" datatype="html">
         <source>Upload canceled.</source>
@@ -7224,7 +7224,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">383</context>
         </context-group>
-        <target>Upload canceled.</target>
+        <target>Nahrávanie zrušené.</target>
       </trans-unit>
       <trans-unit id="1005897192040844293" datatype="html">
         <source>Uploaded files: <x id="count" equiv-text="this.batchUploaded"/></source>
@@ -7232,7 +7232,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">386</context>
         </context-group>
-        <target>Uploaded files: <x id="count" equiv-text="this.batchUploaded"/></target>
+        <target>Nahrané súbory: <x id="count" equiv-text="this.batchUploaded"/></target>
       </trans-unit>
       <trans-unit id="6551511810334633089" datatype="html">
         <source>Upload completed.</source>
@@ -7240,7 +7240,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">386</context>
         </context-group>
-        <target>Upload completed.</target>
+        <target>Nahrávanie dokončené.</target>
       </trans-unit>
       <trans-unit id="167942783952169868" datatype="html">
         <source>Uploaded: <x id="uploaded" equiv-text="this.batchUploaded"/>, failed: <x id="failed" equiv-text="this.batchFailed.size"/></source>
@@ -7256,7 +7256,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/gallery/uploader/uploader.service.ts</context>
           <context context-type="linenumber">390</context>
         </context-group>
-        <target>Upload completed with errors</target>
+        <target>Nahrávanie dokončené s chybami</target>
       </trans-unit>
       <trans-unit id="6218888260949839774" datatype="html">
         <source>Failed files: <x id="count" equiv-text="this.batchFailed.size"/></source>
@@ -7272,7 +7272,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/invalid-sharing/invalid-sharing.component.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
-        <target>This link is invalid or has expired.</target>
+        <target>Tento odkaz je neplatný alebo vypršal.</target>
       </trans-unit>
       <trans-unit id="6441339821362062110" datatype="html">
         <source>Ask the person who shared it for a new link.</source>
@@ -7280,7 +7280,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/invalid-sharing/invalid-sharing.component.html</context>
           <context context-type="linenumber">8,9</context>
         </context-group>
-        <target>Ask the person who shared it for a new link.</target>
+        <target>Požiadajte osobu, ktorá ho zdieľala, o nový odkaz.</target>
       </trans-unit>
       <trans-unit id="8381456313279476438" datatype="html">
         <source>Go to your gallery</source>
@@ -7288,7 +7288,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/invalid-sharing/invalid-sharing.component.html</context>
           <context context-type="linenumber">10,11</context>
         </context-group>
-        <target>Go to your gallery</target>
+        <target>Prejsť do vašej galérie</target>
       </trans-unit>
       <trans-unit id="1692815930495952260" datatype="html">
         <source>Please log in</source>
@@ -7312,7 +7312,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/login/login.component.html</context>
           <context context-type="linenumber">23</context>
         </context-group>
-        <target>Login with</target>
+        <target>Prihlásiť sa cez</target>
       </trans-unit>
       <trans-unit id="6627551976444260400" datatype="html">
         <source>or</source>
@@ -7320,7 +7320,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/login/login.component.html</context>
           <context context-type="linenumber">26</context>
         </context-group>
-        <target>or</target>
+        <target>alebo</target>
       </trans-unit>
       <trans-unit id="931252989873527145" datatype="html">
         <source>Remember me</source>
@@ -7336,7 +7336,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/login/login.component.html</context>
           <context context-type="linenumber">71</context>
         </context-group>
-        <target>Login </target>
+        <target>Prihlásiť</target>
       </trans-unit>
       <trans-unit id="2275328567992347600" datatype="html">
         <source>Page not found</source>
@@ -7344,7 +7344,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/not-found/not-found.component.html</context>
           <context context-type="linenumber">7</context>
         </context-group>
-        <target>Page not found</target>
+        <target>Stránka sa nenašla</target>
       </trans-unit>
       <trans-unit id="4372352591753131487" datatype="html">
         <source>The page you are looking for does not exist.</source>
@@ -7352,7 +7352,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/not-found/not-found.component.html</context>
           <context context-type="linenumber">8,9</context>
         </context-group>
-        <target>The page you are looking for does not exist.</target>
+        <target>Stránka, ktorú hľadáte, neexistuje.</target>
       </trans-unit>
       <trans-unit id="5500175451795807478" datatype="html">
         <source>Go to the gallery</source>
@@ -7360,7 +7360,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/not-found/not-found.component.html</context>
           <context context-type="linenumber">9,10</context>
         </context-group>
-        <target>Go to the gallery</target>
+        <target>Prejsť do galérie</target>
       </trans-unit>
       <trans-unit id="2518237780867209325" datatype="html">
         <source>What's new</source>
@@ -7368,7 +7368,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/release-notes/release-notes-popup.component.html</context>
           <context context-type="linenumber">5,6</context>
         </context-group>
-        <target>What's new</target>
+        <target>Novinky</target>
       </trans-unit>
       <trans-unit id="5209375229038355212" datatype="html">
         <source>All releases</source>
@@ -7376,7 +7376,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/release-notes/release-notes-popup.component.html</context>
           <context context-type="linenumber">15,16</context>
         </context-group>
-        <target>All releases</target>
+        <target>Všetky vydania</target>
       </trans-unit>
       <trans-unit id="5681346778475396643" datatype="html">
         <source>Sponsor</source>
@@ -7384,7 +7384,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/release-notes/release-notes-popup.component.html</context>
           <context context-type="linenumber">18</context>
         </context-group>
-        <target>Sponsor</target>
+        <target>Podporiť</target>
       </trans-unit>
       <trans-unit id="8998179362936748717" datatype="html">
         <source>OK</source>
@@ -7400,7 +7400,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/directory-search-list/directory-search-list.settings.component.html</context>
           <context context-type="linenumber">32,33</context>
         </context-group>
-        <target>/path/to/folder</target>
+        <target>/cesta/k/priecinku</target>
       </trans-unit>
       <trans-unit id="3654055349273965047" datatype="html">
         <source>Install extensions</source>
@@ -7412,7 +7412,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">12,13</context>
         </context-group>
-        <target>Install extensions</target>
+        <target>Inštalovať rozšírenia</target>
       </trans-unit>
       <trans-unit id="1451533126518313032" datatype="html">
         <source> No extensions available. </source>
@@ -7420,7 +7420,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">36</context>
         </context-group>
-        <target> No extensions available. </target>
+        <target> Nie sú dostupné žiadne rozšírenia.</target>
       </trans-unit>
       <trans-unit id="4902817035128594900" datatype="html">
         <source>Description</source>
@@ -7428,7 +7428,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">44,45</context>
         </context-group>
-        <target>Description</target>
+        <target>Popis</target>
       </trans-unit>
       <trans-unit id="3193976279273491157" datatype="html">
         <source>Actions</source>
@@ -7436,7 +7436,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">45,46</context>
         </context-group>
-        <target>Actions</target>
+        <target>Akcie</target>
       </trans-unit>
       <trans-unit id="6993437395710220266" datatype="html">
         <source> Install </source>
@@ -7444,7 +7444,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">67</context>
         </context-group>
-        <target> Install </target>
+        <target> Inštalovať</target>
       </trans-unit>
       <trans-unit id="4545371931284972880" datatype="html">
         <source> Manual installation </source>
@@ -7452,7 +7452,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">77</context>
         </context-group>
-        <target> Manual installation </target>
+        <target> Ručná inštalácia</target>
       </trans-unit>
       <trans-unit id="4894835484717268716" datatype="html">
         <source>Installed</source>
@@ -7460,7 +7460,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">81,82</context>
         </context-group>
-        <target>Installed</target>
+        <target>Nainštalované</target>
       </trans-unit>
       <trans-unit id="1102717806459547726" datatype="html">
         <source>Refresh</source>
@@ -7468,7 +7468,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/extension-installer/extension-installer.component.html</context>
           <context context-type="linenumber">96</context>
         </context-group>
-        <target>Refresh</target>
+        <target>Obnoviť</target>
       </trans-unit>
       <trans-unit id="3466167636009088678" datatype="html">
         <source> Statistic: </source>
@@ -7725,7 +7725,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
           <context context-type="linenumber">390</context>
         </context-group>
-        <target>The value must be between <x id="MIN" equiv-text="min"/> and <x id="MAX" equiv-text="max"/>.</target>
+        <target>Hodnota musí byť od <x id="MIN" equiv-text="min"/> do <x id="MAX" equiv-text="max"/>.</target>
       </trans-unit>
       <trans-unit id="2970990413632613258" datatype="html">
         <source>The value must be at least <x id="MIN" equiv-text="min"/>.</source>
@@ -7733,7 +7733,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
           <context context-type="linenumber">392</context>
         </context-group>
-        <target>The value must be at least <x id="MIN" equiv-text="min"/>.</target>
+        <target>Hodnota musí byť aspoň <x id="MIN" equiv-text="min"/>.</target>
       </trans-unit>
       <trans-unit id="7041548856832831326" datatype="html">
         <source>The value must be at most <x id="MAX" equiv-text="max"/>.</source>
@@ -7741,7 +7741,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/settings-entry/settings-entry.component.ts</context>
           <context context-type="linenumber">394</context>
         </context-group>
-        <target>The value must be at most <x id="MAX" equiv-text="max"/>.</target>
+        <target>Hodnota môže byť najviac <x id="MAX" equiv-text="max"/>.</target>
       </trans-unit>
       <trans-unit id="3574891459850265938" datatype="html">
         <source>config is not supported with these settings.</source>
@@ -7773,7 +7773,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.html</context>
           <context context-type="linenumber">150</context>
         </context-group>
-        <target>Restart</target>
+        <target>Reštartovať</target>
       </trans-unit>
       <trans-unit id="530701245868286843" datatype="html">
         <source>Can't save: invalid form.</source>
@@ -7781,7 +7781,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">166</context>
         </context-group>
-        <target>Can't save: invalid form.</target>
+        <target>Nemožno uložiť: neplatný formulár.</target>
       </trans-unit>
       <trans-unit id="6899262680299804128" datatype="html">
         <source>Can't save: not changed.</source>
@@ -7789,7 +7789,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">169</context>
         </context-group>
-        <target>Can't save: not changed.</target>
+        <target>Nemožno uložiť: nič sa nezmenilo.</target>
       </trans-unit>
       <trans-unit id="1539522345914464374" datatype="html">
         <source>Can't save: saving in progress.</source>
@@ -7797,7 +7797,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">172</context>
         </context-group>
-        <target>Can't save: saving in progress.</target>
+        <target>Nemožno uložiť: ukladanie prebieha.</target>
       </trans-unit>
       <trans-unit id="5238544251762521836" datatype="html">
         <source>Click to save.</source>
@@ -7805,7 +7805,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">174</context>
         </context-group>
-        <target>Click to save.</target>
+        <target>Kliknutím uložíte.</target>
       </trans-unit>
       <trans-unit id="1353646366342026793" datatype="html">
         <source>settings saved</source>
@@ -7837,7 +7837,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">383</context>
         </context-group>
-        <target>Extension deleted successfully</target>
+        <target>Rozšírenie bolo odstránené</target>
       </trans-unit>
       <trans-unit id="3279142274755197532" datatype="html">
         <source>Failed to delete extension</source>
@@ -7845,7 +7845,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">388</context>
         </context-group>
-        <target>Failed to delete extension</target>
+        <target>Rozšírenie sa nepodarilo odstrániť</target>
       </trans-unit>
       <trans-unit id="6772528423869242668" datatype="html">
         <source>Extension reloaded successfully</source>
@@ -7853,7 +7853,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">402</context>
         </context-group>
-        <target>Extension reloaded successfully</target>
+        <target>Rozšírenie bolo znova načítané</target>
       </trans-unit>
       <trans-unit id="2581872154471695773" datatype="html">
         <source>Failed to reload extension</source>
@@ -7861,7 +7861,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/template/template.component.ts</context>
           <context context-type="linenumber">407</context>
         </context-group>
-        <target>Failed to reload extension</target>
+        <target>Rozšírenie sa nepodarilo znova načítať</target>
       </trans-unit>
       <trans-unit id="199756697926372667" datatype="html">
         <source>User list</source>
@@ -7877,7 +7877,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">35</context>
         </context-group>
-        <target>Edit</target>
+        <target>Upraviť</target>
       </trans-unit>
       <trans-unit id="3232668463541979382" datatype="html">
         <source>Unlink OIDC account</source>
@@ -7885,7 +7885,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">40</context>
         </context-group>
-        <target>Unlink OIDC account</target>
+        <target>Zrušiť prepojenie účtu OIDC</target>
       </trans-unit>
       <trans-unit id="5918723526444903137" datatype="html">
         <source>Add user</source>
@@ -7909,7 +7909,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">71,72</context>
         </context-group>
-        <target>Confirm Password</target>
+        <target>Potvrdiť heslo</target>
       </trans-unit>
       <trans-unit id="1543538730036692975" datatype="html">
         <source>Passwords do not match.</source>
@@ -7921,7 +7921,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">130,131</context>
         </context-group>
-        <target>Passwords do not match.</target>
+        <target>Heslá sa nezhodujú.</target>
       </trans-unit>
       <trans-unit id="4032325907350308427" datatype="html">
         <source>Add User </source>
@@ -7937,7 +7937,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">102</context>
         </context-group>
-        <target>Edit user</target>
+        <target>Upraviť používateľa</target>
       </trans-unit>
       <trans-unit id="7980738033733285256" datatype="html">
         <source>Controls the permissions of the user.</source>
@@ -7945,7 +7945,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">119,120</context>
         </context-group>
-        <target>Controls the permissions of the user.</target>
+        <target>Určuje oprávnenia používateľa.</target>
       </trans-unit>
       <trans-unit id="3588415639242079458" datatype="html">
         <source>New password</source>
@@ -7953,7 +7953,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">122,123</context>
         </context-group>
-        <target>New password</target>
+        <target>Nové heslo</target>
       </trans-unit>
       <trans-unit id="3012300493580437387" datatype="html">
         <source>Leave blank to keep password</source>
@@ -7961,7 +7961,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">124,125</context>
         </context-group>
-        <target>Leave blank to keep password</target>
+        <target>Nechajte prázdne, ak chcete heslo ponechať</target>
       </trans-unit>
       <trans-unit id="8656126574213649581" datatype="html">
         <source>Confirm new password</source>
@@ -7969,7 +7969,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">127,128</context>
         </context-group>
-        <target>Confirm new password</target>
+        <target>Potvrdiť nové heslo</target>
       </trans-unit>
       <trans-unit id="8961337827227034430" datatype="html">
         <source>Leave empty to keep the current password.</source>
@@ -7977,7 +7977,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">132,133</context>
         </context-group>
-        <target>Leave empty to keep the current password.</target>
+        <target>Nechajte prázdne, ak chcete ponechať aktuálne heslo.</target>
       </trans-unit>
       <trans-unit id="749379966622739019" datatype="html">
         <source>Override allow/block list</source>
@@ -7985,7 +7985,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">137,138</context>
         </context-group>
-        <target>Override allow/block list</target>
+        <target>Prepísať zoznamy povolených/blokovaných</target>
       </trans-unit>
       <trans-unit id="1133608990360480669" datatype="html">
         <source>Enable to apply the queries below to limit what this user can see.</source>
@@ -7993,7 +7993,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">138,139</context>
         </context-group>
-        <target>Enable to apply the queries below to limit what this user can see.</target>
+        <target>Zapnite, ak chcete dopytmi nižšie obmedziť, čo tento používateľ vidí.</target>
       </trans-unit>
       <trans-unit id="7501196614063104981" datatype="html">
         <source>Allowed query</source>
@@ -8005,7 +8005,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">148,149</context>
         </context-group>
-        <target>Allowed query</target>
+        <target>Povoľujúci dopyt</target>
       </trans-unit>
       <trans-unit id="4472281759584443519" datatype="html">
         <source>Only items matching this query will be visible.</source>
@@ -8013,7 +8013,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">149,150</context>
         </context-group>
-        <target>Only items matching this query will be visible.</target>
+        <target>Viditeľné budú len položky, ktoré zodpovedajú tomuto dopytu.</target>
       </trans-unit>
       <trans-unit id="1181053164213404881" datatype="html">
         <source>Blocked query</source>
@@ -8025,7 +8025,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">155,156</context>
         </context-group>
-        <target>Blocked query</target>
+        <target>Blokujúci dopyt</target>
       </trans-unit>
       <trans-unit id="7103175231914556252" datatype="html">
         <source>Items matching this query will be hidden.</source>
@@ -8033,7 +8033,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">157,158</context>
         </context-group>
-        <target>Items matching this query will be hidden.</target>
+        <target>Položky, ktoré zodpovedajú tomuto dopytu, budú skryté.</target>
       </trans-unit>
       <trans-unit id="3375928127080691464" datatype="html">
         <source>Allowed directories</source>
@@ -8041,7 +8041,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">160,161</context>
         </context-group>
-        <target>Allowed directories</target>
+        <target>Povolené priečinky</target>
       </trans-unit>
       <trans-unit id="9005073265664443464" datatype="html">
         <source>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</source>
@@ -8049,7 +8049,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">163</context>
         </context-group>
-        <target>If not empty, only directories (and their content) matching any of these will be visible. E.g.: glob /photos/public/* for the directory and everything below it. Parents of these directories can be opened, but their content is hidden.</target>
+        <target>Ak zoznam nie je prázdny, viditeľné budú len priečinky (a ich obsah), ktoré zodpovedajú niektorej z týchto položiek. Napr.: glob /photos/public/* pre priečinok a všetko pod ním. Nadradené priečinky sa dajú otvoriť, ale ich obsah je skrytý.</target>
       </trans-unit>
       <trans-unit id="1074999904348142618" datatype="html">
         <source>Blocked directories</source>
@@ -8057,7 +8057,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">166,167</context>
         </context-group>
-        <target>Blocked directories</target>
+        <target>Blokované priečinky</target>
       </trans-unit>
       <trans-unit id="4600002224506309266" datatype="html">
         <source>Directories (and their content) matching any of these will be hidden.</source>
@@ -8065,7 +8065,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">169</context>
         </context-group>
-        <target>Directories (and their content) matching any of these will be hidden.</target>
+        <target>Priečinky (a ich obsah), ktoré zodpovedajú niektorej z týchto položiek, budú skryté.</target>
       </trans-unit>
       <trans-unit id="7000649363168371045" datatype="html">
         <source>Save changes</source>
@@ -8073,7 +8073,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.html</context>
           <context context-type="linenumber">179</context>
         </context-group>
-        <target>Save changes</target>
+        <target>Uložiť zmeny</target>
       </trans-unit>
       <trans-unit id="6451269955734195952" datatype="html">
         <source>Passwords do not match</source>
@@ -8085,7 +8085,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
           <context context-type="linenumber">205</context>
         </context-group>
-        <target>Passwords do not match</target>
+        <target>Heslá sa nezhodujú</target>
       </trans-unit>
       <trans-unit id="1821735653273245237" datatype="html">
         <source>User creation error!</source>
@@ -8105,7 +8105,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
           <context context-type="linenumber">197</context>
         </context-group>
-        <target>Can't modify user role</target>
+        <target>Rolu používateľa nemožno zmeniť</target>
       </trans-unit>
       <trans-unit id="8157249496279037173" datatype="html">
         <source>Could not save user settings</source>
@@ -8117,7 +8117,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
           <context context-type="linenumber">228</context>
         </context-group>
-        <target>Could not save user settings</target>
+        <target>Nastavenia používateľa sa nepodarilo uložiť</target>
       </trans-unit>
       <trans-unit id="8617892905633961461" datatype="html">
         <source>User settings saved successfully</source>
@@ -8125,7 +8125,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/users/users.component.ts</context>
           <context context-type="linenumber">221</context>
         </context-group>
-        <target>User settings saved successfully</target>
+        <target>Nastavenia používateľa boli uložené</target>
       </trans-unit>
       <trans-unit id="9128681615749206002" datatype="html">
         <source>Trigger job run manually</source>
@@ -8153,7 +8153,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/button/job-button.settings.component.html</context>
           <context context-type="linenumber">31</context>
         </context-group>
-        <target>Do you want to run</target>
+        <target>Chcete spustiť</target>
       </trans-unit>
       <trans-unit id="8767702319647682943" datatype="html">
         <source>Are you sure you want to run this job? This will have the following effect:</source>
@@ -8161,7 +8161,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/button/job-button.settings.component.html</context>
           <context context-type="linenumber">36,37</context>
         </context-group>
-        <target>Are you sure you want to run this job? This will have the following effect:</target>
+        <target>Naozaj chcete spustiť túto úlohu? Bude to mať tento účinok:</target>
       </trans-unit>
       <trans-unit id="3030272344799552884" datatype="html">
         <source>Job started</source>
@@ -8469,7 +8469,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/settings/workflow/workflow.component.html</context>
           <context context-type="linenumber">386,387</context>
         </context-group>
-        <target>';' separated integers. </target>
+        <target>Celé čísla oddelené ';'.</target>
       </trans-unit>
       <trans-unit id="163671953128893071" datatype="html">
         <source>Add Job</source>
@@ -8613,7 +8613,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/toast/toast-container.component.html</context>
           <context context-type="linenumber">55,56</context>
         </context-group>
-        <target>Cancel all</target>
+        <target>Zrušiť všetko</target>
       </trans-unit>
       <trans-unit id="7619560701830330401" datatype="html">
         <source>Loading</source>
@@ -8621,7 +8621,7 @@
           <context context-type="sourcefile">src/frontend/app/ui/utils/spinner/spinner.component.html</context>
           <context context-type="linenumber">1</context>
         </context-group>
-        <target>Loading</target>
+        <target>Načítava sa</target>
       </trans-unit>
     </body>
   </file>
