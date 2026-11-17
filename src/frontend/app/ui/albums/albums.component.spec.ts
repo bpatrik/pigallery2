@@ -5,16 +5,39 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {AlbumsComponent} from './albums.component';
 import {AlbumsService} from './albums.service';
 import {AuthenticationService} from '../../model/network/authentication.service';
+import {Config} from '../../../../common/config/public/Config';
 import {PiTitleService} from '../../model/pi-title.service';
 import {ShareService} from '../gallery/share.service';
 import {NavigationService} from '../../model/navigation.service';
 import {RangeSearch, SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../common/entities/SearchQueryDTO';
+import {UserRoles} from '../../../../common/entities/UserDTO';
 import {AlbumBaseDTO} from '../../../../common/entities/album/AlbumBaseDTO';
 import {FrameComponent} from '../frame/frame.component';
 import {AlbumComponent} from './album/album.component';
 import {GallerySearchQueryBuilderComponent} from '../gallery/search/query-builder/query-bulder.gallery.component';
 import {SavedSearchPopupComponent} from './saved-search-popup/saved-search-popup.component';
 import {appIcons} from '../../icons';
+
+describe('AlbumsComponent - CanCreateAlbum', () => {
+  it('allows users when the configured minimum role is User', () => {
+    const isAuthorized = vi.fn((minimumRole: UserRoles): boolean => UserRoles.User >= minimumRole);
+    TestBed.configureTestingModule({
+      providers: [
+        {provide: AlbumsService, useValue: {getAlbums: () => Promise.resolve()}},
+        {provide: BsModalService, useValue: null},
+        {provide: AuthenticationService, useValue: {isAuthorized}},
+        {provide: PiTitleService, useValue: null},
+        {provide: ShareService, useValue: null},
+        {provide: NavigationService, useValue: null},
+      ]
+    });
+    const component = TestBed.runInInjectionContext(() => new AlbumsComponent());
+
+    expect(Config.Album.createAccessMinRole).toBe(UserRoles.User);
+    expect(component.CanCreateAlbum).toBe(true);
+    expect(isAuthorized).toHaveBeenCalledWith(UserRoles.User);
+  });
+});
 
 describe('AlbumsComponent - IsSearchQueryEmpty', () => {
   let component: AlbumsComponent;
