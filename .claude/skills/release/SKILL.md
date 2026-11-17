@@ -1,6 +1,6 @@
 ---
 name: release
-description: Walk the maintainer through releasing a new PiGallery2 version (man page, translations, Hungarian review, tests, docs screenshots, tag, GitHub release with notes and the CI zip, sample extension update). Use when the maintainer asks to do / prepare / cut a release.
+description: Walk the maintainer through releasing a new PiGallery2 version (man page, translations, Hungarian review, tests, docs screenshots, tag, GitHub release with notes and the CI zip, sample extension update, announcement post reminder). Use when the maintainer asks to do / prepare / cut a release.
 ---
 
 # PiGallery2 release checklist
@@ -62,6 +62,11 @@ Don't read `messages.hu.xlf` itself (~470 KB). Use the script next to this file:
   `node .claude/skills/release/translation-review.mjs apply <file>`. It checks the placeholders, writes nothing if any
   unit is wrong, and adds every applied id to `translation-reviewed.hu.json` (commit it with the translations). Include the units that are fine as they are (with their current target), so they count as reviewed too.
 - Run the export again: it should come out empty, apart from what the maintainer chose to leave for later.
+
+Other languages, when the maintainer asks for them: the same script with `--lang <code> --with-admin` lists what still
+equals the English; translate only those (keep good existing translations, keep product names like SQLite as they are),
+apply, and commit each language on its own (`translation-reviewed.<lang>.json` with it). Order used so far: merge, hu, fr, es, de,
+then the rest by number of speakers. Check with `npx ng build --configuration production --localize --output-path=<scratchpad>/dist`.
 
 ## 3b. Release notes **(ask)**
 
@@ -155,6 +160,17 @@ must work with the new release. Its local checkout is `extensions/pigallery2-sam
   the log should show `Running init on extension: pigallery2-sample-extension`, its routes and `SampleMessenger`, and no errors;
   after logging in as `admin`, `GET /pgapi/extension/pigallery2-sample-extension/sample` returns the saved rows.
 - Leave the changes for review; the maintainer commits and pushes them in that repo.
+
+## 8c. Announce the release **(ask)**
+
+Donations come in spikes around releases, and this is the only recurring donation work (no sponsor rewards to deliver).
+Remind the maintainer to post it; they post it themselves.
+
+- Draft a short post into the scratchpad (give the full path): title `PiGallery2 X.Y.Z released`, 3-5 user-facing highlights
+  from the release notes, one docs screenshot (`docs/assets/`), links to the release and the demo, and one closing line:
+  free and open source, built in spare time, [GitHub Sponsors](https://github.com/sponsors/bpatrik) / [Ko-fi](https://ko-fi.com/pigallery2) if it's useful to you.
+- Where: r/selfhosted (check its current self-promotion rules first), the selfh.st newsletter (submit the release to its
+  weekly roundup), and a Ko-fi post (the same text, keeps the Ko-fi feed alive).
 
 ## 9. Back to edge
 
