@@ -9,7 +9,6 @@ import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryParserService} from './search-query-parser.service';
 import {AlbumsService} from '../../albums/albums.service';
 import {Config} from '../../../../../common/config/public/Config';
-import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {Utils} from '../../../../../common/Utils';
 import {FormsModule} from '@angular/forms';
@@ -76,7 +75,7 @@ export class GallerySearchComponent implements OnDestroy {
   get CanCreateAlbum(): boolean {
     return (
       Config.Album.enabled &&
-      this.authenticationService.isAuthorized(UserRoles.Admin)
+      this.authenticationService.isAuthorized(Config.Album.writeAccessMinRole)
     );
   }
 

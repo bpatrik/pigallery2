@@ -6,6 +6,7 @@ import {Config} from '../../../common/config/private/Config';
 import {RequestParams} from '../RequestParams';
 import {UserDTO, UserRoles} from '../../../common/entities/UserDTO';
 import {UserSettingsDTO} from '../../../common/entities/UserSettingsDTO';
+import {RequestSession} from '../RequestSession';
 
 export class UserMWs {
   public static async createUser(
@@ -24,6 +25,9 @@ export class UserMWs {
       return next();
     }
 
+    if (UserMWs.isAboveOwnRole(req, body.newUser.role)) {
+      return next(new ErrorDTO(ErrorCodes.USER_CREATION_ERROR, 'The role is not valid or above your own.'));
+    }
     try {
       await ObjectManagers.getInstance().UserManager.createUser(
         body.newUser
@@ -78,6 +82,9 @@ export class UserMWs {
       return next();
     }
 
+    if (UserMWs.isAboveOwnRole(req, body.newRole)) {
+      return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'The role is not valid or above your own.'));
+    }
     try {
       await ObjectManagers.getInstance().UserManager.changeRole(
         parseInt(RequestParams.getRequired(req, 'id'), 10),
@@ -168,5 +175,14 @@ export class UserMWs {
     } catch (err) {
       return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
     }
+  }
+
+  // nobody can grant a role above their own (e.g. an Admin can't make a Developer)
+  private static isAboveOwnRole(req: Request, role: UserRoles | undefined): boolean {
+    if (typeof role === 'undefined') {
+      return false;
+    }
+    const r = Number(role);
+    return !Number.isInteger(r) || r > Number(RequestSession.getContext(req).user.role);
   }
 }

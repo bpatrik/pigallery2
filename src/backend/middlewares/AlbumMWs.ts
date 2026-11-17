@@ -69,10 +69,11 @@ export class AlbumMWs {
       typeof body.searchQuery !== 'object'
     ) {
       return next(
-        new ErrorDTO(ErrorCodes.INPUT_ERROR, 'updateSharing filed is missing')
+        new ErrorDTO(ErrorCodes.INPUT_ERROR, 'name or searchQuery field is missing')
       );
     }
     try {
+      // it also validates the album
       await ObjectManagers.getInstance().AlbumManager.addSavedSearch(
         body.name,
         body.searchQuery
@@ -83,7 +84,7 @@ export class AlbumMWs {
       return next(
         new ErrorDTO(
           ErrorCodes.ALBUM_ERROR,
-          'Error during creating saved search albums',
+          'Error during creating saved search album: ' + ((err as Error)?.message ?? err),
           err
         )
       );

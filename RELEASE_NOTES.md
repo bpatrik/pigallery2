@@ -25,6 +25,8 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 * Upload limits: `Upload.maxFileSizeMB` and `Upload.blockedExtensions`
 * About page (in the menu, for everyone): what PiGallery2 is, links to the docs and the release notes, and how to support it. Admins also see the build details there, ready to copy into a bug report.
 * Admins get a "What's new" popup with these notes once after every update.
+* Let normal users create and delete albums (`Album.writeAccessMinRole`, default: Admin; needs a server restart) by @dasmaetthes in [#1400](https://github.com/bpatrik/pigallery2/pull/1400) ([#557](https://github.com/bpatrik/pigallery2/issues/557)). Albums are visible to everyone who can list them, and both album rights are at least User. The server now also checks `Album.readAccessMinRole` when listing albums (before it only hid the tab).
+* Nobody can give a role above their own or change a user above it: an Admin can't make a user Developer, set a role setting to Developer, or change, delete or set the password of a Developer. Changing `Faces.writeAccessMinRole`, `Faces.readAccessMinRole` or `Upload.minimumRole` is marked as needing a server restart (it always needed one).
 
 ## Under the hood
 This is the bulk of this release:
@@ -55,6 +57,7 @@ This is the bulk of this release:
 * Can't create albums based on date [#1152](https://github.com/bpatrik/pigallery2/issues/1152)
 * Search: negated ranges (e.g. `rating!:1..2`, `rating!=2`) found nothing, date searches (e.g. `date=2020-05-05`, `date<=2020-05-05`) missed the photos of their last day, and decimal resolutions and distances (e.g. `resolution>=0.5`, `1.5-km-from:Budapest`) were searched as plain text. The query builder showed an empty relation (`=` / `!=`) for non-text searches.
 * Saving a search link without a query broke routing [#1176](https://github.com/bpatrik/pigallery2/issues/1176)
+* Albums with an invalid search query are not saved; a broken entry of a `.saved_searches.pg2conf` is skipped with a warning to the admins instead of stopping the indexing.
 * Memory leak during indexing [#1070](https://github.com/bpatrik/pigallery2/issues/1070)
 * `vips_colourspace` error [#1122](https://github.com/bpatrik/pigallery2/issues/1122), `creationDate` null error [#1126](https://github.com/bpatrik/pigallery2/issues/1126), numeric tags shown twice [#1103](https://github.com/bpatrik/pigallery2/issues/1103)
 

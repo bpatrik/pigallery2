@@ -189,6 +189,11 @@ MySQL needs a running MariaDB (see "MySQL / MariaDB tests" in the contribution g
 - **Albums** are saved searches: an album links to its search (`/search/<query>`), not to an album URL.
   The link of a deleted album keeps working as a plain search; that's intended.
 - **Request flow**: see "Case-study: Listing a directory" in the contribution guide.
+- **Roles** (`UserRoles`): in practice LimitedGuest (sharing links), User and Admin. Guest is rarely used; Developer only
+  exists when set by hand in the DB (e.g. for more detailed errors). Nobody can grant a role above their own (settings
+  role options, `SettingsMWs`, `UserMWs`) or change a user above it (`UserRequestConstrainsMWs.notAboveOwnRole`). A role setting that is already above the own role
+  (e.g. Developer set by a Developer or in the config file) still shows on the settings page, so an Admin can lower it. Role settings that a router passes to `AuthenticationMWs.authorise()` are read
+  once at start, so they get `uiResetNeeded: {server: true}`.
 - **Config**: typed `typeconfig` classes in `src/common/config`; `tags: {client: true}` / public config is sent to the browser,
   so never put secrets there.
 
@@ -214,6 +219,10 @@ Pitfalls seen so far:
 
 - `src/common` is shared by the backend and the frontend: it never imports from `src/backend` or `src/frontend`
   (`config/private/Config.ts` and `PrivateConfigClass.ts` still do; don't add more).
+- Reuse before you write: know the shared helpers (`src/common/Utils.ts`, `SearchQueryUtils.ts`, `UploadUtils.ts`,
+  `frontend/app/ui/EnumTranslations.ts`, `backend/model/database/enitites/EntityUtils.ts`, the frontend `*.helper.ts`) and use them
+  instead of duplicating code. A general function that isn't tied to an entity, above all one that both the backend and
+  the frontend can use, goes to `src/common/Utils.ts` (or the more specific `*Utils.ts`).
 - Config enums live in `src/common/config/Enums.ts`, which imports nothing: the extension kit ships it and `common/entities` as its runtime code.
 - Routers contain no logic: they only list the middlewares of each path. Put the logic in `*MWs` classes.
 - Middlewares are only called from routers. Helpers shared inside a middleware class are private;

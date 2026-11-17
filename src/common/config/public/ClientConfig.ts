@@ -237,6 +237,10 @@ export class ClientSearchConfig {
   listMetafiles: boolean = true;
 }
 
+// albums are shared by all users, so only logged-in users can list or edit them
+// (typeconfig already rejects values that are not a role)
+const isAlbumRole = (v: UserRoles): boolean => v >= UserRoles.User;
+
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientAlbumConfig {
   @ConfigProperty({
@@ -253,11 +257,38 @@ export class ClientAlbumConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Albums listing right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer],
+      // the album routes read it when they are registered
+      uiResetNeeded: {server: true}
+    },
+    constraint: {
+      assert: isAlbumRole,
+      assertReason: 'Album.readAccessMinRole should be at least User.',
+      fallBackValue: UserRoles.User
     },
     description: $localize`Required minimum right to show the albums tab.`
   })
   readAccessMinRole: UserRoles = UserRoles.User;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Album editing right`,
+      priority: ConfigPriority.underTheHood,
+      githubIssue: 557,
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer],
+      // the album routes read it when they are registered
+      uiResetNeeded: {server: true}
+    },
+    constraint: {
+      assert: isAlbumRole,
+      assertReason: 'Album.writeAccessMinRole should be at least User.',
+      fallBackValue: UserRoles.Admin
+    },
+    description: $localize`Required minimum right to create and delete albums. Albums are visible to every user who can list them.`
+  })
+  writeAccessMinRole: UserRoles = UserRoles.Admin;
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
@@ -1589,7 +1620,9 @@ export class ClientFacesConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Face starring right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      // the person routes read it when they are registered
+      uiResetNeeded: {server: true}
     },
     description: $localize`Required minimum right to star (favourite) a face.`
   })
@@ -1597,7 +1630,9 @@ export class ClientFacesConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Face listing right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      // the person routes read it when they are registered
+      uiResetNeeded: {server: true}
     },
     description: $localize`Required minimum right to show the faces tab.`
   })
@@ -1834,6 +1869,8 @@ export class ClientUploadConfig {
     type: UserRoles,
     tags: {
       name: $localize`Minimum user role`,
+      // the upload route reads it when it is registered
+      uiResetNeeded: {server: true}
     },
     description: $localize`Minimum user role to enable file upload.`
   })

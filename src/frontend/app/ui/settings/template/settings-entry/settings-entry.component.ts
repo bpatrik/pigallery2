@@ -22,6 +22,8 @@ import {DirectorySearchListSettingsComponent} from '../../directory-search-list/
 import {RecursiveState, Stateful, StatefulConfig} from '../RecursiveState';
 import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 import {errorMessage} from '../../../../../../common/entities/Error';
+import {UserRoles} from '../../../../../../common/entities/UserDTO';
+import {AuthenticationService} from '../../../../model/network/authentication.service';
 
 interface OptionView {
   key: number | string;
@@ -60,6 +62,7 @@ export class SettingsEntryComponent
   private searchQueryParserService = inject(SearchQueryParserService);
   settingsService = inject(SettingsService);
   private modalService = inject(BsModalService);
+  private authService = inject(AuthenticationService);
 
   name: string | undefined;
   required!: boolean; // set by ngOnChanges()
@@ -325,11 +328,11 @@ export class SettingsEntryComponent
     }
 
     this.optionsView = this.uiType === 'EnumType' || this.uiType === 'EnumArray' ?
-      this.getOptionsView(this.st) : [];
+      this.getOptionsView(this.st, Array.isArray(this.st.value) ? this.st.value : [this.st.value]) : [];
     this.navigationLinkTypeOptions = this.arrayType === 'NavigationLinkConfig' ?
       this.getOptionsView(this.newArrayItemState('type')) : [];
     this.userRoleOptions = this.arrayType === 'UserConfig' ?
-      this.getOptionsView(this.newArrayItemState('role')) : [];
+      this.getOptionsView(this.newArrayItemState('role'), (this.st.value as { role: UserRoles }[]).map(u => u.role)) : [];
 
     this.placeholder = (this.st.tags?.hint || this.st.default) as string;
 
@@ -413,7 +416,20 @@ export class SettingsEntryComponent
     return new (this.st.arrayType as new () => StatefulConfig)().__state[property];
   }
 
-  private getOptionsView(state: RecursiveState): OptionView[] {
+  /**
+   * @param currentValues the values that are set now, they are always offered so that the select can show them
+   */
+  private getOptionsView(state: RecursiveState, currentValues: unknown[] = []): OptionView[] {
+    const options = this.getEnumOptionsView(state);
+    if ((state.isEnumType ? state.type : state.arrayType) === UserRoles) {
+      // nobody can grant a role above their own (e.g. Developer), the server rejects it too.
+      // A role that is already set (e.g. by a Developer) is still shown, so it can be lowered.
+      return options.filter(o => this.authService.isAuthorized(o.key as UserRoles) || currentValues.includes(o.key));
+    }
+    return options;
+  }
+
+  private getEnumOptionsView(state: RecursiveState): OptionView[] {
     const eClass = state.isEnumType
         ? state.type
         : state.arrayType;

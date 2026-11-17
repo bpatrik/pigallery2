@@ -2,6 +2,7 @@
   "Album": "config",
   "Album.enabled": "boolean",
   "Album.readAccessMinRole": "enum:LimitedGuest,Guest,User,Admin,Developer",
+  "Album.writeAccessMinRole": "enum:LimitedGuest,Guest,User,Admin,Developer",
   "AlbumCover": "config",
   "AlbumCover.SearchQuery": "object",
   "AlbumCover.Sorting": "array<config>",
