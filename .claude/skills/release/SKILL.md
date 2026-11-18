@@ -190,8 +190,8 @@ Remind the maintainer to post it; they post it themselves.
 
 ## 9. Back to edge
 
-- Bump master to the next prerelease, e.g. `npm version X.(Y+1).0-edge --no-git-tag-version`
-  (commit `Version bump to X.(Y+1).0-edge`, like `42af9167`).
+- Bump master to the next patch prerelease: `npm version X.Y.(Z+1)-edge --no-git-tag-version`
+  (commit `Version bump to X.Y.(Z+1)-edge`); the next release decides whether it becomes a minor or major.
 - Reset `RELEASE_NOTES.md` to its top comment and the five empty headings (Breaking changes, Main new features,
   Under the hood, Further changes, Bug fixes), in the same commit. Edge never opens the "What's new" popup by itself.
 - Wrap up with what was released, links (release, Docker Hub), and anything left open.
