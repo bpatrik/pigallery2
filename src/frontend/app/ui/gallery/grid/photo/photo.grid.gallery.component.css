@@ -42,14 +42,16 @@ img.loading {
   animation: show-info var(--transition-duration) forwards;
 }
 
+/* the bar sits on the bottom edge of the photo and slides out below it: shown, it has no offset,
+ so it can't leave a line of the photo below it (a translateY(-100%) of a fractional height rounds to another pixel) */
 @keyframes show-info {
   0% {
-    transform: translateY(0);
+    transform: translateY(100%);
     background: transparent;
   }
 
   100% {
-    transform: translateY(-100%);
+    transform: none;
     background: var(--overlay-hover-background);
   }
 }
@@ -57,18 +59,20 @@ img.loading {
 @keyframes hide-info {
 
   0% {
-    transform: translateY(-100%);
+    transform: none;
     background: var(--overlay-hover-background);
   }
   100% {
-    transform: translateY(0);
+    transform: translateY(100%);
     background: transparent;
   }
 }
 
 .info {
   animation: hide-info var(--transition-duration) forwards;
-  transform: translateY(0);
+  transform: translateY(100%);
+  bottom: 0;
+  left: 0;
   background-color: transparent;
   color: var(--overlay-color);
   text-shadow: var(--overlay-text-shadow);
