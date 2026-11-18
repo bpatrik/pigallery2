@@ -80,6 +80,12 @@ zip, and admins see it in the app ("What's new" popup once per version, about pa
   - a `DataStructureVersion` bump (`git diff <last-tag> -- src/common/DataStructureVersion.ts`) → the DB is rebuilt on first start (users kept),
   - config changes that need user action (diff of `docs/user-guide/configuration.md`),
   - extension API breaking changes (PR descriptions list them; `extension/` and `src/backend/model/extension/IExtension.ts` diffs).
+- Cross-check with GitHub's generated notes, which list every merged PR (also before the tag exists):
+  `gh api repos/bpatrik/pigallery2/releases/generate-notes -f tag_name=X.Y.Z -f target_commitish=master -f previous_tag_name=<last-tag> --jq .body`
+  (or the maintainer pastes them from a release draft). Look for user-visible PRs the notes miss, and for PRs that were
+  reverted later (`Revert "..."`), which must not be listed.
+- Highlight: lead "Main new features" with the headline feature in bold, and open "Under the hood" with a one-line
+  summary (bug fixes, security fixes, tech upgrades) followed by one line that collects the security fixes.
 - Update the file in the style of earlier releases (`gh release view <last-tag>`): `## Breaking changes`, `## Main new features`,
   `## Under the hood`, `## Further changes`, `## Bug fixes`, with full issue/PR links (the app does not link a bare `#1234`)
   and the contributors (`by @name in [#1234](...)`). Drop empty sections. Resolve the `TODO` comments with the maintainer.
@@ -101,6 +107,9 @@ Save the output to the scratchpad and read only the summaries (see AGENTS.md "Bu
 - `npm run test-frontend`
 - `npm run build-en` (production build), then `npm run test-e2e`
 - Report failures with their output; don't release over a red suite unless the maintainer says so.
+- The maintainer may skip the local runs: then open the release PR and let its CI run the full suite (backend incl. MySQL,
+  frontend, e2e, Docker builds) and merge it once green. A red `coverage/coveralls` status of a few hundredths of a percent
+  on a PR without code changes is noise.
 
 ## 5b. Docs screenshots **(ask)**
 
@@ -120,6 +129,11 @@ Then the maintainer commits, the release PR is merged, and CI on master must be 
 (`gh run list --workflow ci.yml --branch master --limit 1`).
 
 ## 6. Tag **(ask)**
+
+Cloud sessions can push only their own branch (no tags) and can't create releases or upload release assets. There the
+maintainer does steps 6 and 8 in the GitHub web UI (also from a phone): Draft a new release, tag `X.Y.Z` "Create new tag on publish"
+with the target `master`. Publishing creates the tag from `master` at that moment, so merge every PR that changes `RELEASE_NOTES.md`
+before publishing (the zip and the in-app "What's new" ship the tag's file). The draft can be saved before the notes are final.
 
 - On the merged master commit whose `package.json` says `X.Y.Z`: `git tag X.Y.Z` and `git push origin X.Y.Z`.
 - The tag's CI run (`gh run list --workflow ci.yml --branch X.Y.Z`) builds the release zip and pushes the Docker images
@@ -143,6 +157,8 @@ Then the maintainer commits, the release PR is merged, and CI on master must be 
   - Sanity-check it: `unzip -l` shows `package.json`, `src/backend/index.js` and the `dist/` languages.
 - `gh release create X.Y.Z --title X.Y.Z --notes-file <draft> --verify-tag <scratchpad>/pigallery2-release.zip`
   (add `--draft` if the maintainer wants a last look on GitHub), then give the release URL.
+- In a cloud session: download the artifact (or give its link from the tag's run page), check it, and send it to the
+  maintainer to attach as `pigallery2-release.zip` with "Edit release".
 
 ## 8b. Sample extension **(ask)**
 
@@ -174,8 +190,8 @@ Remind the maintainer to post it; they post it themselves.
 
 ## 9. Back to edge
 
-- Bump master to the next prerelease, e.g. `npm version X.(Y+1).0-edge --no-git-tag-version`
-  (commit `Version bump to X.(Y+1).0-edge`, like `42af9167`).
+- Bump master to the next patch prerelease: `npm version X.Y.(Z+1)-edge --no-git-tag-version`
+  (commit `Version bump to X.Y.(Z+1)-edge`); the next release decides whether it becomes a minor or major.
 - Reset `RELEASE_NOTES.md` to its top comment and the five empty headings (Breaking changes, Main new features,
   Under the hood, Further changes, Bug fixes), in the same commit. Edge never opens the "What's new" popup by itself.
 - Wrap up with what was released, links (release, Docker Hub), and anything left open.
