@@ -9,8 +9,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 * The DB gets rebuilt on the first start, so the first indexing takes a while. Users are kept now; older updates (e.g. to 3.5.2) deleted them, then log in with `admin` / `admin`. [#1399](https://github.com/bpatrik/pigallery2/issues/1399)
 * Docker: the images run on Node 26 and there is no `linux/arm/v7` image anymore. 32-bit Raspberry Pi OS users need a 64-bit OS (or stay on 3.5.2). [#1284](https://github.com/bpatrik/pigallery2/issues/1284)
 * Extensions: the backend moved to Express 5 and TypeORM 1. Extension REST paths need the Express 5 path syntax (no regex params, `:id?` becomes `{:id}`, wildcards need a name like `*path`); a path that doesn't parse is logged and skipped. `getCacheForDirectory` gets a `DataSource` instead of a `Connection`, and `invalidateDirectoryCache` gets a `DirectoryPathDTO`. Update to the latest extension kit (now on npm, [#1319](https://github.com/bpatrik/pigallery2/issues/1319)). [#1291](https://github.com/bpatrik/pigallery2/issues/1291) [#1290](https://github.com/bpatrik/pigallery2/issues/1290)
-<!-- TODO check: anything user-facing from cleaning up the Guest role (#1204)? -->
-<!-- TODO check: is the new `Indexing.excludeFolderList` syntax compatible with old entries? -->
+* `Indexing.excludeFolderList`: `*` and `?` are now wildcards. Existing entries keep working, except a folder name that contains a literal `*` or `?`. [#192](https://github.com/bpatrik/pigallery2/issues/192)
 
 ## Main new features
 * Folder sharing [#1133](https://github.com/bpatrik/pigallery2/issues/1133) [#1076](https://github.com/bpatrik/pigallery2/issues/1076)
@@ -44,6 +43,7 @@ This is the bulk of this release:
 * Random sort is no longer biased (Fisher-Yates) by @infinitejones in [#1131](https://github.com/bpatrik/pigallery2/pull/1131)
 * Docker: the release images are rebuilt every week on fresh base images, so OS and Node security fixes arrive without a new release (same tags, e.g. `latest`; Watchtower picks them up). The release zip now ships a `package-lock.json`, so every build installs the npm versions that were tested.
 * Only admins see the app version: it is no longer in the browser console or the page source of every visitor.
+* Guests of a sharing link no longer get search autocomplete, and notifications are shown only to users with the User role or above. [#1204](https://github.com/bpatrik/pigallery2/issues/1204)
 * The sponsor links moved from the bottom of the settings page to the about page.
 * The server log tells when the DB got rebuilt, when the default `admin` / `admin` user was created, and when a login failed because the user does not exist. [#1399](https://github.com/bpatrik/pigallery2/issues/1399)
 * The example nginx configs (Docker and Nginx Proxy Manager) rate limit the login and the API, only allow TLS 1.2+, and forward the client IP (see `Server.trustProxy`). If you copied an older one, compare it with the new one: the login limit could be bypassed by writing the URL in upper case. [#1302](https://github.com/bpatrik/pigallery2/issues/1302)
