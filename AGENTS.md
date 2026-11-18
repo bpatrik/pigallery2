@@ -160,6 +160,7 @@ so the maintainer's own `config.json` and DB are not touched:
 
 ### Cloud / container sessions
 
+- Cloud sessions can push only their own branch: no tags, no GitHub releases or release assets. Leave those to the maintainer.
 - Dependencies come from the environment's setup script (`npm ci`). If `node_modules` is missing, run `npm ci`
   without `--ignore-scripts`: tests need the native `better-sqlite3` build and the `ffmpeg-static`/`ffprobe-static` downloads.
 
