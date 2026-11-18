@@ -1166,6 +1166,82 @@ export class ThemeConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class ThemesConfig {
 
+  /**
+   * The themes that ship with the app. applyBuiltInThemes() puts them into availableThemes on every config load and
+   * settings save, so they can't be deleted or changed and get the fixes of new releases; the settings page shows them read-only.
+   */
+  static readonly BUILT_IN_THEMES: readonly { name: string, theme: string }[] = [
+    {
+      name: 'classic',
+      theme:
+        ':root nav.navbar {\n' +
+        '--bs-navbar-color: rgba(255, 255, 255, 0.55);\n' +
+        '--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n' +
+        '--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n' +
+        '--bs-navbar-active-color: #fff;\n' +
+        '--bs-navbar-brand-color: #fff;\n' +
+        '--bs-navbar-brand-hover-color: #fff;\n' +
+        '--bs-bg-opacity: 1;\n' +
+        'background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n' +
+        '}'
+    },
+    {
+      name: 'modern',
+      theme:
+        ':root, [data-bs-theme=light] {\n' +
+        '  --bs-body-bg: #f5f5f7;\n' +
+        '  --bs-body-bg-rgb: 245, 245, 247;\n' +
+        '  --item-background: #e4e4e7;\n' +
+        '}\n' +
+        '[data-bs-theme=dark] {\n' +
+        '  --bs-body-bg: #18181b;\n' +
+        '  --bs-body-bg-rgb: 24, 24, 27;\n' +
+        '  --bs-secondary-bg: #27272a;\n' +
+        '  --bs-secondary-bg-rgb: 39, 39, 42;\n' +
+        '  --bs-tertiary-bg: #1f1f23;\n' +
+        '  --bs-tertiary-bg-rgb: 31, 31, 35;\n' +
+        '  --item-background: #2a2a2e;\n' +
+        '}\n' +
+        ':root {\n' +
+        '  accent-color: var(--bs-primary);\n' +
+        '  --item-border: 0;\n' +
+        '  --item-radius: .5rem;\n' +
+        '  --item-hover-scale: 100%;\n' +
+        '  --overlay-background: linear-gradient(transparent, rgba(0, 0, 0, .65));\n' +
+        '  --overlay-hover-background: linear-gradient(transparent, rgba(0, 0, 0, .85));\n' +
+        '  --overlay-text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\n' +
+        '  --overlay-font-size: .875rem;\n' +
+        '  --overlay-button-background: rgba(0, 0, 0, .35);\n' +
+        '  --overlay-button-hover-background: rgba(0, 0, 0, .6);\n' +
+        '  --lightbox-title-background: transparent;\n' +
+        '  --lightbox-title-opacity: .9;\n' +
+        '  --lightbox-title-text-shadow: 0 1px 3px rgba(0, 0, 0, .8);\n' +
+        '  --popover-border: 1px solid var(--bs-border-color);\n' +
+        '  --popover-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 24px rgba(0, 0, 0, .18);\n' +
+        '  --separator-color: var(--bs-border-color);\n' +
+        '  --transition-easing: cubic-bezier(.2, .8, .2, 1);\n' +
+        '}\n' +
+        '@media (prefers-reduced-motion: no-preference) {\n' +
+        '  :root {\n' +
+        '    --item-hover-image-scale: 104%;\n' +
+        '    --fade-in-duration: .3s;\n' +
+        '  }\n' +
+        '}'
+    }];
+
+  static isBuiltInTheme(name: string | undefined): boolean {
+    return ThemesConfig.BUILT_IN_THEMES.some(th => th.name === name);
+  }
+
+  /**
+   * Puts the built-in themes (unchanged, first) into availableThemes, keeping the custom ones after them.
+   */
+  static applyBuiltInThemes(themes: ThemesConfig): void {
+    const custom = (themes.availableThemes || []).filter(th => !ThemesConfig.isBuiltInTheme(th.name))
+      .map(th => new ThemeConfig(th.name, th.theme));
+    themes.availableThemes = [...ThemesConfig.BUILT_IN_THEMES.map(th => new ThemeConfig(th.name, th.theme)), ...custom];
+  }
+
   @ConfigProperty({
     type: 'boolean',
     tags: {
@@ -1207,62 +1283,7 @@ export class ThemesConfig {
     },
     description: $localize`Adds these CSS settings as it is to the end of the body tag of the page.`
   })
-  availableThemes: ThemeConfig[] = [
-    new ThemeConfig(
-      'classic',
-      ':root nav.navbar {\n' +
-      '--bs-navbar-color: rgba(255, 255, 255, 0.55);\n' +
-      '--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n' +
-      '--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n' +
-      '--bs-navbar-active-color: #fff;\n' +
-      '--bs-navbar-brand-color: #fff;\n' +
-      '--bs-navbar-brand-hover-color: #fff;\n' +
-      '--bs-bg-opacity: 1;\n' +
-      'background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n' +
-      '}'
-    ),
-    new ThemeConfig(
-      'modern',
-      ':root, [data-bs-theme=light] {\n' +
-      '  --bs-body-bg: #f5f5f7;\n' +
-      '  --bs-body-bg-rgb: 245, 245, 247;\n' +
-      '  --item-background: #e4e4e7;\n' +
-      '}\n' +
-      '[data-bs-theme=dark] {\n' +
-      '  --bs-body-bg: #18181b;\n' +
-      '  --bs-body-bg-rgb: 24, 24, 27;\n' +
-      '  --bs-secondary-bg: #27272a;\n' +
-      '  --bs-secondary-bg-rgb: 39, 39, 42;\n' +
-      '  --bs-tertiary-bg: #1f1f23;\n' +
-      '  --bs-tertiary-bg-rgb: 31, 31, 35;\n' +
-      '  --item-background: #2a2a2e;\n' +
-      '}\n' +
-      ':root {\n' +
-      '  accent-color: var(--bs-primary);\n' +
-      '  --item-border: 0;\n' +
-      '  --item-radius: .5rem;\n' +
-      '  --item-hover-scale: 100%;\n' +
-      '  --overlay-background: linear-gradient(transparent, rgba(0, 0, 0, .65));\n' +
-      '  --overlay-hover-background: linear-gradient(transparent, rgba(0, 0, 0, .85));\n' +
-      '  --overlay-text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\n' +
-      '  --overlay-font-size: .875rem;\n' +
-      '  --overlay-button-background: rgba(0, 0, 0, .35);\n' +
-      '  --overlay-button-hover-background: rgba(0, 0, 0, .6);\n' +
-      '  --lightbox-title-background: transparent;\n' +
-      '  --lightbox-title-opacity: .9;\n' +
-      '  --lightbox-title-text-shadow: 0 1px 3px rgba(0, 0, 0, .8);\n' +
-      '  --popover-border: 1px solid var(--bs-border-color);\n' +
-      '  --popover-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 24px rgba(0, 0, 0, .18);\n' +
-      '  --separator-color: var(--bs-border-color);\n' +
-      '  --transition-easing: cubic-bezier(.2, .8, .2, 1);\n' +
-      '}\n' +
-      '@media (prefers-reduced-motion: no-preference) {\n' +
-      '  :root {\n' +
-      '    --item-hover-image-scale: 104%;\n' +
-      '    --fade-in-duration: .3s;\n' +
-      '  }\n' +
-      '}'
-    )];
+  availableThemes: ThemeConfig[] = ThemesConfig.BUILT_IN_THEMES.map(th => new ThemeConfig(th.name, th.theme));
 }
 
 
