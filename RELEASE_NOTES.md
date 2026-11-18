@@ -14,3 +14,4 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 ## Further changes
 
 ## Bug fixes
+- Indexing no longer crashes and restarts the app on an empty or 1-byte photo file (Node 26, e.g. the Docker images) [#1408](https://github.com/bpatrik/pigallery2/issues/1408)

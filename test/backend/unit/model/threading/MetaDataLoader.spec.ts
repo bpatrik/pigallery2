@@ -154,6 +154,52 @@ describe('MetadataLoader', () => {
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
 
+  describe('file handles', () => {
+    // A FileHandle that is left for the garbage collector crashes the app on Node 26 (#1408)
+    const dir = path.join(TestHelper.TMP_DIR, 'metadata_file_handles');
+    const originalOpen = fs.promises.open;
+    let handles: fs.promises.FileHandle[];
+
+    beforeEach(() => {
+      fs.mkdirSync(dir, {recursive: true});
+      handles = [];
+      fs.promises.open = async (...args: Parameters<typeof originalOpen>): Promise<fs.promises.FileHandle> => {
+        const handle = await originalOpen(...args);
+        handles.push(handle);
+        return handle;
+      };
+    });
+
+    afterEach(() => {
+      fs.promises.open = originalOpen;
+      fs.rmSync(dir, {recursive: true, force: true});
+    });
+
+    const expectAllClosed = (): void => {
+      expect(handles.length).to.be.greaterThan(0);
+      expect(handles.map(h => h.fd)).to.deep.equal(handles.map(() => -1));
+    };
+
+    it('should close the file of an empty photo', async () => {
+      const file = path.join(dir, 'empty.jpg');
+      fs.writeFileSync(file, '');
+      await MetadataLoader.loadPhotoMetadata(file);
+      expectAllClosed();
+    });
+
+    it('should close the file of a one byte photo', async () => {
+      const file = path.join(dir, 'one_byte.jpg');
+      fs.writeFileSync(file, 'x');
+      await MetadataLoader.loadPhotoMetadata(file);
+      expectAllClosed();
+    });
+
+    it('should close the file of a photo', async () => {
+      await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test image öüóőúéáű-.,.jpg'));
+      expectAllClosed();
+    });
+  });
+
   describe('sidecar', () => {
     it('should load sidecar file with file extension for video', async () => {
       const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/sidecar/bunny_1sec.mp4'));
