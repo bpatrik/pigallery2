@@ -16,6 +16,10 @@ import {
 
 const isReleaseNotes = (url: string): boolean => new URL(url).pathname === '/pgapi/admin/release-notes';
 
+// like RELEASE_NOTES.md of a release in progress: the writers' comment and an empty section
+const SAMPLE_NOTES = '<!-- for the writers -->\n\n## Breaking changes\n\n## Main new features\n' +
+  '* A new feature [#1](https://github.com/bpatrik/pigallery2/issues/1)\n\n## Bug fixes\n';
+
 /**
  * Opens the about page with the menu of the navbar, from the loaded gallery
  * (the gallery's own navigation would otherwise override the click).
@@ -31,6 +35,13 @@ test.describe('About', () => {
   test.use(desktopViewport({width: 1200, height: 800}));
 
   test('About page should look right for an admin', {tag: '@sanity'}, async ({page}) => {
+    // RELEASE_NOTES.md is empty on edge right after a release, so the popup gets notes of its own
+    await page.route(url => isReleaseNotes(url.href), async route => {
+      const response = await route.fetch();
+      const body = await response.json();
+      body.result.notes = SAMPLE_NOTES;
+      await route.fulfill({response, json: body});
+    });
     const releaseNotes = page.waitForResponse(res => isReleaseNotes(res.url()));
     await page.goto('/gallery/');
     await expectApiOk(await releaseNotes, 'loading the release notes');
