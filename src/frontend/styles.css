@@ -1,5 +1,45 @@
-:root{
-  --item-background: #bbbbbb
+/* The look of the gallery. A theme (Gallery.Themes) overrides these instead of the component CSS. */
+:root {
+  /* grid photos and directory tiles */
+  --item-background: #bbbbbb;
+  --item-border: 1px solid #333; /* directory tiles */
+  --item-hover-border-color: #000;
+  --item-radius: var(--bs-border-radius);
+  --item-hover-scale: 98%; /* the whole tile */
+  --item-hover-image-scale: 100%; /* the photo inside the tile */
+
+  /* text and buttons over a photo (grid, directory tiles) */
+  --overlay-color: #fff;
+  --overlay-background: rgba(0, 0, 0, 0.6);
+  --overlay-hover-background: rgba(0, 0, 0, 0.8);
+  --overlay-text-shadow: none;
+  --overlay-font-size: medium;
+  --overlay-button-background: rgba(0, 0, 0, 0.5);
+  --overlay-button-hover-background: rgba(0, 0, 0, 0.8);
+
+  /* lightbox texts over the photo */
+  --lightbox-title-background: rgba(0, 0, 0, 0.2);
+  --lightbox-title-opacity: 0.7;
+  --lightbox-title-text-shadow: none;
+
+  /* dropdowns and popovers (search, query builder) */
+  --popover-border: 1px solid #ccc;
+  --popover-shadow: 0 6px 12px rgba(0, 0, 0, .175);
+  --separator-color: #6c757d;
+
+  /* motion */
+  --transition-duration: .3s;
+  --transition-easing: ease-out;
+  --fade-in-duration: 2s; /* a grid photo that loaded */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --item-hover-scale: 100%;
+    --item-hover-image-scale: 100%;
+    --transition-duration: 0s;
+    --fade-in-duration: 0s;
+  }
 }
 
 a {

@@ -9,7 +9,6 @@
 .static ng-icon {
   top: 50%;
   transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
   left: 50%;
   display: table;
   position: relative;
@@ -28,77 +27,54 @@
 }
 
 .sk-cube-grid.animate .sk-cube {
-  -webkit-animation: sk-cubeGridScaleDelay 4.6s infinite ease-in-out;
   animation: sk-cubeGridScaleDelay 4.6s infinite ease-in-out;
 }
 
 .sk-cube-grid.animate .sk-cube1 {
-  -webkit-animation-delay: 0.4s;
   animation-delay: 0.4s;
   border-top-left-radius: var(--bs-border-radius);
 }
 
 .sk-cube-grid.animate .sk-cube2 {
-  -webkit-animation-delay: 0.6s;
   animation-delay: 0.6s;
 }
 
 .sk-cube-grid.animate .sk-cube3 {
-  -webkit-animation-delay: 0.8s;
   animation-delay: 0.8s;
   border-top-right-radius: var(--bs-border-radius);
 }
 
 .sk-cube-grid.animate .sk-cube4 {
-  -webkit-animation-delay: 0.2s;
   animation-delay: 0.2s;
 }
 
 .sk-cube-grid.animate .sk-cube5 {
-  -webkit-animation-delay: 0.4s;
   animation-delay: 0.4s;
 }
 
 .sk-cube-grid.animate .sk-cube6 {
-  -webkit-animation-delay: 0.6s;
   animation-delay: 0.6s;
   border-bottom-left-radius: var(--bs-border-radius);
 }
 
 .sk-cube-grid.animate .sk-cube7 {
-  -webkit-animation-delay: 0s;
   animation-delay: 0s;
 }
 
 .sk-cube-grid.animate .sk-cube8 {
-  -webkit-animation-delay: 0.2s;
   animation-delay: 0.2s;
 }
 
 .sk-cube-grid.animate .sk-cube9 {
-  -webkit-animation-delay: 0.4s;
   animation-delay: 0.4s;
   border-bottom-right-radius: var(--bs-border-radius);
 }
 
-@-webkit-keyframes sk-cubeGridScaleDelay {
-  0%, 70%, 100% {
-    -webkit-transform: scale3D(1, 1, 1);
-    transform: scale3D(1, 1, 1);
-  }
-  35% {
-    -webkit-transform: scale3D(0, 0, 1);
-    transform: scale3D(0, 0, 1);
-  }
-}
-
 @keyframes sk-cubeGridScaleDelay {
   0%, 70%, 100% {
-    -webkit-transform: scale3D(1, 1, 1);
     transform: scale3D(1, 1, 1);
   }
   35% {
-    -webkit-transform: scale3D(0, 0, 1);
     transform: scale3D(0, 0, 1);
   }
 }

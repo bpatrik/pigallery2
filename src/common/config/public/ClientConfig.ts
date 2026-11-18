@@ -1195,7 +1195,7 @@ export class ThemesConfig {
     },
     description: $localize`Selected theme to use on the site.`
   })
-  selectedTheme: string = 'classic';
+  selectedTheme: string = 'modern';
 
   @ConfigProperty({
     type: 'array',
@@ -1219,6 +1219,48 @@ export class ThemesConfig {
       '--bs-navbar-brand-hover-color: #fff;\n' +
       '--bs-bg-opacity: 1;\n' +
       'background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n' +
+      '}'
+    ),
+    new ThemeConfig(
+      'modern',
+      ':root, [data-bs-theme=light] {\n' +
+      '  --bs-body-bg: #f5f5f7;\n' +
+      '  --bs-body-bg-rgb: 245, 245, 247;\n' +
+      '  --item-background: #e4e4e7;\n' +
+      '}\n' +
+      '[data-bs-theme=dark] {\n' +
+      '  --bs-body-bg: #18181b;\n' +
+      '  --bs-body-bg-rgb: 24, 24, 27;\n' +
+      '  --bs-secondary-bg: #27272a;\n' +
+      '  --bs-secondary-bg-rgb: 39, 39, 42;\n' +
+      '  --bs-tertiary-bg: #1f1f23;\n' +
+      '  --bs-tertiary-bg-rgb: 31, 31, 35;\n' +
+      '  --item-background: #2a2a2e;\n' +
+      '}\n' +
+      ':root {\n' +
+      '  accent-color: var(--bs-primary);\n' +
+      '  --item-border: 0;\n' +
+      '  --item-radius: .5rem;\n' +
+      '  --item-hover-scale: 100%;\n' +
+      '  --overlay-background: linear-gradient(transparent, rgba(0, 0, 0, .65));\n' +
+      '  --overlay-hover-background: linear-gradient(transparent, rgba(0, 0, 0, .85));\n' +
+      '  --overlay-text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\n' +
+      '  --overlay-font-size: .875rem;\n' +
+      '  --overlay-button-background: rgba(0, 0, 0, .35);\n' +
+      '  --overlay-button-hover-background: rgba(0, 0, 0, .6);\n' +
+      '  --lightbox-title-background: transparent;\n' +
+      '  --lightbox-title-opacity: .9;\n' +
+      '  --lightbox-title-text-shadow: 0 1px 3px rgba(0, 0, 0, .8);\n' +
+      '  --popover-border: 1px solid var(--bs-border-color);\n' +
+      '  --popover-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 24px rgba(0, 0, 0, .18);\n' +
+      '  --separator-color: var(--bs-border-color);\n' +
+      '  --transition-easing: cubic-bezier(.2, .8, .2, 1);\n' +
+      '}\n' +
+      '@media (prefers-reduced-motion: no-preference) {\n' +
+      '  :root {\n' +
+      '    --item-hover-image-scale: 104%;\n' +
+      '    --fade-in-duration: .3s;\n' +
+      '  }\n' +
       '}'
     )];
 }
