@@ -1188,10 +1188,26 @@ export class ThemesConfig {
     {
       name: 'modern',
       theme:
-        ':root, [data-bs-theme=light] {\n' +
-        '  --bs-body-bg: #f5f5f7;\n' +
-        '  --bs-body-bg-rgb: 245, 245, 247;\n' +
+        '/* light: white surfaces (navbar, menus, inputs, cards) on a grey page */\n' +
+        'html:not([data-bs-theme=dark]) {\n' +
+        '  --bs-border-color: #d4d4d8;\n' +
         '  --item-background: #e4e4e7;\n' +
+        '}\n' +
+        'html:not([data-bs-theme=dark]) body {\n' +
+        '  background-color: #f5f5f7;\n' +
+        '}\n' +
+        '/* a switch that is off: a darker knob and border than in Bootstrap */\n' +
+        'html:not([data-bs-theme=dark]) .form-switch .form-check-input:not(:checked):not(:focus) {\n' +
+        '  border-color: #a1a1aa;\n' +
+        '  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'-4 -4 8 8\'%3e%3ccircle r=\'3\' fill=\'rgba%280, 0, 0, 0.55%29\'/%3e%3c/svg%3e");\n' +
+        '}\n' +
+        '[data-bs-theme=dark] .form-switch .form-check-input:not(:checked):not(:focus) {\n' +
+        '  border-color: #71717a;\n' +
+        '  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'-4 -4 8 8\'%3e%3ccircle r=\'3\' fill=\'rgba%28255, 255, 255, 0.6%29\'/%3e%3c/svg%3e");\n' +
+        '}\n' +
+        '/* navbar links (e.g. Share): darker than the 65% of Bootstrap */\n' +
+        '.navbar {\n' +
+        '  --bs-navbar-color: rgba(var(--bs-emphasis-color-rgb), .8);\n' +
         '}\n' +
         '[data-bs-theme=dark] {\n' +
         '  --bs-body-bg: #18181b;\n' +
