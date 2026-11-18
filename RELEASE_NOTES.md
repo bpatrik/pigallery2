@@ -59,6 +59,7 @@ This is the bulk of this release: lots of bug fixes, security fixes and a full t
 * The example nginx configs (Docker and Nginx Proxy Manager) rate limit the login and the API, only allow TLS 1.2+, and forward the client IP (see `Server.trustProxy`). If you copied an older one, compare it with the new one: the login limit could be bypassed by writing the URL in upper case. [#1302](https://github.com/bpatrik/pigallery2/issues/1302)
 
 ## Bug fixes
+* Indexing no longer crashes and restarts the app on an empty or 1-byte photo file (Node 26, e.g. the Docker images) [#1408](https://github.com/bpatrik/pigallery2/issues/1408)
 * Photos lost all metadata when their XMP segment started right before 64 KiB by @PhilippMundhenk in [#1270](https://github.com/bpatrik/pigallery2/pull/1270) ([#1269](https://github.com/bpatrik/pigallery2/issues/1269))
 * Uploaded files with accented names got mangled names [#1263](https://github.com/bpatrik/pigallery2/issues/1263)
 * Search keywords (`and`, `or`) are case-insensitive by @cycsmail in [#1177](https://github.com/bpatrik/pigallery2/pull/1177) ([#1090](https://github.com/bpatrik/pigallery2/issues/1090))
