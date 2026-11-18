@@ -13,7 +13,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 * `Indexing.excludeFolderList`: `*` and `?` are now wildcards. Existing entries keep working, except a folder name that contains a literal `*` or `?`. [#192](https://github.com/bpatrik/pigallery2/issues/192)
 
 ## Main new features
-* Folder sharing [#1133](https://github.com/bpatrik/pigallery2/issues/1133) [#1076](https://github.com/bpatrik/pigallery2/issues/1076)
+* **Folder sharing is back**: share a folder with a link, optionally with a password and an expiry date [#1133](https://github.com/bpatrik/pigallery2/issues/1133) [#1076](https://github.com/bpatrik/pigallery2/issues/1076)
 * Sharing: a "Prevent downloading" switch. Guests of such a link get no zip or lightbox download, and saving with right click or dragging is blocked (it can't be fully prevented). [#1158](https://github.com/bpatrik/pigallery2/issues/1158)
 * Huge folders scroll smoothly, also on phones: the grid gets a touch scroll handle and never hits the browser's page height limit. [#1394](https://github.com/bpatrik/pigallery2/pull/1394) [#1395](https://github.com/bpatrik/pigallery2/pull/1395) [#1396](https://github.com/bpatrik/pigallery2/pull/1396) [#1397](https://github.com/bpatrik/pigallery2/pull/1397)
 * Better installed app (PWA) on phones: proper icons, the page stays clear of the notch, the theme colour follows light / dark mode, and the share dialog can open the phone's share sheet. [#1390](https://github.com/bpatrik/pigallery2/pull/1390)
@@ -32,12 +32,11 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 * Nobody can give a role above their own or change a user above it: an Admin can't make a user Developer, set a role setting to Developer, or change, delete or set the password of a Developer. Changing `Faces.writeAccessMinRole`, `Faces.readAccessMinRole` or `Upload.minimumRole` is marked as needing a server restart (it always needed one).
 
 ## Under the hood
-This is the bulk of this release:
+This is the bulk of this release: lots of bug fixes, security fixes and a full tech stack upgrade.
+* Security fixes: deleting or changing a user or a sharing now ends its open sessions (and `Server.sessionTimeout` is enforced on the server), uploads check the folder rights of the user, nobody can give a role above their own, a path traversal in deleting extensions is fixed, and all CodeQL alerts are resolved [#1212](https://github.com/bpatrik/pigallery2/pull/1212) [#1385](https://github.com/bpatrik/pigallery2/pull/1385) [#557](https://github.com/bpatrik/pigallery2/issues/557) [#1300](https://github.com/bpatrik/pigallery2/pull/1300) [#1302](https://github.com/bpatrik/pigallery2/issues/1302)
 * Angular 19 → 22: zoneless, signals and `OnPush` everywhere, esbuild, lazy-loaded routes, fewer dependencies (Hammer.js, ngx-toastr, `@angular/animations` replaced) [#1219](https://github.com/bpatrik/pigallery2/issues/1219)
 * Backend on Node 26, Express 5, TypeORM 1, strict TypeScript and type-aware linting [#1279](https://github.com/bpatrik/pigallery2/issues/1279)
 * End-to-end tests for all main user journeys, and the bugs they found are fixed [#1254](https://github.com/bpatrik/pigallery2/issues/1254) [#1344](https://github.com/bpatrik/pigallery2/issues/1344)
-* Sessions are checked against the DB: deleting or changing a user or a sharing (or a sharing expiring) ends its open sessions, and `Server.sessionTimeout` is enforced on the server. [#1212](https://github.com/bpatrik/pigallery2/pull/1212)
-* CodeQL alerts reviewed and fixed, incl. a path traversal in deleting extensions [#1302](https://github.com/bpatrik/pigallery2/issues/1302) [#1300](https://github.com/bpatrik/pigallery2/pull/1300)
 
 ## Further changes
 * Closing the lightbox goes back in the browser history, so the Back button no longer opens the photo again [#470](https://github.com/bpatrik/pigallery2/issues/470)
