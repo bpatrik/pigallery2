@@ -7,6 +7,8 @@
 
 PiGallery2 is a **fast** directory-first photo gallery website, optimized for running on low-resource servers (especially on Raspberry Pi).
 
+![pigallery2 — browse a photo folder as a grid, open a photo with its map, search and find faces](https://raw.githubusercontent.com/yasirwhite/opendemo-media/main/bpatrik-pigallery2/pigallery2-demo.gif)
+
 ## 🚀 Key Features
 - **⚡ Fast**: Optimized for low-end hardware.
 - **✔️ Simple**: Point to your photos and you are ready.
