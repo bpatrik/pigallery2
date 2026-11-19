@@ -1,16 +1,50 @@
-site_name: PiGallery2 Documentation
+site_name: PiGallery2
+site_description: A fast, directory-first, self-hosted photo gallery for low-resource servers like the Raspberry Pi.
 site_url: https://bpatrik.github.io/pigallery2/
 repo_url: https://github.com/bpatrik/pigallery2
 repo_name: bpatrik/pigallery2
+edit_uri: edit/master/docs/
 
 
 theme:
   name: material
+  logo: assets/icon_inv.png
+  favicon: assets/icon.png
   icon:
     repo: fontawesome/brands/github # Shows the GitHub icon in the header
+  font:
+    text: Inter
+    code: JetBrains Mono
   palette:
-    primary: indigo
-    accent: indigo
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.indexes
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
 
 
 extra:
@@ -29,8 +63,18 @@ extra:
 plugins:
   - search
   - glightbox
+  - redirects:
+      redirect_maps:
+        'blog/How do I use PiGallery2 2021.md': blog/how-i-use-pigallery2-2021.md
+        'blog/The future of pigallery2 v2.0.0 and beyond 2023.md': blog/future-of-pigallery2-2023.md
+        'blog/[Tutorial] Pigallery2 From Zero To Hero 2025.md': blog/from-zero-to-hero-2025.md
 
 markdown_extensions:
+  - attr_list
+  - md_in_html
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.magiclink
   - pymdownx.highlight:
       anchor_linenums: true
@@ -46,10 +90,12 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 nav:
-  - Home: index.md
-  - FAQ: faq.md
-  - Features: features.md
-  - Apps & 3rd party tools: third-party.md
+  - Home:
+      - index.md
+      - Features: features.md
+      - FAQ: faq.md
+      - Apps & 3rd party tools: third-party.md
+      - What people say: references.md
   - Getting Started:
       - Docker (Recommended): setup/docker.md
       - Advanced:
@@ -64,7 +110,6 @@ nav:
       - Docker Development: development/docker-contributing.md
       - Extensions: development/extensions.md
   - Blog:
-      - How do I use PiGallery2 (2021): blog/How do I use PiGallery2 2021.md
-      - The future of PiGallery2 (2023): blog/The future of pigallery2 v2.0.0 and beyond 2023.md
-      - From Zero To Hero (2025): blog/[Tutorial] Pigallery2 From Zero To Hero 2025.md
-  - References: references.md
+      - From Zero To Hero (2025): blog/from-zero-to-hero-2025.md
+      - The future of PiGallery2 (2023): blog/future-of-pigallery2-2023.md
+      - How I use PiGallery2 (2021): blog/how-i-use-pigallery2-2021.md
