@@ -144,7 +144,11 @@ before publishing (the zip and the in-app "What's new" ship the tag's file). The
 
 - Start from `RELEASE_NOTES.md` of the tag (step 3b), without its comments (the top one, `TODO`s, the contributor list at the end). Add **New Contributors**
   (first-time contributors of the merged PRs since the last release) and
-  `**Full Changelog**: https://github.com/bpatrik/pigallery2/compare/<last-tag>...X.Y.Z`.
+  `**Full Changelog**: https://github.com/bpatrik/pigallery2/compare/<last-tag>...X.Y.Z`,
+  with a `## ❤️ Support` section right before it: the sponsor line of `README.md` (GitHub Sponsors and Ko-fi).
+- Above `## Breaking changes` (GitHub release only, not `RELEASE_NOTES.md`): leave room for a 2-3 sentence intro that the
+  maintainer writes in their own words (what the release is about), and one image of the headline feature
+  (a `docs/assets/` screenshot, or a GIF). The full notes are long; most readers only see this part.
 - Write the draft to a file in the scratchpad (give the full path) and let the maintainer edit it.
   These notes are written by the maintainer about their own project; don't add an AI footer unless they want one.
 
@@ -155,8 +159,9 @@ before publishing (the zip and the in-app "What's new" ship the tag's file). The
   - `gh api repos/bpatrik/pigallery2/actions/runs/<run-id>/artifacts --jq '.artifacts[] | select(.name=="pigallery2-release") | .id'`
   - `gh api repos/bpatrik/pigallery2/actions/artifacts/<artifact-id>/zip > <scratchpad>/pigallery2-release.zip`
   - Sanity-check it: `unzip -l` shows `package.json`, `src/backend/index.js` and the `dist/` languages.
-- `gh release create X.Y.Z --title X.Y.Z --notes-file <draft> --verify-tag <scratchpad>/pigallery2-release.zip`
-  (add `--draft` if the maintainer wants a last look on GitHub), then give the release URL.
+- `gh release create X.Y.Z --title X.Y.Z --notes-file <draft> --verify-tag --discussion-category General <scratchpad>/pigallery2-release.zip`
+  (add `--draft` if the maintainer wants a last look on GitHub), then give the release URL. The discussion gives the
+  release a comment thread; link it from the announcement posts.
 - In a cloud session: download the artifact (or give its link from the tag's run page), check it, and send it to the
   maintainer to attach as `pigallery2-release.zip` with "Edit release".
 
@@ -180,13 +185,29 @@ must work with the new release. Its local checkout is `extensions/pigallery2-sam
 ## 8c. Announce the release **(ask)**
 
 Donations come in spikes around releases, and this is the only recurring donation work (no sponsor rewards to deliver).
-Remind the maintainer to post it; they post it themselves.
+Remind the maintainer to post it; they post it themselves. Read "Past announcements" at the end of this file first.
 
-- Draft a short post into the scratchpad (give the full path): title `PiGallery2 X.Y.Z released`, 3-5 user-facing highlights
-  from the release notes, one docs screenshot (`docs/assets/`), links to the release and the demo, and one closing line:
-  free and open source, built in spare time, [GitHub Sponsors](https://github.com/sponsors/bpatrik) / [Ko-fi](https://ko-fi.com/pigallery2) if it's useful to you.
-- Where: r/selfhosted (check its current self-promotion rules first), the selfh.st newsletter (submit the release to its
-  weekly roundup), and a Ko-fi post (the same text, keeps the Ko-fi feed alive).
+- **The maintainer writes the Reddit post in their own words.** r/selfhosted readers spot and dislike AI-written posts,
+  and the post's flair must say whether AI was used (3.8.0: an AI-written post under the "No AI" flair drew a mod-bot thread
+  on top and few upvotes). Collect the material into the scratchpad (give the full path), not a finished post:
+  - title ideas that name the main benefit, not the version (e.g. "Folder sharing with password and expiry is back in PiGallery2"),
+  - one line on what PiGallery2 is and isn't next to Immich / PhotoPrism: uses your folders as they are, read-only, no ML, runs on a Pi,
+  - 3-5 user-facing highlights from the release notes, and the breaking changes in one line,
+  - one image or GIF of the headline feature (`docs/assets/`),
+  - 1-2 concrete questions for readers (e.g. which feature should become an official extension), to put in the post itself,
+  - links: the release, its discussion, the demo, and the closing line: free and open source, built in spare time,
+    [GitHub Sponsors](https://github.com/sponsors/bpatrik) / [Ko-fi](https://ko-fi.com/pigallery2) if it's useful to you.
+  If the maintainer still wants a drafted post, say it needs the sub's AI-assisted flair.
+- Before posting, check the sub's current self-promotion and AI rules and its flairs.
+- Timing: a weekday, about 14:00-16:00 UTC (morning in the US). Reddit ranks a post in its first hour or two, so the
+  maintainer should be around then to reply. Open the demo (it sleeps when idle) right before posting, so the first
+  visitors don't wait; don't put a "slow first load" warning in the post.
+- Where: r/selfhosted, the selfh.st newsletter (submit the release to its weekly roundup), and a Ko-fi post
+  (keeps the Ko-fi feed alive).
+- Length limits: the selfh.st form (https://selfh.st/submit/) takes at most 200 characters, and a Ko-fi post at most 800.
+  Draft a separate short version for each (count with `node`), and leave the Ko-fi link out of the Ko-fi post.
+- Expectations: release reactions and GitHub traffic (Insights → Traffic, UTC, lags about a day) come in over days;
+  judge them after 2-3 days, not on release day.
 
 ## 9. Back to edge
 
@@ -195,7 +216,16 @@ Remind the maintainer to post it; they post it themselves.
 - Reset `RELEASE_NOTES.md` to its top comment and the five empty headings (Breaking changes, Main new features,
   Under the hood, Further changes, Bug fixes), in the same commit. Edge never opens the "What's new" popup by itself.
 - Wrap up with what was released, links (release, Docker Hub), and anything left open.
+- A few days after the release (or at the next release's step 8c, if nobody did it then), ask how the announcement went and
+  add a line to "Past announcements": reactions, Reddit views / upvotes / comments, and what to do differently.
 
 ## Improving this checklist
 
 When the maintainer changes the process during a release, update this file in the same session.
+
+## Past announcements
+
+- 3.8.0 (2026-11-18): GitHub release 2 reactions on day 1 (3.0.0: 12, 2.0.0: 24 in total). r/selfhosted: 9.9K views,
+  14 upvotes, few comments, all from happy long-time users. The post was AI-written under the "No AI" flair (mod-bot AI thread
+  on top), had a version-number title and a changelog body, never said why to pick it over Immich, warned about a 60 s demo
+  load, and asked for feedback only in a comment 12 hours later. The 13k-character release notes opened with breaking changes and had no image.
