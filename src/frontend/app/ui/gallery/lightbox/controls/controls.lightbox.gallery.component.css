@@ -71,10 +71,6 @@
   font-size: large;
   opacity: 1;
   transition: width 0.3s ease-in-out, opacity 1s;
-  -webkit-transition: width 0.3s ease-in-out, opacity 1s;
-  -o-transition: width 0.3s ease-in-out, opacity 1s;
-  -ms-transition: width 0.3s ease-in-out, opacity 1s;
-  -moz-transition: width 0.3s ease-in-out, opacity 1s;
 }
 
 .controls-background {
@@ -116,13 +112,14 @@
 }
 
 .controls-title {
-  opacity: 0.7;
+  opacity: var(--lightbox-title-opacity);
+  text-shadow: var(--lightbox-title-text-shadow);
   position: absolute;
   height: initial;
   text-align: left;
   padding: 5px 13px;
   font-size: 1.5rem;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--lightbox-title-background);
   border-radius: 5px !important;
   margin-left: env(safe-area-inset-left);
 }
@@ -206,10 +203,6 @@
 .highlight {
   opacity: 0.5;
   transition: opacity .2s ease-out;
-  -moz-transition: opacity .2s ease-out;
-  -webkit-transition: opacity .2s ease-out;
-  -o-transition: opacity .2s ease-out;
-  -ms-transition: opacity .2s ease-out;
 }
 
 .highlight:hover {
@@ -217,21 +210,6 @@
 }
 
 @keyframes blink {
-  0% {
-    opacity: 0.5;
-  }
-  25% {
-    opacity: 1.0;
-  }
-  75% {
-    opacity: 1.0;
-  }
-  100% {
-    opacity: 0.5;
-  }
-}
-
-@-webkit-keyframes blink {
   0% {
     opacity: 0.5;
   }
@@ -348,7 +326,7 @@ input[type="range"].zoom-progress::-moz-range-track {
 }
 
 .controls-title.controls-nodim {
-  opacity: 0.7;
+  opacity: var(--lightbox-title-opacity);
 }
 
 .controls:hover {

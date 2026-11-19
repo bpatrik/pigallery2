@@ -9,6 +9,7 @@ import {ExtensionConfigWrapper} from '../../../../../src/backend/model/extension
 import {ConfigClassBuilder} from 'typeconfig/node';
 import {DBTestHelper} from '../../../DBTestHelper';
 import {TestHelper} from '../../../../TestHelper';
+import {ThemesConfig} from '../../../../../src/common/config/public/ClientConfig';
 
 
 declare let describe: any;
@@ -110,6 +111,27 @@ describe('Settings middleware', (sqlHelper: DBTestHelper) => {
     expect(err!.code).to.equal(ErrorCodes.SETTINGS_ERROR);
     expect(Config.Media.folder).to.equal(before);
     expect((await ExtensionConfigWrapper.original()).Media.folder).to.equal(before);
+  });
+
+  it('should not let the settings change or delete a built-in theme', async () => {
+    const gallery = ConfigClassBuilder.attachPrivateInterface(Config.Gallery).toJSON({skipTags: {secret: true}}) as any;
+    gallery.Themes.availableThemes = [{name: 'classic', theme: 'changed'}, {name: 'mine', theme: 'a {}'}];
+    const req: any = {
+      session: {context: {user: {role: UserRoles.Admin}}}, sessionOptions: {}, query: {}, params: {},
+      body: {settingsPath: 'Gallery', settings: gallery}
+    };
+    const err = await new Promise<ErrorDTO | undefined>((resolve) => {
+      SettingsMWs.updateSettings(req, null!, resolve as any).catch(resolve);
+    });
+    expect(err).to.be.undefined;
+    const expected = [
+      ...ThemesConfig.BUILT_IN_THEMES.map(th => ({name: th.name, theme: th.theme})),
+      {name: 'mine', theme: 'a {}'}
+    ];
+    const themes = (cfg: { Gallery: { Themes: { availableThemes: { name?: string, theme?: string }[] } } }) =>
+      cfg.Gallery.Themes.availableThemes.map(th => ({name: th.name, theme: th.theme}));
+    expect(themes(Config)).to.deep.equal(expected);
+    expect(themes(await ExtensionConfigWrapper.original())).to.deep.equal(expected);
   });
 
 });

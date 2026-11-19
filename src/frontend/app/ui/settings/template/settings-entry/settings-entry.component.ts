@@ -4,7 +4,7 @@ import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type Validation
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
 import {SearchQueryParserService} from '../../../gallery/search/search-query-parser.service';
-import {MapLayers, MapPathGroupConfig, MapPathGroupThemeConfig, NavigationLinkConfig, PathThemeConfig, SVGIconConfig, ThemeConfig} from '../../../../../../common/config/public/ClientConfig';
+import {MapLayers, MapPathGroupConfig, MapPathGroupThemeConfig, NavigationLinkConfig, PathThemeConfig, SVGIconConfig, ThemeConfig, ThemesConfig} from '../../../../../../common/config/public/ClientConfig';
 import {ConfigStyle, SettingsService} from '../../settings.service';
 import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
@@ -252,6 +252,18 @@ export class SettingsEntryComponent
         .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
   }
 
+
+  // "default" (no theme CSS) and the built-in themes can't be deleted
+  get CanRemoveTheme(): boolean {
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    return this.st.value !== 'default' && !ThemesConfig.isBuiltInTheme(this.st.value as string);
+  }
+
+  // the CSS of a built-in theme is shown read-only: it is reset on every start (see ThemesConfig.applyBuiltInThemes)
+  get SelectedThemeBuiltIn(): boolean {
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    return ThemesConfig.isBuiltInTheme(this.st.rootConfig!.__state['selectedTheme'].value as string);
+  }
 
   get SelectedThemeSettings(): {
     theme: string | undefined

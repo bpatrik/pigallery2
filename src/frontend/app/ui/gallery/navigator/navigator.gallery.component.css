@@ -7,7 +7,7 @@
 
 .divider {
   margin-left: 5px;
-  border-left: 1px solid #6c757d;
+  border-left: 1px solid var(--separator-color);
   display: inline-block;
   vertical-align: middle;
 }

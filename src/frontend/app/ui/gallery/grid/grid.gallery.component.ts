@@ -349,8 +349,10 @@ export class GalleryGridComponent
     if (!layout || line === -1) {
       return null;
     }
+    // only a line that is off the screen: a photo cut by the edge of the screen (e.g. a click on it) stays where it is,
+    // the lightbox opens from there
     const screenTop = this.scroller.screenTop();
-    if (screenTop > layout.top(line) || screenTop + window.innerHeight < layout.top(line) + layout.height(line)) {
+    if (screenTop >= layout.top(line) + layout.height(line) || screenTop + window.innerHeight <= layout.top(line)) {
       this.scrollToLineAfterRender(layout, line, 0);
     }
     await this.afterRender();
@@ -362,9 +364,9 @@ export class GalleryGridComponent
       return null;
     }
     const rect = tile.getDimension();
-    // if the tile is out of the screen -> scroll to there.
+    // if the tile is (still) off the screen -> scroll to there.
     // Instantly (the page has smooth scrolling): the lightbox animates from the tile's place right away.
-    if (PageHelper.ScrollY > rect.top || PageHelper.ScrollY + window.innerHeight < rect.top) {
+    if (PageHelper.ScrollY >= rect.top + rect.height || PageHelper.ScrollY + window.innerHeight <= rect.top) {
       this.scroller.scrollTo(rect.top);
     }
     return {rect, gridMedia: tile.gridMedia()};

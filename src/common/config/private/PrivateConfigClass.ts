@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {ConfigClass} from 'typeconfig/node';
 import {IConfigClass} from 'typeconfig/common';
 import {PasswordHelper} from '../../../backend/model/PasswordHelper';
-import {ClientConfig, TAGS} from '../public/ClientConfig';
+import {ClientConfig, TAGS, ThemesConfig} from '../public/ClientConfig';
 
 const upTime = new Date().toISOString();
 // TODO: Refactor Config to be injectable globally.
@@ -38,6 +38,8 @@ if (isTesting) {
     },
   },
   onLoadedSync: (config) => {
+    // in memory only: saving here could fail on a read-only config file; the next settings save writes them
+    ThemesConfig.applyBuiltInThemes(config.Gallery.Themes);
     let changed = false;
     for (let i = 0; i < config.Users.enforcedUsers.length; ++i) {
       const uc = config.Users.enforcedUsers[i];

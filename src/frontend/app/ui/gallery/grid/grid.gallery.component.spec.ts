@@ -499,6 +499,30 @@ describe('GalleryGridComponent', () => {
       expect(tile.rect).toEqual({top: 0, left: 0, width: 0, height: 0}); // jsdom has no layout
     });
 
+    // a click on a photo that is cut by the bottom or the top of the screen: the lightbox opens from where the photo is,
+    // the page does not jump to put its line at the top of the screen
+    for (const cut of ['bottom', 'top']) {
+      it(`should not scroll to a photo that is cut by the ${cut} of the screen`, async () => {
+        const line = layout().lineOf(photos[100]);
+        const top = layout().top(line);
+        const height = layout().height(line);
+        scroll(cut === 'bottom' ? top + height / 2 - window.innerHeight : top + height / 2);
+        fixture.detectChanges();
+        // jsdom has no layout: the tile is where its line is (the grid is at the top of the page)
+        vi.spyOn(GalleryPhotoComponent.prototype, 'getDimension').mockImplementation(() => ({top, left: 0, width: 100, height}));
+        const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+
+        const revealed = component.revealMedia(photos[100]);
+        fixture.detectChanges();
+        TestBed.tick();
+        const tile = (await revealed)!;
+
+        expect(tile.gridMedia.media).toBe(photos[100]);
+        expect(tile.rect.top).toBe(top);
+        expect(scrollTo).not.toHaveBeenCalled();
+      });
+    }
+
     // e.g. a face of the lightbox opens a search that is not cached yet: its empty content removes the grid,
     // while the closing lightbox waits for the tile of its photo
     it('should resolve null when the grid is removed before the next render', async () => {

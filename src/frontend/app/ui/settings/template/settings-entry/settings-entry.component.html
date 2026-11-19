@@ -95,7 +95,7 @@
                 <ng-icon name="ionAddOutline" class="me-1" />
                 <ng-container i18n>Add new</ng-container>
               </button>
-              @if (st.value !== 'default') {
+              @if (CanRemoveTheme) {
                 <button type="button" class="btn btn-danger"
                   (click)="removeTheme()">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -147,6 +147,7 @@
               [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onChange($event)"
               [name]="idName"
+              [readonly]="SelectedThemeBuiltIn"
               [disabled]="st.readonly || Disabled"
               required="required">
             </textarea>

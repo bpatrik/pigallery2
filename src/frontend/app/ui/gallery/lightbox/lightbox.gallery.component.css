@@ -22,10 +22,6 @@ app-gallery-lightbox-photo {
   height: 100%; /* Full height */
   background-color: black;
   transition: all 0.2s ease-in-out;
-  -o-transition: all 0.2s ease-in-out;
-  -ms-transition: all 0.2s ease-in-out;
-  -webkit-transition: all 0.2s ease-in-out;
-  -moz-transition: all 0.2s ease-in-out;
 }
 
 app-info-panel {
@@ -36,10 +32,6 @@ app-info-panel {
   right: 0;
   top: 0;
   transition: all 0.2s ease-in-out;
-  -o-transition: all 0.2s ease-in-out;
-  -ms-transition: all 0.2s ease-in-out;
-  -moz-transition: all 0.2s ease-in-out;
-  -webkit-transition: all 0.2s ease-in-out;
 }
 
 

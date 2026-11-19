@@ -3,7 +3,7 @@ import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
 import {Config} from '../../../common/config/private/Config';
 import {ConfigDiagnostics} from '../../model/diagnostics/ConfigDiagnostics';
 import {ConfigClassBuilder} from 'typeconfig/node';
-import {TAGS} from '../../../common/config/public/ClientConfig';
+import {TAGS, ThemesConfig} from '../../../common/config/public/ClientConfig';
 import {ObjectManagers} from '../../model/ObjectManagers';
 import {ExtensionConfigWrapper} from '../../model/extension/ExtensionConfigWrapper';
 import {UserRoles} from '../../../common/entities/UserDTO';
@@ -48,8 +48,11 @@ export class SettingsMWs {
       const original = await ExtensionConfigWrapper.original();
       // only updating explicitly set config (not saving config set by the diagnostics)
       sections(original)[settingsPath] = settings;
+      // the built-in themes can't be deleted or changed
+      ThemesConfig.applyBuiltInThemes(original.Gallery.Themes);
       await ConfigDiagnostics.testConfig(original);
       sections(Config)[settingsPath] = settings;
+      ThemesConfig.applyBuiltInThemes(Config.Gallery.Themes);
       await original.save();
       await ConfigDiagnostics.runDiagnostics();
       // restart all schedule timers. In case they have changed
