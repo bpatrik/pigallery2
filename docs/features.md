@@ -158,7 +158,7 @@ Build your own extensions. Mostly server-side changes are supported with minimal
 - **Authentication options**:
     - No authentication.
     - Basic, built-in authentication.
-    - ORCID support [#1096](https://github.com/bpatrik/pigallery2/issues/1096)
+    - OIDC (OpenID Connect) support [#1096](https://github.com/bpatrik/pigallery2/issues/1096)
 - **Client-side Caching**: For directories and search results.
 - **GPS & Maps**:
     - Render photos on OpenStreetMap.

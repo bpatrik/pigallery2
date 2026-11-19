@@ -54,7 +54,7 @@ nav:
       - Docker (Recommended): setup/docker.md
       - Advanced:
           - Portainer & NPM: setup/advanced/advanced-docker-npm-portainer.md
-          - ORCID with Authentik SSO (Optional): setup/advanced/authentik.md
+          - OIDC with Authentik SSO (Optional): setup/advanced/authentik.md
       - Direct Install (Unsupported): setup/direct-install.md
   - User Guide:
       - Configuration: user-guide/configuration.md
