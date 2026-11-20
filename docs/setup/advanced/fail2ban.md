@@ -4,8 +4,8 @@
 PiGallery2 logs every failed login with the client's IP, so Fail2Ban can ban brute force attempts on the login page
 and on password protected sharing links.
 
-This guide works for any setup. If you use Nginx Proxy Manager, see the
-[Fail2Ban section of the Portainer & NPM guide](advanced-docker-npm-portainer.md#6-fail2ban-optional) for a ready-made version.
+This guide works for any setup. With Portainer and Nginx Proxy Manager, the
+[Fail2Ban section of the Portainer & NPM guide](advanced-docker-npm-portainer.md#6-fail2ban-optional) is the short version.
 
 **Note:** Fail2Ban is not a replacement for rate limiting in your reverse proxy (see the `limit_req` lines in the
 [default nginx.conf](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/default/nginx.conf)):
@@ -66,17 +66,23 @@ so send the container's log to the systemd journal with a fixed tag instead. Add
 **Direct install (no Docker):** run PiGallery2 as a systemd service named `pigallery2`; its output then goes to the journal too.
 Use `journalmatch = _SYSTEMD_UNIT=pigallery2.service` instead of the one below.
 
-## 3. Install Fail2Ban
+## 3. Run Fail2Ban
 
-On Debian / Ubuntu:
+Run it either in Docker (easiest with Portainer) or installed on the host. Both read the journal and ban in the host's firewall.
 
-```bash
-sudo apt install fail2ban python3-systemd
-```
+### A) In Docker
 
-## 4. Filter
+Deploy [this compose file](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/fail2ban/docker-compose.yml)
+as its own stack (e.g. paste it into Portainer). It uses the `crazymax/fail2ban:debian` image and writes the filter and the jail
+itself, so it needs no other files. Change `port`, `maxretry`, `bantime` or `ignoreip` in it if needed.
 
-Create `/etc/fail2ban/filter.d/pigallery2.conf`:
+Check it with `docker logs fail2ban`. Run the `fail2ban-*` commands of step 4 in the container, e.g. `docker exec fail2ban fail2ban-client status pigallery2`.
+
+### B) On the host
+
+On Debian / Ubuntu: `sudo apt install fail2ban python3-systemd`.
+
+Create the filter, `/etc/fail2ban/filter.d/pigallery2.conf`:
 
 ```ini
 [Definition]
@@ -89,9 +95,7 @@ ignoreregex =
 journalmatch = CONTAINER_TAG=pigallery2
 ```
 
-## 5. Jail
-
-Create `/etc/fail2ban/jail.d/pigallery2.local`:
+And the jail, `/etc/fail2ban/jail.d/pigallery2.local`:
 
 ```ini
 [pigallery2]
@@ -113,12 +117,15 @@ ignoreip = 127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
 
 Then `sudo systemctl restart fail2ban`.
 
-**Why `DOCKER-USER`:** traffic to a port that Docker publishes (`ports:` in the compose file) is forwarded to the container
+### Why `DOCKER-USER`
+
+Traffic to a port that Docker publishes (`ports:` in a compose file) is forwarded to the container
 and never passes the host's `INPUT` chain, where Fail2Ban bans by default. Docker's `DOCKER-USER` chain sees it.
 The ports in that chain are the container's ports: if the container listens on a different port than the host
 (e.g. `8080:80`), set `port` to the container port. Check that the chain exists with `sudo iptables -L DOCKER-USER`.
+A ban blocks the IP for every container behind those ports (e.g. everything behind your reverse proxy), not only for PiGallery2.
 
-## 6. Test it
+## 4. Test it
 
 1. Check the filter against the log: `sudo fail2ban-regex systemd-journal /etc/fail2ban/filter.d/pigallery2.conf`
 2. Fail a login from a device outside your network (e.g. a phone on mobile data) a few times, then check that

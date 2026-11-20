@@ -245,77 +245,81 @@ Don't set it to `true`: then any client can fake its IP.
 ## 6. Fail2Ban (Optional)
 
 Rate limiting slows password guessing down; [Fail2Ban](https://github.com/fail2ban/fail2ban) bans the IPs that keep failing.
-PiGallery2 logs every failed login with the client IP, and Fail2Ban on the Docker host bans those IPs before they reach NPM.
-More background and other setups: [Fail2Ban guide](fail2ban.md).
+Details and other setups: [Fail2Ban guide](fail2ban.md).
 
-### Send PiGallery2's log to the journal
-
-In the `pigallery2` stack, check that `Server-trustProxy=uniquelocal` is set (see above) and add a `logging` section to the service.
-The fixed tag keeps working when Portainer re-creates the container, unlike the container's own log file:
+1. In the `pigallery2` stack, keep `Server-trustProxy=uniquelocal` (see above) and send the log to the journal with a fixed tag
+   (it keeps working when Portainer re-creates the container):
+   ```yaml
+   services:
+     pigallery2:
+       # ... as above
+       logging:
+         driver: journald
+         options:
+           tag: pigallery2
+   ```
+2. Create a new stack named `fail2ban` with [this compose file](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/fail2ban/docker-compose.yml).
+   It bans in Docker's `DOCKER-USER` chain on ports 80 and 443, so a banned IP can't reach anything behind NPM.
 
 ```yaml
+# Fail2Ban for PiGallery2: bans the IPs that keep failing to log in.
+# Guide: https://bpatrik.github.io/pigallery2/setup/advanced/fail2ban/
+# Needs the pigallery2 container to
+#  - log to the journal with a fixed tag:  logging: {driver: journald, options: {tag: pigallery2}}
+#  - log the client IP when behind a reverse proxy:  Server-trustProxy=uniquelocal
+# The filter and the jail are written by the entrypoint below, so this file is all you need (e.g. paste it into Portainer).
 services:
-  pigallery2:
-    # ... as above
-    logging:
-      driver: journald
-      options:
-        tag: pigallery2
+  fail2ban:
+    image: crazymax/fail2ban:debian # the debian image can read the systemd journal
+    container_name: fail2ban
+    network_mode: host # it changes the host's firewall
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - fail2ban-data:/data
+      - /var/log/journal:/var/log/journal:ro
+      - /run/log/journal:/run/log/journal:ro
+      - /etc/machine-id:/etc/machine-id:ro
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /data/filter.d /data/jail.d
+        cat > /data/filter.d/pigallery2.conf <<'END'
+        [Definition]
+        # the first "Failed login from IP" of the line; the user name comes after the IP
+        failregex = ^.*?\bAuthenticationMWs Failed login from IP `<ADDR>`(?: for user:| with sharing:| no user or password provided)
+        ignoreregex =
+        [Init]
+        journalmatch = CONTAINER_TAG=pigallery2
+        END
+        cat > /data/jail.d/pigallery2.local <<'END'
+        [pigallery2]
+        enabled = true
+        filter = pigallery2
+        backend = systemd
+        # Docker forwards published ports past the INPUT chain, so ban in DOCKER-USER.
+        # These are the ports of your reverse proxy container (80, 443), or of pigallery2 if it is published directly.
+        banaction = iptables-multiport
+        chain = DOCKER-USER
+        port = http,https
+        maxretry = 5
+        findtime = 10m
+        bantime = 1h
+        bantime.increment = true
+        # never ban your own networks (add your VPN's too)
+        ignoreip = 127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
+        END
+        exec /entrypoint.sh fail2ban-server -f -x -v start
+
+volumes:
+  fail2ban-data:
 ```
 
-Update the stack, fail a login from outside your network (e.g. a phone on mobile data) and check that the logged IP is the phone's
-public IP, not a `172.x` Docker address:
-
-```bash
-journalctl CONTAINER_TAG=pigallery2 | grep "Failed login"
-```
-
-### Install Fail2Ban on the Docker host
-
-```bash
-sudo apt install fail2ban python3-systemd
-```
-
-`/etc/fail2ban/filter.d/pigallery2.conf`:
-
-```ini
-[Definition]
-failregex = ^.*?\bAuthenticationMWs Failed login from IP `<ADDR>`(?: for user:| with sharing:| no user or password provided)
-ignoreregex =
-
-[Init]
-journalmatch = CONTAINER_TAG=pigallery2
-```
-
-`/etc/fail2ban/jail.d/pigallery2.local`:
-
-```ini
-[pigallery2]
-enabled  = true
-filter   = pigallery2
-backend  = systemd
-# NPM's ports 80 and 443 are published by Docker, so the traffic skips the INPUT chain: ban in DOCKER-USER
-banaction = iptables-multiport
-chain    = DOCKER-USER
-port     = http,https
-maxretry = 5
-findtime = 10m
-bantime  = 1h
-bantime.increment = true
-# never ban your own network (add your VPN's range too)
-ignoreip = 127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
-```
-
-Restart it and check the jail:
-
-```bash
-sudo systemctl restart fail2ban
-sudo fail2ban-regex systemd-journal /etc/fail2ban/filter.d/pigallery2.conf
-sudo fail2ban-client status pigallery2
-```
-
-A ban blocks the IP for everything behind NPM (ports 80 and 443), not only for PiGallery2.
-Unban an IP with `sudo fail2ban-client set pigallery2 unbanip <ip>`.
+Check that it works: `docker exec fail2ban fail2ban-client status pigallery2` lists the failed logins and bans.
+Unban an IP with `docker exec fail2ban fail2ban-client set pigallery2 unbanip <ip>`.
 
 ---
 
