@@ -15,6 +15,8 @@ import {QueryParams} from '../../../../../src/common/QueryParams';
 import {UserMWs} from '../../../../../src/backend/middlewares/user/UserMWs';
 import {OIDCAuthService} from '../../../../../src/backend/middlewares/user/OIDCAuthService';
 import {TestHelper} from '../../../../TestHelper';
+import {Logger} from '../../../../../src/backend/Logger';
+import {NotificationManager} from '../../../../../src/backend/model/NotifocationManager';
 
 
 declare let describe: any;
@@ -1223,6 +1225,70 @@ describe('Authentication middleware', (sqlHelper: DBTestHelper) => {
       (ctx.directoryAccess as any).blockList = {}; // broken context
       const r2 = await authorise(ctx, 'public');
       expect(r2.code).to.equal(ErrorCodes.DIRECTORY_NOT_FOUND);
+    });
+  });
+
+  describe('failed login log (fail2ban)', async () => {
+    const origWarn = Logger.warn;
+    let warnings: string[];
+
+    beforeEach(() => {
+      warnings = [];
+      Logger.warn = (...args: unknown[]) => {
+        warnings.push(args.join(' '));
+      };
+      NotificationManager.notifications = [];
+      (AuthenticationMWs as any).proxyWarningShown = false;
+      Config.Server.trustProxy = 'false';
+    });
+
+    afterEach(() => {
+      Logger.warn = origWarn;
+      NotificationManager.notifications = [];
+      Config.Server.trustProxy = 'false';
+    });
+
+    const failLogin = async (username: string, headers: Record<string, string> = {}): Promise<void> => {
+      const req: any = {
+        ip: '203.0.113.7',
+        headers,
+        body: {loginCredential: {username, password: 'wrong'}},
+        query: {},
+        params: {}
+      };
+      ObjectManagers.getInstance().UserManager = {
+        findOne: () => Promise.resolve(null)
+      } as any;
+      await new Promise<void>((resolve) => AuthenticationMWs.login(req, null!, () => resolve()));
+    };
+
+    it('logs the client IP in a stable format', async () => {
+      await failLogin('admin');
+      expect(warnings).to.have.length(1);
+      expect(warnings[0]).to.equal('AuthenticationMWs Failed login from IP `203.0.113.7` for user:"admin", the user does not exist');
+    });
+
+    it('does not let the username start a new (forged) log line', async () => {
+      await failLogin('x\n1/1/2026, 1:00:00 AM[WARN_] AuthenticationMWs Failed login from IP `192.168.1.50` for user:y');
+      expect(warnings).to.have.length(1);
+      expect(warnings[0]).to.not.contain('\n');
+      expect(warnings[0]).to.match(/^AuthenticationMWs Failed login from IP `203\.0\.113\.7` for user:"x\\n/);
+    });
+
+    it('warns once when a proxy is not trusted', async () => {
+      await failLogin('a', {'x-forwarded-for': '198.51.100.1'});
+      await failLogin('b', {'x-forwarded-for': '198.51.100.1'});
+      expect(warnings.filter(w => w.includes('Server.trustProxy'))).to.have.length(1);
+      expect(NotificationManager.notifications).to.have.length(1);
+      expect(NotificationManager.notifications[0].message).to.contain('Server.trustProxy');
+    });
+
+    it('does not warn about the proxy without one or when it is trusted', async () => {
+      await failLogin('a');
+      Config.Server.trustProxy = 'uniquelocal';
+      await failLogin('b', {'x-forwarded-for': '198.51.100.1'});
+      expect(warnings.filter(w => w.includes('Server.trustProxy'))).to.have.length(0);
+      expect(NotificationManager.notifications).to.have.length(0);
     });
   });
 });

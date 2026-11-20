@@ -111,6 +111,7 @@ services:
           memory: 3G # <1GB RAM might also work. It will trigger GC more often. GC is slow. See https://github.com/bpatrik/pigallery2/issues/1080
     environment:
       - NODE_ENV=production # set to 'debug' for full debug logging
+      - Server-trustProxy=uniquelocal # log the client's IP, not NPM's (see "Client IP in the logs" below)
       # - NODE_OPTIONS=--enable-source-maps # enable source map support on the backend for development
     volumes:
       - "/home/<user>/configs/pigallery2/config:/app/data/config"
@@ -233,9 +234,88 @@ location / {
 **Note:** create `http_top.conf` first: without its zones nginx rejects the `limit_req` lines of the Advanced tab.
 
 #### Client IP in the logs
-PiGallery2 logs the IP of failed logins (useful e.g. for fail2ban). Behind a proxy it only sees the proxy's IP,
-unless you tell it to trust the proxy: set `Server.trustProxy` (Settings → Server, "Under the hood" mode) to `uniquelocal`.
+PiGallery2 logs the IP of failed logins (useful e.g. for Fail2Ban). Behind a proxy it only sees the proxy's IP,
+unless you tell it to trust the proxy. The compose file above does this with `Server-trustProxy=uniquelocal`
+(or set `Server.trustProxy` in Settings → Server, "Under the hood" mode).
 That trusts the `X-Forwarded-For` header from private network addresses, like the Docker network of NPM.
+Don't set it to `true`: then any client can fake its IP.
+
+---
+
+## 6. Fail2Ban (Optional)
+
+Rate limiting slows password guessing down; [Fail2Ban](https://github.com/fail2ban/fail2ban) bans the IPs that keep failing.
+PiGallery2 logs every failed login with the client IP, and Fail2Ban on the Docker host bans those IPs before they reach NPM.
+More background and other setups: [Fail2Ban guide](fail2ban.md).
+
+### Send PiGallery2's log to the journal
+
+In the `pigallery2` stack, check that `Server-trustProxy=uniquelocal` is set (see above) and add a `logging` section to the service.
+The fixed tag keeps working when Portainer re-creates the container, unlike the container's own log file:
+
+```yaml
+services:
+  pigallery2:
+    # ... as above
+    logging:
+      driver: journald
+      options:
+        tag: pigallery2
+```
+
+Update the stack, fail a login from outside your network (e.g. a phone on mobile data) and check that the logged IP is the phone's
+public IP, not a `172.x` Docker address:
+
+```bash
+journalctl CONTAINER_TAG=pigallery2 | grep "Failed login"
+```
+
+### Install Fail2Ban on the Docker host
+
+```bash
+sudo apt install fail2ban python3-systemd
+```
+
+`/etc/fail2ban/filter.d/pigallery2.conf`:
+
+```ini
+[Definition]
+failregex = ^.*?\bAuthenticationMWs Failed login from IP `<ADDR>`(?: for user:| with sharing:| no user or password provided)
+ignoreregex =
+
+[Init]
+journalmatch = CONTAINER_TAG=pigallery2
+```
+
+`/etc/fail2ban/jail.d/pigallery2.local`:
+
+```ini
+[pigallery2]
+enabled  = true
+filter   = pigallery2
+backend  = systemd
+# NPM's ports 80 and 443 are published by Docker, so the traffic skips the INPUT chain: ban in DOCKER-USER
+banaction = iptables-multiport
+chain    = DOCKER-USER
+port     = http,https
+maxretry = 5
+findtime = 10m
+bantime  = 1h
+bantime.increment = true
+# never ban your own network (add your VPN's range too)
+ignoreip = 127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
+```
+
+Restart it and check the jail:
+
+```bash
+sudo systemctl restart fail2ban
+sudo fail2ban-regex systemd-journal /etc/fail2ban/filter.d/pigallery2.conf
+sudo fail2ban-client status pigallery2
+```
+
+A ban blocks the IP for everything behind NPM (ports 80 and 443), not only for PiGallery2.
+Unban an IP with `sudo fail2ban-client set pigallery2 unbanip <ip>`.
 
 ---
 
