@@ -72,9 +72,9 @@ Run it either in Docker (easiest with Portainer) or installed on the host. Both 
 
 ### A) In Docker
 
-Deploy [this compose file](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/fail2ban/docker-compose.yml)
-as its own stack (e.g. paste it into Portainer). It uses the `crazymax/fail2ban:debian` image and writes the filter and the jail
-itself, so it needs no other files. Change `port`, `maxretry`, `bantime` or `ignoreip` in it if needed.
+The [Portainer & NPM guide](advanced-docker-npm-portainer.md#6-fail2ban-optional) has an example compose file to start from.
+It runs the [`crazymax/fail2ban:debian`](https://github.com/crazy-max/docker-fail2ban) image and writes the filter and the jail of option B itself,
+so it needs no other files. Change `port`, `maxretry`, `bantime` or `ignoreip` in it if needed.
 
 Check it with `docker logs fail2ban`. Run the `fail2ban-*` commands of step 4 in the container, e.g. `docker exec fail2ban fail2ban-client status pigallery2`.
 

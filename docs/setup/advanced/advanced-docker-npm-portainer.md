@@ -258,16 +258,15 @@ Details and other setups: [Fail2Ban guide](fail2ban.md).
          options:
            tag: pigallery2
    ```
-2. Create a new stack named `fail2ban` with [this compose file](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/fail2ban/docker-compose.yml).
-   It bans in Docker's `DOCKER-USER` chain on ports 80 and 443, so a banned IP can't reach anything behind NPM.
+2. Create a new stack named `fail2ban`. The compose below is an example to start from (it's not maintained with PiGallery2, check the
+   [image's docs](https://github.com/crazy-max/docker-fail2ban) for its current options). It bans in Docker's `DOCKER-USER` chain on ports 80 and 443, so a banned IP can't reach anything behind NPM.
 
 ```yaml
 # Fail2Ban for PiGallery2: bans the IPs that keep failing to log in.
-# Guide: https://bpatrik.github.io/pigallery2/setup/advanced/fail2ban/
 # Needs the pigallery2 container to
 #  - log to the journal with a fixed tag:  logging: {driver: journald, options: {tag: pigallery2}}
 #  - log the client IP when behind a reverse proxy:  Server-trustProxy=uniquelocal
-# The filter and the jail are written by the entrypoint below, so this file is all you need (e.g. paste it into Portainer).
+# The entrypoint below writes the filter and the jail, so no other files are needed.
 services:
   fail2ban:
     image: crazymax/fail2ban:debian # the debian image can read the systemd journal
