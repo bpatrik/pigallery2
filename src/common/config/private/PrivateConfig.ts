@@ -1262,7 +1262,7 @@ export class ServerServiceConfig extends ClientServiceConfig {
       priority: ConfigPriority.underTheHood,
       githubIssue: 1014
     },
-    description: $localize`Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html`,
+    description: $localize`Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use "uniquelocal". "true" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html`,
   })
   trustProxy: string = 'false';
 

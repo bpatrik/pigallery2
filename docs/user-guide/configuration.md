@@ -37,7 +37,7 @@ App CLI options:
   --Server-hideSponsorLinks                                                 Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes). (default: false)
   --Server-sessionSecret                                                     (default: [])
   --Server-sessionTimeout                                                   Users kept logged in for this long time. (default: 604800000)
-  --Server-trustProxy                                                       Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html (default: 'false')
+  --Server-trustProxy                                                       Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use "uniquelocal". "true" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html (default: 'false')
   --Server-port                                                             Port number. Port 80 is usually what you need. (default: 80)
   --Server-host                                                             Server will accept connections from this IPv6 or IPv4 address. (default: '0.0.0.0')
   --Server-Log-level                                                        Logging level. (default: 'info')
@@ -228,7 +228,7 @@ Environmental variables:
   Server-hideSponsorLinks                                               Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes). (default: false)
   Server-sessionSecret                                                   (default: [])
   Server-sessionTimeout                                                 Users kept logged in for this long time. (default: 604800000)
-  Server-trustProxy                                                     Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html (default: 'false')
+  Server-trustProxy                                                     Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use "uniquelocal". "true" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html (default: 'false')
   Server-port                                                           Port number. Port 80 is usually what you need. (default: 80)
   PORT                                                                   same as Server-port
   Server-host                                                           Server will accept connections from this IPv6 or IPv4 address. (default: '0.0.0.0')
@@ -442,7 +442,7 @@ Environmental variables:
         "sessionSecret": [],
         "//[sessionTimeout]": "Users kept logged in for this long time.",
         "sessionTimeout": 604800000,
-        "//[trustProxy]": "Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html",
+        "//[trustProxy]": "Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use \"uniquelocal\". \"true\" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html",
         "trustProxy": "false",
         "//[port]": "Port number. Port 80 is usually what you need.",
         "port": 80,

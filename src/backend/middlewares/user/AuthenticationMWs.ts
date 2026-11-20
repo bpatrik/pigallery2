@@ -15,10 +15,12 @@ import {OIDCAuthService} from './OIDCAuthService';
 import {RequestParams} from '../RequestParams';
 import {RequestSession} from '../RequestSession';
 import {LoginCredential} from '../../../common/entities/LoginCredential';
+import {NotificationManager} from '../../model/NotifocationManager';
 
 const LOG_TAG = 'AuthenticationMWs';
 
 export class AuthenticationMWs {
+  private static proxyWarningShown = false;
 
   public static async tryAuthenticate(
     req: Request,
@@ -167,6 +169,34 @@ export class AuthenticationMWs {
    * The response for not existing and not available directories. They need to be the same:
    * GalleryMWs.listDirectory answers not existing directories with the same status and error.
    */
+  /**
+   * Logs a failed login in a stable format for fail2ban (see docs/setup/advanced/fail2ban.md):
+   * Failed login from IP `<ip>` <details>
+   * User input in details must be JSON.stringify-ed: a raw newline would start a new log line
+   * that the client controls, e.g. a fake failed login of someone else's IP.
+   */
+  private static logFailedLogin(req: Request, details: string): void {
+    Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` ' + details);
+  }
+
+  /**
+   * Behind a reverse proxy, req.ip is the proxy's IP unless Server.trustProxy is set,
+   * so fail2ban would only ever see (and ban) the proxy. Tell the admin once.
+   */
+  private static warnIfBehindUntrustedProxy(req: Request): void {
+    if (AuthenticationMWs.proxyWarningShown ||
+      Config.Server.trustProxy !== 'false' ||
+      !req.headers?.['x-forwarded-for']) {
+      return;
+    }
+    AuthenticationMWs.proxyWarningShown = true;
+    const msg = 'The request came through a reverse proxy (it has an X-Forwarded-For header), but Server.trustProxy does not trust it, ' +
+      'so failed logins are logged with the proxy\'s IP (' + req.ip + ') instead of the client\'s. ' +
+      'Set Server.trustProxy (e.g. to "uniquelocal") so tools like fail2ban see the real IP.';
+    Logger.warn(LOG_TAG, msg);
+    NotificationManager.warning(msg);
+  }
+
   private static directoryNotFound(next: NextFunction): void {
     return next(new ErrorDTO(ErrorCodes.DIRECTORY_NOT_FOUND, 'Directory not found'));
   }
@@ -223,6 +253,7 @@ export class AuthenticationMWs {
     if (Config.Sharing.enabled === false) {
       return next();
     }
+    AuthenticationMWs.warnIfBehindUntrustedProxy(req);
     const sharingKey = AuthenticationMWs.getSharingKey(req);
     // not enough parameter
     if (!sharingKey) {
@@ -243,7 +274,7 @@ export class AuthenticationMWs {
             sharing.password) &&
           !PasswordHelper.comparePassword(password, sharing.password))
       ) {
-        Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` with sharing:' + sharingKey + ', bad password');
+        AuthenticationMWs.logFailedLogin(req, 'with sharing:' + JSON.stringify(sharingKey) + ', bad password');
         return next(new ErrorDTO(ErrorCodes.CREDENTIAL_NOT_FOUND));
       }
 
@@ -273,6 +304,7 @@ export class AuthenticationMWs {
     if (Config.Users.authenticationRequired === false) {
       return res.sendStatus(404);
     }
+    AuthenticationMWs.warnIfBehindUntrustedProxy(req);
 
     // not enough parameters
     const body = req.body as { loginCredential?: Partial<LoginCredential> } | undefined;
@@ -284,7 +316,7 @@ export class AuthenticationMWs {
       body.loginCredential.username.length === 0 ||
       body.loginCredential.password.length === 0
     ) {
-      Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` no user or password provided');
+      AuthenticationMWs.logFailedLogin(req, 'no user or password provided');
       return next(
         new ErrorDTO(
           ErrorCodes.INPUT_ERROR,
@@ -307,7 +339,7 @@ export class AuthenticationMWs {
     } catch (err) {
       // tell the admin in the log if the user is missing, e.g. because the DB got rebuilt; the client never learns it
       const exists = !!(await ObjectManagers.getInstance().UserManager.findOne({name: credential.username}).catch(() => null));
-      Logger.warn(LOG_TAG, 'Failed login from IP `' + req.ip + '` for user:' + credential.username
+      AuthenticationMWs.logFailedLogin(req, 'for user:' + JSON.stringify(credential.username)
         + (exists ? ', bad password' : ', the user does not exist'));
       return next(
         new ErrorDTO(

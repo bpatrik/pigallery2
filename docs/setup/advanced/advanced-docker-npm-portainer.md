@@ -111,6 +111,7 @@ services:
           memory: 3G # <1GB RAM might also work. It will trigger GC more often. GC is slow. See https://github.com/bpatrik/pigallery2/issues/1080
     environment:
       - NODE_ENV=production # set to 'debug' for full debug logging
+      - Server-trustProxy=uniquelocal # log the client's IP, not NPM's (see "Client IP in the logs" below)
       # - NODE_OPTIONS=--enable-source-maps # enable source map support on the backend for development
     volumes:
       - "/home/<user>/configs/pigallery2/config:/app/data/config"
@@ -233,9 +234,91 @@ location / {
 **Note:** create `http_top.conf` first: without its zones nginx rejects the `limit_req` lines of the Advanced tab.
 
 #### Client IP in the logs
-PiGallery2 logs the IP of failed logins (useful e.g. for fail2ban). Behind a proxy it only sees the proxy's IP,
-unless you tell it to trust the proxy: set `Server.trustProxy` (Settings → Server, "Under the hood" mode) to `uniquelocal`.
+PiGallery2 logs the IP of failed logins (useful e.g. for Fail2Ban). Behind a proxy it only sees the proxy's IP,
+unless you tell it to trust the proxy. The compose file above does this with `Server-trustProxy=uniquelocal`
+(or set `Server.trustProxy` in Settings → Server, "Under the hood" mode).
 That trusts the `X-Forwarded-For` header from private network addresses, like the Docker network of NPM.
+Don't set it to `true`: then any client can fake its IP.
+
+---
+
+## 6. Fail2Ban (Optional)
+
+Rate limiting slows password guessing down; [Fail2Ban](https://github.com/fail2ban/fail2ban) bans the IPs that keep failing.
+Details and other setups: [Fail2Ban guide](fail2ban.md).
+
+1. In the `pigallery2` stack, keep `Server-trustProxy=uniquelocal` (see above) and send the log to the journal with a fixed tag
+   (it keeps working when Portainer re-creates the container):
+   ```yaml
+   services:
+     pigallery2:
+       # ... as above
+       logging:
+         driver: journald
+         options:
+           tag: pigallery2
+   ```
+2. Create a new stack named `fail2ban`. The compose below is an example to start from (it's not maintained with PiGallery2, check the
+   [image's docs](https://github.com/crazy-max/docker-fail2ban) for its current options). It bans in Docker's `DOCKER-USER` chain on ports 80 and 443, so a banned IP can't reach anything behind NPM.
+
+```yaml
+# Fail2Ban for PiGallery2: bans the IPs that keep failing to log in.
+# Needs the pigallery2 container to
+#  - log to the journal with a fixed tag:  logging: {driver: journald, options: {tag: pigallery2}}
+#  - log the client IP when behind a reverse proxy:  Server-trustProxy=uniquelocal
+# The entrypoint below writes the filter and the jail, so no other files are needed.
+services:
+  fail2ban:
+    image: crazymax/fail2ban:debian # the debian image can read the systemd journal
+    container_name: fail2ban
+    network_mode: host # it changes the host's firewall
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - fail2ban-data:/data
+      - /var/log/journal:/var/log/journal:ro
+      - /run/log/journal:/run/log/journal:ro
+      - /etc/machine-id:/etc/machine-id:ro
+    restart: unless-stopped
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        mkdir -p /data/filter.d /data/jail.d
+        cat > /data/filter.d/pigallery2.conf <<'END'
+        [Definition]
+        # the first "Failed login from IP" of the line; the user name comes after the IP
+        failregex = ^.*?\bAuthenticationMWs Failed login from IP `<ADDR>`(?: for user:| with sharing:| no user or password provided)
+        ignoreregex =
+        [Init]
+        journalmatch = CONTAINER_TAG=pigallery2
+        END
+        cat > /data/jail.d/pigallery2.local <<'END'
+        [pigallery2]
+        enabled = true
+        filter = pigallery2
+        backend = systemd
+        # Docker forwards published ports past the INPUT chain, so ban in DOCKER-USER.
+        # These are the ports of your reverse proxy container (80, 443), or of pigallery2 if it is published directly.
+        banaction = iptables-multiport
+        chain = DOCKER-USER
+        port = http,https
+        maxretry = 5
+        findtime = 10m
+        bantime = 1h
+        bantime.increment = true
+        # never ban your own networks (add your VPN's too)
+        ignoreip = 127.0.0.1/8 ::1 192.168.0.0/16 10.0.0.0/8 172.16.0.0/12
+        END
+        exec /entrypoint.sh fail2ban-server -f -x -v start
+
+volumes:
+  fail2ban-data:
+```
+
+Check that it works: `docker exec fail2ban fail2ban-client status pigallery2` lists the failed logins and bans.
+Unban an IP with `docker exec fail2ban fail2ban-client set pigallery2 unbanip <ip>`.
 
 ---
 

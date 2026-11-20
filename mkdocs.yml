@@ -101,6 +101,7 @@ nav:
       - Advanced:
           - Portainer & NPM: setup/advanced/advanced-docker-npm-portainer.md
           - OIDC with Authentik SSO (Optional): setup/advanced/authentik.md
+          - Fail2Ban (Optional): setup/advanced/fail2ban.md
       - Direct Install (Unsupported): setup/direct-install.md
   - User Guide:
       - Configuration: user-guide/configuration.md

@@ -6,12 +6,15 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 -->
 
 ## Breaking changes
+- The failed login log lines quote the user name and the sharing key (`for user:"admin"`), so a user name can't fake a log line. Fail2Ban filters that match up to the IP keep working [#519](https://github.com/bpatrik/pigallery2/issues/519)
 
 ## Main new features
 
 ## Under the hood
 
 ## Further changes
+- New [Fail2Ban guide](https://bpatrik.github.io/pigallery2/setup/advanced/fail2ban/) (also in the Portainer & NPM guide) to ban IPs that keep failing to log in [#519](https://github.com/bpatrik/pigallery2/issues/519)
+- PiGallery2 warns (in the log and on the admin page) when a login comes through a reverse proxy that `Server.trustProxy` doesn't trust, as failed logins then show the proxy's IP
 - New default theme: `modern` (Settings → Gallery → Themes; `classic` is the old look): deeper colors, no tile borders, gradients behind the texts over photos and softer motion. The built-in themes (`classic`, `modern`) are always up to date and read-only in the settings; add a new theme to customize one. The look of the gallery is now set by CSS variables (e.g. `--item-radius`, `--overlay-background`), so custom themes can change it with a few lines.
 
 ## Bug fixes

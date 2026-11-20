@@ -113,6 +113,10 @@ export class Server {
     // from optional reverse proxies trusted headers
     // See https://expressjs.com/en/guide/behind-proxies.html
     this.app.set('trust proxy', Server.getAppTrustProxyConfig());
+    if (Config.Server.trustProxy === 'true') {
+      Logger.warn(LOG_TAG, 'Server.trustProxy is "true": every client can fake its IP with an X-Forwarded-For header, also in the failed login logs that fail2ban reads. ' +
+        'Behind a reverse proxy on a private network use "uniquelocal" instead.');
+    }
 
     // Create HTTP server.
     this.server = _http.createServer(this.app);
