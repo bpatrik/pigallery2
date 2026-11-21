@@ -19,7 +19,7 @@
     vertical-align: top;
 }
 
-/* the group's width comes from its photos; the one-line blog preview would widen it past the gallery */
+/* the one-line blog preview would widen its group past the gallery */
 app-gallery-blog {
     display: block;
     contain: inline-size;

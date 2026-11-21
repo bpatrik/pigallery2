@@ -13,6 +13,8 @@ export interface GridLayoutParams {
   imageMargin: number;
   // the estimated height of a group header, until the line of the group is measured
   headerHeight: number;
+  // the days (UTC midnight, see MediaGroup.date) that have an inline blog: their group gets a line of its own
+  blogDates?: ReadonlySet<number>;
 }
 
 /** The part of a group that is on a line: its header (on its first line) and one row of its media. */
@@ -20,6 +22,8 @@ export interface GridSegment {
   key: string;
   group: MediaGroup;
   header: boolean;
+  // the inline blog is above the row: the segment is alone on its line and as wide as the grid
+  blog: boolean;
   media: GridMedia[];
 }
 
@@ -64,22 +68,26 @@ export class GridLayout {
       }
       const rows = this.buildRows(group.media);
       const header = !!group.name;
+      const blog = header && !!group.date && !!params.blogDates?.has(group.date.getTime());
       const segment = (row: { media: GridMedia[] }, rowIndex: number): GridSegment => ({
         key: groupIndex + '-' + rowIndex,
         group,
         header: header && rowIndex === 0,
+        blog: blog && rowIndex === 0,
         media: row.media
       });
       if (rows.length === 1) {
         const row = rows[0];
-        if (open && !group.startsNewLine && open.width + row.width <= params.width) {
+        if (open && !blog && !group.startsNewLine && open.width + row.width <= params.width) {
           open.line.segments.push(segment(row, 0));
           open.width += row.width;
           const i = this.lines.length - 1;
           this.rowHeights[i] = Math.max(this.rowHeights[i], row.height);
           this.hasHeader[i] = this.hasHeader[i] || header;
         } else {
-          open = {line: this.addLine(segment(row, 0), row.height, header), width: row.width};
+          // nothing joins the line of a blog
+          const line = this.addLine(segment(row, 0), row.height, header);
+          open = blog ? null : {line, width: row.width};
         }
         this.indexMedia(row.media);
         return;
@@ -94,7 +102,7 @@ export class GridLayout {
     const layoutKey = [params.width, params.screenHeight, params.targetColCount, params.imageMargin].join('|');
     this.lines.forEach((line, i) => {
       const media = line.segments.flatMap(s => s.media);
-      this.cacheKeys[i] = layoutKey + '|' + line.segments.length + '|' + GridLayout.mediaKey(media[0].media) + '|' + GridLayout.mediaKey(media[media.length - 1].media);
+      this.cacheKeys[i] = layoutKey + '|' + (line.segments[0].blog ? 'blog|' : '') + line.segments.length + '|' + GridLayout.mediaKey(media[0].media) + '|' + GridLayout.mediaKey(media[media.length - 1].media);
       const cached = heightCache?.get(this.cacheKeys[i]);
       this.measured[i] = cached !== undefined;
       this.heights[i] = cached ?? this.estimate(i);

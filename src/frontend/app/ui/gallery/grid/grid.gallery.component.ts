@@ -34,6 +34,7 @@ import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
+import {BlogService} from '../blog/blog.service';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
 import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
 import {NavigationEnd, Router, RouterLink} from '@angular/router';
@@ -65,6 +66,7 @@ export class GalleryGridComponent
   navigatorService = inject(GalleryNavigatorService);
   private scrollRestoration = inject(ScrollRestorationService);
   private router = inject(Router);
+  private blogService = inject(BlogService);
 
   readonly gridContainer = viewChild.required<ElementRef<HTMLElement>>('gridContainer');
   private readonly linesContainer = viewChild.required<ElementRef<HTMLElement>>('linesContainer');
@@ -83,6 +85,11 @@ export class GalleryGridComponent
   private readonly gridParams = computed(() => GRID_PARAMS[this.gridSize()] ?? GRID_PARAMS[GridSizes.medium]);
   readonly IMAGE_MARGIN = computed(() => this.gridParams().imageMargin);
 
+  // the days with an inline blog: their group gets a line of its own (see GridLayout). A new set only if the days changed
+  private readonly blogDates = computed((): ReadonlySet<number> =>
+      new Set((this.blogService.groupedMarkdowns() ?? []).map(m => m.date).filter(d => d !== null)),
+    {equal: (a, b) => a.size === b.size && [...a].every(d => b.has(d))});
+
   /**
    * Where all lines of the grid are. It is rebuilt when the media, the width or the grid size changes,
    * and changed in place when the rendered lines are measured: layoutVersion tells that.
@@ -99,6 +106,7 @@ export class GalleryGridComponent
     }
     return new GridLayout(groups, {
       ...this.gridParams(),
+      blogDates: this.blogDates(),
       width: width - this.overlayService.getPhantomScrollbarWidth(),
       screenHeight: this.screenHeight(),
       headerHeight: GalleryGridComponent.headerHeight
@@ -172,6 +180,7 @@ export class GalleryGridComponent
           key: s.key,
           group: s.group,
           header: s.header,
+          blog: s.blog,
           blogOpen: (s.group.date && openBlogs.get(s.group.date.getTime())) ?? Config.Gallery.InlineBlogStartsOpen,
           tiles: s.media.map(tile)
         }))
