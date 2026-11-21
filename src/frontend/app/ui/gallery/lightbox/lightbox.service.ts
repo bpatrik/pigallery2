@@ -1,10 +1,11 @@
+import {LightBoxTitleTexts} from '../../../../../common/config/Enums';
 import {Injectable, inject, OnDestroy, signal} from '@angular/core';
 import {Config} from '../../../../../common/config/public/Config';
 import {ActivatedRoute, Params, Router} from '@angular/router';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {Subscription} from 'rxjs';
-import {LightBoxTitleTexts} from '../../../../../common/config/public/ClientConfig';
 import {Utils} from '../../../../../common/Utils';
+import {QueryService} from '../../../model/query.service';
 
 /**
  * The lightbox settings that can be set through the URL (e.g. by the photo frame builder).
@@ -16,6 +17,7 @@ import {Utils} from '../../../../../common/Utils';
 export class LightboxService implements OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private queryService = inject(QueryService);
 
   private readonly slideshowSpeedSignal = signal<number>(Config.Gallery.Lightbox.slideshowSpeed);
   public readonly slideshowSpeed = this.slideshowSpeedSignal.asReadonly();
@@ -143,7 +145,8 @@ export class LightboxService implements OnDestroy {
         [key]: newValue
       },
       queryParamsHandling: 'merge', // keep existing params
-      replaceUrl: true // optional: avoid pushing to the history stack
+      replaceUrl: true, // optional: avoid pushing to the history stack
+      state: this.queryService.keepLightboxState(),
     }).catch(console.error);
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "pigallery2",
-  "version": "3.6.0-edge",
+  "version": "3.8.1-edge",
   "description": "This is a photo gallery optimised for running low resource servers (especially on raspberry pi)",
   "author": "Patrik J. Braun",
   "homepage": "https://github.com/bpatrik/pigallery2",
@@ -27,9 +27,10 @@
     "merge-new-translation": "gulp merge-new-translation",
     "generate-man": "gulp generate-man",
     "lint": "ng lint",
-    "start-e2e-server": "node ./test/folder-reset test/e2e && node ./src/backend/index --config-path=test/e2e/config.json --Database-dbFolder=test/e2e --Server-port=8080 --Users.suppressDefUserWarn=true",
-    "start-docs-e2e-server": "npm run start-e2e-server -- \"--Media-folder=demo/images2/docs/puerto rico\" --Media-tempFolder=demo/tmp/docs --Extensions-enabled=false",
-    "build-extension-interface": "tsc -p extension/ext-interface.tsconfig.json && tsc -p extension/ext-enums.tsconfig.json"
+    "start-e2e-server": "npm run e2e-server -- --Server-port=8080 --Media-folder=test/playwright/media",
+    "e2e-server": "node ./test/folder-reset test/e2e && node ./src/backend/index --config-path=test/e2e/config.json --Database-dbFolder=test/e2e --Users.suppressDefUserWarn=true",
+    "start-docs-e2e-server": "npm run e2e-server -- \"--Media-folder=demo/images2/docs/puerto rico\" --Media-tempFolder=demo/tmp/docs --Extensions-enabled=false",
+    "build-extension-interface": "tsc -p extension/ext-interface.tsconfig.json && tsc -p extension/ext-enums.tsconfig.json && tsc -p extension/ext-index.tsconfig.json"
   },
   "repository": {
     "type": "git",

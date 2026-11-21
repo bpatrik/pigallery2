@@ -4,12 +4,18 @@
 
 PiGallery2 has grown beyond what one person can maintain alone. Community contributions as extension or pull requests (PRs) are highly welcome!
 
+!!! note "Bug fixes first"
+    PiGallery2 is a hobby project with a single maintainer, done in free time next to a day job and a family:
+    about 1-2 releases and 4-5 medium features a year. The maintainer mostly merges bug fixes;
+    feature PRs have a low chance of being reviewed. To keep the app simple, the core stays small and features move to extensions.
+
 To keep development organized, please follow our feature workflow and rule of thumb before writing code.
 
 !!! info "Feature Contribution Workflow"
-    1. As an Extension: If possible, implement your new feature entirely as an isolated [extension](extensions.md).
-    2. Improve Extension Support: If the current architecture doesn't support your extension, send a PR to improve extension support first, then add your feature as an extension.
-    3. Consult the Maintainer: If adding extension support is not technically possible, open an issue to consult with the maintainer first before making changes to the core code.
+    1. Without code: Check whether an existing [setting](../user-guide/configuration.md) or a theme (custom CSS, `Gallery.Themes` setting) already does it.
+    2. As an Extension: If possible, implement your new feature entirely as an isolated [extension](extensions.md). Extensions can also change the settings and the theme.
+    3. Improve Extension Support: If the current architecture doesn't support your extension, send a PR to improve extension support first, then add your feature as an extension.
+    4. Consult the Maintainer: If adding extension support is not technically possible, open an issue to consult with the maintainer first before making changes to the core code.
 
 !!! warning "Before Submitting a PR"
     Always open an issue/ticket first to discuss your planned changes. This ensures your hard work aligns with the project roadmap and can be safely merged!
@@ -27,6 +33,13 @@ To keep development organized, please follow our feature workflow and rule of th
      * To rebuild on change run `tsc -w`
    * Note: you can skip this test if you use and IDE that supports typescript (e.g.: webstorm, vscode)
 5. Run the server `npm start`
+
+## Releasing
+
+The `pigallery2-extension-kit` npm package is published by CI (`.github/workflows/ci.yml`) with the app's version, once per version:
+bump the version in `package.json`; prereleases (e.g. `4.0.0-edge`) publish from `master` with the npm dist-tag `edge`,
+stable versions from their release tag (the tag must equal the version) with `latest`.
+Build it locally with `npm run build-extension-interface`.
 
 ## Developing with AI agents
 
@@ -83,6 +96,7 @@ Backend structure:
 Scenario: Web UI wants to show the `/demoDir` directory, using SQL database with low reindexing severity.
 
 Client side:
+
 1. Navigating to `http://<domain>/demoDir` 
 2. URL changed: [gallery.component.ts]: `onRoute` triggered
 3. Calling: [gallery.component.ts]: `galleryService.loadDirectory('/demoDir')`

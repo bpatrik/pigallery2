@@ -18,6 +18,8 @@ export class AuthenticationService {
   public readonly isAuthenticated = computed((): boolean =>
     Config.Users.authenticationRequired === false || !!this.user()
   );
+  // the user logged out (not: the session ended), so the login page does not take them back to where they were
+  public loggedOutByUser = false;
   public readonly isAdmin = computed((): boolean => this.isAuthorized(UserRoles.Admin));
 
   constructor() {
@@ -45,7 +47,7 @@ export class AuthenticationService {
         return true;
       }
       if (error.code === ErrorCodes.NOT_AUTHORISED) {
-        this.logout().catch(console.error);
+        // the error interceptor logs out
         return true;
       }
       return false;
@@ -65,6 +67,7 @@ export class AuthenticationService {
 
   public async login(credential: LoginCredential): Promise<UserDTO> {
     const user = await this.userService.login(credential);
+    this.loggedOutByUser = false;
     this.currentUser.set(user);
     return user;
   }
@@ -81,8 +84,14 @@ export class AuthenticationService {
   }
 
   public readonly canSearch = computed((): boolean => Config.Search.enabled && this.isAuthorized(UserRoles.Guest));
+  // false in a sharing session that prevents downloading (only hides the options, the browser can still save what it shows)
+  public readonly canDownload = computed((): boolean => !this.user()?.preventDownload);
 
+  /**
+   * @param reason why the session ended; none when the user logs out
+   */
   public async logout(reason?: ErrorCodes): Promise<void> {
+    this.loggedOutByUser = reason === undefined;
     await this.userService.logout();
     await this.shareService.wait();
     if (this.shareService.isSharing() && reason !== ErrorCodes.NOT_AUTHENTICATED_SHARING) {

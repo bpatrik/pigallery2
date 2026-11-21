@@ -50,19 +50,22 @@
         </button>
         <ul id="dropdown-basic" *dropdownMenu class="dropdown-menu dropdown-menu-right"
           role="menu" aria-labelledby="button-basic">
-          <li role="menuitem">
-            @if (activePhoto(); as activePhoto) {
-              <a
-                [href]="originalMediaPath()"
-                [download]="activePhoto.media.name"
-                class="dropdown-item">
-                <ng-icon class="me-2"
-                name="ionDownloadOutline" title="Download" i18n-title />
-                <span i18n>Download</span>
-                <small>(shift + D)</small>
-              </a>
-            }
-          </li>
+          @if (canDownload()) {
+            <li role="menuitem">
+              @if (activePhoto(); as activePhoto) {
+                <a
+                  [href]="originalMediaPath()"
+                  [download]="activePhoto.media.name"
+                  (click)="downloadOriginal($event)"
+                  class="dropdown-item">
+                  <ng-icon class="me-2"
+                  name="ionDownloadOutline" title="Download" i18n-title />
+                  <span i18n>Download</span>
+                  <small>(shift + D)</small>
+                </a>
+              }
+            </li>
+          }
           <li role="menuitem"
             dropdown>
             <div class="dropdown-item">
@@ -159,6 +162,7 @@
             (swipeLeft)="zoom() === 1 && nextPhoto.emit()"
             (swipeRight)="zoom() === 1 && previousPhoto.emit()"
             (swipeUp)="zoom() === 1 && closed.emit()"
+            (tap)="onTap($event)"
             (doubleTap)="doubleTap()"
             (pan)="pan($event)"
             (pinch)="pinch($event)"
@@ -167,6 +171,7 @@
 
             @if (facesEnabled && faces().length > 0) {
               <div class="faces-container"
+                [class.faces-shown]="facesShown()"
                 [style.top.px]="photoFrameDim().height/2 + drag().y"
                 [style.left.px]="photoFrameDim().width/2 + drag().x"
                 [style.width.px]="faceContainerDim().width * zoom()"
@@ -176,7 +181,9 @@
                   @for (face of faces(); track $index) {
                     <a
                       class="face"
-                      [routerLink]="['/search', face.query]"
+                      [href]="face.href"
+                      [attr.data-face]="$index"
+                      (click)="onFaceClick($event, face.url)"
                       [style.top.%]="face.top"
                       [style.left.%]="face.left"
                       [style.height.%]="face.height"
@@ -222,9 +229,9 @@
           }
           @if (navigation().hasNext && zoom() === 1) {
             <div role="button" tabindex="-1" [class.dim-controls]="controllersDimmed()" class="navigation-arrow navigation-arrow-right highlight rounded-start"
-              title="key: right arrow" id="rightArrow" i18n-title
+              [title]="nextButton().title" id="rightArrow"
               (click)="nextMediaManuallyTriggered()">
-              <ng-icon name="ionChevronForwardOutline" />
+              <ng-icon [name]="nextButton().icon" [class.restart-icon]="navigation().nextLoops" />
               @if (slideShowRunning()) {
                 <canvas
                 #canvas width="55px" height="55px"></canvas>
@@ -289,22 +296,18 @@
             }
 
             @if (isVideo()) {
-              <div class="controls controls-video row mb-3">
-                <div class="col-1">
-                  <ng-icon [name]="!mediaElement().paused() ? 'ionPauseOutline' :'ionPlayOutline'"
+              <div class="controls controls-video mb-3">
+                <ng-icon [name]="!mediaElement().paused() ? 'ionPauseOutline' :'ionPlayOutline'"
                   (click)="mediaElement().playPause()" />
-                </div>
                 <input type="range" [ngModel]="mediaElement().videoProgress()" (ngModelChange)="mediaElement().setVideoProgress($event)"
-                  min="0" max="100" step="0.1" class="col video-progress rounded">
-                  <div class="col-1">
-                    <ng-icon [name]="mediaElement().muted() ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
-                    (click)="mediaElement().mute()" />
-                  </div>
-                  <input type="range"
-                    [ngModel]="mediaElement().videoVolume()" (ngModelChange)="mediaElement().setVideoVolume($event)" min="0" max="1" step="0.1"
-                    value="1" class="col-2 col-md-1 volume rounded">
-                  </div>
-                }
+                  min="0" max="100" step="0.1" class="video-progress rounded">
+                <ng-icon [name]="mediaElement().muted() ? 'ionVolumeMuteOutline' :'ionVolumeMediumOutline'"
+                  (click)="mediaElement().mute()" />
+                <input type="range"
+                  [ngModel]="mediaElement().videoVolume()" (ngModelChange)="mediaElement().setVideoVolume($event)" min="0" max="1" step="0.1"
+                  value="1" class="volume rounded">
+              </div>
+            }
 
 
               </div>

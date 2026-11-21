@@ -323,11 +323,17 @@ describe('SearchQueryParser', () => {
       check({type: SearchQueryTypes.resolution, max: 5} as ResolutionSearch);
       check({type: SearchQueryTypes.resolution, min: 10, negate: true} as ResolutionSearch);
       check({type: SearchQueryTypes.resolution, max: 5, negate: true} as ResolutionSearch);
+      // the query builder takes Mpx with decimals
+      check({type: SearchQueryTypes.resolution, min: 0.5} as ResolutionSearch);
+      check({type: SearchQueryTypes.resolution, min: 1.5, max: 2.25} as ResolutionSearch);
     });
     it('Distance search', () => {
       // Test location-based distance search
       check({type: SearchQueryTypes.distance, distance: 10, from: {value: 'New York'}} as DistanceSearch);
       check({type: SearchQueryTypes.distance, distance: 10, from: {value: 'New York'}, negate: true} as DistanceSearch);
+      // the query builder takes the distance in 0.1 km steps
+      check({type: SearchQueryTypes.distance, distance: 0.5, from: {value: 'New York'}} as DistanceSearch);
+      check({type: SearchQueryTypes.distance, distance: 1.5, from: {value: 'Budapest'}, negate: true} as DistanceSearch);
 
       // Test coordinate-based distance search
       check({

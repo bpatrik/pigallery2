@@ -1,0 +1,6 @@
+name: PiGallery2 CodeQL config
+
+# Only the code that runs on a server is scanned: tests and the developer-only build script are not (#1302)
+paths-ignore:
+  - test
+  - gulpfile.ts

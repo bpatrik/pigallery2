@@ -4,5 +4,18 @@
   "description": "Interfaces for developing extensions for pigallery2",
   "author": "Patrik J. Braun",
   "homepage": "https://github.com/bpatrik/pigallery2",
-  "license": "MIT"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bpatrik/pigallery2.git",
+    "directory": "extension"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "lib/",
+    "index.js",
+    "index.d.ts",
+    "README.md"
+  ]
 }

@@ -1,5 +1,5 @@
+import {ThemeModes} from '../../../common/config/Enums';
 import { Injectable, inject, signal } from '@angular/core';
-import {ThemeModes} from '../../../common/config/public/ClientConfig';
 import {Config} from '../../../common/config/public/Config';
 import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
 
@@ -48,14 +48,27 @@ export class ThemeService {
   }
 
   applyMode(darkMode: boolean) {
-    if (!Config.Gallery.Themes.enabled) {
+    if (Config.Gallery.Themes.enabled) {
+      if (!darkMode) {
+        document.documentElement.removeAttribute('data-bs-theme');
+      } else {
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+      }
+    }
+    this.updateThemeColor();
+  }
+
+  /**
+   * A phone colours its status bar (and the title bar of the installed app) with the theme-color:
+   * the page background, which is also the colour of the navbar below it.
+   */
+  private updateThemeColor(): void {
+    const color = getComputedStyle(document.body).backgroundColor;
+    // a see-through or missing background says nothing: keep the colour of index.html
+    if (!color || color === 'transparent' || color === 'rgba(0, 0, 0, 0)') {
       return;
     }
-    if (!darkMode) {
-      document.documentElement.removeAttribute('data-bs-theme');
-    } else {
-      document.documentElement.setAttribute('data-bs-theme', 'dark');
-    }
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', color);
   }
 
   setMode(mode: ThemeModes) {

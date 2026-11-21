@@ -1,7 +1,8 @@
+import {ThemeModes} from '../../../common/config/Enums';
 import {TestBed} from '@angular/core/testing';
 import {ThemeService} from './theme.service';
 import {GalleryCacheService} from '../ui/gallery/cache.gallery.service';
-import {ThemeModes} from '../../../common/config/public/ClientConfig';
+
 
 describe('ThemeService', () => {
 
@@ -73,5 +74,44 @@ describe('ThemeService', () => {
 
     fireChange(false);
     expect(theme()).toBeNull();
+  });
+
+  describe('theme-color', () => {
+    let meta: HTMLMetaElement;
+    let style: HTMLStyleElement;
+    const themeColor = (): string | null => meta.getAttribute('content');
+
+    beforeEach(() => {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'theme-color');
+      meta.setAttribute('content', '#000000');
+      document.head.appendChild(meta);
+      style = document.createElement('style');
+      document.head.appendChild(style);
+    });
+
+    afterEach(() => {
+      meta.remove();
+      style.remove();
+    });
+
+    it('should follow the background of the page', () => {
+      style.textContent = 'body {background-color: rgb(255, 255, 255);} ' +
+        '[data-bs-theme=dark] body {background-color: rgb(33, 37, 41);}';
+      const service = setUp(ThemeModes.light);
+      expect(themeColor()).toBe('rgb(255, 255, 255)');
+
+      service.setMode(ThemeModes.dark);
+      expect(themeColor()).toBe('rgb(33, 37, 41)');
+
+      service.setMode(ThemeModes.light);
+      expect(themeColor()).toBe('rgb(255, 255, 255)');
+    });
+
+    it('should keep the colour of index.html when the page has no background', () => {
+      const service = setUp(ThemeModes.light);
+      service.setMode(ThemeModes.dark);
+      expect(themeColor()).toBe('#000000');
+    });
   });
 });

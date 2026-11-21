@@ -27,11 +27,8 @@
     <div class="form-horizontal">
       <div class="d-flex justify-content-between">
         <div>
-          <a triggers="mouseenter:mouseleave"
-            placement="bottom"
-            [popover]="popTemplate"
-            class="version"
-            href="https://github.com/bpatrik/pigallery2/releases">
+          <!-- the build details and release notes are on the about page -->
+          <a class="version" [routerLink]="['/about']">
             <span
               i18n>App version:</span>&nbsp;<span>{{'v' + (settingsService.settings().Environment.appVersion || '----')}}</span>
             </a>
@@ -52,7 +49,7 @@
               <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 @for (cp of configPriorities; track cp) {
                   <li>
-                    <button class="dropdown-item"
+                    <button type="button" class="dropdown-item"
                     (click)="settingsService.configPriority.set(cp.key); settingsService.configSetupChanged()">{{cp.value}}</button>
                   </li>
                 }
@@ -71,7 +68,7 @@
               <ul class="dropdown-menu dropdown-menu-right" *dropdownMenu>
                 @for (cp of configStyles; track cp) {
                   <li>
-                    <button class="dropdown-item"
+                    <button type="button" class="dropdown-item"
                     (click)="settingsService.configStyle.set(cp.key); settingsService.configSetupChanged()">{{cp.value}}</button>
                   </li>
                 }
@@ -92,13 +89,13 @@
                 @for (s of settingsComponents(); track s) {
                   <div class="py-md-1 px-md-0"
                     [hidden]="!s.HasAvailableSettings">
-                    <button class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
+                    <button type="button" class="btn btn-link btn-settings-nav nav-link text-start p-0 text-nowrap"
                       (click)="viewportScroller.scrollToAnchor(s.ConfigPath() ?? '')"
                       >
                       <ng-icon [name]="s.icon()" /> {{s.Name()}}
                     </button>
                     @for (n of s.nestedConfigs(); track n.id) {
-                      <button class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"
+                      <button type="button" class="btn btn-link btn-settings-nav nav-link text-start ms-3 p-0  text-nowrap"
                         [hidden]="!n.visible()"
                         (click)="viewportScroller.scrollToAnchor(n.id)">
                         <ng-icon [name]="n.icon" /> {{n.name}}
@@ -137,25 +134,12 @@
         </div>
       </div>
 
-      <div class="row mb-3">
-        <div class="col-12">
-          <div class="text-end">
-            <ng-container i18n>Up time</ng-container><!--
-            -->: {{settingsService.settings().Environment.upTime | date:'medium'}}
-          </div>
-        </div>
-      </div>
+      <footer class="d-flex flex-wrap justify-content-end align-items-center me-1 mb-3 small">
+        <span class="text-body-secondary">
+          <ng-container i18n>Up time</ng-container><!--
+          -->: {{settingsService.settings().Environment.upTime | date:'medium'}}
+        </span>
+      </footer>
 
     </div>
   </app-frame>
-  <ng-template #popTemplate>
-    <span i18n>Application version</span>: v{{settingsService.settings().Environment.appVersion}}
-    @if (settingsService.settings().Environment.buildTime) {
-      <br/>
-      <span i18n>Built at</span>: {{settingsService.settings().Environment.buildTime | date:'medium' }}
-    }
-    @if (settingsService.settings().Environment.buildCommitHash) {
-      <br/>
-      <span i18n>Git commit</span>: {{settingsService.settings().Environment.buildCommitHash}}
-    }
-  </ng-template>

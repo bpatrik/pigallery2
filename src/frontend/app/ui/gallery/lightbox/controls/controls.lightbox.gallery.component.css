@@ -8,9 +8,12 @@
   padding: 15px;
   cursor: pointer;
   font-size: xxx-large;
-  left: 0;
+  left: env(safe-area-inset-left);
   background-color: rgba(0, 0, 0, 0.2);
 }
+
+/* The photo fills the whole screen, the controls stay off the notch, the rounded corners and the home indicator
+ (env(safe-area-inset-*) is 0 on other screens) */
 
 .navigation-arrow ng-icon {
   top: 50%;
@@ -24,6 +27,17 @@
 }
 .navigation-arrow-right ng-icon {
   transform: translate(-45%,-50%);
+}
+
+/* the round restart icon fills its box, unlike the narrow chevron: smaller and centered, inside the slideshow's progress ring */
+.navigation-arrow-right ng-icon.restart-icon {
+  font-size: 2.5rem; /* between xx-large (2rem) and the chevron's xxx-large (3rem) */
+  transform: translate(-50%, -50%);
+}
+
+/* drawn smaller than the chevron, so it needs a thicker stroke to look as bold (overrides styles.css's 40 on the svg) */
+.navigation-arrow-right ng-icon.restart-icon ::ng-deep svg {
+  --ng-icon__stroke-width: 48;
 }
 
 #controllers-container {
@@ -41,7 +55,7 @@
 }
 
 #rightArrow {
-  right: 0;
+  right: env(safe-area-inset-right);
   left: auto;
   text-align: right;
 }
@@ -57,10 +71,6 @@
   font-size: large;
   opacity: 1;
   transition: width 0.3s ease-in-out, opacity 1s;
-  -webkit-transition: width 0.3s ease-in-out, opacity 1s;
-  -o-transition: width 0.3s ease-in-out, opacity 1s;
-  -ms-transition: width 0.3s ease-in-out, opacity 1s;
-  -moz-transition: width 0.3s ease-in-out, opacity 1s;
 }
 
 .controls-background {
@@ -90,6 +100,8 @@
   z-index: 4;
   top: 0;
   line-height: 0;
+  padding-top: env(safe-area-inset-top);
+  padding-right: env(safe-area-inset-right);
 }
 .controls-top ng-icon {
   vertical-align: middle !important;
@@ -100,14 +112,16 @@
 }
 
 .controls-title {
-  opacity: 0.7;
+  opacity: var(--lightbox-title-opacity);
+  text-shadow: var(--lightbox-title-text-shadow);
   position: absolute;
   height: initial;
   text-align: left;
   padding: 5px 13px;
   font-size: 1.5rem;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--lightbox-title-background);
   border-radius: 5px !important;
+  margin-left: env(safe-area-inset-left);
 }
 
 .controls-subtitle-text{
@@ -115,29 +129,34 @@
 }
 
 .controls-top-left-title {
-  top: 0;
+  top: env(safe-area-inset-top);
 }
 
 .controls-bottom-left-title {
-  bottom: 2rem;
+  bottom: calc(2rem + env(safe-area-inset-bottom));
 }
 
 
 .controls-zoom {
-  bottom: 0;
+  bottom: env(safe-area-inset-bottom);
   z-index: 3;
   position: absolute;
 }
 
 .controls-playback {
-  bottom: 0;
+  bottom: env(safe-area-inset-bottom);
+  padding-right: env(safe-area-inset-right);
   z-index: 3;
   position: absolute;
 }
 
 .controls-video {
-  padding-right: 15px;
-  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-left: calc(15px + env(safe-area-inset-left));
+  padding-right: calc(15px + env(safe-area-inset-right));
+  bottom: env(safe-area-inset-bottom);
   position: absolute;
   z-index: 3;
 }
@@ -159,22 +178,31 @@
 
 .controls-video input[type=range] {
   padding: 0;
-  margin-top: 10px;
+  margin: 0;
+}
+
+.controls-video .video-progress {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.controls-video .volume {
+  flex: 0 0 4rem;
+}
+
+@media (min-width: 768px) {
+  .controls-video .volume {
+    flex-basis: 8rem;
+  }
 }
 
 .controls-video ng-icon {
-  text-align: center;
-  max-width: 45px;
-  margin-left: 10px;
+  flex: 0 0 auto;
 }
 
 .highlight {
   opacity: 0.5;
   transition: opacity .2s ease-out;
-  -moz-transition: opacity .2s ease-out;
-  -webkit-transition: opacity .2s ease-out;
-  -o-transition: opacity .2s ease-out;
-  -ms-transition: opacity .2s ease-out;
 }
 
 .highlight:hover {
@@ -196,28 +224,12 @@
   }
 }
 
-@-webkit-keyframes blink {
-  0% {
-    opacity: 0.5;
-  }
-  25% {
-    opacity: 1.0;
-  }
-  75% {
-    opacity: 1.0;
-  }
-  100% {
-    opacity: 0.5;
-  }
-}
-
 .button-active {
   animation: blink 3s ease-in-out infinite;
 }
 
 
 .controls-zoom {
-  bottom: 0;
   position: absolute;
   margin-right: 0;
   margin-left: 0;
@@ -299,6 +311,11 @@ input[type="range"].zoom-progress::-moz-range-track {
   text-decoration: none;
 }
 
+/* a phone has no hover: a tap shows the faces */
+.faces-shown .face-box, .faces-shown .face-name {
+  opacity: 1.0;
+}
+
 .dim-controls {
   opacity: 0.0;
 }
@@ -309,7 +326,7 @@ input[type="range"].zoom-progress::-moz-range-track {
 }
 
 .controls-title.controls-nodim {
-  opacity: 0.7;
+  opacity: var(--lightbox-title-opacity);
 }
 
 .controls:hover {

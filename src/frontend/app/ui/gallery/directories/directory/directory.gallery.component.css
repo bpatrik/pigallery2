@@ -1,9 +1,10 @@
 :host {
-  transition: scale .3s ease-out;
+  --bs-border-radius: var(--item-radius);
+  transition: scale var(--transition-duration) var(--transition-easing);
 }
 
 :host:hover {
-  scale: 98%;
+  scale: var(--item-hover-scale);
 }
 
 a {
@@ -11,7 +12,7 @@ a {
 }
 
 .photo-container {
-  border: 1px solid #333;
+  border: var(--item-border);
   width: 180px;
   height: 180px;
   background-color: var(--item-background);
@@ -33,6 +34,11 @@ a {
   height: 100%;
   background-size: cover;
   background-position: center;
+  transition: scale var(--transition-duration) var(--transition-easing);
+}
+
+a:hover .photo {
+  scale: var(--item-hover-image-scale);
 }
 
 .button {
@@ -43,9 +49,10 @@ a {
 }
 
 .info {
-  background-color: rgba(0, 0, 0, 0.6);
-  color: white;
-  font-size: medium;
+  background: var(--overlay-background);
+  color: var(--overlay-color);
+  text-shadow: var(--overlay-text-shadow);
+  font-size: var(--overlay-font-size);
   position: absolute;
   bottom: 0;
   left: 0;
@@ -54,11 +61,11 @@ a {
 }
 
 a:hover .info {
-  background-color: rgba(0, 0, 0, 0.8);
+  background: var(--overlay-hover-background);
 }
 
 a:hover .photo-container {
-  border-color: #000;
+  border-color: var(--item-hover-border-color);
 }
 
 .directory-name {

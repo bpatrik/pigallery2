@@ -1,11 +1,8 @@
+import {NavigationLinkTypes} from '../../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import * as path from 'node:path';
 import {ConfigDiagnostics} from '../../../../../src/backend/model/diagnostics/ConfigDiagnostics';
-import {
-  NavBarConfig,
-  NavigationLinkConfig,
-  NavigationLinkTypes
-} from '../../../../../src/common/config/public/ClientConfig';
+import {NavBarConfig, NavigationLinkConfig} from '../../../../../src/common/config/public/ClientConfig';
 import {SearchQueryDTO, SearchQueryTypes, TextSearch} from '../../../../../src/common/entities/SearchQueryDTO';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {SupportedFormats} from '../../../../../src/common/SupportedFormats';
@@ -140,7 +137,7 @@ describe('ConfigDiagnostics', () => {
     });
 
     it('should reject a missing folder with an Error that names it', async () => {
-      const folder = path.join(__dirname, 'not-existing-képek');
+      const folder = path.join(__dirname, 'not-existing-images');
       let error: unknown = null;
       try {
         await ConfigDiagnostics.testImageFolder(folder);

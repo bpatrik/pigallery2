@@ -90,13 +90,13 @@
                   </option>
                 }
               </select>
-              <button class="btn btn-primary"
+              <button type="button" class="btn btn-primary"
                 (click)="showNewThemeModal(newThemeModal)">
                 <ng-icon name="ionAddOutline" class="me-1" />
                 <ng-container i18n>Add new</ng-container>
               </button>
-              @if (st.value !== 'default') {
-                <button class="btn btn-danger"
+              @if (CanRemoveTheme) {
+                <button type="button" class="btn btn-danger"
                   (click)="removeTheme()">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
                 </button>
@@ -147,6 +147,7 @@
               [ngModelOptions]="{standalone: true}"
               (ngModelChange)="onChange($event)"
               [name]="idName"
+              [readonly]="SelectedThemeBuiltIn"
               [disabled]="st.readonly || Disabled"
               required="required">
             </textarea>
@@ -169,6 +170,24 @@
               [name]="idName"
               (ngModelChange)="onChange($event)" />
           }
+          @case ('ClientDirectorySortingConfig') {
+            <app-settings-entry-sorting-method class="w-100"
+              [(ngModel)]="st.value"
+              [ngModelOptions]="{standalone: true}"
+              [sortingByEnum]="DirectorySortByTypes"
+              [id]="idName"
+              [name]="idName"
+              (ngModelChange)="onChange($event)" />
+          }
+          @case ('ClientDirectoryGroupingConfig') {
+            <app-settings-entry-sorting-method class="w-100"
+              [(ngModel)]="st.value"
+              [ngModelOptions]="{standalone: true}"
+              [sortingByEnum]="DirectoryGroupByTypes"
+              [id]="idName"
+              [name]="idName"
+              (ngModelChange)="onChange($event)" />
+          }
           @case ('JobScheduleConfig-Array') {
             <app-settings-workflow class="w-100"
               [(ngModel)]="st.value"
@@ -178,7 +197,7 @@
               (ngModelChange)="onChange($event)" />
           }
           @case ('SVGIconConfig') {
-            <button class="btn btn-outline-primary"
+            <button type="button" class="btn btn-outline-primary"
               (click)="showIconModal(iconModalTmp)">
               <svg xmlns="http://www.w3.org/2000/svg"
                 width="1em"
@@ -270,7 +289,7 @@
                         [name]="'list_ml_url_'+idName+i" [id]="'list_ml_url_'+idName+i" required>
                     </td>
                     <td>
-                      <button [disabled]="MapLayersValue.length === 1"
+                      <button type="button" [disabled]="MapLayersValue.length === 1"
                         [class]="MapLayersValue.length > 1? 'btn-danger':'btn-secondary'"
                         (click)="removeLayer(layer)"
                         class="btn float-end">
@@ -281,7 +300,7 @@
                 }
               </table>
               <div class="row justify-content-end">
-                <button class="btn btn-primary"
+                <button type="button" class="btn btn-primary"
                   (click)="addNewLayer()">
                   <ng-icon name="ionAddOutline" class="me-1" />
                   <span i18n>Add Layer</span>
@@ -302,7 +321,7 @@
                       (change)="onChange($event)" />
                     </div>
                     <div class="col-1 pe-0">
-                      <button [disabled]="PathThemeGroupsValue.length === 1" (click)="remove(i)"
+                      <button type="button" [disabled]="PathThemeGroupsValue.length === 1" (click)="remove(i)"
                         [class]="PathThemeGroupsValue.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -337,7 +356,7 @@
               }
               <div class="row">
                 <div class="col pe-0">
-                  <button class="btn btn-primary float-end"
+                  <button type="button" class="btn btn-primary float-end"
                     (click)="AddNew()">
                     <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add matcher</span>
@@ -361,7 +380,7 @@
                         [id]="'arr_n_'+idName+i" required>
                     </div>
                     <div class="col-1 pe-0">
-                      <button [disabled]="PathGroupsValue.length === 1" (click)="remove(i)"
+                      <button type="button" [disabled]="PathGroupsValue.length === 1" (click)="remove(i)"
                         [class]="PathGroupsValue.length > 1? 'btn-danger':'btn-secondary'"
                         class="btn float-end">
                         <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -382,7 +401,7 @@
               }
               <div class="row">
                 <div class="col pe-0">
-                  <button class="btn btn-primary float-end"
+                  <button type="button" class="btn btn-primary float-end"
                     (click)="AddNew()">
                     <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add path theme group</span>
@@ -446,7 +465,7 @@
                     </div>
                   }
                   <div class="col-1 pe-0">
-                    <button [disabled]="NavigationLinksValue.length === 1" (click)="remove(i)"
+                    <button type="button" [disabled]="NavigationLinksValue.length === 1" (click)="remove(i)"
                       [class]="NavigationLinksValue.length > 1? 'btn-danger':'btn-secondary'"
                       class="btn float-end">
                       <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
@@ -456,7 +475,7 @@
               }
               <div class="row">
                 <div class="col pe-0">
-                  <button class="btn btn-primary float-end"
+                  <button type="button" class="btn btn-primary float-end"
                     (click)="AddNew()">
                     <ng-icon name="ionAddOutline" class="me-1" />
                     <span i18n>Add Link</span>
@@ -518,7 +537,7 @@
                     }
                   </div>
                   <div class="col-1 pe-0">
-                    <button [disabled]="(UsersValue.length === 1 && !st.tags?.uiOptional) || st.readonly"
+                    <button type="button" [disabled]="(UsersValue.length === 1 && !st.tags?.uiOptional) || st.readonly"
                       (click)="remove(i)"
                       [class]="(UsersValue.length > 1  || st.tags?.uiOptional)? 'btn-danger':'btn-secondary'"
                       class="btn float-end">
@@ -529,7 +548,7 @@
               }
               <div class="row me-0">
                 <div class="col pe-0">
-                  <button class="btn btn-primary float-end"
+                  <button type="button" class="btn btn-primary float-end"
                     [disabled]="!!st.readonly"
                     (click)="AddNew()">
                     <ng-icon name="ionAddOutline" class="me-1" />
@@ -561,7 +580,7 @@
                 </div>
                 <ng-container>
                   <div class="col-auto pe-0">
-                    <button class="btn float-end"
+                    <button type="button" class="btn float-end"
                       [disabled]="ArrayValue.length === 1"
                       [class]="ArrayValue.length > 1? 'btn-danger':'btn-secondary'"
                       [id]="'list_btn_'+idName+i"
@@ -574,7 +593,7 @@
             }
             <ng-container>
               <div class="col-12 p-0">
-                <button class="btn btn-primary mt-1 float-end"
+                <button type="button" class="btn btn-primary mt-1 float-end"
                   [id]="'btn_add_'+idName"
                   [name]="'btn_add_'+idName"
                   (click)="AddNew()">
@@ -603,7 +622,7 @@
                 </div>
                 <ng-container>
                   <div class="col-auto pe-0">
-                    <button class="btn float-end"
+                    <button type="button" class="btn float-end"
                       [disabled]="ArrayValue.length === 1"
                       [class]="ArrayValue.length > 1? 'btn-danger':'btn-secondary'"
                       [id]="'list_btn_'+idName+i"
@@ -616,7 +635,7 @@
             }
             <ng-container>
               <div class="col-12 p-0">
-                <button class="btn btn-primary mt-1 float-end"
+                <button type="button" class="btn btn-primary mt-1 float-end"
                   [id]="'btn_add_'+idName"
                   [name]="'btn_add_'+idName"
                   (click)="AddNew()">
@@ -640,6 +659,9 @@
           </div>
         }
       </div>
+      @if (rangeError(); as error) {
+        <small class="form-text text-danger d-block" role="alert">{{error}}</small>
+      }
       @if (warning) {
         <small class="form-text text-warning d-block">
           <ng-icon name="ionWarningOutline" />

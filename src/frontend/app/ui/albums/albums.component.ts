@@ -1,9 +1,9 @@
-import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, TemplateRef, inject, viewChild, signal, computed } from '@angular/core';
 import {AlbumsService} from './albums.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryTypes, TextSearch,} from '../../../../common/entities/SearchQueryDTO';
-import {UserRoles} from '../../../../common/entities/UserDTO';
+import {Config} from '../../../../common/config/public/Config';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {PiTitleService} from '../../model/pi-title.service';
 import {FrameComponent} from '../frame/frame.component';
@@ -14,6 +14,8 @@ import {GallerySearchQueryBuilderComponent} from '../gallery/search/query-builde
 import {SavedSearchPopupComponent} from './saved-search-popup/saved-search-popup.component';
 import {ShareService} from '../gallery/share.service';
 import {NavigationService} from '../../model/navigation.service';
+import {SpinnerComponent} from '../utils/spinner/spinner.component';
+import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 import {SearchQueryParserService} from '../gallery/search/search-query-parser.service';
 
 @Component({
@@ -26,7 +28,9 @@ import {SearchQueryParserService} from '../gallery/search/search-query-parser.se
     NgIconComponent,
     FormsModule,
     GallerySearchQueryBuilderComponent,
-    SavedSearchPopupComponent
+    SavedSearchPopupComponent,
+    EmptyStateComponent,
+    SpinnerComponent
 ]
 })
 export class AlbumsComponent implements OnInit {
@@ -41,6 +45,8 @@ export class AlbumsComponent implements OnInit {
 
   readonly container = viewChild<ElementRef>('container');
   public readonly size = signal(0); // set from the container width in ngOnInit
+  // the albums and the size of a tile are known
+  public readonly isLoaded = computed((): boolean => this.size() > 0 && this.albumsService.albums() !== null);
   public savedSearch = {
     name: '',
     searchQuery: {type: SearchQueryTypes.any_text, value: ''} as TextSearch,
@@ -52,7 +58,7 @@ export class AlbumsComponent implements OnInit {
   }
 
   get CanCreateAlbum(): boolean {
-    return this.authenticationService.isAuthorized(UserRoles.Admin);
+    return this.authenticationService.isAuthorized(Config.Album.writeAccessMinRole);
   }
 
   get IsSearchQueryEmpty(): boolean {

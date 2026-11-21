@@ -15,7 +15,7 @@ const LOG_TAG = '[SessionManager]';
 
 export class SessionManager {
 
-  public static readonly NO_PROJECTION_KEY = crypto.createHash('md5').update('No Key').digest('hex');
+  public static readonly NO_PROJECTION_KEY = crypto.createHash('sha256').update('No Key').digest('hex').slice(0, 32);
 
   // Session stamps by user id or sharing key (see getSessionStamp), so they do not need a DB query per request.
   private stamps = new Map<string, { stamp: string | null, expires?: number }>();
@@ -49,6 +49,7 @@ export class SessionManager {
       name: 'Guest',
       role: UserRoles.LimitedGuest,
       usedSharingKey: sharing.sharingKey,
+      preventDownload: sharing.preventDownload === true,
       overrideAllowBlockList: true,
       allowQuery: SessionManager.andQueries(this.getMediaQueryForUser(sharing.creator), sharing.searchQuery ?? null),
       allowDirectoryList: creatorLists.allow,
@@ -103,7 +104,12 @@ export class SessionManager {
     if (typeof user.id !== 'number') {
       return null;
     }
-    return connection.getRepository(UserEntity).findOneBy({id: user.id});
+    const row = await connection.getRepository(UserEntity).findOneBy({id: user.id});
+    // confirming the release notes must not end the session
+    if (row) {
+      delete row.releaseNotesSeenVersion;
+    }
+    return row;
   }
 
   /**
@@ -115,7 +121,8 @@ export class SessionManager {
 
   public createProjectionKey(q: SearchQueryDTO) {
     const canonical = SearchQueryUtils.stringifyForComparison(q);
-    return crypto.createHash('md5').update(canonical).digest('hex');
+    // the projectionKey columns are 32 characters long
+    return crypto.createHash('sha256').update(canonical).digest('hex').slice(0, 32);
   }
 
   public async buildContext(user: SessionUser): Promise<SessionContext> {

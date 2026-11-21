@@ -44,6 +44,9 @@ npm start
 ```
 Default credentials: `admin` / `admin`.
 
+**Warning:** PiGallery2 does not limit the request rate itself (e.g. password guessing on the login page).
+Before making it reachable from the internet, put a reverse proxy with rate limiting in front of it, like the [nginx.conf](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/default/nginx.conf) of the Docker setup.
+
 ## Configuration
 - Run the app once to generate `config.json`.
 - Edit `config.json` manually or use the Settings UI.

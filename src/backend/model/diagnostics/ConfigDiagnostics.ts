@@ -1,3 +1,4 @@
+import {MapProviders, NavigationLinkTypes, DatabaseType} from '../../../common/config/Enums';
 import {PrivateConfigClass} from '../../../common/config/private/PrivateConfigClass';
 import {Logger} from '../../Logger';
 import {NotificationManager} from '../NotifocationManager';
@@ -6,29 +7,8 @@ import * as fs from 'node:fs';
 import {errorMessage} from '../../../common/entities/Error';
 import * as path from 'node:path';
 import {FFmpeg} from '../FFmpeg';
-import {
-  ClientAlbumConfig,
-  ClientFacesConfig,
-  ClientMapConfig,
-  ClientMetaFileConfig,
-  ClientPhotoConfig,
-  ClientRandomPhotoConfig,
-  ClientSearchConfig,
-  ClientSharingConfig,
-  MapLayers,
-  MapProviders,
-  NavBarConfig,
-  NavigationLinkConfig,
-  NavigationLinkTypes,
-} from '../../../common/config/public/ClientConfig';
-import {
-  DatabaseType,
-  ServerAlbumCoverConfig,
-  ServerDataBaseConfig,
-  ServerJobConfig,
-  ServerPhotoConfig,
-  ServerVideoConfig,
-} from '../../../common/config/private/PrivateConfig';
+import {ClientAlbumConfig, ClientFacesConfig, ClientMapConfig, ClientMetaFileConfig, ClientPhotoConfig, ClientRandomPhotoConfig, ClientSearchConfig, ClientSharingConfig, MapLayers, NavBarConfig, NavigationLinkConfig} from '../../../common/config/public/ClientConfig';
+import {ServerAlbumCoverConfig, ServerDataBaseConfig, ServerJobConfig, ServerPhotoConfig, ServerVideoConfig} from '../../../common/config/private/PrivateConfig';
 import {SearchQueryTypes, TextSearch,} from '../../../common/entities/SearchQueryDTO';
 import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {JobRepository} from '../jobs/JobRepository';

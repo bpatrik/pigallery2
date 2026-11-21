@@ -1,8 +1,10 @@
-import {expect, test} from '@playwright/test';
-import {expectLightboxPhoto, expectVisiblePhotosLoaded} from './helpers';
+import {expect, Page, test} from '@playwright/test';
+import {ACCENTED_DIR, expectApiOk, expectLightboxPhoto, expectNoHorizontalScroll, expectVisiblePhotosLoaded, pressEnterLikeAPhoneKeyboard} from './helpers';
 
 const SEARCH_KEYWORD = 104; // SearchQueryTypes.keyword
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match
+const SEARCH_DIRECTORY = 102; // SearchQueryTypes.directory
+const GLOB_MATCH = 3; // TextSearchQueryMatchTypes.globMatch
 
 test.describe('Search', () => {
   test('Search builder should propagate to search bar', async ({page}) => {
@@ -26,19 +28,167 @@ test.describe('Search', () => {
     await searchBar.fill('űáéú őóüö');
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await searchBar.press('Enter');
-    expect((await search).ok()).toBe(true);
+    await expectApiOk(await search, 'the search');
 
     await expect(page).toHaveURL(/\/search\//);
     await expect(searchBar).toHaveValue('űáéú őóüö');
     // the photos of the folder with accents in its name, also of its subfolder
     for (const name of ['IMG_8943.jpg', 'IMG_9697.jpg', 'IMG_8824.jpg']) {
-      await expect(page.locator(`.photo-container > img[alt="${name}"]`)).toBeVisible();
+      await expect(page.locator(`.photo-link > img[alt="${name}"]`)).toBeVisible();
     }
     await expectVisiblePhotosLoaded(page);
   });
 
+  // CUJ 21: the autocomplete of the search bar
+  test('Search should suggest a keyword while typing and search for the picked suggestion', async ({page}) => {
+    await page.goto('/gallery/');
+    const searchBar = page.locator('app-gallery-search .search-text');
+    const autocomplete = page.locator('app-gallery-search .autocomplete-list');
+    const suggestions = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/autocomplete/'));
+    // typed key by key: the suggestions follow the keyup
+    await searchBar.pressSequentially('Berk');
+    await expectApiOk(await suggestions, 'the autocomplete');
+    await expect(searchBar).toHaveAttribute('aria-expanded', 'true');
+    const berkley = autocomplete.getByRole('option').filter({hasText: 'Berkley'});
+    await expect(berkley.first()).toBeVisible();
+
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    // clicking a suggestion fills the search bar and searches for it (the arrow of the suggestion only fills it)
+    await berkley.first().click();
+    await expect(searchBar).toHaveValue(/Berkley/);
+    await expectApiOk(await search, 'the search');
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(page.locator('.photo-link > img[alt="IMG_5910.jpg"]')).toBeVisible();
+    await expect(autocomplete).toHaveCount(0);
+  });
+
+  test('Search dialog should search on Enter and close', async ({page}) => {
+    await page.goto('/gallery/');
+    await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
+    const builderText = page.locator('modal-container app-gallery-search-field-base input.search-text');
+    await builderText.fill('big_ben');
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await builderText.press('Enter');
+    await expectApiOk(await search, 'the search');
+
+    await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+    // like its Search button
+    await expect(page.locator('modal-container')).toHaveCount(0);
+  });
+
+  // Android keyboards often send Enter as an unidentified key (229) that no keydown.enter handler sees
+  test.describe('Enter key of a phone keyboard', () => {
+    test('should search from the search bar', async ({page}) => {
+      await page.goto('/gallery/');
+      const searchBar = page.locator('app-gallery-search .search-text');
+      // the keyboard shows a search key
+      await expect.soft(searchBar).toHaveAttribute('enterkeyhint', 'search');
+      await searchBar.fill('big_ben');
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      await pressEnterLikeAPhoneKeyboard(searchBar);
+      await expectApiOk(await search, 'the search');
+
+      await expect(page).toHaveURL(/\/search\//);
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+    });
+
+    test('should search from the search dialog and close it', async ({page}) => {
+      await page.goto('/gallery/');
+      await page.locator('app-gallery-search ng-icon[name="ionChevronDownOutline"]').click();
+      const builderText = page.locator('modal-container app-gallery-search-field-base input.search-text');
+      await expect.soft(builderText).toHaveAttribute('enterkeyhint', 'search');
+      await builderText.fill('big_ben');
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      await pressEnterLikeAPhoneKeyboard(builderText);
+      await expectApiOk(await search, 'the search');
+
+      // the typed query, not an emptied one
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('modal-container')).toHaveCount(0);
+    });
+  });
+
+  test('Search deep link with a photo should open the lightbox on that photo', async ({page}) => {
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    // accents in the search text and in the folder of the photo: the link has to encode both.
+    // In search results the photo is identified with its folder (QueryService.getMediaStringId).
+    await page.goto('/search/' + encodeURIComponent('űáéú őóüö') + '?p=' + encodeURIComponent(ACCENTED_DIR + '/IMG_8943.jpg'));
+    await expectApiOk(await search, 'the search');
+
+    await expectLightboxPhoto(page, 'IMG_8943.jpg');
+    // not the fallback to the first photo of a stale link
+    await expect(page.locator('app-toast-card')).toHaveCount(0);
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('app-gallery-lightbox-media img')).toHaveCount(0);
+    // back on the results of the same search
+    await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/search/űáéú őóüö' && !url.searchParams.has('p'));
+    await expect(page.locator('.photo-link > img[alt="IMG_8943.jpg"]')).toBeInViewport();
+  });
+
+  test.describe('Malformed search link', () => {
+    /**
+     * The search bar still works after a broken link: a new search shows its results.
+     */
+    const expectSearchBarWorks = async (page: Page): Promise<void> => {
+      const searchBar = page.locator('app-gallery-search .search-text');
+      await searchBar.fill('big_ben');
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      await searchBar.press('Enter');
+      await expectApiOk(await search, 'the search');
+      await expect(page.locator('.photo-link > img[alt="big_ben.jpg"]')).toBeVisible();
+      await expect(page.locator('app-gallery .alert-danger')).toHaveCount(0);
+    };
+
+    test('should search for a link that is not a query object as text', async ({page}) => {
+      const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+      // broken JSON: "{"
+      await page.goto('/search/%7B');
+      await expectApiOk(await search, 'the search');
+
+      await expect(page.locator('app-gallery-search .search-text')).toHaveValue('{');
+      await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
+      await expect(page.locator('app-gallery .alert-danger')).toHaveCount(0);
+      await expectSearchBarWorks(page);
+    });
+
+    test('should tell that the link is broken for an unknown search type, and keep the search bar working', async ({page}) => {
+      await page.goto('/search/' + encodeURIComponent(JSON.stringify({t: 999, v: 'x'})));
+
+      await expect(page.locator('app-gallery').getByText('This search link is broken')).toBeVisible();
+      await expect(page.getByText('Something went spectacularly wrong')).toHaveCount(0);
+      await expectSearchBarWorks(page);
+    });
+  });
+
   // Sanity check: what a user notices right away when opening search results. Soft checks, so one failure does not hide the others.
-  test('Search results should look right', async ({page}) => {
+  test('Search should group by directory in tree order and link the directories', async ({page}) => {
+    // the flattened accented folder: the media of the folder and of its subfolder
+    const query = {type: SEARCH_DIRECTORY, value: ACCENTED_DIR + '/*', matchType: GLOB_MATCH};
+    const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
+    await page.goto('/search/' + encodeURIComponent(JSON.stringify(query)));
+    await expectApiOk(await search, 'the search');
+
+    // the grouping follows the sorting
+    await page.locator('app-gallery-navbar #button-alignment').click();
+    await page.locator('#sorting-dropdown .sorting-grouping-item').filter({hasText: 'directory'}).first().click();
+    await page.locator('#sorting-dropdown .sorting-grouping-item').filter({hasText: 'ascending'}).first().click();
+    await page.locator('body').click({position: {x: 0, y: 0}});
+
+    // the whole path, the folder before its subfolder
+    const headers = page.locator('app-gallery-grid .directory-link');
+    await expect(headers).toHaveText([ACCENTED_DIR, ACCENTED_DIR + '/subdirectory']);
+    await expect(headers.first()).toHaveAttribute('title', ACCENTED_DIR);
+    // too long for the width of its photos: the start is cut, the end stays visible
+    expect.soft(await headers.first().evaluate(el => el.scrollWidth > el.clientWidth), 'cut header').toBe(true);
+    await expectNoHorizontalScroll(page, 'grouped by directory');
+
+    await headers.last().click();
+    await expect(page).toHaveURL(url => decodeURIComponent(url.pathname) === '/gallery/' + ACCENTED_DIR + '/subdirectory');
+    await expect(page.locator('.photo-link > img[alt="IMG_8824.jpg"]')).toBeVisible();
+  });
+
+  test('Search results should look right', {tag: '@sanity'}, async ({page}) => {
     const query = {type: SEARCH_KEYWORD, value: 'Berkley', matchType: EXACT_MATCH};
     const search = page.waitForResponse(res => new URL(res.url()).pathname.startsWith('/pgapi/search/'));
     await page.goto('/search/' + encodeURIComponent(JSON.stringify(query)));
@@ -46,12 +196,14 @@ test.describe('Search', () => {
 
     // the query is shown and the results render with loaded thumbnails
     await expect.soft(page.locator('app-gallery-search .search-text')).toHaveValue(/Berkley/);
-    const squirrel = page.locator('.photo-container > img[alt="IMG_5910.jpg"]');
+    const squirrel = page.locator('.photo-link > img[alt="IMG_5910.jpg"]');
     await expect(squirrel).toBeVisible();
     await expectVisiblePhotosLoaded(page);
+    await expectNoHorizontalScroll(page, 'search results');
 
     // opening a result shows it in the lightbox
     await squirrel.click();
     await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    await expectNoHorizontalScroll(page, 'lightbox');
   });
 });

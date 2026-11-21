@@ -1,3 +1,4 @@
+import {LightBoxTitleTexts} from '../../../../../common/config/Enums';
 import { Component, OnDestroy, TemplateRef, computed, inject } from '@angular/core';
 import {NotificationService} from '../../../model/notification.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -9,9 +10,8 @@ import {ContentLoaderService} from '../contentLoader.service';
 import { NgIconComponent } from '@ng-icons/core';
 import { FormsModule } from '@angular/forms';
 import {CopyDirective} from '../../utils/copy/copy.directive';
-
 import { StringifyEnum } from '../../../pipes/StringifyEnum';
-import { LightBoxTitleTexts } from '../../../../../common/config/public/ClientConfig';
+
 import {Utils} from '../../../../../common/Utils';
 import {Config} from '../../../../../common/config/public/Config';
 
@@ -81,12 +81,8 @@ import {Config} from '../../../../../common/config/public/Config';
       u.searchParams.delete(QueryParams.gallery.autoPollInterval);
     }
 
-    // Loop slideshow toggle
-    if (this.loopSlideshow) {
-      u.searchParams.set(QueryParams.gallery.lightbox.loopSlideshow, 'true');
-    } else {
-      u.searchParams.delete(QueryParams.gallery.lightbox.loopSlideshow);
-    }
+    // Loop slideshow toggle: always explicit, as the gallery loops by default
+    u.searchParams.set(QueryParams.gallery.lightbox.loopSlideshow, String(this.loopSlideshow));
 
     // Captions always on
     if (this.captionAlwaysOn) {

@@ -12,6 +12,14 @@ import {ProjectedAlbumCacheEntity} from '../../../../../src/backend/model/databa
 import {SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {TestHelper} from '../../../../TestHelper';
 import chaiAsPromised from 'chai-as-promised';
+import {IndexingManager} from '../../../../../src/backend/model/database/IndexingManager';
+import {NotificationManager} from '../../../../../src/backend/model/NotifocationManager';
+import {Config} from '../../../../../src/common/config/private/Config';
+import {ProjectPath} from '../../../../../src/backend/ProjectPath';
+import {SearchQueryDTO} from '../../../../../src/common/entities/SearchQueryDTO';
+import {FileDTO} from '../../../../../src/common/entities/FileDTO';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 
 const deepEqualInAnyOrder = require('deep-equal-in-any-order');
@@ -160,6 +168,51 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
         searchQuery: query
       } as SavedSearchDTO]);
     });
+
+    it('should not save an album with an invalid search query #557', async () => {
+      const am = new AlbumManager();
+      const connection = await SQLConnection.getConnection();
+      const query: TextSearch = {value: 'test', type: SearchQueryTypes.any_text};
+
+      await expect(am.addSavedSearch('Unknown type', {type: 999} as unknown as SearchQueryDTO)).to.be.rejectedWith(Error);
+      await expect(am.addSavedSearch('No value', {type: SearchQueryTypes.any_text} as SearchQueryDTO)).to.be.rejectedWith(Error);
+      await expect(am.addSavedSearch('Bad list', {
+        type: SearchQueryTypes.AND,
+        list: [Utils.clone(query), {type: 999}]
+      } as unknown as SearchQueryDTO)).to.be.rejectedWith(Error);
+      await expect(am.addSavedSearch('', Utils.clone(query))).to.be.rejectedWith(Error);
+      await expect(am.addSavedSearch('  ', Utils.clone(query))).to.be.rejectedWith(Error);
+
+      expect(await connection.getRepository(AlbumBaseEntity).find()).to.deep.equal([]);
+    });
+
+    it('should skip invalid saved searches of a .saved_searches.pg2conf and warn the admins #557', async () => {
+      const connection = await SQLConnection.getConnection();
+      const query: TextSearch = {value: 'árvíz', type: SearchQueryTypes.any_text};
+      const folder = path.join(TestHelper.TMP_DIR, 'pg2conf-gallery');
+      fs.mkdirSync(folder, {recursive: true});
+      fs.writeFileSync(path.join(folder, '.saved_searches.pg2conf'), JSON.stringify([
+        {name: 'Broken', searchQuery: {type: 999}},
+        {name: 'Tükörfúrógép', searchQuery: query}
+      ]));
+      Config.Media.folder = folder;
+      ProjectPath.reset();
+      NotificationManager.notifications = [];
+
+      await (IndexingManager as unknown as {
+        processServerSidePG2Conf: (parent: unknown, files: FileDTO[]) => Promise<void>
+      }).processServerSidePG2Conf({path: '.', name: ''}, [{name: '.saved_searches.pg2conf'} as FileDTO]);
+
+      expect(await connection.getRepository(AlbumBaseEntity).find()).to.deep.equal([{
+        id: 1,
+        name: 'Tükörfúrógép',
+        locked: true,
+        searchQuery: query
+      } as SavedSearchDTO]);
+      expect(NotificationManager.notifications.map(n => n.message)).to.have.length(1);
+      expect(NotificationManager.notifications[0].message).to.contain('Broken');
+      NotificationManager.notifications = [];
+    });
   });
 
   it('should list album', async () => {
@@ -185,6 +238,23 @@ describe('AlbumManager', (sqlHelper: DBTestHelper) => {
     } as SavedSearchDTO]);
 
 
+  });
+
+  // #1312: an album whose saved search matches nothing (anymore) stays in the list, without a cover
+  it('should list an album whose search matches nothing, with no cover and count 0', async () => {
+    const am = new AlbumManager();
+    const query: TextSearch = {value: 'no such photo', type: SearchQueryTypes.any_text};
+    await am.addSavedSearch('Empty album', Utils.clone(query));
+
+    // twice: the first call fills the cache, the second reads it
+    for (let i = 0; i < 2; ++i) {
+      const albums = await am.getAll(DBTestHelper.defaultSession);
+      expect(albums.map(a => a.name)).to.deep.equal(['Empty album']);
+      expect((albums[0] as unknown as SavedSearchDTO).searchQuery).to.deep.equal(query);
+      expect(albums[0].cache, 'the album cache').to.not.be.undefined;
+      expect(albums[0].cache!.itemCount).to.equal(0);
+      expect(albums[0].cache!.cover ?? null).to.be.null;
+    }
   });
 
   describe('Projection Tests',async () => {

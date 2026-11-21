@@ -20,6 +20,7 @@ import {NgIconComponent} from '@ng-icons/core';
 import {InfoPanelLightboxComponent} from './infopanel/info-panel.lightbox.gallery.component';
 import {LightboxService} from './lightbox.service';
 import {ReloadAfterUpgradeComponent} from '../../../model/lazy-loading';
+import {Location} from '@angular/common';
 
 export enum LightboxStates {
   Open = 1,
@@ -72,6 +73,7 @@ export class GalleryLightboxComponent implements OnDestroy {
   private wakeLockService = inject(WakeLockService);
   private lightboxService = inject(LightboxService);
   private notificationService = inject(NotificationService);
+  private location = inject(Location);
 
   readonly grid = input<LightboxGrid>();
   readonly mediaElement = viewChild.required<GalleryLightboxMediaComponent>('photo');
@@ -115,10 +117,16 @@ export class GalleryLightboxComponent implements OnDestroy {
     if (index + 1 < media.length) {
       return media[index + 1];
     }
-    return this.lightboxService.loopSlideshow() ? media[0] : null;
+    // a single photo has nothing to loop to
+    return this.lightboxService.loopSlideshow() && media.length > 1 ? media[0] : null;
   });
   readonly hasNext = computed((): boolean => !!this.nextMedia());
-  readonly navigation = computed(() => ({hasPrev: this.hasPrev(), hasNext: this.hasNext()}));
+  readonly navigation = computed(() => ({
+    hasPrev: this.hasPrev(),
+    hasNext: this.hasNext(),
+    // the last photo with loop on: next starts over from the first one
+    nextLoops: this.hasNext() && this.activeIndex() === (this.media()?.length ?? 0) - 1
+  }));
   // only used to preload the next photo, that is sized to the window: it does not need the grid's tile
   readonly nextGridMedia = computed((): GridMedia | null => {
     const media = this.nextMedia();
@@ -136,6 +144,9 @@ export class GalleryLightboxComponent implements OnDestroy {
   private navigationId = 0;
   // increases with every open and close: an outdated animation end is ignored
   private openCloseId = 0;
+  // zooms in from the tile of the photo and back into it (scrolls the grid there); set on open, as the history
+  // state is already the one of the page under the lightbox when back closes it
+  private revealInGrid = true;
   private photoPlayer: Animation | null = null;
   private lightboxPlayer: Animation | null = null;
 
@@ -212,8 +223,16 @@ export class GalleryLightboxComponent implements OnDestroy {
   }
 
   public hide(): void {
+    if (this.queryService.lightboxClosesWithBack()) {
+      // the page it was opened from (the grid, the map) is the history entry before it: going back
+      // leaves no photo in the history that back would open again (#470)
+      this.location.back();
+      this.piTitleService.setLastNonMedia();
+      return;
+    }
+    // opened from a link: the folder replaces the photo, for the same reason
     this.router
-      .navigate([], {queryParams: this.queryService.getParams()})
+      .navigate([], {queryParams: this.queryService.getParams(), replaceUrl: true})
       .then(() => {
         this.piTitleService.setLastNonMedia();
       })
@@ -353,7 +372,10 @@ export class GalleryLightboxComponent implements OnDestroy {
     const navigationId = ++this.navigationId;
     this.shownId = this.queryService.getMediaStringId(media);
     this.resetZoom();
-    const tile = await this.grid()?.revealMedia(media);
+    if (this.status() === LightboxStates.Closed || this.status() === LightboxStates.Closing) {
+      this.revealInGrid = this.queryService.lightboxRevealsInGrid();
+    }
+    const tile = this.revealInGrid ? await this.grid()?.revealMedia(media) : null;
     if (navigationId !== this.navigationId) {
       return;
     }
@@ -405,7 +427,7 @@ export class GalleryLightboxComponent implements OnDestroy {
     this.blackCanvasOpacity.set(0);
 
     const activePhoto = this.activePhoto();
-    const tile = activePhoto ? await this.grid()?.revealMedia(activePhoto.media) : null;
+    const tile = activePhoto && this.revealInGrid ? await this.grid()?.revealMedia(activePhoto.media) : null;
     if (navigationId !== this.navigationId) {
       return; // opened again meanwhile
     }
@@ -452,6 +474,7 @@ export class GalleryLightboxComponent implements OnDestroy {
         queryParams: {...this.queryService.getParams({media}), ...extraParams},
         queryParamsHandling: 'merge', // keep existing params
         replaceUrl: true,
+        state: this.queryService.keepLightboxState(),
       })
       .catch((err) => {
         console.error(`Can't navigate to photo ${media.name}`, err);

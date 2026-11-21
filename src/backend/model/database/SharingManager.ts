@@ -125,10 +125,10 @@ export class SharingManager {
     }
     const connection = await SQLConnection.getConnection();
 
-    const sharing = await connection.getRepository(SharingEntity).findOneBy({
-      id: inSharing.id,
-      creator: {id: creatorId},
-    });
+    // an Admin (forceUpdate) may update the sharing of anybody; it stays the sharing of its creator
+    const sharing = await connection.getRepository(SharingEntity).findOneBy(forceUpdate === true
+      ? {id: inSharing.id}
+      : {id: inSharing.id, creator: {id: creatorId}});
     if (!sharing) {
       throw new Error('Sharing not found');
     }
@@ -163,6 +163,9 @@ export class SharingManager {
       sharing.defaultSearchView = null;
     } else if (inSharing.defaultDirectoryView === null) {
       sharing.defaultDirectoryView = null;
+    }
+    if (typeof inSharing.preventDownload === 'boolean') {
+      sharing.preventDownload = inSharing.preventDownload;
     }
     sharing.expires = inSharing.expires;
 

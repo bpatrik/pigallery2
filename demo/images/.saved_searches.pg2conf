@@ -2,29 +2,7 @@
   {
     "name": "Group photos",
     "searchQuery": {
-      "type": 3,
-      "list": [
-        {
-          "type": 105,
-          "value": "Balu the bear",
-          "matchType": 1
-        },
-        {
-          "type": 105,
-          "value": "Boo-Boo Bear",
-          "matchType": 1
-        },
-        {
-          "type": 105,
-          "value": "Hugin the raven",
-          "matchType": 1
-        },
-        {
-          "type": 105,
-          "value": "Akela the wolf",
-          "matchType": 1
-        }
-      ],
+      "type": 16,
       "min": 2
     }
   },

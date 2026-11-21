@@ -1,7 +1,8 @@
+import {DatabaseType} from '../../../../../src/common/config/Enums';
 import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {Server} from '../../../../../src/backend/server';
-import {DatabaseType, ServerConfig} from '../../../../../src/common/config/private/PrivateConfig';
+import {ServerConfig} from '../../../../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {TAGS} from '../../../../../src/common/config/public/ClientConfig';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';

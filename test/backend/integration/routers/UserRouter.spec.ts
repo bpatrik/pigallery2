@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../src/common/config/Enums';
 import {Config} from '../../../../src/common/config/private/Config';
 import {Server} from '../../../../src/backend/server';
 import {LoginCredential} from '../../../../src/common/entities/LoginCredential';
@@ -9,8 +10,8 @@ import {Utils} from '../../../../src/common/Utils';
 import {SuperAgentStatic} from 'superagent';
 import {RouteTestingHelper} from './RouteTestingHelper';
 import {ErrorCodes} from '../../../../src/common/entities/Error';
-import {DatabaseType} from '../../../../src/common/config/private/PrivateConfig';
 import * as chai from "chai";
+import {CookieNames} from '../../../../src/common/CookieNames';
 import {default as chaiHttp, request} from "chai-http";
 import {DBTestHelper} from '../../DBTestHelper';
 import {TestHelper} from '../../../TestHelper';
@@ -70,6 +71,48 @@ describe('UserRouter', () => {
       await login(server);
 
     });
+    it('should reject a wrong password with CREDENTIAL_NOT_FOUND and 401', async () => {
+      Config.Users.authenticationRequired = true;
+      const result = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username: testUser.name, password: 'wrong', rememberMe: false} as LoginCredential});
+
+      result.body.error.should.be.a('object');
+      should.equal(result.body.error.code, ErrorCodes.CREDENTIAL_NOT_FOUND);
+      should.equal(result.body.result, null);
+      should.not.exist(result.headers['set-cookie']);
+      result.should.have.status(401);
+    });
+
+    // remember me checked: the cookie survives a browser restart; unchecked: a session cookie, ends with the browser session
+    const sessionCookie = async (rememberMe: boolean): Promise<string> => {
+      const result = await request.execute(server.Server)
+        .post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username: testUser.name, password: testUser.password, rememberMe} as LoginCredential});
+      RouteTestingHelper.shouldBeValidUIUser(result, expectedUser);
+      const cookies = result.headers['set-cookie'] as unknown as string[];
+      const cookie = cookies.find(c => c.startsWith(CookieNames.session + '='));
+      should.exist(cookie);
+      return cookie!;
+    };
+
+    it('should set a persistent session cookie with remember me', async () => {
+      Config.Users.authenticationRequired = true;
+      const cookie = await sessionCookie(true);
+      const expires = cookie.match(/;\s*expires=([^;]+)/i);
+      should.exist(expires, cookie);
+      const lifetime = new Date(expires![1]).getTime() - Date.now();
+      // whole seconds in the header
+      lifetime.should.be.within(Config.Server.sessionTimeout - 60000, Config.Server.sessionTimeout + 1000);
+    });
+
+    it('should set a browser session cookie without remember me', async () => {
+      Config.Users.authenticationRequired = true;
+      const cookie = await sessionCookie(false);
+      cookie.should.not.match(/;\s*expires=/i);
+      cookie.should.not.match(/;\s*max-age=/i);
+    });
+
     it('it skip login', async () => {
       Config.Users.authenticationRequired = false;
       const result = await request.execute(server.Server)
@@ -214,6 +257,183 @@ describe('UserRouter', () => {
       me.should.have.status(401);
       should.equal(me.body.error.code, ErrorCodes.NOT_AUTHENTICATED_SHARING);
       agent.close();
+    });
+  });
+
+  describe('user management (#1315)', () => {
+    beforeEach(setUp);
+    afterEach(tearDown);
+
+    const admin = {name: 'admin_1315', password: 'admin_pass', role: UserRoles.Admin} as UserDTO;
+    let adminId: number;
+    let testUserId: number;
+
+    beforeEach(async () => {
+      Config.Users.authenticationRequired = true;
+      const um = ObjectManagers.getInstance().UserManager;
+      adminId = (await um.createUser(Utils.clone(admin))).id;
+      testUserId = (await um.findOne({name: testUser.name}))!.id;
+    });
+
+    const loginAs = async (u: UserDTO): Promise<ReturnType<typeof request.agent>> => {
+      const agent = request.agent(server.Server);
+      const res = await agent.post(Config.Server.apiPath + '/user/login')
+        .send({loginCredential: {username: u.name, password: u.password, rememberMe: false} as LoginCredential});
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+      return agent;
+    };
+
+    it('should refuse the admin API to a normal user', async () => {
+      const userAgent = await loginAs(testUser);
+      const statuses: number[] = [];
+      for (const url of ['/settings', '/user/list', '/admin/jobs/available']) {
+        const res = await userAgent.get(Config.Server.apiPath + url);
+        should.equal(res.body.error.code, ErrorCodes.NOT_AUTHORISED, url);
+        should.equal(res.body.result, null, url);
+        statuses.push(res.status);
+      }
+      userAgent.close();
+      chai.expect(statuses).to.deep.equal([403, 403, 403]);
+    });
+
+    it('should end the session of a user whose role an admin changed', async () => {
+      const userAgent = await loginAs(testUser);
+      (await userAgent.get(Config.Server.apiPath + '/user/me')).should.have.status(200);
+      const adminAgent = await loginAs(admin);
+
+      const res = await adminAgent.post(Config.Server.apiPath + '/user/' + testUserId + '/role').send({newRole: UserRoles.Guest});
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+
+      (await userAgent.get(Config.Server.apiPath + '/user/me')).should.have.status(401);
+      // the admin's own session is not affected
+      (await adminAgent.get(Config.Server.apiPath + '/user/me')).should.have.status(200);
+      userAgent.close();
+      adminAgent.close();
+    });
+
+    it('should end the session of a user an admin deleted', async () => {
+      const userAgent = await loginAs(testUser);
+      const adminAgent = await loginAs(admin);
+
+      const res = await adminAgent.delete(Config.Server.apiPath + '/user/' + testUserId);
+      res.should.have.status(200);
+      should.equal(res.body.error, null);
+
+      (await userAgent.get(Config.Server.apiPath + '/user/me')).should.have.status(401);
+      userAgent.close();
+      adminAgent.close();
+    });
+
+    it('should not let an admin delete themselves', async () => {
+      const adminAgent = await loginAs(admin);
+      const res = await adminAgent.delete(Config.Server.apiPath + '/user/' + adminId);
+
+      res.body.error.should.be.a('object');
+      should.exist(await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}));
+      adminAgent.close();
+    });
+
+    it('should not let the only admin lower their own role', async () => {
+      const adminAgent = await loginAs(admin);
+      const res = await adminAgent.post(Config.Server.apiPath + '/user/' + adminId + '/role').send({newRole: UserRoles.User});
+
+      res.body.error.should.be.a('object');
+      (await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}))!.role.should.equal(UserRoles.Admin);
+      adminAgent.close();
+    });
+
+    it('should not let an admin lower their own role, even if there is an other admin', async () => {
+      await ObjectManagers.getInstance().UserManager.createUser({name: 'other_admin', password: 'pass', role: UserRoles.Admin} as UserDTO);
+      const adminAgent = await loginAs(admin);
+      const res = await adminAgent.post(Config.Server.apiPath + '/user/' + adminId + '/role').send({newRole: UserRoles.User});
+      res.status.should.equal(403);
+      res.body.error.code.should.equal(ErrorCodes.NOT_AUTHORISED);
+      (await ObjectManagers.getInstance().UserManager.findOne({name: admin.name}))!.role.should.equal(UserRoles.Admin);
+      adminAgent.close();
+    });
+
+    it('should not let an admin change, delete or unlink a Developer', async () => {
+      const um = ObjectManagers.getInstance().UserManager;
+      const dev = {name: 'developer', password: 'dev', role: UserRoles.Developer} as UserDTO;
+      const devId = (await um.createUser(Utils.clone(dev))).id;
+      const adminAgent = await loginAs(admin);
+      const api = (p: string) => Config.Server.apiPath + '/user/' + devId + p;
+
+      const responses = [
+        await adminAgent.post(api('/role')).send({newRole: UserRoles.User}),
+        await adminAgent.post(api('/settings')).send({settings: {newPassword: 'hacked'}}),
+        await adminAgent.delete(api('/oidc')),
+        await adminAgent.delete(api('')),
+      ];
+      chai.expect(responses.map(r => r.body.error?.code)).to.deep.equal(Array(4).fill(ErrorCodes.NOT_AUTHORISED));
+      adminAgent.close();
+
+      const stored = (await um.findOne({id: devId}))!;
+      stored.role.should.equal(UserRoles.Developer);
+      // the password did not change
+      (await loginAs(dev)).close();
+    });
+
+    it('should not let an admin create a Developer or make a user Developer', async () => {
+      const adminAgent = await loginAs(admin);
+      const um = ObjectManagers.getInstance().UserManager;
+
+      let res = await adminAgent.put(Config.Server.apiPath + '/user')
+        .send({newUser: {name: 'dev', password: 'dev', role: UserRoles.Developer}});
+      res.body.error.code.should.equal(ErrorCodes.USER_CREATION_ERROR);
+      should.equal(await um.findOne({name: 'dev'}), null);
+
+      res = await adminAgent.post(Config.Server.apiPath + '/user/' + testUserId + '/role').send({newRole: UserRoles.Developer});
+      res.body.error.code.should.equal(ErrorCodes.INPUT_ERROR);
+      (await um.findOne({name: testUser.name}))!.role.should.equal(UserRoles.User);
+
+      res = await adminAgent.post(Config.Server.apiPath + '/user/' + testUserId + '/role').send({newRole: UserRoles.Admin});
+      should.equal(res.body.error, null);
+      (await um.findOne({name: testUser.name}))!.role.should.equal(UserRoles.Admin);
+      adminAgent.close();
+    });
+
+    it('should not let an admin set a role setting to Developer, but a Developer can', async () => {
+      const putAlbum = (agent: ReturnType<typeof request.agent>, writeAccessMinRole: UserRoles) =>
+        agent.put(Config.Server.apiPath + '/settings').send({
+          settingsPath: 'Album',
+          settings: {...JSON.parse(JSON.stringify(Config.Album)), writeAccessMinRole}
+        });
+      const putEnforcedUsers = (agent: ReturnType<typeof request.agent>, role: UserRoles) =>
+        agent.put(Config.Server.apiPath + '/settings').send({
+          settingsPath: 'Users',
+          settings: {...JSON.parse(JSON.stringify(Config.Users)), enforcedUsers: [{name: 'enforced', password: 'pass', role}]}
+        });
+      const adminAgent = await loginAs(admin);
+
+      let res = await putAlbum(adminAgent, UserRoles.Developer);
+      res.body.error.code.should.equal(ErrorCodes.SETTINGS_ERROR);
+      Config.Album.writeAccessMinRole.should.equal(UserRoles.Admin);
+      res = await putEnforcedUsers(adminAgent, UserRoles.Developer);
+      res.body.error.code.should.equal(ErrorCodes.SETTINGS_ERROR);
+      Config.Users.enforcedUsers.should.deep.equal([]);
+
+      res = await putAlbum(adminAgent, UserRoles.User);
+      should.equal(res.body.error, null);
+      Config.Album.writeAccessMinRole.should.equal(UserRoles.User);
+      adminAgent.close();
+
+      const dev = {name: 'developer', password: 'dev', role: UserRoles.Developer} as UserDTO;
+      await ObjectManagers.getInstance().UserManager.createUser(Utils.clone(dev));
+      const devAgent = await loginAs(dev);
+      res = await putAlbum(devAgent, UserRoles.Developer);
+      should.equal(res.body.error, null);
+      Config.Album.writeAccessMinRole.should.equal(UserRoles.Developer);
+      devAgent.close();
+
+      // an admin can still save the settings that a Developer set to Developer
+      const adminAgent2 = await loginAs(admin);
+      res = await putAlbum(adminAgent2, UserRoles.Developer);
+      should.equal(res.body.error, null);
+      adminAgent2.close();
+      TestHelper.resetConfig();
     });
   });
 });

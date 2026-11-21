@@ -15,6 +15,7 @@ import {MediaDTO} from '../../../../common/entities/MediaDTO';
 import {FileDTO} from '../../../../common/entities/FileDTO';
 import {GalleryService} from './gallery.service';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
+import {ToastService} from '../toast/toast.service';
 
 @Injectable({providedIn: 'root'})
 export class ContentLoaderService {
@@ -23,6 +24,7 @@ export class ContentLoaderService {
   private shareService = inject(ShareService);
   private galleryService = inject(GalleryService);
   private router = inject(Router);
+  private toastService = inject(ToastService);
 
   public readonly content = signal<ContentWrapperWithError>({} as ContentWrapperWithError);
   public readonly originalContent = computed((): DirectoryContent | undefined => {
@@ -32,7 +34,9 @@ export class ContentLoaderService {
   private ongoingContentRequest: string | null = null;
   // directories that answered 'not found' since the last successfully loaded directory (avoids redirect loops)
   private readonly notFoundDirectories = new Set<string>();
-  private lastContentRequest: { type: 'directory' | 'search', value: string } | null = null;
+  private readonly lastContentRequest = signal<{ type: 'directory' | 'search', value: string } | null>(null);
+  // the content could not be loaded, but loading it again may work (e.g. a server error or a lost connection)
+  public readonly canRetry = computed((): boolean => !!this.content().error && this.lastContentRequest() !== null);
   private pollingTimerRestart = new Subject<void>();
 
   constructor() {
@@ -67,20 +71,23 @@ export class ContentLoaderService {
   }
 
   setContent(content: ContentWrapperWithError): void {
-    if (ContentWrapperUtils.equals(this.content(), content)) {
+    // equals() compares only the content, not the error
+    if (this.content().error === content.error && ContentWrapperUtils.equals(this.content(), content)) {
       return;
     }
     this.content.set(content);
   }
 
   public async loadDirectory(directoryName: string, forceReload = false): Promise<void> {
+    // a reload (e.g. the polling of a photo frame) that fails keeps showing it
+    const shown = forceReload && this.content().directory ? this.content() : null;
 
     // load from cache
     const cachedCw = this.galleryCacheService.getDirectory(directoryName);
 
     this.setContent(ContentWrapperUtils.unpack(cachedCw));
     this.ongoingContentRequest = directoryName;
-    this.lastContentRequest = {type: 'directory', value: directoryName};
+    this.lastContentRequest.set({type: 'directory', value: directoryName});
 
     // prepare server request
     const params: Record<string, unknown> = {};
@@ -90,7 +97,7 @@ export class ContentLoaderService {
           this.shareService.getSharingKey();
       }
     }
-    let cw: PackedContentWrapperWithError | null = null;
+    let cw: PackedContentWrapperWithError | null;
 
     try {
       if (
@@ -119,6 +126,11 @@ export class ContentLoaderService {
         return;
       }
       console.error(e);
+      if (this.ongoingContentRequest === directoryName) {
+        this.ongoingContentRequest = null;
+        this.setContent(shown ?? {error: $localize`Unknown server error` + ': ' + errorMessage(e)} as ContentWrapperWithError);
+      }
+      return;
     }
     if (this.ongoingContentRequest !== directoryName) {
       return;
@@ -159,6 +171,11 @@ export class ContentLoaderService {
       this.setContent({error: $localize`Directory not found`} as ContentWrapperWithError);
       return;
     }
+    this.toastService.open({
+      type: 'warning',
+      text: $localize`Folder "${directoryName}:FOLDER:" not found. Showing Home.`,
+      timeout: ToastService.TIMEOUT
+    });
     const queryParams: Record<string, string> = {};
     const sharingKey = this.shareService.getSharingKey();
     if (this.shareService.isSharing() && sharingKey) {
@@ -170,7 +187,7 @@ export class ContentLoaderService {
   public async search(query: SearchQueryDTO, forceReload = false): Promise<void> {
     const queryStr = JSON.stringify(query);
     this.ongoingContentRequest = queryStr;
-    this.lastContentRequest = {type: 'search', value: queryStr};
+    this.lastContentRequest.set({type: 'search', value: queryStr});
 
     if (!forceReload) {
       this.setContent({} as PackedContentWrapperWithError); // don't empty the page when its just a reload
@@ -203,17 +220,27 @@ export class ContentLoaderService {
     this.setContent(ContentWrapperUtils.unpack(cw));
   }
 
+  /**
+   * The search link has a query that this version does not understand: nothing to load.
+   */
+  public showBrokenSearchLink(): void {
+    this.ongoingContentRequest = null;
+    this.lastContentRequest.set(null);
+    this.setContent({error: $localize`This search link is broken`} as ContentWrapperWithError);
+  }
+
   public readonly isSearchResult = computed((): boolean => !!this.content().searchResult);
 
   public async reloadCurrentContent(): Promise<void> {
-    if (!this.lastContentRequest) {
+    const last = this.lastContentRequest();
+    if (!last) {
       return;
     }
 
-    if (this.lastContentRequest.type === 'directory') {
-      await this.loadDirectory(this.lastContentRequest.value, true);
-    } else if (this.lastContentRequest.type === 'search') {
-      await this.search(JSON.parse(this.lastContentRequest.value), true);
+    if (last.type === 'directory') {
+      await this.loadDirectory(last.value, true);
+    } else if (last.type === 'search') {
+      await this.search(JSON.parse(last.value), true);
     }
   }
 }

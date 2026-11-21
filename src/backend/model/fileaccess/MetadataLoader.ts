@@ -26,10 +26,21 @@ type ExifData = any;
 
 sharp.cache(false);
 
-// exifr (unmaintained) calls fileHandle.stat(path). Node 26 rejects the string as `options`, so every
-// chunked read throws and leaks the open FileHandle, which Node 26 also turns into an uncaught error.
+// exifr (unmaintained) leaves its FileHandle open whenever reading or parsing throws (e.g. on an empty file).
+// Node 26 turns a FileHandle that the garbage collector closes into an uncaught error that crashes the app (#1408),
+// so it gets closed on every error here and in MetadataLoader.parseExif().
 const ExifrFsReader = exifr.fileReaders.get('fs');
 exifr.fileReaders.set('fs', class extends ExifrFsReader {
+  async read(): Promise<void> {
+    try {
+      await super.read();
+    } catch (err) {
+      await this['close']();
+      throw err;
+    }
+  }
+
+  // exifr calls fileHandle.stat(path). Node 26 rejects the string as `options`, so every chunked read throws.
   async open(): Promise<void> {
     if (this['fh'] === undefined) {
       this['fh'] = await this['fs'].open(this['input'], 'r');
@@ -45,6 +56,26 @@ export class MetadataLoader {
     creationDate: 0,
     fileSize: 0,
   };
+
+  /**
+   * Same as exifr.parse(), but always closes the file, also when parsing throws.
+   */
+  private static async parseExif(fullPath: string, options: Record<string, boolean>): Promise<ExifData> {
+    const exr: ExifData = new exifr.Exifr(options); // exifr's typings miss exr.file
+    try {
+      await exr.read(fullPath);
+      return await exr.parse();
+    } finally {
+      await exr.file?.close();
+    }
+  }
+
+  /**
+   * True if exifr returned nothing but errors (with mergeOutput: false it reports them in an 'errors' section).
+   */
+  private static isOnlyErrors(exif: Record<string, unknown> | undefined): boolean {
+    return !!exif && Array.isArray(exif['errors']) && Object.keys(exif).every(k => k === 'errors');
+  }
 
   @ExtensionDecorator(e => e.gallery.MetadataLoader.loadVideoMetadata)
   public static async loadVideoMetadata(fullPath: string): Promise<VideoMetadata> {
@@ -71,7 +102,13 @@ export class MetadataLoader {
     try {
 
 
-      const data = await FFmpeg.probe(fullPath);
+      // ffprobe only exposes the embedded XMP with the export_xmp flag, and only the mov/mp4 demuxer knows that flag.
+      // Old ffprobe versions (e.g. the 4.0.2 that ffprobe-static ships) fail on it for any other container,
+      // so it is only sent for these extensions and a failed probe is repeated without it.
+      const exportXmp = ['.mp4', '.mov', '.m4v', '.3gp'].includes(path.extname(fullPath).toLowerCase());
+      const data = exportXmp
+        ? await FFmpeg.probe(fullPath, ['-export_xmp', '1']).catch(() => FFmpeg.probe(fullPath))
+        : await FFmpeg.probe(fullPath);
 
       try {
         for (const stream of data.streams) {
@@ -160,19 +197,25 @@ export class MetadataLoader {
       metadata.creationDate = metadata.creationDate || 0;
 
       try {
-        // GPS of videos is stored in the embedded XMP (issue #1260). ffprobe only exposes the XMP with
-        // the export_xmp flag, and only the mov/mp4 demuxer accepts that flag (e.g. matroska rejects it).
-        if ((data.format.format_name || '').split(',').includes('mp4')) {
-          const xmp = (await FFmpeg.probe(fullPath, ['-export_xmp', '1'])).format.tags?.['xmp'];
-          if (xmp) {
-            const xmpData: ExifData = await exifr.sidecar(Buffer.from(xmp), undefined, 'xmp');
-            if (xmpData) {
-              MetadataLoader.mapGPS(metadata, xmpData);
-            }
+        // GPS of videos (issue #1260): the embedded XMP comes first, parsed like the XMP of photos and sidecars
+        const xmp = data.format.tags?.['xmp'];
+        if (xmp) {
+          const xmpData: ExifData = await exifr.sidecar(Buffer.from(xmp), undefined, 'xmp');
+          if (xmpData) {
+            MetadataLoader.mapGPS(metadata, xmpData);
+          }
+        }
+        // phones store the position in the QuickTime location tag (ISO 6709) instead
+        const gps = (metadata as PhotoMetadata).positionData?.GPSData;
+        if (gps?.latitude === undefined || gps.longitude === undefined) {
+          const position = Utils.parseISO6709(data.format.tags?.['com.apple.quicktime.location.ISO6709']) ??
+            Utils.parseISO6709(data.format.tags?.['location']);
+          if (position) {
+            MetadataLoader.mapGPS(metadata, {gps: position});
           }
         }
       } catch (err) {
-        Logger.silly(LOG_TAG, 'Error loading embedded XMP metadata for : ' + fullPath);
+        Logger.silly(LOG_TAG, 'Error loading GPS metadata for : ' + fullPath);
         Logger.silly(err);
       }
 
@@ -255,7 +298,18 @@ export class MetadataLoader {
 
       try {
         try {
-          const exif = await exifr.parse(fullPath, exifrOptions);
+          let exif = await MetadataLoader.parseExif(fullPath, exifrOptions);
+          if (MetadataLoader.isOnlyErrors(exif)) {
+            // exifr reads files in chunks and fails on segments that start right before the end of the first chunk,
+            // losing all metadata (https://github.com/MikeKovarik/exifr/issues/141). Reading the whole file works.
+            // (options.chunked is documented, but missing from exifr's typings)
+            const wholeFile: Record<string, boolean> = {...exifrOptions, chunked: false};
+            exif = await MetadataLoader.parseExif(fullPath, wholeFile);
+            if (MetadataLoader.isOnlyErrors(exif)) {
+              // let the sharp fallback below try it
+              throw new Error('exifr could not parse ' + fullPath);
+            }
+          }
           MetadataLoader.mapMetadata(metadata, exif, true);
           if (exif?.makerNote) {
             const contentId = MetadataLoader.parseAppleMakerNoteContentId(exif.makerNote);

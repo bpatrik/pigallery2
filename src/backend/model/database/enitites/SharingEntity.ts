@@ -70,6 +70,10 @@ export class SharingEntity implements BaseSharingDTO {
   })
   defaultSearchView!: SearchQueryDTO | null;
 
+  // the sharing session hides the download options. It is not bulletproof: what the browser shows can be saved.
+  @Column({default: false})
+  preventDownload!: boolean;
+
   @Column({type: 'text', nullable: true})
   password!: string | null;
 

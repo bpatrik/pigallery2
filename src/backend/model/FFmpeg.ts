@@ -18,7 +18,6 @@ export interface FfprobeStream {
 }
 
 export interface FfprobeFormat {
-  format_name?: string;
   duration?: string;
   bit_rate?: string;
   tags?: Record<string, string>;

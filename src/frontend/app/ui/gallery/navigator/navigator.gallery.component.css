@@ -7,7 +7,7 @@
 
 .divider {
   margin-left: 5px;
-  border-left: 1px solid #6c757d;
+  border-left: 1px solid var(--separator-color);
   display: inline-block;
   vertical-align: middle;
 }
@@ -48,6 +48,31 @@ app-gallery-filter {
 .sorting-grouping-item {
   cursor: pointer;
   flex-wrap: nowrap;
+}
+
+/* Keep it on a phone screen (the component shifts it right when it doesn't fit left of its button):
+   long (e.g. Hungarian) labels wrap instead of stretching it. */
+#sorting-dropdown {
+  width: max-content;
+  max-width: calc(100vw - 1rem);
+}
+
+/* Each column as wide as its content, not half of the menu */
+#sorting-dropdown .col {
+  flex: 1 1 auto;
+  width: auto;
+}
+
+/* Stacked, so max-content is the widest item, not all items side by side */
+#sorting-dropdown .col > .row {
+  flex-direction: column;
+}
+
+#sorting-dropdown .sorting-grouping-item,
+#sorting-dropdown h6 {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 

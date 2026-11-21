@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
-import {FaceSortByTypes, GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../entities/SortingMethods';
+import {ConfigPriority, LightBoxTitleTexts, MapProviders, NavigationLinkTypes, ScrollLabelModes, ScrollUpModes, ThemeModes} from '../Enums';
+import {DirectoryGroupByTypes, DirectorySortByTypes, FaceSortByTypes, GroupByTypes, GroupingMethod, SortByTypes, SortingMethod} from '../../entities/SortingMethods';
 import {UserRoles} from '../../entities/UserDTO';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {SearchQueryDTO} from '../../entities/SearchQueryDTO';
@@ -14,54 +15,6 @@ if (typeof $localize === 'undefined') {
   global.$localize = (s: TemplateStringsArray) => s[0];
 }
 
-
-export enum MapProviders {
-  OpenStreetMap = 1,
-  Mapbox = 2,
-  Custom = 3,
-}
-
-export enum ConfigPriority {
-  basic = 1, advanced, underTheHood
-}
-
-
-export enum ThemeModes {
-  light = 1, dark, auto
-}
-
-export enum ScrollUpModes {
-  never = 1, mobileOnly, always
-}
-
-/**
- * Used for lightbox titles
- */
-export enum LightBoxTitleTexts {
-  NONE = 1,
-  file,
-  resolution,
-  size,
-
-  caption,
-  title,
-
-  keywords,
-  persons,
-  location,
-  date,
-
-  camera,
-  lens,
-  iso,
-  fstop,
-  focal_length,
-  directory,
-  titleOrCaption,
-  titleOrDirectory,
-  titleOrCaptionOrDirectory
-
-}
 
 export interface TAGS {
   client?: true,
@@ -284,6 +237,10 @@ export class ClientSearchConfig {
   listMetafiles: boolean = true;
 }
 
+// albums are shared by all users, so only logged-in users can list or edit them
+// (typeconfig already rejects values that are not a role)
+const isAlbumRole = (v: UserRoles): boolean => v >= UserRoles.User;
+
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class ClientAlbumConfig {
   @ConfigProperty({
@@ -300,11 +257,38 @@ export class ClientAlbumConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Albums listing right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer],
+      // the album routes read it when they are registered
+      uiResetNeeded: {server: true}
+    },
+    constraint: {
+      assert: isAlbumRole,
+      assertReason: 'Album.readAccessMinRole should be at least User.',
+      fallBackValue: UserRoles.User
     },
     description: $localize`Required minimum right to show the albums tab.`
   })
   readAccessMinRole: UserRoles = UserRoles.User;
+
+  @ConfigProperty({
+    type: UserRoles,
+    tags: {
+      name: $localize`Album editing right`,
+      priority: ConfigPriority.underTheHood,
+      githubIssue: 557,
+      uiOptions: [UserRoles.User, UserRoles.Admin, UserRoles.Developer],
+      // the album routes read it when they are registered
+      uiResetNeeded: {server: true}
+    },
+    constraint: {
+      assert: isAlbumRole,
+      assertReason: 'Album.writeAccessMinRole should be at least User.',
+      fallBackValue: UserRoles.Admin
+    },
+    description: $localize`Required minimum right to create and delete albums. Albums are visible to every user who can list them.`
+  })
+  writeAccessMinRole: UserRoles = UserRoles.Admin;
 }
 
 @SubConfigClass({tags: {client: true}, softReadonly: true})
@@ -665,10 +649,6 @@ export class ClientMapConfig {
   bendLongPathsTrigger: number = 0.5;
 }
 
-export enum NavigationLinkTypes {
-  gallery = 1, faces, albums, search, url
-}
-
 @SubConfigClass({tags: {client: true}, softReadonly: true})
 export class NavigationLinkConfig {
   @ConfigProperty({
@@ -791,18 +771,68 @@ export class ClientGroupingConfig implements GroupingMethod {
 }
 
 
+// the sorting of a directory: all its media are in the same directory, so no sorting by directory
+@SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
+export class ClientDirectorySortingConfig implements SortingMethod {
+  @ConfigProperty({
+    type: DirectorySortByTypes,
+    tags: {
+      name: $localize`Method`,
+    },
+  })
+  method: SortingMethod['method'] = SortByTypes.Date;
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Ascending`,
+    },
+  })
+  ascending: boolean = true;
+
+  constructor(method: SortingMethod['method'] = SortByTypes.Date, ascending: boolean = true) {
+    this.method = method;
+    this.ascending = ascending;
+  }
+}
+
+
+// the grouping of a directory: all its media are in the same directory, so no grouping by directory
+@SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
+export class ClientDirectoryGroupingConfig implements GroupingMethod {
+  @ConfigProperty({
+    type: DirectoryGroupByTypes,
+    tags: {
+      name: $localize`Method`,
+    },
+  })
+  method: number = GroupByTypes.Date;
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Ascending`,
+    },
+  })
+  ascending: boolean = true;
+
+  constructor(method: number = GroupByTypes.Date, ascending: boolean = true) {
+    this.method = method;
+    this.ascending = ascending;
+  }
+}
+
+
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class NavBarSortingAndGroupingConfig {
 
   @ConfigProperty({
-    type: ClientSortingConfig,
+    type: ClientDirectorySortingConfig,
     tags: {
       name: $localize`Default sorting`,
       priority: ConfigPriority.advanced,
     },
     description: $localize`Default sorting method for photo and video in a directory results.`
   })
-  defaultPhotoSortingMethod: ClientSortingConfig = new ClientSortingConfig(SortByTypes.Date, true);
+  defaultPhotoSortingMethod: ClientDirectorySortingConfig = new ClientDirectorySortingConfig(SortByTypes.Date, true);
 
   @ConfigProperty({
     type: ClientSortingConfig,
@@ -815,7 +845,7 @@ export class NavBarSortingAndGroupingConfig {
   defaultSearchSortingMethod: ClientSortingConfig = new ClientSortingConfig(SortByTypes.Date, false);
 
   @ConfigProperty({
-    type: ClientGroupingConfig,
+    type: ClientDirectoryGroupingConfig,
     tags: {
       name: $localize`Default grouping`,
       githubIssue: 706,
@@ -823,7 +853,7 @@ export class NavBarSortingAndGroupingConfig {
     },
     description: $localize`Default grouping method for photo and video in a directory results.`
   })
-  defaultPhotoGroupingMethod: ClientGroupingConfig = new ClientGroupingConfig(GroupByTypes.Date, true);
+  defaultPhotoGroupingMethod: ClientDirectoryGroupingConfig = new ClientDirectoryGroupingConfig(GroupByTypes.Date, true);
 
   @ConfigProperty({
     type: ClientGroupingConfig,
@@ -928,6 +958,16 @@ export class NavBarConfig {
     description: $localize`Set when the floating scroll-up button should be visible.`,
   })
   showScrollUpButton: ScrollUpModes = ScrollUpModes.mobileOnly;
+
+  @ConfigProperty({
+    tags: {
+      name: $localize`Show scroll label`,
+      priority: ConfigPriority.underTheHood
+    },
+    type: ScrollLabelModes,
+    description: $localize`Set when the label (e.g.: month and year) of the first visible photo should be shown next to the scrollbar while scrolling. Date: only if the photos are ordered by date. Always: for every order except random.`,
+  })
+  showScrollLabel: ScrollLabelModes = ScrollLabelModes.always;
 
 
   @ConfigProperty({
@@ -1063,7 +1103,7 @@ export class ClientLightboxConfig {
     },
     description: $localize`If enabled, lightbox will start from the first photo when it reached the last one.`
   })
-  loopSlideshow: boolean = false;
+  loopSlideshow: boolean = true;
 
   @ConfigProperty({
     type: 'boolean',
@@ -1126,6 +1166,98 @@ export class ThemeConfig {
 @SubConfigClass<TAGS>({tags: {client: true}, softReadonly: true})
 export class ThemesConfig {
 
+  /**
+   * The themes that ship with the app. applyBuiltInThemes() puts them into availableThemes on every config load and
+   * settings save, so they can't be deleted or changed and get the fixes of new releases; the settings page shows them read-only.
+   */
+  static readonly BUILT_IN_THEMES: readonly { name: string, theme: string }[] = [
+    {
+      name: 'classic',
+      theme:
+        ':root nav.navbar {\n' +
+        '--bs-navbar-color: rgba(255, 255, 255, 0.55);\n' +
+        '--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n' +
+        '--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n' +
+        '--bs-navbar-active-color: #fff;\n' +
+        '--bs-navbar-brand-color: #fff;\n' +
+        '--bs-navbar-brand-hover-color: #fff;\n' +
+        '--bs-bg-opacity: 1;\n' +
+        'background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n' +
+        '}'
+    },
+    {
+      name: 'modern',
+      theme:
+        '/* light: white surfaces (navbar, menus, inputs, cards) on a grey page */\n' +
+        'html:not([data-bs-theme=dark]) {\n' +
+        '  --bs-border-color: #d4d4d8;\n' +
+        '  --item-background: #e4e4e7;\n' +
+        '}\n' +
+        'html:not([data-bs-theme=dark]) body {\n' +
+        '  background-color: #f5f5f7;\n' +
+        '}\n' +
+        '/* a switch that is off: a darker knob and border than in Bootstrap */\n' +
+        'html:not([data-bs-theme=dark]) .form-switch .form-check-input:not(:checked):not(:focus) {\n' +
+        '  border-color: #a1a1aa;\n' +
+        '  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'-4 -4 8 8\'%3e%3ccircle r=\'3\' fill=\'rgba%280, 0, 0, 0.55%29\'/%3e%3c/svg%3e");\n' +
+        '}\n' +
+        '[data-bs-theme=dark] .form-switch .form-check-input:not(:checked):not(:focus) {\n' +
+        '  border-color: #71717a;\n' +
+        '  --bs-form-switch-bg: url("data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'-4 -4 8 8\'%3e%3ccircle r=\'3\' fill=\'rgba%28255, 255, 255, 0.6%29\'/%3e%3c/svg%3e");\n' +
+        '}\n' +
+        '/* navbar links (e.g. Share): darker than the 65% of Bootstrap */\n' +
+        '.navbar {\n' +
+        '  --bs-navbar-color: rgba(var(--bs-emphasis-color-rgb), .8);\n' +
+        '}\n' +
+        '[data-bs-theme=dark] {\n' +
+        '  --bs-body-bg: #18181b;\n' +
+        '  --bs-body-bg-rgb: 24, 24, 27;\n' +
+        '  --bs-secondary-bg: #27272a;\n' +
+        '  --bs-secondary-bg-rgb: 39, 39, 42;\n' +
+        '  --bs-tertiary-bg: #1f1f23;\n' +
+        '  --bs-tertiary-bg-rgb: 31, 31, 35;\n' +
+        '  --item-background: #2a2a2e;\n' +
+        '}\n' +
+        ':root {\n' +
+        '  accent-color: var(--bs-primary);\n' +
+        '  --item-border: 0;\n' +
+        '  --item-radius: .5rem;\n' +
+        '  --item-hover-scale: 100%;\n' +
+        '  --overlay-background: linear-gradient(transparent, rgba(0, 0, 0, .65));\n' +
+        '  --overlay-hover-background: linear-gradient(transparent, rgba(0, 0, 0, .85));\n' +
+        '  --overlay-text-shadow: 0 1px 2px rgba(0, 0, 0, .6);\n' +
+        '  --overlay-font-size: .875rem;\n' +
+        '  --overlay-button-background: rgba(0, 0, 0, .35);\n' +
+        '  --overlay-button-hover-background: rgba(0, 0, 0, .6);\n' +
+        '  --lightbox-title-background: transparent;\n' +
+        '  --lightbox-title-opacity: .9;\n' +
+        '  --lightbox-title-text-shadow: 0 1px 3px rgba(0, 0, 0, .8);\n' +
+        '  --popover-border: 1px solid var(--bs-border-color);\n' +
+        '  --popover-shadow: 0 1px 2px rgba(0, 0, 0, .12), 0 8px 24px rgba(0, 0, 0, .18);\n' +
+        '  --separator-color: var(--bs-border-color);\n' +
+        '  --transition-easing: cubic-bezier(.2, .8, .2, 1);\n' +
+        '}\n' +
+        '@media (prefers-reduced-motion: no-preference) {\n' +
+        '  :root {\n' +
+        '    --item-hover-image-scale: 104%;\n' +
+        '    --fade-in-duration: .3s;\n' +
+        '  }\n' +
+        '}'
+    }];
+
+  static isBuiltInTheme(name: string | undefined): boolean {
+    return ThemesConfig.BUILT_IN_THEMES.some(th => th.name === name);
+  }
+
+  /**
+   * Puts the built-in themes (unchanged, first) into availableThemes, keeping the custom ones after them.
+   */
+  static applyBuiltInThemes(themes: ThemesConfig): void {
+    const custom = (themes.availableThemes || []).filter(th => !ThemesConfig.isBuiltInTheme(th.name))
+      .map(th => new ThemeConfig(th.name, th.theme));
+    themes.availableThemes = [...ThemesConfig.BUILT_IN_THEMES.map(th => new ThemeConfig(th.name, th.theme)), ...custom];
+  }
+
   @ConfigProperty({
     type: 'boolean',
     tags: {
@@ -1155,7 +1287,7 @@ export class ThemesConfig {
     },
     description: $localize`Selected theme to use on the site.`
   })
-  selectedTheme: string = 'classic';
+  selectedTheme: string = 'modern';
 
   @ConfigProperty({
     type: 'array',
@@ -1167,20 +1299,7 @@ export class ThemesConfig {
     },
     description: $localize`Adds these CSS settings as it is to the end of the body tag of the page.`
   })
-  availableThemes: ThemeConfig[] = [
-    new ThemeConfig(
-      'classic',
-      ':root nav.navbar {\n' +
-      '--bs-navbar-color: rgba(255, 255, 255, 0.55);\n' +
-      '--bs-navbar-hover-color: rgba(255, 255, 255, 0.75);\n' +
-      '--bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);\n' +
-      '--bs-navbar-active-color: #fff;\n' +
-      '--bs-navbar-brand-color: #fff;\n' +
-      '--bs-navbar-brand-hover-color: #fff;\n' +
-      '--bs-bg-opacity: 1;\n' +
-      'background-color: rgba(var(--bs-dark-rgb), var(--bs-bg-opacity)) !important;\n' +
-      '}'
-    )];
+  availableThemes: ThemeConfig[] = ThemesConfig.BUILT_IN_THEMES.map(th => new ThemeConfig(th.name, th.theme));
 }
 
 
@@ -1195,15 +1314,6 @@ export class ClientGalleryConfig {
     description: $localize`Caches directory contents and search results for better performance.`
   })
   enableCache: boolean = true;
-  @ConfigProperty({
-    type: 'boolean',
-    tags: {
-      name: $localize`Scroll based thumbnail generation`,
-      priority: ConfigPriority.advanced,
-    },
-    description: $localize`Those thumbnails get higher priority that are visible on the screen.`
-  })
-  enableOnScrollRendering: boolean = true;
 
   @ConfigProperty({
     type: 'boolean',
@@ -1589,7 +1699,9 @@ export class ClientFacesConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Face starring right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      // the person routes read it when they are registered
+      uiResetNeeded: {server: true}
     },
     description: $localize`Required minimum right to star (favourite) a face.`
   })
@@ -1597,7 +1709,9 @@ export class ClientFacesConfig {
   @ConfigProperty({
     type: UserRoles, tags: {
       name: $localize`Face listing right`,
-      priority: ConfigPriority.underTheHood
+      priority: ConfigPriority.underTheHood,
+      // the person routes read it when they are registered
+      uiResetNeeded: {server: true}
     },
     description: $localize`Required minimum right to show the faces tab.`
   })
@@ -1692,6 +1806,16 @@ export class ClientServiceConfig {
     description: $localize`If set the UI will auto reload when client related config changed or the app was restarted (except when the UI shows the settings page).`,
   })
   reloadClientOnServerUpdate: boolean = true;
+
+  @ConfigProperty({
+    type: 'boolean',
+    tags: {
+      name: $localize`Hide sponsor links`,
+      priority: ConfigPriority.underTheHood,
+    },
+    description: $localize`Hides the links that ask for supporting the development of PiGallery2 (on the about page and in the release notes).`,
+  })
+  hideSponsorLinks: boolean = false;
 
   /**
    * Normalized urlBase: '' or a path with a leading and no trailing '/' (e.g.: '/myGallery').
@@ -1824,6 +1948,8 @@ export class ClientUploadConfig {
     type: UserRoles,
     tags: {
       name: $localize`Minimum user role`,
+      // the upload route reads it when it is registered
+      uiResetNeeded: {server: true}
     },
     description: $localize`Minimum user role to enable file upload.`
   })
@@ -1837,6 +1963,18 @@ export class ClientUploadConfig {
     description: $localize`Only enable upload in folder where an ".uploader.pg2conf" is present in the folder.`
   })
   enforcedDirectoryConfig: boolean = false;
+
+  @ConfigProperty({
+    type: 'unsignedInt', min: 1,
+    tags: {
+      name: $localize`Maximum file size`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 1314,
+      unit: 'MB'
+    },
+    description: $localize`Larger files are not uploaded. A reverse proxy in front of the gallery has its own limit (e.g. client_max_body_size of nginx): set it at least this high.`
+  })
+  maxFileSizeMB: number = 500;
 
   @ConfigProperty({
     type: 'array',

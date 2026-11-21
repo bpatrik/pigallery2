@@ -1,26 +1,17 @@
+import {NavigationLinkTypes} from '../../../../../../common/config/Enums';
 import { Component, forwardRef, OnChanges, TemplateRef, inject, input, signal } from '@angular/core';
 import { ControlValueAccessor, NG_VALIDATORS, NG_VALUE_ACCESSOR, type ValidationErrors, Validator, FormsModule } from '@angular/forms';
 import {Utils} from '../../../../../../common/Utils';
 import {propertyTypes} from 'typeconfig/common';
 import {SearchQueryParserService} from '../../../gallery/search/search-query-parser.service';
-import {
-  MapLayers,
-  MapPathGroupConfig,
-  MapPathGroupThemeConfig,
-  NavigationLinkConfig,
-  NavigationLinkTypes,
-  PathThemeConfig,
-  SVGIconConfig,
-  ThemeConfig
-} from '../../../../../../common/config/public/ClientConfig';
+import {MapLayers, MapPathGroupConfig, MapPathGroupThemeConfig, NavigationLinkConfig, PathThemeConfig, SVGIconConfig, ThemeConfig, ThemesConfig} from '../../../../../../common/config/public/ClientConfig';
 import {ConfigStyle, SettingsService} from '../../settings.service';
 import {DirectorySearchConfig, JobScheduleConfig, UserConfig} from '../../../../../../common/config/private/PrivateConfig';
 import {enumToTranslatedArray} from '../../../EnumTranslations';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap/modal';
 import {CustomSettingsEntries} from '../CustomSettingsEntries';
-import {GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
+import {DirectoryGroupByTypes, DirectorySortByTypes, GroupByTypes, SortByTypes} from '../../../../../../common/entities/SortingMethods';
 import { ServerExtensionsEntryConfig } from '../../../../../../common/config/private/subconfigs/ServerExtensionsConfig';
-
 import { GallerySearchFieldComponent } from '../../../gallery/search/search-field/search-field.gallery.component';
 import { NgIconComponent } from '@ng-icons/core';
 import { SortingMethodSettingsEntryComponent } from './sorting-method/sorting-method.settings-entry.component';
@@ -31,6 +22,8 @@ import {DirectorySearchListSettingsComponent} from '../../directory-search-list/
 import {RecursiveState, Stateful, StatefulConfig} from '../RecursiveState';
 import {DirectorySearch, SearchQueryDTO} from '../../../../../../common/entities/SearchQueryDTO';
 import {errorMessage} from '../../../../../../common/entities/Error';
+import {UserRoles} from '../../../../../../common/entities/UserDTO';
+import {AuthenticationService} from '../../../../model/network/authentication.service';
 
 interface OptionView {
   key: number | string;
@@ -69,6 +62,7 @@ export class SettingsEntryComponent
   private searchQueryParserService = inject(SearchQueryParserService);
   settingsService = inject(SettingsService);
   private modalService = inject(BsModalService);
+  private authService = inject(AuthenticationService);
 
   name: string | undefined;
   required!: boolean; // set by ngOnChanges()
@@ -85,6 +79,7 @@ export class SettingsEntryComponent
   }
   isNumberArray = false;
   isNumber = false;
+  readonly rangeError = signal<string | null>(null);
   HTMLInputType = 'text';
   title!: string; // set by ngOnChanges()
   idName!: string; // set by ngOnChanges()
@@ -107,6 +102,8 @@ export class SettingsEntryComponent
   public readonly ConfigStyle = ConfigStyle;
   protected readonly SortByTypes = SortByTypes;
   protected readonly GroupByTypes = GroupByTypes;
+  protected readonly DirectorySortByTypes = DirectorySortByTypes;
+  protected readonly DirectoryGroupByTypes = DirectoryGroupByTypes;
 
   // typed views of the value for the editors of the template (it depends on uiType)
   get ArrayValue(): unknown[] {
@@ -242,8 +239,8 @@ export class SettingsEntryComponent
     this.st.value = value;
     if (this.isNumber) {
       this.st.value = parseFloat(value);
+      this.updateRangeError();
     }
-
   }
 
   get AvailableThemes() {
@@ -255,6 +252,18 @@ export class SettingsEntryComponent
         .map((th: ThemeConfig) => ({key: th.name, value: th.name}))];
   }
 
+
+  // "default" (no theme CSS) and the built-in themes can't be deleted
+  get CanRemoveTheme(): boolean {
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    return this.st.value !== 'default' && !ThemesConfig.isBuiltInTheme(this.st.value as string);
+  }
+
+  // the CSS of a built-in theme is shown read-only: it is reset on every start (see ThemesConfig.applyBuiltInThemes)
+  get SelectedThemeBuiltIn(): boolean {
+    this.settingsService.edits(); // depends on other entries: refresh after every edit
+    return ThemesConfig.isBuiltInTheme(this.st.rootConfig!.__state['selectedTheme'].value as string);
+  }
 
   get SelectedThemeSettings(): {
     theme: string | undefined
@@ -331,11 +340,11 @@ export class SettingsEntryComponent
     }
 
     this.optionsView = this.uiType === 'EnumType' || this.uiType === 'EnumArray' ?
-      this.getOptionsView(this.st) : [];
+      this.getOptionsView(this.st, Array.isArray(this.st.value) ? this.st.value : [this.st.value]) : [];
     this.navigationLinkTypeOptions = this.arrayType === 'NavigationLinkConfig' ?
       this.getOptionsView(this.newArrayItemState('type')) : [];
     this.userRoleOptions = this.arrayType === 'UserConfig' ?
-      this.getOptionsView(this.newArrayItemState('role')) : [];
+      this.getOptionsView(this.newArrayItemState('role'), (this.st.value as { role: UserRoles }[]).map(u => u.role)) : [];
 
     this.placeholder = (this.st.tags?.hint || this.st.default) as string;
 
@@ -378,6 +387,40 @@ export class SettingsEntryComponent
       this.required = this.required || !this.st.tags.uiOptional;
       this.experimental = this.st.tags.experimental;
     }
+    this.updateRangeError();
+  }
+
+  // shown on the field, as the form can't be saved with a value out of the limits (#1315)
+  private updateRangeError(): void {
+    if (!this.state() || !this.checkRange()) {
+      this.rangeError.set(null);
+      return;
+    }
+    const min = this.st.min;
+    const max = this.st.max;
+    if (typeof min === 'number' && typeof max === 'number') {
+      this.rangeError.set($localize`The value must be between ${min}:MIN: and ${max}:MAX:.`);
+    } else if (typeof min === 'number') {
+      this.rangeError.set($localize`The value must be at least ${min}:MIN:.`);
+    } else {
+      this.rangeError.set($localize`The value must be at most ${max}:MAX:.`);
+    }
+  }
+
+  // the limits of the config metadata; the server rejects the save otherwise
+  private checkRange(): ValidationErrors | null {
+    const value = this.st.value;
+    if (!this.isNumber || typeof value === 'undefined' || value === null || value === '') {
+      return null;
+    }
+    const n = Number(value);
+    if (typeof this.st.min === 'number' && n < this.st.min) {
+      return {min: {min: this.st.min, actual: n}};
+    }
+    if (typeof this.st.max === 'number' && n > this.st.max) {
+      return {max: {max: this.st.max, actual: n}};
+    }
+    return null;
   }
 
   // The state of a property of the array items. It is the same for every item, so a fresh item is used.
@@ -385,7 +428,20 @@ export class SettingsEntryComponent
     return new (this.st.arrayType as new () => StatefulConfig)().__state[property];
   }
 
-  private getOptionsView(state: RecursiveState): OptionView[] {
+  /**
+   * @param currentValues the values that are set now, they are always offered so that the select can show them
+   */
+  private getOptionsView(state: RecursiveState, currentValues: unknown[] = []): OptionView[] {
+    const options = this.getEnumOptionsView(state);
+    if ((state.isEnumType ? state.type : state.arrayType) === UserRoles) {
+      // nobody can grant a role above their own (e.g. Developer), the server rejects it too.
+      // A role that is already set (e.g. by a Developer) is still shown, so it can be lowered.
+      return options.filter(o => this.authService.isAuthorized(o.key as UserRoles) || currentValues.includes(o.key));
+    }
+    return options;
+  }
+
+  private getEnumOptionsView(state: RecursiveState): OptionView[] {
     const eClass = state.isEnumType
         ? state.type
         : state.arrayType;
@@ -405,16 +461,11 @@ export class SettingsEntryComponent
   }
 
   validate(): ValidationErrors | null {
-    if (
-        !this.required ||
-        (this.state() &&
-            typeof this.st.value !== 'undefined' &&
-            this.st.value !== null &&
-            this.st.value !== '')
-    ) {
-      return null;
+    const value = this.state() ? this.st.value : undefined;
+    if (typeof value === 'undefined' || value === null || value === '') {
+      return this.required ? {required: true} : null;
     }
-    return {required: true};
+    return this.checkRange();
   }
 
   public onChange = (_value: unknown): void => {

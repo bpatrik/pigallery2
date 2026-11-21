@@ -11,6 +11,8 @@ import {QueryParams} from '../../common/QueryParams';
 import {PhotoProcessing} from '../model/fileaccess/fileprocessing/PhotoProcessing';
 import {ObjectManagers} from '../model/ObjectManagers';
 import {RequestParams} from '../middlewares/RequestParams';
+import {UserRoles} from '../../common/entities/UserDTO';
+import {BuildInfo} from '../model/BuildInfo';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -86,6 +88,7 @@ export class PublicRouter {
           name: req.session.context.user.name,
           role: req.session.context.user.role,
           usedSharingKey: req.session.context.user.usedSharingKey,
+          preventDownload: req.session.context.user.preventDownload,
           projectionKey: req.session.context.user.projectionKey,
         };
 
@@ -106,6 +109,8 @@ export class PublicRouter {
       res.tpl['usedTheme'] = selectedTheme;
 
       res.tpl['UIExtensionConfigs'] = ObjectManagers.getInstance().ExtensionManager.getUIExtensionConfigs();
+      // only admins learn the version; anyone else could look up the known bugs of it
+      res.tpl['buildInfo'] = (req.session.context?.user?.role ?? 0) >= UserRoles.Admin ? BuildInfo.get() : null;
 
       return next();
     };
@@ -115,6 +120,9 @@ export class PublicRouter {
     app.get('/heartbeat', (req: Request, res: Response) => {
       res.sendStatus(200);
     });
+
+    // home screen icons: 180 is the apple-touch-icon, 192 and 512 are what Android asks for
+    const appIconSizes = [192, 512];
 
     app.get('/manifest.json', (req: Request, res: Response) => {
       res.send({
@@ -132,23 +140,28 @@ export class PublicRouter {
             type: 'image/svg+xml',
             purpose: 'maskable'
           },
-          {
-            src: 'icon_white.png',
-            sizes: '48x48 72x72 96x96 128x128 256x256',
-          },
+          // png for the browsers that take no svg icon
+          ...appIconSizes.map(size => ({
+            src: 'icon_' + size + '.png',
+            sizes: size + 'x' + size,
+            type: 'image/png',
+            purpose: 'any'
+          })),
         ],
         display: 'standalone',
         categories: [
           'photo'
         ],
-        start_url:
-          Config.Server.getPublicUrl(),
+        // host relative: the app is installed from the host it was opened on (publicUrl can be another one)
+        id: Config.Server.getAppUrl(),
+        start_url: Config.Server.getAppUrl(),
+        scope: Config.Server.getAppUrl(),
         background_color: '#000000',
         theme_color: '#000000',
       });
     });
 
-    const getIcon = (theme: string | null = null, paddingPercent = 0): string => {
+    const getIcon = (theme: string | null = null, paddingPercent = 0, size: number | null = null): string => {
       const vBs = (Config.Server.svgIcon.viewBox || '').split(' ').slice(0, 4).map(s => parseFloat(s));
       vBs[0] = vBs[0] || 0;
       vBs[1] = vBs[1] || 0;
@@ -188,6 +201,7 @@ export class PublicRouter {
       };
       return '<svg ' +
         ' xmlns="http://www.w3.org/2000/svg"' +
+        (size ? ' width="' + size + '" height="' + size + '"' : '') +
         ' viewBox="' + vBs.join(' ') + '">' +
         (theme === 'auto' ? ('<style>' +
             '    path, circle {' +
@@ -280,6 +294,23 @@ export class PublicRouter {
       }
     });
 
+    // The icon on its white background: a see-through png would get a black one on the iOS home screen.
+    for (const size of [180, ...appIconSizes]) {
+      app.get('/icon_' + size + '.png', async (req: Request, res: Response, next: NextFunction) => {
+        try {
+          const p = path.join(ProjectPath.TempFolder, '/icon_' + size + '.png');
+          const outP = await PhotoProcessing.renderSVGString(getIcon(null, 0, size), size, p);
+          res.set('Cache-Control', 'no-cache');
+          res.sendFile(outP, {
+            cacheControl: false,
+            dotfiles: 'allow',
+          });
+        } catch (e) {
+          return next(e);
+        }
+      });
+    }
+
     app.get(
       [
         '/error'
@@ -297,6 +328,7 @@ export class PublicRouter {
         '/share/:' + QueryParams.gallery.sharingKey_params,
         '/shareLogin',
         '/admin',
+        '/about',
         '/duplicates',
         '/faces',
         '/albums',
@@ -309,8 +341,9 @@ export class PublicRouter {
     );
     app.get(['/:locale', '/:locale/*page'], redirectToLocalePage);
 
-    const renderFile = (subDir = '') => {
-      return (req: Request, res: Response) => {
+    // a missing file: a plain 404, unless notFoundNext is set (the page catch-all below decides)
+    const renderFile = (subDir = '', notFoundNext = false) => {
+      return (req: Request, res: Response, next: NextFunction) => {
         // esbuild puts a content hash in the name of the build output (e.g. hu.main-PCUX7IQM.js, styles-GXRELOEQ.css).
         // Other files (robots.txt, copied assets, the unhashed dev build) are revalidated with the ETag.
         const file = RequestParams.getRequired(req, 'file');
@@ -329,10 +362,27 @@ export class PublicRouter {
         }, (err) => {
           if (err && !res.headersSent) {
             res.removeHeader('Cache-Control');
+            if (notFoundNext) {
+              return next();
+            }
             res.sendStatus(404);
           }
         });
       };
+    };
+
+    // Nothing above matched: the API answers its own JSON 404 (ErrorRouter), a file gets a plain 404,
+    // any other path is a page of the app that does not exist: the app shows "Page not found" with HTTP 404.
+    const notFound = (req: Request, res: Response, next: NextFunction) => {
+      const apiPath = Config.Server.apiPath;
+      if (req.path === apiPath || req.path.startsWith(apiPath + '/')) {
+        return next('route');
+      }
+      if (path.extname(req.path) !== '') {
+        return res.sendStatus(404);
+      }
+      res.status(404);
+      next();
     };
 
     app.get(
@@ -345,7 +395,15 @@ export class PublicRouter {
       '/:file',
       setLocale,
       AuthenticationMWs.normalizePathParam('file'),
-      renderFile()
+      renderFile('', true)
+    );
+    app.get(
+      '/{*rest}',
+      notFound,
+      AuthenticationMWs.tryAuthenticate,
+      addTPl,
+      setLocale,
+      renderIndex
     );
   }
 }

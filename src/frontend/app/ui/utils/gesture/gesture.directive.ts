@@ -11,13 +11,19 @@ export interface PinchEvent {
   isFinal: boolean;
 }
 
+export interface TapEvent {
+  pointerType: string;
+  // where the tap started
+  target: EventTarget | null;
+}
+
 interface Point {
   x: number;
   y: number;
 }
 
 /**
- * Swipe, double tap, pan and pinch from pointer events (touch, pen and mouse).
+ * Swipe, tap, double tap, pan and pinch from pointer events (touch, pen and mouse).
  * The thresholds follow the HammerJS defaults the lightbox used before.
  * The element needs `touch-action: none`, otherwise the browser scrolls and zooms instead.
  */
@@ -39,6 +45,8 @@ export class GestureDirective implements OnDestroy {
   readonly swipeLeft = output();
   readonly swipeRight = output();
   readonly swipeUp = output();
+  // a single tap: once no second tap followed, so it comes DOUBLE_TAP_INTERVAL after the tap
+  readonly tap = output<TapEvent>();
   readonly doubleTap = output();
   readonly pan = output<PanEvent>();
   readonly pinch = output<PinchEvent>();
@@ -52,9 +60,12 @@ export class GestureDirective implements OnDestroy {
   private pinchStartDistance = 0;
   private pinchScale = 1;
   private lastTap: Point & { time: number } | null = null;
+  private startTarget: EventTarget | null = null;
+  private tapTimer: number | null = null;
 
   ngOnDestroy(): void {
     this.listen(false);
+    this.cancelTap();
   }
 
   onPointerDown(e: PointerEvent): void {
@@ -67,6 +78,7 @@ export class GestureDirective implements OnDestroy {
     }
     if (this.pointers.size === 0) {
       this.start = {x: e.clientX, y: e.clientY, time: e.timeStamp};
+      this.startTarget = e.target;
       this.multiTouch = false;
       this.panning = false;
       this.listen(true);
@@ -151,10 +163,24 @@ export class GestureDirective implements OnDestroy {
       tap.time - this.lastTap.time < GestureDirective.DOUBLE_TAP_INTERVAL &&
       Math.hypot(tap.x - this.lastTap.x, tap.y - this.lastTap.y) < GestureDirective.DOUBLE_TAP_DISTANCE) {
       this.lastTap = null;
+      this.cancelTap();
       this.doubleTap.emit();
       return;
     }
     this.lastTap = tap;
+    this.cancelTap();
+    const single: TapEvent = {pointerType: e.pointerType, target: this.startTarget};
+    this.tapTimer = window.setTimeout((): void => {
+      this.tapTimer = null;
+      this.tap.emit(single);
+    }, GestureDirective.DOUBLE_TAP_INTERVAL);
+  }
+
+  private cancelTap(): void {
+    if (this.tapTimer !== null) {
+      clearTimeout(this.tapTimer);
+      this.tapTimer = null;
+    }
   }
 
   private endPan(): void {

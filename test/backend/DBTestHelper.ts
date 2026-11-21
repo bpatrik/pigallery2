@@ -1,8 +1,8 @@
+import {DatabaseType} from '../../src/common/config/Enums';
 import {Config} from '../../src/common/config/private/Config';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
 import {SQLConnection} from '../../src/backend/model/database/SQLConnection';
-import {DatabaseType} from '../../src/common/config/private/PrivateConfig';
 import {ProjectPath} from '../../src/backend/ProjectPath';
 import {DirectoryBaseDTO, ParentDirectoryDTO, SubDirectoryDTO} from '../../src/common/entities/DirectoryDTO';
 import {ObjectManagers} from '../../src/backend/model/ObjectManagers';

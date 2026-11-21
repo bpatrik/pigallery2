@@ -1,4 +1,4 @@
-import {SortByDirectionalTypes, SortByTypes, SortingMethod} from './entities/SortingMethods';
+import {DirectorySortByTypes, SortByDirectionalTypes, SortingMethod} from './entities/SortingMethods';
 import {Utils} from './Utils';
 
 /**
@@ -12,7 +12,8 @@ export const PG2ConfMap: { sorting: Record<string, SortingMethod>, upload: Recor
   }
 };
 
-Utils.enumToArray(SortByTypes).forEach(kv => {
+// a .pg2conf file sets the sorting of a directory, so no sorting by directory
+Utils.enumToArray(DirectorySortByTypes).forEach(kv => {
   if (!Utils.isValidEnumInt(SortByDirectionalTypes, kv.key)) {
     PG2ConfMap.sorting['.order_random.pg2conf'] = {method: kv.key, ascending: null};
     return;

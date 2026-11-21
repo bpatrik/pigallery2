@@ -66,7 +66,7 @@ test.describe('Docs generation', () => {
 
   test('lightbox', async ({page}) => {
     await page.goto('/gallery/?p=IMG_4330.jpg');
-    await expect(page.locator('.photo-container > img[alt="IMG_4330.jpg"]')).toBeAttached(); // the main photo should be visible
+    await expect(page.locator('.photo-link > img[alt="IMG_4330.jpg"]')).toBeAttached(); // the main photo should be visible
     await page.locator('div[title="info key: i"]').click();
     await expectLightboxPhoto(page, 'IMG_4330.jpg', LOAD_TIMEOUT);
     await lightboxScreenshot(page, 'lightbox');
@@ -142,6 +142,8 @@ test.describe('Docs generation', () => {
     await page.locator('ng-icon[name="ionHammerOutline"]').click();
     await page.locator('ng-icon[name="ionShuffleOutline"]').click();
     await page.locator('#randomLink').fill('https://<your domain>/pgapi/gallery/random/{"type":1,"list":[{"type":104,"text":"Landscape","matchType":1},{"type":100,"text":"vuk"}]}', {force: true});
+    // the dialog starts with the opened folder (#1313)
+    await page.locator('.modal-dialog .search-text').clear();
     await page.locator('.modal-dialog .search-text').pressSequentially('keyword:"Landscape" and vuk');
     await expect(page.locator('.modal-dialog .autocomplete-item').first()).toBeVisible();
     await screenshot(page, 'random_link');

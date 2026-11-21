@@ -8,19 +8,32 @@ import {SessionContext} from '../SessionContext';
 import {ProjectedAlbumCacheEntity} from './enitites/album/ProjectedAlbumCacheEntity';
 import {ProjectionAwareManager} from './ProjectionAwareManager';
 import {NotificationManager} from '../NotifocationManager';
+import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 
 const LOG_TAG = '[AlbumManager]';
 
 export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
+
+  /**
+   * Throws if the album can't be saved: its name is empty or its search query is not valid.
+   */
+  private static validateSavedSearch(name: string, searchQuery: SearchQueryDTO): void {
+    if (typeof name !== 'string' || name.trim() === '') {
+      throw new Error('Invalid saved search, name is missing');
+    }
+    if (!searchQuery) {
+      throw new Error(`Invalid saved search '${name}', search query is missing`);
+    }
+    // also rejects unknown query types
+    SearchQueryUtils.validateSearchQuery(searchQuery, `Saved search '${name}'`);
+  }
 
   public async addIfNotExistSavedSearch(
     name: string,
     searchQuery: SearchQueryDTO,
     lockedAlbum: boolean
   ): Promise<void> {
-    if (!name || !searchQuery) {
-      throw new Error('Invalid saved search, name or search query is missing');
-    }
+    AlbumManager.validateSavedSearch(name, searchQuery);
     const connection = await SQLConnection.getConnection();
     const album = await connection
       .getRepository(SavedSearchEntity)
@@ -37,6 +50,7 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
     searchQuery: SearchQueryDTO,
     lockedAlbum?: boolean
   ): Promise<void> {
+    AlbumManager.validateSavedSearch(name, searchQuery);
     const connection = await SQLConnection.getConnection();
     await connection
       .getRepository(SavedSearchEntity)

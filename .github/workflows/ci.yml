@@ -1,0 +1,361 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+      - experimental
+  # Other branches: run manually (workflow_dispatch) or open a PR
+  push:
+    branches:
+      - master
+      - experimental
+    tags:
+      - '*.*'
+  workflow_dispatch:
+
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # a hanging run would otherwise take 6 hours
+    timeout-minutes: 45
+
+    strategy:
+      matrix:
+        node-version: [24.x, 26.x]
+    steps:
+    - uses: getong/mariadb-action@v1.11
+      with:
+        mysql database: 'pigallery_test'
+        mysql root password: 'password'
+        mysql user: 'user'
+        mysql password: 'password'
+    - uses: actions/checkout@v7
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v7
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Verify MariaDB connection
+      env:
+        PORT: ${{ job.services.mariadb.ports[3306] }}
+      run: |
+        while ! mysqladmin ping -h"127.0.0.1" -P"$PORT" --silent; do
+          sleep 1
+        done
+
+    - name: npm install and build
+      run: |
+        npm ci
+        npm run build
+
+    - name: Check the ffmpeg and ffprobe binaries
+      # ffmpeg-static downloads ffmpeg in its install script and npm ci does not fail when that download does.
+      # Without the binary, the video tests fail with 'spawn ffmpeg ENOENT'. Retry the download once, then fail with a clear error.
+      run: |
+        check='const fs = require("fs"); const {execFileSync} = require("child_process");
+          for (const p of [require("ffmpeg-static"), require("ffprobe-static").path]) {
+            fs.accessSync(p, fs.constants.X_OK); console.log(p + ": " + execFileSync(p, ["-version"]).toString().split("\n")[0]);
+          }'
+        node -e "$check" && exit 0
+        echo "::warning::ffmpeg-static or ffprobe-static binary is missing, re-running the ffmpeg-static install script"
+        npm rebuild ffmpeg-static && node -e "$check" && exit 0
+        echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
+        exit 1
+
+    - name: lint
+      run: |
+        npm run lint
+    - name: Build the extension kit
+      # the content that publish-extension-kit would publish
+      if: matrix.node-version == '26.x'
+      run: |
+        npm run build-extension-interface
+        cd extension && npm pack --dry-run
+    - name: test
+      # a step timeout fails the step (a job timeout cancels it), so the summary still runs
+      # and the log keeps what test/backend/OpenHandles.ts lists as keeping the process alive
+      timeout-minutes: 20
+      shell: bash
+      run: |
+        npm test 2>&1 | tee test-output.log
+        if [ "${{ matrix.node-version }}" = "26.x" ]; then npm run coverage; fi
+      env:
+        MYSQL_HOST: localhost
+        MYSQL_USERNAME: root
+        MYSQL_PASSWORD: password
+        MYSQL_PORT: ${{ job.services.mariadb.ports[3306] }}
+        PORT: 35000
+        CI: true
+    - name: Test summary
+      if: ${{ !cancelled() && hashFiles('test-output.log') != '' }}
+      shell: bash
+      run: |
+        log=$(sed 's/\x1b\[[0-9;]*m//g' test-output.log)
+        # number before $1 in the line $2 (0 if missing)
+        num() { grep -aE "$2" <<<"$log" | tail -n 1 | grep -oE "[0-9]+ $1" | grep -oE '^[0-9]+' || echo 0; }
+        fe_line='^ +Tests +[0-9]'
+        be_passing=$(num passing '^ +[0-9]+ passing')
+        be_known=$(grep -aoE '^ +Known failures: [0-9]+' <<<"$log" | tail -n 1 | grep -oE '[0-9]+$' || echo 0)
+        {
+          echo "### Unit tests (Node ${{ matrix.node-version }})"
+          echo ""
+          echo "| Suite | Passed | Known failures | Failed |"
+          echo "| --- | --: | --: | --: |"
+          echo "| Frontend (Vitest) | $(num passed "$fe_line") | $(num 'expected fail' "$fe_line") | $(num failed "$fe_line") |"
+          echo "| Backend (mocha) | $((be_passing - be_known)) | $be_known | $(num failing '^ +[0-9]+ failing') |"
+          echo ""
+          echo "Known failures: tests of behaviour that doesn't work yet (\`it.fails()\`, \`expectToFail()\`); they pass while it is broken."
+        } >> "$GITHUB_STEP_SUMMARY"
+    - name: Coveralls
+      if: matrix.node-version == '26.x'
+      uses: coverallsapp/github-action@v2
+      with:
+        # a failed upload (e.g. a broken download of the Coveralls reporter) must not fail the build
+        fail-on-error: false
+        files: coverage/lcov.info coverage/pigallery2/lcov.info
+
+  # own job, so a failing unit test does not skip the e2e tests (and the other way around)
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+    - uses: actions/checkout@v7
+    - name: Use Node.js 26
+      uses: actions/setup-node@v7
+      with:
+        node-version: 26.x
+    - name: npm install and build
+      run: |
+        npm ci
+        npm run build
+    - name: Check the ffmpeg and ffprobe binaries
+      # ffmpeg-static downloads ffmpeg in its install script and npm ci does not fail when that download does.
+      # Without the binary, the video tests fail with 'spawn ffmpeg ENOENT'. Retry the download once, then fail with a clear error.
+      run: |
+        check='const fs = require("fs"); const {execFileSync} = require("child_process");
+          for (const p of [require("ffmpeg-static"), require("ffprobe-static").path]) {
+            fs.accessSync(p, fs.constants.X_OK); console.log(p + ": " + execFileSync(p, ["-version"]).toString().split("\n")[0]);
+          }'
+        node -e "$check" && exit 0
+        echo "::warning::ffmpeg-static or ffprobe-static binary is missing, re-running the ffmpeg-static install script"
+        npm rebuild ffmpeg-static && node -e "$check" && exit 0
+        echo "::error::The ffmpeg or ffprobe binary is missing or not executable (the ffmpeg-static download failed during npm ci)"
+        exit 1
+    - name: Type check the e2e tests
+      # Playwright runs the tests without a type check
+      run: npx tsc --noEmit -p test/playwright/tsconfig.json
+    - name: Install Playwright browser
+      run: npx playwright install --with-deps chromium
+    - name: E2E test - Playwright
+      id: e2e
+      run: npm run test-e2e
+    - name: E2E test summary
+      if: ${{ !cancelled() && hashFiles('test-results/results.json') != '' }}
+      run: &e2e-summary |
+        jq -r --arg title "${E2E_TITLE:-E2E tests (Playwright)}" '
+          def tests: [.. | objects | select(has("expectedStatus"))];
+          def count(s): map(select(.status == s)) | length;
+          # test.fail(): expected to fail, and it did
+          def known: map(select(.status == "expected" and .expectedStatus == "failed")) | length;
+          def passed: map(select(.status == "expected" and .expectedStatus != "failed")) | length;
+          def row(name): "| \(name) | \(passed) | \(known) | \(count("unexpected")) | \(count("flaky")) | \(count("skipped")) |";
+          "### \($title)",
+          "",
+          "| Spec | Passed | Known failures | Failed | Flaky | Skipped |",
+          "| --- | --: | --: | --: | --: | --: |",
+          (.suites[] | .file as $f | tests | row($f)),
+          (.stats.duration / 1000 | floor) as $s | (tests | row("**All (\($s) s)**")),
+          "",
+          "Known failures: test.fail() tests of behaviour that doesn'"'"'t work yet; they pass while it is broken. Details: the playwright-report artifact."
+        ' test-results/results.json >> "$GITHUB_STEP_SUMMARY"
+    - uses: actions/upload-artifact@v7
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30
+    # admin-config depends on the other projects, so Playwright skips it when one of them failed: run it on its own then, for its result
+    - name: E2E test - admin-config project on its own
+      id: e2e-admin-config
+      if: ${{ !cancelled() && steps.e2e.outcome == 'failure' }}
+      run: npx playwright test --project=admin-config --no-deps
+      env:
+        PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report-admin-config
+    - name: E2E test summary - admin-config project on its own
+      if: ${{ !cancelled() && steps.e2e-admin-config.outcome != 'skipped' && hashFiles('test-results/results.json') != '' }}
+      env:
+        E2E_TITLE: E2E tests - admin-config project on its own (the other projects failed)
+      run: *e2e-summary
+    - uses: actions/upload-artifact@v7
+      if: ${{ !cancelled() && steps.e2e-admin-config.outcome != 'skipped' }}
+      with:
+        name: playwright-report-admin-config
+        path: playwright-report-admin-config/
+        retention-days: 30
+
+  create-release:
+    runs-on: [ubuntu-latest]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v7
+      -
+        name: Setup Node.js for use with actions
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+      -
+        name: Install Deps
+        run: npm install
+      -
+        name: Create Release
+        run: npm run create-release -- --skip-opt-packages=ffmpeg-static,ffprobe-static --force-opt-packages
+      - uses: actions/upload-artifact@v7
+        with:
+          name: pigallery2-release
+          path: release
+
+  # --- MULTI-PLATFORM DOCKER VERIFICATION ---
+  build-verify-docker:
+    runs-on: ubuntu-latest
+    # Docker images are only built when all tests pass, the e2e tests included
+    needs: [test, e2e, create-release]
+    strategy:
+      fail-fast: false # Ensures one platform failure doesn't stop others from testing
+      matrix:
+        container: [alpine, debian-trixie]
+        include:
+          - container: alpine
+            platforms: linux/amd64,linux/arm64
+          - container: debian-trixie
+            platforms: linux/amd64,linux/arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: pigallery2-release
+          path: pigallery2-release
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build and Verify Platforms
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/${{ matrix.container }}/Dockerfile.build
+          platforms: ${{ matrix.platforms }}
+          push: false # Do not push yet
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # --- DOCKER LOGIN AND PUSH ---
+  push-docker:
+    runs-on: ubuntu-latest
+    needs: [build-verify-docker]
+    # Only push on branch merges or tags, never on plain PRs
+    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/experimental'
+    strategy:
+      matrix:
+        container: [alpine, debian-trixie]
+        include:
+          - container: alpine
+            platforms: linux/amd64,linux/arm64
+          - container: debian-trixie
+            platforms: linux/amd64,linux/arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: pigallery2-release
+          path: pigallery2-release
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Push Verified Images
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/${{ matrix.container }}/Dockerfile.build
+          platforms: ${{ matrix.platforms }}
+          push: true
+          cache-from: type=gha # Pulls from the cache created in Job 1
+          tags: |
+            ${{ (github.ref == 'refs/heads/master' && matrix.container == 'debian-trixie') && format('{0}/pigallery2:edge,{0}/pigallery2:edge-{1}', secrets.REGISTRY_NAMESPACE, matrix.container) || '' }}
+            ${{ (github.ref == 'refs/heads/master' && matrix.container != 'debian-trixie') && format('{0}/pigallery2:edge-{1}', secrets.REGISTRY_NAMESPACE, matrix.container) || '' }}
+            ${{ (github.ref == 'refs/heads/experimental') && format('{0}/pigallery2:experimental-{1}', secrets.REGISTRY_NAMESPACE, matrix.container) || '' }}
+            ${{ (startsWith(github.ref, 'refs/tags/') && matrix.container == 'debian-trixie') && format('{0}/pigallery2:{1},{0}/pigallery2:latest,{0}/pigallery2:edge-{2}', secrets.REGISTRY_NAMESPACE, github.ref_name, matrix.container) || '' }}
+            ${{ (startsWith(github.ref, 'refs/tags/') && matrix.container != 'debian-trixie') && format('{0}/pigallery2:{1}-{2},{0}/pigallery2:latest-{2},{0}/pigallery2:edge-{2}', secrets.REGISTRY_NAMESPACE, github.ref_name, matrix.container) || '' }}
+
+  # --- PUBLISH THE EXTENSION KIT TO NPM ---
+  # Publishes pigallery2-extension-kit with the app's version (package.json), once per version:
+  # prereleases (e.g. 4.0.0-edge) from master with the dist-tag 'edge', stable versions from their release tag with 'latest'.
+  # Auth: npm trusted publishing (package settings on npmjs.com: GitHub Actions, bpatrik/pigallery2, ci.yml); fallback: the NPM_TOKEN secret.
+  publish-extension-kit:
+    runs-on: ubuntu-latest
+    needs: [test, e2e, build-verify-docker]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/'))
+    permissions:
+      contents: read
+      id-token: write # trusted publishing and provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Use Node.js 26
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26.x
+          registry-url: 'https://registry.npmjs.org'
+      - name: Decide version and dist-tag
+        id: version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            if [ "$GITHUB_REF_NAME" != "$version" ]; then
+              echo "::error::The tag $GITHUB_REF_NAME does not match the package.json version $version"
+              exit 1
+            fi
+            tag=latest
+          else
+            tag=edge
+          fi
+          if [[ "$version" == *-* && "$tag" == latest ]] || [[ "$version" != *-* && "$tag" == edge ]]; then
+            echo "Not publishing $version from $GITHUB_REF: prereleases publish from master, stable versions from their release tag."
+            exit 0
+          fi
+          if [ -n "$(npm view "pigallery2-extension-kit@$version" version 2>/dev/null)" ]; then
+            echo "pigallery2-extension-kit@$version is already published."
+            exit 0
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - name: Build the extension kit
+        if: steps.version.outputs.version != ''
+        # only tsc is needed: skip the install scripts (native builds, ffmpeg downloads)
+        run: |
+          npm ci --ignore-scripts
+          npm run build-extension-interface
+      - name: Publish pigallery2-extension-kit@${{ steps.version.outputs.version }}
+        if: steps.version.outputs.version != ''
+        working-directory: extension
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm version "${{ steps.version.outputs.version }}" --no-git-tag-version --allow-same-version
+          npm publish --provenance --access public --tag "${{ steps.version.outputs.tag }}"

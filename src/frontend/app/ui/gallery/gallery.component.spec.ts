@@ -34,6 +34,10 @@ import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {provideIcons} from '@ng-icons/core';
 import {appIcons} from '../../icons';
+import {By} from '@angular/platform-browser';
+import {GalleryGridComponent} from './grid/grid.gallery.component';
+import {LightboxService} from './lightbox/lightbox.service';
+import {SearchResultDTO} from '../../../../common/entities/SearchResultDTO';
 
 
 // Mock services
@@ -41,6 +45,9 @@ class MockContentLoaderService {
   readonly content = signal<ContentWrapperWithError | null>({} as ContentWrapperWithError);
   loadDirectory = vi.fn();
   search = vi.fn().mockReturnValue(Promise.resolve());
+  readonly canRetry = signal(false);
+  reloadCurrentContent = vi.fn().mockReturnValue(Promise.resolve());
+  showBrokenSearchLink = vi.fn();
 
   constructor(private initialContent: ContentWrapperWithError | null = null) {
     if (initialContent) {
@@ -57,6 +64,7 @@ class MockAuthenticationService {
   readonly user = signal(null);
   isAuthenticated = vi.fn().mockReturnValue(true);
   canSearch = vi.fn().mockReturnValue(true);
+  canDownload = vi.fn().mockReturnValue(true);
   isAuthorized = vi.fn().mockReturnValue(true);
   isAdmin = vi.fn().mockReturnValue(false);
   logout = vi.fn(); // Also add logout method if needed
@@ -124,6 +132,7 @@ describe('GalleryComponent', () => {
   let mockAuthService: MockAuthenticationService;
   let mockShareService: MockShareService;
   let mockCacheService: MockCacheService;
+  const playback = signal(false);
 
   const setSortedContent = (content: GroupedDirectoryContent): void =>
     (TestBed.inject(ContentService) as unknown as MockContentService).sortedFilteredContent.set(content);
@@ -139,6 +148,7 @@ describe('GalleryComponent', () => {
     mockAuthService = new MockAuthenticationService();
     mockShareService = new MockShareService();
     mockCacheService = new MockCacheService();
+    playback.set(false);
 
     await TestBed.configureTestingModule({
       imports: [GalleryComponent],
@@ -157,6 +167,7 @@ describe('GalleryComponent', () => {
         {provide: BlogService, useClass: MockBlogService},
         {provide: UploaderService, useClass: MockUploaderService},
         {provide: ThemeService, useClass: MockThemeService},
+        {provide: LightboxService, useValue: {playback}},
         {provide: FullScreenService, useValue: {mock: vi.fn()}},
         {provide: OverlayService, useValue: {mock: vi.fn()}},
         {provide: QueryService, useValue: {params: signal({}), getParams: vi.fn(), getMediaStringId: vi.fn(), getParamsForDirs: vi.fn()}},
@@ -221,6 +232,63 @@ describe('GalleryComponent', () => {
     it('should return null when contentLoader has no content', () => {
       mockContentLoader.content.set(null);
       expect(component.ContentWrapper).toBeNull();
+    });
+  });
+
+  describe('photo frame whose search matches nothing (#1313)', () => {
+    const noMatch = {searchResult: {searchQuery: {}, directories: [], media: []} as unknown as SearchResultDTO} as ContentWrapperWithError;
+
+    it('should show a full screen message without the gallery around it', () => {
+      playback.set(true);
+      mockContentLoader.content.set(noMatch);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.empty-frame')?.textContent).toContain('No photos match this frame.');
+      expect(el.querySelector('app-frame')?.classList).toContain('d-none');
+    });
+
+    it('should show the gallery with the empty search message when it is not a frame', () => {
+      mockContentLoader.content.set(noMatch);
+      fixture.detectChanges();
+
+      const el = fixture.nativeElement as HTMLElement;
+      expect(el.querySelector('.empty-frame')).toBeNull();
+      expect(el.querySelector('app-frame')?.classList).not.toContain('d-none');
+    });
+  });
+
+  describe('countdown of a sharing (#1307)', () => {
+    const NOW = new Date(2026, 10, 12, 12, 0, 0).getTime();
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(NOW);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    const expiresIn = (ms: number): void =>
+      (mockShareService.sharing as unknown as ReturnType<typeof signal<{ expires: number } | null>>).set({expires: NOW + ms});
+
+    it('should show the time left', () => {
+      expiresIn(((24 + 1) * 60 + 1) * 60 * 1000 + 1000);
+      component.updateTimer(0);
+      expect(component.countDown()).toEqual({day: 1, hour: '01', minute: '01', second: '01'});
+      expect(mockContentLoader.reloadCurrentContent).not.toHaveBeenCalled();
+    });
+
+    // the server decides whether the sharing ended: the browser's clock can be off
+    it('should stop at zero and ask the server once', () => {
+      expiresIn(-5000);
+      component.updateTimer(0);
+      vi.setSystemTime(NOW + 1000);
+      component.updateTimer(1);
+
+      expect(component.countDown()).toEqual({day: 0, hour: '00', minute: '00', second: '00'});
+      expect(mockContentLoader.reloadCurrentContent).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -367,6 +435,25 @@ describe('GalleryComponent', () => {
       expect(overflowAlert).toBeTruthy();
       expect(overflowAlert.textContent).toContain('Too many results');
     });
+
+    // #1309: the alert tells to refine the search, the results that came back are still shown
+    it('should still show the results of a search with too many results', () => {
+      const photos = ['sunset.jpg', '東京.jpg'].map(name => ({
+        name,
+        directory: {path: './', name: 'Vacation'},
+        metadata: {size: {width: 400, height: 300}, creationDate: 0}
+      })) as unknown as PhotoDTO[];
+      mockContentLoader.content.set({
+        searchResult: {media: photos, directories: [], metaFile: [], resultOverflow: true}
+      } as unknown as ContentWrapperWithError);
+      setSortedContent({directories: [], mediaGroups: [{name: '', media: photos}], metaFile: []} as unknown as GroupedDirectoryContent);
+      fixture.detectChanges();
+
+      const compiled = fixture.nativeElement as HTMLElement;
+      expect(compiled.querySelector('.alert-info')?.textContent?.trim()).toBe('Too many results to show. Refine your search.');
+      const grid = fixture.debugElement.query(By.directive(GalleryGridComponent)).componentInstance as GalleryGridComponent;
+      expect(grid.mediaGroups().flatMap(g => g.media).map(m => m.name)).toEqual(['sunset.jpg', '東京.jpg']);
+    });
   });
 
   describe('spinner display', () => {
@@ -458,6 +545,36 @@ describe('GalleryComponent', () => {
       Config.RandomPhoto.enabled = false;
       await component.ngOnInit();
       expect(component.showRandomPhotoBuilder()).toBe(false);
+    });
+
+    describe('sharing that prevents downloading (#1158)', () => {
+      // right click (and a long press on Android) and dragging a photo out; returns whether it got blocked
+      const blocked = (type: 'contextmenu' | 'dragstart', tag: 'img' | 'video' | 'div'): boolean => {
+        const element = document.createElement(tag);
+        fixture.nativeElement.appendChild(element);
+        const event = new Event(type, {bubbles: true, cancelable: true});
+        element.dispatchEvent(event);
+        element.remove();
+        return event.defaultPrevented;
+      };
+
+      it('should block saving the photos and videos', () => {
+        mockAuthService.canDownload.mockReturnValue(false);
+        fixture.detectChanges();
+        expect(fixture.nativeElement.classList.contains('prevent-download'), 'no long press menu on iOS').toBe(true);
+        for (const type of ['contextmenu', 'dragstart'] as const) {
+          expect(blocked(type, 'img'), type + ' img').toBe(true);
+          expect(blocked(type, 'video'), type + ' video').toBe(true);
+          expect(blocked(type, 'div'), type + ' anything else').toBe(false);
+        }
+      });
+
+      it('should not block anything otherwise', () => {
+        fixture.detectChanges();
+        expect(fixture.nativeElement.classList.contains('prevent-download')).toBe(false);
+        expect(blocked('contextmenu', 'img')).toBe(false);
+        expect(blocked('dragstart', 'img')).toBe(false);
+      });
     });
   });
 

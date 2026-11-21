@@ -21,7 +21,7 @@
   <div class="info rounded-bottom">
     {{album().name}} ({{album().cache?.itemCount}})
     @if (canUpdate() && !album().locked) {
-      <ng-icon (click)="deleteAlbum($event)"
+      <ng-icon (click)="askDelete($event, deleteConfirm)"
         class="info-button delete float-end"
         name="ionTrashOutline"
       title="Delete" i18n-title />
@@ -37,3 +37,14 @@
   </div>
 </a>
 
+<ng-template #deleteConfirm>
+  <div class="modal-header">
+    <h5 class="modal-title" i18n>Delete album</h5>
+    <button type="button" class="btn-close" (click)="hideModal()" aria-label="Close" i18n-aria-label></button>
+  </div>
+  <div class="modal-body" i18n>Delete the album "{{album().name}}"? Only the album is deleted, its photos stay.</div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="hideModal()" i18n>Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="deleteAlbum()" i18n>Delete</button>
+  </div>
+</ng-template>

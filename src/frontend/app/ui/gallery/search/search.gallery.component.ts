@@ -1,6 +1,6 @@
 import { Component, OnDestroy, TemplateRef, inject, signal } from '@angular/core';
 import {AutoCompleteService} from './autocomplete.service';
-import {ActivatedRoute, Params, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, Params, Router} from '@angular/router';
 import {Subscription} from 'rxjs';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {MetadataSearchQueryTypes, SearchQueryDTO, SearchQueryTypes, TextSearch,} from '../../../../../common/entities/SearchQueryDTO';
@@ -9,7 +9,6 @@ import {BsModalRef} from 'ngx-bootstrap/modal';
 import {SearchQueryParserService} from './search-query-parser.service';
 import {AlbumsService} from '../../albums/albums.service';
 import {Config} from '../../../../../common/config/public/Config';
-import {UserRoles} from '../../../../../common/entities/UserDTO';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {Utils} from '../../../../../common/Utils';
 import {FormsModule} from '@angular/forms';
@@ -28,7 +27,6 @@ import {SearchQueryUtils} from '../../../../../common/SearchQueryUtils';
   imports: [
     FormsModule,
     GallerySearchFieldBaseComponent,
-    RouterLink,
     NgIconComponent,
     GallerySearchQueryBuilderComponent,
     SavedSearchPopupComponent
@@ -77,7 +75,7 @@ export class GallerySearchComponent implements OnDestroy {
   get CanCreateAlbum(): boolean {
     return (
       Config.Album.enabled &&
-      this.authenticationService.isAuthorized(UserRoles.Admin)
+      this.authenticationService.isAuthorized(Config.Album.writeAccessMinRole)
     );
   }
 
@@ -139,6 +137,11 @@ export class GallerySearchComponent implements OnDestroy {
     this.router
       .navigate(['/search', this.HTMLSearchQuery])
       .catch(console.error);
+  }
+
+  searchFromModal(): void {
+    this.hideSearchModal();
+    this.Search();
   }
 
   async saveSearch(): Promise<void> {

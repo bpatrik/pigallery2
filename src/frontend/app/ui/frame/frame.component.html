@@ -85,9 +85,9 @@
                   type="button" class="btn btn-tertiary dropdown-toggle"
                   aria-controls="dropdown-frame-menu">
                   <ng-icon class="align-text-top" size="1.2em" name="ionMenuOutline" />
-                  @if (isAdmin() && notificationService.numberOfNotifications>0) {
+                  @if (isAdmin() && notificationService.numberOfNotifications()>0) {
                     <span
-                    class="navbar-badge badge text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                    class="navbar-badge badge text-bg-warning">{{ notificationService.numberOfNotifications() }}</span>
                   }
                 </button>
                 <ul id="dropdown-frame-menu" *dropdownMenu
@@ -112,7 +112,7 @@
                   @if (themesEnabled) {
                     <li role="menuitem">
                       <div class="dropdown-item bg-transparent">
-                        <button class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
+                        <button type="button" class="btn w-100 btn-secondary" (click)="themeService.toggleMode()">
                           @switch (themeService.mode()) {
                             @case (ThemeModes.light) {
                               <ng-icon name="ionSunnyOutline" />
@@ -188,7 +188,7 @@
                       <ng-icon name="ionHammerOutline" />
                       <ng-container i18n>Tools</ng-container>
                     </a>
-                    <ul class="dropdown-menu"
+                    <ul class="dropdown-menu tools-menu"
                       [style.right.px]="-dropdownMenu.clientWidth"
                       *dropdownMenu role="menu">
                       <ng-content select="[navbar-menu]" />
@@ -254,17 +254,24 @@
                         <li role="menuitem">
                           <a class="dropdown-item" [routerLink]="['/admin']">
                             <ng-icon name="ionSettingsOutline" />
-                            @if (notificationService.numberOfNotifications>0) {
+                            @if (notificationService.numberOfNotifications()>0) {
                               <span
-                              class="badge rounded-pill position-absolute p-0 text-bg-warning">{{ notificationService.numberOfNotifications }}</span>
+                              class="badge rounded-pill position-absolute p-0 text-bg-warning">{{ notificationService.numberOfNotifications() }}</span>
                             }
                             <ng-container i18n>Settings</ng-container>
                           </a>
                         </li>
                       }
+                      <li role="menuitem">
+                        <!-- also for sharing guests: everyone may see what this app is; the query keeps the sharing -->
+                        <a class="dropdown-item" id="menu-about" [routerLink]="['/about']" [queryParams]="queryService.params()">
+                          <ng-icon name="ionInformationCircleOutline" />
+                          <ng-container i18n>About</ng-container>
+                        </a>
+                      </li>
                       @if (authenticationRequired) {
                         <li role="menuitem">
-                          <button class="dropdown-item btn btn-link" (click)="logout()">
+                          <button type="button" class="dropdown-item btn btn-link" (click)="logout()">
                             <ng-icon name="ionLogOutOutline" />
                             <ng-container i18n>Logout</ng-container>
                           </button>
@@ -283,7 +290,7 @@
     </div>
     <ng-content select="[body]" />
     @if (enableScrollUpButton) {
-      <button
+      <button type="button"
         (click)="scrollUp()"
         [class.show-btn-scroll-up]="!shouldHideNavbar && !navbarKeepTop"
         class="btn btn-tertiary rounded-pill btn-scroll-up">

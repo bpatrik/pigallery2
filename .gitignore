@@ -26,7 +26,7 @@ config.json
 users.db
 sqlite.db
 dist/
-release/
+/release/
 out-tsc/
 ffmpeg/
 locale.source.xlf
@@ -35,6 +35,8 @@ test2.*
 /db/
 /extensions/
 /extension/lib/
+/extension/index.js
+/extension/index.d.ts
 *.sublime-project
 *.sublime-workspace
 .DS_Store

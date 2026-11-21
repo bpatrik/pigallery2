@@ -1,12 +1,16 @@
 {
+  // the runtime part of the kit: the enums of the entities and the config.
+  // These files must not import the config classes or backend code, or the kit ships them too.
   "extends": "./../tsconfig.json",
   "compilerOptions": {
     "rootDir": "./../src",
     "outDir": "./lib",
-    "sourceMap": false
+    "sourceMap": false,
+    // no runtime dependency on tslib
+    "importHelpers": false
   },
   "include": [
     "./../src/common/entities/**/*",
-    "./../src/common/config/**/*"
+    "./../src/common/config/Enums.ts"
   ]
 }

@@ -18,6 +18,8 @@ import {SafeHtmlPipe} from '../../../../pipes/SafeHTMLPipe';
 import type {IClientMediaButtonConfig, IMetadataFilter} from '../../../../../../common/entities/extension/IClientUIConfig';
 import {Utils} from '../../../../../../common/Utils';
 import {SearchQueryUtils} from '../../../../../../common/SearchQueryUtils';
+import {QueryService} from '../../../../model/query.service';
+import {ScrollRestorationService} from '../../../../model/scroll-restoration.service';
 
 export interface IClientMediaButtonConfigWithBaseApiPath extends IClientMediaButtonConfig {
   extensionBasePath: string;
@@ -41,8 +43,12 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
   private extensionService = inject(ExtensionService);
   private modalService = inject(MediaButtonModalService);
   private elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private queryService = inject(QueryService);
+  private scrollRestoration = inject(ScrollRestorationService);
 
   readonly gridMedia = input.required<GridMedia>();
+  // the grid rendered this photo already (e.g. it was scrolled out and back): it shows up at once, without fading in again
+  readonly shownBefore = input(false);
   readonly imageRef = viewChild<ElementRef>('img');
   readonly container = viewChild.required<ElementRef>('photoContainer');
 
@@ -55,8 +61,12 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   wasInView: boolean | null = null;
   loaded = false;
+  // only a photo shown the first time fades in: browser back and forward or a scroll back show the same photos again at once
+  fadeIn = true;
   public mediaButtons: IClientMediaButtonConfigWithBaseApiPath[] = [];
 
+  // the query params of the link to this media in the lightbox
+  readonly lightboxLink = computed(() => this.queryService.getLightboxLink(this.gridMedia().media));
   readonly isVideo = computed((): boolean => this.gridMedia().isVideo());
   readonly isLivePhoto = computed((): boolean => this.gridMedia().isLivePhoto());
   readonly hasPositionData = computed((): boolean => this.gridMedia().hasPositionData());
@@ -222,6 +232,7 @@ export class GalleryPhotoComponent implements IRenderable, OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.thumbnail = this.thumbnailService.getThumbnail(this.gridMedia());
+    this.fadeIn = this.scrollRestoration.restoreTarget() === null && !this.shownBefore();
     this.updateMediaButtons();
   }
 

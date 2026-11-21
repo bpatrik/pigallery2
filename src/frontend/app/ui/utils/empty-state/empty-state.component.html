@@ -1,0 +1,6 @@
+<div class="empty-state">
+  <ng-icon class="icon" [name]="icon()" />
+  <p class="message"><ng-content /></p>
+  <ng-content select="[hint]" />
+  <ng-content select="[action]" />
+</div>

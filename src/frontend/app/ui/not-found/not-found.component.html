@@ -1,0 +1,11 @@
+<div class="container d-flex flex-column align-items-center">
+  <h1 class="title mt-5">
+    <app-icon [width]="60" />
+    {{ title }}
+  </h1>
+  <app-empty-state icon="ionCompassOutline">
+    <ng-container i18n>Page not found</ng-container>
+    <span hint i18n>The page you are looking for does not exist.</span>
+    <a action class="btn btn-primary mt-4" routerLink="/gallery" i18n>Go to the gallery</a>
+  </app-empty-state>
+</div>

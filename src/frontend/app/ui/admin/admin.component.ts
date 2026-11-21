@@ -1,19 +1,16 @@
+import {ConfigPriority} from '../../../../common/config/Enums';
 import { Component, ElementRef, OnInit, inject, viewChildren, computed } from '@angular/core';
-import {AuthenticationService} from '../../model/network/authentication.service';
-import {UserRoles} from '../../../../common/entities/UserDTO';
 import {CountedNotificationDTO, NotificationService} from '../../model/notification.service';
 import {NotificationType} from '../../../../common/entities/NotificationDTO';
-import {NavigationService} from '../../model/navigation.service';
 import {ViewportScroller, DatePipe} from '@angular/common';
 import {ConfigStyle, SettingsService} from '../settings/settings.service';
-import {ConfigPriority} from '../../../../common/config/public/ClientConfig';
 import {WebConfig} from '../../../../common/config/private/WebConfig';
 import {ISettingsComponent} from '../settings/template/ISettingsComponent';
 import {WebConfigClassBuilder} from 'typeconfig/web';
 import {enumToTranslatedArray} from '../EnumTranslations';
 import {PiTitleService} from '../../model/pi-title.service';
 import { FrameComponent } from '../frame/frame.component';
-import { PopoverDirective } from 'ngx-bootstrap/popover';
+import {RouterLink} from '@angular/router';
 import { BsDropdownDirective, BsDropdownToggleDirective, BsDropdownMenuDirective } from 'ngx-bootstrap/dropdown';
 import { NgIconComponent } from '@ng-icons/core';
 import { TemplateComponent } from '../settings/template/template.component';
@@ -29,7 +26,7 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
     styleUrl: './admin.component.css',
     imports: [
     FrameComponent,
-    PopoverDirective,
+    RouterLink,
     BsDropdownDirective,
     BsDropdownToggleDirective,
     BsDropdownMenuDirective,
@@ -44,8 +41,6 @@ import { StringifyEnum } from '../../pipes/StringifyEnum';
 ]
 })
 export class AdminComponent implements OnInit {
-  private authService = inject(AuthenticationService);
-  private navigation = inject(NavigationService);
   viewportScroller = inject(ViewportScroller);
   notificationService = inject(NotificationService);
   settingsService = inject(SettingsService);
@@ -75,13 +70,7 @@ export class AdminComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (
-      !this.authService.isAuthenticated() ||
-      !this.authService.isAuthorized(UserRoles.Admin)
-    ) {
-      this.navigation.toLogin();
-      return;
-    }
+    // adminGuard lets only admins in
     this.piTitleService.setTitle($localize`Admin`);
   }
 

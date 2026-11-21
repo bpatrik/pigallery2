@@ -4,7 +4,7 @@ import * as path from 'node:path';
 import {ConfigClass} from 'typeconfig/node';
 import {IConfigClass} from 'typeconfig/common';
 import {PasswordHelper} from '../../../backend/model/PasswordHelper';
-import {ClientConfig, TAGS} from '../public/ClientConfig';
+import {ClientConfig, TAGS, ThemesConfig} from '../public/ClientConfig';
 
 const upTime = new Date().toISOString();
 // TODO: Refactor Config to be injectable globally.
@@ -38,6 +38,8 @@ if (isTesting) {
     },
   },
   onLoadedSync: (config) => {
+    // in memory only: saving here could fail on a read-only config file; the next settings save writes them
+    ThemesConfig.applyBuiltInThemes(config.Gallery.Themes);
     let changed = false;
     for (let i = 0; i < config.Users.enforcedUsers.length; ++i) {
       const uc = config.Users.enforcedUsers[i];
@@ -84,11 +86,14 @@ export class PrivateConfigClass extends ServerConfig {
   }
 
   getClientConfig() {
-    return (this as unknown as IConfigClass<TAGS>).toJSON({
+    const config = (this as unknown as IConfigClass<TAGS>).toJSON({
       attachVolatile: true,
       skipTags: {secret: true},
       keepTags: {client: true}
     }) as unknown as ClientConfig;
+    // the server environment (e.g.: the app version) is only for admins, they get it from the settings
+    delete (config as unknown as Partial<ServerConfig>).Environment;
+    return config;
   }
 
 

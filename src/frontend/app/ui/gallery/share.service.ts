@@ -146,6 +146,7 @@ export class ShareService {
     searchQuery: SearchQueryDTO,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
@@ -155,6 +156,7 @@ export class ShareService {
         valid,
         ...(!!password && {password: password}),
         searchQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
         ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
@@ -168,6 +170,7 @@ export class ShareService {
     directoryQuery: DirectorySearch,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
     return this.networkService.postJson('/share/', {
@@ -175,6 +178,7 @@ export class ShareService {
         valid,
         ...(!!password && {password: password}),
         directoryQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
       } as CreateSharingDTO,
     });
@@ -185,6 +189,7 @@ export class ShareService {
     directoryQuery: DirectorySearch,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string
   ): Promise<ResponseSharingDTO> {
     return this.networkService.putJson('/share/', {
@@ -193,6 +198,7 @@ export class ShareService {
         valid,
         password,
         directoryQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
       } as CreateSharingDTO,
     });
@@ -245,6 +251,7 @@ export class ShareService {
     searchQuery: SearchQueryDTO,
     password: string | null,
     valid: number,
+    preventDownload: boolean,
     defaultDirectoryView?: string,
     defaultSearchView?: SearchQueryDTO
   ): Promise<ResponseSharingDTO> {
@@ -255,6 +262,7 @@ export class ShareService {
         valid,
         password,
         searchQuery,
+        preventDownload,
         ...(!!defaultDirectoryView && {defaultDirectoryView}),
         ...(!!defaultSearchView && {defaultSearchView}),
       } as CreateSharingDTO,
@@ -323,6 +331,15 @@ export class ShareService {
     return this.publicSharing();
   }
 
+  /**
+   * Asks the server again whether the sharing is still valid (e.g. it might have been deleted or expired since).
+   * Returns its public info, or null if it is not valid anymore.
+   */
+  public async reloadPublicSharing(): Promise<PublicSharingDTO | null> {
+    await this.checkSharing();
+    return this.publicSharing();
+  }
+
   private async checkSharing(): Promise<void> {
     try {
       this.sharingIsValid.set(null);
@@ -338,6 +355,7 @@ export class ShareService {
       }
     } catch (e) {
       this.sharingIsValid.set(false);
+      this.publicSharing.set(null);
       console.error(e);
     }
   }

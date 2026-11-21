@@ -60,7 +60,7 @@ export class SharingMWs {
 
       const sharing = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
       if (!sharing) {
-        throw new Error('Sharing not found: ' + sharingKey);
+        return next(new ErrorDTO(ErrorCodes.SHARING_NOT_FOUND, 'Sharing not found'));
       }
       req.resultPipe =
         {
@@ -133,6 +133,7 @@ export class SharingMWs {
         searchQuery,
         directoryQuery,
         password: createSharing.password,
+        preventDownload: createSharing.preventDownload === true,
         defaultSearchView: null,
         defaultDirectoryView: null,
         creator: RequestSession.getContext(req).user as UserEntity, // only the user id is used
@@ -215,6 +216,7 @@ export class SharingMWs {
           updateSharing.password && updateSharing.password !== ''
             ? updateSharing.password
             : null,
+        preventDownload: updateSharing.preventDownload,
         creator: RequestSession.getContext(req).user,
         expires:
           updateSharing.valid >= 0 // if === -1 its forever
@@ -279,7 +281,6 @@ export class SharingMWs {
       if (RequestSession.getContext(req).user.role < UserRoles.Admin) {
         const s = await ObjectManagers.getInstance().SharingManager.findOne(sharingKey);
         if (!s || s.creator.id !== RequestSession.getContext(req).user.id) {
-          res.status(401);
           return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED, 'Can\'t delete sharing.'));
         }
       }

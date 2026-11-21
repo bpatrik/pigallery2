@@ -1,3 +1,4 @@
+import {ReIndexingSensitivity} from '../../../common/config/Enums';
 import {ParentDirectoryDTO, SubDirectoryDTO,} from '../../../common/entities/DirectoryDTO';
 import * as path from 'node:path';
 import * as fs from 'node:fs';
@@ -12,7 +13,6 @@ import {VideoEntity} from './enitites/VideoEntity';
 import {Logger} from '../../Logger';
 import {ObjectManagers} from '../ObjectManagers';
 import {DuplicatesDTO} from '../../../common/entities/DuplicatesDTO';
-import {ReIndexingSensitivity} from '../../../common/config/private/PrivateConfig';
 import {DiskManager} from '../fileaccess/DiskManager';
 import {SessionContext} from '../SessionContext';
 import {FileEntity} from './enitites/FileEntity';

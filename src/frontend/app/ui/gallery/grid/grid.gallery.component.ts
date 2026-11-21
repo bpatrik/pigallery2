@@ -1,21 +1,44 @@
-import {AfterViewInit, ChangeDetectorRef, Component, ElementRef, Injector, OnChanges, OnDestroy, afterNextRender, computed, effect, inject, input, signal, untracked, viewChild, viewChildren} from '@angular/core';
-import {GridRowBuilder} from './GridRowBuilder';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  Injector,
+  OnChanges,
+  OnDestroy,
+  afterNextRender,
+  afterRenderEffect,
+  computed,
+  effect,
+  inject,
+  input,
+  linkedSignal,
+  signal,
+  untracked,
+  viewChild,
+  viewChildren
+} from '@angular/core';
 import type {LightboxGrid, LightboxGridTile} from '../lightbox/lightbox.gallery.component';
 import {GridMedia} from './GridMedia';
+import {GridLayout, GridLayoutParams, GridSegment} from './GridLayout';
+import {GridScroller} from './GridScroller';
+import {GalleryGridScrollLabelComponent} from './scroll-label/scroll-label.grid.gallery.component';
 import {GalleryPhotoComponent} from './photo/photo.grid.gallery.component';
 import {OverlayService} from '../overlay.service';
 import {Config} from '../../../../../common/config/public/Config';
 import {PageHelper} from '../../../model/page.helper';
-import {Router} from '@angular/router';
 import {QueryService} from '../../../model/query.service';
-import {MediaDTO, MediaDTOUtils,} from '../../../../../common/entities/MediaDTO';
+import {MediaDTO} from '../../../../../common/entities/MediaDTO';
 import {GallerySortingService, MediaGroup} from '../navigator/sorting.service';
 import {GroupByTypes} from '../../../../../common/entities/SortingMethods';
 import {GalleryNavigatorService} from '../navigator/navigator.service';
 import {GridSizes} from '../../../../../common/entities/GridSizes';
 import {NgIconComponent} from '@ng-icons/core';
 import {GalleryBlogComponent} from '../blog/blog.gallery.component';
+import {BlogService} from '../blog/blog.service';
 import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
+import {ScrollRestorationService} from '../../../model/scroll-restoration.service';
+import {NavigationEnd, Router, RouterLink} from '@angular/router';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-gallery-grid',
@@ -29,113 +52,252 @@ import {ParseIntPipe} from '../../../pipes/ParseIntPipe';
     NgIconComponent,
     GalleryBlogComponent,
     GalleryPhotoComponent,
-    ParseIntPipe
-]
+    GalleryGridScrollLabelComponent,
+    ParseIntPipe,
+    RouterLink
+  ]
 })
 export class GalleryGridComponent
   implements OnChanges, AfterViewInit, OnDestroy, LightboxGrid {
   private overlayService = inject(OverlayService);
-  private changeDetector = inject(ChangeDetectorRef);
   private injector = inject(Injector);
   queryService = inject(QueryService);
-  private router = inject(Router);
   sortingService = inject(GallerySortingService);
   navigatorService = inject(GalleryNavigatorService);
+  private scrollRestoration = inject(ScrollRestorationService);
+  private router = inject(Router);
+  private blogService = inject(BlogService);
 
-  readonly gridContainer = viewChild.required<ElementRef>('gridContainer');
+  readonly gridContainer = viewChild.required<ElementRef<HTMLElement>>('gridContainer');
+  private readonly linesContainer = viewChild.required<ElementRef<HTMLElement>>('linesContainer');
   // only read imperatively (revealMedia, onScroll), never in a template, computed or effect
   private readonly photoComponents = viewChildren(GalleryPhotoComponent);
   readonly mediaGroups = input.required<MediaGroup[]>();
-  // all media in grid order, also the ones that are not rendered yet; null while the content loads
+  // all media in grid order, also the ones that are not rendered; null while the content loads
   readonly media = computed((): MediaDTO[] => this.mediaGroups()?.flatMap(g => g.media) ?? null);
-  readonly mediaToRender = signal<GridMediaGroup[]>([]);
-  containerWidth = 0;
-  readonly containerMinHeight = signal(0); // used to fix container height while updating photos to prevent flickering
+
+  // the width of the rows and the height of the screen they are sized to
+  readonly containerWidth = signal(0);
+  readonly screenHeight = signal(0);
   readonly pinnedWidth = signal<number | null>(null); // keeps the grid width while a resize is waiting to rerender
-  screenHeight = 0;
+  // follows the grid size of the navigator, see the constructor
+  private readonly gridSize = signal(GridSizes.medium);
+  private readonly gridParams = computed(() => GRID_PARAMS[this.gridSize()] ?? GRID_PARAMS[GridSizes.medium]);
+  readonly IMAGE_MARGIN = computed(() => this.gridParams().imageMargin);
+
+  // the days with an inline blog: their group gets a line of its own (see GridLayout). A new set only if the days changed
+  private readonly blogDates = computed((): ReadonlySet<number> =>
+      new Set((this.blogService.groupedMarkdowns() ?? []).map(m => m.date).filter(d => d !== null)),
+    {equal: (a, b) => a.size === b.size && [...a].every(d => b.has(d))});
+
+  /**
+   * Where all lines of the grid are. It is rebuilt when the media, the width or the grid size changes,
+   * and changed in place when the rendered lines are measured: layoutVersion tells that.
+   */
+  readonly layout = computed((): GridLayout | null => {
+    // no width before ngAfterViewInit, when the inputs are set
+    const width = this.containerWidth();
+    if (width <= 0) {
+      return null;
+    }
+    const groups = this.mediaGroups();
+    if (!groups) {
+      return null;
+    }
+    return new GridLayout(groups, {
+      ...this.gridParams(),
+      blogDates: this.blogDates(),
+      width: width - this.overlayService.getPhantomScrollbarWidth(),
+      screenHeight: this.screenHeight(),
+      headerHeight: GalleryGridComponent.headerHeight
+    }, GalleryGridComponent.heightCache);
+  });
+  private readonly layoutVersion = signal(0);
+  // where the page is in the grid: all scrolling of the grid goes through it
+  readonly scroller = new GridScroller({
+    height: () => this.layout()?.totalHeight ?? 0,
+    top: () => this.getGridTop(),
+    afterRender: callback => afterNextRender(() => {
+      if (!this.destroyed) {
+        callback();
+      }
+    }, {injector: this.injector})
+  });
+  // the lines on and near the screen, only these are rendered
+  private readonly range = computed((): { first: number, last: number } => {
+    const layout = this.layout();
+    this.layoutVersion();
+    if (!layout || layout.length === 0) {
+      return {first: 0, last: -1};
+    }
+    const {top, height} = this.scroller.viewport();
+    return {
+      first: layout.lineAt(top - height * RENDER_BUFFER_SCREENS),
+      last: layout.lineAt(top + height * (1 + RENDER_BUFFER_SCREENS))
+    };
+  }, {equal: (a, b) => a.first === b.first && a.last === b.last});
+  // the space of the not rendered lines above and below the rendered ones
+  readonly padding = computed((): { top: number, bottom: number } => {
+    const layout = this.layout();
+    this.layoutVersion();
+    const {first, last} = this.range();
+    if (!layout || last < first) {
+      return {top: 0, bottom: 0};
+    }
+    // in the page: a huge grid is only as high there as a page can be, see GridScrollWindow
+    const offset = this.scroller.offset();
+    return {
+      top: Math.max(0, layout.top(first) - offset),
+      bottom: Math.max(0, this.scroller.pageHeight() - (layout.top(last) + layout.height(last) - offset))
+    };
+  });
+  private readonly openBlogs = signal<ReadonlyMap<number, boolean>>(new Map());
+  /**
+   * The rendered lines. An unchanged media keeps its GridMedia (so its tile) of the previous lines:
+   * a reload of the content (e.g. the server's answer after the cached one) does not render the tiles again.
+   */
+  readonly renderedLines = linkedSignal<{ layout: GridLayout | null, first: number, last: number, openBlogs: ReadonlyMap<number, boolean> }, RenderedLine[]>({
+    source: () => ({layout: this.layout(), ...this.range(), openBlogs: this.openBlogs()}),
+    computation: ({layout, first, last, openBlogs}, previous): RenderedLine[] => {
+      const previousTiles = new Map<string, GridMedia>();
+      previous?.value.forEach(l => l.segments.forEach(s => s.tiles.forEach(t => previousTiles.set(GalleryGridComponent.tileKey(t.gridMedia.media), t.gridMedia))));
+      const tile = (gm: GridMedia): RenderedTile => {
+        const key = GalleryGridComponent.tileKey(gm.media);
+        const old = previousTiles.get(key);
+        return {
+          gridMedia: old && old.renderWidth === gm.renderWidth && old.renderHeight === gm.renderHeight && old.equals(gm.media) ? old : gm,
+          shownBefore: this.shownTiles.has(key)
+        };
+      };
+      if (!layout) {
+        return [];
+      }
+      return layout.lines.slice(first, last + 1).map((line, i) => ({
+        key: line.key,
+        index: first + i,
+        layout,
+        segments: line.segments.map((s: GridSegment): RenderedSegment => ({
+          key: s.key,
+          group: s.group,
+          header: s.header,
+          blog: s.blog,
+          blogOpen: (s.group.date && openBlogs.get(s.group.date.getTime())) ?? Config.Gallery.InlineBlogStartsOpen,
+          tiles: s.media.map(tile)
+        }))
+      }));
+    }
+  });
+
   isAfterViewInit = false;
-  public IMAGE_MARGIN = 2;
-  private renderDelayTimer: number | null = null; // delays render on resize
   public readonly GroupByTypes = GroupByTypes;
-  public readonly blogOpen = Config.Gallery.InlineBlogStartsOpen;
-  private TARGET_COL_COUNT = 5;
-  private MIN_ROW_COUNT = 2;
-  private MAX_ROW_COUNT = 5;
-  private onScrollFired = false;
-  private helperTime: number | null = null;
+  // the estimated height of a group header, until one is rendered and measured; kept for the next grid (e.g. after a browser back)
+  private static headerHeight = 56;
+  // the measured heights of the lines, also for the next grid
+  private static readonly heightCache = new Map<string, number>();
+  private renderDelayTimer: number | null = null; // delays render on resize
+  private scrollFrame: number | null = null;
+  private destroyed = false;
+  // the waits for the next render: a removed grid never renders again, so they end on destroy
+  private readonly pendingRenders = new Set<() => void>();
+  private resizeObserver: ResizeObserver | null = null;
+  // no hover on a phone to see the whole path of a directory group header: its first tap shows it (only this one at a time)
+  readonly touchOnly = typeof window.matchMedia === 'function' && window.matchMedia('(hover: none)').matches;
+  readonly expandedDirectory = signal<string | null>(null);
+  // the scroll handle is dragged, see renderVisibleLines()
+  private handleDragged = false;
+  private lastDragRender = 0;
+  // the lines in the DOM, set after each render: a resize can be observed before the render of new lines
+  private linesInDom: RenderedLine[] = [];
+  // the photos this grid rendered on this page: they show up at once when they are rendered again (e.g. scrolled back), only new ones fade in.
+  // A new page fades in all of its photos, also the ones seen before.
+  private readonly shownTiles = new Set<string>();
+  private shownTilesPath: string | null = null;
+  private dragRenderTimer: number | null = null;
+  private readonly scrollOffset = (): number => this.scroller.offset();
 
   constructor() {
+    // a browser back comes back to the same place of a huge grid
+    this.scrollRestoration.setScrollOffset(this.scrollOffset);
+    // a new grid size keeps the first photo of the screen on the screen
     effect(() => {
-      const gs = this.navigatorService.girdSize();
-      untracked(() => this.onGridSizeChange(gs));
+      const size = this.navigatorService.girdSize();
+      untracked(() => this.keepFirstVisibleMedia(() => this.gridSize.set(size)));
+    });
+    this.router.events.pipe(takeUntilDestroyed()).subscribe(e => {
+      if (!(e instanceof NavigationEnd)) {
+        return;
+      }
+      const path = e.urlAfterRedirects.split(/[?#]/)[0];
+      if (path !== this.shownTilesPath) {
+        this.shownTilesPath = path;
+        this.shownTiles.clear();
+      }
+    });
+    // the lines are as high as they are rendered: a header, an inline blog or a cut directory path can differ from the estimate
+    afterRenderEffect({
+      read: () => {
+        this.linesInDom = this.renderedLines();
+        this.linesInDom.forEach(l => l.segments.forEach(s => s.tiles.forEach(t => this.shownTiles.add(GalleryGridComponent.tileKey(t.gridMedia.media)))));
+        this.measureLines();
+      }
     });
   }
 
-  // Side effect: merges the new media into the rendered grid after the view settled.
+  private static tileKey(m: MediaDTO): string {
+    return m.directory?.path + '/' + m.directory?.name + '/' + m.name;
+  }
+
+  // the content can change the scrollbar and so the width
   ngOnChanges(): void {
     if (this.isAfterViewInit === false) {
       return;
     }
-
-    this.containerMinHeight.set(Math.min(PageHelper.ScrollY + window.innerHeight, this.gridContainer().nativeElement.clientHeight)); // reduce flickering
-    setTimeout(() => {
-      this.updateContainerDimensions();
-      this.mergeNewPhotos();
-      this.renderMinimalPhotos();
-      setTimeout(() => {
-        this.containerMinHeight.set(0); // remove min height after new photos are rendered
-      }, 0);
-    }, 0);
+    this.updateContainerDimensions();
+    this.restoreScroll();
   }
 
-  private onGridSizeChange(gs: GridSizes): void {
-    switch (gs) {
-      case GridSizes.extraSmall:
-        this.TARGET_COL_COUNT = 12;
-        this.MIN_ROW_COUNT = 5;
-        this.MAX_ROW_COUNT = 10;
-        this.IMAGE_MARGIN = 1;
-        break;
-      case GridSizes.small:
-        this.TARGET_COL_COUNT = 8;
-        this.MIN_ROW_COUNT = 3;
-        this.MAX_ROW_COUNT = 8;
-        this.IMAGE_MARGIN = 1.5;
-        break;
-      case GridSizes.medium:
-        this.TARGET_COL_COUNT = 5;
-        this.MIN_ROW_COUNT = 2;
-        this.MAX_ROW_COUNT = 5;
-        this.IMAGE_MARGIN = 2;
-        break;
-      case GridSizes.large:
-        this.TARGET_COL_COUNT = 2;
-        this.MIN_ROW_COUNT = 1;
-        this.MAX_ROW_COUNT = 3;
-        this.IMAGE_MARGIN = 2;
-        break;
-      case GridSizes.extraLarge:
-        this.TARGET_COL_COUNT = 1;
-        this.MIN_ROW_COUNT = 1;
-        this.MAX_ROW_COUNT = 2;
-        this.IMAGE_MARGIN = 2;
-        break;
+  /**
+   * On a phone, the first tap on a directory group header shows its whole path if it was cut, the next one opens the directory.
+   * Otherwise (or with a mouse) the header is a plain link.
+   */
+  onDirectoryHeaderClick(event: MouseEvent, directoryPath: string | undefined): void {
+    if (!this.touchOnly || !directoryPath || this.expandedDirectory() === directoryPath) {
+      return; // the routerLink opens it
     }
-    // the first render happens in ngAfterViewInit
-    if (!this.isAfterViewInit) {
+    const link = event.currentTarget as HTMLElement;
+    if (link.scrollWidth > link.clientWidth) {
+      this.expandedDirectory.set(directoryPath);
       return;
     }
-    this.clearRenderedPhotos();
-    this.renderMinimalPhotos();
+    this.router.navigate(['/gallery', directoryPath], {queryParams: this.queryService.params()}).catch(console.error);
+  }
+
+  // the line of a blog is rendered again when it is scrolled back: it keeps whether it was open
+  onBlogOpenChange(date: Date | undefined, open: boolean): void {
+    if (!date) {
+      return;
+    }
+    this.openBlogs.update(m => new Map(m).set(date.getTime(), open));
   }
 
   ngOnDestroy(): void {
-    if (this.helperTime != null) {
-      clearTimeout(this.helperTime);
-    }
+    this.destroyed = true;
+    this.scrollRestoration.clearScrollOffset(this.scrollOffset);
+    this.scroller.destroy();
+    this.pendingRenders.forEach(resolve => resolve());
+    this.pendingRenders.clear();
+    this.resizeObserver?.disconnect();
     if (this.renderDelayTimer) {
       clearTimeout(this.renderDelayTimer);
       this.renderDelayTimer = null;
+    }
+    if (this.scrollFrame !== null) {
+      cancelAnimationFrame(this.scrollFrame);
+      this.scrollFrame = null;
+    }
+    if (this.dragRenderTimer != null) {
+      clearTimeout(this.dragRenderTimer);
+      this.dragRenderTimer = null;
     }
   }
 
@@ -147,399 +309,310 @@ export class GalleryGridComponent
       clearTimeout(this.renderDelayTimer);
       this.renderDelayTimer = null;
     }
-    this.pinnedWidth.set(this.containerWidth);
+    this.pinnedWidth.set(this.containerWidth());
     this.renderDelayTimer = window.setTimeout(() => {
       this.renderDelayTimer = null;
       this.pinnedWidth.set(null);
-      // render the same amount of images after resize
-      const renderedCount = this.getNumberOfRenderedMedia();
-      // do not rerender if container is not changes
-      if (this.updateContainerDimensions() === false) {
-        return;
-      }
-      this.renderPhotos(renderedCount);
+      this.keepFirstVisibleMedia(() => this.updateContainerDimensions());
+      this.updateViewport();
     }, 100);
-  }
-
-  photoClicked(media: MediaDTO): void {
-    this.router.navigate([], {
-      queryParams: this.queryService.getParams({media}),
-    });
   }
 
   ngAfterViewInit(): void {
     this.updateContainerDimensions();
-    this.clearRenderedPhotos();
-    this.renderMinimalPhotos();
+    this.updateViewport();
     this.isAfterViewInit = true;
+    // An inline blog opens or closes, a directory path is shown whole: the rendered lines change their height.
+    // The page changes its height when something above the grid does (e.g. the blog of the folder closes):
+    // the grid moves without a scroll, other lines are on the screen.
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => {
+        this.measureLines();
+        this.renderVisibleLines();
+      });
+      this.resizeObserver.observe(this.linesContainer().nativeElement);
+      this.resizeObserver.observe(document.body);
+    }
+    this.restoreScroll();
   }
 
   /**
-   * Renders the rows up to this media plus one more and scrolls its tile into view.
+   * Renders the line of this media and scrolls its tile into view.
    * Resolves after that render with the tile's position and its GridMedia, or null if the media is not in the grid.
    */
   async revealMedia(media: MediaDTO): Promise<LightboxGridTile | null> {
-    // the grid measures its width in ngAfterViewInit, it can't render rows before that
+    // the grid measures its width in ngAfterViewInit, it has no layout before that
     if (!this.isAfterViewInit) {
       await this.afterRender();
     }
-    const id = this.queryService.getMediaStringId(media);
-    if (!this.renderUpToMedia(id)) {
+    if (this.destroyed) {
       return null;
     }
+    const layout = this.layout();
+    const id = this.queryService.getMediaStringId(media);
+    let line = layout?.lineOf(media) ?? -1;
+    if (line === -1 && layout) {
+      // the same media in a reloaded content is a new object
+      line = layout.lines.findIndex(l => l.segments.some(s => s.media.some(m => this.queryService.getMediaStringId(m.media) === id)));
+    }
+    if (!layout || line === -1) {
+      return null;
+    }
+    // only a line that is off the screen: a photo cut by the edge of the screen (e.g. a click on it) stays where it is,
+    // the lightbox opens from there
+    const screenTop = this.scroller.screenTop();
+    if (screenTop >= layout.top(line) + layout.height(line) || screenTop + window.innerHeight <= layout.top(line)) {
+      this.scrollToLineAfterRender(layout, line, 0);
+    }
     await this.afterRender();
+    if (this.destroyed) {
+      return null;
+    }
     const tile = this.photoComponents().find(p => this.queryService.getMediaStringId(p.gridMedia().media) === id);
     if (!tile) {
       return null;
     }
     const rect = tile.getDimension();
-    // if the tile is out of the screen -> scroll to there.
+    // if the tile is (still) off the screen -> scroll to there.
     // Instantly (the page has smooth scrolling): the lightbox animates from the tile's place right away.
-    if (PageHelper.ScrollY > rect.top || PageHelper.ScrollY + window.innerHeight < rect.top) {
-      window.scrollTo({left: window.scrollX, top: rect.top, behavior: 'instant'});
+    if (PageHelper.ScrollY >= rect.top + rect.height || PageHelper.ScrollY + window.innerHeight <= rect.top) {
+      this.scroller.scrollTo(rect.top);
     }
     return {rect, gridMedia: tile.gridMedia()};
   }
 
+  /**
+   * Resolves after the next render, or right away when the grid is (or gets) removed: it then never renders again.
+   */
   private afterRender(): Promise<void> {
-    return new Promise<void>(resolve => afterNextRender(() => resolve(), {injector: this.injector}));
-  }
-
-  private static hasSameLayout(m1: MediaDTO, m2: MediaDTO): boolean {
-    return m1.name === m2.name &&
-      m1.directory?.name === m2.directory?.name &&
-      m1.directory?.path === m2.directory?.path &&
-      m1.metadata?.size?.width === m2.metadata?.size?.width &&
-      m1.metadata?.size?.height === m2.metadata?.size?.height;
-  }
-
-  // Merging photos after new sorting and filter was applied
-  public mergeNewPhotos(): void {
-    const rendered = this.mediaToRender();
-    if (rendered.length === 0) {
-      return;
+    if (this.destroyed) {
+      return Promise.resolve();
     }
-    const mediaGroups = this.mediaGroups();
-    if (mediaGroups?.length === 0) {
-      this.clearRenderedPhotos();
-      return;
-    }
-    // a copy of the rendered groups: an unchanged group keeps its object, a changed one gets a new one
-    const groups = [...rendered];
-    // merge new data with old one
-    const firstDeleteIndex = {
-      groups: 0,
-      media: 0
-    };
-    const lastOkIndex = {
-      groups: 0,
-      media: 0
-    };
-    let diffFound = false;
-    let i = 0;
-    let j: number;
-
-    for (; i < mediaGroups.length && i < groups.length; ++i) {
-
-      if (diffFound) {
-        break;
-      }
-
-      if (groups[i].name !== mediaGroups[i].name) {
-        groups[i] = {...groups[i], name: mediaGroups[i].name}; // update name if only this changed
-      }
-
-      let lastRowId = null;
-      j = 0;
-      for (; j < mediaGroups[i].media.length && j < groups[i].media.length; ++j) {
-        const media = mediaGroups[i].media[j];
-        const gridMedia = groups[i].media[j];
-
-        // If a media changed the whole row has to be removed
-        if (gridMedia.rowId !== lastRowId) {
-          firstDeleteIndex.groups = i;
-          firstDeleteIndex.media = j;
-          lastRowId = gridMedia.rowId;
-        }
-
-        if (gridMedia.equals(media) === false) {
-          // Same file with the same size: only its metadata changed (e.g. an
-          // extension button edited its keywords). Swap it in: the rows
-          // and the scroll position are kept, only this tile is re-rendered.
-          if (GalleryGridComponent.hasSameLayout(gridMedia.media, media)) {
-            const groupMedia = [...groups[i].media];
-            groupMedia[j] = new GridMedia(media, gridMedia.renderWidth, gridMedia.renderHeight, gridMedia.rowId);
-            groups[i] = {...groups[i], media: groupMedia};
-          } else {
-            // we go no further. Found the first bad media
-            diffFound = true;
-            break;
-          }
-        }
-        // save the last media that was checked and was ok
-        lastOkIndex.groups = i;
-        lastOkIndex.media = j;
-      }
-      if (mediaGroups[i].media.length != groups[i].media.length) {
-        break;
-      }
-    }
-
-    // if all check passed, nothing to delete from the last group
-    if (!diffFound &&
-      lastOkIndex.media == mediaGroups[lastOkIndex.groups].media.length - 1) {
-      firstDeleteIndex.groups = lastOkIndex.groups; // delete last ok group as we might want to add more photos
-      firstDeleteIndex.media = lastOkIndex.media + 1;
-    }
-
-    if (firstDeleteIndex.media < 0 && firstDeleteIndex.groups < 0) {
-      this.clearRenderedPhotos();
-      return;
-    }
-    // only delete the whole group if all media is different
-    if (firstDeleteIndex.media === 0) {
-      this.mediaToRender.set(groups.slice(0, firstDeleteIndex.groups));
-      return;
-    }
-    const kept = groups.slice(0, firstDeleteIndex.groups + 1);
-    const lastGroup = kept[firstDeleteIndex.groups];
-    if (lastGroup.media.length > firstDeleteIndex.media) {
-      kept[firstDeleteIndex.groups] = {...lastGroup, media: lastGroup.media.slice(0, firstDeleteIndex.media)};
-    }
-    this.mediaToRender.set(kept);
-  }
-
-  public renderARow(): number | null {
-    if (
-      !this.isMoreToRender() ||
-      this.containerWidth === 0
-    ) {
-      return null;
-    }
-
-    const groups = [...this.mediaToRender()];
-    // step group
-    const mediaGroups = this.mediaGroups();
-    if (groups.length == 0 ||
-      groups[groups.length - 1].media.length >=
-      mediaGroups[groups.length - 1].media.length) {
-      groups.push({
-        name: mediaGroups[groups.length].name,
-        date: mediaGroups[groups.length].date,
-        media: []
-      } as GridMediaGroup);
-    }
-    const lastIndex = groups.length - 1;
-
-    const baseMaxRowHeight = this.getMaxRowHeight();
-    let maxRowHeight = baseMaxRowHeight;
-    const minRowHeight = this.screenHeight / this.MAX_ROW_COUNT;
-
-    const photoRowBuilder = new GridRowBuilder(
-      mediaGroups[lastIndex].media,
-      groups[lastIndex].media.length,
-      this.IMAGE_MARGIN,
-      this.containerWidth - this.overlayService.getPhantomScrollbarWidth()
-    );
-
-    photoRowBuilder.addPhotos(this.TARGET_COL_COUNT);
-    photoRowBuilder.adjustRowHeightBetween(minRowHeight, maxRowHeight);
-
-    // little trick: We don't want too big single images. But if a little extra height helps fit the row, its ok
-    if (photoRowBuilder.getPhotoRow().length > 1) {
-      maxRowHeight *= 1.2;
-    }
-    const noFullRow = photoRowBuilder.calcRowHeight() > maxRowHeight;
-    // if the row is not full, make it average sized.
-    // Use the base max height, so not full rows of different groups that share a line have the same height
-    const rowHeight = noFullRow ? (minRowHeight + baseMaxRowHeight) / 2 :
-      Math.min(photoRowBuilder.calcRowHeight(), maxRowHeight);
-    const imageHeight = rowHeight - this.IMAGE_MARGIN * 2;
-
-    const rowId = groups[lastIndex].media.length;
-    const row = photoRowBuilder.getPhotoRow().map((media): GridMedia => {
-      const imageWidth = imageHeight * MediaDTOUtils.calcAspectRatio(media);
-      return new GridMedia(media, imageWidth, imageHeight, rowId);
+    return new Promise<void>(resolve => {
+      const done = (): void => {
+        this.pendingRenders.delete(done);
+        resolve();
+      };
+      this.pendingRenders.add(done);
+      afterNextRender(done, {injector: this.injector});
     });
-    groups[lastIndex] = {...groups[lastIndex], media: [...groups[lastIndex].media, ...row]};
-    this.mediaToRender.set(groups);
-
-    return rowHeight;
   }
 
   onScroll(): void {
-    const prioritiseThumbnails = Config.Gallery.enableOnScrollThumbnailPrioritising === true;
-    if (
-      !this.onScrollFired &&
-      this.mediaGroups() &&
-      // should we trigger this at all?
-      (this.isMoreToRender() || prioritiseThumbnails)
-    ) {
-      window.requestAnimationFrame((): void => {
-        this.renderPhotos();
-
-        if (prioritiseThumbnails) {
-          for (const pc of this.photoComponents()) {
-            if (pc.ScrollListener) {
-              pc.onScroll();
-            }
+    if (this.scrollFrame !== null) {
+      return;
+    }
+    this.scrollFrame = window.requestAnimationFrame((): void => {
+      this.scrollFrame = null;
+      this.renderVisibleLines();
+      if (Config.Gallery.enableOnScrollThumbnailPrioritising === true) {
+        for (const pc of this.photoComponents()) {
+          if (pc.ScrollListener) {
+            pc.onScroll();
           }
         }
-
-        this.onScrollFired = false;
-      });
-      this.onScrollFired = true;
-    }
-  }
-
-  getNumberOfRenderedMedia(): number {
-    return this.mediaToRender().reduce((c, mg) => c + mg.media.length, 0);
-  }
-
-  /*
-  Renders some photos. If nothing is specified, this amount should be enough
-  * */
-  private renderMinimalPhotos(): void {
-    this.helperTime = window.setTimeout((): void => {
-      this.renderPhotos();
-    }, 0);
-  }
-
-  private getMaxRowHeight(): number {
-    return this.screenHeight / this.MIN_ROW_COUNT;
+      }
+    });
   }
 
   /**
-   * Renders the rows up to the media with the given string id, plus one more row.
-   * Returns false if the media is not in the grid.
+   * Renders the lines of the shown part of the page.
+   * While the scroll handle is dragged (e.g. across thousands of photos), only every few frames:
+   * the photos it passes would not even show up, but would ask for their thumbnails.
    */
-  private renderUpToMedia(mediaStringId: string): boolean {
-    const mediaGroups = this.mediaGroups();
-    if (!mediaGroups) {
-      return false;
+  private renderVisibleLines(): void {
+    if (!this.handleDragged) {
+      this.updateViewport();
+      return;
     }
-    let groupIndex = -1;
-    let mediaIndex = -1;
-
-    for (let i = 0; i < mediaGroups.length; ++i) {
-      mediaIndex = mediaGroups[i].media.findIndex(
-        (p): boolean => this.queryService.getMediaStringId(p) === mediaStringId
-      );
-      if (mediaIndex !== -1) {
-        groupIndex = i;
-        break;
-      }
+    const wait = this.lastDragRender + DRAG_RENDER_INTERVAL_MS - performance.now();
+    if (wait <= 0) {
+      this.lastDragRender = performance.now();
+      this.updateViewport();
+      return;
     }
-    if (groupIndex === -1) {
-      return false;
+    if (this.dragRenderTimer === null) {
+      this.dragRenderTimer = window.setTimeout(() => {
+        this.dragRenderTimer = null;
+        this.renderVisibleLines();
+      }, wait);
     }
-    // Make sure that at least one more row is rendered
-    // It is possible that only the last few pixels of a photo are visible,
-    // so not required to render more. However, the scrollbar does not trigger more photos to render
-    // (on lightbox navigation)
-    const needsMore = (): boolean => {
-      const rendered = this.mediaToRender();
-      if (rendered.length - 1 < groupIndex) {
-        return true; // the group of the media is not rendered yet
-      }
-      if (rendered.length - 1 > groupIndex) {
-        return false; // the next group already has a row
-      }
-      const groupMedia = rendered[groupIndex].media;
-      if (groupMedia.length <= mediaIndex) {
-        return true; // the media is not rendered yet
-      }
-      // is there a row after the row of the media?
-      return groupMedia[groupMedia.length - 1].rowId === groupMedia[mediaIndex].rowId;
-    };
-    while (needsMore() && this.renderARow() !== null) {
-      // renders a row in each step
-    }
-    return true;
   }
 
-  private clearRenderedPhotos(): void {
-    this.mediaToRender.set([]);
-    this.changeDetector.detectChanges();
+  /** The scroll handle of a touch screen got grabbed or released. */
+  onScrollHandleDrag(dragged: boolean): void {
+    this.handleDragged = dragged;
+    if (dragged) {
+      return;
+    }
+    if (this.dragRenderTimer != null) {
+      clearTimeout(this.dragRenderTimer);
+      this.dragRenderTimer = null;
+    }
+    this.updateViewport();
+  }
+
+  private updateViewport(): void {
+    if (!this.isAfterViewInit && this.containerWidth() === 0) {
+      return;
+    }
+    this.scroller.update();
   }
 
   /**
-   * Returns true, if scroll is >= 70% to render more images.
-   * Or of onscroll rendering is off: return always to render all the images at once
-   * @param offset Add height to the client height (content is not yet added to the dom, but calculate with it)
-   * @returns boolean
+   * Renders the lines at a line, then scrolls there (offset px below its top), see GridScroller.scrollToAfterRender().
+   * Not if the grid gets another layout until then.
    */
-  private shouldRenderMore(offset = 0): boolean {
-    const bottomOffset = this.getMaxRowHeight() * 2;
-    const maxScroll = PageHelper.MaxScrollY + offset;
-    return (
-      Config.Gallery.enableOnScrollRendering === false ||
-      PageHelper.ScrollY >= maxScroll - bottomOffset || // too close to the bottom
-      maxScroll * 0.85 < window.innerHeight
-    );
+  private scrollToLineAfterRender(layout: GridLayout, line: number, offset: number): void {
+    this.scroller.scrollToAfterRender(() => this.layout() === layout ? layout.top(line) + offset : null);
   }
 
-  private renderPhotos(numberOfPhotos = 0): void {
-    if (!this.mediaGroups()) {
-      return;
-    }
-    if (
-      this.containerWidth === 0 ||
-      !this.isMoreToRender() ||
-      !this.shouldRenderMore()
-    ) {
-      return;
-    }
-    let renderedContentHeight = 0;
+  /** The top of the grid in the page. */
+  private getGridTop(): number {
+    return this.gridContainer().nativeElement.getBoundingClientRect().top + PageHelper.ScrollY;
+  }
 
-    while (
-      this.isMoreToRender() &&
-      (this.shouldRenderMore(renderedContentHeight) === true ||
-        this.getNumberOfRenderedMedia() < numberOfPhotos)
-      ) {
-      const ret = this.renderARow();
-      if (ret === null) {
-        throw new Error('Grid media rendering failed');
+  /**
+   * Corrects the estimated heights of the rendered lines with their real ones. The lines below move with it, so
+   * the page scrolls by the change of the lines above the screen: what is on the screen stays where it is.
+   */
+  private measureLines(): void {
+    const layout = this.layout();
+    if (!layout || this.destroyed) {
+      return;
+    }
+    // the first line on the screen stays where it is on the screen
+    const screenTop = this.scroller.screenTop();
+    const anchor = layout.lineAt(screenTop);
+    const anchorTop = layout.top(anchor);
+    if (!this.setMeasuredHeights(layout)) {
+      return;
+    }
+    layout.updateTops();
+    this.layoutVersion.update(v => v + 1);
+    const moved = screenTop > 0 && screenTop >= anchorTop ? layout.top(anchor) - anchorTop : 0;
+    this.scroller.restoreScreenTop(screenTop + moved);
+    this.updateViewport();
+  }
+
+  /** Sets the heights of the rendered lines and of the group header in the layout. Returns true if any changed. */
+  private setMeasuredHeights(layout: GridLayout): boolean {
+    const container = this.linesContainer().nativeElement;
+    const elements = container.children;
+    const lines = this.linesInDom;
+    if (elements.length !== lines.length) {
+      return false;
+    }
+    let changed = false;
+    const headerHeight = container.querySelector<HTMLElement>('.group-header')?.getBoundingClientRect().height ?? 0;
+    if (headerHeight > 0) {
+      GalleryGridComponent.headerHeight = headerHeight;
+      changed = layout.setHeaderHeight(headerHeight);
+    }
+    for (let i = 0; i < elements.length; ++i) {
+      const height = elements[i].getBoundingClientRect().height;
+      // 0: not laid out (e.g. the gallery is hidden)
+      if (height > 0 && lines[i].layout === layout) {
+        changed = layout.setHeight(lines[i].index, height) || changed;
       }
-      renderedContentHeight += ret;
     }
+    return changed;
   }
 
-  private isMoreToRender(): boolean {
-    const rendered = this.mediaToRender();
-    const mediaGroups = this.mediaGroups();
-    return rendered.length < mediaGroups.length ||
-      (rendered[rendered.length - 1]?.media.length || 0) < mediaGroups[rendered.length - 1]?.media.length;
+  /**
+   * Relayouts the grid (e.g. a new width) so that the first photo on the screen stays on the top of the screen.
+   */
+  private keepFirstVisibleMedia(relayout: () => void): void {
+    // the first one that is not scrolled out at the top or hidden behind the navbar; also if it is not rendered
+    const navbarBottom = PageHelper.NavbarBottom;
+    const before = this.layout();
+    const media = before?.firstMediaAt(this.scroller.screenTop() + navbarBottom) ?? null;
+    relayout();
+    const layout = this.layout();
+    if (!media || !layout || layout === before) {
+      return;
+    }
+    const line = layout.lineOf(media);
+    if (line === -1) {
+      return;
+    }
+    this.scrollToLineAfterRender(layout, line, -navbarBottom);
   }
 
-  private updateContainerDimensions(): boolean {
+  /**
+   * Browser back or forward to this page: scrolls to its last scroll position.
+   * The grid has the height of all its lines from the start, so it can scroll there right away.
+   * Runs after every render until the user scrolls: the first one may still show the previous content (e.g. the search).
+   */
+  private restoreScroll(): void {
+    if (!this.mediaGroups()?.length || this.scrollRestoration.restoreTarget() === null) {
+      return;
+    }
+    afterNextRender(() => {
+      const y = this.scrollRestoration.restoreTarget();
+      if (y === null || this.destroyed) {
+        return;
+      }
+      // y is in the whole grid (see ScrollRestorationService.setScrollOffset()): a huge grid shows that part first
+      const layout = this.layout();
+      const gridY = y - this.getGridTop();
+      if (layout && gridY > 0 && this.scroller.isWindowed()) {
+        const line = layout.lineAt(gridY);
+        this.scrollToLineAfterRender(layout, line, gridY - layout.top(line));
+        return;
+      }
+      this.scroller.scrollTo(y);
+    }, {injector: this.injector});
+  }
+
+  private updateContainerDimensions(): void {
     const gridContainer = this.gridContainer();
     if (!gridContainer) {
-      return false;
+      return;
     }
 
     const scrollY = PageHelper.OverflowY;
     PageHelper.showScrollY('grid');
+    const width = gridContainer.nativeElement.parentElement?.clientWidth ?? 0;
     // if the width changed a bit or the height changed a lot
     if (
-      this.containerWidth !== gridContainer.nativeElement.parentElement.clientWidth ||
-      this.screenHeight < window.innerHeight * 0.75 ||
-      this.screenHeight > window.innerHeight * 1.25
+      this.containerWidth() !== width ||
+      this.screenHeight() < window.innerHeight * 0.75 ||
+      this.screenHeight() > window.innerHeight * 1.25
     ) {
-      this.screenHeight = window.innerHeight;
-      this.containerWidth = gridContainer.nativeElement.parentElement.clientWidth;
-      this.clearRenderedPhotos();
-      PageHelper.OverflowY = scrollY;
-      return true;
+      this.screenHeight.set(window.innerHeight);
+      this.containerWidth.set(width);
     }
-
     PageHelper.OverflowY = scrollY;
-    return false;
   }
 }
 
-interface GridMediaGroup {
-  media: GridMedia[];
-  name: string;
-  date?: Date;
+// rendered above and below the screen, so a scroll shows rendered photos
+const RENDER_BUFFER_SCREENS = 1;
+// the lines render this often while the scroll handle is dragged
+const DRAG_RENDER_INTERVAL_MS = 150;
+
+const GRID_PARAMS: Record<GridSizes, Omit<GridLayoutParams, 'width' | 'screenHeight' | 'headerHeight'>> = {
+  [GridSizes.extraSmall]: {targetColCount: 12, minRowCount: 5, maxRowCount: 10, imageMargin: 1},
+  [GridSizes.small]: {targetColCount: 8, minRowCount: 3, maxRowCount: 8, imageMargin: 1.5},
+  [GridSizes.medium]: {targetColCount: 5, minRowCount: 2, maxRowCount: 5, imageMargin: 2},
+  [GridSizes.large]: {targetColCount: 2, minRowCount: 1, maxRowCount: 3, imageMargin: 2},
+  [GridSizes.extraLarge]: {targetColCount: 1, minRowCount: 1, maxRowCount: 2, imageMargin: 2},
+};
+
+interface RenderedTile {
+  gridMedia: GridMedia;
+  shownBefore: boolean; // this grid rendered it already
+}
+
+interface RenderedSegment extends Omit<GridSegment, 'media'> {
+  blogOpen: boolean;
+  tiles: RenderedTile[];
+}
+
+interface RenderedLine {
+  key: string;
+  index: number; // in the layout
+  layout: GridLayout;
+  segments: RenderedSegment[];
 }

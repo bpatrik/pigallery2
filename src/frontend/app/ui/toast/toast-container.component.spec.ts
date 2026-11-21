@@ -79,6 +79,16 @@ describe('ToastContainerComponent', () => {
     expect(cards('bottom-right').length).toBe(1); // the owner closes it
   });
 
+  it('should call the retry action without closing the toast by the click', () => {
+    const onRetry = vi.fn();
+    service.open({type: 'error', title: 'Balaton.jpg', text: 'Unknown Error', onRetry});
+    render();
+    (cards('bottom-right')[0].querySelector('.toast-retry') as HTMLElement).click();
+    render();
+    expect(onRetry).toHaveBeenCalled();
+    expect(cards('bottom-right').length).toBe(1); // the owner updates it
+  });
+
   describe('group', () => {
     beforeEach(() => {
       service.registerGroup('notifications', {

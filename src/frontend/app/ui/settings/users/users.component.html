@@ -24,18 +24,18 @@
             {{ row.roleName }}
           </td>
           <td>
-            <button [disabled]="!row.canDelete" (click)="deleteUser(row.user)"
+            <button type="button" [disabled]="!row.canDelete" (click)="deleteUser(row.user)"
               [class]="row.canDelete ? 'btn-danger':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
-            <button [disabled]="!row.canModify" (click)="openEditUser(row.user)"
+            <button type="button" [disabled]="!row.canModify" (click)="openEditUser(row.user)"
               [class]="row.canModify ? 'btn-primary':'btn-secondary'"
               class="btn float-end ms-2">
               <ng-icon name="ionPencil" title="Edit" i18n-title />
             </button>
             @if (row.user.oidcSubject) {
-              <button (click)="unlinkOidc(row.user)"
+              <button type="button" (click)="unlinkOidc(row.user)"
                 class="btn btn-warning float-end ms-2">
                 <ng-icon name="ionUnlinkOutline" title="Unlink OIDC account" i18n-title />
               </button>
@@ -45,7 +45,7 @@
       }
     </tbody>
   </table>
-  <button class="btn btn-primary float-end"
+  <button type="button" class="btn btn-primary float-end"
     (click)="initNewUser()">
     <ng-icon name="ionAddOutline" class="me-1" />
     <span i18n>Add user</span>

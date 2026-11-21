@@ -1,23 +1,28 @@
 :host {
   position: relative;
   overflow: hidden;
-  transition: scale .3s ease-out;
+  --bs-border-radius: var(--item-radius);
+  transition: scale var(--transition-duration) var(--transition-easing);
 }
 
 :host:hover {
-  scale: 98%;
+  scale: var(--item-hover-scale);
 }
 
 img {
   width: inherit;
   height: inherit;
-
-  -webkit-animation: fadein 2s; /* Safari, Chrome and Opera > 12.1 */
-  -moz-animation: fadein 2s; /* Firefox < 16 */
-  -ms-animation: fadein 2s; /* Internet Explorer */
-  -o-animation: fadein 2s; /* Opera < 12.1 */
-  animation: fadein 2s;
   vertical-align: unset;
+  transition: scale var(--transition-duration) var(--transition-easing);
+}
+
+.photo-container:hover img {
+  scale: var(--item-hover-image-scale);
+}
+
+/* only a photo that was not shown yet: one seen before (e.g. after back) shows up at once */
+img.fade-in {
+  animation: fadein var(--fade-in-duration);
 }
 
 img.loading {
@@ -33,81 +38,52 @@ img.loading {
   }
 }
 
-/* Firefox < 16 */
-@-moz-keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Safari, Chrome and Opera > 12.1 */
-@-webkit-keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Internet Explorer */
-@-ms-keyframes fadein {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 .photo-container:hover .info {
-  animation: show-info .3s forwards;
+  animation: show-info var(--transition-duration) forwards;
 }
 
+/* the bar sits on the bottom edge of the photo and slides out below it: shown, it has no offset,
+ so it can't leave a line of the photo below it (a translateY(-100%) of a fractional height rounds to another pixel) */
 @keyframes show-info {
   0% {
-    transform: translateY(0);
-    background-color: transparent;
+    transform: translateY(100%);
+    background: transparent;
   }
 
   100% {
-    transform: translateY(-100%);
-    background: rgba(0, 0, 0, 0.8);
+    transform: none;
+    background: var(--overlay-hover-background);
   }
 }
 
 @keyframes hide-info {
 
   0% {
-    transform: translateY(-100%);
-    background: rgba(0, 0, 0, 0.8);
+    transform: none;
+    background: var(--overlay-hover-background);
   }
   100% {
-    transform: translateY(0);
-    background-color: transparent;
+    transform: translateY(100%);
+    background: transparent;
   }
 }
 
 .info {
-  animation: hide-info .3s forwards;
-  transform: translateY(0);
+  animation: hide-info var(--transition-duration) forwards;
+  transform: translateY(100%);
+  bottom: 0;
+  left: 0;
   background-color: transparent;
-  color: white;
-  font-size: medium;
+  color: var(--overlay-color);
+  text-shadow: var(--overlay-text-shadow);
+  font-size: var(--overlay-font-size);
   display: table-caption;
   position: absolute;
   padding: 5px;
   width: 100%;
   margin-top: 0;
-
-  transition: transform .3s ease-out, background-color .3s ease-out;
-  -moz-transition: transform .3s ease-out, background-color .3s ease-out;
-  -webkit-transition: transform .3s ease-out, background-color .3s ease-out;
-  -o-transition: transform .3s ease-out, background-color .3s ease-out;
-  -ms-transition: transform .3s ease-out, background-color .3s ease-out;
+  transition: transform var(--transition-duration) var(--transition-easing),
+  background-color var(--transition-duration) var(--transition-easing);
 }
 
 .photo-container {
@@ -126,7 +102,7 @@ img.loading {
 }
 
 a {
-  color: white;
+  color: var(--overlay-color);
 }
 
 .photo-keywords {
@@ -145,17 +121,13 @@ a {
   right: 0;
   white-space: nowrap;
   border-bottom-left-radius: 15px !important;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  transition: background-color .3s ease-out;
-  -moz-transition: background-color .3s ease-out;
-  -webkit-transition: background-color .3s ease-out;
-  -o-transition: background-color .3s ease-out;
-  -ms-transition: background-color .3s ease-out;
+  background-color: var(--overlay-button-background);
+  color: var(--overlay-color);
+  transition: background-color var(--transition-duration) var(--transition-easing);
 }
 
 .photo-container:hover .video-indicator {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: var(--overlay-button-hover-background);
 }
 
 .live-photo-indicator {
@@ -168,13 +140,13 @@ a {
   right: 0;
   white-space: nowrap;
   border-bottom-left-radius: 10px !important;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  transition: background-color .3s ease-out;
+  background-color: var(--overlay-button-background);
+  color: var(--overlay-color);
+  transition: background-color var(--transition-duration) var(--transition-easing);
 }
 
 .photo-container:hover .live-photo-indicator {
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: var(--overlay-button-hover-background);
 }
 
 .photo-keywords ng-icon {
@@ -191,28 +163,27 @@ a {
 }
 
 .media-button {
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--overlay-button-background);
   border: none;
   border-radius: 50%;
   width: 30px;
   height: 30px;
   padding: 6px;
   cursor: pointer;
-  transition: background-color .3s ease-out;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .media-button:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--overlay-button-hover-background);
 }
 
 .media-button-icon {
   width: 18px;
   height: 18px;
-  fill: white;
-  color: white;
+  fill: var(--overlay-color);
+  color: var(--overlay-color);
 }
 
 .photo-container:hover .media-button {
@@ -221,7 +192,7 @@ a {
 
 .media-button {
   opacity: 0;
-  transition: opacity .3s ease-out;
+  transition: opacity var(--transition-duration) var(--transition-easing);
 }
 
 .media-button.always-visible {
@@ -230,4 +201,28 @@ a {
 
 .no-click {
   cursor: auto;
+}
+
+.photo-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.photo-link:focus-visible {
+  outline: 3px solid var(--bs-focus-ring-color, #0d6efd);
+  outline-offset: -3px;
+}
+
+/* a click on the info bar (except its links) or an indicator opens the photo, like a click on the photo */
+.info, .video-indicator, .live-photo-indicator {
+  pointer-events: none;
+}
+
+.info a {
+  pointer-events: auto;
+}
+
+.info a:hover {
+  text-decoration: underline;
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import {Component, ElementRef, OnInit, inject, signal, viewChild} from '@angular/core';
 import {LoginCredential} from '../../../../common/entities/LoginCredential';
 import {AuthenticationService} from '../../model/network/authentication.service';
 import {ErrorCodes, isErrorDTO} from '../../../../common/entities/Error';
@@ -27,6 +27,7 @@ export class LoginComponent implements OnInit {
 
   loginCredential: LoginCredential;
   readonly loginError = signal(false);
+  private readonly passwordInput = viewChild<ElementRef<HTMLInputElement>>('passwordInput');
   title: string;
   readonly inProgress = signal(false);
   oidcEnabled = false;
@@ -41,7 +42,7 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
-      this.navigation.toDefault().catch(console.error);
+      this.navigation.toAfterLogin().catch(console.error);
     }
   }
 
@@ -54,6 +55,9 @@ export class LoginComponent implements OnInit {
     } catch (error) {
       if (isErrorDTO(error) && error.code === ErrorCodes.CREDENTIAL_NOT_FOUND) {
         this.loginError.set(true);
+        // a fresh start for the next try
+        this.loginCredential.password = '';
+        this.passwordInput()?.nativeElement.focus();
       }
     }
 

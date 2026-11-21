@@ -4,7 +4,6 @@ import {Utils} from '../../../../common/Utils';
 import {QueryService} from '../../model/query.service';
 import {DuplicatesDTO} from '../../../../common/entities/DuplicatesDTO';
 import {DirectoryPathDTO} from '../../../../common/entities/DirectoryDTO';
-import {Config} from '../../../../common/config/public/Config';
 import {PageHelper} from '../../model/page.helper';
 import {MediaDTO} from '../../../../common/entities/MediaDTO';
 import {PiTitleService} from '../../model/pi-title.service';
@@ -45,6 +44,8 @@ export class DuplicateComponent implements OnInit {
   queryService = inject(QueryService);
   private piTitleService = inject(PiTitleService);
 
+  // the duplicates are still loading (it can take a while on a big gallery)
+  readonly loading = computed((): boolean => this.duplicateService.duplicates() === null);
   readonly directoryGroups = computed((): GroupedDuplicate[] => {
     let duplicates = this.duplicateService.duplicates();
     const groups: GroupedDuplicate[] = [];
@@ -106,7 +107,7 @@ export class DuplicateComponent implements OnInit {
     return groups;
   });
   // grows while rendering; its groups and pair lists are pushed to in place, so it is set to a new array after each step
-  readonly renderedDirGroups = signal<GroupedDuplicate[] | null>(null);
+  readonly renderedDirGroups = signal<GroupedDuplicate[]>([]);
   renderedIndex = {
     group: -1,
     pairs: 0,
@@ -179,7 +180,7 @@ export class DuplicateComponent implements OnInit {
       return;
     }
     if (this.shouldRenderMore()) {
-      const groups = this.renderedDirGroups() ?? [];
+      const groups = this.renderedDirGroups();
       if (
           groups.length === 0 ||
           this.renderedIndex.pairs >=
@@ -208,7 +209,6 @@ export class DuplicateComponent implements OnInit {
 
   private shouldRenderMore(): boolean {
     return (
-        Config.Gallery.enableOnScrollRendering === false ||
         PageHelper.ScrollY >= PageHelper.MaxScrollY * 0.7 ||
         document.body.clientHeight * 0.85 < window.innerHeight
     );

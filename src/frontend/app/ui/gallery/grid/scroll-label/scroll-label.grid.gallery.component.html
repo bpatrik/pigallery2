@@ -1,0 +1,37 @@
+@if (scrollLabel(); as label) {
+  <div class="scroll-label shadow" aria-hidden="true"
+    [class.directory-label]="label.order === GroupByTypes.Directory"
+    [class.handle]="label.handle"
+    [class.dragging]="dragging()"
+    [style.--thumb-center.px]="label.thumbCenter"
+    [style.top.px]="dragTop()"
+    [style.--navbar-bottom.px]="label.navbarBottom"
+    (pointerdown)="onHandlePointerDown($event)"
+    (pointermove)="onHandlePointerMove($event)"
+    (pointerup)="onHandlePointerUp($event)"
+    (pointercancel)="onHandlePointerUp($event)">
+    @if (label.handle) {
+      <ng-icon class="handle-icon flex-shrink-0" name="ionChevronExpandOutline" />
+    }
+    <!-- like the group headers of the grid -->
+    @if (label.text) {
+      @switch (label.order) {
+        @case (GroupByTypes.Rating) {
+          @for (filled of label.stars; track $index) {
+            <ng-icon [name]="filled ? 'ionStar' : 'ionStarOutline'" />
+          }
+        }
+        @case (GroupByTypes.PersonCount) {
+          {{ label.text }}
+          <ng-icon class="ms-1" name="ionPeopleOutline" />
+        }
+        @case (GroupByTypes.Directory) {
+          <ng-icon class="me-1 flex-shrink-0" name="ionFolderOutline" /><span class="trim-start"><bdi>{{ label.text }}</bdi></span>
+        }
+        @default {
+          {{ label.text }}
+        }
+      }
+    }
+  </div>
+}

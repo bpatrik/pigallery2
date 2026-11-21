@@ -44,7 +44,6 @@ export class ThumbnailGeneratorMWs {
       }
     } catch (error) {
       console.error(error);
-      res.status(500);
       return next(
         new ErrorDTO(
           ErrorCodes.INTERNAL,
@@ -96,7 +95,6 @@ export class ThumbnailGeneratorMWs {
         item.missingThumbnail = !fs.existsSync(thPath);
       }
     } catch (error) {
-      res.status(500);
       return next(
         new ErrorDTO(
           ErrorCodes.INTERNAL,

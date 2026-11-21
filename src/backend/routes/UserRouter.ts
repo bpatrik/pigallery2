@@ -66,6 +66,7 @@ export class UserRouter {
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
         UserRequestConstrainsMWs.notSelfRequest,
+        UserRequestConstrainsMWs.notAboveOwnRole,
         UserMWs.deleteUser,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderOK
@@ -88,9 +89,10 @@ export class UserRouter {
         Config.Server.apiPath + '/user/:id/role',
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
-        UserRequestConstrainsMWs.notSelfRequestOr2Admins,
+        // an admin can't lower their own role, not even when there is an other admin (#1315)
+        UserRequestConstrainsMWs.notSelfRequest,
+        UserRequestConstrainsMWs.notAboveOwnRole,
         UserMWs.changeRole,
-        AuthenticationMWs.refreshSession,
         ServerTimingMWs.addServerTiming,
         RenderingMWs.renderOK
     );
@@ -101,6 +103,7 @@ export class UserRouter {
         Config.Server.apiPath + '/user/:id/settings',
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
+        UserRequestConstrainsMWs.notAboveOwnRole,
         UserMWs.updateSettings,
         AuthenticationMWs.refreshSession,
         ServerTimingMWs.addServerTiming,
@@ -113,6 +116,7 @@ export class UserRouter {
         Config.Server.apiPath + '/user/:id/oidc',
         AuthenticationMWs.authenticate,
         AuthenticationMWs.authorise(UserRoles.Admin),
+        UserRequestConstrainsMWs.notAboveOwnRole,
         UserMWs.unlinkOidc,
         AuthenticationMWs.refreshSession,
         ServerTimingMWs.addServerTiming,

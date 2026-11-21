@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-inferrable-types */
+import {ConfigPriority, DatabaseType, FFmpegPresets, LogLevel, ReIndexingSensitivity, SQLLogLevel} from '../Enums';
 import {
   AfterJobTrigger,
   JobScheduleDTO,
@@ -8,22 +9,7 @@ import {
   PeriodicJobTrigger,
   ScheduledJobTrigger,
 } from '../../entities/job/JobScheduleDTO';
-import {
-  ClientConfig,
-  ClientGPXCompressingConfig,
-  ClientMediaConfig,
-  ClientMetaFileConfig,
-  ClientPhotoConfig,
-  ClientServiceConfig,
-  ClientSharingConfig,
-  ClientSortingConfig,
-  ClientUploadConfig,
-  ClientUserConfig,
-  ClientUserOIDCConfig,
-  ClientVideoConfig,
-  ConfigPriority,
-  TAGS
-} from '../public/ClientConfig';
+import {ClientConfig, ClientGPXCompressingConfig, ClientMediaConfig, ClientMetaFileConfig, ClientPhotoConfig, ClientServiceConfig, ClientSharingConfig, ClientSortingConfig, ClientUploadConfig, ClientUserConfig, ClientUserOIDCConfig, ClientVideoConfig, TAGS} from '../public/ClientConfig';
 import {ConfigProperty, SubConfigClass} from 'typeconfig/common';
 import {DefaultsJobs} from '../../entities/job/JobDTO';
 import {DirectorySearch, SearchQueryDTO, SearchQueryTypes, TextSearch, TextSearchQueryMatchTypes,} from '../../entities/SearchQueryDTO';
@@ -41,48 +27,6 @@ if (typeof $localize === 'undefined') {
   global.$localize = (s: TemplateStringsArray) => s;
 }
 
-
-export enum DatabaseType {
-  mysql = 2,
-  sqlite = 3,
-}
-
-export enum LogLevel {
-  error = 1,
-  warn = 2,
-  info = 3,
-  verbose = 4,
-  debug = 5,
-  silly = 6,
-}
-
-export enum SQLLogLevel {
-  none = 1,
-  error = 2,
-  all = 3,
-}
-
-export enum ReIndexingSensitivity {
-  // Order is important. It also used to do relative comparison.
-  // Keep space between items for future
-  never = 10,
-  low = 20,
-  medium = 30,
-  high = 40,
-}
-
-export enum FFmpegPresets {
-  ultrafast = 1,
-  superfast = 2,
-  veryfast = 3,
-  faster = 4,
-  fast = 5,
-  medium = 6,
-  slow = 7,
-  slower = 8,
-  veryslow = 9,
-  placebo = 10,
-}
 
 export type videoCodecType = 'libvpx-vp9' | 'libx264' | 'libvpx' | 'libx265';
 export type videoResolutionType =
@@ -167,6 +111,21 @@ export class SQLiteConfig {
     description: $localize`Sqlite will save the db with this filename.`,
   })
   DBFileName: string = 'sqlite.db';
+
+  @ConfigProperty({
+    type: 'boolean',
+    tags:
+      {
+        name: $localize`Accent-insensitive search`,
+        priority: ConfigPriority.advanced,
+        githubIssue: 729,
+        uiWarning: (v: unknown) => v === true ?
+          $localize`Slows down the database significantly: every text search and autocomplete becomes several times slower, which is noticeable on a large gallery or a Raspberry Pi.` :
+          undefined
+      },
+    description: $localize`Search and autocomplete ignore the accents and the case of every letter (e.g. "padme" finds "Padmé"), like on MySQL. Without it SQLite ignores only the case of the English letters. Warning: it slows down the database significantly, text searches become several times slower.`,
+  })
+  accentInsensitiveSearch: boolean = false;
 }
 
 @SubConfigClass({softReadonly: true})
@@ -852,6 +811,16 @@ export class ServerLogConfig {
   })
   sqlLevel: SQLLogLevel = SQLLogLevel.error;
   @ConfigProperty({
+    type: 'string',
+    tags: {
+      name: $localize`Log file`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 519,
+    },
+    description: $localize`If set, the app also writes its log to this file (absolute or relative to the app's folder), e.g. for Fail2Ban. Lines have an ISO timestamp and no colours. Above 10 MB the file is renamed to .1 and a new one is started. Leave it empty to only log to the console.`
+  })
+  file: string = '';
+  @ConfigProperty({
     type: 'boolean',
     tags: {
       name: $localize`Server timing`,
@@ -1303,7 +1272,7 @@ export class ServerServiceConfig extends ClientServiceConfig {
       priority: ConfigPriority.underTheHood,
       githubIssue: 1014
     },
-    description: $localize`Should the backend trust proxies to extract remote Client IP. See express docs, for valid values: https://expressjs.com/en/guide/behind-proxies.html`,
+    description: $localize`Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use "uniquelocal". "true" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html`,
   })
   trustProxy: string = 'false';
 

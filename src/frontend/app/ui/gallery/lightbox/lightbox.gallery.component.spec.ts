@@ -15,8 +15,10 @@ import {GridMedia} from '../grid/GridMedia';
 import {QueryParams} from '../../../../../common/QueryParams';
 import {AuthenticationService} from '../../../model/network/authentication.service';
 import {MediaDTO} from '../../../../../common/entities/MediaDTO';
-import {provideIcons} from '@ng-icons/core';
+import {NgIcon, provideIcons} from '@ng-icons/core';
+import {By} from '@angular/platform-browser';
 import {appIcons} from '../../../icons';
+import {Location} from '@angular/common';
 
 // Mock classes
 class MockFullScreenService {
@@ -48,6 +50,14 @@ class MockWakeLockService {
 }
 
 class MockQueryService {
+  lightboxClosesWithBack = vi.fn(() => false);
+
+  lightboxRevealsInGrid = vi.fn(() => true);
+
+  keepLightboxState() {
+    return {lightboxClosesWithBack: this.lightboxClosesWithBack(), lightboxRevealsInGrid: this.lightboxRevealsInGrid()};
+  }
+
   getMediaStringId(media: MediaDTO) {
     return media.name;
   }
@@ -317,13 +327,24 @@ describe('GalleryLightboxComponent', () => {
 
   it('should tell whether there is a previous and a next photo', async () => {
     await openPhoto('photo1.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: false, hasNext: true});
+    expect(component.navigation()).toEqual({hasPrev: false, hasNext: true, nextLoops: false});
 
     await openPhoto('photo2.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: false});
 
     await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'});
-    expect(component.navigation()).toEqual({hasPrev: true, hasNext: false});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: false, nextLoops: false});
+
+    await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+    expect(component.navigation()).toEqual({hasPrev: true, hasNext: true, nextLoops: true});
+  });
+
+  it('should have no next photo to loop to when there is only one photo', async () => {
+    grid.media.set([photos[0]]);
+    await openPhoto('photo1.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+
+    expect(component.nextMedia()).toBeNull();
+    expect(component.navigation()).toEqual({hasPrev: false, hasNext: false, nextLoops: false});
   });
 
   it('should navigate by the content order, also beyond the rendered photos', async () => {
@@ -395,6 +416,76 @@ describe('GalleryLightboxComponent', () => {
     expect(notifications.info).not.toHaveBeenCalled();
   });
 
+  describe('paging with the keys (#1310)', () => {
+    const key = async (k: string): Promise<void> => {
+      window.dispatchEvent(new KeyboardEvent('keydown', {key: k}));
+      await settle();
+    };
+    const noLoop = {[QueryParams.gallery.lightbox.loopSlideshow]: 'false'};
+
+    it('should page with the arrow keys and stop at the first and the last photo', async () => {
+      await openPhoto('photo1.jpg', noLoop);
+      await key('ArrowLeft');
+      expect(photoParam()).toBe('photo1.jpg');
+
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo2.jpg');
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo3.jpg');
+      expect(component.activePhoto()!.media).toBe(photos[2]);
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo3.jpg');
+
+      await key('ArrowLeft');
+      expect(photoParam()).toBe('photo2.jpg');
+      expect(component.activePhoto()!.media).toBe(photos[1]);
+    });
+
+    it('should wrap from the last photo to the first with loop on', async () => {
+      await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+      await key('ArrowRight');
+      expect(photoParam()).toBe('photo1.jpg');
+      expect(component.activePhoto()!.media).toBe(photos[0]);
+    });
+  });
+
+  describe('next button icon (#1310)', () => {
+    // the icon of the right arrow button, and its tooltip
+    const nextButton = (): { icon: string | undefined, title: string | null } => {
+      const arrow = fixture.debugElement.query(By.css('#rightArrow'));
+      const icon = arrow.query(By.directive(NgIcon)).componentInstance as NgIcon;
+      return {icon: icon.name() as string | undefined, title: arrow.nativeElement.getAttribute('title')};
+    };
+
+    it('should show the normal next icon when there is a next photo', async () => {
+      await openPhoto('photo2.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+      expect(nextButton()).toEqual({icon: 'ionChevronForwardOutline', title: 'key: right arrow'});
+    });
+
+    // on the last photo the next button starts over from the first photo, so it does not look like the normal next button
+    it('should show the restart icon on the last photo with loop on', async () => {
+      await openPhoto('photo3.jpg', {[QueryParams.gallery.lightbox.loopSlideshow]: 'true'});
+      const button = nextButton();
+      expect(button.icon).toBe('ionReloadOutline');
+      // a tooltip of its own, e.g.: "start over from the first photo"
+      expect(button.title).toBeTruthy();
+      expect(button.title).not.toBe('key: right arrow');
+    });
+  });
+
+  it('should reset the zoom when moving to another photo (#1310)', async () => {
+    await openPhoto('photo1.jpg');
+    component.zoom.set(3);
+    component.drag.set({x: 100, y: -50});
+
+    component.nextImage();
+    await settle();
+
+    expect(photoParam()).toBe('photo2.jpg');
+    expect(component.zoom()).toBe(1);
+    expect(component.drag()).toEqual({x: 0, y: 0});
+  });
+
   it('should reveal the open photo in the grid on close', async () => {
     await openPhoto('photo1.jpg');
     component.nextImage();
@@ -408,6 +499,44 @@ describe('GalleryLightboxComponent', () => {
     expect(grid.revealMedia).toHaveBeenCalledWith(photos[1]);
     expect(component.status()).toBe(LightboxStates.Closed);
     expect(component.activePhoto()).toBeNull();
+  });
+
+  // #470: back after closing must not open the photo again
+  it('should go back on close when the photo was opened from the page under it', async () => {
+    await openPhoto('photo1.jpg');
+    const location = TestBed.inject(Location);
+    (TestBed.inject(QueryService) as unknown as MockQueryService).lightboxClosesWithBack.mockReturnValue(true);
+    const back = vi.spyOn(location, 'back').mockImplementation(() => undefined);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    component.hide();
+
+    expect(back).toHaveBeenCalledTimes(1);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it('should replace the photo with its folder on close when the photo was opened from a link', async () => {
+    await openPhoto('photo1.jpg');
+    const back = vi.spyOn(TestBed.inject(Location), 'back');
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
+
+    component.hide();
+
+    expect(back).not.toHaveBeenCalled();
+    expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({replaceUrl: true}));
+  });
+
+  // e.g. opened from the map: the grid under it does not scroll to the photo
+  it('should not reveal the photo in the grid when its link says so, also on close', async () => {
+    (TestBed.inject(QueryService) as unknown as MockQueryService).lightboxRevealsInGrid.mockReturnValue(false);
+    await openPhoto('photo1.jpg');
+    component.nextImage();
+    await settle();
+    component.hide();
+    await settle();
+
+    expect(grid.revealMedia).not.toHaveBeenCalled();
+    expect(component.status()).toBe(LightboxStates.Closed);
   });
 
   it('should release the scroll lock and full screen when destroyed while open', () => {

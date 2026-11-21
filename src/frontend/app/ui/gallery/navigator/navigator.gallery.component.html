@@ -34,7 +34,7 @@
         <div class="divider">&nbsp;</div>
       }
 
-      @if (config.Gallery.NavBar.enableDownloadZip  && itemCount() > 0) {
+      @if (config.Gallery.NavBar.enableDownloadZip && authService.canDownload() && itemCount() > 0) {
         <a [href]="downloadZipLink()"
           class="btn  btn-outline-secondary btn-navigator">
           <ng-icon name="ionDownloadOutline" title="Download" i18n-title />
@@ -63,6 +63,7 @@
       }
       <div class="btn-group" dropdown #dropdown="bs-dropdown" placement="bottom right"
         [insideClick]="true"
+        (isOpenChange)="sortingMenuOpen.set($event)"
         title="Sort and group" i18n-title>
         <button id="button-alignment" dropdownToggle type="button"
           class="btn dropdown-toggle  btn-outline-secondary btn-navigator"
@@ -85,12 +86,12 @@
             </div>
           }
         </button>
-        <div id="sorting-dropdown" *dropdownMenu class="dropdown-menu dropdown-menu-right"
+        <div id="sorting-dropdown" #sortingMenu *dropdownMenu class="dropdown-menu dropdown-menu-right"
           role="menu" aria-labelledby="button-alignment">
           <div class="row flex-nowrap">
             <div class="col  p-1 border-end">
               <h6 class="ps-2"><ng-container i18n>Sorting</ng-container>
-              <button class="btn btn-outline-primary btn-group-follow btn-sm"
+              <button type="button" class="btn btn-outline-primary btn-group-follow btn-sm"
                 [class.btn-outline-primary]="groupingFollowSorting"
                 [class.btn-outline-secondary]="!groupingFollowSorting"
                 (click)="groupingFollowSorting=!groupingFollowSorting"
@@ -101,8 +102,8 @@
             </h6>
 
             <div class="row">
-              @for (type of sortingByTypes; track type) {
-                <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+              @for (type of visibleSortingByTypes(); track type) {
+                <button type="button" class="dropdown-item sorting-grouping-item ps-2 pe-2 ps-sm-3 pe-sm-3" role="menuitem"
                   [class.active]="sortingService.sorting().method === type.key"
                   (click)="setSortingBy(type.key)">
                   <span class="me-2 d-inline-block">
@@ -114,7 +115,7 @@
 
               @if (isDirectionalSorting()) {
                 <hr>
-                  <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                  <button type="button" class="dropdown-item sorting-grouping-item ps-2 pe-2 ps-sm-3 pe-sm-3" role="menuitem"
                     [class.active]="sortingService.sorting().ascending === true"
                     (click)="setSortingAscending(true)">
                     <span class="me-2 d-inline-block">
@@ -122,7 +123,7 @@
                     </span>
                     <span class="d-inline-block" i18n>ascending</span>
                   </button>
-                  <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                  <button type="button" class="dropdown-item sorting-grouping-item ps-2 pe-2 ps-sm-3 pe-sm-3" role="menuitem"
                     [class.active]="sortingService.sorting().ascending === false"
                     (click)="setSortingAscending(false)">
                     <span class="me-2 d-inline-block">
@@ -136,8 +137,8 @@
             <div class="col p-1">
               <h6 class="ps-2" i18n>Grouping</h6>
               <div class="row">
-                @for (type of groupingByTypes; track type) {
-                  <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                @for (type of visibleGroupingByTypes(); track type) {
+                  <button type="button" class="dropdown-item sorting-grouping-item ps-2 pe-2 ps-sm-3 pe-sm-3" role="menuitem"
                     [class.active]="sortingService.grouping().method === type.key"
                     (click)="setGroupingBy(type.key)">
                     <span class="me-2 d-inline-block">
@@ -148,7 +149,7 @@
                 }
                 @if (isDirectionalGrouping()) {
                   <hr>
-                    <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                    <button type="button" class="dropdown-item sorting-grouping-item ps-2 pe-2 ps-sm-3 pe-sm-3" role="menuitem"
                       [class.active]="sortingService.grouping().ascending === true"
                       (click)="setGroupingAscending(true)">
                       <span class="me-2 d-inline-block">
@@ -156,7 +157,7 @@
                       </span>
                       <span class="d-inline-block" i18n>ascending</span>
                     </button>
-                    <button type="button" class="dropdown-item sorting-grouping-item ps-3 pe-3" role="menuitem"
+                    <button type="button" class="dropdown-item sorting-grouping-item ps-2 pe-2 ps-sm-3 pe-sm-3" role="menuitem"
                       [class.active]="sortingService.grouping().ascending === false"
                       (click)="setGroupingAscending(false)">
                       <span class="me-2 d-inline-block">

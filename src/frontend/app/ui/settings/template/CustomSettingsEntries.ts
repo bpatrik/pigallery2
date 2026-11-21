@@ -1,5 +1,7 @@
 import {propertyTypes} from 'typeconfig/common';
 import {
+  ClientDirectoryGroupingConfig,
+  ClientDirectorySortingConfig,
   ClientGroupingConfig,
   ClientSortingConfig,
   MapLayers,
@@ -18,6 +20,8 @@ export class CustomSettingsEntries {
   public static readonly entries = [
     {c: ClientSortingConfig, name: 'ClientSortingConfig'},
     {c: ClientGroupingConfig, name: 'ClientGroupingConfig'},
+    {c: ClientDirectorySortingConfig, name: 'ClientDirectorySortingConfig'},
+    {c: ClientDirectoryGroupingConfig, name: 'ClientDirectoryGroupingConfig'},
     {c: MapLayers, name: 'MapLayers'},
     {c: JobScheduleConfig, name: 'JobScheduleConfig'},
     {c: UserConfig, name: 'UserConfig'},

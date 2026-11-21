@@ -39,7 +39,7 @@
             }
           </div>
           <div>
-            <button class="btn btn-danger ms-0" (click)="remove(schedule)">
+            <button type="button" class="btn btn-danger ms-0" (click)="remove(schedule)">
               <ng-icon name="ionTrashOutline" title="Delete" i18n-title />
             </button>
             @if (validJobs()[schedule.jobName]) {
@@ -303,7 +303,7 @@
                                           (change)="onChange($event)" />
                                       </div>
                                       <div class="col-auto pe-0">
-                                        <button class="btn btn-danger float-end"
+                                        <button type="button" class="btn btn-danger float-end"
                                           [class.btn-secondary]="mp.sortBy.length < 2"
                                           [class.btn-danger]="mp.sortBy.length >= 2"
                                           [disabled]="mp.sortBy.length < 2"
@@ -316,7 +316,7 @@
                                     </div>
                                   }
                                   <div class="col-12 p-0">
-                                    <button class="btn btn-primary mt-1 float-end"
+                                    <button type="button" class="btn btn-primary mt-1 float-end"
                                       [id]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
                                       [name]="'btn_add_'+configEntry.id+'_'+i+'_'+j"
                                       (click)="AddNewSorting(mp.sortBy)">
@@ -354,7 +354,7 @@
                               </div>
                             </div>
                             <div class="row">
-                              <button class="btn float-end"
+                              <button type="button" class="btn float-end"
                                 [class.btn-secondary]="mediaPicks.length < 2"
                                 [class.btn-danger]="mediaPicks.length >= 2"
                                 [disabled]="mediaPicks.length < 2"
@@ -368,7 +368,7 @@
                           }
                           <ng-container>
                             <div class="col-12 p-0">
-                              <button class="btn btn-primary mt-1 float-end"
+                              <button type="button" class="btn btn-primary mt-1 float-end"
                                 [id]="'btn_add_'+configEntry.id+'_'+i"
                                 [name]="'btn_add_'+configEntry.id+'_'+i"
                                 (click)="AddNewMediaPickDTO(schedule.config[configEntry.id])">
@@ -404,7 +404,7 @@
   </div>
 }
 
-<button class="btn btn-primary float-end mt-2"
+<button type="button" class="btn btn-primary float-end mt-2"
   (click)="prepareNewJob()">
   <ng-icon name="ionAddOutline" class="me-1" />
   <span i18n>Add Job</span>

@@ -22,6 +22,10 @@ export class UserEntity implements UserDTO,SessionUser {
   @Column({type: 'text', nullable: true})
   oidcSubject?: string | null;
 
+  // the app version whose release notes the user (an admin) confirmed last; not part of the session stamp
+  @Column({type: 'text', nullable: true})
+  releaseNotesSeenVersion?: string | null;
+
   // only if this set to true, will the per-user allow/blocklist be considered
   @Column({type: 'boolean', default: false})
   overrideAllowBlockList?: boolean;

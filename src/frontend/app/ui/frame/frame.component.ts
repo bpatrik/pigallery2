@@ -1,3 +1,4 @@
+import {NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/Enums';
 import { Component, ElementRef, ViewEncapsulation, computed, inject, input, viewChild } from '@angular/core';
 import {RouterLink} from '@angular/router';
 import {AuthenticationService} from '../../model/network/authentication.service';
@@ -5,7 +6,7 @@ import {UserRoles} from '../../../../common/entities/UserDTO';
 import {Config} from '../../../../common/config/public/Config';
 import {NotificationService} from '../../model/notification.service';
 import {QueryService} from '../../model/query.service';
-import {NavigationLinkConfig, NavigationLinkTypes, ScrollUpModes, ThemeModes} from '../../../../common/config/public/ClientConfig';
+import {NavigationLinkConfig} from '../../../../common/config/public/ClientConfig';
 import {SearchQueryDTO} from '../../../../common/entities/SearchQueryDTO';
 import {Utils} from '../../../../common/Utils';
 import {PageHelper} from '../../model/page.helper';
@@ -15,7 +16,6 @@ import {ThemeService} from '../../model/theme.service';
 import {DeviceHelper} from '../../model/device.helper';
 import {LoadingBarModule} from '@ngx-loading-bar/core';
 import {IconComponent} from '../../icon.component';
-
 import {GallerySearchComponent} from '../gallery/search/search.gallery.component';
 import {GalleryShareComponent} from '../gallery/share/share.gallery.component';
 import {NgIconComponent} from '@ng-icons/core';
@@ -36,7 +36,8 @@ export interface NavbarLinkItem {
 @Component({
   selector: 'app-frame',
   host: {
-    '(window:scroll)': 'onScroll()'
+    '(window:scroll)': 'onScroll()',
+    '(document:click)': 'onDocumentClick($event)'
   },
   templateUrl: './frame.component.html',
   styleUrl: './frame.component.css',
@@ -197,6 +198,24 @@ export class FrameComponent {
     }
 
     this.lastScroll.any = scrollPosition;
+  }
+
+  /**
+   * Closes the navbar menu on a click outside of it.
+   * The menu has no autoClose, so its submenus (Tools, language) and controls (theme, switches) keep it open:
+   * a click inside any dropdown menu (the submenus are rendered into the body) or on the toggle does not close it.
+   * composedPath(), not the target: the click may re-render the clicked element (e.g.: the theme button's icon).
+   */
+  onDocumentClick(event: Event): void {
+    const dropdown = this.dropdown();
+    if (!dropdown?.isOpen) {
+      return;
+    }
+    const inside = event.composedPath().some((el) =>
+      el instanceof Element && el.matches('.dropdown-menu, #button-frame-menu'));
+    if (!inside) {
+      dropdown.hide();
+    }
   }
 
   scrollUp(): void {

@@ -1,8 +1,8 @@
 // Browsing folders (#1308, CUJ 5) on the folder with accents in its name (#1316). Also runs on a phone (mobile project).
 import {expect, Page, test} from '@playwright/test';
-import {ACCENTED_DIR, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached} from './helpers';
+import {ACCENTED_DIR, desktopViewport, expectVisiblePhotosLoaded, isGalleryContent, scrollUntilAttached, swipe, touchDrag} from './helpers';
 
-const photo = (page: Page, name: string) => page.locator(`.photo-container > img[alt="${name}"]`);
+const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt="${name}"]`);
 const breadcrumb = (page: Page) => page.locator('app-gallery-navbar #directory-path .breadcrumb-item');
 const folderCard = (page: Page, name: string) => page.locator('app-gallery-directory').filter({hasText: name});
 
@@ -55,5 +55,205 @@ test.describe('Navigation', () => {
     await subDir();
     await page.goForward();
     await accentedDir();
+  });
+
+  // #1308: the browser history keeps the scroll position too, not only the URL and the content
+  test('Browser back should restore the scroll position of the folder', async ({page}) => {
+    const scrollY = (): Promise<number> => page.evaluate(() => window.scrollY);
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+
+    // scroll down the photos of the root, a screen at a time (the grid renders more of them while scrolling)
+    await expect(async () => {
+      await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+      expect(await scrollY()).toBeGreaterThan(1000);
+    }, 'scrolled down').toPass({intervals: [200], timeout: 15000});
+    const scrolledTo = await scrollY();
+    // a photo on the screen there
+    const belowName = await page.evaluate(() => [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-link > img')]
+      .find(img => img.getBoundingClientRect().top >= 0 && img.getBoundingClientRect().bottom <= window.innerHeight)?.alt);
+    expect(belowName, 'a photo on the screen').toBeTruthy();
+
+    // a folder link at the top of the page: clicked without scrolling up to it (like after scrolling, e.g. with alt + up)
+    const folderLink = folderCard(page, ACCENTED_DIR).locator('a').first();
+    await folderLink.evaluate((a: HTMLElement) => a.click());
+    await expect(breadcrumb(page)).toHaveText(['Home', ACCENTED_DIR]);
+
+    await page.goBack();
+    await expect(breadcrumb(page)).toHaveText(['Home']);
+    await expect.poll(scrollY, {message: 'the scroll position after back'}).toBeGreaterThan(scrolledTo - 50);
+    expect(await scrollY()).toBeLessThan(scrolledTo + 50);
+    // the same photos on the screen
+    await expect(photo(page, belowName!)).toBeInViewport();
+    // they were shown before: they show up at once, without fading in again (it flickers)
+    expect(await photo(page, belowName!).evaluate((img: HTMLImageElement) => img.getAnimations().length), 'fade in animations').toBe(0);
+
+    // a new screen fades in its photos, also the ones seen before
+    await folderLink.evaluate((a: HTMLElement) => a.click());
+    await expect(breadcrumb(page)).toHaveText(['Home', ACCENTED_DIR]);
+    await breadcrumb(page).getByRole('link', {name: 'Home'}).click();
+    await expect(breadcrumb(page)).toHaveText(['Home']);
+    await expect(page.locator('app-gallery-grid .photo-link > img').first()).toHaveClass(/fade-in/);
+  });
+
+  // the grid renders only the photos on and near the screen, but the page is as high as all of them: the end is one scroll away
+  test('The page should be as high as all photos before they are rendered', async ({page}) => {
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+    const pageHeight = (): Promise<number> => page.evaluate(() => document.documentElement.scrollHeight);
+    const height = await pageHeight();
+    expect(height, 'a few screens long').toBeGreaterThan(3 * page.viewportSize()!.height);
+    const firstPhoto = await page.locator('app-gallery-grid .photo-link > img').first().getAttribute('alt');
+
+    await page.evaluate(() => window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'instant'}));
+    // not all are loaded: the last one is a broken image
+    await expect(page.locator('app-gallery-grid app-gallery-grid-photo').last()).toBeInViewport();
+    expect(Math.abs(await pageHeight() - height), 'it did not grow').toBeLessThan(50);
+    await expect(photo(page, firstPhoto!), 'the photos far above are not rendered').toHaveCount(0);
+
+    await page.evaluate(() => window.scrollTo({top: 0, behavior: 'instant'}));
+    await expect(photo(page, firstPhoto!)).toBeVisible();
+  });
+
+  // a phone has no scrollbar to grab: the scroll label is the handle
+  test('Dragging the scroll label should scroll the page on a phone', async ({page, isMobile}) => {
+    test.skip(!isMobile, 'touch screen only');
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+    const toBottom = (): Promise<number> => page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight - window.scrollY);
+
+    await swipe(page, 0, -200); // shows the handle
+    const handle = page.locator('app-gallery-grid .scroll-label.handle');
+    await expect(handle).toBeVisible();
+    const box = (await handle.boundingBox())!;
+    const x = box.x + box.width / 2;
+    await touchDrag(page, {x, y: box.y + box.height / 2}, {x, y: page.viewportSize()!.height - 1});
+    await expect.poll(toBottom, {message: 'scrolled to the end'}).toBeLessThan(5);
+    await expect(page.locator('app-gallery-grid app-gallery-grid-photo').last()).toBeInViewport();
+
+    // and back up; it hides a while after the scrolling stopped: a scroll shows it again
+    await swipe(page, 0, 100);
+    await expect(handle).toBeVisible();
+    const end = (await handle.boundingBox())!;
+    const endX = end.x + end.width / 2;
+    await touchDrag(page, {x: endX, y: end.y + end.height / 2}, {x: endX, y: 0});
+    await expect.poll(() => page.evaluate(() => window.scrollY), {message: 'scrolled to the top'}).toBeLessThan(5);
+  });
+});
+
+test.describe('Navigation on a large screen', () => {
+  // fewer, larger rows: right after back the grid still shows the rows of the search, the restore must not measure them
+  test.use(desktopViewport({width: 1920, height: 1080}));
+
+  // #1308: a search opened from a photo (its keyword) shows other content; back must still find the folder's position
+  test('Browser back from a keyword search should restore the scroll position of the folder', async ({page}) => {
+    const scrollY = (): Promise<number> => page.evaluate(() => window.scrollY);
+    const content = page.waitForResponse(res => isGalleryContent(new URL(res.url())));
+    await page.goto('/gallery/');
+    await content;
+    await expectVisiblePhotosLoaded(page);
+    await expect(async () => {
+      await page.evaluate(() => window.scrollBy(0, window.innerHeight));
+      expect(await scrollY()).toBeGreaterThan(1000);
+    }, 'scrolled down').toPass({intervals: [200], timeout: 15000});
+
+    // a photo on the screen with a keyword: its info bar shows up on hover
+    const onScreen = await page.evaluate(() => [...document.querySelectorAll<HTMLImageElement>('app-gallery-grid .photo-link > img')]
+      .filter(img => img.getBoundingClientRect().top >= 0 && img.getBoundingClientRect().bottom <= window.innerHeight)
+      .map(img => img.alt));
+    let keyword = null;
+    let shownName = null;
+    for (const name of onScreen) {
+      await photo(page, name).hover();
+      const link = photo(page, name).locator('xpath=../..').locator('.info .photo-keywords a').first();
+      if (await link.count() > 0) {
+        keyword = link;
+        shownName = name;
+        break;
+      }
+    }
+    expect(keyword, 'a photo with a keyword on the screen').not.toBeNull();
+    // where the photo is on the screen: content above the grid that loads later moves the scroll position, not the photo.
+    // A click event, not a mouse click: that would first scroll the link into view, while the info bar still slides in.
+    const shownTop = async (): Promise<number> => (await photo(page, shownName!).boundingBox())?.y ?? -10000;
+    const topBefore = await shownTop();
+    await keyword!.dispatchEvent('click');
+    await expect(page).toHaveURL(/\/search\//);
+    await expect(page.locator('app-gallery-grid .photo-link > img').first()).toBeVisible();
+
+    await page.goBack();
+    await expect(breadcrumb(page)).toHaveText(['Home']);
+    await expect.poll(async () => Math.abs(await shownTop() - topBefore), {message: 'the photo at the same place on the screen after back'}).toBeLessThan(50);
+    await expect(photo(page, shownName!)).toBeInViewport();
+  });
+});
+
+test.describe('Empty folder', () => {
+
+  // #1311: there is nothing to zip in a folder without media
+  test('should not offer the zip download', async ({page}) => {
+    const content = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/gallery/content/emptydirectory');
+    await page.goto('/gallery/emptydirectory');
+    await content;
+    await expect(breadcrumb(page)).toHaveText(['Home', 'emptydirectory']);
+    await expect(page.locator('app-gallery-navbar ng-icon[name="ionDownloadOutline"]')).toHaveCount(0);
+
+    // a folder with media has it
+    await breadcrumb(page).getByRole('link', {name: 'Home'}).click();
+    await expect(page.locator('app-gallery-navbar a[href*="/pgapi/gallery/zip/"] ng-icon[name="ionDownloadOutline"]')).toBeVisible();
+  });
+});
+
+test.describe('Navbar menu', () => {
+  // below the xl breakpoint: the language selector is in the menu too
+  test.use(desktopViewport({width: 1000, height: 800}));
+
+  test('should close on a click outside, but not on its submenus and controls', async ({page}) => {
+    await page.goto('/gallery/');
+    const menuButton = page.locator('button#button-frame-menu');
+    const menu = page.locator('#dropdown-frame-menu');
+    await menuButton.click();
+    await expect(menu).toBeVisible();
+
+    // the theme mode button
+    const themeButton = menu.locator('button.btn-secondary');
+    const mode = await themeButton.innerText();
+    await themeButton.click();
+    await expect(themeButton).not.toHaveText(mode);
+    await expect(menu).toBeVisible();
+
+    // the language selector
+    const languageButton = menu.locator('app-language button#language');
+    await languageButton.click();
+    await expect(menu.locator('app-language .dropdown-menu')).toBeVisible();
+    await expect(menu).toBeVisible();
+    // closed again: with all languages (a release build) its list covers the rest of the menu
+    await languageButton.click();
+    await expect(menu.locator('app-language .dropdown-menu')).toBeHidden();
+    await expect(menu).toBeVisible();
+
+    // the Tools submenu (rendered into the body) and its switch
+    await menu.locator('a.dropdown-item').filter({hasText: 'Tools'}).click();
+    const fixNavbar = page.locator('#fix-switch');
+    await fixNavbar.click();
+    await expect(fixNavbar).toBeChecked();
+    await expect(menu).toBeVisible();
+
+    // outside: closes the menu with its submenus
+    await page.locator('app-gallery-navbar #directory-path').click();
+    await expect(menu).toHaveCount(0);
+    await expect(fixNavbar).toHaveCount(0);
+
+    // the toggle still opens and closes it
+    await menuButton.click();
+    await expect(menu).toBeVisible();
+    await menuButton.click();
+    await expect(menu).toHaveCount(0);
   });
 });

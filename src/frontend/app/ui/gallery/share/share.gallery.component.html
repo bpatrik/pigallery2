@@ -1,5 +1,5 @@
 @if (!dropDownItem()) {
-  <button id="shareButton" class="nav-link btn  btn-link"
+  <button id="shareButton" class="btn btn-tertiary"
     style="white-space:nowrap"
     type="button" [disabled]="!enabled()" (click)="openModal(shareModal)">
     <ng-icon name="ionShareSocialOutline" class="me-1" />
@@ -36,7 +36,7 @@
         </div>
         <div class="col-5 col-sm-3">
           @if (!sharing()) {
-            <button
+            <button type="button"
               id="getShareButton" name="getShareButton"
               (click)="share()"
               [disabled]="!shareForm.form.valid"
@@ -44,13 +44,25 @@
             i18n>Share</button>
           }
           @if (sharing()) {
-            <button
-              id="copyButton" name="copyButton"
-              [appCopy]="url()"
-              (copied)="onCopy()"
-              [disabled]="!shareForm.form.valid"
-              class="btn btn-primary btn-block float-end"
-            i18n>Copy</button>
+            <div class="btn-group float-end">
+              <button type="button"
+                id="copyButton" name="copyButton"
+                [appCopy]="url()"
+                (copied)="onCopy()"
+                [disabled]="!shareForm.form.valid"
+                class="btn btn-primary"
+              i18n>Copy</button>
+              @if (canNativeShare) {
+                <button type="button"
+                  id="nativeShareButton" name="nativeShareButton"
+                  (click)="nativeShare()"
+                  [disabled]="!shareForm.form.valid"
+                  class="btn btn-primary"
+                  title="Send with another app" i18n-title>
+                  <ng-icon name="ionShareSocialOutline" />
+                </button>
+              }
+            </div>
           }
         </div>
       </div>
@@ -102,6 +114,26 @@
         </div>
       </div>
     }
+
+    <div class="row mt-2">
+      <div class="col-12">
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" id="share-prevent-download" name="share-prevent-download"
+            [(ngModel)]="preventDownload" (ngModelChange)="onPreventDownloadChange()">
+          <label class="form-check-label" for="share-prevent-download" i18n>Prevent downloading</label>
+          <span id="share-prevent-download-info"
+            class="ms-1 text-secondary"
+            tabindex="0"
+            triggers="mouseenter:mouseleave focus:blur"
+            placement="bottom"
+            container="body"
+            [popover]="preventDownloadInfo"
+            i18n-aria-label aria-label="About preventing downloads">
+            <ng-icon name="ionInformationCircleOutline" />
+          </span>
+        </div>
+      </div>
+    </div>
 
     <div class="row">
       <div class="col-4">
@@ -193,7 +225,7 @@
               }
               <td>{{share.expires | date}}</td>
               <td>
-                <button (click)="deleteSharing(share)"
+                <button type="button" (click)="deleteSharing(share)"
                   [disabled]="share.sharingKey === sharing()?.sharingKey"
                   class="btn btn-danger float-end">
                   <ng-icon name="ionTrashOutline" title="Delete" i18n-title />

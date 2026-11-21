@@ -7,6 +7,8 @@ import { FrameComponent } from '../frame/frame.component';
 import { FaceComponent } from './face/face.component';
 import {SortByDirectionalTypes} from '../../../../common/entities/SortingMethods';
 import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
+import {SpinnerComponent} from '../utils/spinner/spinner.component';
+import {EmptyStateComponent} from '../utils/empty-state/empty-state.component';
 
 @Component({
     selector: 'app-faces',
@@ -15,7 +17,9 @@ import { FacesNavigatorComponent } from './navigator/navigator.faces.component';
     imports: [
     FrameComponent,
     FaceComponent,
-    FacesNavigatorComponent
+    FacesNavigatorComponent,
+    EmptyStateComponent,
+    SpinnerComponent
 ]
 })
 export class FacesComponent implements OnInit {
@@ -28,7 +32,7 @@ export class FacesComponent implements OnInit {
   private readonly sortedPersons: Signal<PersonDTO[]> = computed(() => {
     const sorting = this.facesService.sorting();
     // sorting a copy: the service's array must not change in place
-    return [...this.facesService.persons()].sort((p1: PersonDTO, p2: PersonDTO) => {
+    return [...this.facesService.persons() ?? []].sort((p1: PersonDTO, p2: PersonDTO) => {
       let res: number;
       if (sorting.method === SortByDirectionalTypes.PersonCount) {
         res = (p1.cache?.count || 0) - (p2.cache?.count || 0);
@@ -40,6 +44,7 @@ export class FacesComponent implements OnInit {
   });
   readonly favourites = computed(() => this.sortedPersons().filter((p) => p.isFavourite));
   readonly nonFavourites = computed(() => this.sortedPersons().filter((p) => !p.isFavourite));
+  readonly isLoading = computed((): boolean => this.facesService.persons() === null);
 
   constructor() {
     this.facesService.getPersons().catch(console.error);

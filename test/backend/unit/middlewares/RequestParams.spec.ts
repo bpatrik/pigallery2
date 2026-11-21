@@ -22,7 +22,8 @@ describe('RequestParams', () => {
   it('should join the segments of a wildcard param', () => {
     expect(RequestParams.get(req({directory: ['a']}), 'directory')).to.equal('a');
     expect(RequestParams.get(req({directory: ['a', 'b', 'c.jpg']}), 'directory')).to.equal('a/b/c.jpg');
-    expect(RequestParams.get(req({directory: ['árvíz', 'kép 1.jpg']}), 'directory')).to.equal('árvíz/kép 1.jpg');
+    // non-ASCII segments are joined as they are
+    expect(RequestParams.get(req({directory: ['árvíztűrő', 'tükörfúrógép 1.jpg']}), 'directory')).to.equal('árvíztűrő/tükörfúrógép 1.jpg');
   });
 
   it('should give the same string as Express 4 for encoded slashes, empty segments and trailing slashes', () => {

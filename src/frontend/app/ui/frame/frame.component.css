@@ -52,6 +52,11 @@ a.dropdown-item, button.dropdown-item, div.dropdown-item {
   padding: 0.3rem 1.0rem 0.3rem 0.8rem;
 }
 
+/* the Tools submenu sticks out of the menu on the right, so its edge does not line up with the menu's */
+.tools-menu {
+  margin-right: -1rem;
+}
+
 a.dropdown-item ng-icon, button.dropdown-item ng-icon, div.dropdown-item ng-icon {
   margin-right: 0.5rem;
 }
@@ -75,11 +80,11 @@ a.dropdown-item span.badge, button.dropdown-item span.badge {
   width: 3em;
   height: 3em;
   right: -3em;
-  bottom: 3em;
+  bottom: calc(3em + env(safe-area-inset-bottom));
   transition: 0.3s right;
   z-index: 999;
 }
 
 .show-btn-scroll-up {
-  right: 1em;
+  right: calc(1em + env(safe-area-inset-right));
 }

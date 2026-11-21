@@ -6,27 +6,25 @@
       [size]="size()" />
     }
 
-    @if (CanCreateAlbum) {
+    @if (albumsService.albums() === null) {
+      <app-spinner />
+    }
+    @if (albumsService.albums()?.length === 0) {
+      <app-empty-state class="no-item-msg" icon="ionAlbumsOutline" center>
+        <ng-container i18n>No albums yet.</ng-container>
+        <span hint i18n>Search for something, then save the search as an album with the save button next to the search bar.</span>
+      </app-empty-state>
+    }
+
+    <!-- once the albums are loaded, so it does not jump from the first place to the last -->
+    @if (CanCreateAlbum && isLoaded()) {
       <button type="button" class="add-saved-search btn btn-secondary"
         [style.width.px]="size()"
         [style.height.px]="size()"
         (click)="openModal(modal)">
-        <span class="text d-block">
-          <ng-icon name="ionAddOutline" class="mb-2" />
-          <span i18n>Add saved search</span>
-        </span>
+        <ng-icon name="ionAddOutline" class="mb-2" />
+        <span i18n>Add saved search</span>
       </button>
-    }
-
-    @if (albumsService.albums()?.length === 0) {
-      <div class="d-flex no-item-msg"
-        >
-        <div class="flex-fill">
-          <h2>:(
-            <ng-container i18n>No albums to show.</ng-container>
-          </h2>
-        </div>
-      </div>
     }
   </div>
 </app-frame>

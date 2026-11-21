@@ -1,4 +1,4 @@
-import {IExtensionAfterEventHandler, IExtensionBeforeEventHandler, IExtensionEvent} from './IExtension';
+import {IExtensionAfterEventHandler, IExtensionBeforeEventHandler, IExtensionEvent, IExtensionEvents} from './IExtension';
 
 export class ExtensionEvent<I extends unknown[], O> implements IExtensionEvent<I, O> {
   protected beforeHandlers: IExtensionBeforeEventHandler<I, O>[] = [];
@@ -55,3 +55,38 @@ export class ExtensionEvent<I extends unknown[], O> implements IExtensionEvent<I
 
 
 
+
+/**
+ * The events as one extension sees them: it forwards to the shared events and remembers the handlers,
+ * so they can all be removed when the extension is cleaned up (e.g. on reload).
+ */
+export class ExtensionEventsTracker {
+  public readonly events: IExtensionEvents;
+  private readonly removers: (() => void)[] = [];
+
+  constructor(events: IExtensionEvents) {
+    this.events = this.wrap(events) as IExtensionEvents;
+  }
+
+  public removeHandlers(): void {
+    this.removers.splice(0).forEach(r => r());
+  }
+
+  private wrap(node: unknown): unknown {
+    if (node instanceof ExtensionEvent) {
+      const event = node as ExtensionEvent<unknown[], unknown>;
+      const tracked: IExtensionEvent<unknown[], unknown> = {
+        before: (handler) => {
+          event.before(handler);
+          this.removers.push(() => event.offBefore(handler));
+        },
+        after: (handler) => {
+          event.after(handler);
+          this.removers.push(() => event.offAfter(handler));
+        }
+      };
+      return tracked;
+    }
+    return Object.fromEntries(Object.entries(node as Record<string, unknown>).map(([k, v]) => [k, this.wrap(v)]));
+  }
+}

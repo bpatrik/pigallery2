@@ -1,4 +1,4 @@
-import { Injectable, effect, inject, signal, untracked } from '@angular/core';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import {ToastService, ToastSummary, ToastType} from '../ui/toast/toast.service';
 import {NetworkService} from './network/network.service';
 import {AuthenticationService} from './network/authentication.service';
@@ -17,7 +17,7 @@ export class NotificationService {
   private authService = inject(AuthenticationService);
 
   readonly countedNotifications = signal<CountedNotificationDTO[]>([]);
-  numberOfNotifications = 0;
+  readonly numberOfNotifications = computed((): number => this.countedNotifications().reduce((sum, n) => sum + n.count, 0));
   lastUser: UserDTO | null = null;
 
   constructor() {
@@ -61,7 +61,6 @@ export class NotificationService {
       groups[key] = groups[key] || {notification: n, count: 0};
       groups[key].count++;
     });
-    this.numberOfNotifications = notifications.length;
     const counted: CountedNotificationDTO[] = [];
     for (const key of Object.keys(groups)) {
       (groups[key].notification as CountedNotificationDTO).count =

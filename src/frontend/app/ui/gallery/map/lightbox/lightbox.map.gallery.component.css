@@ -11,10 +11,6 @@
   align-items: center; /* add to align vertical */
   cursor: pointer;
   transition: all 0.3s ease-in-out;
-  -o-transition: all 0.3s ease-in-out;
-  -ms-transition: all 0.3s ease-in-out;
-  -webkit-transition: all 0.3s ease-in-out;
-  -moz-transition: all 0.3s ease-in-out;
 }
 
 .controls-background {
@@ -36,10 +32,6 @@
   height: 100%; /* Full height */
   background-color: black;
   transition: all 0.3s ease-in-out;
-  -o-transition: all 0.3s ease-in-out;
-  -ms-transition: all 0.3s ease-in-out;
-  -webkit-transition: all 0.3s ease-in-out;
-  -moz-transition: all 0.3s ease-in-out;
 }
 
 #controllers-container {
@@ -80,10 +72,6 @@
 .highlight {
   opacity: 0.4;
   transition: opacity .2s ease-out;
-  -moz-transition: opacity .2s ease-out;
-  -webkit-transition: opacity .2s ease-out;
-  -o-transition: opacity .2s ease-out;
-  -ms-transition: opacity .2s ease-out;
 }
 
 .highlight:hover {

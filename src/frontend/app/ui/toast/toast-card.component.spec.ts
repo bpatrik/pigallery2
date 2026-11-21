@@ -9,7 +9,7 @@ import {appIcons} from '../../icons';
     <app-toast-card icon="ionCloudUploadOutline" [color]="color()" [wrap]="false" [progress]="progress()">
       <span toastTitle>Balaton_naplemente.jpg</span>
       <span>{{ progress() }}%</span>
-      <button toastAction>x</button>
+      <button type="button" toastAction>x</button>
     </app-toast-card>`,
   imports: [ToastCardComponent]
 })

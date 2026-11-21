@@ -4,9 +4,13 @@
 
 You can use [docker](https://docs.docker.com/install/) to run PiGallery2. See all available docker tags [here](https://hub.docker.com/r/bpatrik/pigallery2/tags/).
 available tags:
+
  - `v*` (stable): built from the release with the same version name.
- - `latest` (stable): same as the latest `v*`, built with debian buster.
+ - `latest` (stable): same as the latest `v*`, built with debian trixie.
  - `edge` : built from the current state of `master`. This might break from time to time.
+
+The latest release's images (`latest`, `latest-alpine` and its version tags) are rebuilt every week on fresh base images,
+so OS and Node security fixes arrive without a new release. The app inside stays the same; pull the image again to get them.
 
 **Note**: Some changes may require database reset or config changes, see [#317](https://github.com/bpatrik/pigallery2/issues/317) (If you want to reduce the frequency of those, use stable builds (`latest`)
 
@@ -46,9 +50,14 @@ Edit `nginx.conf` at the `# CHANGE ME` lines by replacing `yourdomain.com` with 
 
 **Note**: Do not change the `image` and `tmp` paths in the `config.json` or UI; only use Docker `volume` settings. See [here](https://github.com/bpatrik/pigallery2/issues/114#issuecomment-570006336) and [here](https://github.com/bpatrik/pigallery2/issues/119).
 
-**Note:** We are using nginx as reverse proxy to handle https and do proper HTTP queuing, gzipping, etc. Full nginx-based docker-compose tutorial [here](https://www.domysee.com/blogposts/reverse-proxy-nginx-docker-compose).
+**Note:** We are using nginx as reverse proxy to handle https and do proper HTTP queuing, gzipping, rate limiting, etc. Full nginx-based docker-compose tutorial [here](https://www.domysee.com/blogposts/reverse-proxy-nginx-docker-compose).
 
 **Note 2:** You can skip nginx, by using [docker-compose/pigallery2-only/docker-compose.yml](https://github.com/bpatrik/pigallery2/blob/master/docker/docker-compose/pigallery2-only/docker-compose.yml).
+
+**Warning:** PiGallery2 does not limit the request rate itself: nothing slows down password guessing on the login page or on a password protected sharing link, and nothing stops a client from flooding the server with requests.
+The `nginx.conf` above does both (see its `limit_req` lines). If you skip nginx or use another reverse proxy, set up rate limiting there before making the gallery reachable from the internet.
+
+**Note 3:** To log the real client IP of failed logins (e.g. for fail2ban) instead of the IP of the nginx container, set `Server.trustProxy` (Settings, "Under the hood" mode) to `uniquelocal`. See the [Fail2Ban guide](advanced/fail2ban.md).
 
 ### I.1.a Get SSL Certificate with Certbot
 Install Certbot: https://certbot.eff.org/. (Certbot uses letsencrypt to get free certificate).
@@ -120,6 +129,23 @@ You do not need the `<path to your db file folder>/sqlite.db` line if you don't 
  
 You can clone the repository and build the image, or you can just use the 'self-contained' Dockerfile: [debian-trixie/selfcontained/Dockerfile](https://github.com/bpatrik/pigallery2/blob/master/docker/debian-trixie/selfcontained/Dockerfile)
 Note: 'self-contained' is not well tested, bug fix PRs are welcome.
+
+### Older browsers
+
+The frontend supports the browsers that [Angular supports](https://angular.dev/reference/versions#browser-support).
+An older browser (e.g. Safari on iOS 15) shows "This browser is too old" instead of the gallery.
+If you need such a browser, you can build the image for it yourself with the 'self-contained' Dockerfile.
+Its `BROWSERSLIST` build argument sets the [browsers](https://browsersl.ist/) that the frontend is built for:
+
+```bash
+curl -O https://raw.githubusercontent.com/bpatrik/pigallery2/master/docker/debian-trixie/selfcontained/Dockerfile
+docker build --build-arg BROWSERSLIST="defaults, iOS >= 15.4" -t pigallery2-old-browsers .
+```
+
+Then use `pigallery2-old-browsers` instead of `bpatrik/pigallery2:latest` in your `docker-compose.yml` or `docker run` command.
+This is not supported: it builds the latest development version (`master`), only changes the JavaScript syntax
+(missing browser APIs are not added), and a later version may need a newer browser again.
+iOS 15.4 is the oldest Safari that works this way; earlier versions lack APIs that the app uses.
 
 ## Contributing to Docker
 See the [Docker Contribution Guide](../development/docker-contributing.md).

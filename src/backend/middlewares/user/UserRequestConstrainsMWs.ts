@@ -1,10 +1,9 @@
 import {NextFunction, Request, Response} from 'express';
-import {MoreThanOrEqual} from 'typeorm';
 import {ErrorCodes, ErrorDTO} from '../../../common/entities/Error';
-import {UserRoles} from '../../../common/entities/UserDTO';
-import {ObjectManagers} from '../../model/ObjectManagers';
 import {RequestParams} from '../RequestParams';
 import {RequestSession} from '../RequestSession';
+import {ObjectManagers} from '../../model/ObjectManagers';
+import {Utils} from '../../../common/Utils';
 
 export class UserRequestConstrainsMWs {
   public static forceSelfRequest(
@@ -19,7 +18,6 @@ export class UserRequestConstrainsMWs {
       return next();
     }
     if (RequestSession.getContext(req).user.id !== parseInt(RequestParams.getRequired(req, 'id'), 10)) {
-      res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
 
@@ -39,40 +37,33 @@ export class UserRequestConstrainsMWs {
     }
 
     if (RequestSession.getContext(req).user.id === parseInt(RequestParams.getRequired(req, 'id'), 10)) {
-      res.status(401);
       return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
     }
 
     return next();
   }
 
-  public static async notSelfRequestOr2Admins(
+  /**
+   * Nobody can change or delete a user with a role above their own (e.g. an Admin can't touch a Developer).
+   */
+  public static async notAboveOwnRole(
       req: Request,
       res: Response,
       next: NextFunction
   ): Promise<void> {
-    if (
-        typeof req.params === 'undefined' ||
-        typeof RequestParams.get(req, 'id') === 'undefined'
-    ) {
-      return next();
+    const id = parseInt(RequestParams.get(req, 'id') ?? '', 10);
+    if (!Utils.isUInt32(id)) {
+      // fail closed: a route without an :id param can't be checked, so it should not use this middleware
+      return next(new ErrorDTO(ErrorCodes.INPUT_ERROR, 'User id is missing or not valid'));
     }
-
-    if (RequestSession.getContext(req).user.id !== parseInt(RequestParams.getRequired(req, 'id'), 10)) {
-      return next();
-    }
-
-    // TODO: fix it!
     try {
-      const result = await ObjectManagers.getInstance().UserManager.find({
-        role: MoreThanOrEqual(UserRoles.Admin),
-      });
-      if (result.length <= 1) {
-        return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR));
+      const user = await ObjectManagers.getInstance().UserManager.findOne({id});
+      if (user && Number(user.role) > Number(RequestSession.getContext(req).user.role)) {
+        return next(new ErrorDTO(ErrorCodes.NOT_AUTHORISED));
       }
       return next();
-    } catch {
-      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR));
+    } catch (err) {
+      return next(new ErrorDTO(ErrorCodes.GENERAL_ERROR, null, err));
     }
   }
 }

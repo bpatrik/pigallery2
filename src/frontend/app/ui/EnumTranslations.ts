@@ -1,12 +1,6 @@
+import {ConfigPriority, LightBoxTitleTexts, MapProviders, NavigationLinkTypes, ScrollLabelModes, ScrollUpModes, ReIndexingSensitivity} from '../../../common/config/Enums';
 import {UserRoles} from '../../../common/entities/UserDTO';
-import {
-  ConfigPriority,
-  LightBoxTitleTexts,
-  MapProviders,
-  NavigationLinkTypes,
-  ScrollUpModes
-} from '../../../common/config/public/ClientConfig';
-import {ReIndexingSensitivity} from '../../../common/config/private/PrivateConfig';
+
 import {SearchQueryTypes} from '../../../common/entities/SearchQueryDTO';
 import {ConfigStyle} from './settings/settings.service';
 import {GroupByTypes, SortByTypes} from '../../../common/entities/SortingMethods';
@@ -39,6 +33,7 @@ EnumTranslations[ConfigPriority[ConfigPriority.underTheHood]] = $localize`Under 
 EnumTranslations[ScrollUpModes[ScrollUpModes.always]] = $localize`Always`;
 EnumTranslations[ScrollUpModes[ScrollUpModes.mobileOnly]] = $localize`Mobile only`;
 EnumTranslations[ScrollUpModes[ScrollUpModes.never]] = $localize`Never`;
+EnumTranslations[ScrollLabelModes[ScrollLabelModes.date]] = $localize`Only by date`;
 
 EnumTranslations[ConfigStyle[ConfigStyle.full]] = $localize`Full`;
 EnumTranslations[ConfigStyle[ConfigStyle.compact]] = $localize`Compact`;
@@ -56,6 +51,7 @@ EnumTranslations[ReIndexingSensitivity[ReIndexingSensitivity.medium]] = $localiz
 
 EnumTranslations[SortByTypes[SortByTypes.Date]] = $localize`date`;
 EnumTranslations[SortByTypes[SortByTypes.Name]] = $localize`name`;
+EnumTranslations[SortByTypes[SortByTypes.Directory]] = $localize`directory`;
 EnumTranslations[SortByTypes[SortByTypes.Rating]] = $localize`rating`;
 EnumTranslations[SortByTypes[SortByTypes.Random]] = $localize`random`;
 EnumTranslations[SortByTypes[SortByTypes.PersonCount]] = $localize`faces`;

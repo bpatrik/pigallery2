@@ -27,7 +27,7 @@ export class LoggerRouter {
       res.end(...args);
       loggerFn(
           req.method,
-          req.url,
+          req.originalUrl,
           res.statusCode,
           Date.now() - (req._startTime ?? NaN) + 'ms'
       );

@@ -6,20 +6,32 @@
   <title>Loading..</title>
   <link rel="shortcut icon" href="icon_auto.svg">
   <link rel="shortcut icon" sizes="256x256"  href="icon.png" type="image/png">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- viewport-fit=cover: the lightbox uses the whole screen of a phone with a notch, the rest keeps to the safe area -->
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
   <meta name="theme-color" content="#000000" />
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-  <link rel="apple-touch-icon" href="icon_auto.svg">
-  <link rel="apple-touch-icon" sizes="256x256"  href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon_180.png">
 
   <link rel="manifest" crossorigin="use-credentials" href="manifest.json">
 
   <script>
-    var ServerInject = {user:  <%- JSON.stringify(user); %>, ConfigInject: <%- JSON.stringify(Config); %>, UIExtensionConfigs:<%- JSON.stringify(UIExtensionConfigs); %>}
+    var ServerInject = {user:  <%- JSON.stringify(user); %>, ConfigInject: <%- JSON.stringify(Config); %>, UIExtensionConfigs:<%- JSON.stringify(UIExtensionConfigs); %>, buildInfo: <%- JSON.stringify(buildInfo); %>}
+  </script>
+
+  <script>
+    // A browser older than what Angular supports can't parse the app (e.g. iOS 15 Safari, #1186).
+    // Say so instead of an endless "Loading...". Old-style JS, so that this script itself runs there.
+    window.addEventListener('error', function (e) {
+      var loading = document.getElementById('app-loading-text');
+      if (!loading || !(e.error instanceof SyntaxError || /SyntaxError/.test(e.message))) {
+        return;
+      }
+      loading.textContent = 'This browser is too old for PiGallery2. Please update it or use a newer browser.';
+    });
   </script>
 
   <script>
@@ -28,7 +40,7 @@
 
 </head>
 
-<body style="overflow-y: scroll; padding-right: 0 !important;">
+<body style="overflow-y: scroll; padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right) !important;">
 <app-pi-gallery2>
   <div style="position: absolute;
     top: 50%;
@@ -43,7 +55,7 @@
          viewBox="<%- Config.Server.svgIcon.viewBox || '0 0 512 512' %>">
      <!-- <%- "-->"+Config.Server.svgIcon.items+"<!--" %> -->
     </svg>
-    <h2 style="margin-top: 1em">Loading...</h2>
+    <h2 id="app-loading-text" style="margin-top: 1em">Loading...</h2>
   </div>
 </app-pi-gallery2>
 

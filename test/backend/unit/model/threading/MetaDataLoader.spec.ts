@@ -1,3 +1,4 @@
+import {DatabaseType} from '../../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import {MetadataLoader} from '../../../../../src/backend/model/fileaccess/MetadataLoader';
 import {Utils} from '../../../../../src/common/Utils';
@@ -7,8 +8,8 @@ import * as fs from 'node:fs';
 import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/PhotoProcessing';
 import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';
-import {DatabaseType} from '../../../../../src/common/config/private/PrivateConfig';
 import {PhotoMetadata} from '../../../../../src/common/entities/PhotoDTO';
+import {FFmpeg} from '../../../../../src/backend/model/FFmpeg';
 import {TestHelper} from '../../../../TestHelper';
 
 declare const before: any;
@@ -128,6 +129,13 @@ describe('MetadataLoader', () => {
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben.json'));
     expect(Utils.clone(data)).to.be.deep.equal(expected);
   });
+  it('should load jpg whose XMP segment starts right before the end of exifr\'s first chunk', async () => {
+    // big_ben.jpg with its XMP segment moved to byte 65508 (by an APP4 filler):
+    // exifr's chunked reader returns only errors for it (https://github.com/MikeKovarik/exifr/issues/141)
+    const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_xmp_at_64k.jpg'));
+    const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_xmp_at_64k.json'));
+    expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
   it('should load jpg with timestamps and gps (UTC) and calculate offset +1', async () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.jpg'));
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_no_tsoffset_but_gps_utc.json'));
@@ -147,6 +155,52 @@ describe('MetadataLoader', () => {
     const data = await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/timestamps/big_ben_only_time.jpg'));
     const expected = require(path.join(__dirname, '/../../../assets/timestamps/big_ben_only_time.json'));
     expect(Utils.clone(data)).to.be.deep.equal(expected);
+  });
+
+  describe('file handles', () => {
+    // A FileHandle that is left for the garbage collector crashes the app on Node 26 (#1408)
+    const dir = path.join(TestHelper.TMP_DIR, 'metadata_file_handles');
+    const originalOpen = fs.promises.open;
+    let handles: fs.promises.FileHandle[];
+
+    beforeEach(() => {
+      fs.mkdirSync(dir, {recursive: true});
+      handles = [];
+      fs.promises.open = async (...args: Parameters<typeof originalOpen>): Promise<fs.promises.FileHandle> => {
+        const handle = await originalOpen(...args);
+        handles.push(handle);
+        return handle;
+      };
+    });
+
+    afterEach(() => {
+      fs.promises.open = originalOpen;
+      fs.rmSync(dir, {recursive: true, force: true});
+    });
+
+    const expectAllClosed = (): void => {
+      expect(handles.length).to.be.greaterThan(0);
+      expect(handles.map(h => h.fd)).to.deep.equal(handles.map(() => -1));
+    };
+
+    it('should close the file of an empty photo', async () => {
+      const file = path.join(dir, 'empty.jpg');
+      fs.writeFileSync(file, '');
+      await MetadataLoader.loadPhotoMetadata(file);
+      expectAllClosed();
+    });
+
+    it('should close the file of a one byte photo', async () => {
+      const file = path.join(dir, 'one_byte.jpg');
+      fs.writeFileSync(file, 'x');
+      await MetadataLoader.loadPhotoMetadata(file);
+      expectAllClosed();
+    });
+
+    it('should close the file of a photo', async () => {
+      await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test image öüóőúéáű-.,.jpg'));
+      expectAllClosed();
+    });
   });
 
   describe('sidecar', () => {
@@ -394,6 +448,61 @@ describe('MetadataLoader', () => {
     } finally {
       await fs.promises.rm(tmpDir, {recursive: true, force: true});
     }
+  });
+
+  it('should load GPS from the QuickTime location tag of a mov', async () => {
+    // phones store the position of a video in this tag, not in XMP
+    const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/live_photo/IMG_7943_HEVC.MOV'));
+    expect((data as PhotoMetadata).positionData).to.be.deep.equal({
+      GPSData: {latitude: 49.1989, longitude: 16.6071},
+    });
+  });
+
+  describe('ffprobe runs', () => {
+    // starting ffprobe is the expensive part of reading a video, so one run per file has to be enough
+    const dir = path.join(TestHelper.TMP_DIR, 'metadata_ffprobe_runs');
+    const originalProbe = FFmpeg.probe;
+    let probeArgs: string[][];
+
+    beforeEach(() => {
+      fs.mkdirSync(dir, {recursive: true});
+      probeArgs = [];
+      FFmpeg.probe = (file: string, extraArgs: string[] = []): ReturnType<typeof originalProbe> => {
+        probeArgs.push(extraArgs);
+        return originalProbe.call(FFmpeg, file, extraArgs);
+      };
+    });
+
+    afterEach(() => {
+      FFmpeg.probe = originalProbe;
+      fs.rmSync(dir, {recursive: true, force: true});
+    });
+
+    it('should probe an mp4 once', async () => {
+      await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/video.mp4'));
+      expect(probeArgs).to.be.deep.equal([['-export_xmp', '1']]);
+    });
+
+    it('should fall back to a plain probe when ffprobe rejects export_xmp', async () => {
+      // ffprobe 4.0.2 (ffprobe-static) fails on the flag for anything but mov/mp4, current versions only warn.
+      // A matroska file with an mp4 name gets the flag and needs the second probe there.
+      const file = path.join(dir, 'video_mkv.mp4');
+      fs.copyFileSync(path.join(__dirname, '/../../../assets/video_mkv.mkv'), file);
+      const data = await MetadataLoader.loadVideoMetadata(file);
+      const expected = require(path.join(__dirname, '/../../../assets/video_mkv.json'));
+      expect(probeArgs[0]).to.be.deep.equal(['-export_xmp', '1']);
+      expect(Utils.clone(data)).to.be.deep.equal(expected);
+    });
+
+    it('should load GPS from the plain location tag', async () => {
+      // the tag that e.g. Android videos have; no test asset has it, so the probe result is stubbed
+      FFmpeg.probe = async (): ReturnType<typeof originalProbe> =>
+        ({streams: [], format: {tags: {location: '+47.4883+019.0366/'}}});
+      const data = await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/video.mp4'));
+      expect((data as PhotoMetadata).positionData).to.be.deep.equal({
+        GPSData: {latitude: 47.4883, longitude: 19.0366},
+      });
+    });
   });
 
 

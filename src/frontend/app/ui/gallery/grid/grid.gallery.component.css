@@ -3,12 +3,23 @@
     width: 100%;
 }
 
+/* the grid corrects the scroll position itself when a line above the screen gets its real height */
+.grid-container {
+    overflow-anchor: none;
+}
+
+/* padding, not margin: the measured height of a header is all of it */
+.group-header {
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+}
+
 /* groups that share a line should be top aligned, not baseline aligned */
 .media-group {
     vertical-align: top;
 }
 
-/* the group's width comes from its photos; the one-line blog preview would widen it past the gallery */
+/* the one-line blog preview would widen its group past the gallery */
 app-gallery-blog {
     display: block;
     contain: inline-size;
@@ -22,4 +33,37 @@ app-gallery-blog {
 app-gallery-grid-photo {
     display: inline-block;
     cursor: pointer;
+}
+
+/* like the blog: the directory path does not widen the group past its photos, it is cut instead */
+.directory-header {
+    contain: inline-size;
+}
+
+.directory-link {
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.directory-link:hover {
+    text-decoration: underline;
+}
+
+/* keeps the end of a path (the directory itself) and cuts its start with '…'. The rtl only moves the cut to the start:
+   the <bdi> isolates the path, so it keeps its own direction (incl. '/' and digits) */
+.trim-start {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
+}
+
+/* tapped on a phone: the whole path */
+.directory-link.expanded {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    direction: ltr;
 }

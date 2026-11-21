@@ -45,6 +45,12 @@ export class PageHelper {
     );
   }
 
+  /** The bottom of the navbar on the screen; 0 if the navbar is hidden. */
+  public static get NavbarBottom(): number {
+    const navbar = document.querySelector('.navbar-container');
+    return navbar ? Math.max(0, navbar.getBoundingClientRect().bottom) : 0;
+  }
+
   public static get ScrollX(): number {
     return this.supportPageOffset
       ? window.pageXOffset

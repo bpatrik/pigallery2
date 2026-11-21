@@ -79,6 +79,7 @@ John or Kate # photos with "John" or "Kate" (any string match)
 ### Folder Sorting
 Add an empty file like `.order_[ORDER].pg2conf` to a folder to override the default sorting for that folder. It's not recursively applied to subfolders.
 Replace `[ORDER]` with one of the following:
+
 - `descending_name`
 - `ascending_name`
 - `descending_date`
@@ -157,7 +158,7 @@ Build your own extensions. Mostly server-side changes are supported with minimal
 - **Authentication options**:
     - No authentication.
     - Basic, built-in authentication.
-    - ORCID support [#1096](https://github.com/bpatrik/pigallery2/issues/1096)
+    - OIDC (OpenID Connect) support [#1096](https://github.com/bpatrik/pigallery2/issues/1096)
 - **Client-side Caching**: For directories and search results.
 - **GPS & Maps**:
     - Render photos on OpenStreetMap.
@@ -171,6 +172,7 @@ Build your own extensions. Mostly server-side changes are supported with minimal
 - **Faces (Persons)**: Reads Adobe's XMP Face region metadata.
 - **Internationalization**: Full translation support.
 - **Responsive Design**: Phone, tablet, and desktop support.
+- **Installable (PWA)**: Install it on your phone as an app. See: [Apps & 3rd party tools](third-party.md)
 - **Setup Page**: Easy configuration UI.
 - **Random Photo URL**: For 3rd party integrations.
 - **Video Support**:

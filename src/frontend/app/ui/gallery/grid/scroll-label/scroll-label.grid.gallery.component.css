@@ -1,0 +1,64 @@
+/* its middle next to the middle of the scrollbar thumb, but below the navbar and on the screen.
+   The dragged handle is at the finger instead (its inline top) */
+.scroll-label {
+    position: fixed;
+    top: clamp(calc(var(--navbar-bottom) + 1.25rem), var(--thumb-center), calc(100% - 1.25rem));
+    transform: translateY(-50%);
+    right: 24px;
+    z-index: 10;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    border: 1px solid var(--bs-border-color);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* a long path stays a short label next to the scrollbar */
+.scroll-label.directory-label {
+    display: flex;
+    align-items: center;
+    max-width: min(60vw, 20rem);
+}
+
+/* like the directory headers of the grid: keeps the end of a path (the directory itself) and cuts its start with '…'.
+   The rtl only moves the cut to the start: the <bdi> isolates the path, so it keeps its own direction (incl. '/' and digits) */
+.trim-start {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    direction: rtl;
+    text-align: left;
+}
+
+/* on a touch screen: the handle to drag the page, like the thumb of a scrollbar. Right at the edge, big enough for a finger */
+.scroll-label.handle {
+    display: flex;
+    align-items: center;
+    right: 4px;
+    min-height: 2.5rem;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+}
+
+/* a bigger area to grab than what it shows */
+.scroll-label.handle::after {
+    content: '';
+    position: absolute;
+    inset: -0.5rem -4px -0.5rem -0.5rem;
+}
+
+.scroll-label.handle.dragging {
+    transform: none;
+    background-color: var(--bs-secondary-bg);
+}
+
+.handle-icon {
+    font-size: 1.25rem;
+}
+
+.scroll-label.handle .handle-icon:not(:last-child) {
+    margin-right: 0.25rem;
+}
