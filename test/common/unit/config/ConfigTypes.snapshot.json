@@ -217,6 +217,7 @@
   "Search.searchCacheTimeout": "unsignedInt",
   "Server": "config",
   "Server.Log": "config",
+  "Server.Log.file": "string",
   "Server.Log.level": "enum:error,warn,info,verbose,debug,silly",
   "Server.Log.logServerTiming": "boolean",
   "Server.Log.sqlLevel": "enum:none,error,all",

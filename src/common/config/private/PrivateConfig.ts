@@ -811,6 +811,16 @@ export class ServerLogConfig {
   })
   sqlLevel: SQLLogLevel = SQLLogLevel.error;
   @ConfigProperty({
+    type: 'string',
+    tags: {
+      name: $localize`Log file`,
+      priority: ConfigPriority.advanced,
+      githubIssue: 519,
+    },
+    description: $localize`If set, the app also writes its log to this file (absolute or relative to the app's folder), e.g. for Fail2Ban. Lines have an ISO timestamp and no colours. Above 10 MB the file is renamed to .1 and a new one is started. Leave it empty to only log to the console.`
+  })
+  file: string = '';
+  @ConfigProperty({
     type: 'boolean',
     tags: {
       name: $localize`Server timing`,

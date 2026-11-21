@@ -14,6 +14,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 
 ## Further changes
 - New [Fail2Ban guide](https://bpatrik.github.io/pigallery2/setup/advanced/fail2ban/) (also in the Portainer & NPM guide) to ban IPs that keep failing to log in [#519](https://github.com/bpatrik/pigallery2/issues/519)
+- New `Server.Log.file` setting: PiGallery2 can also write its log to a file (ISO dates, no colours, rotated at 10 MB), e.g. for Fail2Ban on hosts without journald like Unraid [#519](https://github.com/bpatrik/pigallery2/issues/519)
 - PiGallery2 warns (in the log and on the admin page) when a login comes through a reverse proxy that `Server.trustProxy` doesn't trust, as failed logins then show the proxy's IP
 - New default theme: `modern` (Settings → Gallery → Themes; `classic` is the old look): deeper colors, no tile borders, gradients behind the texts over photos and softer motion. The built-in themes (`classic`, `modern`) are always up to date and read-only in the settings; add a new theme to customize one. The look of the gallery is now set by CSS variables (e.g. `--item-radius`, `--overlay-background`), so custom themes can change it with a few lines.
 

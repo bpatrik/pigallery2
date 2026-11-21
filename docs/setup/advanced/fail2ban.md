@@ -25,8 +25,12 @@ A failed login is logged as a warning, so the default log level (`info`) shows i
 ```
 
 The part up to the IP is stable, so filter on that. The user name and the sharing key are JSON-quoted (newlines are escaped),
-so a client can't write a log line of its own. The date follows the server's locale and the level is coloured;
-Fail2Ban doesn't need either (see the `systemd` backend below).
+so a client can't write a log line of its own. On the console the date follows the server's locale and the level is coloured;
+Fail2Ban doesn't need either (see the `systemd` backend below). The [log file](#b-log-file) has an ISO date and no colours:
+
+```
+2026-11-20T20:18:03.123Z [WARN_] AuthenticationMWs Failed login from IP `203.0.113.7` for user:"admin", bad password
+```
 
 ## 1. Log the real client IP
 
@@ -52,7 +56,14 @@ Without a reverse proxy (PiGallery2 listens on the internet directly) leave `Ser
 
 Fail2Ban needs a log that stays at the same place. A Docker container's own log file
 (`/var/lib/docker/containers/<id>/<id>-json.log`) gets a new path every time the container is re-created (e.g. on an update),
-so send the container's log to the systemd journal with a fixed tag instead. Add this to the `pigallery2` service:
+so use one of these instead:
+
+- **A) journald:** on hosts with systemd (most Linux distributions).
+- **B) Log file:** on hosts without systemd's journal (e.g. Unraid, Synology), or if you prefer a file.
+
+### A) journald
+
+Send the container's log to the systemd journal with a fixed tag. Add this to the `pigallery2` service:
 
 ```yaml
     logging:
@@ -66,21 +77,40 @@ so send the container's log to the systemd journal with a fixed tag instead. Add
 **Direct install (no Docker):** run PiGallery2 as a systemd service named `pigallery2`; its output then goes to the journal too.
 Use `journalmatch = _SYSTEMD_UNIT=pigallery2.service` instead of the one below.
 
+### B) Log file
+
+Let PiGallery2 also write its log to a file (`Server.Log.file`, Settings → Server → Logs), and put that file on a volume:
+
+```yaml
+    environment:
+      - Server-Log-file=/app/data/logs/pigallery2.log
+    volumes:
+      - "./logs:/app/data/logs" # on Unraid e.g. /mnt/user/appdata/pigallery2/logs
+```
+
+The file keeps its path across restarts and updates. Above 10 MB it is renamed to `pigallery2.log.1`
+(the old `.1` is overwritten) and a new file is started; Fail2Ban follows that. Check it with `tail -f logs/pigallery2.log`.
+
+In the filter below, remove the `[Init]` part (`journalmatch`). In the jail, use `backend = auto` instead of `systemd` and
+point `logpath` to the file as Fail2Ban sees it, e.g. `logpath = /path/to/logs/pigallery2.log`.
+When Fail2Ban runs in Docker, mount the `logs` folder into its container too (read-only is enough) and use the path in there.
+
 ## 3. Run Fail2Ban
 
-Run it either in Docker (easiest with Portainer) or installed on the host. Both read the journal and ban in the host's firewall.
+Run it either in Docker (easiest with Portainer or Unraid) or installed on the host. Both read the log and ban in the host's firewall.
 
 ### A) In Docker
 
 The [Portainer & NPM guide](advanced-docker-npm-portainer.md#6-fail2ban-optional) has an example compose file to start from.
 It runs the [`crazymax/fail2ban:debian`](https://github.com/crazy-max/docker-fail2ban) image and writes the filter and the jail of option B itself,
-so it needs no other files. Change `port`, `maxretry`, `bantime` or `ignoreip` in it if needed.
+so it needs no other files. Change `port`, `maxretry`, `bantime` or `ignoreip` in it if needed. With a [log file](#b-log-file),
+change the filter and the jail as described there.
 
 Check it with `docker logs fail2ban`. Run the `fail2ban-*` commands of step 4 in the container, e.g. `docker exec fail2ban fail2ban-client status pigallery2`.
 
 ### B) On the host
 
-On Debian / Ubuntu: `sudo apt install fail2ban python3-systemd`.
+On Debian / Ubuntu: `sudo apt install fail2ban python3-systemd` (`python3-systemd` is only needed for journald).
 
 Create the filter, `/etc/fail2ban/filter.d/pigallery2.conf`:
 
@@ -91,7 +121,7 @@ failregex = ^.*?\bAuthenticationMWs Failed login from IP `<ADDR>`(?: for user:| 
 ignoreregex =
 
 [Init]
-# the tag of the journald log driver
+# journald only: the tag of the journald log driver
 journalmatch = CONTAINER_TAG=pigallery2
 ```
 
@@ -101,6 +131,7 @@ And the jail, `/etc/fail2ban/jail.d/pigallery2.local`:
 [pigallery2]
 enabled  = true
 filter   = pigallery2
+# log file: backend = auto and logpath = /path/to/logs/pigallery2.log
 backend  = systemd
 port     = http,https
 # Docker: published ports bypass the INPUT chain, ban in DOCKER-USER instead.
@@ -128,8 +159,10 @@ A ban blocks the IP for every container behind those ports (e.g. everything behi
 ## 4. Test it
 
 1. Check the filter against the log: `sudo fail2ban-regex systemd-journal /etc/fail2ban/filter.d/pigallery2.conf`
+   (log file: `sudo fail2ban-regex /path/to/logs/pigallery2.log /etc/fail2ban/filter.d/pigallery2.conf`)
 2. Fail a login from a device outside your network (e.g. a phone on mobile data) a few times, then check that
    the logged IP is the phone's public IP, not a `172.x` Docker address: `journalctl CONTAINER_TAG=pigallery2 | grep "Failed login"`
+   (log file: `grep "Failed login" logs/pigallery2.log`)
 3. `sudo fail2ban-client status pigallery2` lists the banned IPs. Unban one with
    `sudo fail2ban-client set pigallery2 unbanip <ip>`.
 
