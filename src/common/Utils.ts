@@ -443,6 +443,27 @@ export class Utils {
     return Number.isFinite(ret) ? ret : undefined;
   }
 
+  /**
+   * Parses the decimal degrees form of an ISO 6709 position, e.g. `+47.4883+019.0366/`.
+   * Whatever follows the longitude (altitude, CRS, place name) is ignored.
+   */
+  public static parseISO6709(text: string | undefined): { latitude: number; longitude: number } | undefined {
+    if (!text) {
+      return undefined;
+    }
+    // the forms with minutes (DDMM.M) or seconds (DDMMSS.S) have more integer digits and don't match
+    const parts = text.match(/^([+-]\d{1,2}(?:\.\d+)?)([+-]\d{1,3}(?:\.\d+)?)(?![\d.])/);
+    if (!parts) {
+      return undefined;
+    }
+    const latitude = parseFloat(parts[1]);
+    const longitude = parseFloat(parts[2]);
+    if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+      return undefined;
+    }
+    return {latitude, longitude};
+  }
+
 
   public static sortableFilename(filename: string): string {
     const lastDot = filename.lastIndexOf('.');

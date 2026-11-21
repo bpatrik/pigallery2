@@ -102,7 +102,13 @@ export class MetadataLoader {
     try {
 
 
-      const data = await FFmpeg.probe(fullPath);
+      // ffprobe only exposes the embedded XMP with the export_xmp flag, and only the mov/mp4 demuxer knows that flag.
+      // Old ffprobe versions (e.g. the 4.0.2 that ffprobe-static ships) fail on it for any other container,
+      // so it is only sent for these extensions and a failed probe is repeated without it.
+      const exportXmp = ['.mp4', '.mov', '.m4v', '.3gp'].includes(path.extname(fullPath).toLowerCase());
+      const data = exportXmp
+        ? await FFmpeg.probe(fullPath, ['-export_xmp', '1']).catch(() => FFmpeg.probe(fullPath))
+        : await FFmpeg.probe(fullPath);
 
       try {
         for (const stream of data.streams) {
@@ -189,6 +195,29 @@ export class MetadataLoader {
         Logger.silly(err);
       }
       metadata.creationDate = metadata.creationDate || 0;
+
+      try {
+        // GPS of videos (issue #1260): the embedded XMP comes first, parsed like the XMP of photos and sidecars
+        const xmp = data.format.tags?.['xmp'];
+        if (xmp) {
+          const xmpData: ExifData = await exifr.sidecar(Buffer.from(xmp), undefined, 'xmp');
+          if (xmpData) {
+            MetadataLoader.mapGPS(metadata, xmpData);
+          }
+        }
+        // phones store the position in the QuickTime location tag (ISO 6709) instead
+        const gps = (metadata as PhotoMetadata).positionData?.GPSData;
+        if (gps?.latitude === undefined || gps.longitude === undefined) {
+          const position = Utils.parseISO6709(data.format.tags?.['com.apple.quicktime.location.ISO6709']) ??
+            Utils.parseISO6709(data.format.tags?.['location']);
+          if (position) {
+            MetadataLoader.mapGPS(metadata, {gps: position});
+          }
+        }
+      } catch (err) {
+        Logger.silly(LOG_TAG, 'Error loading GPS metadata for : ' + fullPath);
+        Logger.silly(err);
+      }
 
       try {
         // search for sidecar and merge metadata

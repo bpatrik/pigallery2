@@ -90,4 +90,27 @@ describe('Utils', () => {
       expect(Utils.xmpExifGpsCoordinateToDecimalDegrees([12, 3, 4] as any)).to.be.equal(undefined);
     });
   });
+
+  describe('parseISO6709', () => {
+    it('should parse positions in decimal degrees', () => {
+      expect(Utils.parseISO6709('+47.4883+019.0366/')).to.be.deep.equal({latitude: 47.4883, longitude: 19.0366});
+      expect(Utils.parseISO6709('-33.8568-070.6483/')).to.be.deep.equal({latitude: -33.8568, longitude: -70.6483});
+      // iPhone: altitude after the longitude
+      expect(Utils.parseISO6709('+49.1989+016.6071+222.469/')).to.be.deep.equal({latitude: 49.1989, longitude: 16.6071});
+      // 3GPP: place name after the slash
+      expect(Utils.parseISO6709('+47.4883+019.0366/Budapest')).to.be.deep.equal({latitude: 47.4883, longitude: 19.0366});
+    });
+
+    it('should return undefined for malformed input', () => {
+      expect(Utils.parseISO6709(undefined)).to.be.equal(undefined);
+      expect(Utils.parseISO6709('garbage')).to.be.equal(undefined);
+      // degrees and minutes, degrees, minutes and seconds
+      expect(Utils.parseISO6709('+4729.30+01902.20/')).to.be.equal(undefined);
+      expect(Utils.parseISO6709('+472918+0190212/')).to.be.equal(undefined);
+      expect(Utils.parseISO6709('+47.4883+01902.20/')).to.be.equal(undefined);
+      // out of range
+      expect(Utils.parseISO6709('+91.0000+019.0366/')).to.be.equal(undefined);
+      expect(Utils.parseISO6709('+47.4883+181.0000/')).to.be.equal(undefined);
+    });
+  });
 });
