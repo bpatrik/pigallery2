@@ -1,93 +1,113 @@
-# Blog
+# USA Road Trip 2015
 
-You can use this feature to create index.md files to your folders and render them in your gallery. 
+A month on the road through the American West: from the Bay Area up the Pacific coast, over to Yellowstone,
+down through the canyons of Utah and Arizona, and back along Highway 1.
 
-Here are some examples how to format the text:
- 
+| | |
+|---|---|
+| **When** | 11 June – 10 July 2015 |
+| **National parks** | Yosemite, Lassen, Redwood, Crater Lake, Olympic, Yellowstone, Grand Teton, Zion, Bryce, Capitol Reef, Canyonlands, Arches |
+| **Camera** | Canon EOS 600D |
 
-# h1 Heading 8-)
-## h2 Heading
-### h3 Heading
-#### h4 Heading
-##### h5 Heading
-###### h6 Heading
+Yosemite and Yellowstone have their own folders; everything else is below, day by day.
+Open the map to follow the route, or the **Faces** page to meet the animals we ran into.
 
+*We weren't travelling alone, as it turned out. Open the day notes for the other side of the story.*
 
-## Horizontal Rules
+<!-- @pg-date 2015-06-11 -->
+## Berkeley
 
-___
+The trip started on the Berkeley campus, where *Alvin the Squirrel* posed for his first photo shoot.
+By the evening we were in Yosemite.
 
----
+> **Alvin's diary, day 1.** The tall ones with the big black box gave me a peanut. Then they opened the car door
+> and left it open for exactly as long as it takes a squirrel to make a life decision. I am under the back seat.
+> There are crackers here. I regret nothing.
 
-***
+<!-- @pg-date 2015-06-14 -->
+## Lake Tahoe and Lassen
 
+Crystal clear water at Lake Tahoe. The next morning we hiked in Lassen Volcanic National Park:
+the track is in the folder, so it shows on the map.
 
-## Typographic replacements
+> **Day 4.** Lake Tahoe is a very large puddle. I did not go in. A squirrel has standards.
 
-Enable typographer option to see result.
+<!-- @pg-date 2015-06-16 -->
+## Redwoods and Crater Lake
 
-(c) (C) (r) (R) (tm) (TM) (p) (P) +-
+Morning among the tallest trees on Earth, afternoon at the rim of Crater Lake,
+the deepest lake in the USA, filling the caldera of a collapsed volcano.
 
-test.. test... test..... test?..... test!....
+> **Day 6.** The redwoods. I have climbed trees all my life, and I now understand that I have never climbed a tree.
+> I made it about a fortieth of the way up before the car honked.
 
-!!!!!! ???? ,,  -- ---
+<!-- @pg-date 2015-06-19 -->
+## Hurricane Ridge
 
-"Smartypants, double quotes" and 'single quotes'
+Evening in the Olympic Mountains, looking over the meadows all the way to the Strait of Juan de Fuca.
 
+> **Day 9.** Windy. Very windy. Hurricane Ridge is not a name somebody chose as a joke.
 
-## Emphasis
+<!-- @pg-date 2015-06-21 -->
+## Yellowstone
 
-**This is bold text**
+Three days of geysers, hot springs and wildlife: see the Yellowstone folder.
+This elk came out at dusk near Canyon Village.
 
-__This is bold text__
+> **Day 11.** The ground here hisses, bubbles and smells of eggs. A deer the size of a car looked at me as if *I*
+> were the strange one. He says his name is Rudolph. I said he looked more like a Ceryneian Hind. We agreed to disagree.
 
-*This is italic text*
+<!-- @pg-date 2015-06-22 -->
+## Grand Teton
 
-_This is italic text_
+The Tetons rise straight out of the valley, without any foothills. Worth getting up early for:
+the mountains are at their best in the morning light.
 
-~~Strikethrough~~
+> **Day 12.** Up before sunrise again. These humans keep chasing "the light". I chase pine cones. Mine are tastier.
 
+<!-- @pg-date 2015-06-25 -->
+## Zion, Bryce and Capitol Reef
 
-## Blockquotes
+Utah, in a few days:
 
+- **Zion**: red cliffs and a river at the bottom of the canyon.
+- **Bryce Canyon**: a forest of orange hoodoos.
+- **Capitol Reef**: cliffs, domes and the quiet roads of the Waterpocket Fold.
 
-> Blockquotes can also be nested...
->> ...by using additional greater-than signs right next to each other...
-> > > ...or with spaces between arrows.
-
-
-## Lists
-
-Unordered
-
-+ Create a list by starting a line with `+`, `-`, or `*`
-+ Sub-lists are made by indenting 2 spaces:
-  - Marker character change forces new list start:
-    * Ac tristique libero volutpat at
-    + Facilisis in pretium nisl aliquet
-    - Nulla volutpat aliquam velit
-+ Very easy!
-
-Ordered
-
-1. Lorem ipsum dolor sit amet
-2. Consectetur adipiscing elit
-3. Integer molestie lorem at massa
-
-
-1. You can use sequential numbers...
-1. ...or keep all the numbers as `1.`
-
-Start numbering with offset:
-
-57. foo
-1. bar
+> **Day 16.** Bryce has thousands of stone towers and not one single tree. Who designed this place?
 
 <!-- @pg-date 2015-06-29 -->
-## Day 1
+## Canyonlands and Arches
 
-You can tag section in the `*.md` files  with `<!-- @pg-date <ISO_DATE> -->`, like: `<!-- @pg-date 2015-06-29 -->` to attach them to a date. 
-Then, if you group by date, they will show up at the assigned day.
+The Green River Overlook in Canyonlands at noon, then Arches in the afternoon.
 
-That part of the markdown will be removed from the main markdown at the top and shown only at that day.
- 
+> **Day 19.** Out of crackers. Morale is low. Rationing the last peanut.
+
+<!-- @pg-date 2015-07-01 -->
+## Antelope Canyon
+
+> The light falls in from above and the walls glow in every shade of orange and purple.
+
+Only with a guide, and the midday tours are the ones with the light beams. Horseshoe Bend was the next morning.
+
+> **Day 21.** No squirrels allowed on the tour, so I guarded the car. Somebody has to.
+
+<!-- @pg-date 2015-07-03 -->
+## Bearizona
+
+A drive-through wildlife park near Williams, Arizona. We tagged our new friends with names, so they show up on the
+**Faces** page: *Balu*, *Boo-Boo*, *Akela*, *Hugin* and the others. The *Group photos* album is a saved search
+for photos with at least two of them.
+
+> **Day 23.** FRIENDS! Balu and Boo-Boo are enormous and very polite. Akela only howled at me a little.
+> Hugin the raven offered to show me a shortcut to the coast. Ravens know everything.
+
+<!-- @pg-date 2015-07-10 -->
+## Big Sur
+
+The last days: Los Angeles, then north on Highway 1, where the mountains drop straight into the Pacific.
+Back in San Francisco, a short flight took us down to LA for the long one home. The flight is on the map too.
+
+> **Day 30.** I can smell home from here. When they open the door in Berkeley, I'll be the first one out.
+> I'll tell everyone on campus about the giant trees, the stinking ground and the bears.
+> Nobody will believe me. That's fine. I've got photos. Well, *they* have photos. Check the Faces page.

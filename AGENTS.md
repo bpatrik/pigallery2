@@ -98,7 +98,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     `import '<…>/common/config/public/Config';`, like `main.ts` does; otherwise the private config's asserts throw on load.
 - Lint: `npm run lint`.
 - Frontend dev build (watch): `npm run run-dev`; one-off: `npx ng build --configuration=dev --watch=false`. Run the server: `npm start`.
-- E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts `npm run start-e2e-server` itself
+- E2E (Playwright, `test/playwright`): needs a frontend build in `dist`. `npm run test-e2e` (`playwright test`) starts the e2e server (`npm run start-e2e-server`) itself
   (port 8080, resets `test/e2e`). Locally it reuses a server that already runs on 8080, so stop your own server first or the tests
   run against your DB. `E2E_PORT=8091 npm run test-e2e` runs it on another port (e.g. in parallel git worktrees). Single file: `npm run test-e2e -- share`; debugging: `npm run test-e2e-ui` (UI mode), or `--trace on` + `npx playwright show-trace`.
   It covers login (wrong password, deep links, logout, a session that ends while the app is open), gallery (filters, blog, map, lightbox, video, URL deep links),
@@ -119,9 +119,9 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
   - Wait for conditions (`expect(...)`, `page.waitForResponse()`), not fixed timeouts. Mark tests of not yet implemented behaviour
     with `test.fail()` (Vitest: `it.fails()`; mocha: `expectToFail('#<issue>', check)` of `test/backend/KnownFailures.ts`, see `SharingRouter.spec.ts`).
     CI counts them as "Known failures" in the job summaries.
-  - Tests may only use photos and folders tracked in git under `demo/images`. Local checkouts can have extra,
-    git-ignored test folders (e.g. `demo/images/sub_dir`, `demo/images2`) that CI doesn't have.
-    `demo/images` is also the public demo page: don't add test-only files or folders to it.
+  - The e2e server serves `test/playwright/media`: the test photos and edge cases (accented folder name, broken image,
+    empty folder, timestamps, duplicates). Add test-only files there. `demo/images` is the public demo page and the docs
+    screenshots: keep it a nice-looking showcase, and don't let tests depend on it.
   - Browser: `npx playwright install chromium` once. Cloud sessions have a Chromium in `/opt/pw-browsers` but can't download one;
     if its revision differs from what `@playwright/test` expects, symlink the expected `chromium-<rev>` and
     `chromium_headless_shell-<rev>` folders there to the installed ones.

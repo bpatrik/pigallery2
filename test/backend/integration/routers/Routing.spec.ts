@@ -50,7 +50,7 @@ describe('Routing', () => {
     [ACCENTED + '/sub folder/photo 2.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
     [HIDDEN + '/secret folder/photo.jpg']: path.join(assets, 'sidecar/no_metadata.jpg'),
     'video.mp4': path.join(assets, 'sidecar/20240128_105420.mp4'),
-    'track.gpx': path.join(__dirname, '../../../../demo/images/SF- LA flight.gpx'),
+    'track.gpx': path.join(__dirname, '../../../playwright/media/SF- LA flight.gpx'),
   };
   // files that contain their own relative path
   const markerFiles = (): string[] => [

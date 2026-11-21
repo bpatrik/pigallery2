@@ -18,7 +18,7 @@ const photo = (page: Page, name: string) => page.locator(`.photo-link > img[alt=
 const lightboxTitle = (page: Page, text: string) =>
   page.locator('app-lightbox-controls > #controllers-container > .controls-title').filter({hasText: text});
 const lightboxFaceNames = (page: Page) => page.locator('app-lightbox-controls .faces-container > .face > .face-name');
-// the real title of demo/images/IMG_1252.jpg in its metadata: it tests a long title with accents
+// the real title of test/playwright/media/IMG_1252.jpg in its metadata: it tests a long title with accents
 const LONG_TITLE = 'This is a super long title with special characters -.,űáéúőpóüö';
 
 /**

@@ -18,7 +18,7 @@ import {
   scrollUntilAttached
 } from './helpers';
 
-// The e2e server serves the demo/images folder.
+// The e2e server serves the test/playwright/media folder.
 // timestamps has big_ben.jpg, dupl is an other directory next to it (without big_ben.jpg).
 const SEARCH_FILE_NAME = 103; // SearchQueryTypes.file_name
 const EXACT_MATCH = 1; // TextSearchQueryMatchTypes.exact_match

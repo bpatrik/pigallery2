@@ -39,9 +39,10 @@ export default defineConfig({
     {name: 'admin-config', use: {...devices['Desktop Chrome']}, testMatch: /admin-config\.spec\.ts/, dependencies: ['chromium', 'mobile', 'mobile-sanity']},
   ],
 
-  // Starts the e2e server with an empty DB (test/e2e is reset) on the demo/images folder.
+  // Starts the e2e server with an empty DB (test/e2e is reset) on the test/playwright/media folder.
   webServer: {
-    command: (process.env.DOCS_SCREENSHOTS ? 'npm run start-docs-e2e-server' : 'npm run e2e-server') + ' -- --Server-port=' + port,
+    command: (process.env.DOCS_SCREENSHOTS ? 'npm run start-docs-e2e-server -- ' : 'npm run e2e-server -- --Media-folder=test/playwright/media ') +
+      '--Server-port=' + port,
     url: 'http://localhost:' + port,
     reuseExistingServer: !process.env.CI,
   },

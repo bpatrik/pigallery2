@@ -197,7 +197,7 @@ test.describe('Album edge cases', () => {
     });
   });
 
-  // demo/images/.saved_searches.pg2conf defines "Group photos" and "Animals": indexing adds them as locked albums
+  // test/playwright/media/.saved_searches.pg2conf defines "Group photos" and "Animals": indexing adds them as locked albums
   test('should list the albums of the .saved_searches.pg2conf file', async ({page}) => {
     const albums = page.waitForResponse(res => new URL(res.url()).pathname === '/pgapi/albums');
     await page.goto('/albums');
