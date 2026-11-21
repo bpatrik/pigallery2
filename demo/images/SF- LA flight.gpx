@@ -2,11 +2,11 @@
   <trk>
     <name>SF - LA flight</name>
     <trkseg>
-      <trkpt lat="37.61907358382852" lon="-122.38276951882519">
-        <time>2023-07-16T04:09:32Z</time>
+      <trkpt lat="37.6213" lon="-122.3790">
+        <time>2015-07-11T15:12:00Z</time>
       </trkpt>
-      <trkpt lat="33.973731424165905" lon="-118.25928533563894">
-        <time>2023-07-16T04:09:33Z</time>
+      <trkpt lat="33.9425" lon="-118.4081">
+        <time>2015-07-11T16:30:00Z</time>
       </trkpt>
     </trkseg>
   </trk>

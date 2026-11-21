@@ -106,6 +106,7 @@ for photos with at least two of them.
 ## Big Sur
 
 The last days: Los Angeles, then north on Highway 1, where the mountains drop straight into the Pacific.
+Back in San Francisco, a short flight took us down to LA for the long one home. The flight is on the map too.
 
 > **Day 30.** I can smell home from here. When they open the door in Berkeley, I'll be the first one out.
 > I'll tell everyone on campus about the giant trees, the stinking ground and the bears.
