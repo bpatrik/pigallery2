@@ -150,6 +150,23 @@ export const SearchQueryUtils = {
     }
     return true;
   },
+  /**
+   * True if the query (or any nested part of it) contains a relative date (`date_pattern`),
+   * whose result depends on the current day.
+   */
+  hasRelativeDate: (query: SearchQueryDTO | null | undefined): boolean => {
+    if (!query || typeof query !== 'object') {
+      return false;
+    }
+    if (query.type === SearchQueryTypes.date_pattern) {
+      return true;
+    }
+    if (ListSearchQueryTypes.includes(query.type)) {
+      const list = (query as SearchListQuery).list;
+      return Array.isArray(list) && list.some(q => SearchQueryUtils.hasRelativeDate(q));
+    }
+    return false;
+  },
   validateSearchQuery: (query: SearchQueryDTO, what = 'SearchQuery'): void => {
     if (!query) {
       return;

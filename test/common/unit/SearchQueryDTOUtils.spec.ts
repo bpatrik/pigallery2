@@ -581,3 +581,50 @@ describe('SearchQueryDTOUtils.negate', () => {
     expect(SearchQueryUtils.negate(q)).to.deep.equal({...q, negate: true});
   });
 });
+
+describe('SearchQueryDTOUtils.hasRelativeDate', () => {
+  it('should return true for direct date_pattern queries', () => {
+    expect(SearchQueryUtils.hasRelativeDate({
+      type: SearchQueryTypes.date_pattern,
+      daysLength: 2,
+      frequency: DatePatternFrequency.every_year
+    } as DatePatternSearch)).to.equal(true);
+    expect(SearchQueryUtils.hasRelativeDate({
+      type: SearchQueryTypes.date_pattern,
+      daysLength: 1,
+      frequency: DatePatternFrequency.days_ago,
+      agoNumber: 0,
+      negate: true
+    } as DatePatternSearch)).to.equal(true);
+  });
+
+  it('should return true when a date_pattern is nested inside list queries', () => {
+    const rel: DatePatternSearch = {
+      type: SearchQueryTypes.date_pattern,
+      daysLength: 2,
+      frequency: DatePatternFrequency.every_year
+    };
+    const kw: TextSearch = {type: SearchQueryTypes.keyword, value: 'holiday'};
+    expect(SearchQueryUtils.hasRelativeDate({type: SearchQueryTypes.AND, list: [kw, rel]} as ANDSearchQuery)).to.equal(true);
+    expect(SearchQueryUtils.hasRelativeDate({
+      type: SearchQueryTypes.OR,
+      list: [{type: SearchQueryTypes.SOME_OF, min: 1, list: [kw, rel]} as SomeOfSearchQuery]
+    } as ORSearchQuery)).to.equal(true);
+  });
+
+  it('should return false for queries without a date_pattern and for empty inputs', () => {
+    expect(SearchQueryUtils.hasRelativeDate(null)).to.equal(false);
+    expect(SearchQueryUtils.hasRelativeDate(undefined)).to.equal(false);
+    expect(SearchQueryUtils.hasRelativeDate({type: SearchQueryTypes.date, min: 1000, max: 2000} as SearchQueryDTO)).to.equal(false);
+    expect(SearchQueryUtils.hasRelativeDate({type: SearchQueryTypes.keyword, value: 'summer'} as TextSearch)).to.equal(false);
+    expect(SearchQueryUtils.hasRelativeDate({
+      type: SearchQueryTypes.AND,
+      list: [
+        {type: SearchQueryTypes.directory, value: 'trips'} as DirectorySearch,
+        {type: SearchQueryTypes.OR, list: [{type: SearchQueryTypes.person, value: 'Alice'} as TextSearch]} as ORSearchQuery
+      ]
+    } as ANDSearchQuery)).to.equal(false);
+    expect(SearchQueryUtils.hasRelativeDate({type: SearchQueryTypes.AND, list: []} as ANDSearchQuery)).to.equal(false);
+  });
+});
+
