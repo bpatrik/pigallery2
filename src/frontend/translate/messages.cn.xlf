@@ -10,7 +10,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1284</context>
+          <context context-type="linenumber">1294</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/subconfigs/MessagingConfig.ts</context>
@@ -26,7 +26,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1271</context>
+          <context context-type="linenumber">1281</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/subconfigs/MessagingConfig.ts</context>
@@ -42,7 +42,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1341</context>
+          <context context-type="linenumber">1351</context>
         </context-group>
         <target>数据库</target>
       </trans-unit>
@@ -938,11 +938,27 @@
         </context-group>
         <target>SQL 查询的日志记录级别.</target>
       </trans-unit>
+      <trans-unit id="6296258419365617212" datatype="html">
+        <source>Log file</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">816</context>
+        </context-group>
+        <target>Log file</target>
+      </trans-unit>
+      <trans-unit id="8429763615489971592" datatype="html">
+        <source>If set, the app also writes its log to this file (absolute or relative to the app's folder), e.g. for Fail2Ban. Lines have an ISO timestamp and no colours. Above 10 MB the file is renamed to .1 and a new one is started. Leave it empty to only log to the console.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
+          <context context-type="linenumber">820</context>
+        </context-group>
+        <target>If set, the app also writes its log to this file (absolute or relative to the app's folder), e.g. for Fail2Ban. Lines have an ISO timestamp and no colours. Above 10 MB the file is renamed to .1 and a new one is started. Leave it empty to only log to the console.</target>
+      </trans-unit>
       <trans-unit id="6212535853329157478" datatype="html">
         <source>Server timing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">816</context>
+          <context context-type="linenumber">826</context>
         </context-group>
         <target>服务器计时</target>
       </trans-unit>
@@ -950,7 +966,7 @@
         <source>If enabled, the app adds "Server-Timing" http header to the response.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">819</context>
+          <context context-type="linenumber">829</context>
         </context-group>
         <target>启用后，应用会在响应中添加 "Server-Timing" HTTP 头。.</target>
       </trans-unit>
@@ -958,7 +974,7 @@
         <source>Max saved progress</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">942</context>
+          <context context-type="linenumber">952</context>
         </context-group>
         <target>最大保存进度</target>
       </trans-unit>
@@ -966,7 +982,7 @@
         <source>Job history size.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">945</context>
+          <context context-type="linenumber">955</context>
         </context-group>
         <target>失败任务历史记录大小.</target>
       </trans-unit>
@@ -974,7 +990,7 @@
         <source>Processing batch size</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">952</context>
+          <context context-type="linenumber">962</context>
         </context-group>
         <target>处理批次大小</target>
       </trans-unit>
@@ -982,7 +998,7 @@
         <source>Jobs load this many photos or videos from the DB for processing at once.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">955</context>
+          <context context-type="linenumber">965</context>
         </context-group>
         <target>任务每次从数据库加载这么多张照片或视频进行处理。.</target>
       </trans-unit>
@@ -990,7 +1006,7 @@
         <source>Scheduled jobs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">962</context>
+          <context context-type="linenumber">972</context>
         </context-group>
         <target>计划失败任务</target>
       </trans-unit>
@@ -998,7 +1014,7 @@
         <source>Bit rate</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1012</context>
+          <context context-type="linenumber">1022</context>
         </context-group>
         <target>比特率</target>
       </trans-unit>
@@ -1006,7 +1022,7 @@
         <source>Target bit rate of the output video will be scaled down to this. This should be less than the upload rate of your home server.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1016</context>
+          <context context-type="linenumber">1026</context>
         </context-group>
         <target>输出视频的目标码率会降到此值。它应低于你家用服务器的上传带宽。.</target>
       </trans-unit>
@@ -1014,7 +1030,7 @@
         <source>Resolution</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1023</context>
+          <context context-type="linenumber">1033</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/EnumTranslations.ts</context>
@@ -1030,7 +1046,7 @@
         <source>The height of the output video will be scaled down to this, while keeping the aspect ratio.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1028</context>
+          <context context-type="linenumber">1038</context>
         </context-group>
         <target>输出视频的高度将缩小, 同时保持纵横比.</target>
       </trans-unit>
@@ -1038,7 +1054,7 @@
         <source>FPS</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1035</context>
+          <context context-type="linenumber">1045</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/grid/photo/media-button-modal/media-button-modal.component.ts</context>
@@ -1050,7 +1066,7 @@
         <source>Target frame per second (fps) of the output video will be scaled down to this.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1039</context>
+          <context context-type="linenumber">1049</context>
         </context-group>
         <target>输出视频的目标帧率（fps）会降到此值。.</target>
       </trans-unit>
@@ -1058,7 +1074,7 @@
         <source>Format</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1046</context>
+          <context context-type="linenumber">1056</context>
         </context-group>
         <target>格式</target>
       </trans-unit>
@@ -1066,7 +1082,7 @@
         <source>MP4 codec</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1056</context>
+          <context context-type="linenumber">1066</context>
         </context-group>
         <target>MP4 编解码器</target>
       </trans-unit>
@@ -1074,7 +1090,7 @@
         <source>Webm Codec</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1067</context>
+          <context context-type="linenumber">1077</context>
         </context-group>
         <target>Webm 编解码器</target>
       </trans-unit>
@@ -1082,7 +1098,7 @@
         <source>CRF</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1078</context>
+          <context context-type="linenumber">1088</context>
         </context-group>
         <target>CRF</target>
       </trans-unit>
@@ -1090,7 +1106,7 @@
         <source>The range of the Constant Rate Factor (CRF) scale is 0–51, where 0 is lossless, 23 is the default, and 51 is worst quality possible.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1081</context>
+          <context context-type="linenumber">1091</context>
         </context-group>
         <target>恒定速率因子 (CRF) 标度的范围是 0–51,其中 0 是无损, 23 是默认值, 51 是最差.</target>
       </trans-unit>
@@ -1098,7 +1114,7 @@
         <source>Preset</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1089</context>
+          <context context-type="linenumber">1099</context>
         </context-group>
         <target>预设</target>
       </trans-unit>
@@ -1106,7 +1122,7 @@
         <source>A preset is a collection of options that will provide a certain encoding speed to compression ratio. A slower preset will provide better compression (compression is quality per filesize).</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1092</context>
+          <context context-type="linenumber">1102</context>
         </context-group>
         <target>预设是一组选项, 可提供特定的编码速度与压缩比. 越慢的预设可以提供更高的压缩比(会影响画质).</target>
       </trans-unit>
@@ -1114,7 +1130,7 @@
         <source>Custom Output Options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1100</context>
+          <context context-type="linenumber">1110</context>
         </context-group>
         <target>自定义输出选项</target>
       </trans-unit>
@@ -1122,7 +1138,7 @@
         <source>It will be sent to ffmpeg as it is, as custom output options.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1105</context>
+          <context context-type="linenumber">1115</context>
         </context-group>
         <target>它将作为自定义输出选项按原样发送到 ffmpeg.</target>
       </trans-unit>
@@ -1130,7 +1146,7 @@
         <source>Custom Input Options</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1113</context>
+          <context context-type="linenumber">1123</context>
         </context-group>
         <target>自定义输入选项</target>
       </trans-unit>
@@ -1138,7 +1154,7 @@
         <source>It will be sent to ffmpeg as it is, as custom input options.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1119</context>
+          <context context-type="linenumber">1129</context>
         </context-group>
         <target>它将作为自定义输入选项按原样发送到 ffmpeg.</target>
       </trans-unit>
@@ -1146,7 +1162,7 @@
         <source>Video transcoding</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1130</context>
+          <context context-type="linenumber">1140</context>
         </context-group>
         <target>视频转码</target>
       </trans-unit>
@@ -1154,7 +1170,7 @@
         <source>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate.   The transcoded videos will be saved to the thumbnail folder.  You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1134</context>
+          <context context-type="linenumber">1144</context>
         </context-group>
         <target>To ensure smooth video playback, video transcoding is recommended to a lower bit rate than the server's upload rate. The transcoded videos will be saved to the thumbnail folder. You can trigger the transcoding manually, but you can also create an automatic encoding job in advanced settings mode.</target>
       </trans-unit>
@@ -1162,7 +1178,7 @@
         <source>Cover Filter query</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1145</context>
+          <context context-type="linenumber">1155</context>
         </context-group>
         <target>封面过滤器查询</target>
       </trans-unit>
@@ -1170,7 +1186,7 @@
         <source>Filters the sub-folders with this search query. If filter results no photo, the app will search again without the filter.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1150</context>
+          <context context-type="linenumber">1160</context>
         </context-group>
         <target>使用此搜索查询过滤子文件夹.如果过滤结果中没有照片,应用将再次搜索,无需过滤器.</target>
       </trans-unit>
@@ -1178,7 +1194,7 @@
         <source>Cover Sorting</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1161</context>
+          <context context-type="linenumber">1171</context>
         </context-group>
         <target>封面排序</target>
       </trans-unit>
@@ -1186,7 +1202,7 @@
         <source>If multiple cover is available sorts them by these methods and selects the first one. Using random sorting does not allow to use any other sorting method.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1172</context>
+          <context context-type="linenumber">1182</context>
         </context-group>
         <target>如果有多张可用封面，会按这些方式排序并选择第一张。使用随机排序时不能再使用其他排序方式。.</target>
       </trans-unit>
@@ -1194,7 +1210,7 @@
         <source>Images folder</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1187</context>
+          <context context-type="linenumber">1197</context>
         </context-group>
         <target>图片文件夹</target>
       </trans-unit>
@@ -1202,7 +1218,7 @@
         <source>Images are loaded from this folder (read permission required)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1192</context>
+          <context context-type="linenumber">1202</context>
         </context-group>
         <target>图像从此文件夹加载(需要读取权限)</target>
       </trans-unit>
@@ -1210,7 +1226,7 @@
         <source>Temp folder</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1199</context>
+          <context context-type="linenumber">1209</context>
         </context-group>
         <target>临时文件夹</target>
       </trans-unit>
@@ -1218,7 +1234,7 @@
         <source>Thumbnails, converted photos, videos will be stored here (write permission required)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1204</context>
+          <context context-type="linenumber">1214</context>
         </context-group>
         <target>缩略图、转换后的照片、视频将存储在这里(需要写入权限)</target>
       </trans-unit>
@@ -1226,7 +1242,7 @@
         <source>Video</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1211</context>
+          <context context-type="linenumber">1221</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
@@ -1238,7 +1254,7 @@
         <source>Video support uses ffmpeg. ffmpeg and ffprobe binaries need to be available in the PATH or the @ffmpeg-installer/ffmpeg and @ffprobe-installer/ffprobe optional node packages need to be installed.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1220</context>
+          <context context-type="linenumber">1230</context>
         </context-group>
         <target>使用ffmpeg来提供视频支持.ffmpeg 和 ffprobe 二进制文件需要在 PATH 中可用,或者需要安装 @ffmpeg-installer/ffmpeg 和 @ffprobe-installer/ffprobe 可选包.</target>
       </trans-unit>
@@ -1246,7 +1262,7 @@
         <source>Photo</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1226</context>
+          <context context-type="linenumber">1236</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
@@ -1258,7 +1274,7 @@
         <source>Session Timeout</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1250</context>
+          <context context-type="linenumber">1260</context>
         </context-group>
         <target>会话超时</target>
       </trans-unit>
@@ -1266,7 +1282,7 @@
         <source>Users kept logged in for this long time.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1254</context>
+          <context context-type="linenumber">1264</context>
         </context-group>
         <target>用户保持登录状态的时间.</target>
       </trans-unit>
@@ -1274,7 +1290,7 @@
         <source>Trust Proxy</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1261</context>
+          <context context-type="linenumber">1271</context>
         </context-group>
         <target>信任代理</target>
       </trans-unit>
@@ -1282,7 +1298,7 @@
         <source>Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use "uniquelocal". "true" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1265</context>
+          <context context-type="linenumber">1275</context>
         </context-group>
         <target>Which reverse proxies to trust for the client IP (X-Forwarded-For header), e.g. to log the real IP of failed logins for fail2ban. Behind a proxy on a private network (Docker, nginx, Nginx Proxy Manager) use "uniquelocal". "true" trusts every client, so anyone can fake their IP. For all valid values see: https://expressjs.com/en/guide/behind-proxies.html</target>
       </trans-unit>
@@ -1290,7 +1306,7 @@
         <source>Port number. Port 80 is usually what you need.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1276</context>
+          <context context-type="linenumber">1286</context>
         </context-group>
         <target>端口号.通常您需要的是80端口.</target>
       </trans-unit>
@@ -1298,7 +1314,7 @@
         <source>Server will accept connections from this IPv6 or IPv4 address.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1289</context>
+          <context context-type="linenumber">1299</context>
         </context-group>
         <target>服务器将接受来自此 IPv6 或 IPv4 地址的连接.</target>
       </trans-unit>
@@ -1306,7 +1322,7 @@
         <source>Logs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1296</context>
+          <context context-type="linenumber">1306</context>
         </context-group>
         <target>日志</target>
       </trans-unit>
@@ -1314,7 +1330,7 @@
         <source>Server</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1332</context>
+          <context context-type="linenumber">1342</context>
         </context-group>
         <target>服务器</target>
       </trans-unit>
@@ -1322,7 +1338,7 @@
         <source>Users</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1350</context>
+          <context context-type="linenumber">1360</context>
         </context-group>
         <target>用户</target>
       </trans-unit>
@@ -1330,7 +1346,7 @@
         <source>Indexing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1359</context>
+          <context context-type="linenumber">1369</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/model/backendtext.service.ts</context>
@@ -1342,7 +1358,7 @@
         <source>If you add a new folder to your gallery, the site indexes it automatically.  If you would like to trigger indexing manually, click index button. (Note: search only works among the indexed directories.)</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1364</context>
+          <context context-type="linenumber">1374</context>
         </context-group>
         <target>如果您向图库添加新文件夹,网站会自动为其编制索引.如果您想手动触发索引,请点击索引按钮.（注意：搜索功能仅在已编制索引的目录中有效.）</target>
       </trans-unit>
@@ -1350,7 +1366,7 @@
         <source>Media</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1376</context>
+          <context context-type="linenumber">1386</context>
         </context-group>
         <target>媒体</target>
       </trans-unit>
@@ -1358,7 +1374,7 @@
         <source>Meta file</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1385</context>
+          <context context-type="linenumber">1395</context>
         </context-group>
         <target>元文件</target>
       </trans-unit>
@@ -1366,7 +1382,7 @@
         <source>Album cover</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1394</context>
+          <context context-type="linenumber">1404</context>
         </context-group>
         <target>专辑封面</target>
       </trans-unit>
@@ -1374,7 +1390,7 @@
         <source>Specify a search query and sorting that the app can use to pick the best photo for an album and folder cover. There is no way to manually pick folder and album cover in the app. You can tag some of your photos with 'cover' and set that as search query or rate them to 5 and set sorting to descending by rating.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1405</context>
+          <context context-type="linenumber">1415</context>
         </context-group>
         <target>指定搜索查询和排序方式,以便应用选择最佳照片作为相册和文件夹封面.应用无法手动选择文件夹和相册封面.您可以将部分照片标记为“封面”,并将其设置为搜索查询,或者将其评分为 5 分,并将排序设置为按评分降序排列.</target>
       </trans-unit>
@@ -1382,7 +1398,7 @@
         <source>Sharing</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1412</context>
+          <context context-type="linenumber">1422</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/share/share.gallery.component.html</context>
@@ -1402,7 +1418,7 @@
         <source>Duplicates</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1421</context>
+          <context context-type="linenumber">1431</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/duplicates/duplicates.component.ts</context>
@@ -1418,7 +1434,7 @@
         <source>Messaging</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1430</context>
+          <context context-type="linenumber">1440</context>
         </context-group>
         <target>信息</target>
       </trans-unit>
@@ -1426,7 +1442,7 @@
         <source>The App can send messages (like photos on the same day a year ago. aka: "Top Pick"). Here you can configure the delivery method.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1434</context>
+          <context context-type="linenumber">1444</context>
         </context-group>
         <target>该应用程序可以发送消息（例如一年前同一天的照片,又称“精选”）.您可以在这里配置发送方式.</target>
       </trans-unit>
@@ -1434,7 +1450,7 @@
         <source>Extensions</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1442</context>
+          <context context-type="linenumber">1452</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
@@ -1446,7 +1462,7 @@
         <source>Upload</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1451</context>
+          <context context-type="linenumber">1461</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/public/ClientConfig.ts</context>
@@ -1462,7 +1478,7 @@
         <source>Jobs</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/common/config/private/PrivateConfig.ts</context>
-          <context context-type="linenumber">1460</context>
+          <context context-type="linenumber">1470</context>
         </context-group>
         <target>任务</target>
       </trans-unit>

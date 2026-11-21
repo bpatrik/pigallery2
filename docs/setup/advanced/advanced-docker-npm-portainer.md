@@ -258,6 +258,7 @@ Details and other setups: [Fail2Ban guide](fail2ban.md).
          options:
            tag: pigallery2
    ```
+   On a host without systemd's journal (e.g. Unraid, Synology) write a [log file](fail2ban.md#b-log-file) instead.
 2. Create a new stack named `fail2ban`. The compose below is an example to start from (it's not maintained with PiGallery2, check the
    [image's docs](https://github.com/crazy-max/docker-fail2ban) for its current options). It bans in Docker's `DOCKER-USER` chain on ports 80 and 443, so a banned IP can't reach anything behind NPM.
 
