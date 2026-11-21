@@ -115,8 +115,7 @@ Save the output to the scratchpad and read only the summaries (see AGENTS.md "Bu
 
 The docs images (`docs/assets/*.png`, used by `docs/features.md`) come from a Playwright spec, so they show the current UI.
 
-- Needs the maintainer's docs photos in `demo/images2/docs/puerto rico` (not in git; ask if they're missing) and the
-  production build in `dist` from step 5.
+- Uses the demo photos in `demo/images` and needs the production build in `dist` from step 5.
 - `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens` (it starts its own server, `start-docs-e2e-server`;
   stop any own server on 8080 first or set `E2E_PORT`). It writes `test/playwright/screenshots/*.png` (git-ignored).
 - Look at every new screenshot (Read the PNGs) and compare it with the one in `docs/assets` with the same name:

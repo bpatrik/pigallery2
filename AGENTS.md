@@ -126,7 +126,7 @@ Use reasonable deadlines: usually nothing should run for more than 3 minutes, so
     if its revision differs from what `@playwright/test` expects, symlink the expected `chromium-<rev>` and
     `chromium_headless_shell-<rev>` folders there to the installed ones.
   - Docs screenshots (skipped by default): `DOCS_SCREENSHOTS=true npm run test-e2e -- docs-screens` saves them to `test/playwright/screenshots`.
-    It starts its own server (`start-docs-e2e-server`) on the maintainer's `demo/images2/docs/puerto rico` photos, which are not in git.
+    It starts its own server (`start-docs-e2e-server`) on the demo photos in `demo/images`.
   - CI writes a per-spec table to the job summary (`jq` over the json reporter's `test-results/results.json`, see `ci.yml`),
     and a table of the unit tests (parsed from their output).
 - Test output is long (server logs, browser console warnings) and Vitest colours it. Save it to a file, strip the colours and
