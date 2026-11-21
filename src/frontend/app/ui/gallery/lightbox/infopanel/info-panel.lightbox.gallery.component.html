@@ -290,15 +290,13 @@
             </div>
           }
           <div class="mt-auto" style="height: 400px">
-            @if (mapEnabled && gps(); as gps) {
+            @if (mapEnabled && mapCenter(); as center) {
               <div
                 id="map"
                 leaflet
-      [leafletOptions]="{zoom:10,
-          center:{lat:gps.latitude,
-          lng:gps.longitude},
-          layers:[baseLayer],
-          zoomControl: false}"
+                [leafletOptions]="mapOptions"
+                [leafletCenter]="center"
+                [leafletZoom]="10"
                 [leafletLayers]="markerLayer()">
               </div>
             }

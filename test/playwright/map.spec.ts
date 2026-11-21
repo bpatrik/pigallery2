@@ -123,4 +123,29 @@ test.describe('Map', () => {
     await expect(pin).toHaveCSS('position', 'absolute');
     await expect(pin).toHaveCSS('border-top-left-radius', '50%');
   });
+
+  test('Info panel map should follow the photo when switching photos', async ({page}) => {
+    await page.goto('/gallery/4MinsAroundTheWorld?p=UTC-20240413-203430-Auckland.jpg');
+    await expectLightboxPhoto(page, 'UTC-20240413-203430-Auckland.jpg');
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    await page.keyboard.press('i');
+
+    const map = page.locator('app-info-panel #map');
+    const pin = map.locator('.leaflet-marker-icon');
+    // how far the pin is from the middle of the map, in pixels
+    const pinOffset = async (): Promise<number> => {
+      const m = await map.boundingBox();
+      const p = await pin.boundingBox();
+      if (!m || !p) {
+        return Infinity;
+      }
+      return Math.hypot(p.x + p.width / 2 - (m.x + m.width / 2), p.y + p.height / 2 - (m.y + m.height / 2));
+    };
+    await expect(pin).toBeVisible();
+    await expect.poll(pinOffset, {message: 'the pin of the first photo is in the middle'}).toBeLessThan(30);
+
+    await page.keyboard.press('ArrowRight');
+    await expectLightboxPhoto(page, 'UTC-20240413-203830-NewYork.jpg');
+    await expect.poll(pinOffset, {message: 'the pin of the next photo is in the middle'}).toBeLessThan(30);
+  });
 });

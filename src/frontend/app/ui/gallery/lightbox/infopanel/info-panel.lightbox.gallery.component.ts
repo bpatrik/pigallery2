@@ -13,7 +13,7 @@ import {
   SearchQueryTypes
 } from '../../../../../../common/entities/SearchQueryDTO';
 import {AuthenticationService} from '../../../../model/network/authentication.service';
-import {LatLngLiteral, marker, Marker, TileLayer, tileLayer} from 'leaflet';
+import {LatLng, latLng, LatLngLiteral, MapOptions, marker, Marker, TileLayer, tileLayer} from 'leaflet';
 import {ThemeService} from '../../../../model/theme.service';
 import {ContentLoaderService} from '../../contentLoader.service';
 import { DatePipe } from '@angular/common';
@@ -52,6 +52,12 @@ export class InfoPanelLightboxComponent {
   public readonly SearchQueryTypes: typeof SearchQueryTypes = SearchQueryTypes;
 
   public baseLayer: TileLayer;
+  public readonly mapOptions: MapOptions;
+  // leafletOptions is only read when the map is created, so the view follows the media through leafletCenter (and leafletZoom for the first view)
+  public readonly mapCenter = computed((): LatLng | null => {
+    const gps = this.gps();
+    return gps ? latLng(gps.latitude, gps.longitude) : null;
+  });
   public readonly markerLayer = computed((): Marker[] => {
     const gps = this.gps();
     if (!gps) {
@@ -77,6 +83,7 @@ export class InfoPanelLightboxComponent {
         attribution: this.mapService.ShortAttributions,
       });
     }
+    this.mapOptions = {layers: [this.baseLayer], zoomControl: false};
   }
 
   public readonly directoryPath = computed((): string => Utils.concatUrls(

@@ -23,3 +23,4 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 - Opening a photo that is cut by the bottom or top of the screen no longer makes the page jump: the lightbox opens from where the photo is
 - Indexing no longer crashes and restarts the app on an empty or 1-byte photo file (Node 26, e.g. the Docker images) [#1408](https://github.com/bpatrik/pigallery2/issues/1408)
 - The map in the info panel of a photo shows a pin again, not a big blue dot, also when the small map of the folder was not on the screen
+- The map in the info panel follows the photo when you step to the next or previous photo, so its pin stays in the middle
