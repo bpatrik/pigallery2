@@ -17,7 +17,9 @@ import * as path from 'node:path';
 import {SessionContext} from '../SessionContext';
 import {MediaEntity} from './enitites/MediaEntity';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
+import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
+import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {Config} from '../../../common/config/private/Config';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {NotificationManager} from '../NotifocationManager';
@@ -27,10 +29,39 @@ const LOG_TAG = '[ProjectedCacheManager]';
 type RawNumber = string | number | null;
 
 export class ProjectedCacheManager implements IObjectManager {
+  private lastCleanupDayKey: string | null = null;
+  private dayCleanupPromise: Promise<void> | null = null;
 
   async init(): Promise<void> {
     // Cleanup at startup to avoid stale growth
     await this.cleanupNonExistingProjections();
+    await this.invalidateRelativeDateAlbumCaches();
+  }
+
+  /**
+   * Lazily prunes stale projection keys and invalidates relative-date caches once per calendar day.
+   */
+  public async cleanupIfDayChanged(): Promise<void> {
+    const today = SessionManager.getDayKey();
+    if (this.lastCleanupDayKey === today && !this.dayCleanupPromise) {
+      return;
+    }
+    if (!this.dayCleanupPromise) {
+      const prevDayKey = this.lastCleanupDayKey;
+      this.lastCleanupDayKey = today;
+      this.dayCleanupPromise = (async () => {
+        await this.cleanupNonExistingProjections();
+        await this.invalidateRelativeDateAlbumCaches();
+      })()
+        .catch((e) => {
+          this.lastCleanupDayKey = prevDayKey;
+          Logger.warn(LOG_TAG, 'Failed to clean up stale projection caches on day change:', e);
+        })
+        .finally(() => {
+          this.dayCleanupPromise = null;
+        });
+    }
+    await this.dayCleanupPromise;
   }
 
   public async onNewDataVersion(changedDir?: DirectoryPathDTO): Promise<void> {
@@ -46,16 +77,28 @@ export class ProjectedCacheManager implements IObjectManager {
   public async getAllProjections(): Promise<string[]> {
     const connection = await SQLConnection.getConnection();
     const activeKeys = new Set<string>();
+    const sm = ObjectManagers.getInstance().SessionManager;
 
     // Always include default projection key
     activeKeys.add(SessionManager.NO_PROJECTION_KEY);
 
+    // Unauthenticated session when authentication is disabled
+    if (Config.Users.authenticationRequired === false) {
+      try {
+        const user = ObjectManagers.getInstance().UserManager.getUnAuthenticatedUser();
+        activeKeys.add(sm.getProjectionKeyForUser(user));
+      } catch (e) {
+        Logger.warn(LOG_TAG, 'Skipping invalid unauthenticated projection: ' + (e as Error)?.message);
+      }
+    }
+
     // Users
     const users = await connection.getRepository(UserEntity).find();
     for (const user of users) {
-      const ctx = await ObjectManagers.getInstance().SessionManager.buildContext(user);
-      if (ctx?.user?.projectionKey) {
-        activeKeys.add(ctx.user.projectionKey);
+      try {
+        activeKeys.add(sm.getProjectionKeyForUser(user));
+      } catch (e) {
+        Logger.warn(LOG_TAG, 'Skipping invalid user projection for user id=' + user.id + ': ' + (e as Error)?.message);
       }
     }
 
@@ -66,9 +109,9 @@ export class ProjectedCacheManager implements IObjectManager {
       .getMany();
     for (const s of shares) {
       try {
-        const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(s);
+        const q = sm.buildAllowListForSharing(s);
         // same as SessionManager.buildContext: no projection query, no projection key
-        const key = q ? ObjectManagers.getInstance().SessionManager.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
+        const key = q ? sm.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
         activeKeys.add(key);
       } catch (e) {
         // an invalid sharing can't be opened, so it has no projection
@@ -80,6 +123,7 @@ export class ProjectedCacheManager implements IObjectManager {
   }
 
   public async cleanupNonExistingProjections(): Promise<void> {
+    this.lastCleanupDayKey = SessionManager.getDayKey();
     const connection = await SQLConnection.getConnection();
     const keys = await this.getAllProjections();
     Logger.debug(LOG_TAG, 'Cleanup non existing projections, known number of keys: ' + keys.length);
@@ -105,6 +149,31 @@ export class ProjectedCacheManager implements IObjectManager {
       .delete()
       .where('projectionKey NOT IN (:...keys)', {keys})
       .execute();
+
+    const om = ObjectManagers.getInstance();
+    om.AlbumManager?.resetMemoryCache();
+    om.PersonManager?.resetMemoryCache();
+  }
+
+  /**
+   * Invalidates DB and in-memory caches for saved-search albums whose own query contains a relative date.
+   */
+  private async invalidateRelativeDateAlbumCaches(): Promise<void> {
+    const connection = await SQLConnection.getConnection();
+    const albums = await connection.getRepository(SavedSearchEntity).find();
+    const relativeAlbumIds = albums
+      .filter(a => SearchQueryUtils.hasRelativeDate(a.searchQuery))
+      .map(a => a.id);
+    if (relativeAlbumIds.length === 0) {
+      return;
+    }
+    await connection.getRepository(ProjectedAlbumCacheEntity)
+      .createQueryBuilder()
+      .update()
+      .set({valid: false})
+      .where('albumId IN (:...ids)', {ids: relativeAlbumIds})
+      .execute();
+    ObjectManagers.getInstance().AlbumManager?.resetMemoryCache();
   }
 
 
