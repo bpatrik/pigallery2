@@ -7,7 +7,8 @@
     @for (line of renderedLines(); track line.key) {
       <div class="grid-line">
         @for (segment of line.segments; track segment.key) {
-          <div class="d-inline-block media-group">
+          <!-- a group with a blog is alone on its line: the blog is as wide as the grid, not only as its photos -->
+          <div class="media-group" [class.d-inline-block]="!segment.blog" [class.d-block]="segment.blog">
             @if (segment.header) {
               @switch (sortingService.grouping().method) {
                 @case (GroupByTypes.Rating) {

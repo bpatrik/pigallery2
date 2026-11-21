@@ -99,6 +99,19 @@ describe('GridLayout', () => {
     expect(names(new GridLayout(groups, {...params, width: 4000}))).toEqual([['2025'], ['2022', '2022 too']]);
   });
 
+  it('should give a group with a blog a line of its own', () => {
+    const day = (d: number): Date => new Date(Date.UTC(2015, 5, d));
+    const groups: MediaGroup[] = [
+      {name: 'June 24', date: day(24), media: photos(1, 'a')},
+      {name: 'June 25', date: day(25), media: photos(1, 'b')},
+      {name: 'June 26', date: day(26), media: photos(1, 'c')},
+      {name: 'June 27', date: day(27), media: photos(1, 'd')}
+    ];
+    const layout = new GridLayout(groups, {...params, width: 4000, blogDates: new Set([day(25).getTime()])});
+    expect(names(layout)).toEqual([['June 24'], ['June 25'], ['June 26', 'June 27']]);
+    expect(layout.lines.map(l => l.segments.map(s => s.blog))).toEqual([[false], [true], [false, false]]);
+  });
+
   it('should find the line of a y position and of a media', () => {
     const all = photos(100);
     const layout = new GridLayout([{name: '', media: all}], params);
