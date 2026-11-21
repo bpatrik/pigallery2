@@ -86,62 +86,6 @@
   font-size: x-large;
 }
 
-::ng-deep  .marker-svg-wrapper {
-  width: 30px;
-  height: 30px;
-}
-
-::ng-deep .marker-svg-small .marker-svg-wrapper {
-  transform: scale(0.5);
-}
-
-::ng-deep .marker-svg-pin {
-  width: 30px;
-  height: 30px;
-  left: 50%;
-  top: 50%;
-  margin: -15px 0 0 -15px;
-  border-radius: 50% 50% 50% 0;
-  position: absolute;
-  border: 3px solid;
-  transform: rotate(-45deg);
-  background-color: rgb(248, 249, 250);
-}
-
-::ng-deep .marker-svg-shadow {
-  content: "";
-  background: rgba(128, 128, 128, 0.4);
-  width: 20px;
-  height: 10px;
-  border-radius: 100%;
-  position: absolute;
-  top: 31px;
-  left: 5px
-}
-
-::ng-deep .custom-div-icon:hover , ::ng-deep .gpx-marker-highlighted  {
-  transition: all 0.2s ease-in-out;
-  z-index: 9999 !important;
-}
-
-
-::ng-deep .custom-div-icon:hover .marker-svg-wrapper, ::ng-deep .gpx-marker-highlighted .marker-svg-wrapper {
-  transition: all 0.2s ease-in-out;
-  transform: scale(1.2);
-}
-
-::ng-deep .custom-div-icon svg {
-  position: absolute;
-  width: 16px !important;
-  max-height: 20px;
-  left: 0;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  margin: auto;
-  text-align: center;
-}
-
 ::ng-deep .lightbox-map-gallery-component-preview-loading {
   background-color: var(--item-background);
   color: var(--bs-secondary-color-rgb);
