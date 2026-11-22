@@ -831,6 +831,10 @@ export class SearchManager {
 
           } else {
             // recurring
+            // TODO: "today" is not coherent: the fixed frequencies above use the server's local day (JS),
+            //  but these use the DB's clock: SQLite 'now' is UTC, MySQL CURDATE() is the MySQL server's time zone.
+            //  Compute today's day/week/month in JS and pass them as parameters instead.
+            //  Once fixed, SessionManager.getDayKey() only needs the local date (drop the UTC part).
 
             const textParam: Record<string, unknown> = {};
             textParam['diff' + queryId] = tq.daysLength;

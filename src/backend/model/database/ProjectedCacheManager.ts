@@ -27,9 +27,11 @@ const LOG_TAG = '[ProjectedCacheManager]';
 type RawNumber = string | number | null;
 
 export class ProjectedCacheManager implements IObjectManager {
-
-  async init(): Promise<void> {
-    // Cleanup at startup to avoid stale growth
+  /**
+   * Also runs at startup (ObjectManagers.init), to avoid stale growth.
+   * Projection keys with a relative date change daily, so the old ones go away here.
+   */
+  async onNewDay(): Promise<void> {
     await this.cleanupNonExistingProjections();
   }
 
@@ -46,16 +48,28 @@ export class ProjectedCacheManager implements IObjectManager {
   public async getAllProjections(): Promise<string[]> {
     const connection = await SQLConnection.getConnection();
     const activeKeys = new Set<string>();
+    const sm = ObjectManagers.getInstance().SessionManager;
 
     // Always include default projection key
     activeKeys.add(SessionManager.NO_PROJECTION_KEY);
 
+    // Unauthenticated session when authentication is disabled
+    if (Config.Users.authenticationRequired === false) {
+      try {
+        const user = ObjectManagers.getInstance().UserManager.getUnAuthenticatedUser();
+        activeKeys.add(sm.getProjectionKeyForUser(user));
+      } catch (e) {
+        Logger.warn(LOG_TAG, 'Skipping invalid unauthenticated projection: ' + (e as Error)?.message);
+      }
+    }
+
     // Users
     const users = await connection.getRepository(UserEntity).find();
     for (const user of users) {
-      const ctx = await ObjectManagers.getInstance().SessionManager.buildContext(user);
-      if (ctx?.user?.projectionKey) {
-        activeKeys.add(ctx.user.projectionKey);
+      try {
+        activeKeys.add(sm.getProjectionKeyForUser(user));
+      } catch (e) {
+        Logger.warn(LOG_TAG, 'Skipping invalid user projection for user id=' + user.id + ': ' + (e as Error)?.message);
       }
     }
 
@@ -66,10 +80,7 @@ export class ProjectedCacheManager implements IObjectManager {
       .getMany();
     for (const s of shares) {
       try {
-        const q = ObjectManagers.getInstance().SessionManager.buildAllowListForSharing(s);
-        // same as SessionManager.buildContext: no projection query, no projection key
-        const key = q ? ObjectManagers.getInstance().SessionManager.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
-        activeKeys.add(key);
+        activeKeys.add(sm.createProjectionKey(sm.buildAllowListForSharing(s)));
       } catch (e) {
         // an invalid sharing can't be opened, so it has no projection
         Logger.warn(LOG_TAG, 'Skipping invalid sharing ' + s.sharingKey + ': ' + (e as Error)?.message);

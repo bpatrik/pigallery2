@@ -42,6 +42,8 @@ export class ObjectManagers {
   private uploadManager!: UploadManager;
   private sessionManager!: SessionManager;
   private initDone = false;
+  private lastDayKey: string | null = null;
+  private dayChangePromise: Promise<void> | null = null;
 
   constructor() {
     this.managers = [];
@@ -89,8 +91,38 @@ export class ObjectManagers {
     }
     await SQLConnection.init();
     await this.initManagers();
+    // also cleans up the projections that no longer exist
+    await this.onDayChangeIfNeeded();
     Logger.debug(LOG_TAG, 'SQL DB inited');
     this.initDone = true;
+  }
+
+  /**
+   * Calls onNewDay() of the managers once per day key.
+   * Called on every request (SessionManager.buildContext), so it is a string compare unless the day changed.
+   */
+  public async onDayChangeIfNeeded(): Promise<void> {
+    const today = SessionManager.getDayKey();
+    if (this.lastDayKey !== today) {
+      // Set before the cleanup: parallel requests wait for this run instead of starting another one,
+      // and a failing manager is retried the next day, not on every request
+      // (until then, e.g. an album with a relative date may show yesterday's counts).
+      this.lastDayKey = today;
+      this.dayChangePromise = (async () => {
+        for (const manager of this.managers) {
+          if (!manager.onNewDay) {
+            continue;
+          }
+          // one failing manager should not keep the others stale
+          try {
+            await manager.onNewDay();
+          } catch (e) {
+            Logger.warn(LOG_TAG, 'Failed to clean up the caches of ' + manager.constructor.name + ' on day change:', e);
+          }
+        }
+      })();
+    }
+    await this.dayChangePromise;
   }
 
   private async initManagers(): Promise<void> {

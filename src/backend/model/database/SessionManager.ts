@@ -119,23 +119,49 @@ export class SessionManager {
     return this.getQueryForUser(this.createSharingUser(sharing));
   }
 
-  public createProjectionKey(q: SearchQueryDTO) {
-    const canonical = SearchQueryUtils.stringifyForComparison(q);
+  /**
+   * Calendar-day stamp combining UTC and local dates (SQLite 'now' is UTC, MySQL CURDATE() is server local,
+   * and JS mixes both), so relative-date caches refresh across either midnight without a stale window.
+   */
+  public static getDayKey(): string {
+    const now = new Date();
+    return now.toISOString().slice(0, 10) + '|' + now.toDateString();
+  }
+
+  /**
+   * The only place that builds a projection key: buildContext and the cache cleanup (getAllProjections) must agree on it.
+   */
+  public createProjectionKey(q: SearchQueryDTO | null): string {
+    // no projection query, no projection key
+    if (!q) {
+      return SessionManager.NO_PROJECTION_KEY;
+    }
+    let canonical = SearchQueryUtils.stringifyForComparison(q);
+    // relative dates resolve differently every day, so the cached results do too
+    if (SearchQueryUtils.hasRelativeDate(q)) {
+      canonical += '|' + SessionManager.getDayKey();
+    }
     // the projectionKey columns are 32 characters long
     return crypto.createHash('sha256').update(canonical).digest('hex').slice(0, 32);
   }
 
+  public getProjectionKeyForUser(user: SessionUser): string {
+    return this.createProjectionKey(this.getQueryForUser(user));
+  }
+
   public async buildContext(user: SessionUser): Promise<SessionContext> {
+    if (ObjectManagers.isReady()) {
+      await ObjectManagers.getInstance().onDayChangeIfNeeded();
+    }
     const context = new SessionContext();
-    context.user = Object.assign(user, {projectionKey: SessionManager.NO_PROJECTION_KEY});
     const finalQuery = this.getQueryForUser(user);
+    context.user = Object.assign(user, {projectionKey: this.createProjectionKey(finalQuery)});
 
     if (finalQuery) {
       const sm = ObjectManagers.getInstance().SearchManager;
       // Build the Brackets-based query
       context.projectionQuery = await sm.prepareAndBuildWhereQuery(finalQuery);
       context.hasDirectoryProjection = sm.hasDirectoryQuery(finalQuery);
-      context.user.projectionKey = this.createProjectionKey(finalQuery);
       if (SearchQueryUtils.isQueryEmpty(finalQuery)) {
         Logger.silly(LOG_TAG, 'Empty Projection query.');
       } else {
