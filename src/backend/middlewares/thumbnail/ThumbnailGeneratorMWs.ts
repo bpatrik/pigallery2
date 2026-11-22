@@ -166,8 +166,8 @@ export class ThumbnailGeneratorMWs {
         return next(
           new ErrorDTO(
             ErrorCodes.THUMBNAIL_GENERATION_ERROR,
-            'Error during generating thumbnail: ' + mediaPath,
-            String(error)
+            'Error during generating thumbnail: ' + RequestParams.get(req, 'mediaPath'),
+            'Failed on ' + mediaPath + ': ' + String(error)
           )
         );
       }
@@ -202,8 +202,8 @@ export class ThumbnailGeneratorMWs {
         return next(
           new ErrorDTO(
             ErrorCodes.THUMBNAIL_GENERATION_ERROR,
-            'Error during generating thumbnail: ' + mediaPath,
-            String(error)
+            'Error during generating thumbnail: ' + RequestParams.get(req, 'mediaPath'),
+            'Failed on ' + mediaPath + ': ' + String(error)
           )
         );
       }
