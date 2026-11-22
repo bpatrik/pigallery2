@@ -39,9 +39,16 @@ export abstract class ProjectionAwareManager<T> implements IObjectManager {
   }
 
   /**
+   * Drops the lists of the projection keys that changed with the day (relative dates).
+   */
+  public async onNewDay(): Promise<void> {
+    this.resetMemoryCache();
+  }
+
+  /**
    * Reset the entire memory cache
    */
-  public resetMemoryCache(): void {
+  protected resetMemoryCache(): void {
     this.cache = {};
   }
 

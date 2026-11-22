@@ -123,7 +123,8 @@ export class SessionManager {
    * Calendar-day stamp combining UTC and local dates (SQLite 'now' is UTC, MySQL CURDATE() is server local,
    * and JS mixes both), so relative-date caches refresh across either midnight without a stale window.
    */
-  public static getDayKey(now = new Date()): string {
+  public static getDayKey(): string {
+    const now = new Date();
     return now.toISOString().slice(0, 10) + '|' + now.toDateString();
   }
 
@@ -150,7 +151,7 @@ export class SessionManager {
 
   public async buildContext(user: SessionUser): Promise<SessionContext> {
     if (ObjectManagers.isReady()) {
-      await ObjectManagers.getInstance().ProjectedCacheManager?.cleanupIfDayChanged();
+      await ObjectManagers.getInstance().onDayChangeIfNeeded();
     }
     const context = new SessionContext();
     const finalQuery = this.getQueryForUser(user);

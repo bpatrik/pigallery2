@@ -17,9 +17,7 @@ import * as path from 'node:path';
 import {SessionContext} from '../SessionContext';
 import {MediaEntity} from './enitites/MediaEntity';
 import {AlbumBaseEntity} from './enitites/album/AlbumBaseEntity';
-import {SavedSearchEntity} from './enitites/album/SavedSearchEntity';
 import {SearchQueryDTO} from '../../../common/entities/SearchQueryDTO';
-import {SearchQueryUtils} from '../../../common/SearchQueryUtils';
 import {Config} from '../../../common/config/private/Config';
 import {ProjectedPersonCacheEntity} from './enitites/person/ProjectedPersonCacheEntity';
 import {NotificationManager} from '../NotifocationManager';
@@ -29,33 +27,12 @@ const LOG_TAG = '[ProjectedCacheManager]';
 type RawNumber = string | number | null;
 
 export class ProjectedCacheManager implements IObjectManager {
-  private lastCleanupDayKey: string | null = null;
-  private dayCleanupPromise: Promise<void> | null = null;
-
-  async init(): Promise<void> {
-    // Cleanup at startup to avoid stale growth
-    await this.cleanupIfDayChanged();
-  }
-
   /**
-   * Lazily prunes stale projection keys and invalidates relative-date caches once per calendar day.
-   * Called on every request (SessionManager.buildContext), so it is a string compare unless the day changed.
+   * Also runs at startup (ObjectManagers.init), to avoid stale growth.
+   * Projection keys with a relative date change daily, so the old ones go away here.
    */
-  public async cleanupIfDayChanged(): Promise<void> {
-    const today = SessionManager.getDayKey();
-    if (this.lastCleanupDayKey !== today) {
-      // Set before the cleanup: parallel requests wait for this run instead of starting another one,
-      // and a failing cleanup is retried the next day, not on every request.
-      // Stale rows are harmless until then: the rotated projection keys never read them.
-      this.lastCleanupDayKey = today;
-      this.dayCleanupPromise = (async () => {
-        await this.cleanupNonExistingProjections();
-        await this.invalidateRelativeDateAlbumCaches();
-      })().catch((e) => {
-        Logger.warn(LOG_TAG, 'Failed to clean up stale projection caches on day change:', e);
-      });
-    }
-    await this.dayCleanupPromise;
+  async onNewDay(): Promise<void> {
+    await this.cleanupNonExistingProjections();
   }
 
   public async onNewDataVersion(changedDir?: DirectoryPathDTO): Promise<void> {
@@ -139,31 +116,6 @@ export class ProjectedCacheManager implements IObjectManager {
       .delete()
       .where('projectionKey NOT IN (:...keys)', {keys})
       .execute();
-
-    const om = ObjectManagers.getInstance();
-    om.AlbumManager?.resetMemoryCache();
-    om.PersonManager?.resetMemoryCache();
-  }
-
-  /**
-   * Invalidates DB and in-memory caches for saved-search albums whose own query contains a relative date.
-   */
-  private async invalidateRelativeDateAlbumCaches(): Promise<void> {
-    const connection = await SQLConnection.getConnection();
-    const albums = await connection.getRepository(SavedSearchEntity).find();
-    const relativeAlbumIds = albums
-      .filter(a => SearchQueryUtils.hasRelativeDate(a.searchQuery))
-      .map(a => a.id);
-    if (relativeAlbumIds.length === 0) {
-      return;
-    }
-    await connection.getRepository(ProjectedAlbumCacheEntity)
-      .createQueryBuilder()
-      .update()
-      .set({valid: false})
-      .where('albumId IN (:...ids)', {ids: relativeAlbumIds})
-      .execute();
-    ObjectManagers.getInstance().AlbumManager?.resetMemoryCache();
   }
 
 

@@ -591,7 +591,7 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
   });
 
   describe('createProjectionKey with relative dates', () => {
-    beforeEach(async () => {
+    before(async () => {
       await sqlHelper.initDB();
     });
 

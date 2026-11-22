@@ -329,7 +329,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       p1.metadata.faces = [{
         name: 'Alice',
         box: {top: 0, left: 0, width: 10, height: 10}
-      } as FaceRegion] as any[];
+      } as FaceRegion];
 
       const p2 = TestHelper.getPhotoEntry(sub);
       p2.name = 'day2.jpg';
@@ -339,7 +339,7 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       p2.metadata.faces = [{
         name: 'Bob',
         box: {top: 0, left: 0, width: 10, height: 10}
-      } as FaceRegion] as any[];
+      } as FaceRegion];
 
       await DBTestHelper.persistTestDir(root);
     };
@@ -454,6 +454,30 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
       expect(albums2[0].cache.itemCount).to.equal(1);
       expect(albums2[0].cache.cover.name).to.equal('day2.jpg');
     });
+
+    it('keeps the projection of the unauthenticated user when no login is required', async () => {
+      const authenticationRequired = Config.Users.authenticationRequired;
+      const allowQuery = Config.Users.allowQuery;
+      Config.Users.authenticationRequired = false;
+      Config.Users.allowQuery = {
+        type: SearchQueryTypes.date_pattern,
+        daysLength: 1,
+        frequency: DatePatternFrequency.days_ago,
+        agoNumber: 0
+      } as DatePatternSearch;
+      try {
+        await sqlHelper.initDB();
+        const om = ObjectManagers.getInstance();
+        // no DB user shares the global projection: only the unauthenticated user has it
+        await (await SQLConnection.getConnection()).getRepository(UserEntity).createQueryBuilder().delete().execute();
+
+        const session = await om.SessionManager.buildContext(om.UserManager.getUnAuthenticatedUser());
+        expect(session.user.projectionKey).to.not.equal(SessionManager.NO_PROJECTION_KEY);
+        expect(await om.ProjectedCacheManager.getAllProjections()).to.include(session.user.projectionKey);
+      } finally {
+        Config.Users.authenticationRequired = authenticationRequired;
+        Config.Users.allowQuery = allowQuery;
+      }
+    });
   });
 });
-
