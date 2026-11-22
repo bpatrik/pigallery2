@@ -28,3 +28,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 - Users, sharings and albums that filter by a relative date (e.g. this day in earlier years) now show the current day's folders, counts, covers and faces, not the ones from the day they were first opened [#1405](https://github.com/bpatrik/pigallery2/issues/1405)
 - When the OIDC provider denies the access or the OIDC login fails, the login page says so instead of showing a raw error [#1422](https://github.com/bpatrik/pigallery2/issues/1422)
 - Error messages no longer tell normal users where the photos are on the server or what the database error was (only the server log and developers see that)
+- A new install with an empty photo folder shows an empty gallery instead of "Error during listing the directory" (the folder still has to stay non-empty once photos are indexed, so an unmounted drive can't wipe the gallery)
+<!-- TODO after this release: bump the Umbrel package (bpatrik/umbrel-apps branch add-pigallery2, getumbrel/umbrel-apps#6409) to this version
+     and remove its note that the gallery shows an error until the Photos folder is connected (umbrel-app.yml: description and folderAccess note). -->
+

@@ -89,8 +89,10 @@ export class IndexingManager {
       // Check if root is still a valid (non-empty) folder
       // With weak devices, it is possible that the media that stores
       // the galley gets unmounted that triggers a full gallery wipe.
-      // Prevent it by stopping indexing on an empty folder.
-      if (fs.readdirSync(ProjectPath.ImageFolder).length === 0) {
+      // Prevent it by stopping indexing on an empty folder,
+      // unless nothing is indexed yet (e.g.: fresh install with an empty gallery).
+      if (fs.readdirSync(ProjectPath.ImageFolder).length === 0 &&
+        await this.hasIndexedFiles()) {
         throw new Error('Root directory is empty. This is probably error and would erase gallery database. Stopping indexing.');
       }
 
@@ -123,6 +125,16 @@ export class IndexingManager {
       console.error(error);
       throw error;
     }
+  }
+
+  private async hasIndexedFiles(): Promise<boolean> {
+    const connection = await SQLConnection.getConnection();
+    for (const entity of [MediaEntity, FileEntity]) {
+      if (await connection.getRepository(entity).createQueryBuilder('file').getExists()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   async resetDB(): Promise<void> {

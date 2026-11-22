@@ -212,6 +212,24 @@ describe('IndexingManager', (sqlHelper: DBTestHelper) => {
 
   });
 
+  it('should index an empty folder if nothing is indexed yet', async () => {
+    if (!fs.existsSync(TestHelper.TMP_DIR)) {
+      fs.mkdirSync(TestHelper.TMP_DIR);
+    }
+    const tmpDir = path.join(TestHelper.TMP_DIR, '/rnd7kqz_emptyFreshDir');
+    fs.rmSync(tmpDir, {recursive: true, force: true});
+    fs.mkdirSync(tmpDir);
+    ProjectPath.reset();
+    ProjectPath.ImageFolder = tmpDir;
+    try {
+      const dir = await ObjectManagers.getInstance().IndexingManager.indexDirectory('.', true);
+      expect(dir.media).to.deep.equal([]);
+      expect(dir.directories).to.deep.equal([]);
+    } finally {
+      fs.rmSync(tmpDir, {recursive: true, force: true});
+    }
+  });
+
 
   it('should support case sensitive directory', async () => {
     const gm = new GalleryManagerTest();
