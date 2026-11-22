@@ -8,6 +8,7 @@ import {LanguageComponent} from '../language/language.component';
 import {IconComponent} from '../../icon.component';
 import {FormsModule} from '@angular/forms';
 import {NgIconComponent} from '@ng-icons/core';
+import {ActivatedRoute} from '@angular/router';
 
 
 @Component({
@@ -24,6 +25,7 @@ import {NgIconComponent} from '@ng-icons/core';
 export class LoginComponent implements OnInit {
   private authService = inject(AuthenticationService);
   private navigation = inject(NavigationService);
+  private route = inject(ActivatedRoute);
 
   loginCredential: LoginCredential;
   readonly loginError = signal(false);
@@ -32,12 +34,16 @@ export class LoginComponent implements OnInit {
   readonly inProgress = signal(false);
   oidcEnabled = false;
   oidcDisplayName = 'OpenID login';
+  // set by the server when the OIDC login failed (#1422)
+  readonly oidcError: 'denied' | 'failed' | null;
 
   constructor() {
     this.loginCredential = new LoginCredential();
     this.title = Config.Server.applicationTitle;
     this.oidcEnabled = !!Config.Users.oidc?.enabled;
     this.oidcDisplayName = Config.Users.oidc?.displayName || 'OpenID login';
+    const oidcError = this.route.snapshot.queryParamMap.get('oidcError');
+    this.oidcError = oidcError === 'denied' || oidcError === 'failed' ? oidcError : null;
   }
 
   ngOnInit(): void {

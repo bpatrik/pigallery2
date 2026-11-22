@@ -14,6 +14,11 @@
         <div class="error-message" [hidden]="loginError()===false" i18n>
           Wrong username or password
         </div>
+        @if (oidcError === 'denied') {
+          <div class="error-message" i18n>Access denied. Ask the administrator to give you access.</div>
+        } @else if (oidcError === 'failed') {
+          <div class="error-message" i18n>Login with the provider failed. Please try again later.</div>
+        }
 
         <!-- OIDC login option -->
         @if (oidcEnabled) {

@@ -26,3 +26,5 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 - The map in the info panel of a photo shows a pin again, not a big blue dot, also when the small map of the folder was not on the screen
 - The map in the info panel follows the photo when you step to the next or previous photo, so its pin stays in the middle
 - Users, sharings and albums that filter by a relative date (e.g. this day in earlier years) now show the current day's folders, counts, covers and faces, not the ones from the day they were first opened [#1405](https://github.com/bpatrik/pigallery2/issues/1405)
+- When the OIDC provider denies the access or the OIDC login fails, the login page says so instead of showing a raw error [#1422](https://github.com/bpatrik/pigallery2/issues/1422)
+- Error messages no longer tell normal users where the photos are on the server or what the database error was (only the server log and developers see that)
