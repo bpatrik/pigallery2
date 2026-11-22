@@ -117,7 +117,7 @@ export class GalleryComponent implements OnInit, OnDestroy {
     )
   );
   // a loaded folder or search result without anything in it (the filters are not taken into account)
-  public readonly emptyState = computed((): { icon: string, message: string, hint?: string } | null => {
+  public readonly emptyState = computed((): { icon: string, message: string, hint?: string, upload?: boolean } | null => {
     const content = this.contentLoader.content();
     if (content.error) {
       return null;
@@ -132,7 +132,17 @@ export class GalleryComponent implements OnInit, OnDestroy {
         hint: $localize`Check the spelling or try fewer words.`
       };
     }
-    if (content.directory && content.directory.isPartial !== true && isEmpty(content.directory) && !content.directory.metaFile?.length) {
+    // *.pg2conf files (e.g. the .uploader.pg2conf that allows uploading) are not shown, so they do not count as content
+    const shownMetaFiles = content.directory?.metaFile?.filter((m) => !m.name.toLowerCase().endsWith('.pg2conf'));
+    if (content.directory && content.directory.isPartial !== true && isEmpty(content.directory) && !shownMetaFiles?.length) {
+      if (this.uploaderService.canUpload()) {
+        return {
+          icon: 'ionFolderOpenOutline',
+          message: $localize`This folder is empty.`,
+          hint: $localize`Upload some photos: drop them here or use the button below.`,
+          upload: true
+        };
+      }
       return {icon: 'ionFolderOpenOutline', message: $localize`This folder is empty.`};
     }
     return null;
