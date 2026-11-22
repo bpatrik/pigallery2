@@ -13,6 +13,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 ## Under the hood
 
 ## Further changes
+- An empty folder that allows uploads now says so and offers an Upload button (a folder that only holds its `.uploader.pg2conf` showed nothing before)
 - New [Fail2Ban guide](https://bpatrik.github.io/pigallery2/setup/advanced/fail2ban/) (also in the Portainer & NPM guide) to ban IPs that keep failing to log in [#519](https://github.com/bpatrik/pigallery2/issues/519)
 - New `Server.Log.file` setting: PiGallery2 can also write its log to a file (ISO dates, no colours, rotated at 10 MB), e.g. for Fail2Ban on hosts without journald like Unraid [#519](https://github.com/bpatrik/pigallery2/issues/519)
 - PiGallery2 warns (in the log and on the admin page) when a login comes through a reverse proxy that `Server.trustProxy` doesn't trust, as failed logins then show the proxy's IP

@@ -1472,6 +1472,10 @@
           <context context-type="sourcefile">src/frontend/app/ui/frame/frame.component.html</context>
           <context context-type="linenumber">247</context>
         </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
+          <context context-type="linenumber">65,66</context>
+        </context-group>
         <target>Uploaden</target>
       </trans-unit>
       <trans-unit id="3229595422546554334" datatype="html">
@@ -5570,7 +5574,7 @@
         <source> Too many results to show. Refine your search. </source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.html</context>
-          <context context-type="linenumber">69,70</context>
+          <context context-type="linenumber">78,79</context>
         </context-group>
         <target> Te veel resultaten om weer te geven, beperk de zoekopdracht. </target>
       </trans-unit>
@@ -5594,9 +5598,21 @@
         <source>This folder is empty.</source>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
-          <context context-type="linenumber">136</context>
+          <context context-type="linenumber">141</context>
+        </context-group>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
+          <context context-type="linenumber">146</context>
         </context-group>
         <target>Deze map is leeg.</target>
+      </trans-unit>
+      <trans-unit id="3724203292069370153" datatype="html">
+        <source>Upload some photos: drop them here or use the button below.</source>
+        <context-group purpose="location">
+          <context context-type="sourcefile">src/frontend/app/ui/gallery/gallery.component.ts</context>
+          <context context-type="linenumber">142</context>
+        </context-group>
+        <target>Upload some photos: drop them here or use the button below.</target>
       </trans-unit>
       <trans-unit id="8282018551586977212" datatype="html">
         <source>Camera Data</source>
@@ -5846,7 +5862,7 @@
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/lightbox/infopanel/info-panel.lightbox.gallery.component.ts</context>
-          <context context-type="linenumber">90</context>
+          <context context-type="linenumber">97</context>
         </context-group>
         <context-group purpose="location">
           <context context-type="sourcefile">src/frontend/app/ui/gallery/navigator/navigator.gallery.component.ts</context>
