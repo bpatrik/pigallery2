@@ -34,32 +34,26 @@ export class ProjectedCacheManager implements IObjectManager {
 
   async init(): Promise<void> {
     // Cleanup at startup to avoid stale growth
-    await this.cleanupNonExistingProjections();
-    await this.invalidateRelativeDateAlbumCaches();
+    await this.cleanupIfDayChanged();
   }
 
   /**
    * Lazily prunes stale projection keys and invalidates relative-date caches once per calendar day.
+   * Called on every request (SessionManager.buildContext), so it is a string compare unless the day changed.
    */
   public async cleanupIfDayChanged(): Promise<void> {
     const today = SessionManager.getDayKey();
-    if (this.lastCleanupDayKey === today && !this.dayCleanupPromise) {
-      return;
-    }
-    if (!this.dayCleanupPromise) {
-      const prevDayKey = this.lastCleanupDayKey;
+    if (this.lastCleanupDayKey !== today) {
+      // Set before the cleanup: parallel requests wait for this run instead of starting another one,
+      // and a failing cleanup is retried the next day, not on every request.
+      // Stale rows are harmless until then: the rotated projection keys never read them.
       this.lastCleanupDayKey = today;
       this.dayCleanupPromise = (async () => {
         await this.cleanupNonExistingProjections();
         await this.invalidateRelativeDateAlbumCaches();
-      })()
-        .catch((e) => {
-          this.lastCleanupDayKey = prevDayKey;
-          Logger.warn(LOG_TAG, 'Failed to clean up stale projection caches on day change:', e);
-        })
-        .finally(() => {
-          this.dayCleanupPromise = null;
-        });
+      })().catch((e) => {
+        Logger.warn(LOG_TAG, 'Failed to clean up stale projection caches on day change:', e);
+      });
     }
     await this.dayCleanupPromise;
   }
@@ -109,10 +103,7 @@ export class ProjectedCacheManager implements IObjectManager {
       .getMany();
     for (const s of shares) {
       try {
-        const q = sm.buildAllowListForSharing(s);
-        // same as SessionManager.buildContext: no projection query, no projection key
-        const key = q ? sm.createProjectionKey(q) : SessionManager.NO_PROJECTION_KEY;
-        activeKeys.add(key);
+        activeKeys.add(sm.createProjectionKey(sm.buildAllowListForSharing(s)));
       } catch (e) {
         // an invalid sharing can't be opened, so it has no projection
         Logger.warn(LOG_TAG, 'Skipping invalid sharing ' + s.sharingKey + ': ' + (e as Error)?.message);
@@ -123,7 +114,6 @@ export class ProjectedCacheManager implements IObjectManager {
   }
 
   public async cleanupNonExistingProjections(): Promise<void> {
-    this.lastCleanupDayKey = SessionManager.getDayKey();
     const connection = await SQLConnection.getConnection();
     const keys = await this.getAllProjections();
     Logger.debug(LOG_TAG, 'Cleanup non existing projections, known number of keys: ' + keys.length);

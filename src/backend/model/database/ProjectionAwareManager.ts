@@ -1,7 +1,6 @@
 import {IObjectManager} from './IObjectManager';
 import {SessionContext} from '../SessionContext';
 import {DirectoryPathDTO} from '../../../common/entities/DirectoryDTO';
-import {ObjectManagers} from '../ObjectManagers';
 
 /**
  * Base class for managers that handle projection-aware caching.
@@ -16,9 +15,6 @@ export abstract class ProjectionAwareManager<T> implements IObjectManager {
    * the actual loading logic in loadEntities().
    */
   public async getAll(session: SessionContext): Promise<T[]> {
-    if (ObjectManagers.isReady()) {
-      await ObjectManagers.getInstance().ProjectedCacheManager?.cleanupIfDayChanged();
-    }
     const cached = this.getCachedEntities(session);
     if (cached !== null) {
       return cached;

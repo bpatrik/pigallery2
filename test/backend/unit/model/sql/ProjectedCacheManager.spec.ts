@@ -20,6 +20,7 @@ import {ClientSortingConfig} from '../../../../../src/common/config/public/Clien
 import {SortByTypes} from '../../../../../src/common/entities/SortingMethods';
 import {DatePatternFrequency, DatePatternSearch, SearchQueryTypes, TextSearch} from '../../../../../src/common/entities/SearchQueryDTO';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
+import {SessionContext} from '../../../../../src/backend/model/SessionContext';
 import {MediaDTO} from '../../../../../src/common/entities/MediaDTO';
 import {Utils} from '../../../../../src/common/Utils';
 import {GalleryManager} from '../../../../../src/backend/model/database/GalleryManager';
@@ -437,14 +438,18 @@ describe('ProjectedCacheManager', (sqlHelper: DBTestHelper) => {
         agoNumber: 0
       } as DatePatternSearch);
 
-      const albums1 = await om.AlbumManager.getAll(DBTestHelper.defaultSession);
+      // every request builds its context, which runs the day-change cleanup
+      const adminSession = (): Promise<SessionContext> =>
+        om.SessionManager.buildContext({name: 'admin', role: UserRoles.Admin} as UserEntity);
+
+      const albums1 = await om.AlbumManager.getAll(await adminSession());
       expect(albums1).to.have.lengthOf(1);
       expect(albums1[0].cache.itemCount).to.equal(1);
       expect(albums1[0].cache.cover.name).to.equal('day1.jpg');
 
       mock.timers.setTime(day2.getTime());
 
-      const albums2 = await om.AlbumManager.getAll(DBTestHelper.defaultSession);
+      const albums2 = await om.AlbumManager.getAll(await adminSession());
       expect(albums2).to.have.lengthOf(1);
       expect(albums2[0].cache.itemCount).to.equal(1);
       expect(albums2[0].cache.cover.name).to.equal('day2.jpg');
