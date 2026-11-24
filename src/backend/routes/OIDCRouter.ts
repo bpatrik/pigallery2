@@ -24,7 +24,8 @@ export class OIDCRouter {
       OIDCRouter.BASE + '/callback',
       OIDCMWs.isEnabled,
       AuthenticationMWs.oidcLogin,
-      OIDCMWs.redirectToApp
+      OIDCMWs.redirectToApp,
+      OIDCMWs.redirectToLoginOnError
     );
   }
 }

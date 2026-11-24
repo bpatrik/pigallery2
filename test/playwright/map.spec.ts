@@ -107,4 +107,45 @@ test.describe('Map', () => {
     // the GPS coordinates next to it
     await expect(panel.getByTitle('Click GPS coordinates to search for nearby media')).toContainText(/\d+\.\d+,\s*-?\d+\.\d+/);
   });
+
+  test('Info panel should show a pin, also when the small map was never on the screen', async ({page}) => {
+    // on a short screen the gallery scrolls past the small map to the photo, so the map of the folder never loads
+    await page.setViewportSize({width: 1280, height: 400});
+    await page.goto('/gallery/?p=IMG_5910.jpg');
+    await expectLightboxPhoto(page, 'IMG_5910.jpg');
+    expect(await page.locator('app-gallery-map').count(), 'the small map is not loaded').toBe(0);
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    await page.keyboard.press('i');
+
+    const pin = page.locator('app-info-panel #map .marker-svg-pin');
+    await expect(pin).toBeVisible();
+    // a pin, not a plain dot
+    await expect(pin).toHaveCSS('position', 'absolute');
+    await expect(pin).toHaveCSS('border-top-left-radius', '50%');
+  });
+
+  test('Info panel map should follow the photo when switching photos', async ({page}) => {
+    await page.goto('/gallery/4MinsAroundTheWorld?p=UTC-20240413-203430-Auckland.jpg');
+    await expectLightboxPhoto(page, 'UTC-20240413-203430-Auckland.jpg');
+    await expect(page.locator('app-lightbox-controls #rightArrow')).toBeVisible();
+    await page.keyboard.press('i');
+
+    const map = page.locator('app-info-panel #map');
+    const pin = map.locator('.leaflet-marker-icon');
+    // how far the pin is from the middle of the map, in pixels
+    const pinOffset = async (): Promise<number> => {
+      const m = await map.boundingBox();
+      const p = await pin.boundingBox();
+      if (!m || !p) {
+        return Infinity;
+      }
+      return Math.hypot(p.x + p.width / 2 - (m.x + m.width / 2), p.y + p.height / 2 - (m.y + m.height / 2));
+    };
+    await expect(pin).toBeVisible();
+    await expect.poll(pinOffset, {message: 'the pin of the first photo is in the middle'}).toBeLessThan(30);
+
+    await page.keyboard.press('ArrowRight');
+    await expectLightboxPhoto(page, 'UTC-20240413-203830-NewYork.jpg');
+    await expect.poll(pinOffset, {message: 'the pin of the next photo is in the middle'}).toBeLessThan(30);
+  });
 });

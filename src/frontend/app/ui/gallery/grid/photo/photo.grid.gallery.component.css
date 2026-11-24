@@ -2,6 +2,8 @@
   position: relative;
   overflow: hidden;
   --bs-border-radius: var(--item-radius);
+  /* clips the absolutely positioned indicators (video, live) to the rounded corner too */
+  border-radius: var(--item-radius);
   transition: scale var(--transition-duration) var(--transition-easing);
 }
 

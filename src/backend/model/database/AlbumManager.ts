@@ -109,6 +109,26 @@ export class AlbumManager extends ProjectionAwareManager<AlbumBaseEntity> {
     return result;
   }
 
+  /**
+   * Albums whose own query has a relative date change daily, also for projection keys that do not.
+   */
+  public override async onNewDay(): Promise<void> {
+    const connection = await SQLConnection.getConnection();
+    const albums = await connection.getRepository(SavedSearchEntity).find({select: {id: true, searchQuery: true}});
+    const relativeAlbumIds = albums
+      .filter(a => SearchQueryUtils.hasRelativeDate(a.searchQuery))
+      .map(a => a.id);
+    if (relativeAlbumIds.length > 0) {
+      await connection.getRepository(ProjectedAlbumCacheEntity)
+        .createQueryBuilder()
+        .update()
+        .set({valid: false})
+        .where('albumId IN (:...ids)', {ids: relativeAlbumIds})
+        .execute();
+    }
+    await super.onNewDay();
+  }
+
   protected async invalidateDBCache(): Promise<void> {
     // Invalidate all album cache entries
     const connection = await SQLConnection.getConnection();

@@ -1,8 +1,11 @@
 import {expect} from 'chai';
+import {mock} from 'node:test';
 import {ObjectManagers} from '../../../../../src/backend/model/ObjectManagers';
 import {UserEntity} from '../../../../../src/backend/model/database/enitites/UserEntity';
 import {
   ANDSearchQuery,
+  DatePatternFrequency,
+  DatePatternSearch,
   DirectorySearch,
   SearchQueryTypes,
   TextSearch,
@@ -586,5 +589,91 @@ describe('SessionManager', (sqlHelper: DBTestHelper) => {
       });
     });
   });
-});
 
+  describe('createProjectionKey with relative dates', () => {
+    before(async () => {
+      await sqlHelper.initDB();
+    });
+
+    afterEach(() => {
+      mock.timers.reset();
+    });
+
+    after(sqlHelper.clearDB);
+
+    it('should keep projectionKey stable across days for queries without relative dates', () => {
+      const sm = new SessionManager();
+      const nonRelativeQuery: TextSearch = {
+        type: SearchQueryTypes.keyword,
+        value: 'summer',
+        matchType: TextSearchQueryMatchTypes.like
+      };
+
+      mock.timers.enable({apis: ['Date'], now: new Date('2026-06-10T12:00:00Z')});
+      const key1 = sm.createProjectionKey(nonRelativeQuery);
+
+      mock.timers.tick(24 * 60 * 60 * 1000);
+      const key2 = sm.createProjectionKey(nonRelativeQuery);
+
+      expect(key2).to.equal(key1);
+    });
+
+    it('should change projectionKey across midnight for queries with relative dates', () => {
+      const sm = new SessionManager();
+      const directRelative: DatePatternSearch = {
+        type: SearchQueryTypes.date_pattern,
+        daysLength: 2,
+        frequency: DatePatternFrequency.every_year
+      };
+      const nestedRelative: ANDSearchQuery = {
+        type: SearchQueryTypes.AND,
+        list: [
+          {type: SearchQueryTypes.keyword, value: 'holiday'} as TextSearch,
+          directRelative
+        ]
+      };
+
+      mock.timers.enable({apis: ['Date'], now: new Date('2026-06-10T10:00:00Z')});
+      const directDay1Morning = sm.createProjectionKey(directRelative);
+      const nestedDay1Morning = sm.createProjectionKey(nestedRelative);
+
+      mock.timers.tick(60 * 60 * 1000);
+      expect(sm.createProjectionKey(directRelative)).to.equal(directDay1Morning);
+      expect(sm.createProjectionKey(nestedRelative)).to.equal(nestedDay1Morning);
+
+      mock.timers.tick(24 * 60 * 60 * 1000);
+      const directDay2 = sm.createProjectionKey(directRelative);
+      const nestedDay2 = sm.createProjectionKey(nestedRelative);
+
+      expect(directDay2).to.not.equal(directDay1Morning);
+      expect(nestedDay2).to.not.equal(nestedDay1Morning);
+    });
+
+    it('should match buildContext projectionKey in getProjectionKeyForUser', async () => {
+      const sm = new SessionManager();
+      const plainUser = new UserEntity();
+      plainUser.id = 20;
+      plainUser.name = 'plain';
+      plainUser.role = UserRoles.User;
+      plainUser.overrideAllowBlockList = true;
+
+      const relativeUser = new UserEntity();
+      relativeUser.id = 21;
+      relativeUser.name = 'relative';
+      relativeUser.role = UserRoles.User;
+      relativeUser.overrideAllowBlockList = true;
+      relativeUser.allowQuery = {
+        type: SearchQueryTypes.date_pattern,
+        daysLength: 2,
+        frequency: DatePatternFrequency.every_year
+      } as DatePatternSearch;
+
+      const plainCtx = await sm.buildContext(plainUser);
+      expect(sm.getProjectionKeyForUser(plainUser)).to.equal(plainCtx.user.projectionKey);
+      expect(sm.getProjectionKeyForUser(plainUser)).to.equal(SessionManager.NO_PROJECTION_KEY);
+
+      const relCtx = await sm.buildContext(relativeUser);
+      expect(sm.getProjectionKeyForUser(relativeUser)).to.equal(relCtx.user.projectionKey);
+    });
+  });
+});

@@ -1188,13 +1188,10 @@ export class ThemesConfig {
     {
       name: 'modern',
       theme:
-        '/* light: white surfaces (navbar, menus, inputs, cards) on a grey page */\n' +
+        '/* light: a white page; darker borders and loading tiles than in Bootstrap */\n' +
         'html:not([data-bs-theme=dark]) {\n' +
         '  --bs-border-color: #d4d4d8;\n' +
         '  --item-background: #e4e4e7;\n' +
-        '}\n' +
-        'html:not([data-bs-theme=dark]) body {\n' +
-        '  background-color: #f5f5f7;\n' +
         '}\n' +
         '/* a switch that is off: a darker knob and border than in Bootstrap */\n' +
         'html:not([data-bs-theme=dark]) .form-switch .form-check-input:not(:checked):not(:focus) {\n' +
@@ -1527,7 +1524,7 @@ export class ClientPhotoConfig {
     },
     description: $localize`Photo formats that are supported. Browser needs to support these formats natively. Also sharp (libvips) package should be able to convert these formats.`,
   })
-  supportedFormats: string[] = ['gif', 'jpeg', 'jpg', 'jpe', 'png', 'webp', 'svg', 'avif', 'heic', 'dng', 'arw', 'tiff'];
+  supportedFormats: string[] = ['gif', 'jpeg', 'jpg', 'jpe', 'png', 'webp', 'svg', 'avif', 'heic', 'dng', 'arw', 'tiff', 'jxl'];
 
   /**
    * Generates a map for bitwise operation from icon and normal thumbnails

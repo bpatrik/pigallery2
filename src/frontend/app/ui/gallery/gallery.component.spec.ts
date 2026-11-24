@@ -117,6 +117,8 @@ class MockPiTitleService {
 
 class MockUploaderService{
   public uploadProgress: unknown[] = [];
+  readonly canUpload = signal(false);
+  uploadFiles = vi.fn();
 }
 
 // the map reads the dark mode; the real service needs window.matchMedia, which jsdom lacks
@@ -255,6 +257,40 @@ describe('GalleryComponent', () => {
       const el = fixture.nativeElement as HTMLElement;
       expect(el.querySelector('.empty-frame')).toBeNull();
       expect(el.querySelector('app-frame')?.classList).not.toContain('d-none');
+    });
+  });
+
+  describe('empty folder', () => {
+    const emptyDir = (metaFile: { name: string }[]): ContentWrapperWithError =>
+      ({directory: {name: 'empty', path: './', directories: [], media: [], metaFile}} as unknown as ContentWrapperWithError);
+    const emptyState = (): HTMLElement | null =>
+      (fixture.nativeElement as HTMLElement).querySelector('app-frame app-empty-state');
+
+    it('should say that it is empty', () => {
+      mockContentLoader.content.set(emptyDir([]));
+      fixture.detectChanges();
+
+      expect(emptyState()?.textContent).toContain('This folder is empty.');
+      expect(emptyState()?.querySelector('button')).toBeNull();
+    });
+
+    it('should offer an upload when the folder only holds its .uploader.pg2conf', () => {
+      (TestBed.inject(UploaderService) as unknown as MockUploaderService).canUpload.set(true);
+      mockContentLoader.content.set(emptyDir([{name: '.uploader.pg2conf'}]));
+      fixture.detectChanges();
+
+      expect(emptyState()?.textContent).toContain('Upload some photos');
+      const uploader = TestBed.inject(UploaderService) as unknown as MockUploaderService;
+      const input = emptyState()?.querySelector('input[type=file]') as HTMLInputElement;
+      input.dispatchEvent(new Event('change'));
+      expect(uploader.uploadFiles).toHaveBeenCalled();
+    });
+
+    it('should not show the empty state when the folder has a markdown file', () => {
+      mockContentLoader.content.set(emptyDir([{name: 'index.md'}]));
+      fixture.detectChanges();
+
+      expect(emptyState()).toBeNull();
     });
   });
 
