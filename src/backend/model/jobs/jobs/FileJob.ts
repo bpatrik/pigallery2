@@ -30,8 +30,14 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
   };
 
 
-  protected constructor(private scanFilter: DirectoryScanSettings) {
+  protected parallelProcessingLimit: number;
+
+  protected constructor(
+    private scanFilter: DirectoryScanSettings,
+    parallelProcessingLimit = 1
+  ) {
     super();
+    this.parallelProcessingLimit = this.normalizeParallelProcessingLimit(parallelProcessingLimit);
     this.scanFilter.noChildDirPhotos = true;
     this.ConfigTemplate.push({
       id: 'indexedOnly',
@@ -71,6 +77,16 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
 
   protected abstract processFile(filePath: string): Promise<void>;
 
+  private normalizeParallelProcessingLimit(limit: number): number {
+    return Number.isFinite(limit)
+      ? Math.max(1, Math.floor(limit))
+      : 1;
+  }
+
+  protected setParallelProcessingLimit(limit: number): void {
+    this.parallelProcessingLimit = this.normalizeParallelProcessingLimit(limit);
+  }
+
   protected async step(): Promise<boolean> {
     if (
       this.fileQueue.length === 0 &&
@@ -105,29 +121,31 @@ export abstract class FileJob<S extends { indexedOnly?: boolean } = { indexedOnl
       }
     }
 
-    const filePath = this.fileQueue.shift();
-    if (filePath === undefined) {
-      return true; // nothing loaded yet, the next step loads more or finishes
-    }
-    try {
-      if ((await this.shouldProcess(filePath)) === true) {
-        this.Progress.Processed++;
-        this.Progress.log('processing: ' + filePath);
-        await this.processFile(filePath);
-      } else {
-        this.Progress.log('skipping: ' + filePath);
-        this.Progress.Skipped++;
-      }
-    } catch (e) {
-      console.error(e);
-      Logger.error(
-        LOG_TAG,
-        'Error during processing file:' + filePath + ', ' + String(e)
-      );
-      this.Progress.log(
-        'Error during processing file:' + filePath + ', ' + String(e)
-      );
-    }
+    const filePaths = this.fileQueue.splice(0, this.parallelProcessingLimit);
+
+    await Promise.all(
+      filePaths.map(async (filePath): Promise<void> => {
+        try {
+          if ((await this.shouldProcess(filePath)) === true) {
+            this.Progress.Processed++;
+            this.Progress.log('processing: ' + filePath);
+            await this.processFile(filePath);
+          } else {
+            this.Progress.log('skipping: ' + filePath);
+            this.Progress.Skipped++;
+          }
+        } catch (e) {
+          console.error(e);
+          Logger.error(
+            LOG_TAG,
+            'Error during processing file:' + filePath + ', ' + String(e)
+          );
+          this.Progress.log(
+            'Error during processing file:' + filePath + ', ' + String(e)
+          );
+        }
+      })
+    );
 
     return true;
   }
