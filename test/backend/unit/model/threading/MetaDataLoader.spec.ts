@@ -8,6 +8,7 @@ import {PhotoProcessing} from '../../../../../src/backend/model/fileaccess/filep
 import {VideoProcessing} from '../../../../../src/backend/model/fileaccess/fileprocessing/VideoProcessing';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {TestHelper} from '../../../../TestHelper';
+import {Logger} from '../../../../../src/backend/Logger';
 
 declare const before: any;
 
@@ -197,6 +198,58 @@ describe('MetadataLoader', () => {
     it('should close the file of a photo', async () => {
       await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test image öüóőúéáű-.,.jpg'));
       expectAllClosed();
+    });
+  });
+
+  describe('unreadable media', () => {
+    const dir = path.join(TestHelper.TMP_DIR, 'metadata_unreadable_media');
+    const originalWarn = Logger.warn;
+    let warnings: string[];
+
+    beforeEach(() => {
+      fs.mkdirSync(dir, {recursive: true});
+      warnings = [];
+      Logger.warn = (...args: unknown[]): void => {
+        warnings.push(args.join(' '));
+      };
+    });
+
+    afterEach(() => {
+      Logger.warn = originalWarn;
+      fs.rmSync(dir, {recursive: true, force: true});
+    });
+
+    it('should warn about a video that was cut off while recording (no moov) #1426', async () => {
+      // drop the moov box (it follows ftyp in the test video), like a recording that never finished
+      const video = fs.readFileSync(path.join(__dirname, '/../../../assets/video.mp4'));
+      const ftypSize = video.readUInt32BE(0);
+      const moovSize = video.readUInt32BE(ftypSize);
+      const file = path.join(dir, 'cut_off.mp4');
+      fs.writeFileSync(file, Buffer.concat([video.subarray(0, ftypSize), video.subarray(ftypSize + moovSize)]));
+
+      const metadata = await MetadataLoader.loadVideoMetadata(file);
+
+      expect(metadata.fileSize).to.equal(fs.statSync(file).size);
+      expect(warnings.length).to.equal(1);
+      expect(warnings[0]).to.contain(file);
+      expect(warnings[0]).to.contain('moov atom not found');
+    });
+
+    it('should warn about a broken photo, but keep it', async () => {
+      const file = path.join(dir, 'broken.jpg');
+      fs.writeFileSync(file, 'not a photo');
+
+      const metadata = await MetadataLoader.loadPhotoMetadata(file);
+
+      expect(metadata.fileSize).to.equal(fs.statSync(file).size);
+      expect(warnings.length).to.equal(1);
+      expect(warnings[0]).to.contain(file);
+    });
+
+    it('should not warn about a readable video or photo', async () => {
+      await MetadataLoader.loadVideoMetadata(path.join(__dirname, '/../../../assets/video.mp4'));
+      await MetadataLoader.loadPhotoMetadata(path.join(__dirname, '/../../../assets/test_png.png'));
+      expect(warnings).to.deep.equal([]);
     });
   });
 

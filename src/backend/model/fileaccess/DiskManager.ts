@@ -204,7 +204,15 @@ export class DiskManager {
       const fullFilePath = path.normalize(
         path.join(absoluteDirectoryName, file)
       );
-      if ((await fsp.stat(fullFilePath)).isDirectory()) {
+      let fileStat: Stats;
+      try {
+        fileStat = await fsp.stat(fullFilePath);
+      } catch (e) {
+        // e.g. deleted since readdir listed it, or a dangling symlink
+        Logger.warn(LOG_TAG, 'Cannot read file, skipping: ' + fullFilePath + ', reason: ' + String(e));
+        continue;
+      }
+      if (fileStat.isDirectory()) {
         try {
           if (
             settings.noDirectory === true ||
@@ -270,13 +278,13 @@ export class DiskManager {
           if (settings.coverOnly === true) {
             break;
           }
-        } catch (err) {
-          NotificationManager.warning('Media loading error, skipping: ' +
+        } catch (e) {
+          Logger.warn(LOG_TAG,
+            'Media loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
-            String(err)
+            String(e)
           );
-          console.error(err);
         }
       } else if (VideoProcessing.isVideo(fullFilePath)) {
         try {
@@ -297,7 +305,7 @@ export class DiskManager {
           };
           directory.media.push(video as VideoDTO);
         } catch (e) {
-          Logger.warn(
+          Logger.warn(LOG_TAG,
             'Media loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
@@ -321,7 +329,7 @@ export class DiskManager {
           };
           directory.metaFile.push(metaFile as FileDTO);
         } catch (e) {
-          Logger.warn(
+          Logger.warn(LOG_TAG,
             'Metafile loading error, skipping: ' +
             fullFilePath +
             ', reason: ' +
