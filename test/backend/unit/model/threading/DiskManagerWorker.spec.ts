@@ -1,6 +1,7 @@
 import {DatabaseType} from '../../../../../src/common/config/Enums';
 import {expect} from 'chai';
 import * as path from 'node:path';
+import * as fs from 'node:fs';
 import {Config} from '../../../../../src/common/config/private/Config';
 import {ProjectPath} from '../../../../../src/backend/ProjectPath';
 import {Utils} from '../../../../../src/common/Utils';
@@ -92,6 +93,31 @@ describe('DiskMangerWorker', () => {
       Config.Indexing.excludeFilenameList = [];
       const dir = await DiskManager.scanDirectory('/');
       expect(dir.media.length).to.be.equals(18);
+    });
+  });
+
+  describe('a file that is gone by the time it is read', () => {
+    const dir = path.join(TestHelper.TMP_DIR, 'disk_manager_gone_file');
+
+    afterEach(() => {
+      fs.rmSync(dir, {recursive: true, force: true});
+    });
+
+    it('should be skipped, not fail the whole directory', async function () {
+      fs.mkdirSync(dir, {recursive: true});
+      fs.copyFileSync(path.join(__dirname, '/../../../assets/test_png.png'), path.join(dir, 'photo.png'));
+      // readdir lists a dangling symlink, but stat fails on it, like on a file deleted during the scan
+      try {
+        fs.symlinkSync(path.join(dir, 'deleted.jpg'), path.join(dir, 'gone.jpg'));
+      } catch {
+        this.skip(); // creating symlinks needs extra rights on Windows
+      }
+      Config.Media.folder = dir;
+      ProjectPath.ImageFolder = dir;
+
+      const scanned = await DiskManager.scanDirectory('/');
+
+      expect(scanned.media.map(m => m.name)).to.deep.equal(['photo.png']);
     });
   });
 

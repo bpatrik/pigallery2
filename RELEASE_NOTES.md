@@ -23,6 +23,8 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 - The info bar of a grid photo no longer leaves a line of the photo visible below it at some zoom levels
 - Opening a photo that is cut by the bottom or top of the screen no longer makes the page jump: the lightbox opens from where the photo is
 - Indexing no longer crashes and restarts the app on an empty or 1-byte photo file (Node 26, e.g. the Docker images) [#1408](https://github.com/bpatrik/pigallery2/issues/1408)
+- Indexing logs a warning for a photo or video it can't read (e.g. a recording cut off by a dead battery, "moov atom not found"), instead of indexing it silently. The file still shows in the gallery [#1426](https://github.com/bpatrik/pigallery2/issues/1426)
+- Indexing no longer fails a whole folder when a file is deleted during the scan or is a broken symlink: only that file is skipped
 - The map in the info panel of a photo shows a pin again, not a big blue dot, also when the small map of the folder was not on the screen
 - The map in the info panel follows the photo when you step to the next or previous photo, so its pin stays in the middle
 - Users, sharings and albums that filter by a relative date (e.g. this day in earlier years) now show the current day's folders, counts, covers and faces, not the ones from the day they were first opened [#1405](https://github.com/bpatrik/pigallery2/issues/1405)

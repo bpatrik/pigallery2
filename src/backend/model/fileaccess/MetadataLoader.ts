@@ -215,8 +215,8 @@ export class MetadataLoader {
       }
 
     } catch (err) {
-      Logger.silly(LOG_TAG, 'Error loading metadata for : ' + fullPath);
-      Logger.silly(err);
+      // e.g. a recording that was cut off (no moov atom): the video is kept, but it won't play
+      Logger.warn(LOG_TAG, 'Cannot read video, indexing it without metadata: ' + fullPath + ', reason: ' + String(err));
     }
 
     return metadata;
@@ -327,6 +327,10 @@ export class MetadataLoader {
         if (!metadata.creationDate) {
           // creationDate can be negative, when it was created before epoch (1970)
           metadata.creationDate = 0;
+        }
+        if (!metadata.size.width || !metadata.size.height) {
+          // neither the image nor its tags tell the size: the photo is most likely broken, but it is kept
+          Logger.warn(LOG_TAG, 'Cannot read photo, indexing it without size: ' + fullPath);
         }
       } catch (err) {
         Logger.error(LOG_TAG, 'Error during reading photo: ' + fullPath);
