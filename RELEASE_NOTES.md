@@ -20,6 +20,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 - New default theme: `modern` (Settings → Gallery → Themes; `classic` is the old look): deeper colors, no tile borders, gradients behind the texts over photos and softer motion. The built-in themes (`classic`, `modern`) are always up to date and read-only in the settings; add a new theme to customize one. The look of the gallery is now set by CSS variables (e.g. `--item-radius`, `--overlay-background`), so custom themes can change it with a few lines.
 
 ## Bug fixes
+- The login page and the password page of a sharing use the standard autofill field names (`username`, `current-password`), so password managers fill both the user name and the password instead of the user name only [#1429](https://github.com/bpatrik/pigallery2/issues/1429)
 - The info bar of a grid photo no longer leaves a line of the photo visible below it at some zoom levels
 - Opening a photo that is cut by the bottom or top of the screen no longer makes the page jump: the lightbox opens from where the photo is
 - Indexing no longer crashes and restarts the app on an empty or 1-byte photo file (Node 26, e.g. the Docker images) [#1408](https://github.com/bpatrik/pigallery2/issues/1408)

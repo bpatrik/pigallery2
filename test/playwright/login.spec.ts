@@ -42,6 +42,8 @@ test.describe('Login', () => {
     await expect.soft(page.locator('#username'), 'username').toBeVisible();
     await expect.soft(page.locator('#password'), 'password').toBeVisible();
     await expect.soft(page.locator('#password'), 'password is masked').toHaveAttribute('type', 'password');
+    await expect.soft(page.locator('#username'), 'username autofill token').toHaveAttribute('autocomplete', 'username');
+    await expect.soft(page.locator('#password'), 'password autofill token').toHaveAttribute('autocomplete', 'current-password');
     await expect.soft(page.locator('#rememberMe'), 'remember me').toBeVisible();
     await expect.soft(page.locator('app-login app-language'), 'language switch').toBeVisible();
     // no error before the first try
