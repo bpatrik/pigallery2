@@ -1,3 +1,5 @@
+// uv threadpool size initialisation via environment variable
+import './threadpool';
 // TypeORM reads the decorator metadata of the entities, so load the polyfill before any of them
 import 'reflect-metadata';
 import {Server} from './server';

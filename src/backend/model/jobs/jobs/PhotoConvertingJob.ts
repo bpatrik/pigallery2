@@ -35,7 +35,7 @@ export class PhotoConvertingJob extends FileJob<{
     return '[PhotoConvertingJob]';
   }
 
-  
+
   public get Supported(): boolean {
     return true;
   }
