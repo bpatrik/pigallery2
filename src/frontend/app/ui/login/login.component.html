@@ -38,7 +38,7 @@
             class="form-control"
             name="username"
             id="username"
-            autocomplete="login-username"
+            autocomplete="username"
             [(ngModel)]="loginCredential.username"
             placeholder="Username"
             required>
@@ -52,7 +52,7 @@
               name="password"
               id="password" #passwordInput
               placeholder="Password"
-              autocomplete="login-password"
+              autocomplete="current-password"
               autocorrect="off"
               autocapitalize="none"
               [(ngModel)]="loginCredential.password"
