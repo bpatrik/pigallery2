@@ -207,6 +207,9 @@ Remind the maintainer to post it; they post it themselves. Read "Past announceme
   (keeps the Ko-fi feed alive).
 - Length limits: the selfh.st form (https://selfh.st/submit/) takes at most 200 characters, and a Ko-fi post at most 800.
   Draft a separate short version for each (count with `node`), and leave the Ko-fi link out of the Ko-fi post.
+- Listings (since 2026-11): PiGallery2 is listed on [The Noted Wire](https://noted.lol/wire/) (description max 500
+  characters) and [AlternativeTo](https://alternativeto.net/) (plain text: emoji break there). When the release adds a
+  headline feature or changes a claim (read-only, formats, platforms), remind the maintainer to update both descriptions.
 - Expectations: release reactions and GitHub traffic (Insights → Traffic, UTC, lags about a day) come in over days;
   judge them after 2-3 days, not on release day.
 
