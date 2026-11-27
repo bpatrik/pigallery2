@@ -6,7 +6,7 @@ Human contributors: see the [contribution guide](docs/development/contributing.m
 ## Project overview
 
 PiGallery2 is a fast, directory-first, read-only photo gallery for low-resource servers (e.g. Raspberry Pi).
-The photo folder is never modified.
+Existing photos are never modified; the optional upload (`Upload` config, off by default) only adds new files.
 
 - Language: TypeScript everywhere; `tsc` emits `.js` next to each `.ts` file (git-ignored).
 - Backend: Node.js + Express + TypeORM. Config via [typeconfig](https://github.com/bpatrik/typeconfig)

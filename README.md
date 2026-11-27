@@ -18,9 +18,10 @@ Point it at your photo folder and browse it as it is: PiGallery2 never modifies 
 - **⚡ Fast**: optimized for low-end hardware.
 - **✔️ Simple**: point it to your photos and you are ready.
 - **📁 Directory-first**: shows your folder structure as it is.
-- **🔒 Read-only**: your photo folder is never modified.
+- **🔒 Read-only**: your photos are never modified.
+  - Optional uploads (off by default) only add new files, never overwrite.
 
-Map, search, sharing, albums, faces and more: see the [full feature list](https://bpatrik.github.io/pigallery2/features).
+Map, search, sharing, albums, faces, uploads and more: see the [full feature list](https://bpatrik.github.io/pigallery2/features).
 
 ## 🏁 Getting started
 

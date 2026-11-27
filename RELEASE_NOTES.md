@@ -9,6 +9,7 @@ Write for users, keep it short, link issues and PRs in full: [#1234](https://git
 - The failed login log lines quote the user name and the sharing key (`for user:"admin"`), so a user name can't fake a log line. Fail2Ban filters that match up to the IP keep working [#519](https://github.com/bpatrik/pigallery2/issues/519)
 
 ## Main new features
+- JPEG XL (`.jxl`) photos are supported, if the libvips of your install can read them (PiGallery2 checks this at startup) [#1135](https://github.com/bpatrik/pigallery2/issues/1135)
 
 ## Under the hood
 
