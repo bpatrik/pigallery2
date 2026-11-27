@@ -143,6 +143,77 @@ export class SearchManager {
     return a;
   }
 
+  private static projectAutoComplete(q: SelectQueryBuilder<PhotoEntity>, session: SessionContext): void {
+    if (session.projectionQuery) {
+      if (session.hasDirectoryProjection) {
+        q.leftJoin('media.directory', 'directory');
+      }
+      q.andWhere(session.projectionQuery);
+    }
+  }
+
+  /**
+   * A row is a photo's whole comma-joined keyword list, so LIMIT counts lists, not keywords.
+   * Every round cuts the keywords found so far out of the list before matching,
+   * so each returned row has a new keyword and the query can still stop early.
+   */
+  private async autoCompleteKeywords(session: SessionContext, value: string): Promise<string[]> {
+    const limit = Config.Search.AutoComplete.ItemsPerCategory.keyword;
+    const found = new Set<string>();
+    if (value.includes(',')) { // a keyword can't contain a comma
+      return [];
+    }
+    const repository = (await SQLConnection.getConnection()).getRepository(PhotoEntity);
+    while (found.size < limit) {
+      const params: Record<string, string> = {valueKW: SearchManager.likeValue('%' + value + '%')};
+      let field = Config.Database.type === DatabaseType.mysql ?
+        'CONCAT(\',\', media.metadata.keywords, \',\')' : '(\',\' || media.metadata.keywords || \',\')';
+      [...found].forEach((k, i) => {
+        params['foundKW' + i] = ',' + k + ',';
+        field = `REPLACE(${field}, :foundKW${i}, ',')`;
+      });
+      const q = repository
+        .createQueryBuilder('media')
+        .select('DISTINCT(media.metadata.keywords)')
+        .where(SearchManager.like(field, 'valueKW'), params);
+      SearchManager.projectAutoComplete(q, session);
+      const sizeBefore = found.size;
+      for (const r of await q.limit(limit - found.size).getRawMany<{ metadataKeywords: string }>()) {
+        r.metadataKeywords.split(',')
+          .filter((k) => found.size < limit && SearchManager.containsText(k, value))
+          .forEach((k) => found.add(k));
+      }
+      if (found.size === sizeBefore) { // no row with a new keyword
+        break;
+      }
+    }
+    return [...found];
+  }
+
+  // One query per column, so a row is one suggestion and LIMIT counts suggestions.
+  private async autoCompletePositions(session: SessionContext, value: string): Promise<string[]> {
+    const limit = Config.Search.AutoComplete.ItemsPerCategory.position;
+    const found = new Set<string>();
+    const repository = (await SQLConnection.getConnection()).getRepository(PhotoEntity);
+    for (const column of ['city', 'country', 'state']) {
+      if (found.size >= limit) {
+        break;
+      }
+      const field = 'media.metadata.positionData.' + column;
+      const q = repository
+        .createQueryBuilder('media')
+        .select(`DISTINCT(${field})`, 'name')
+        .where(SearchManager.like(field, 'value'), {value: SearchManager.likeValue('%' + value + '%')});
+      if (found.size > 0) { // the same name can be a city and a state
+        q.andWhere(`${field} NOT IN (:...found)`, {found: [...found]});
+      }
+      SearchManager.projectAutoComplete(q, session);
+      (await q.limit(limit - found.size).getRawMany<{ name: string }>())
+        .forEach((r) => found.add(r.name));
+    }
+    return [...found];
+  }
+
   async autocomplete(
     session: SessionContext,
     value: string,
@@ -161,36 +232,10 @@ export class SearchManager {
       type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.keyword
     ) {
-      const acList: AutoCompleteItem[] = [];
-      const q = photoRepository
-        .createQueryBuilder('media')
-        .select('DISTINCT(media.metadata.keywords)')
-        .where(SearchManager.like('media.metadata.keywords', 'valueKW'), {
-          valueKW: SearchManager.likeValue('%' + value + '%'),
-        });
-
-      if (session.projectionQuery) {
-        if (session.hasDirectoryProjection) {
-          q.leftJoin('media.directory', 'directory');
-        }
-        q.andWhere(session.projectionQuery);
-      }
-
-      q.limit(Config.Search.AutoComplete.ItemsPerCategory.keyword);
-      (await q.getRawMany<{ metadataKeywords: string }>())
-        .map(
-          (r): string[] =>
-            r.metadataKeywords.split(',')
-        )
-        .forEach((keywords): void => {
-          acList.push(
-            ...this.encapsulateAutoComplete(
-              keywords.filter((k): boolean => SearchManager.containsText(k, value)),
-              SearchQueryTypes.keyword
-            )
-          );
-        });
-      partialResult.push(acList);
+      partialResult.push(this.encapsulateAutoComplete(
+        await this.autoCompleteKeywords(session, value),
+        SearchQueryTypes.keyword
+      ));
     }
 
     if (
@@ -226,58 +271,10 @@ export class SearchManager {
       type === SearchQueryTypes.position ||
       type === SearchQueryTypes.distance
     ) {
-      const acList: AutoCompleteItem[] = [];
-      const q = photoRepository
-        .createQueryBuilder('media')
-        .select(
-          'media.metadata.positionData.country as country, ' +
-          'media.metadata.positionData.state as state, media.metadata.positionData.city as city'
-        );
-      const b = new Brackets((q) => {
-        q.where(
-          SearchManager.like('media.metadata.positionData.country', 'value'),
-          {value: SearchManager.likeValue('%' + value + '%')}
-        ).orWhere(
-          SearchManager.like('media.metadata.positionData.state', 'value'),
-          {value: SearchManager.likeValue('%' + value + '%')}
-        ).orWhere(
-          SearchManager.like('media.metadata.positionData.city', 'value'),
-          {value: SearchManager.likeValue('%' + value + '%')}
-        );
-      });
-      q.where(b);
-
-      if (session.projectionQuery) {
-        if (session.hasDirectoryProjection) {
-          q.leftJoin('media.directory', 'directory');
-        }
-        q.andWhere(session.projectionQuery);
-      }
-
-      q.groupBy(
-        'media.metadata.positionData.country, media.metadata.positionData.state, media.metadata.positionData.city'
-      )
-        .limit(Config.Search.AutoComplete.ItemsPerCategory.position);
-      (
-
-        await q.getRawMany<{ city: string | null, country: string | null, state: string | null }>()
-      )
-        .filter((pm): boolean => !!pm)
-        .map(
-          (pm): string[] =>
-            [pm.city || '', pm.country || '', pm.state || ''] as string[]
-        )
-        .forEach((positions): void => {
-          acList.push(
-            ...this.encapsulateAutoComplete(
-              positions.filter((p): boolean => SearchManager.containsText(p, value)),
-              type === SearchQueryTypes.distance
-                ? type
-                : SearchQueryTypes.position
-            )
-          );
-        });
-      partialResult.push(acList);
+      partialResult.push(this.encapsulateAutoComplete(
+        await this.autoCompletePositions(session, value),
+        type === SearchQueryTypes.distance ? type : SearchQueryTypes.position
+      ));
     }
 
     if (
