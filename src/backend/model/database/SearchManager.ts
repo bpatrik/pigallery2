@@ -350,8 +350,8 @@ export class SearchManager {
         .createQueryBuilder('media')
         .select('DISTINCT(media.metadata.title) as title')
         .where(
-          'media.metadata.title LIKE :value COLLATE ' + SQL_COLLATE,
-          {value: '%' + value + '%'}
+          SearchManager.like('media.metadata.title', 'value'),
+          {value: SearchManager.likeValue('%' + value + '%')}
         );
 
       if (session.projectionQuery) {
@@ -366,7 +366,7 @@ export class SearchManager {
       partialResult.push(
         this.encapsulateAutoComplete(
           (
-            await q.getRawMany()
+            await q.getRawMany<{ title: string }>()
           ).map((r) => r.title),
           SearchQueryTypes.title
         )
