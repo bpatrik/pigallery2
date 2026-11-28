@@ -27,6 +27,7 @@ export enum SearchQueryTypes {
   keyword,
   person,
   position,
+  title,
 
 
 }
@@ -44,6 +45,7 @@ export const TextSearchQueryTypes = [
   SearchQueryTypes.keyword,
   SearchQueryTypes.person,
   SearchQueryTypes.position,
+  SearchQueryTypes.title,
 ];
 export const RangeSearchQueryTypes = [
   SearchQueryTypes.date,
@@ -103,7 +105,8 @@ export interface TextSearch extends NegatableSearchQuery {
     | SearchQueryTypes.position
     | SearchQueryTypes.caption
     | SearchQueryTypes.file_name
-    | SearchQueryTypes.directory;
+    | SearchQueryTypes.directory
+    | SearchQueryTypes.title;
   matchType?: TextSearchQueryMatchTypes;
   value: string;
 }

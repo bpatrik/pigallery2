@@ -344,6 +344,37 @@ export class SearchManager {
 
     if (
       type === SearchQueryTypes.any_text ||
+      type === SearchQueryTypes.title
+    ) {
+      const q = photoRepository
+        .createQueryBuilder('media')
+        .select('DISTINCT(media.metadata.title) as title')
+        .where(
+          SearchManager.like('media.metadata.title', 'value'),
+          {value: SearchManager.likeValue('%' + value + '%')}
+        );
+
+      if (session.projectionQuery) {
+        if (session.hasDirectoryProjection) {
+          q.leftJoin('media.directory', 'directory');
+        }
+        q.andWhere(session.projectionQuery);
+      }
+      q.limit(
+        Config.Search.AutoComplete.ItemsPerCategory.title
+      );
+      partialResult.push(
+        this.encapsulateAutoComplete(
+          (
+            await q.getRawMany<{ title: string }>()
+          ).map((r) => r.title),
+          SearchQueryTypes.title
+        )
+      );
+    }
+
+    if (
+      type === SearchQueryTypes.any_text ||
       type === SearchQueryTypes.directory
     ) {
       const dirQ = directoryRepository
@@ -1022,6 +1053,28 @@ export class SearchManager {
       const textParam: Record<string, unknown> = {};
       textParam['text' + queryId] = likeValue(createMatchString(textValue));
 
+      // A nullable column needs its NULL rows put back when the expression is
+      // negated. `NULL NOT LIKE 'x'` is NULL rather than TRUE, so a negated
+      // clause silently drops every row where the column was never set — and
+      // since negation chains the per-field clauses with AND (whereFN above),
+      // a single such column empties the entire result.
+      //
+      // `media.name` and `directory.path` are NOT NULL and do not need this.
+      // `metadata.caption`, `metadata.title` and the three
+      // `metadata.positionData` columns are all nullable and all do.
+      //
+      // On the positive side the Brackets wrap one term and nothing changes.
+      const matchNullableField = (fieldName: string): void => {
+        q[whereFN](
+          new Brackets((qbr): void => {
+            qbr.where(getLikeExpr(fieldName, 'text'), textParam);
+            if ((query as TextSearch).negate) {
+              qbr.orWhere(`${fieldName} IS NULL`);
+            }
+          })
+        );
+      };
+
       if (
         query.type === SearchQueryTypes.any_text ||
         query.type === SearchQueryTypes.directory
@@ -1088,26 +1141,23 @@ export class SearchManager {
         (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
         query.type === SearchQueryTypes.caption
       ) {
-        q[whereFN](
-          getLikeExpr('media.metadata.caption', 'text'),
-          textParam
-        );
+        matchNullableField('media.metadata.caption');
+      }
+
+      if (
+        (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
+        query.type === SearchQueryTypes.title
+      ) {
+        matchNullableField('media.metadata.title');
       }
 
       if (
         (query.type === SearchQueryTypes.any_text && !directoryOnly) ||
         query.type === SearchQueryTypes.position
       ) {
-        q[whereFN](
-          getLikeExpr('media.metadata.positionData.country', 'text'),
-          textParam
-        )[whereFN](
-          getLikeExpr('media.metadata.positionData.state', 'text'),
-          textParam
-        )[whereFN](
-          getLikeExpr('media.metadata.positionData.city', 'text'),
-          textParam
-        );
+        matchNullableField('media.metadata.positionData.country');
+        matchNullableField('media.metadata.positionData.state');
+        matchNullableField('media.metadata.positionData.city');
       }
 
       // Matching for array type fields
