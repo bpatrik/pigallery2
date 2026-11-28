@@ -60,6 +60,13 @@ export class PhotoConvertingJob extends FileJob<{
       }
     }
 
+    const limit = Config.Media.Photo.concurrentThumbnailGenerationsLimit;
+    this.setParallelProcessingLimit(
+      limit > 0
+        ? limit
+        : Config.Media.Photo.concurrentThumbnailGenerations
+    );
+
     return super.start(config, soloRun, allowParallelRun);
   }
 

@@ -33,9 +33,7 @@ export class PhotoProcessing {
       os.cpus().length - 1
     );
 
-    if (Config.Media.Photo.concurrentThumbnailGenerationsLimit > 0) {
-      Config.Media.Photo.concurrentThumbnailGenerations = Math.min(Config.Media.Photo.concurrentThumbnailGenerations, Config.Media.Photo.concurrentThumbnailGenerationsLimit);
-    }
+    Config.Media.Photo.concurrentThumbnailGenerations = Math.min(Config.Media.Photo.concurrentThumbnailGenerations, Config.Media.Photo.concurrentThumbnailGenerationsLimit);
 
     this.taskQueInstance = new TaskExecuter(
       Config.Media.Photo.concurrentThumbnailGenerations,
